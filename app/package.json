@@ -37,7 +37,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "serve": "npx serve -s build"
+    "serve": "npx serve -s build",
+    "deploy": "yarn build && firebase use casino-tycoon-14684 && firebase deploy --only hosting"
   },
   "eslintConfig": {
     "extends": [
