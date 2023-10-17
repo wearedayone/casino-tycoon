@@ -7,14 +7,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import './index.css';
 import App from './App';
+import InstallGuideModal from './components/InstallGuideModal';
+
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
 
-const theme = createTheme({
-  typography: {
-    fontFamily: "'Black Ops One', cursive",
-  },
-});
+const theme = createTheme();
 
 // default: 10s for stale time, 10m for cache time
 const queryClient = new QueryClient({
@@ -37,6 +35,7 @@ root.render(
         >
           <ThemeProvider theme={theme}>
             <App />
+            <InstallGuideModal />
           </ThemeProvider>
         </SnackbarProvider>
       </BrowserRouter>

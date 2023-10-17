@@ -1,5 +1,7 @@
+import Navigations from './navigations';
+
 const App = () => {
-  return <div>App</div>;
+  return <Navigations />;
 };
 
 export default App;
