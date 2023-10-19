@@ -1,40 +1,25 @@
 import { useState, useEffect } from 'react';
-import { onSnapshot, doc } from 'firebase/firestore';
 
-import { firestore } from '../configs/firebase.config';
-import useUserStore from '../stores/user.store';
+import useUserProfile from './useUserProfile';
+import useUserGamePlay from './useUserGamePlay';
+import useUserMachine from './useUserMachine';
+import useUserWorker from './useUserWorker';
+import useUserBuilding from './useUserBuilding';
 
 const useAuth = () => {
   const [userId, setUserId] = useState(null);
-  const setInitialized = useUserStore((state) => state.setInitialized);
-  const setUser = useUserStore((state) => state.setUser);
+  useUserProfile(userId);
+  useUserGamePlay();
+  useUserMachine();
+  useUserWorker();
+  useUserBuilding();
 
   // TODO: now use for testing, rm and use privy.io api later
   useEffect(() => {
-    if (!window.setUserId) {
+    if (!window.setUserId && setUserId) {
       window.setUserId = setUserId;
     }
-  }, []);
-
-  useEffect(() => {
-    let unsubscribe;
-    if (userId) {
-      unsubscribe = onSnapshot(doc(firestore, 'user', userId), (snapshot) => {
-        if (snapshot.exists()) {
-          setUser({ id: snapshot.id, ...snapshot.data() });
-          setInitialized(true);
-        } else {
-          setUser(null);
-          setInitialized(true);
-        }
-      });
-    } else {
-      setUser(null);
-      setInitialized(true);
-    }
-
-    return () => unsubscribe?.();
-  }, [userId]);
+  }, [setUserId]);
 };
 
 export default useAuth;

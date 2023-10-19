@@ -17,10 +17,10 @@ const Login = () => {
       gap={4}
     >
       <Typography fontSize={64} fontWeight={600} align="center" lineHeight={1}>
-        CASINO TYCOON
+        GANGSTER ARENA
       </Typography>
       <Typography fontSize={18} fontWeight={600} align="center">
-        Become the richest on the strip!
+        Work your way to be the top Godfather!
       </Typography>
       <Box display="flex" flexDirection="column" gap={2}>
         <Box

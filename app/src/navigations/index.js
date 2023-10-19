@@ -1,16 +1,19 @@
 import AuthRoutes from './AuthRoutes';
 import MainRoutes from './MainRoutes';
+import useSystem from '../hooks/useSystem';
 import useAuth from '../hooks/useAuth';
 import useUserStore from '../stores/user.store';
 
 const Navigations = () => {
+  useSystem();
   useAuth();
+
   const initialized = useUserStore((state) => state.initialized);
-  const user = useUserStore((state) => state.user);
+  const profile = useUserStore((state) => state.profile);
 
   if (!initialized) return null;
 
-  if (!user) return <AuthRoutes />;
+  if (!profile) return <AuthRoutes />;
 
   return <MainRoutes />;
 };
