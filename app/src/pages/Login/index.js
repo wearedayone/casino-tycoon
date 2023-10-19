@@ -3,6 +3,10 @@ import { grey } from '@mui/material/colors';
 import MailOutlineRoundedIcon from '@mui/icons-material/MailOutlineRounded';
 
 const Login = () => {
+  const login = () => {
+    window.setUserId?.('0x65355c36a566bdd9912118f35de2c94cef2dbcf4');
+  };
+
   return (
     <Box
       minHeight="100vh"
@@ -74,6 +78,7 @@ const Login = () => {
               height: 30,
             },
           }}
+          onClick={login}
         >
           <img src="/images/icons/twitter.png" alt="twitter" />
         </Button>

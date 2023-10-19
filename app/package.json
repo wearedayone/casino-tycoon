@@ -12,6 +12,7 @@
     "@testing-library/react": "^13.0.0",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.5.1",
+    "firebase": "^10.5.0",
     "notistack": "^3.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -29,7 +30,8 @@
     "workbox-range-requests": "^6.4.2",
     "workbox-routing": "^6.4.2",
     "workbox-strategies": "^6.4.2",
-    "workbox-streams": "^6.4.2"
+    "workbox-streams": "^6.4.2",
+    "zustand": "^4.4.3"
   },
   "scripts": {
     "dev": "react-scripts start",
