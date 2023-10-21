@@ -7,6 +7,9 @@ const environments = {
     process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
   FIREBASE_APP_ID: process.env.REACT_APP_FIREBASE_APP_ID,
   FIREBASE_MEASUREMENT_ID: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID,
+  API_URL: process.env.REACT_APP_API_URL,
+  PRIVY_APP_ID: process.env.REACT_APP_PRIVY_APP_ID,
+  NETWORK_ID: process.env.REACT_APP_NETWORK_ID,
 };
 
 export default environments;

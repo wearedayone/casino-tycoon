@@ -4,13 +4,17 @@ import ReactDOM from 'react-dom/client';
 import { ThemeProvider, createTheme } from '@mui/material';
 import { SnackbarProvider } from 'notistack';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { PrivyProvider } from '@privy-io/react-auth';
 
 import './index.css';
 import App from './App';
 import InstallGuideModal from './components/InstallGuideModal';
+import environments from './utils/environments';
 
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
+
+const { PRIVY_APP_ID } = environments;
 
 const theme = createTheme();
 
@@ -24,22 +28,41 @@ const queryClient = new QueryClient({
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <SnackbarProvider
-          maxSnack={3}
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'left',
-          }}
-        >
-          <ThemeProvider theme={theme}>
-            <App />
-            <InstallGuideModal />
-          </ThemeProvider>
-        </SnackbarProvider>
-      </BrowserRouter>
-    </QueryClientProvider>
+    <PrivyProvider
+      appId={PRIVY_APP_ID}
+      onSuccess={(user) => {
+        console.log('logged in', { user });
+      }}
+      config={{
+        loginMethods: ['email', 'twitter'],
+        embeddedWallets: {
+          createOnLogin: 'all-users',
+        },
+        appearance: {
+          // TODO: update logo
+          theme: 'dark',
+          accentColor: '#1e90ff',
+          logo: 'https://placehold.co/600x600/1e90ff/FFF?text=Gangster+Arena',
+        },
+      }}
+    >
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <SnackbarProvider
+            maxSnack={3}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left',
+            }}
+          >
+            <ThemeProvider theme={theme}>
+              <App />
+              <InstallGuideModal />
+            </ThemeProvider>
+          </SnackbarProvider>
+        </BrowserRouter>
+      </QueryClientProvider>
+    </PrivyProvider>
   </React.StrictMode>
 );
 

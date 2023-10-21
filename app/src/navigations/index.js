@@ -1,19 +1,29 @@
+import { usePrivy } from '@privy-io/react-auth';
+
 import AuthRoutes from './AuthRoutes';
 import MainRoutes from './MainRoutes';
+import LoadingRoutes from './LoadingRoutes';
 import useSystem from '../hooks/useSystem';
-import useAuth from '../hooks/useAuth';
+import useUserProfile from '../hooks/useUserProfile';
+import useUserGame from '../hooks/useUserGame';
 import useUserStore from '../stores/user.store';
+import useUserWallet from '../hooks/useUserWallet';
 
 const Navigations = () => {
-  useSystem();
-  useAuth();
-
+  const { ready, authenticated, user } = usePrivy();
+  // logout();
   const initialized = useUserStore((state) => state.initialized);
-  const profile = useUserStore((state) => state.profile);
 
-  if (!initialized) return null;
+  useSystem();
+  useUserProfile(ready, user);
+  useUserGame();
+  useUserWallet();
 
-  if (!profile) return <AuthRoutes />;
+  if (!ready) return null;
+
+  if (!authenticated) return <AuthRoutes />;
+
+  if (!initialized) return <LoadingRoutes />;
 
   return <MainRoutes />;
 };
