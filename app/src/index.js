@@ -9,6 +9,7 @@ import { PrivyProvider } from '@privy-io/react-auth';
 import './index.css';
 import App from './App';
 import InstallGuideModal from './components/InstallGuideModal';
+import UpdateDetectedModal from './components/UpdateDetectedModal';
 import environments from './utils/environments';
 
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
@@ -58,6 +59,7 @@ root.render(
             <ThemeProvider theme={theme}>
               <App />
               <InstallGuideModal />
+              <UpdateDetectedModal />
             </ThemeProvider>
           </SnackbarProvider>
         </BrowserRouter>
