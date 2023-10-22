@@ -8,25 +8,22 @@ import { getMe } from '../services/user.service';
 const useUserProfile = (ready, user) => {
   const setInitialized = useUserStore((state) => state.setInitialized);
   const setProfile = useUserStore((state) => state.setProfile);
-
+  console.log({ user });
   useEffect(() => {
     let unsubscribe;
     if (ready) {
       if (user) {
         getMe()
           .then(() => {
-            unsubscribe = onSnapshot(
-              doc(firestore, 'user', user.id),
-              (snapshot) => {
-                if (snapshot.exists()) {
-                  setProfile({ id: snapshot.id, ...snapshot.data() });
-                  setInitialized(true);
-                } else {
-                  setProfile(null);
-                  setInitialized(true);
-                }
+            unsubscribe = onSnapshot(doc(firestore, 'user', user.id), (snapshot) => {
+              if (snapshot.exists()) {
+                setProfile({ id: snapshot.id, ...snapshot.data() });
+                setInitialized(true);
+              } else {
+                setProfile(null);
+                setInitialized(true);
               }
-            );
+            });
           })
           .catch((err) => console.error(err));
       } else {

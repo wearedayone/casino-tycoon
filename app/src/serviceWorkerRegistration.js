@@ -142,9 +142,8 @@ export function unregister() {
 
 // detect new updates in pwa
 const detectSWUpdate = async () => {
-  const registration = await navigator.serviceWorker.ready;
-
-  registration.addEventListener('updatefound', (event) => {
+  const registration = await navigator?.serviceWorker?.ready;
+  registration && registration.addEventListener('updatefound', (event) => {
     const newSW = registration.installing;
     newSW.addEventListener('statechange', (event) => {
       if (newSW.state == 'installed') {

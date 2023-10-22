@@ -20,7 +20,7 @@ const UpdateDetectedModal = () => {
     <Dialog
       maxWidth="sm"
       fullWidth
-      open={openUpdate}
+      open={openUpdate ?? false}
       onClose={() => {}}
       PaperProps={{
         sx: { borderRadius: 4 },

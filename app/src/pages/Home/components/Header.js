@@ -13,13 +13,7 @@ const Header = () => {
   const ethBalance = balances?.find((item) => item.token === 'ETH')?.balance;
 
   return (
-    <Box
-      p={2}
-      display="flex"
-      justifyContent="center"
-      gap={2}
-      sx={{ borderBottom: '1px solid #555' }}
-    >
+    <Box p={2} display="flex" justifyContent="center" gap={2} sx={{ borderBottom: '1px solid #555' }}>
       <Box
         display="flex"
         justifyContent="center"
@@ -34,8 +28,7 @@ const Header = () => {
             width: 24,
             aspectRatio: '1/1',
           },
-        }}
-      >
+        }}>
         <img src="/images/icons/sleep.png" alt="sleep" />
         <Typography fontWeight={600} align="center">
           {formatter.format(totalDailyReward)}/d
@@ -55,8 +48,7 @@ const Header = () => {
             width: 24,
             aspectRatio: '1/1',
           },
-        }}
-      >
+        }}>
         <img src="/images/icons/crown.png" alt="sleep" />
         <Typography fontWeight={600} align="center">
           {formatter.format(chipBalance)}
@@ -77,8 +69,7 @@ const Header = () => {
             width: 24,
             aspectRatio: '1/1',
           },
-        }}
-      >
+        }}>
         <img src="/images/icons/ethereum.png" alt="sleep" />
         <Typography fontWeight={600} align="center">
           {formatter.format(ethBalance)}

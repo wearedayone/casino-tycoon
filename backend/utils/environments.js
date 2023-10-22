@@ -6,6 +6,7 @@ const environments = {
   PORT: process.env.PORT,
   NETWORK_ID: process.env.NETWORK_ID,
   PRIVY_APP_ID: process.env.PRIVY_APP_ID,
+  PRIVY_APP_SECRET: process.env.PRIVY_APP_SECRET,
   PRIVY_VERIFICATION_KEY: process.env.PRIVY_VERIFICATION_KEY,
 };
 

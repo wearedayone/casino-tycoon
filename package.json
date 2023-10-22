@@ -1,0 +1,22 @@
+{
+  "name": "casino-tycoon",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://huyhn310: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@github.com/wearedayone/casino-tycoon.git",
+  "author": "huyhn310 <huyhn310@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "prepare": "husky install",
+    "precommit": "yarn --cwd app build"
+  },
+  "lint-staged": {
+    "**/*.{js,ts,tsx,json,css,scss,md}": [
+      "prettier --write"
+    ]
+  },
+  "devDependencies": {
+    "husky": "^8.0.3",
+    "lint-staged": "^14.0.1",
+    "prettier-plugin-solidity": "^1.1.3"
+  }
+}
