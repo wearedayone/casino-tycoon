@@ -1,8 +1,10 @@
 import { Box, Dialog, Typography, Button, Grid } from '@mui/material';
 import { CopyIcon } from '../../../components/Icons';
+import { usePrivy } from '@privy-io/react-auth';
 
 const PortfolioDialog = ({ open, setOpenUpdate, user }) => {
   console.log('PortfolioDialog', { user });
+  const { logout } = usePrivy();
   const onCopyAddress = () => {
     navigator.clipboard.writeText(user?.wallet?.address);
   };
@@ -104,6 +106,13 @@ const PortfolioDialog = ({ open, setOpenUpdate, user }) => {
                 </Grid>
               </Grid>
             </Box>
+          </Box>
+        </Box>
+        <Box display="flex" flexDirection="column" gap={2} style={{ backgroundColor: 'white' }} borderRadius={2}>
+          <Box display="flex" flexDirection="column" gap={1}>
+            <Button variant="outlined" color="info" onClick={() => logout()}>
+              Logout
+            </Button>
           </Box>
         </Box>
         <Box display="flex" flexDirection="column" gap={2} style={{ backgroundColor: 'white' }} borderRadius={2}>
