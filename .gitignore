@@ -6,7 +6,7 @@
 
 # contract secrets
 contract/*/secrets.json
-
+firebase/build/*
 # debug
 npm-debug.log*
 yarn-debug.log*

@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "casino-tycoon-14684"
+  },
+  "targets": {
+    "casino-tycoon-14684": {
+      "hosting": {
+        "app": [
+          "casino-tycoon-14684"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
