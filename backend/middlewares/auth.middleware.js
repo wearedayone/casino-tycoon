@@ -8,13 +8,9 @@ const middleware = async (req, res, next) => {
   try {
     const authorizationHeader = req.headers.authorization;
     const token = authorizationHeader?.split(' ')?.[1];
-    // for the moment, dont verify, just decode
-    // TODO: implement verify later
-    // const decoded = jwt.verify(token, PRIVY_VERIFICATION_KEY, {
-    //   issuer: 'privy.io',
-    //   audience: PRIVY_APP_ID,
-    // });
-    const decoded = jwt.decode(token, {
+    const verificationKey = PRIVY_VERIFICATION_KEY.replace(/\\n/g, '\n');
+
+    const decoded = jwt.verify(token, verificationKey, {
       issuer: 'privy.io',
       audience: PRIVY_APP_ID,
     });
@@ -22,6 +18,7 @@ const middleware = async (req, res, next) => {
     req.userId = decoded.sub;
     next();
   } catch (err) {
+    console.error(err);
     return res.sendStatus(401);
   }
 };
