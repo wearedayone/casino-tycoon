@@ -1,11 +1,9 @@
 import { Box, Dialog, Typography, Button } from '@mui/material';
-// import { usePrivy } from '@privy-io/react-auth';
 
 import { CopyIcon } from '../../../components/Icons';
 import useUserWallet from '../../../hooks/useUserWallet';
 
 const PortfolioModal = ({ open, setOpenUpdate }) => {
-  // const { logout } = usePrivy();
   const embeddedWallet = useUserWallet();
 
   const onCopyAddress = () => {
@@ -39,22 +37,22 @@ const PortfolioModal = ({ open, setOpenUpdate }) => {
     <Dialog
       maxWidth="sm"
       fullWidth
-      open={open ?? false}
+      open={open}
       onClose={() => {}}
       PaperProps={{
         sx: { borderRadius: 1, backgroundColor: 'transparent', boxShadow: 'none' },
       }}>
       <Box display="flex" flexDirection="column" gap={1}>
         <Box display="flex" flexDirection="column" bgcolor="white" borderRadius={1}>
-          <Box sx={{ borderBottom: '1px solid #555' }}>
+          <Box py={1} sx={{ borderBottom: '1px solid #555' }}>
             <Typography fontSize={20} fontWeight={600} align="center">
               Portfolio
             </Typography>
           </Box>
-          <Box display="flex" flexDirection="column" p={2} gap={2}>
-            <Box display="flex" gap={1}>
+          <Box p={2} display="flex" flexDirection="column" gap={2}>
+            <Box display="flex" alignItems="center" gap={0.5}>
               <Box display="flex" flexDirection="column" justifyContent="center" justifyItems="center">
-                <Typography fontSize={14} align="left">
+                <Typography fontSize={14} fontWeight={600}>
                   My Wallet:
                 </Typography>
               </Box>
@@ -97,19 +95,12 @@ const PortfolioModal = ({ open, setOpenUpdate }) => {
           <Box display="flex" flexDirection="column" gap={1}>
             <Button
               variant="outlined"
-              onClick={() => setOpenUpdate(false)}
+              onClick={() => setOpenUpdate(null)}
               sx={{ color: 'black', textTransform: 'none' }}>
               Back
             </Button>
           </Box>
         </Box>
-        {/* <Box display="flex" flexDirection="column" gap={2} bgcolor="white" borderRadius={2}>
-          <Box display="flex" flexDirection="column" gap={1}>
-            <Button variant="outlined" color="error" onClick={logout} sx={{ textTransform: 'none' }}>
-              Logout
-            </Button>
-          </Box>
-        </Box> */}
       </Box>
     </Dialog>
   );

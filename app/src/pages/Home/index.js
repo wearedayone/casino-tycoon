@@ -5,14 +5,11 @@ import Bank from './components/Bank';
 import House from './components/House';
 import ActionButtons from './components/ActionButtons';
 import PortfolioModal from './components/PortfolioModal';
+import SettingModal from './components/SettingModal';
 import { useState } from 'react';
 
 const Home = () => {
-  const [openPortfolioModal, setOpenPortfolioModal] = useState(false);
-
-  const openModal = (modal) => {
-    if (modal === 'PORTFOLIO') setOpenPortfolioModal(true);
-  };
+  const [openingModal, setOpeningModal] = useState(null);
 
   return (
     <Box height="100vh" display="flex" flexDirection="column">
@@ -26,7 +23,7 @@ const Home = () => {
           backgroundPosition: 'center bottom',
         }}>
         <Header />
-        <Bank openModal={openModal} />
+        <Bank setOpeningModal={setOpeningModal} />
       </Box>
       <Box
         height="30vh"
@@ -50,7 +47,8 @@ const Home = () => {
       <Box height="5vh" bgcolor="#ddd" display="flex" flexDirection="column" justifyContent="center">
         <ActionButtons />
       </Box>
-      <PortfolioModal open={openPortfolioModal} setOpenUpdate={setOpenPortfolioModal} />
+      <PortfolioModal open={openingModal === 'PORTFOLIO'} setOpenUpdate={setOpeningModal} />
+      <SettingModal open={openingModal === 'SETTING'} setOpenUpdate={setOpeningModal} />
     </Box>
   );
 };
