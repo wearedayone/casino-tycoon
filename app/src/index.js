@@ -41,12 +41,11 @@ root.render(
         },
         appearance: {
           // TODO: update logo
-          theme: 'dark',
+          theme: 'light',
           accentColor: '#1e90ff',
           logo: 'https://placehold.co/600x600/1e90ff/FFF?text=Gangster+Arena',
         },
-      }}
-    >
+      }}>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <SnackbarProvider
@@ -54,8 +53,7 @@ root.render(
             anchorOrigin={{
               vertical: 'bottom',
               horizontal: 'left',
-            }}
-          >
+            }}>
             <ThemeProvider theme={theme}>
               <App />
               <InstallGuideModal />

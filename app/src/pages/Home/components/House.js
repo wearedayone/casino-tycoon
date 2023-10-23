@@ -1,73 +1,45 @@
-import { Box, Typography, Button } from '@mui/material';
-import LeaderboardOutlinedIcon from '@mui/icons-material/LeaderboardOutlined';
-import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
-import TimelineOutlinedIcon from '@mui/icons-material/TimelineOutlined';
-import StarBorderOutlinedIcon from '@mui/icons-material/StarBorderOutlined';
+import { Box, Typography } from '@mui/material';
+import StarBorderRoundedIcon from '@mui/icons-material/StarBorderRounded';
 
-import IconButton from './IconButton';
 import useUserStore from '../../../stores/user.store';
 
-const House = ({ callback }) => {
+const House = () => {
   const gamePlay = useUserStore((state) => state.gamePlay);
-  const profile = useUserStore((state) => state.profile);
 
   return (
-    <Box p={2} display="flex" gap={2} sx={{ borderBottom: '1px solid #555' }}>
-      <Box py={2}>
-        <IconButton Icon={<SettingsOutlinedIcon sx={{ fontSize: 32 }} />} onClick={() => {}} />
-      </Box>
-      <Box px={4} flex={1} display="flex" flexDirection="column" gap={2}>
+    <Box
+      height="100%"
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+      justifyContent="center"
+      sx={{
+        '& .house': {
+          display: 'block',
+          width: 180,
+          mb: '20vh',
+        },
+      }}>
+      <Box position="relative">
+        <img src="/images/ribbon.png" alt="ribbon" />
         <Box
-          position="relative"
+          position="absolute"
+          top={0}
+          left={0}
+          width="100%"
+          height="100%"
           display="flex"
           justifyContent="center"
-          sx={{
-            '& img': {
-              width: 150,
-              maxWidth: '100%',
-              minHeight: 70,
-            },
-          }}>
-          <img src="/images/ribbon.png" alt="ribbon" />
-          <Box
-            position="absolute"
-            top="50%"
-            left="50%"
-            display="flex"
-            alignItems="center"
-            gap={0.5}
-            sx={{ transform: 'translate(-50%, -70%)' }}>
-            <Typography fontSize={18} fontWeight={600}>
-              {gamePlay?.networth}
-            </Typography>
-            <StarBorderOutlinedIcon />
-          </Box>
-        </Box>
-
-        <Box py={1} px={2} border="1px solid black">
-          <Typography fontWeight={600} align="center" width={'100%'}>
-            {profile?.username}
+          alignItems="center"
+          gap={0.5}
+          pb={1.25}>
+          <Typography fontWeight={600} color="white">
+            {gamePlay?.networth || 0}
           </Typography>
-          <Typography fontWeight={600} align="center">
-            Gangster House
-          </Typography>
-        </Box>
-        <img src="/images/house.png" alt="house" width="100%" />
-        <Box display="flex" justifyContent="center">
-          <Button variant="outlined" color="inherit" sx={{ px: 3, fontWeight: 600 }}>
-            Buy
-          </Button>
+          <StarBorderRoundedIcon sx={{ color: 'white' }} />
         </Box>
       </Box>
-      <Box py={2} display="flex" flexDirection="column" gap={2}>
-        <IconButton Icon={<LeaderboardOutlinedIcon sx={{ fontSize: 32 }} />} onClick={() => {}} />
-        <IconButton
-          Icon={<TimelineOutlinedIcon sx={{ fontSize: 32 }} />}
-          onClick={() => {
-            callback('PORTFOLIO');
-          }}
-        />
-      </Box>
+      <img className="house" src="/images/house.png" alt="house" />
     </Box>
   );
 };

@@ -23,6 +23,7 @@ const Header = () => {
         px={1}
         border="1px solid #555"
         borderRadius={2}
+        bgcolor="white"
         sx={{
           '& img': {
             width: 24,
@@ -43,6 +44,7 @@ const Header = () => {
         px={1}
         border="1px solid #555"
         borderRadius={2}
+        bgcolor="white"
         sx={{
           '& img': {
             width: 24,
@@ -64,6 +66,7 @@ const Header = () => {
         px={1}
         border="1px solid #555"
         borderRadius={2}
+        bgcolor="white"
         sx={{
           '& img': {
             width: 24,
