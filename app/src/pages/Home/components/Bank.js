@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import LeaderboardOutlinedIcon from '@mui/icons-material/LeaderboardOutlined';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import TimelineOutlinedIcon from '@mui/icons-material/TimelineOutlined';
@@ -16,10 +16,16 @@ const Bank = ({ setOpeningModal }) => {
         <img src="/images/bank.png" alt="bank" width={180} maxWidth="90%" maxHeight="100%" />
       </Box>
       <Box px={2} py={4} width={80} display="flex" flexDirection="column" gap={2}>
-        <IconButton
-          Icon={<LeaderboardOutlinedIcon sx={{ fontSize: 24 }} />}
-          onClick={() => setOpeningModal('LEADERBOARD')}
-        />
+        <Box display="flex" flexDirection="column" alignItems="center">
+          <IconButton
+            Icon={<LeaderboardOutlinedIcon sx={{ fontSize: 24 }} />}
+            onClick={() => setOpeningModal('LEADERBOARD')}
+          />
+          <Box display="flex" justifyContent="center" alignItems="center">
+            <Typography>#80</Typography>
+            <img src="/images/icons/down-arrow.png" width={10} />
+          </Box>
+        </Box>
         <IconButton
           Icon={<TimelineOutlinedIcon sx={{ fontSize: 24 }} />}
           onClick={() => setOpeningModal('PORTFOLIO')}
