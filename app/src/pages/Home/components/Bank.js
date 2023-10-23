@@ -5,7 +5,7 @@ import TimelineOutlinedIcon from '@mui/icons-material/TimelineOutlined';
 
 import IconButton from './IconButton';
 
-const Bank = ({ callback }) => {
+const Bank = ({ openModal }) => {
   return (
     <Box flex={1} display="flex" gap={2} sx={{ borderBottom: '1px solid #555' }}>
       <Box px={2} pt={4} width={80} display="flex" flexDirection="column" justifyContent="space-between">
@@ -20,7 +20,7 @@ const Bank = ({ callback }) => {
         <IconButton
           Icon={<TimelineOutlinedIcon sx={{ fontSize: 24 }} />}
           onClick={() => {
-            callback('PORTFOLIO');
+            openModal('PORTFOLIO');
           }}
         />
       </Box>
