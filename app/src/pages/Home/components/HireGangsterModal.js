@@ -3,12 +3,16 @@ import { Box, Dialog, Typography, Button, Slider } from '@mui/material';
 import StarBorderRoundedIcon from '@mui/icons-material/StarBorderRounded';
 
 import { formatter } from '../../../utils/numbers';
+import BuyBonusModal from './BuyBonusModal';
 
 const HireGangsterModal = ({ open, onBack }) => {
   const [price, setPrice] = useState(0.069);
   const [quantity, setQuantity] = useState(0);
+  const [mode, setMode] = useState('normal');
 
   const buy = () => {};
+
+  if (mode === 'buy-bonus') return <BuyBonusModal open onBack={() => setMode('normal')} />;
 
   return (
     <Dialog
@@ -113,7 +117,7 @@ const HireGangsterModal = ({ open, onBack }) => {
                     Buy Bonus:
                   </Typography>
                   <Box alignSelf="flex-start">
-                    <img src="/images/icons/info.png" alt="info" width={15} />
+                    <img src="/images/icons/info.png" alt="info" width={15} onClick={() => setMode('buy-bonus')} />
                   </Box>
                 </Box>
                 <img src="/images/icons/coin.png" alt="coin" width={20} />
