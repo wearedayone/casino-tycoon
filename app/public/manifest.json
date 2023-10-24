@@ -1,6 +1,7 @@
 {
   "short_name": "Gangster Arena",
   "name": "Gangster Arena",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "favicon.ico",
