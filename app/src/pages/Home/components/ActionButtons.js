@@ -2,11 +2,19 @@ import { useState } from 'react';
 import { Box, Typography } from '@mui/material';
 
 import IconButton from './IconButton';
+import HireGangsterModal from './HireGangsterModal';
+import HireGoonModal from './HireGoonModal';
+import UpgradeSafehouseModal from './UpgradeSafeHouseModal';
 
 const ActionButtons = () => {
+  const [openingModal, setOpeningModal] = useState(null);
   const [open, setOpen] = useState(false);
+
   return (
     <>
+      <HireGangsterModal open={openingModal === 'gangster'} onBack={() => setOpeningModal(null)} />
+      <HireGoonModal open={openingModal === 'goon'} onBack={() => setOpeningModal(null)} />
+      <UpgradeSafehouseModal open={openingModal === 'house'} onBack={() => setOpeningModal(null)} />
       <Box
         display={open ? 'block' : 'none'}
         position="fixed"
@@ -50,7 +58,8 @@ const ActionButtons = () => {
             flexDirection="column"
             alignItems="center"
             gap={0.5}
-            sx={{ borderBottom: '1px solid black' }}>
+            sx={{ borderBottom: '1px solid black' }}
+            onClick={() => setOpeningModal('house')}>
             <img src="/images/house.png" alt="house" width={50} />
             <Typography align="center">Safehouse</Typography>
           </Box>
@@ -61,7 +70,8 @@ const ActionButtons = () => {
             flexDirection="column"
             alignItems="center"
             gap={0.5}
-            sx={{ borderBottom: '1px solid black' }}>
+            sx={{ borderBottom: '1px solid black' }}
+            onClick={() => setOpeningModal('gangster')}>
             <img src="/images/gangster.png" alt="house" width={50} />
             <Typography align="center">Gangster</Typography>
           </Box>
@@ -72,7 +82,8 @@ const ActionButtons = () => {
             flexDirection="column"
             alignItems="center"
             gap={0.5}
-            sx={{ borderBottom: '1px solid black' }}>
+            sx={{ borderBottom: '1px solid black' }}
+            onClick={() => setOpeningModal('goon')}>
             <img src="/images/goon.png" alt="house" width={50} />
             <Typography align="center">Goon</Typography>
           </Box>
