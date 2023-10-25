@@ -1,7 +1,22 @@
+import { useEffect, useState } from 'react';
+
 import Navigations from './navigations';
+import useSettingStore from './stores/setting.store';
 
 const App = () => {
-  return <Navigations />;
+  const [userHasInteracted, setUserHasInteracted] = useState(false);
+  const [audio] = useState(new Audio('/audios/bg.mp3'));
+  const sound = useSettingStore((state) => state.sound);
+
+  useEffect(() => {
+    userHasInteracted && sound === 'on' ? audio.play().catch((e) => {}) : audio.pause();
+  }, [userHasInteracted, sound]);
+
+  return (
+    <div onClick={() => setUserHasInteracted(true)}>
+      <Navigations />
+    </div>
+  );
 };
 
 export default App;
