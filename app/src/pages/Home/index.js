@@ -6,6 +6,7 @@ import House from './components/House';
 import ActionButtons from './components/ActionButtons';
 import PortfolioModal from './components/PortfolioModal';
 import SettingModal from './components/SettingModal';
+import LeaderboardModal from './components/LeaderboardModal';
 import { useState } from 'react';
 
 const Home = () => {
@@ -49,6 +50,7 @@ const Home = () => {
       </Box>
       <PortfolioModal open={openingModal === 'PORTFOLIO'} setOpenUpdate={setOpeningModal} />
       <SettingModal open={openingModal === 'SETTING'} setOpenUpdate={setOpeningModal} />
+      <LeaderboardModal open={openingModal === 'LEADERBOARD'} setOpenUpdate={setOpeningModal} />
     </Box>
   );
 };

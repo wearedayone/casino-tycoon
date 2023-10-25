@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Box, Dialog, Typography, Button, Slider } from '@mui/material';
+import InfoIcon from '@mui/icons-material/Info';
 import StarBorderRoundedIcon from '@mui/icons-material/StarBorderRounded';
 
 import { formatter } from '../../../utils/numbers';
@@ -117,7 +118,7 @@ const HireGangsterModal = ({ open, onBack }) => {
                     Buy Bonus:
                   </Typography>
                   <Box alignSelf="flex-start">
-                    <img src="/images/icons/info.png" alt="info" width={15} onClick={() => setMode('buy-bonus')} />
+                    <InfoIcon sx={{ fontSize: 14 }} onClick={() => setMode('buy-bonus')} />
                   </Box>
                 </Box>
                 <img src="/images/icons/coin.png" alt="coin" width={20} />

@@ -1,7 +1,7 @@
 import { Box, Dialog, Typography, Button } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 
-const BuyBonusModal = ({ open, onBack }) => {
+const ReputationModal = ({ open, onBack }) => {
   return (
     <Dialog
       maxWidth="sm"
@@ -16,17 +16,15 @@ const BuyBonusModal = ({ open, onBack }) => {
           <Box p={2} display="flex" flexDirection="column" gap={2}>
             <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
               <InfoIcon />
-              <Typography fontSize={24}>Buy Bonus</Typography>
+              <Typography fontSize={24}>Reputation</Typography>
             </Box>
             <Box display="flex" flexDirection="column" gap={2}>
               <Typography fontSize={14}>
-                $FIAT that are burn via upgrading Safehouses or purchasing of Goons are added into the buy bonus
+                You will need Reputation to win the game. The higher the Reputation, the higher the prizes allocation to
+                you. Game rankings are based on Reputation.
               </Typography>
               <Typography fontSize={14}>
-                When a player buys a Gangster, they will receive 1% of $FIAT from the buy bonus as a buy-in reward.
-              </Typography>
-              <Typography fontSize={14}>
-                Players can choose whether to buy early or late based on the size of the reserve pool.
+                To increase reputation Upgrade your Safehouse (high rep), buy Gangsters (med rep) or buy Goons (low rep)
               </Typography>
             </Box>
           </Box>
@@ -43,4 +41,4 @@ const BuyBonusModal = ({ open, onBack }) => {
   );
 };
 
-export default BuyBonusModal;
+export default ReputationModal;

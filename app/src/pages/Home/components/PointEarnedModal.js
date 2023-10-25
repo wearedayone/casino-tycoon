@@ -1,7 +1,7 @@
 import { Box, Dialog, Typography, Button } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 
-const BuyBonusModal = ({ open, onBack }) => {
+const PointEarnedModal = ({ open, onBack }) => {
   return (
     <Dialog
       maxWidth="sm"
@@ -16,17 +16,15 @@ const BuyBonusModal = ({ open, onBack }) => {
           <Box p={2} display="flex" flexDirection="column" gap={2}>
             <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
               <InfoIcon />
-              <Typography fontSize={24}>Buy Bonus</Typography>
+              <Typography fontSize={24}>Points Earned</Typography>
             </Box>
             <Box display="flex" flexDirection="column" gap={2}>
               <Typography fontSize={14}>
-                $FIAT that are burn via upgrading Safehouses or purchasing of Goons are added into the buy bonus
+                Points Earned this sessions shows you the points that you earn for the current session.
               </Typography>
               <Typography fontSize={14}>
-                When a player buys a Gangster, they will receive 1% of $FIAT from the buy bonus as a buy-in reward.
-              </Typography>
-              <Typography fontSize={14}>
-                Players can choose whether to buy early or late based on the size of the reserve pool.
+                Points can be earn via ETH spend from buying of machines and $CHIPS spend from buying buildings or
+                workers.
               </Typography>
             </Box>
           </Box>
@@ -43,4 +41,4 @@ const BuyBonusModal = ({ open, onBack }) => {
   );
 };
 
-export default BuyBonusModal;
+export default PointEarnedModal;
