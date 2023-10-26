@@ -20,6 +20,7 @@ const main = async () => {
       building: { basePrice: 1000, dailyReward: 0, networth: 10 },
       nftAddress: '0x',
       tokenAddress: '0x',
+      gameContractAddress: '0x',
       activeSeasonId,
       appVersion: '1.0.0',
     });
