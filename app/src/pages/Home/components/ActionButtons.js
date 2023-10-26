@@ -7,8 +7,13 @@ import HireGoonModal from './HireGoonModal';
 import UpgradeSafehouseModal from './UpgradeSafeHouseModal';
 import WarModal from './WarModal';
 import WarHistoryModal from './WarHistoryModal';
+import useUserStore from '../../../stores/user.store';
+import useSystemStore from '../../../stores/system.store';
+import { formatter } from '../../../utils/numbers';
 
 const ActionButtons = () => {
+  const gamePlay = useUserStore((state) => state.gamePlay);
+  const activeSeason = useSystemStore((state) => state.activeSeason);
   const [isGangWarMenuOpen, setGangWarOpen] = useState(false);
   const [isBuyMenuOpen, setBuyMenuOpen] = useState(false);
 
@@ -18,6 +23,19 @@ const ActionButtons = () => {
     setBuyMenuOpen(false);
     setGangWarOpen(false);
   }, []);
+
+  if (!gamePlay || !activeSeason) return null;
+
+  const { numberOfMachines, numberOfWorkers, startRewardCountingTime, pendingReward } = gamePlay;
+  const { machine, worker } = activeSeason;
+
+  const now = Date.now();
+  const startRewardCountingDateUnix = startRewardCountingTime.toDate().getTime();
+  const diffInDays = (now - startRewardCountingDateUnix) / (24 * 60 * 60 * 1000);
+
+  const countingReward =
+    numberOfMachines * machine.dailyReward * diffInDays + numberOfWorkers * worker.dailyReward * diffInDays;
+  const totalClaimableReward = pendingReward + countingReward;
 
   return (
     <>
@@ -54,7 +72,7 @@ const ActionButtons = () => {
               <Typography fontWeight={600} align="center">
                 CLAIM
               </Typography>
-              <Typography align="center">2K $FIAT</Typography>
+              <Typography align="center">{formatter.format(totalClaimableReward)} $FIAT</Typography>
             </Box>
           }
           onClick={() => {}}

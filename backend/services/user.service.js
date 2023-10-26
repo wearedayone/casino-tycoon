@@ -44,6 +44,7 @@ export const createUserIfNotExist = async (userId) => {
       point: 0,
       war: false,
       pendingReward: 0,
+      startRewardCountingTime: admin.firestore.FieldValue.serverTimestamp(),
     });
   }
 };

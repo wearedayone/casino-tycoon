@@ -9,14 +9,14 @@ const useUserGamePlay = () => {
   const userId = useUserStore((state) => state.profile?.id);
   const setGamePlay = useUserStore((state) => state.setGamePlay);
   const configs = useSystemStore((state) => state.configs);
-  const { activePoolId } = configs || {};
+  const { activeSeasonId } = configs || {};
 
   useEffect(() => {
     let unsubscribe;
-    if (userId && activePoolId) {
+    if (userId && activeSeasonId) {
       const q = query(
         collection(firestore, 'gamePlay'),
-        where('poolId', '==', activePoolId),
+        where('seasonId', '==', activeSeasonId),
         where('userId', '==', userId)
       );
       unsubscribe = onSnapshot(q, (snapshot) => {
@@ -31,7 +31,7 @@ const useUserGamePlay = () => {
     }
 
     return () => unsubscribe?.();
-  }, [userId, activePoolId]);
+  }, [userId, activeSeasonId]);
 };
 
 export default useUserGamePlay;

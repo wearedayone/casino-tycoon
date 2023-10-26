@@ -8,7 +8,7 @@ import { getMe } from '../services/user.service';
 const useUserProfile = (ready, user) => {
   const setInitialized = useUserStore((state) => state.setInitialized);
   const setProfile = useUserStore((state) => state.setProfile);
-  console.log({ user });
+
   useEffect(() => {
     let unsubscribe;
     if (ready) {

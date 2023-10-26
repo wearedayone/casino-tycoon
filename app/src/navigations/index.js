@@ -5,7 +5,7 @@ import MainRoutes from './MainRoutes';
 import LoadingRoutes from './LoadingRoutes';
 import useSystem from '../hooks/useSystem';
 import useUserProfile from '../hooks/useUserProfile';
-import useUserGame from '../hooks/useUserGame';
+import useUserGamePlay from '../hooks/useUserGamePlay';
 import useUserStore from '../stores/user.store';
 import useUserWallet from '../hooks/useUserWallet';
 
@@ -16,7 +16,7 @@ const Navigations = () => {
 
   useSystem();
   useUserProfile(ready, user);
-  useUserGame();
+  useUserGamePlay();
   useUserWallet();
 
   if (!ready) return null;

@@ -2,34 +2,54 @@ import { Box, Dialog, Typography, Button } from '@mui/material';
 
 import { CopyIcon } from '../../../components/Icons';
 import useUserWallet from '../../../hooks/useUserWallet';
+import useUserStore from '../../../stores/user.store';
+import useSystemStore from '../../../stores/system.store';
+import { formatter } from '../../../utils/numbers';
+import { calculateMachineSellPrice } from '../../../utils/formulas';
 
 const PortfolioModal = ({ open, setOpenUpdate }) => {
+  const profile = useUserStore((state) => state.profile);
+  const gamePlay = useUserStore((state) => state.gamePlay);
+  const activeSeason = useSystemStore((state) => state.activeSeason);
   const embeddedWallet = useUserWallet();
 
   const onCopyAddress = () => {
     navigator.clipboard.writeText(embeddedWallet?.address);
   };
 
+  if (!profile || !gamePlay || !activeSeason) return null;
+
+  const { tokenBalance, ETHBalance } = profile;
+  const { numberOfMachines } = gamePlay;
+  const { machineSold } = activeSeason;
+
+  // TODO: implement logic calculate token value in eth
+  const tokenValueInETH = 0;
+  const estimatedMachinesValueInETH = numberOfMachines * calculateMachineSellPrice(machineSold);
+  // TODO: implement logic calculate networth rank reward
+  const networthRankReward = 0;
+  const totalPortfolioValue = ETHBalance + tokenValueInETH + estimatedMachinesValueInETH + networthRankReward;
+
   const items = [
     {
       icon: '/images/icons/ethereum.png',
       text: 'Balance',
-      value: 0.51,
+      value: ETHBalance,
     },
     {
       icon: '/images/icons/coin.png',
-      text: '100K CHIPS',
-      value: 0.51,
+      text: `${formatter.format(tokenBalance)} FIAT`,
+      value: tokenValueInETH,
     },
     {
       icon: '/images/icons/slot-machine.png',
-      text: '15 Machine NFTs',
-      value: 0.51,
+      text: `${numberOfMachines} Machine NFTs`,
+      value: estimatedMachinesValueInETH,
     },
     {
       icon: '/images/icons/crown_1.png',
       text: 'Networth Rank Rewards',
-      value: 0.51,
+      value: networthRankReward,
     },
   ];
 
@@ -72,7 +92,7 @@ const PortfolioModal = ({ open, setOpenUpdate }) => {
                 Total portfolio value
               </Typography>
               <Typography fontSize={20} fontWeight={700} align="center">
-                2.145 ETH
+                {totalPortfolioValue} ETH
               </Typography>
               <Box display="flex" flexDirection="column" gap={1}>
                 {items.map((item) => (

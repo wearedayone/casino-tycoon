@@ -2,15 +2,21 @@ import { Box, Typography } from '@mui/material';
 import AddCircleOutlineRoundedIcon from '@mui/icons-material/AddCircleOutlineRounded';
 
 import useUserStore from '../../../stores/user.store';
+import useSystemStore from '../../../stores/system.store';
 import { formatter } from '../../../utils/numbers';
 
 const Header = () => {
-  const totalDailyReward = useUserStore((state) => state.totalDailyReward());
   const profile = useUserStore((state) => state.profile);
+  const gamePlay = useUserStore((state) => state.gamePlay);
+  const activeSeason = useSystemStore((state) => state.activeSeason);
 
-  const { balances } = profile || { balances: [] };
-  const chipBalance = balances?.find((item) => item.token === 'CHIP')?.balance;
-  const ethBalance = balances?.find((item) => item.token === 'ETH')?.balance;
+  if (!profile || !gamePlay || !activeSeason) return null;
+
+  const { tokenBalance, ETHBalance } = profile;
+  const { numberOfMachines, numberOfWorkers } = gamePlay;
+  const { machine, worker } = activeSeason;
+
+  const totalDailyReward = numberOfMachines * machine.dailyReward + numberOfWorkers * worker.dailyReward;
 
   return (
     <Box p={2} display="flex" justifyContent="center" gap={2} sx={{ borderBottom: '1px solid #555' }}>
@@ -53,7 +59,7 @@ const Header = () => {
         }}>
         <img src="/images/icons/crown.png" alt="sleep" />
         <Typography fontWeight={600} align="center">
-          {formatter.format(chipBalance)}
+          {formatter.format(tokenBalance)}
         </Typography>
         <AddCircleOutlineRoundedIcon />
       </Box>
@@ -75,7 +81,7 @@ const Header = () => {
         }}>
         <img src="/images/icons/ethereum.png" alt="sleep" />
         <Typography fontWeight={600} align="center">
-          {formatter.format(ethBalance)}
+          {formatter.format(ETHBalance)}
         </Typography>
         <AddCircleOutlineRoundedIcon />
       </Box>
