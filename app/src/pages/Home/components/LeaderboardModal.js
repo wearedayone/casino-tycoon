@@ -56,7 +56,7 @@ const LeaderboardModal = ({ open, setOpenUpdate }) => {
       maxWidth="md"
       fullWidth
       open={open}
-      onClose={() => {}}
+      onClose={() => setOpenUpdate(null)}
       PaperProps={{
         sx: { borderRadius: 1, backgroundColor: 'transparent', boxShadow: 'none', minWidth: window.innerWidth * 0.9 },
       }}>
@@ -108,9 +108,9 @@ const LeaderboardModal = ({ open, setOpenUpdate }) => {
           <Box display="flex" flexDirection="column" gap={1}>
             <Button
               variant="outlined"
-              onClick={() => setOpenUpdate(null)}
+              onClick={() => setOpenUpdate('STATISTICS')}
               sx={{ color: 'black', textTransform: 'none' }}>
-              Back
+              View Game Stats
             </Button>
           </Box>
         </Box>

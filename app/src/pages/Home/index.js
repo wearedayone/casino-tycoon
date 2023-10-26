@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Box } from '@mui/material';
 
 import Header from './components/Header';
@@ -7,7 +8,7 @@ import ActionButtons from './components/ActionButtons';
 import PortfolioModal from './components/PortfolioModal';
 import SettingModal from './components/SettingModal';
 import LeaderboardModal from './components/LeaderboardModal';
-import { useState } from 'react';
+import StatisticsModal from './components/StatisticsModal';
 
 const Home = () => {
   const [openingModal, setOpeningModal] = useState(null);
@@ -48,9 +49,10 @@ const Home = () => {
       <Box height="5vh" bgcolor="#ddd" display="flex" flexDirection="column" justifyContent="center">
         <ActionButtons />
       </Box>
-      <PortfolioModal open={openingModal === 'PORTFOLIO'} setOpenUpdate={setOpeningModal} />
       <SettingModal open={openingModal === 'SETTING'} setOpenUpdate={setOpeningModal} />
       <LeaderboardModal open={openingModal === 'LEADERBOARD'} setOpenUpdate={setOpeningModal} />
+      <StatisticsModal open={openingModal === 'STATISTICS'} setOpenUpdate={setOpeningModal} />
+      <PortfolioModal open={openingModal === 'PORTFOLIO'} setOpenUpdate={setOpeningModal} />
     </Box>
   );
 };
