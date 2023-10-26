@@ -1,8 +1,8 @@
 import { firestore } from '../configs/firebase.config.js';
 
-export const getActivePoolId = async () => {
+export const getActiveSeasonId = async () => {
   const snapshot = await firestore.collection('system').doc('default').get();
   const configs = snapshot.data();
 
-  return configs.activePoolId;
+  return configs.activeSeasonId;
 };
