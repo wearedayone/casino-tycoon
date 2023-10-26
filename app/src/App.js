@@ -9,6 +9,14 @@ const App = () => {
   const sound = useSettingStore((state) => state.sound);
 
   useEffect(() => {
+    const play = audio.play;
+    audio.addEventListener('ended', play);
+    return () => {
+      audio.removeEventListener('ended', play);
+    };
+  }, []);
+
+  useEffect(() => {
     userHasInteracted && sound === 'on' ? audio.play().catch((e) => {}) : audio.pause();
   }, [userHasInteracted, sound]);
 
