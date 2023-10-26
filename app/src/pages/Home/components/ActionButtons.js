@@ -176,7 +176,8 @@ const BuyMenu = ({ isOpen, closeMenus }) => {
           flexDirection="column"
           alignItems="center"
           gap={0.5}
-          sx={{ borderBottom: '1px solid black' }}>
+          sx={{ borderBottom: '1px solid black' }}
+          onClick={item.onClick}>
           <img src={item.image} alt={item.title} width={50} />
           <Typography align="center">{item.title}</Typography>
         </Box>
