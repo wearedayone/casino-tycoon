@@ -3,12 +3,24 @@ import { Box, Dialog, Typography, Button, Slider } from '@mui/material';
 import StarBorderRoundedIcon from '@mui/icons-material/StarBorderRounded';
 
 import { formatter } from '../../../utils/numbers';
+import { calculateBuildingBuyPrice } from '../../../utils/formulas';
+import useSystemStore from '../../../stores/system.store';
+import useUserStore from '../../../stores/user.store';
+
+const maxPerPurchase = 1;
 
 const UpgradeSafehouseModal = ({ open, onBack }) => {
-  const [price, setPrice] = useState(1000);
+  const activeSeason = useSystemStore((state) => state.activeSeason);
+  const gamePlay = useUserStore((state) => state.gamePlay);
   const [quantity, setQuantity] = useState(0);
 
   const buy = () => {};
+
+  if (!activeSeason || !gamePlay) return null;
+
+  const { numberOfBuildings } = gamePlay;
+  const { building, buildingSold } = activeSeason;
+  const estimatedPrice = calculateBuildingBuyPrice(buildingSold);
 
   return (
     <Dialog
@@ -23,7 +35,7 @@ const UpgradeSafehouseModal = ({ open, onBack }) => {
         <Box display="flex" flexDirection="column" bgcolor="white" borderRadius={1}>
           <Box py={1} sx={{ borderBottom: '1px solid #555' }}>
             <Typography fontSize={20} fontWeight={600} align="center">
-              Hire Gangsters
+              Upgrade Safehouse
             </Typography>
           </Box>
           <Box p={2} display="flex" flexDirection="column" gap={2} sx={{ borderBottom: '1px solid #555' }}>
@@ -32,9 +44,9 @@ const UpgradeSafehouseModal = ({ open, onBack }) => {
                 <img src="/images/house.png" alt="house" width="100%" />
               </Box>
               <Box flex={1} display="flex" flexDirection="column" gap={0.5}>
-                <Box px={2} py={1} border="1px solid black">
-                  <Typography fontWeight={600} align="center">
-                    Unit available: 0
+                <Box p={1} border="1px solid black">
+                  <Typography fontSize={14} fontWeight={600} align="center">
+                    Safehouse Upgrades: 0
                   </Typography>
                 </Box>
                 <Box>
@@ -74,13 +86,13 @@ const UpgradeSafehouseModal = ({ open, onBack }) => {
                 <Box>
                   <Box display="flex" alignItems="center" justifyContent="flex-end">
                     <Typography fontWeight={600} align="right">
-                      + 0
+                      +{numberOfBuildings * building.networth}
                     </Typography>
                     <StarBorderRoundedIcon />
                   </Box>
                   <Box display="flex" alignItems="center" justifyContent="flex-end">
                     <Typography fontSize={10} color="success.main" align="right">
-                      +500
+                      +{(numberOfBuildings + quantity) * building.networth}
                     </Typography>
                     <StarBorderRoundedIcon sx={{ fontSize: 14, color: 'success.main' }} />
                   </Box>
@@ -112,7 +124,7 @@ const UpgradeSafehouseModal = ({ open, onBack }) => {
             <Box flex={1} px={1.5} pt={0.75}>
               <Slider
                 min={0}
-                max={10}
+                max={maxPerPurchase}
                 valueLabelDisplay="on"
                 value={quantity}
                 onChange={(_e, value) => setQuantity(value)}
@@ -122,7 +134,7 @@ const UpgradeSafehouseModal = ({ open, onBack }) => {
             <Box display="flex" alignItems="center" gap={1}>
               <img src="/images/icons/ethereum.png" alt="eth" width={20} />
               <Typography fontSize={14} fontWeight={600}>
-                {formatter.format(price * quantity)} $FIAT
+                {formatter.format(estimatedPrice * quantity)} $FIAT
               </Typography>
             </Box>
           </Box>

@@ -3,12 +3,24 @@ import { Box, Dialog, Typography, Button, Slider } from '@mui/material';
 import StarBorderRoundedIcon from '@mui/icons-material/StarBorderRounded';
 
 import { formatter } from '../../../utils/numbers';
+import { calculateWorkerBuyPrice } from '../../../utils/formulas';
+import useSystemStore from '../../../stores/system.store';
+import useUserStore from '../../../stores/user.store';
+
+const maxPerPurchase = 1;
 
 const HireGoonModal = ({ open, onBack }) => {
-  const [price, setPrice] = useState(2500);
+  const activeSeason = useSystemStore((state) => state.activeSeason);
+  const gamePlay = useUserStore((state) => state.gamePlay);
   const [quantity, setQuantity] = useState(0);
 
   const buy = () => {};
+
+  if (!activeSeason || !gamePlay) return null;
+
+  const { numberOfWorkers } = gamePlay;
+  const { worker, workerSold } = activeSeason;
+  const estimatedPrice = calculateWorkerBuyPrice(workerSold);
 
   return (
     <Dialog
@@ -32,9 +44,9 @@ const HireGoonModal = ({ open, onBack }) => {
                 <img src="/images/goon.png" alt="goon" width="100%" />
               </Box>
               <Box flex={1} display="flex" flexDirection="column" gap={0.5}>
-                <Box px={2} py={1} border="1px solid black">
-                  <Typography fontWeight={600} align="center">
-                    Unit available: 0
+                <Box p={1} border="1px solid black">
+                  <Typography fontSize={14} fontWeight={600} align="center">
+                    Goons owned: 0
                   </Typography>
                 </Box>
                 <Box>
@@ -56,10 +68,10 @@ const HireGoonModal = ({ open, onBack }) => {
                 <Typography fontWeight={600}>Earning Rate</Typography>
                 <Box>
                   <Typography fontWeight={600} align="right">
-                    0 $FIAT/s
+                    {numberOfWorkers * worker.dailyReward} $FIAT/s
                   </Typography>
                   <Typography fontSize={10} color="success.main" align="right">
-                    +250 $FIAT/s
+                    +{(numberOfWorkers + quantity) * worker.dailyReward} $FIAT/s
                   </Typography>
                 </Box>
               </Box>
@@ -74,13 +86,13 @@ const HireGoonModal = ({ open, onBack }) => {
                 <Box>
                   <Box display="flex" alignItems="center" justifyContent="flex-end">
                     <Typography fontWeight={600} align="right">
-                      + 0
+                      +{numberOfWorkers * worker.networth}
                     </Typography>
                     <StarBorderRoundedIcon />
                   </Box>
                   <Box display="flex" alignItems="center" justifyContent="flex-end">
                     <Typography fontSize={10} color="success.main" align="right">
-                      +5
+                      +{(numberOfWorkers + quantity) * worker.networth}
                     </Typography>
                     <StarBorderRoundedIcon sx={{ fontSize: 14, color: 'success.main' }} />
                   </Box>
@@ -101,7 +113,7 @@ const HireGoonModal = ({ open, onBack }) => {
                 </Box>
                 <Box>
                   <Typography fontWeight={600} align="right">
-                    2.0%
+                    {((worker.dailyReward * 100) / estimatedPrice).toFixed(2)}%
                   </Typography>
                 </Box>
               </Box>
@@ -112,7 +124,7 @@ const HireGoonModal = ({ open, onBack }) => {
             <Box flex={1} px={1.5} pt={0.75}>
               <Slider
                 min={0}
-                max={10}
+                max={maxPerPurchase}
                 valueLabelDisplay="on"
                 value={quantity}
                 onChange={(_e, value) => setQuantity(value)}
@@ -122,7 +134,7 @@ const HireGoonModal = ({ open, onBack }) => {
             <Box display="flex" alignItems="center" gap={1}>
               <img src="/images/icons/coin.png" alt="coin" width={20} />
               <Typography fontSize={14} fontWeight={600}>
-                {formatter.format(price * quantity)} $FIAT
+                {formatter.format(estimatedPrice * quantity)} $FIAT
               </Typography>
             </Box>
           </Box>

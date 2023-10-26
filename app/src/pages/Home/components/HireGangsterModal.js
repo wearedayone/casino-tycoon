@@ -5,13 +5,23 @@ import StarBorderRoundedIcon from '@mui/icons-material/StarBorderRounded';
 
 import { formatter } from '../../../utils/numbers';
 import BuyBonusModal from './BuyBonusModal';
+import useSystemStore from '../../../stores/system.store';
+import useUserStore from '../../../stores/user.store';
+
+const maxPerPurchase = 10;
 
 const HireGangsterModal = ({ open, onBack }) => {
-  const [price, setPrice] = useState(0.069);
+  const activeSeason = useSystemStore((state) => state.activeSeason);
+  const gamePlay = useUserStore((state) => state.gamePlay);
   const [quantity, setQuantity] = useState(0);
   const [mode, setMode] = useState('normal');
 
   const buy = () => {};
+
+  if (!activeSeason || !gamePlay) return null;
+
+  const { numberOfMachines } = gamePlay;
+  const { machine, reversePool } = activeSeason;
 
   if (mode === 'buy-bonus') return <BuyBonusModal open onBack={() => setMode('normal')} />;
 
@@ -37,9 +47,9 @@ const HireGangsterModal = ({ open, onBack }) => {
                 <img src="/images/gangster.png" alt="gangster" width="100%" />
               </Box>
               <Box flex={1} display="flex" flexDirection="column" gap={0.5}>
-                <Box px={2} py={1} border="1px solid black">
-                  <Typography fontWeight={600} align="center">
-                    Unit available: 0
+                <Box p={1} border="1px solid black">
+                  <Typography fontSize={14} fontWeight={600} align="center">
+                    Gangsters owned: 0
                   </Typography>
                 </Box>
                 <Box>
@@ -63,10 +73,10 @@ const HireGangsterModal = ({ open, onBack }) => {
                 <Typography fontWeight={600}>Earning Rate</Typography>
                 <Box>
                   <Typography fontWeight={600} align="right">
-                    0 $FIAT/s
+                    {numberOfMachines * machine.dailyReward} $FIAT/s
                   </Typography>
                   <Typography fontSize={10} color="success.main" align="right">
-                    +15,000 $FIAT/s
+                    +{(numberOfMachines + quantity) * machine.dailyReward} $FIAT/s
                   </Typography>
                 </Box>
               </Box>
@@ -81,13 +91,13 @@ const HireGangsterModal = ({ open, onBack }) => {
                 <Box>
                   <Box display="flex" alignItems="center" justifyContent="flex-end">
                     <Typography fontWeight={600} align="right">
-                      + 0
+                      +{numberOfMachines * machine.networth}
                     </Typography>
                     <StarBorderRoundedIcon />
                   </Box>
                   <Box display="flex" alignItems="center" justifyContent="flex-end">
                     <Typography fontSize={10} color="success.main" align="right">
-                      +1,200
+                      +{(numberOfMachines + quantity) * machine.networth}
                     </Typography>
                     <StarBorderRoundedIcon sx={{ fontSize: 14, color: 'success.main' }} />
                   </Box>
@@ -108,7 +118,8 @@ const HireGangsterModal = ({ open, onBack }) => {
                 </Box>
                 <Box>
                   <Typography fontWeight={600} align="right">
-                    11.0%
+                    XXX%
+                    {/* TODO: implement logic calculate ROI machine */}
                   </Typography>
                 </Box>
               </Box>
@@ -123,7 +134,7 @@ const HireGangsterModal = ({ open, onBack }) => {
                 </Box>
                 <img src="/images/icons/coin.png" alt="coin" width={20} />
                 <Typography fontSize={14} fontWeight={600}>
-                  330K
+                  {formatter.format((reversePool * 1) / 100)}
                 </Typography>
               </Box>
             </Box>
@@ -133,7 +144,7 @@ const HireGangsterModal = ({ open, onBack }) => {
             <Box flex={1} px={1.5} pt={0.75}>
               <Slider
                 min={0}
-                max={10}
+                max={maxPerPurchase}
                 valueLabelDisplay="on"
                 value={quantity}
                 onChange={(_e, value) => setQuantity(value)}
@@ -143,7 +154,7 @@ const HireGangsterModal = ({ open, onBack }) => {
             <Box display="flex" alignItems="center" gap={1}>
               <img src="/images/icons/ethereum.png" alt="eth" width={20} />
               <Typography fontSize={14} fontWeight={600}>
-                {formatter.format(price * quantity)} ETH
+                {formatter.format(machine.basePrice * quantity)} ETH
               </Typography>
             </Box>
           </Box>
