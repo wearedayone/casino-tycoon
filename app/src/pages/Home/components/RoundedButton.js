@@ -1,10 +1,10 @@
 import { Button } from '@mui/material';
 
-const RoundedButton = ({ label, onClick, sx }) => {
+const RoundedButton = ({ label, sx, ...props }) => {
   return (
     <Button
       variant="outlined"
-      onClick={onClick}
+      {...props}
       sx={{ color: 'black', textTransform: 'none', borderColor: 'black', borderRadius: 8, ...sx }}>
       {label}
     </Button>

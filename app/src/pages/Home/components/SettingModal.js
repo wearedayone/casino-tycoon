@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Box, Dialog, Typography, Button, Divider } from '@mui/material';
 import { usePrivy } from '@privy-io/react-auth';
 
@@ -14,9 +14,18 @@ import useUserStore from '../../../stores/user.store';
 
 const SettingModal = ({ open, setOpenUpdate }) => {
   const [mode, setMode] = useState('menu');
-  const { logout } = usePrivy();
+  const { ready, authenticated, user, exportWallet: exportWalletPrivy, logout } = usePrivy();
   const embeddedWallet = useUserWallet();
   const profile = useUserStore((state) => state.profile);
+
+  // Check that your user is authenticated
+  const isAuthenticated = useMemo(() => ready && authenticated, [ready, authenticated]);
+
+  // Check that your user has an embedded wallet
+  const hasEmbeddedWallet = useMemo(
+    () => !!user.linkedAccounts.find((account) => account.type === 'wallet' && account.walletClientType === 'privy'),
+    [user]
+  );
 
   const onCopyAddress = () => {
     navigator.clipboard.writeText(embeddedWallet?.address);
@@ -48,7 +57,11 @@ const SettingModal = ({ open, setOpenUpdate }) => {
     },
   ];
 
-  const exportWallet = () => {};
+  const exportWallet = async () => {
+    try {
+      await exportWalletPrivy();
+    } catch (error) {}
+  };
 
   if (!profile) return null;
 
@@ -111,7 +124,11 @@ const SettingModal = ({ open, setOpenUpdate }) => {
               </Box>
             </Box>
             <Box display="flex" flexDirection="column" gap={1}>
-              <RoundedButton label="Export Wallet" onClick={exportWallet} />
+              <RoundedButton
+                label="Export Wallet"
+                onClick={exportWallet}
+                disabled={!isAuthenticated || !hasEmbeddedWallet}
+              />
               <RoundedButton label="Logout" onClick={logout} />
             </Box>
             <Divider />
