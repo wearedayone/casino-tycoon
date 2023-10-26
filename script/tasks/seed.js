@@ -18,9 +18,6 @@ const main = async () => {
       },
       worker: { basePrice: 1000, dailyReward: 1000, networth: 1 },
       building: { basePrice: 1000, dailyReward: 0, networth: 10 },
-      nftAddress: '0x',
-      tokenAddress: '0x',
-      gameContractAddress: '0x',
       activeSeasonId,
       appVersion: '1.0.0',
     });
