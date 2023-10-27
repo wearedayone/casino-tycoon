@@ -2,26 +2,53 @@ import { useState } from 'react';
 import { Box, Dialog, Typography, Button, Slider } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 import StarBorderRoundedIcon from '@mui/icons-material/StarBorderRounded';
+import { usePrivy } from '@privy-io/react-auth';
+import { Contract } from '@ethersproject/contracts';
+import { useSnackbar } from 'notistack';
 
 import { formatter } from '../../../utils/numbers';
 import BuyBonusModal from './BuyBonusModal';
 import useSystemStore from '../../../stores/system.store';
 import useUserStore from '../../../stores/user.store';
+import useUserWallet from '../../../hooks/useUserWallet';
+import environments from '../../../utils/environments';
+import gameAbi from '../../../assets/abis/GameContract.json';
+import useSmartContract from '../../../hooks/useSmartContract';
+import { create, validate } from '../../../services/transaction.service';
+
+const { NFT_ADDRESS, GAME_CONTRACT_ADDRESS, NETWORK_ID } = environments;
 
 const maxPerPurchase = 10;
 
 const HireGangsterModal = ({ open, onBack }) => {
+  const { enqueueSnackbar } = useSnackbar();
   const activeSeason = useSystemStore((state) => state.activeSeason);
   const gamePlay = useUserStore((state) => state.gamePlay);
+  const { buyMachine } = useSmartContract();
   const [quantity, setQuantity] = useState(0);
   const [mode, setMode] = useState('normal');
-
-  const buy = () => {};
 
   if (!activeSeason || !gamePlay) return null;
 
   const { numberOfMachines } = gamePlay;
   const { machine, reversePool } = activeSeason;
+
+  const buy = async () => {
+    try {
+      const res = await create({ type: 'buy-machine', amount: quantity });
+      const { id, amount, value } = res.data;
+      const receipt = await buyMachine(amount, value);
+      // for test only
+      // const receipt = { status: 1, transactionHash: 'test-txn-hash' };
+      if (receipt.status === 1) {
+        await validate({ transactionId: id, txnHash: receipt.transactionHash });
+      }
+      enqueueSnackbar('Buy goons successfully', { variant: 'success' });
+    } catch (err) {
+      enqueueSnackbar(err.message, { variant: 'error' });
+      console.error(err);
+    }
+  };
 
   if (mode === 'buy-bonus') return <BuyBonusModal open onBack={() => setMode('normal')} />;
 
@@ -49,7 +76,7 @@ const HireGangsterModal = ({ open, onBack }) => {
               <Box flex={1} display="flex" flexDirection="column" gap={0.5}>
                 <Box p={1} border="1px solid black">
                   <Typography fontSize={14} fontWeight={600} align="center">
-                    Gangsters owned: 0
+                    Gangsters owned: {gamePlay.numberOfMachines}
                   </Typography>
                 </Box>
                 <Box>

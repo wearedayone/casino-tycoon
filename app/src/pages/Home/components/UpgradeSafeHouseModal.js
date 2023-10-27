@@ -1,26 +1,46 @@
 import { useState } from 'react';
 import { Box, Dialog, Typography, Button, Slider } from '@mui/material';
 import StarBorderRoundedIcon from '@mui/icons-material/StarBorderRounded';
+import { useSnackbar } from 'notistack';
 
 import { formatter } from '../../../utils/numbers';
-import { calculateBuildingBuyPrice } from '../../../utils/formulas';
+import { calculateNextBuildingBuyPriceBatch } from '../../../utils/formulas';
 import useSystemStore from '../../../stores/system.store';
 import useUserStore from '../../../stores/user.store';
+import useSmartContract from '../../../hooks/useSmartContract';
+import { create, validate } from '../../../services/transaction.service';
 
 const maxPerPurchase = 1;
 
 const UpgradeSafehouseModal = ({ open, onBack }) => {
+  const { enqueueSnackbar } = useSnackbar();
   const activeSeason = useSystemStore((state) => state.activeSeason);
   const gamePlay = useUserStore((state) => state.gamePlay);
+  const { buyWorkerOrBuilding } = useSmartContract();
   const [quantity, setQuantity] = useState(0);
 
-  const buy = () => {};
+  const buy = async () => {
+    try {
+      const res = await create({ type: 'buy-building', amount: quantity });
+      const { id, amount, value, type } = res.data;
+      const receipt = await buyWorkerOrBuilding(amount, value, type);
+      // for test only
+      // const receipt = { status: 1, transactionHash: 'test-txn-hash' };
+      if (receipt.status === 1) {
+        await validate({ transactionId: id, txnHash: receipt.transactionHash });
+      }
+      enqueueSnackbar('Buy buildings successfully', { variant: 'success' });
+    } catch (err) {
+      enqueueSnackbar(err.message, { variant: 'error' });
+      console.error(err);
+    }
+  };
 
   if (!activeSeason || !gamePlay) return null;
 
   const { numberOfBuildings } = gamePlay;
   const { building, buildingSold } = activeSeason;
-  const estimatedPrice = calculateBuildingBuyPrice(buildingSold);
+  const estimatedPrice = calculateNextBuildingBuyPriceBatch(buildingSold, quantity);
 
   return (
     <Dialog
@@ -46,7 +66,7 @@ const UpgradeSafehouseModal = ({ open, onBack }) => {
               <Box flex={1} display="flex" flexDirection="column" gap={0.5}>
                 <Box p={1} border="1px solid black">
                   <Typography fontSize={14} fontWeight={600} align="center">
-                    Safehouse Upgrades: 0
+                    Safehouse Upgrades: {gamePlay.numberOfBuildings}
                   </Typography>
                 </Box>
                 <Box>
@@ -134,7 +154,7 @@ const UpgradeSafehouseModal = ({ open, onBack }) => {
             <Box display="flex" alignItems="center" gap={1}>
               <img src="/images/icons/ethereum.png" alt="eth" width={20} />
               <Typography fontSize={14} fontWeight={600}>
-                {formatter.format(estimatedPrice * quantity)} $FIAT
+                {formatter.format(estimatedPrice.total)} $FIAT
               </Typography>
             </Box>
           </Box>

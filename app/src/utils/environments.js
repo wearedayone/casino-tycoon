@@ -12,6 +12,7 @@ const environments = {
   GAME_CONTRACT_ADDRESS: process.env.REACT_APP_GAME_CONTRACT_ADDRESS,
   TOKEN_ADDRESS: process.env.REACT_APP_TOKEN_ADDRESS,
   NFT_ADDRESS: process.env.REACT_APP_NFT_ADDRESS,
+  SYSTEM_ADDRESS: process.env.REACT_APP_SYSTEM_ADDRESS,
 };
 
 export default environments;

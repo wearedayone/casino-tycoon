@@ -33,8 +33,7 @@ const ActionButtons = () => {
   const startRewardCountingDateUnix = startRewardCountingTime.toDate().getTime();
   const diffInDays = (now - startRewardCountingDateUnix) / (24 * 60 * 60 * 1000);
 
-  const countingReward =
-    numberOfMachines * machine.dailyReward * diffInDays + numberOfWorkers * worker.dailyReward * diffInDays;
+  const countingReward = diffInDays * (numberOfMachines * machine.dailyReward + numberOfWorkers * worker.dailyReward);
   const totalClaimableReward = pendingReward + countingReward;
 
   return (

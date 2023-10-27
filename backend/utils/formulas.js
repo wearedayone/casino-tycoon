@@ -1,9 +1,3 @@
-// TODO: update logic calculateMachineSellPrice later
-// will get sell price from opensea
-export const calculateMachineSellPrice = (machinePrice) => {
-  return machinePrice * 0.6;
-};
-
 export const calculateNextWorkerBuyPrice = (workerSold) => {
   const x = 100;
   const y = 2000;
@@ -44,4 +38,12 @@ export const calculateNextBuildingBuyPriceBatch = (buildingSold, quantity) => {
     total: prices.reduce((total, item) => total + item, 0),
     prices,
   };
+};
+
+export const calculateNewEstimatedEndTimeUnix = (currentEndTimeUnix, newMachineAddedQuantity) => {
+  return currentEndTimeUnix + newMachineAddedQuantity * 60 * 60 * 1000;
+};
+
+export const calculateReversePoolBonus = (reversePool) => {
+  return reversePool * 0.1;
 };

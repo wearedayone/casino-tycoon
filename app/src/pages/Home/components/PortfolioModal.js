@@ -21,11 +21,11 @@ const PortfolioModal = ({ open, setOpenUpdate }) => {
 
   const { tokenBalance, ETHBalance } = profile;
   const { numberOfMachines } = gamePlay;
-  const { machineSold } = activeSeason;
+  const { machine } = activeSeason;
 
   // TODO: implement logic calculate token value in eth
   const tokenValueInETH = 0;
-  const estimatedMachinesValueInETH = numberOfMachines * calculateMachineSellPrice(machineSold);
+  const estimatedMachinesValueInETH = numberOfMachines * calculateMachineSellPrice(machine.basePrice);
   // TODO: implement logic calculate networth rank reward
   const networthRankReward = 0;
   const totalPortfolioValue = ETHBalance + tokenValueInETH + estimatedMachinesValueInETH + networthRankReward;
@@ -96,7 +96,7 @@ const PortfolioModal = ({ open, setOpenUpdate }) => {
               </Typography>
               <Box display="flex" flexDirection="column" gap={1}>
                 {items.map((item) => (
-                  <Box display="flex" alignItems="center" gap={1}>
+                  <Box key={item.text} display="flex" alignItems="center" gap={1}>
                     <img src={item.icon} alt="icon" width={23} height={23} />
                     <Box flex={1} display="flex" alignItems="center">
                       <Typography fontSize={14}>{item.text}</Typography>
