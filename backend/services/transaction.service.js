@@ -142,6 +142,7 @@ const updateUserGamePlay = async (userId, transactionId) => {
   const { type, amount } = snapshot.data();
 
   const activeSeason = await getActiveSeason();
+  const { machine, worker, building } = activeSeason;
 
   // update user number of assets && pendingReward && startRewardCountingTime
   const gamePlaySnapshot = await firestore
@@ -150,16 +151,26 @@ const updateUserGamePlay = async (userId, transactionId) => {
     .where('seasonId', '==', activeSeason.id)
     .get();
   const userGamePlay = gamePlaySnapshot.docs[0];
+  const { numberOfWorkers, numberOfMachines, numberOfBuildings } = userGamePlay.data();
+  const assets = {
+    numberOfBuildings,
+    numberOfMachines,
+    numberOfWorkers,
+  };
+
   let gamePlayData;
   switch (type) {
     case 'buy-machine':
       gamePlayData = { numberOfMachines: admin.firestore.FieldValue.increment(amount) };
+      assets.numberOfMachines += amount;
       break;
     case 'buy-worker':
       gamePlayData = { numberOfWorkers: admin.firestore.FieldValue.increment(amount) };
+      assets.numberOfWorkers += amount;
       break;
     case 'buy-building':
       gamePlayData = { numberOfBuildings: admin.firestore.FieldValue.increment(amount) };
+      assets.numberOfBuildings += amount;
       break;
     default:
       break;
@@ -168,7 +179,12 @@ const updateUserGamePlay = async (userId, transactionId) => {
   gamePlayData.pendingReward = await calculatePendingReward(userId);
   gamePlayData.startRewardCountingTime = admin.firestore.FieldValue.serverTimestamp();
 
-  await userGamePlay.ref.update({ ...gamePlayData });
+  const networth =
+    assets.numberOfBuildings * building.networth +
+    assets.numberOfMachines * machine.networth +
+    assets.numberOfWorkers * worker.networth;
+
+  await userGamePlay.ref.update({ ...gamePlayData, networth });
 };
 
 const sendUserBonus = async (userId, transactionId) => {
