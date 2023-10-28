@@ -1,8 +1,22 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Box, Dialog, Typography, Button, Switch, styled } from '@mui/material';
 
+import { toggleWarStatus } from '../../../services/user.service';
+import useUserStore from '../../../stores/user.store';
+
 const WarModal = ({ open, onClose, onGoToHistory }) => {
+  const gamePlay = useUserStore((state) => state.gamePlay);
   const [isWarEnabled, setWarEnabled] = useState(false);
+
+  useEffect(() => {
+    setWarEnabled(gamePlay.war);
+  }, [gamePlay.war]);
+
+  const onToggleWar = async () => {
+    const war = !isWarEnabled;
+    await toggleWarStatus({ war });
+    setWarEnabled(war);
+  };
 
   return (
     <Dialog
@@ -52,17 +66,13 @@ const WarModal = ({ open, onClose, onGoToHistory }) => {
               </Box>
             </Box>
             <Box display="flex" flexDirection="column" alignItems="center" position="relative">
-              <BigSwitch
-                checked={isWarEnabled}
-                onChange={(e) => setWarEnabled(e.target.checked)}
-                inputProps={{ 'aria-label': 'controlled' }}
-              />
+              <BigSwitch checked={isWarEnabled} onChange={onToggleWar} inputProps={{ 'aria-label': 'controlled' }} />
               <Typography
                 sx={{ position: 'absolute', top: 4, left: 0, right: 0, [isWarEnabled ? 'mr' : 'ml']: 2.5 }}
                 color="white"
                 fontSize={12}
                 textAlign="center"
-                onClick={() => setWarEnabled(!isWarEnabled)}>
+                onClick={onToggleWar}>
                 {isWarEnabled ? 'War' : 'Rest'}
               </Typography>
               <Box display="flex" alignItems="center" gap={0.5}>

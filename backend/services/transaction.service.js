@@ -16,6 +16,7 @@ export const initTransaction = async ({ userId, type, amount }) => {
   let currentSold = 0;
   let value = 0;
   let prices = [];
+  let isWarEnabled = null;
   switch (type) {
     case 'buy-machine':
       token = 'ETH';
@@ -37,6 +38,16 @@ export const initTransaction = async ({ userId, type, amount }) => {
       value = buildingPrices.total;
       prices = buildingPrices.prices;
       break;
+    case 'war-switch':
+      const gamePlaySnapshot = await firestore
+        .collection('gamePlay')
+        .where('userId', '==', userId)
+        .where('seasonId', '==', activeSeason.id)
+        .get();
+      const gamePlay = gamePlaySnapshot.docs[0];
+      const { war } = gamePlay.data();
+      isWarEnabled = war;
+      break;
     default:
       break;
   }
@@ -51,6 +62,7 @@ export const initTransaction = async ({ userId, type, amount }) => {
     currentSold,
     value,
     prices,
+    isWarEnabled,
     status: 'pending',
   };
 

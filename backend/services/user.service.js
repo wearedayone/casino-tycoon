@@ -2,6 +2,7 @@ import { faker } from '@faker-js/faker';
 
 import admin, { firestore } from '../configs/firebase.config.js';
 import { getActiveSeasonId } from './season.service.js';
+import { initTransaction } from './transaction.service.js';
 import environments from '../utils/environments.js';
 import privy from '../configs/privy.config.js';
 
@@ -47,4 +48,21 @@ export const createUserIfNotExist = async (userId) => {
       startRewardCountingTime: admin.firestore.FieldValue.serverTimestamp(),
     });
   }
+};
+
+export const toggleWarStatus = async (userId, war) => {
+  const seasonId = await getActiveSeasonId();
+
+  const gamePlaySnapshot = await firestore
+    .collection('gamePlay')
+    .where('userId', '==', userId)
+    .where('seasonId', '==', seasonId)
+    .get();
+
+  const gamePlay = gamePlaySnapshot.docs[0];
+
+  // update gamePlay
+  await gamePlay.ref.update({ war });
+
+  await initTransaction({ userId, type: 'war-switch', amount: 0 });
 };
