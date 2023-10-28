@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Box, Dialog, Typography, Button, Switch, styled } from '@mui/material';
+import Countdown from 'react-countdown';
 
 import { toggleWarStatus } from '../../../services/user.service';
 import useUserStore from '../../../stores/user.store';
@@ -7,6 +8,18 @@ import useUserStore from '../../../stores/user.store';
 const WarModal = ({ open, onClose, onGoToHistory }) => {
   const gamePlay = useUserStore((state) => state.gamePlay);
   const [isWarEnabled, setWarEnabled] = useState(false);
+  const [nextWar, setNextWar] = useState(new Date());
+
+  useEffect(() => {
+    const date = new Date();
+    // tomorrow at 1AM
+    date.setDate(date.getDate() + 1);
+    date.setHours(1);
+    date.setMinutes(0);
+    date.setMilliseconds(0);
+
+    setNextWar(date);
+  }, [open]);
 
   useEffect(() => {
     setWarEnabled(gamePlay.war);
@@ -16,6 +29,14 @@ const WarModal = ({ open, onClose, onGoToHistory }) => {
     const war = !isWarEnabled;
     await toggleWarStatus({ war });
     setWarEnabled(war);
+  };
+
+  const countdownRenderer = ({ hours, minutes, seconds }) => {
+    return (
+      <span>
+        {hours.toString().padStart(2, '0')}:{minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}
+      </span>
+    );
   };
 
   return (
@@ -78,7 +99,7 @@ const WarModal = ({ open, onClose, onGoToHistory }) => {
               <Box display="flex" alignItems="center" gap={0.5}>
                 <img src="/images/icons/clock.png" alt="" width={12} />
                 <Typography fontSize={12} fontStyle="italic">
-                  Next war: 17:22:02
+                  Next war: <Countdown date={nextWar} renderer={countdownRenderer} />
                 </Typography>
               </Box>
             </Box>
