@@ -1,6 +1,15 @@
+import { useEffect, useState } from 'react';
 import { Box, Dialog, Typography, Button } from '@mui/material';
 
+import { getWarHistory } from '../../../services/user.service';
+
 const WarHistoryModal = ({ open, onClose }) => {
+  const [history, setHistory] = useState([]);
+
+  useEffect(() => {
+    if (open) getWarHistory().then((res) => setHistory(res.data));
+  }, [open]);
+
   return (
     <Dialog
       maxWidth="sm"
@@ -21,40 +30,64 @@ const WarHistoryModal = ({ open, onClose }) => {
             <Box display="flex" flexDirection="column">
               <Typography fontSize={14}>Past History</Typography>
               <table style={{ borderCollapse: 'collapse' }}>
-                <tr>
-                  <th>
-                    <Typography fontSize={12}>Date</Typography>
-                  </th>
-                  <th>
-                    <Typography fontSize={12}>Your vote</Typography>
-                  </th>
-                  <th>
-                    <Typography fontSize={12}>Vote %</Typography>
-                  </th>
-                  <th>
-                    <Typography fontSize={12}>Outcome</Typography>
-                  </th>
-                </tr>
-                {history.map((row) => (
-                  <tr key={row.date} style={{ backgroundColor: '#d9d9d9', borderTop: '2px solid white' }}>
-                    <td style={{ padding: 4 }}>
-                      <Typography fontSize={12}>{row.date}</Typography>
-                    </td>
-                    <td>
-                      <Typography fontSize={12} textAlign="center">
-                        {row.isWarEnabled ? 'War' : 'Peace'}
-                      </Typography>
-                    </td>
-                    <td>
-                      <Typography fontSize={12}>{row.voteRatio * 100}%</Typography>
-                    </td>
-                    <td style={{ padding: 4 }}>
-                      <Typography fontSize={12} textAlign="right" sx={{ mr: row.outcome ? 0 : 3 }}>
-                        {row.outcome ?? '-'}
-                      </Typography>
-                    </td>
+                <thead>
+                  <tr style={{ display: 'table', width: '100%', tableLayout: 'fixed' }}>
+                    <th>
+                      <Typography fontSize={12}>Date</Typography>
+                    </th>
+                    <th>
+                      <Typography fontSize={12}>Your vote</Typography>
+                    </th>
+                    <th>
+                      <Typography fontSize={12}>Vote %</Typography>
+                    </th>
+                    <th>
+                      <Typography fontSize={12}>Outcome</Typography>
+                    </th>
                   </tr>
-                ))}
+                </thead>
+                {history.length ? (
+                  <tbody style={{ display: 'block', maxHeight: '30vh', overflowY: 'scroll' }}>
+                    {history.map((row) => (
+                      <tr
+                        key={row.date}
+                        style={{
+                          display: 'table',
+                          width: '100%',
+                          backgroundColor: '#d9d9d9',
+                          borderTop: '2px solid white',
+                          tableLayout: 'fixed',
+                        }}>
+                        <td style={{ padding: 4 }}>
+                          <Typography fontSize={12}>{`${new Date(row.createdAt).getDate()}/${
+                            new Date(row.createdAt).getMonth() + 1
+                          }`}</Typography>
+                        </td>
+                        <td>
+                          <Typography fontSize={12} textAlign="center">
+                            {row.isWarEnabled ? 'War' : 'Peace'}
+                          </Typography>
+                        </td>
+                        <td>
+                          <Typography fontSize={12} textAlign="center">
+                            {Math.round(row.voteRatio * 100)}%
+                          </Typography>
+                        </td>
+                        <td style={{ padding: 4 }}>
+                          <Typography fontSize={12} textAlign="right" sx={{ mr: row.outcome ? 0 : 3 }}>
+                            {row.outcome ?? '-'}
+                          </Typography>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                ) : (
+                  <Box width="100%" bgcolor="#d9d9d9" p={1}>
+                    <Typography fontSize={12} textAlign="center">
+                      No data.
+                    </Typography>
+                  </Box>
+                )}
               </table>
             </Box>
             <Box display="flex" flexDirection="column">
@@ -122,16 +155,5 @@ const WarHistoryModal = ({ open, onClose }) => {
     </Dialog>
   );
 };
-
-const history = [
-  { date: '14/10', isWarEnabled: true, voteRatio: 0.51, outcome: null },
-  { date: '13/10', isWarEnabled: true, voteRatio: 0.61, outcome: '-1 gangster, -2 goons' },
-  { date: '12/10', isWarEnabled: true, voteRatio: 0.65, outcome: '-1 goon' },
-  { date: '11/10', isWarEnabled: false, voteRatio: 0.4, outcome: null },
-  { date: '10/10', isWarEnabled: false, voteRatio: 0.2, outcome: null },
-  { date: '09/10', isWarEnabled: false, voteRatio: 0.9, outcome: null },
-  { date: '08/10', isWarEnabled: true, voteRatio: 0.3, outcome: '+188K $FIAT' },
-  { date: '07/10', isWarEnabled: true, voteRatio: 0.3, outcome: '+172K $FIAT' },
-];
 
 export default WarHistoryModal;

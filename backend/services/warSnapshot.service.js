@@ -65,6 +65,7 @@ export const takeDailyWarSnapshot = async () => {
     const penalty = penaltyMap[gamePlay.userId] ?? null;
     promises.push(
       firestore.collection('user').doc(gamePlay.userId).collection('warHistory').add({
+        seasonId,
         isWarEnabled: !!gamePlay.war,
         voteRatio,
         createdAt,
@@ -99,4 +100,31 @@ export const takeDailyWarSnapshot = async () => {
   await Promise.all(promises);
 
   console.log('\n---------finish taking daily war snapshot--------\n\n');
+};
+
+export const getWarHistory = async (userId) => {
+  const seasonId = await getActiveSeasonId();
+
+  const warHistorySnapshot = await firestore
+    .collection('user')
+    .doc(userId)
+    .collection('warHistory')
+    .where('seasonId', '==', seasonId)
+    .orderBy('createdAt', 'desc')
+    .get();
+
+  const warHistory = warHistorySnapshot.docs.map((doc) => {
+    const { bonus, penalty, createdAt, ...rest } = doc.data();
+    let outcome = null;
+
+    if (bonus) outcome = `+${bonus} $FIAT`;
+    else if (penalty) {
+      const strings = [];
+      if (penalty.gangster) strings.push(`-${penalty.gangster} gangster${penalty.gangster > 1 ? 's' : ''}`);
+      if (penalty.goon) strings.push(`-${penalty.goon} goon${penalty.goon > 1 ? 's' : ''}`);
+      outcome = penalty.gangster || penalty.goon ? strings.join(', ') : null;
+    }
+    return { id: doc.id, outcome, createdAt: createdAt.toDate(), ...rest };
+  });
+  return warHistory;
 };
