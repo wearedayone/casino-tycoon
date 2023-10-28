@@ -163,7 +163,7 @@ const updateUserGamePlay = async (userId, transactionId) => {
     .where('seasonId', '==', activeSeason.id)
     .get();
   const userGamePlay = gamePlaySnapshot.docs[0];
-  const { numberOfWorkers, numberOfMachines, numberOfBuildings } = userGamePlay.data();
+  const { numberOfWorkers, numberOfMachines, numberOfBuildings, pendingRewardSinceLastWar = 0 } = userGamePlay.data();
   const assets = {
     numberOfBuildings,
     numberOfMachines,
@@ -188,7 +188,9 @@ const updateUserGamePlay = async (userId, transactionId) => {
       break;
   }
 
-  gamePlayData.pendingReward = await calculatePendingReward(userId);
+  const calculatedPendingReward = await calculatePendingReward(userId);
+  gamePlayData.pendingRewardSinceLastWar = pendingRewardSinceLastWar + calculatedPendingReward;
+  gamePlayData.pendingReward = calculatedPendingReward;
   gamePlayData.startRewardCountingTime = admin.firestore.FieldValue.serverTimestamp();
 
   const networth =
@@ -250,7 +252,7 @@ export const validateTxnHash = async ({ userId, transactionId, txnHash }) => {
 };
 
 // utils
-const calculatePendingReward = async (userId) => {
+export const calculatePendingReward = async (userId) => {
   const activeSeason = await getActiveSeason();
   const gamePlaySnapshot = await firestore
     .collection('gamePlay')
