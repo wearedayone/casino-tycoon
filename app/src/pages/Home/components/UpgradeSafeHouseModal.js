@@ -4,23 +4,23 @@ import StarBorderRoundedIcon from '@mui/icons-material/StarBorderRounded';
 import { useSnackbar } from 'notistack';
 
 import { formatter } from '../../../utils/numbers';
-import { calculateNextBuildingBuyPriceBatch } from '../../../utils/formulas';
+import { calculateNextBuildingBuyPriceBatch, estimateNumberOfBuildingCanBuy } from '../../../utils/formulas';
 import useSystemStore from '../../../stores/system.store';
 import useUserStore from '../../../stores/user.store';
 import useSmartContract from '../../../hooks/useSmartContract';
 import { create, validate } from '../../../services/transaction.service';
 
-const maxPerPurchase = 1;
-
 const UpgradeSafehouseModal = ({ open, onBack }) => {
   const { enqueueSnackbar } = useSnackbar();
   const activeSeason = useSystemStore((state) => state.activeSeason);
   const gamePlay = useUserStore((state) => state.gamePlay);
+  const profile = useUserStore((state) => state.profile);
   const { buyWorkerOrBuilding } = useSmartContract();
   const [quantity, setQuantity] = useState(0);
-
+  const [upgrading, setUpgrading] = useState(false);
   const buy = async () => {
     try {
+      setUpgrading(true);
       const res = await create({ type: 'buy-building', amount: quantity });
       const { id, amount, value, type } = res.data;
       const receipt = await buyWorkerOrBuilding(amount, value, type);
@@ -33,6 +33,8 @@ const UpgradeSafehouseModal = ({ open, onBack }) => {
     } catch (err) {
       enqueueSnackbar(err.message, { variant: 'error' });
       console.error(err);
+    } finally {
+      setUpgrading(false);
     }
   };
 
@@ -40,6 +42,8 @@ const UpgradeSafehouseModal = ({ open, onBack }) => {
 
   const { numberOfBuildings } = gamePlay;
   const { building, buildingSold } = activeSeason;
+  const estimateMaxPurchase = estimateNumberOfBuildingCanBuy(buildingSold, profile?.tokenBalance ?? 0);
+  console.log({ buildingSold, estimateMaxPurchase });
   const estimatedPrice = calculateNextBuildingBuyPriceBatch(buildingSold, quantity);
 
   return (
@@ -144,7 +148,7 @@ const UpgradeSafehouseModal = ({ open, onBack }) => {
             <Box flex={1} px={1.5} pt={0.75}>
               <Slider
                 min={0}
-                max={maxPerPurchase}
+                max={estimateMaxPurchase}
                 valueLabelDisplay="on"
                 value={quantity}
                 onChange={(_e, value) => setQuantity(value)}
@@ -161,8 +165,12 @@ const UpgradeSafehouseModal = ({ open, onBack }) => {
         </Box>
         <Box display="flex" flexDirection="column" gap={2} bgcolor="white" borderRadius={2}>
           <Box display="flex" flexDirection="column" gap={1}>
-            <Button variant="outlined" onClick={buy} sx={{ color: 'black', textTransform: 'none' }}>
-              Buy
+            <Button
+              variant="outlined"
+              onClick={buy}
+              disabled={upgrading}
+              sx={{ color: 'black', textTransform: 'none' }}>
+              {upgrading ? 'Upgrading ...' : 'Upgrade'}
             </Button>
           </Box>
         </Box>

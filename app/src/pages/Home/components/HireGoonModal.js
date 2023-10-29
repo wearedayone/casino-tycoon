@@ -4,29 +4,32 @@ import StarBorderRoundedIcon from '@mui/icons-material/StarBorderRounded';
 import { useSnackbar } from 'notistack';
 
 import { formatter } from '../../../utils/numbers';
-import { calculateNextWorkerBuyPriceBatch } from '../../../utils/formulas';
+import { calculateNextWorkerBuyPriceBatch, estimateNumberOfWorkerCanBuy } from '../../../utils/formulas';
 import useSystemStore from '../../../stores/system.store';
 import useUserStore from '../../../stores/user.store';
 import useSmartContract from '../../../hooks/useSmartContract';
 import { create, validate } from '../../../services/transaction.service';
 
-const maxPerPurchase = 1;
-
 const HireGoonModal = ({ open, onBack }) => {
   const { enqueueSnackbar } = useSnackbar();
   const activeSeason = useSystemStore((state) => state.activeSeason);
   const gamePlay = useUserStore((state) => state.gamePlay);
+  const profile = useUserStore((state) => state.profile);
+
   const { buyWorkerOrBuilding } = useSmartContract();
   const [quantity, setQuantity] = useState(0);
-
+  const [buying, setBuying] = useState(false);
   if (!activeSeason || !gamePlay) return null;
 
   const { numberOfWorkers } = gamePlay;
   const { worker, workerSold } = activeSeason;
+  const estimateMaxPurchase = estimateNumberOfWorkerCanBuy(workerSold, profile?.tokenBalance ?? 0);
+  console.log({ workerSold, estimateMaxPurchase });
   const estimatedPrice = calculateNextWorkerBuyPriceBatch(workerSold, quantity);
 
   const buy = async () => {
     try {
+      setBuying(true);
       const res = await create({ type: 'buy-worker', amount: quantity });
       const { id, amount, value, type } = res.data;
       const receipt = await buyWorkerOrBuilding(amount, value, type);
@@ -39,6 +42,8 @@ const HireGoonModal = ({ open, onBack }) => {
     } catch (err) {
       enqueueSnackbar(err.message, { variant: 'error' });
       console.error(err);
+    } finally {
+      setBuying(false);
     }
   };
 
@@ -147,7 +152,7 @@ const HireGoonModal = ({ open, onBack }) => {
             <Box flex={1} px={1.5} pt={0.75}>
               <Slider
                 min={0}
-                max={maxPerPurchase}
+                max={estimateMaxPurchase}
                 valueLabelDisplay="on"
                 value={quantity}
                 onChange={(_e, value) => setQuantity(value)}
@@ -164,8 +169,8 @@ const HireGoonModal = ({ open, onBack }) => {
         </Box>
         <Box display="flex" flexDirection="column" gap={2} bgcolor="white" borderRadius={2}>
           <Box display="flex" flexDirection="column" gap={1}>
-            <Button variant="outlined" onClick={buy} sx={{ color: 'black', textTransform: 'none' }}>
-              Buy
+            <Button variant="outlined" onClick={buy} disabled={buying} sx={{ color: 'black', textTransform: 'none' }}>
+              {buying ? 'Recruiting ...' : 'Buy'}
             </Button>
           </Box>
         </Box>

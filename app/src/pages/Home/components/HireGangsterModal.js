@@ -24,17 +24,22 @@ const HireGangsterModal = ({ open, onBack }) => {
   const { enqueueSnackbar } = useSnackbar();
   const activeSeason = useSystemStore((state) => state.activeSeason);
   const gamePlay = useUserStore((state) => state.gamePlay);
+  const profile = useUserStore((state) => state.profile);
+
   const { buyMachine } = useSmartContract();
   const [quantity, setQuantity] = useState(0);
   const [mode, setMode] = useState('normal');
+  const [buying, setBuying] = useState(false);
 
   if (!activeSeason || !gamePlay) return null;
 
   const { numberOfMachines } = gamePlay;
   const { machine, reversePool } = activeSeason;
-
+  const { ETHBalance } = profile;
+  const maxPurchase = Math.floor(ETHBalance / machine.basePrice);
   const buy = async () => {
     try {
+      setBuying(true);
       const res = await create({ type: 'buy-machine', amount: quantity });
       const { id, amount, value } = res.data;
       const receipt = await buyMachine(amount, value);
@@ -43,10 +48,12 @@ const HireGangsterModal = ({ open, onBack }) => {
       if (receipt.status === 1) {
         await validate({ transactionId: id, txnHash: receipt.transactionHash });
       }
-      enqueueSnackbar('Buy goons successfully', { variant: 'success' });
+      enqueueSnackbar('Buy Gangster successfully', { variant: 'success' });
     } catch (err) {
       enqueueSnackbar(err.message, { variant: 'error' });
       console.error(err);
+    } finally {
+      setBuying(false);
     }
   };
 
@@ -171,7 +178,7 @@ const HireGangsterModal = ({ open, onBack }) => {
             <Box flex={1} px={1.5} pt={0.75}>
               <Slider
                 min={0}
-                max={maxPerPurchase}
+                max={maxPurchase}
                 valueLabelDisplay="on"
                 value={quantity}
                 onChange={(_e, value) => setQuantity(value)}
@@ -188,8 +195,8 @@ const HireGangsterModal = ({ open, onBack }) => {
         </Box>
         <Box display="flex" flexDirection="column" gap={2} bgcolor="white" borderRadius={2}>
           <Box display="flex" flexDirection="column" gap={1}>
-            <Button variant="outlined" onClick={buy} sx={{ color: 'black', textTransform: 'none' }}>
-              Buy
+            <Button variant="outlined" onClick={buy} disabled={buying} sx={{ color: 'black', textTransform: 'none' }}>
+              {buying ? 'Recruiting ...' : 'Buy'}
             </Button>
           </Box>
         </Box>

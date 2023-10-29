@@ -5,25 +5,24 @@ import { getActiveSeasonId } from './season.service.js';
 import { initTransaction } from './transaction.service.js';
 import environments from '../utils/environments.js';
 import privy from '../configs/privy.config.js';
+import alchemy from '../configs/alchemy.config.js';
+import { formatEther } from '@ethersproject/units';
 
 const { NETWORK_ID } = environments;
 
 export const createUserIfNotExist = async (userId) => {
   console.log({ function: 'createUserIfNotExist', userId });
   const snapshot = await firestore.collection('user').doc(userId).get();
-  // const user = await privy.getUser(userId);
-  // console.log({ user });
+  const user = await privy.getUser(userId);
+  console.log({ user });
   if (!snapshot.exists) {
-    const user = await privy.getUser(userId);
-    // console.log({ user });
-
     const { wallet, twitter } = user;
     // create user
     const username = twitter ? twitter.username : faker.internet.userName();
     const avatarURL = `https://placehold.co/400x400/1e90ff/FFF?text=${username[0].toUpperCase()}`;
 
     await firestore.collection('user').doc(userId).set({
-      address: wallet.address,
+      address: wallet.address.toLocaleLowerCase(),
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       username,
       avatarURL,
@@ -47,6 +46,19 @@ export const createUserIfNotExist = async (userId) => {
       pendingReward: 0,
       startRewardCountingTime: admin.firestore.FieldValue.serverTimestamp(),
     });
+  } else {
+    const ethersProvider = await alchemy.config.getProvider();
+    const value = await ethersProvider.getBalance(user.wallet.address);
+    console.log(formatEther(value));
+    const { ETHBalance } = snapshot.data();
+    if (ETHBalance !== formatEther(value)) {
+      await firestore
+        .collection('user')
+        .doc(userId)
+        .update({
+          ETHBalance: formatEther(value),
+        });
+    }
   }
 };
 

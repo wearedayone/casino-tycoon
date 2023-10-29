@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 
-const IconButton = ({ Icon, onClick, sx = {} }) => {
+const IconButton = ({ Icon, onClick, sx = {}, disabled = false }) => {
   return (
     <Box
       width={50}
@@ -10,8 +10,9 @@ const IconButton = ({ Icon, onClick, sx = {} }) => {
       borderRadius={2}
       border="1px solid black"
       bgcolor="white"
+      color={disabled ? 'grey' : 'black'}
       sx={{ aspectRatio: '1/1', ...sx }}
-      onClick={onClick}>
+      onClick={disabled ? () => {} : onClick}>
       {Icon}
     </Box>
   );

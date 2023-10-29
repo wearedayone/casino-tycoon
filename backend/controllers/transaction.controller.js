@@ -1,4 +1,4 @@
-import { initTransaction, validateTxnHash } from '../services/transaction.service.js';
+import { initTransaction, validateTxnHash, claimToken as claimTokenService } from '../services/transaction.service.js';
 
 export const create = async (req, res) => {
   try {
@@ -15,6 +15,17 @@ export const validate = async (req, res) => {
   try {
     const data = { ...req.body, userId: req.userId };
     await validateTxnHash(data);
+    return res.sendStatus(200);
+  } catch (err) {
+    console.log({ err });
+    return res.status(400).send(err);
+  }
+};
+
+export const claimToken = async (req, res) => {
+  try {
+    const data = { ...req.body, userId: req.userId };
+    await claimTokenService(data);
     return res.sendStatus(200);
   } catch (err) {
     console.log({ err });

@@ -6,16 +6,33 @@ import useUserStore from '../../../stores/user.store';
 import useSystemStore from '../../../stores/system.store';
 import { formatter } from '../../../utils/numbers';
 import { calculateMachineSellPrice } from '../../../utils/formulas';
+import { useEffect, useState } from 'react';
+import { useWallets } from '@privy-io/react-auth';
+import { formatEther } from '@ethersproject/units';
 
 const PortfolioModal = ({ open, setOpenUpdate }) => {
   const profile = useUserStore((state) => state.profile);
   const gamePlay = useUserStore((state) => state.gamePlay);
   const activeSeason = useSystemStore((state) => state.activeSeason);
   const embeddedWallet = useUserWallet();
+  const [latestETHBalance, setETHBalance] = useState(0);
+  const [tokenPrice, setTokenPrice] = useState(0.000001);
+  const { wallets } = useWallets();
 
+  const embeddedWallet1 = wallets.find((wallet) => wallet.walletClientType === 'privy');
   const onCopyAddress = () => {
     navigator.clipboard.writeText(embeddedWallet?.address);
   };
+  const getLatestBalance = async () => {
+    const provider = await embeddedWallet?.getEthereumProvider();
+    console.log({ wallets, embeddedWallet, embeddedWallet1, provider });
+    const value = await provider?.provider?.getBalance(embeddedWallet?.address);
+    if (value) setETHBalance(formatEther(value));
+  };
+  console.log({ latestETHBalance });
+  useEffect(() => {
+    getLatestBalance();
+  }, []);
 
   if (!profile || !gamePlay || !activeSeason) return null;
 
@@ -24,32 +41,37 @@ const PortfolioModal = ({ open, setOpenUpdate }) => {
   const { machine } = activeSeason;
 
   // TODO: implement logic calculate token value in eth
-  const tokenValueInETH = 0;
+
+  const tokenValueInETH = tokenPrice * tokenBalance;
   const estimatedMachinesValueInETH = numberOfMachines * calculateMachineSellPrice(machine.basePrice);
   // TODO: implement logic calculate networth rank reward
   const networthRankReward = 0;
-  const totalPortfolioValue = ETHBalance + tokenValueInETH + estimatedMachinesValueInETH + networthRankReward;
+  const totalPortfolioValue =
+    parseFloat(ETHBalance) +
+    parseFloat(tokenValueInETH) +
+    parseFloat(estimatedMachinesValueInETH) +
+    parseFloat(networthRankReward);
 
   const items = [
     {
       icon: '/images/icons/ethereum.png',
       text: 'Balance',
-      value: ETHBalance,
+      value: latestETHBalance ? parseFloat(latestETHBalance).toFixed(3) : parseFloat(ETHBalance).toFixed(3),
     },
     {
       icon: '/images/icons/coin.png',
       text: `${formatter.format(tokenBalance)} FIAT`,
-      value: tokenValueInETH,
+      value: parseFloat(tokenValueInETH).toFixed(3),
     },
     {
       icon: '/images/icons/slot-machine.png',
       text: `${numberOfMachines} Machine NFTs`,
-      value: estimatedMachinesValueInETH,
+      value: parseFloat(estimatedMachinesValueInETH).toFixed(3),
     },
     {
       icon: '/images/icons/crown_1.png',
       text: 'Networth Rank Rewards',
-      value: networthRankReward,
+      value: parseFloat(networthRankReward).toFixed(3),
     },
   ];
 
@@ -92,7 +114,7 @@ const PortfolioModal = ({ open, setOpenUpdate }) => {
                 Total portfolio value
               </Typography>
               <Typography fontSize={20} fontWeight={700} align="center">
-                {totalPortfolioValue} ETH
+                {totalPortfolioValue.toFixed(3)} ETH
               </Typography>
               <Box display="flex" flexDirection="column" gap={1}>
                 {items.map((item) => (

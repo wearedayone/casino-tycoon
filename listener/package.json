@@ -1,0 +1,17 @@
+{
+  "name": "listener",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "start": "env-cmd -f .env.stg node index.js"
+  },
+  "dependencies": {
+    "alchemy-sdk": "^2.10.1",
+    "env-cmd": "^10.1.0",
+    "firebase-admin": "^11.11.0",
+    "winston": "^3.11.0",
+    "winston-daily-rotate-file": "^4.7.1"
+  }
+}

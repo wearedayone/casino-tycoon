@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Box, Typography } from '@mui/material';
 
 import IconButton from './IconButton';
@@ -9,7 +9,7 @@ import WarModal from './WarModal';
 import WarHistoryModal from './WarHistoryModal';
 import useUserStore from '../../../stores/user.store';
 import useSystemStore from '../../../stores/system.store';
-import { formatter } from '../../../utils/numbers';
+import { claimToken } from '../../../services/transaction.service';
 
 const ActionButtons = () => {
   const gamePlay = useUserStore((state) => state.gamePlay);
@@ -25,17 +25,6 @@ const ActionButtons = () => {
   }, []);
 
   if (!gamePlay || !activeSeason) return null;
-
-  const { numberOfMachines, numberOfWorkers, startRewardCountingTime, pendingReward } = gamePlay;
-  const { machine, worker } = activeSeason;
-
-  const now = Date.now();
-  const startRewardCountingDateUnix = startRewardCountingTime.toDate().getTime();
-  const diffInDays = (now - startRewardCountingDateUnix) / (24 * 60 * 60 * 1000);
-
-  const countingReward = diffInDays * (numberOfMachines * machine.dailyReward + numberOfWorkers * worker.dailyReward);
-  const totalClaimableReward = pendingReward + countingReward;
-
   return (
     <>
       <Box
@@ -65,18 +54,7 @@ const ActionButtons = () => {
           }}
           sx={{ aspectRatio: 'auto', height: 50, width: 100 }}
         />
-        <IconButton
-          Icon={
-            <Box>
-              <Typography fontWeight={600} align="center">
-                CLAIM
-              </Typography>
-              <Typography align="center">{formatter.format(totalClaimableReward)} $FIAT</Typography>
-            </Box>
-          }
-          onClick={() => {}}
-          sx={{ aspectRatio: 'auto', height: 60, width: 120 }}
-        />
+        <ClaimButton />
         <IconButton
           Icon={<img src="/images/cash.png" height={30} />}
           onClick={() => {
@@ -87,6 +65,60 @@ const ActionButtons = () => {
         />
       </Box>
     </>
+  );
+};
+
+const ClaimButton = () => {
+  const gamePlay = useUserStore((state) => state.gamePlay);
+  const activeSeason = useSystemStore((state) => state.activeSeason);
+  const [totalClaimableReward, setTotalClaimableReward] = useState(0);
+  const [isClaiming, setClaiming] = useState(false);
+  const [isClaimable, setClaimable] = useState(true);
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      const now = Date.now();
+      if (gamePlay && activeSeason) {
+        const { numberOfMachines, numberOfWorkers, startRewardCountingTime, pendingReward, lastClaimTime } = gamePlay;
+        const { machine, worker } = activeSeason;
+        const startRewardCountingDateUnix = startRewardCountingTime.toDate().getTime();
+        const diffInDays = (now - startRewardCountingDateUnix) / (24 * 60 * 60 * 1000);
+
+        const countingReward =
+          diffInDays * (numberOfMachines * machine.dailyReward + numberOfWorkers * worker.dailyReward);
+        setTotalClaimableReward(pendingReward + countingReward);
+        setClaimable(now - lastClaimTime.toDate().getTime() > 30000);
+      }
+    }, 1000);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [totalClaimableReward, gamePlay, activeSeason]);
+
+  const claim = async () => {
+    try {
+      setClaiming(true);
+      console.log('claimToken');
+      await claimToken();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setClaiming(false);
+    }
+  };
+
+  return (
+    <IconButton
+      Icon={
+        <Box>
+          <Typography fontWeight={600} align="center">
+            CLAIM
+          </Typography>
+          <Typography align="center">{parseFloat(totalClaimableReward).toFixed(2)} $FIAT</Typography>
+        </Box>
+      }
+      disabled={isClaiming || !isClaimable}
+      onClick={claim}
+      sx={{ aspectRatio: 'auto', height: 60, width: 120 }}
+    />
   );
 };
 

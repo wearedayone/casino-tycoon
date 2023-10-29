@@ -38,6 +38,7 @@ root.render(
         loginMethods: ['email', 'twitter'],
         embeddedWallets: {
           createOnLogin: 'all-users',
+          noPromptOnSignature: true,
         },
         appearance: {
           // TODO: update logo

@@ -6,6 +6,9 @@ import {
   calculateNewEstimatedEndTimeUnix,
   calculateReversePoolBonus,
 } from '../utils/formulas.js';
+import alchemy from '../configs/alchemy.config.js';
+import { formatEther } from '@ethersproject/units';
+import { ClaimToken as ClaimTokenTask } from './worker.service.js';
 
 export const initTransaction = async ({ userId, type, amount }) => {
   const activeSeason = await getActiveSeason();
@@ -130,23 +133,25 @@ const updateSeasonState = async (transactionId) => {
 };
 
 const updateUserBalance = async (userId, transactionId) => {
+  const userSnapshot = await firestore.collection('user').doc(userId).get();
   const snapshot = await firestore.collection('transaction').doc(transactionId).get();
-  const { value, token } = snapshot.data();
+  const { token } = snapshot.data();
 
-  // update user balance for both ETH and FIAT
-  // TODO: move this logic to trigger later
-  // need to call the contract to get user balances
-  // for temporary: update directly in the db
-  const userData =
-    token === 'ETH'
-      ? { ETHBalance: admin.firestore.FieldValue.increment(-value) }
-      : { tokenBalance: admin.firestore.FieldValue.increment(-value) };
-  await firestore
-    .collection('user')
-    .doc(userId)
-    .update({
-      ...userData,
-    });
+  if (userSnapshot.exists) {
+    const { address, ETHBalance } = userSnapshot.data();
+    if (token === 'ETH') {
+      const ethersProvider = await alchemy.config.getProvider();
+      const value = await ethersProvider.getBalance(address);
+      if (ETHBalance !== formatEther(value)) {
+        await firestore
+          .collection('user')
+          .doc(userId)
+          .update({
+            ETHBalance: formatEther(value),
+          });
+      }
+    }
+  }
 };
 
 const updateUserGamePlay = async (userId, transactionId) => {
@@ -251,6 +256,53 @@ export const validateTxnHash = async ({ userId, transactionId, txnHash }) => {
   await sendUserBonus(userId, transactionId);
 };
 
+export const claimToken = async ({ userId }) => {
+  console.log('Claim token');
+  const userSnapshot = await firestore.collection('user').doc(userId).get();
+  const activeSeason = await getActiveSeason();
+
+  if (userSnapshot.exists) {
+    const { address, tokenBalance } = userSnapshot.data();
+    const gamePlaySnapshot = await firestore
+      .collection('gamePlay')
+      .where('userId', '==', userId)
+      .where('seasonId', '==', activeSeason.id)
+      .limit(1)
+      .get();
+    if (!gamePlaySnapshot.empty) {
+      const { lastClaimTime, pendingReward, startRewardCountingTime, numberOfMachines, numberOfWorkers } =
+        gamePlaySnapshot.docs[0].data();
+      const gamePlayId = gamePlaySnapshot.docs[0].id;
+      const { machine, worker } = activeSeason;
+      const now = Date.now();
+
+      const startRewardCountingDateUnix = startRewardCountingTime.toDate().getTime();
+      const diffInDays = (now - startRewardCountingDateUnix) / (24 * 60 * 60 * 1000);
+      const countingReward =
+        diffInDays * (numberOfMachines * machine.dailyReward + numberOfWorkers * worker.dailyReward);
+
+      await firestore
+        .collection('gamePlay')
+        .doc(gamePlayId)
+        .update({
+          lastClaimTime: admin.firestore.Timestamp.fromMillis(now),
+          startRewardCountingTime: admin.firestore.Timestamp.fromMillis(now),
+          pendingReward: 0,
+        });
+      await firestore
+        .collection('user')
+        .doc(userId)
+        .update({
+          tokenBalance: Number(tokenBalance) + Number(pendingReward) + Number(countingReward),
+        });
+      await ClaimTokenTask({
+        address,
+        amount: BigInt(Math.floor(Number(pendingReward) + Number(countingReward)) * 1e12) * BigInt(1e6),
+      });
+    }
+  }
+};
+
 // utils
 export const calculatePendingReward = async (userId) => {
   const activeSeason = await getActiveSeason();
@@ -261,13 +313,14 @@ export const calculatePendingReward = async (userId) => {
     .get();
 
   const gamePlay = gamePlaySnapshot.docs[0];
-  const { startRewardCountingTime, numberOfMachines, numberOfWorkers } = gamePlay.data();
+  const { startRewardCountingTime, numberOfMachines, numberOfWorkers, pendingReward } = gamePlay.data();
   const { machine, worker } = activeSeason;
 
   const now = Date.now();
   const startRewardCountingTimeUnix = startRewardCountingTime.toDate().getTime();
   const diffInDays = (now - startRewardCountingTimeUnix) / (24 * 60 * 60 * 1000);
 
-  const pendingReward = diffInDays * (numberOfMachines * machine.dailyReward + numberOfWorkers * worker.dailyReward);
-  return Math.round(pendingReward * 1000) / 1000;
+  const newPendingReward =
+    pendingReward + diffInDays * (numberOfMachines * machine.dailyReward + numberOfWorkers * worker.dailyReward);
+  return Math.round(newPendingReward * 1000) / 1000;
 };
