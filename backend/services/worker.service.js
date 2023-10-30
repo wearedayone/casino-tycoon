@@ -48,7 +48,7 @@ export const claimToken = async ({ address, amount }) => {
       throw new Error(`error: ${JSON.stringify(receipt)}`);
     }
 
-    return { txnHash, status: 'success' };
+    return { txnHash, status: 'Success' };
   } catch (err) {
     const newError = getParsedEthersError(err);
     const regex = /(execution reverted: )([A-Za-z\s])*/;
@@ -62,6 +62,6 @@ export const claimToken = async ({ address, amount }) => {
       log.error(err.message);
     }
 
-    return { txnHash, status: 'failed' };
+    return { txnHash, status: 'Failed' };
   }
 };

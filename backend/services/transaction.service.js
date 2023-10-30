@@ -70,7 +70,7 @@ export const initTransaction = async ({ userId, type, amount }) => {
     value,
     prices,
     isWarEnabled,
-    status: 'pending',
+    status: 'Pending',
   };
 
   const newTransaction = await firestore.collection('transaction').add({
@@ -83,15 +83,6 @@ export const initTransaction = async ({ userId, type, amount }) => {
 
 const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
   try {
-    // const txTest = await alchemy.core.getTransaction(
-    //   '0x742b41716525f835c79794be2c5fed003be770b9a3e9d8c3a458197078288d12'
-    // );
-    // const receiptTest = await txTest.wait();
-
-    // console.log(txTest, receiptTest, txTest.value, Number(txTest.value.toString()) / 1e18);
-
-    // return false;
-
     // validate if this txnHash
     // - doesnt belongs to transaction in firestore - OK
     // - status === 1 - OK
@@ -283,7 +274,7 @@ const sendUserBonus = async (userId, transactionId) => {
       txnHash: '',
       token: 'FIAT',
       value: bonus,
-      status: 'pending',
+      status: 'Pending',
     });
 
     const { txnHash, status } = await claimTokenTask({
@@ -304,7 +295,7 @@ export const validateTxnHash = async ({ userId, transactionId, txnHash }) => {
 
   // update txnHash and status for transaction doc in firestore
   await firestore.collection('transaction').doc(transactionId).update({
-    status: 'success',
+    status: 'Success',
     txnHash,
   });
 
@@ -333,9 +324,12 @@ export const claimToken = async ({ userId }) => {
     if (!gamePlaySnapshot.empty) {
       const { lastClaimTime, pendingReward, startRewardCountingTime, numberOfMachines, numberOfWorkers } =
         gamePlaySnapshot.docs[0].data();
+
       const gamePlayId = gamePlaySnapshot.docs[0].id;
-      const { machine, worker } = activeSeason;
+      const { machine, worker, claimGapInSeconds } = activeSeason;
       const now = Date.now();
+      const diffInSeconds = (now - lastClaimTime.toDate().getTime()) / 1000;
+      if (diffInSeconds < claimGapInSeconds) throw new Error('429: Too much claim request');
 
       const startRewardCountingDateUnix = startRewardCountingTime.toDate().getTime();
       const diffInDays = (now - startRewardCountingDateUnix) / (24 * 60 * 60 * 1000);
@@ -364,7 +358,7 @@ export const claimToken = async ({ userId }) => {
         type: 'claim-reward',
         token: 'FIAT',
         value: Math.floor(Number(pendingReward) + Number(countingReward)),
-        status: 'pending',
+        status: 'Pending',
         txnHash: '',
       });
 
