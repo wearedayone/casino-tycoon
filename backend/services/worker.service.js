@@ -21,10 +21,10 @@ const getTokenContract = async (signer) => {
   return contract;
 };
 
-export const ClaimToken = async ({ address, amount }) => {
+export const claimToken = async ({ address, amount }) => {
   let txnHash;
   try {
-    logger.info('start ClaimToken');
+    logger.info('start claimToken');
     logger.info({ address, amount });
     const workerWallet = await getWorkerWallet();
     const tokenContract = await getTokenContract(workerWallet);

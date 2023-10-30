@@ -8,7 +8,7 @@ import {
 } from '../utils/formulas.js';
 import alchemy from '../configs/alchemy.config.js';
 import { formatEther } from '@ethersproject/units';
-import { ClaimToken as ClaimTokenTask } from './worker.service.js';
+import { claimToken as claimTokenTask } from './worker.service.js';
 
 export const initTransaction = async ({ userId, type, amount }) => {
   const activeSeason = await getActiveSeason();
@@ -207,33 +207,36 @@ const updateUserGamePlay = async (userId, transactionId) => {
 };
 
 const sendUserBonus = async (userId, transactionId) => {
+  const userSnapshot = await firestore.collection('user').doc(userId).get();
+  const { address } = userSnapshot.data();
   const snapshot = await firestore.collection('transaction').doc(transactionId).get();
   const { type } = snapshot.data();
 
   if (type === 'buy-machine') {
-    // TODO: send user FIAT bonus using system wallet
     const activeSeason = await getActiveSeason();
     const { reversePool } = activeSeason;
     const bonus = calculateReversePoolBonus(reversePool);
-    // this document need to be created with pending status before sending bonus
-    // then update its status after the txn is succeed
-    await firestore.collection('transaction').add({
+
+    const newTransaction = await firestore.collection('transaction').add({
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
       userId,
       seasonId: activeSeason.id,
       type: 'bonus-token',
       txnHash: '',
       token: 'FIAT',
       value: bonus,
-      status: 'success',
+      status: 'pending',
     });
 
-    // update user tokenBalance
-    // TODO: move this logic to trigger later
-    // call smartcontract to update balance
-    await firestore
-      .collection('user')
-      .doc(userId)
-      .update({ tokenBalance: admin.firestore.FieldValue.increment(bonus) });
+    const { txnHash, status } = await claimTokenTask({
+      address,
+      amount: BigInt(bonus * 1e18),
+    });
+
+    await firestore.collection('transaction').doc(newTransaction.id).update({
+      txnHash,
+      status,
+    });
   }
 };
 
@@ -307,7 +310,7 @@ export const claimToken = async ({ userId }) => {
         txnHash: '',
       });
 
-      const { txnHash, status } = await ClaimTokenTask({
+      const { txnHash, status } = await claimTokenTask({
         address,
         amount: BigInt(Math.floor(Number(pendingReward) + Number(countingReward)) * 1e12) * BigInt(1e6),
       });
