@@ -1,13 +1,14 @@
 import admin, { firestore } from '../configs/firebase.config.js';
+import logger from '../utils/logger.js';
 import { getActiveSeasonId } from './season.service.js';
-import { calculatePendingReward } from './transaction.service.js';
+import { calculateGeneratedReward, initTransaction, validateTxnHash } from './transaction.service.js';
 
 const BONUS_CHANCE = 0.5;
 const BONUS_MULTIPLIER = 1;
 const PENALTY_CHANCE = 0.1;
 
 export const takeDailyWarSnapshot = async () => {
-  console.log('\n\n---------taking daily war snapshot--------\n');
+  logger.info('\n\n---------taking daily war snapshot--------\n');
   const seasonId = await getActiveSeasonId();
   const usersGamePlaySnapshot = await firestore.collection('gamePlay').where('seasonId', '==', seasonId).get();
   const allUsers = usersGamePlaySnapshot.docs.map((gamePlay) => ({ id: gamePlay.id, ...gamePlay.data() }));
@@ -17,39 +18,95 @@ export const takeDailyWarSnapshot = async () => {
   const voteRatio = usersWithWarEnabledCount / usersGamePlaySnapshot.size;
   const isPenalty = Math.round(voteRatio * 100) / 100 >= BONUS_CHANCE;
 
-  const promises = [],
-    bonusMap = {},
-    pendingRewardMap = {}, // update when calc bonus
-    penaltyMap = {},
-    createdAt = admin.firestore.FieldValue.serverTimestamp();
+  const bonusMap = {};
+  const generatedRewardMap = {}; // update when calc bonus
+  const penaltyMap = {};
+  const createdAt = admin.firestore.FieldValue.serverTimestamp();
 
-  console.log(
-    `${usersWithWarEnabledCount} players voted WAR out of ${usersGamePlaySnapshot.size} players\n voteRatio = ${voteRatio}`
+  logger.info(
+    `${usersWithWarEnabledCount} players voted WAR out of ${usersGamePlaySnapshot.size} players\n voteRatio = ${voteRatio}. isPenalty = ${isPenalty}`
   );
 
   // reset pending rewards timestamp
   for (let gamePlay of allUsers) {
-    pendingRewardMap[gamePlay.userId] = await calculatePendingReward(gamePlay.userId);
+    generatedRewardMap[gamePlay.userId] = await calculateGeneratedReward(gamePlay.userId);
   }
 
+  const lastWarSnapshot = await firestore.collection('warSnapshot').orderBy('createdAt', 'desc').limit(1).get();
+  let lastWarAt;
+  if (lastWarSnapshot.size) {
+    lastWarAt = lastWarSnapshot.docs[0].data().createdAt.toDate();
+  } else {
+    lastWarAt = new Date();
+    lastWarAt.setDate(lastWarAt.getDate() - 1);
+  }
+
+  /* all txn types that affect `pendingReward` in transactionService.updateUserGamePlay */
+  const transactionTypes = ['buy-machine', 'buy-worker', 'buy-building', 'claim-reward'];
   // calculate bonus & penalty
   for (let gamePlay of usersWithWarEnabled) {
+    logger.info(`${gamePlay.userId}`);
+
     if (isPenalty) {
-      penaltyMap[gamePlay.userId] = {
-        gangster: Math.round(PENALTY_CHANCE * gamePlay.numberOfMachines),
-        goon: Math.round(PENALTY_CHANCE * gamePlay.numberOfWorkers),
-      };
+      const gangster = getDeadCount(gamePlay.numberOfMachines);
+      const goon = getDeadCount(gamePlay.numberOfWorkers);
+      penaltyMap[gamePlay.userId] = { gangster, goon };
+
+      logger.info(`   penalty.gangster: ${gangster}`);
+      logger.info(`   penalty.goon: ${goon}`);
     } else {
-      bonusMap[gamePlay.userId] =
-        (gamePlay.pendingRewardSinceLastWar + pendingRewardMap[gamePlay.userId]) * BONUS_MULTIPLIER;
+      const txnsSinceLastWarSnapshot = await firestore
+        .collection('transaction')
+        .where('type', 'in', transactionTypes)
+        .where('createdAt', '>=', lastWarAt)
+        .orderBy('createdAt', 'desc')
+        .get();
+      const hasPendingRewardChangedSinceLastWar = txnsSinceLastWarSnapshot.size > 0;
+
+      if (hasPendingRewardChangedSinceLastWar) {
+        let pendingRewardSinceLastWar = 0,
+          numberOfMachines = gamePlay.numberOfMachines,
+          numberOfWorkers = gamePlay.numberOfWorkers,
+          start,
+          end;
+
+        for (let i = 0; i < txnsSinceLastWarSnapshot.size; i++) {
+          const txn = txnsSinceLastWarSnapshot.docs[i].data();
+          const isLastTxn = i === txnsSinceLastWarSnapshot.size - 1;
+
+          start = isLastTxn
+            ? lastWarAt.getTime()
+            : txnsSinceLastWarSnapshot.docs[i + 1].data().createdAt.toDate().getTime();
+          start = Math.max(gamePlay.createdAt.toDate().getTime(), start); // if user joined after last war
+          end = txn.createdAt.toDate().getTime();
+          if (txn.type === 'buy-machine') numberOfMachines -= txn.amount;
+          if (txn.type === 'buy-worker') numberOfWorkers -= txn.amount;
+          const generatedReward = await calculateGeneratedReward(gamePlay.userId, {
+            start,
+            end,
+            numberOfMachines,
+            numberOfWorkers,
+          });
+
+          pendingRewardSinceLastWar += generatedReward;
+        }
+        const bonusAmount = (pendingRewardSinceLastWar + generatedRewardMap[gamePlay.userId]) * BONUS_MULTIPLIER;
+        bonusMap[gamePlay.userId] = bonusAmount;
+        logger.debug(`   pendingRewardSinceLastWar: ${pendingRewardSinceLastWar}`);
+        logger.debug(`   generatedReward: ${generatedRewardMap[gamePlay.userId]}`);
+        logger.info(`   bonusAmount: ${bonusAmount}\n`);
+      } else {
+        const bonusAmount = generatedRewardMap[gamePlay.userId] * BONUS_MULTIPLIER;
+        bonusMap[gamePlay.userId] = bonusAmount;
+        logger.debug(`   generatedReward: ${generatedRewardMap[gamePlay.userId]}`);
+        logger.info(`   bonusAmount: ${bonusAmount}\n`);
+      }
     }
   }
 
-  if (isPenalty) console.log('\npenaltyMap: ', penaltyMap);
-  else console.log('\nbonusMap: ', bonusMap);
-
   // log war snapshot
-  await firestore.collection('warSnapshot').add({
+  const todayDateString = new Date().toISOString().substring(0, 10).split('-').join(''); // YYYYMMDD format
+  await firestore.collection('warSnapshot').doc(todayDateString).set({
     seasonId,
     usersCount: usersGamePlaySnapshot.size,
     usersWithWarEnabledCount,
@@ -59,47 +116,68 @@ export const takeDailyWarSnapshot = async () => {
     penalty: penaltyMap,
   });
 
-  // log user war history
-  allUsers.forEach((gamePlay) => {
+  // log user war result
+  for (let gamePlay of allUsers) {
     const bonus = bonusMap[gamePlay.userId] ?? null;
     const penalty = penaltyMap[gamePlay.userId] ?? null;
-    promises.push(
-      firestore.collection('user').doc(gamePlay.userId).collection('warHistory').add({
+    try {
+      await firestore.collection('warSnapshot').doc(todayDateString).collection('warResult').add({
         seasonId,
         isWarEnabled: !!gamePlay.war,
         voteRatio,
-        createdAt,
         bonus,
         penalty,
-      })
-    );
-    const pendingRewardWithoutBonus = gamePlay.pendingReward + pendingRewardMap[gamePlay.userId];
-    const pendingReward = bonus ? pendingRewardWithoutBonus + bonus : pendingRewardWithoutBonus;
+        createdAt,
+        userId: gamePlay.userId,
+      });
 
-    promises.push(
-      firestore.collection('gamePlay').doc(gamePlay.id).update({
-        pendingReward,
-        pendingRewardSinceLastWar: 0, // reset
-        startRewardCountingTime: createdAt,
-      })
-    );
+      // create 'war-bonus' transaction
+      if (bonus) {
+        const txn = await initTransaction({
+          userId: gamePlay.userId,
+          type: 'war-bonus',
+          value: bonus,
+        });
+        // TODO: on-chain transfer of war bonus
 
-    if (penalty?.gangster || penalty?.goon) {
-      promises.push(
-        firestore
-          .collection('gamePlay')
-          .doc(gamePlay.id)
-          .update({
-            numberOfMachines: gamePlay.numberOfMachines - penalty?.gangster,
-            numberOfWorkers: gamePlay.numberOfWorkers - penalty?.goon,
-          })
-      );
+        await validateTxnHash({
+          userId: gamePlay.userId,
+          transactionId: txn.id,
+          txnHash: '',
+        });
+      }
+
+      // create 'war-penalty' transaction
+      if (penalty?.gangster || penalty?.goon) {
+        const txn = await initTransaction({
+          userId: gamePlay.userId,
+          type: 'war-penalty',
+          machinesDeadCount: penalty.gangster,
+          workersDeadCount: penalty.goon,
+        });
+        // TODO: on-chain burning of machines (gangsters)
+
+        await validateTxnHash({
+          userId: gamePlay.userId,
+          transactionId: txn.id,
+          txnHash: '',
+        });
+      }
+
+      await firestore
+        .collection('gamePlay')
+        .doc(gamePlay.id)
+        .update({
+          pendingReward: admin.firestore.FieldValue.increment(generatedRewardMap[gamePlay.userId]),
+          startRewardCountingTime: createdAt,
+        });
+    } catch (error) {
+      console.error(error);
+      logger.error(`err while writing war result for ${gamePlay.userId}: ${error.message}`);
     }
-  });
+  }
 
-  await Promise.all(promises);
-
-  console.log('\n---------finish taking daily war snapshot--------\n\n');
+  logger.info('\n---------finish taking daily war snapshot--------\n\n');
 };
 
 export const getWarHistory = async (userId) => {
@@ -127,4 +205,21 @@ export const getWarHistory = async (userId) => {
     return { id: doc.id, outcome, createdAt: createdAt.toDate(), ...rest };
   });
   return warHistory;
+};
+
+// utils
+const getDeadCount = (originalCount) => {
+  // example: originalCount = 86, PENALTY_CHANCE = 0.1;
+  // deadCount = 8.6;
+  const deadCount = originalCount * PENALTY_CHANCE;
+  // certainDeathCount = 8 => 8 units certainly will die
+  const certainDeathCount = Math.floor(deadCount);
+
+  // chanceOfExtraDeath = 0.6 => 1 unit has 60% of dying
+  const chanceOfExtraDeath = deadCount - certainDeathCount;
+  const extraDeath = Math.random() < chanceOfExtraDeath ? 1 : 0;
+  logger.info(`originalCount: ${originalCount}`);
+  logger.info(`deadCount: ${certainDeathCount + extraDeath}`);
+
+  return certainDeathCount + extraDeath;
 };

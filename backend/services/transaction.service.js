@@ -14,36 +14,34 @@ import environments from '../utils/environments.js';
 
 const { TOKEN_ADDRESS, SYSTEM_ADDRESS, GAME_CONTRACT_ADDRESS } = environments;
 
-export const initTransaction = async ({ userId, type, amount }) => {
+export const initTransaction = async ({ userId, type, ...data }) => {
   const activeSeason = await getActiveSeason();
 
   const { machine, machineSold, workerSold, buildingSold } = activeSeason;
-
-  let token = '';
-  let currentSold = 0;
-  let value = 0;
-  let prices = [];
-  let isWarEnabled = null;
+  const txnData = {};
   switch (type) {
     case 'buy-machine':
-      token = 'ETH';
-      currentSold = machineSold;
-      value = Math.round(machine.basePrice * amount * 1000) / 1000;
-      prices = Array.from({ length: amount }, () => machine.basePrice);
+      txnData.amount = data.amount;
+      txnData.token = 'ETH';
+      txnData.currentSold = machineSold;
+      txnData.value = Math.round(machine.basePrice * data.amount * 1000) / 1000;
+      txnData.prices = Array.from({ length: data.amount }, () => machine.basePrice);
       break;
     case 'buy-worker':
-      token = 'FIAT';
-      currentSold = workerSold;
-      const workerPrices = calculateNextWorkerBuyPriceBatch(workerSold, amount);
-      value = workerPrices.total;
-      prices = workerPrices.prices;
+      txnData.amount = data.amount;
+      txnData.token = 'FIAT';
+      txnData.currentSold = workerSold;
+      const workerPrices = calculateNextWorkerBuyPriceBatch(workerSold, data.amount);
+      txnData.value = workerPrices.total;
+      txnData.prices = workerPrices.prices;
       break;
     case 'buy-building':
-      token = 'FIAT';
-      currentSold = buildingSold;
-      const buildingPrices = calculateNextBuildingBuyPriceBatch(workerSold, amount);
-      value = buildingPrices.total;
-      prices = buildingPrices.prices;
+      txnData.amount = data.amount;
+      txnData.token = 'FIAT';
+      txnData.currentSold = buildingSold;
+      const buildingPrices = calculateNextBuildingBuyPriceBatch(workerSold, data.amount);
+      txnData.value = buildingPrices.total;
+      txnData.prices = buildingPrices.prices;
       break;
     case 'war-switch':
       const gamePlaySnapshot = await firestore
@@ -53,32 +51,36 @@ export const initTransaction = async ({ userId, type, amount }) => {
         .get();
       const gamePlay = gamePlaySnapshot.docs[0];
       const { war } = gamePlay.data();
-      isWarEnabled = war;
+      txnData.isWarEnabled = war;
+      break;
+    case 'war-bonus':
+      txnData.value = data.value;
+      txnData.token = 'FIAT';
+      break;
+    case 'war-penalty':
+      const { machinesDeadCount, workersDeadCount } = data;
+      txnData.machinesDeadCount = machinesDeadCount;
+      txnData.workersDeadCount = workersDeadCount;
       break;
     default:
       break;
   }
 
-  const data = {
+  const transaction = {
     userId,
     seasonId: activeSeason.id,
     type,
     txnHash: '',
-    token,
-    amount,
-    currentSold,
-    value,
-    // prices,
-    isWarEnabled,
     status: 'Pending',
+    ...txnData,
   };
 
   const newTransaction = await firestore.collection('transaction').add({
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    ...data,
+    ...transaction,
   });
 
-  return { id: newTransaction.id, ...data };
+  return { id: newTransaction.id, ...transaction };
 };
 
 const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
@@ -175,6 +177,9 @@ const updateSeasonState = async (transactionId) => {
       break;
   }
 
+  // type 'war-bonus' | 'war-penalty'
+  if (!newData) return;
+
   await firestore
     .collection('season')
     .doc(activeSeason.id)
@@ -217,14 +222,15 @@ const updateUserGamePlay = async (userId, transactionId) => {
     .where('seasonId', '==', activeSeason.id)
     .get();
   const userGamePlay = gamePlaySnapshot.docs[0];
-  const { numberOfWorkers, numberOfMachines, numberOfBuildings, pendingRewardSinceLastWar = 0 } = userGamePlay.data();
+  logger.debug(`userGamePlay before update: ${JSON.stringify(userGamePlay.data())}`);
+  const { numberOfWorkers, numberOfMachines, numberOfBuildings } = userGamePlay.data();
   const assets = {
     numberOfBuildings,
     numberOfMachines,
     numberOfWorkers,
   };
 
-  let gamePlayData;
+  let gamePlayData = {};
   switch (type) {
     case 'buy-machine':
       gamePlayData = { numberOfMachines: admin.firestore.FieldValue.increment(amount) };
@@ -238,13 +244,22 @@ const updateUserGamePlay = async (userId, transactionId) => {
       gamePlayData = { numberOfBuildings: admin.firestore.FieldValue.increment(amount) };
       assets.numberOfBuildings += amount;
       break;
+    case 'war-penalty':
+      const { machinesDeadCount, workersDeadCount } = snapshot.data();
+      assets.numberOfMachines -= machinesDeadCount;
+      assets.numberOfWorkers -= workersDeadCount;
+
+      gamePlayData = {
+        numberOfMachines: admin.firestore.FieldValue.increment(-machinesDeadCount),
+        numberOfWorkers: admin.firestore.FieldValue.increment(-workersDeadCount),
+      };
+      break;
     default:
       break;
   }
 
-  const calculatedPendingReward = await calculatePendingReward(userId);
-  gamePlayData.pendingRewardSinceLastWar = pendingRewardSinceLastWar + calculatedPendingReward;
-  gamePlayData.pendingReward = calculatedPendingReward;
+  const generatedReward = await calculateGeneratedReward(userId);
+  gamePlayData.pendingReward = admin.firestore.FieldValue.increment(generatedReward);
   gamePlayData.startRewardCountingTime = admin.firestore.FieldValue.serverTimestamp();
 
   const networth =
@@ -322,19 +337,15 @@ export const claimToken = async ({ userId }) => {
       .limit(1)
       .get();
     if (!gamePlaySnapshot.empty) {
-      const { lastClaimTime, pendingReward, startRewardCountingTime, numberOfMachines, numberOfWorkers } =
-        gamePlaySnapshot.docs[0].data();
+      const { lastClaimTime, pendingReward } = gamePlaySnapshot.docs[0].data();
 
       const gamePlayId = gamePlaySnapshot.docs[0].id;
-      const { machine, worker, claimGapInSeconds } = activeSeason;
+      const { claimGapInSeconds } = activeSeason;
       const now = Date.now();
       const diffInSeconds = (now - lastClaimTime.toDate().getTime()) / 1000;
       if (diffInSeconds < claimGapInSeconds) throw new Error('429: Too much claim request');
 
-      const startRewardCountingDateUnix = startRewardCountingTime.toDate().getTime();
-      const diffInDays = (now - startRewardCountingDateUnix) / (24 * 60 * 60 * 1000);
-      const countingReward =
-        diffInDays * (numberOfMachines * machine.dailyReward + numberOfWorkers * worker.dailyReward);
+      const generatedReward = await calculateGeneratedReward(userId);
 
       await firestore
         .collection('gamePlay')
@@ -348,7 +359,7 @@ export const claimToken = async ({ userId }) => {
         .collection('user')
         .doc(userId)
         .update({
-          tokenBalance: Number(tokenBalance) + Number(pendingReward) + Number(countingReward),
+          tokenBalance: Number(tokenBalance) + Number(pendingReward) + Number(generatedReward),
         });
 
       const newTransaction = await firestore.collection('transaction').add({
@@ -357,14 +368,14 @@ export const claimToken = async ({ userId }) => {
         seasonId: activeSeason.id,
         type: 'claim-token',
         token: 'FIAT',
-        value: Math.floor(Number(pendingReward) + Number(countingReward)),
+        value: Math.floor(Number(pendingReward) + Number(generatedReward)),
         status: 'Pending',
         txnHash: '',
       });
 
       const { txnHash, status } = await claimTokenTask({
         address,
-        amount: BigInt(Math.floor(Number(pendingReward) + Number(countingReward)) * 1e12) * BigInt(1e6),
+        amount: BigInt(Math.floor(Number(pendingReward) + Number(generatedReward)) * 1e12) * BigInt(1e6),
       });
 
       await firestore.collection('transaction').doc(newTransaction.id).update({
@@ -376,23 +387,33 @@ export const claimToken = async ({ userId }) => {
 };
 
 // utils
-export const calculatePendingReward = async (userId) => {
+export const calculateGeneratedReward = async (userId, { start, end, numberOfMachines, numberOfWorkers } = {}) => {
   const activeSeason = await getActiveSeason();
-  const gamePlaySnapshot = await firestore
-    .collection('gamePlay')
-    .where('userId', '==', userId)
-    .where('seasonId', '==', activeSeason.id)
-    .get();
-
-  const gamePlay = gamePlaySnapshot.docs[0];
-  const { startRewardCountingTime, numberOfMachines, numberOfWorkers, pendingReward } = gamePlay.data();
   const { machine, worker } = activeSeason;
 
-  const now = Date.now();
-  const startRewardCountingTimeUnix = startRewardCountingTime.toDate().getTime();
-  const diffInDays = (now - startRewardCountingTimeUnix) / (24 * 60 * 60 * 1000);
+  if (!start || !numberOfMachines || !numberOfWorkers) {
+    const gamePlaySnapshot = await firestore
+      .collection('gamePlay')
+      .where('userId', '==', userId)
+      .where('seasonId', '==', activeSeason.id)
+      .limit(1)
+      .get();
 
-  const newPendingReward =
-    pendingReward + diffInDays * (numberOfMachines * machine.dailyReward + numberOfWorkers * worker.dailyReward);
-  return Math.round(newPendingReward * 1000) / 1000;
+    const gamePlay = gamePlaySnapshot.docs[0];
+    const {
+      startRewardCountingTime,
+      numberOfMachines: userMachinesCount,
+      numberOfWorkers: userWorkersCount,
+    } = gamePlay.data();
+
+    if (!start) start = startRewardCountingTime.toDate().getTime();
+    if (!numberOfMachines) numberOfMachines = userMachinesCount;
+    if (!numberOfWorkers) numberOfWorkers = userWorkersCount;
+  }
+
+  const now = end || Date.now();
+  const diffInDays = (now - start) / (24 * 60 * 60 * 1000);
+
+  const generatedReward = diffInDays * (numberOfMachines * machine.dailyReward + numberOfWorkers * worker.dailyReward);
+  return Math.round(generatedReward * 1000) / 1000;
 };
