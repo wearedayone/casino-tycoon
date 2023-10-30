@@ -295,9 +295,26 @@ export const claimToken = async ({ userId }) => {
         .update({
           tokenBalance: Number(tokenBalance) + Number(pendingReward) + Number(countingReward),
         });
-      await ClaimTokenTask({
+
+      const newTransaction = await firestore.collection('transaction').add({
+        createdAt: admin.firestore.Timestamp.fromMillis(now),
+        userId,
+        seasonId: activeSeason.id,
+        type: 'claim-reward',
+        token: 'FIAT',
+        value: Math.floor(Number(pendingReward) + Number(countingReward)),
+        status: 'pending',
+        txnHash: '',
+      });
+
+      const { txnHash, status } = await ClaimTokenTask({
         address,
         amount: BigInt(Math.floor(Number(pendingReward) + Number(countingReward)) * 1e12) * BigInt(1e6),
+      });
+
+      await firestore.collection('transaction').doc(newTransaction.id).update({
+        txnHash,
+        status,
       });
     }
   }

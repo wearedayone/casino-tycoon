@@ -56,9 +56,12 @@ const updateBalance = async ({ address, newBalance }) => {
   const user = await firestore.collection('user').where('address', '==', address).limit(1).get();
   if (user.empty) return;
   const userId = user.docs[0].id;
-  await firestore.collection('user').doc(userId).update({
-    tokenBalance: newBalance,
-  });
+  await firestore
+    .collection('user')
+    .doc(userId)
+    .update({
+      tokenBalance: Number(newBalance),
+    });
 };
 
 export default tokenListener;

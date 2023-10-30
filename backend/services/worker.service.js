@@ -22,6 +22,7 @@ const getTokenContract = async (signer) => {
 };
 
 export const ClaimToken = async ({ address, amount }) => {
+  let txnHash;
   try {
     logger.info('start ClaimToken');
     logger.info({ address, amount });
@@ -32,20 +33,28 @@ export const ClaimToken = async ({ address, amount }) => {
     logger.info('Transaction:' + tx.hash);
     const receipt = await tx.wait();
 
+    txnHash = receipt.transactionHash;
+
     if (receipt.status !== 1) {
       logger.info(`error: ${JSON.stringify(receipt)}`);
       logger.error(`error: ${JSON.stringify(receipt)}`);
       throw new Error(`error: ${JSON.stringify(receipt)}`);
     }
 
-    return { txnHash: receipt.transactionHash };
+    return { txnHash, status: 'success' };
   } catch (err) {
     const newError = getParsedEthersError(err);
     const regex = /(execution reverted: )([A-Za-z\s])*/;
     if (newError.context) {
       const message = newError.context.match(regex);
-      if (message) throw Error(message[0]);
+      if (message) {
+        const error = new Error(message[0]);
+        log.error(error.message);
+      }
+    } else {
+      log.error(err.message);
     }
-    throw err;
+
+    return { txnHash, status: 'failed' };
   }
 };

@@ -79,14 +79,14 @@ const ClaimButton = () => {
       const now = Date.now();
       if (gamePlay && activeSeason) {
         const { numberOfMachines, numberOfWorkers, startRewardCountingTime, pendingReward, lastClaimTime } = gamePlay;
-        const { machine, worker } = activeSeason;
+        const { machine, worker, claimGapInSeconds } = activeSeason;
         const startRewardCountingDateUnix = startRewardCountingTime.toDate().getTime();
         const diffInDays = (now - startRewardCountingDateUnix) / (24 * 60 * 60 * 1000);
 
         const countingReward =
           diffInDays * (numberOfMachines * machine.dailyReward + numberOfWorkers * worker.dailyReward);
         setTotalClaimableReward(pendingReward + countingReward);
-        setClaimable(now - lastClaimTime.toDate().getTime() > 30000);
+        setClaimable(now - lastClaimTime.toDate().getTime() > claimGapInSeconds * 1000);
       }
     }, 1000);
 

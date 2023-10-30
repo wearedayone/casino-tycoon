@@ -35,6 +35,7 @@ const main = async () => {
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       startTime,
       estimatedEndTime,
+      claimGapInSeconds: 30,
       prizePool: 0,
       reversePool: 0,
       machineSold: 0,
