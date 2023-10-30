@@ -68,7 +68,7 @@ export const initTransaction = async ({ userId, type, amount }) => {
     amount,
     currentSold,
     value,
-    prices,
+    // prices,
     isWarEnabled,
     status: 'Pending',
   };
