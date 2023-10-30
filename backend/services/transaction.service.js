@@ -8,7 +8,11 @@ import {
 } from '../utils/formulas.js';
 import alchemy from '../configs/alchemy.config.js';
 import { formatEther } from '@ethersproject/units';
-import { claimToken as claimTokenTask } from './worker.service.js';
+import { claimToken as claimTokenTask, decodeTokenTxnLogs } from './worker.service.js';
+import logger from '../utils/logger.js';
+import environments from '../utils/environments.js';
+
+const { TOKEN_ADDRESS, SYSTEM_ADDRESS, GAME_CONTRACT_ADDRESS } = environments;
 
 export const initTransaction = async ({ userId, type, amount }) => {
   const activeSeason = await getActiveSeason();
@@ -78,18 +82,72 @@ export const initTransaction = async ({ userId, type, amount }) => {
 };
 
 const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
-  // validate if this txnHash
-  // - doesnt belongs to transaction in firestore
-  // - comes from user wallet address
-  // - buy-worker | buy-building ---> goes to system wallet address
-  // - buy-machine ---> goes to nft contract address
-  // - has the same token as the transaction doc in firestore
-  // - has the same value as the transaction doc in firestore
-  const snapshot = await firestore.collection('transaction').doc(transactionId).get();
-  const { type, value, amount } = snapshot.data();
+  try {
+    // const txTest = await alchemy.core.getTransaction(
+    //   '0x742b41716525f835c79794be2c5fed003be770b9a3e9d8c3a458197078288d12'
+    // );
+    // const receiptTest = await txTest.wait();
 
-  // always return true for the moment
-  return true;
+    // console.log(txTest, receiptTest, txTest.value, Number(txTest.value.toString()) / 1e18);
+
+    // return false;
+
+    // validate if this txnHash
+    // - doesnt belongs to transaction in firestore - OK
+    // - status === 1 - OK
+    // - comes from user wallet address - OK
+    // - buy-worker | buy-building ---> goes to token address - OK
+    //                             ---> token sent to system wallet address - OK
+    // - buy-machine ---> goes to game contract address - OK
+    // - has the same token as the transaction doc in firestore - OK
+    // - has the same value as the transaction doc in firestore - OK
+    const txnSnapshot = await firestore.collection('transaction').where('txnHash', '==', txnHash).limit(1).get();
+    if (!txnSnapshot.empty) throw new Error('Existed txnHash');
+
+    const tx = await alchemy.core.getTransaction(txnHash);
+    const receipt = await tx.wait();
+    console.log(`transaction ${txnHash}`, tx, 'receipt', receipt);
+    const { from, to, status, logs } = receipt;
+
+    if (status !== 1) throw new Error('Invalid txn status');
+
+    const userSnapshot = await firestore.collection('user').doc(userId).get();
+    const { address } = userSnapshot.data();
+
+    if (address?.toLowerCase() !== from.toLowerCase())
+      throw new Error(`Bad request: invalid sender, txn: ${JSON.stringify(receipt)}`);
+
+    const snapshot = await firestore.collection('transaction').doc(transactionId).get();
+    const { type, value } = snapshot.data();
+
+    if (['buy-worker', 'buy-building'].includes(type)) {
+      if (to.toLowerCase() !== TOKEN_ADDRESS.toLowerCase())
+        throw new Error(`Bad request: invalid receiver for ${type}, txn: ${JSON.stringify(receipt)}`);
+
+      const decodedData = await decodeTokenTxnLogs('Transfer', logs[0]);
+      if (decodedData.to.toLowerCase() !== SYSTEM_ADDRESS.toLowerCase())
+        throw new Error(`Bad request: invalid token receiver for ${type}, txn: ${JSON.stringify(receipt)}`);
+
+      const transactionValue = Number(logs[0].data.toString()) / 1e18;
+      if (transactionValue !== value)
+        throw new Error(`Bad request: Value doesnt match, ${JSON.stringify({ transactionValue, value })}`);
+    }
+
+    if (type === 'buy-machine') {
+      if (to.toLowerCase() !== GAME_CONTRACT_ADDRESS.toLowerCase())
+        throw new Error(`Bad request: invalid receiver for ${type}, txn: ${JSON.stringify(receipt)}`);
+
+      const transactionValue = Number(tx.value.toString()) / 1e18;
+      if (transactionValue !== value)
+        throw new Error(`Bad request: Value doesnt match, ${JSON.stringify({ transactionValue, value })}`);
+    }
+
+    return true;
+  } catch (err) {
+    logger.error(
+      `Error: Detect invalid txn, error: ${err.message}, ${JSON.stringify({ userId, transactionId, txnHash })}`
+    );
+  }
 };
 
 const updateSeasonState = async (transactionId) => {
