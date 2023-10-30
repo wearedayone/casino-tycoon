@@ -44,6 +44,14 @@ export const calculateNewEstimatedEndTimeUnix = (currentEndTimeUnix, newMachineA
   return currentEndTimeUnix + newMachineAddedQuantity * 60 * 60 * 1000;
 };
 
-export const calculateReversePoolBonus = (reversePool) => {
-  return reversePool * 0.1;
+export const calculateReversePoolBonus = (reversePool, quantity) => {
+  let totalPercentages = 100;
+  let percentage = 0;
+
+  for (let i = 1; i <= quantity; i++) {
+    percentage += totalPercentages * 0.01;
+    totalPercentages -= percentage;
+  }
+
+  return (reversePool * percentage) / 100;
 };

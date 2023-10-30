@@ -259,12 +259,12 @@ const sendUserBonus = async (userId, transactionId) => {
   const userSnapshot = await firestore.collection('user').doc(userId).get();
   const { address } = userSnapshot.data();
   const snapshot = await firestore.collection('transaction').doc(transactionId).get();
-  const { type } = snapshot.data();
+  const { type, amount } = snapshot.data();
 
   if (type === 'buy-machine') {
     const activeSeason = await getActiveSeason();
     const { reversePool } = activeSeason;
-    const bonus = calculateReversePoolBonus(reversePool);
+    const bonus = calculateReversePoolBonus(reversePool, amount);
 
     const newTransaction = await firestore.collection('transaction').add({
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
