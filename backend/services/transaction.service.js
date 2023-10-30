@@ -355,7 +355,7 @@ export const claimToken = async ({ userId }) => {
         createdAt: admin.firestore.Timestamp.fromMillis(now),
         userId,
         seasonId: activeSeason.id,
-        type: 'claim-reward',
+        type: 'claim-token',
         token: 'FIAT',
         value: Math.floor(Number(pendingReward) + Number(countingReward)),
         status: 'Pending',
