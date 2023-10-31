@@ -71,3 +71,10 @@ export const toggleWarStatus = async (userId, isWarEnabled) => {
 export const updateWalletPasswordAsked = async (userId) => {
   await firestore.collection('user').doc(userId).update({ walletPasswordAsked: true });
 };
+
+export const getUserDisplayInfos = async (userId) => {
+  const snapshot = await firestore.collection('user').doc(userId).get();
+
+  const { avatarURL, username } = snapshot.data();
+  return { id: snapshot.id, avatarURL, username };
+};

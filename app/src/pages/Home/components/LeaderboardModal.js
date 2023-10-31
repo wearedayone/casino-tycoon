@@ -1,22 +1,30 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Box, Grid, Dialog, Typography, Button } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 import StarBorderRoundedIcon from '@mui/icons-material/StarBorderRounded';
+import moment from 'moment';
+import { useQuery } from '@tanstack/react-query';
 
 import PointEarnedModal from './PointEarnedModal';
 import ReputationModal from './ReputationModal';
+import useSystemStore from '../../../stores/system.store';
+import QueryKeys from '../../../utils/queryKeys';
+import { getLeaderboard } from '../../../services/gamePlay.service';
 
 const LeaderboardModal = ({ open, setOpenUpdate }) => {
+  const activeSeason = useSystemStore((state) => state.activeSeason);
   const [mode, setMode] = useState('leaderboard');
   const [tab, setTab] = useState('reputation'); // reputation | pointsEarned
 
   const tabs = [
     { text: 'Reputation', value: 'reputation' },
-    { text: 'Points Earned', value: 'pointsEarned' },
+    // { text: 'Points Earned', value: 'pointsEarned' },
   ];
 
   if (mode === 'pointsEarned') return <PointEarnedModal open onBack={() => setMode('leaderboard')} />;
   if (mode === 'reputation') return <ReputationModal open onBack={() => setMode('leaderboard')} />;
+
+  if (!activeSeason) return null;
 
   const OverView =
     tab === 'reputation' ? (
@@ -30,7 +38,7 @@ const LeaderboardModal = ({ open, setOpenUpdate }) => {
         justifyContent="space-between">
         <Typography fontWeight={600}>Total Prize Pool:</Typography>
         <Typography fontSize={20} sx={{ flexShrink: 0 }}>
-          178.2 ETH
+          {activeSeason.prizePool} ETH
         </Typography>
       </Box>
     ) : (
@@ -69,9 +77,7 @@ const LeaderboardModal = ({ open, setOpenUpdate }) => {
           </Box>
           <Box p={2} display="flex" flexDirection="column" gap={2}>
             <Box>
-              <Typography fontSize={18} sx={{ '& span': { fontWeight: 600 } }}>
-                <span>GAME ENDS IN:</span> 15d 12h 44m 05s
-              </Typography>
+              <CountDown open={open} />
               <Typography fontSize={14} fontStyle="italic" align="center">
                 Every Gangster purchased increases time by 1 hour
               </Typography>
@@ -121,51 +127,56 @@ const LeaderboardModal = ({ open, setOpenUpdate }) => {
 
 export default LeaderboardModal;
 
+const CountDown = ({ open }) => {
+  const activeSeason = useSystemStore((state) => state.activeSeason);
+  const [end, setEnd] = useState(null);
+
+  const interval = useRef();
+  useEffect(() => {
+    if (!open || !activeSeason) {
+      if (interval.current) {
+        clearInterval(interval.current);
+        interval.current = null;
+      }
+    } else {
+      const calculateEnd = () => {
+        const { estimatedEndTime } = activeSeason;
+        const now = moment(new Date());
+        const endTime = moment(estimatedEndTime.toDate());
+        const diff = moment.duration(endTime.diff(now));
+        setEnd({
+          days: diff.days(),
+          hours: diff.hours(),
+          minutes: diff.minutes(),
+          seconds: diff.seconds(),
+        });
+      };
+      interval.current = setInterval(calculateEnd, 1000);
+    }
+
+    return () => {
+      if (interval.current) {
+        clearInterval(interval.current);
+        interval.current = null;
+      }
+    };
+  }, [open]);
+
+  return (
+    <Typography fontSize={18} align="center" sx={{ '& span': { fontWeight: 600 } }}>
+      <span>GAME ENDS IN:</span> {end ? `${end?.days}d ${end?.hours}h ${end?.minutes}m ${end?.seconds}s` : ''}
+    </Typography>
+  );
+};
+
 const LeaderboardList = () => {
-  const items = [
-    {
-      id: '1',
-      username: 'jack.nguyensdadsdasadasd',
-      avatarURL: 'https://placehold.co/400x400/1e90ff/FFF?text=R',
-      reputation: 500,
-      reward: 20,
-    },
-    {
-      id: '2',
-      username: 'ally.tran',
-      avatarURL: 'https://placehold.co/400x400/1e90ff/FFF?text=R',
-      reputation: 500,
-      reward: 20,
-    },
-    {
-      id: '3',
-      username: 'brian.hoang',
-      avatarURL: 'https://placehold.co/400x400/1e90ff/FFF?text=R',
-      reputation: 500,
-      reward: 20,
-    },
-    {
-      id: '4',
-      username: 'bernard.teo',
-      avatarURL: 'https://placehold.co/400x400/1e90ff/FFF?text=R',
-      reputation: 500,
-      reward: 20,
-    },
-    {
-      id: '5',
-      username: 'jw',
-      avatarURL: 'https://placehold.co/400x400/1e90ff/FFF?text=R',
-      reputation: 500,
-      reward: 20,
-    },
-    {
-      id: '6',
-      username: 'derek.lau',
-      avatarURL: 'https://placehold.co/400x400/1e90ff/FFF?text=R',
-      reputation: 500,
-      reward: 20,
-    },
-  ];
+  const { data } = useQuery({
+    queryKey: [QueryKeys.Leaderboard],
+    queryFn: getLeaderboard,
+    refetchInterval: 30 * 1000,
+  });
+
+  console.log({ data });
 
   return (
     <Box display="flex" flexDirection="column" gap={0.5}>
@@ -192,7 +203,7 @@ const LeaderboardList = () => {
         </Grid>
       </Grid>
       <Box maxHeight="200px" overflow="auto" display="flex" flexDirection="column" gap={1}>
-        {items.map((item, index) => (
+        {(data?.data || []).map((item, index) => (
           <Grid key={item.id} container spacing={0.5}>
             <Grid item xs={2}>
               <Box height="100%" overflow="hidden" display="flex" alignItems="center" gap={0.5}>
@@ -224,7 +235,7 @@ const LeaderboardList = () => {
             </Grid>
             <Grid item xs={3}>
               <Box height="100%" overflow="hidden" display="flex" justifyContent="center" alignItems="center" gap={0.5}>
-                <Typography fontSize={12}>{item.reputation}</Typography>
+                <Typography fontSize={12}>{item.networth}</Typography>
                 <StarBorderRoundedIcon sx={{ fontSize: 12 }} />
               </Box>
             </Grid>
