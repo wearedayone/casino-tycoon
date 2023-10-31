@@ -1,7 +1,12 @@
 import admin, { firestore } from '../configs/firebase.config.js';
 import logger from '../utils/logger.js';
 import { getActiveSeasonId } from './season.service.js';
-import { calculateGeneratedReward, initTransaction, validateTxnHash } from './transaction.service.js';
+import {
+  calculateGeneratedReward,
+  initTransaction,
+  userPendingRewardChangedTypes,
+  validateTxnHash,
+} from './transaction.service.js';
 
 const BONUS_CHANCE = 0.5;
 const BONUS_MULTIPLIER = 1;
@@ -41,8 +46,6 @@ export const takeDailyWarSnapshot = async () => {
     lastWarAt.setDate(lastWarAt.getDate() - 1);
   }
 
-  /* all txn types that affect `pendingReward` in transactionService.updateUserGamePlay */
-  const transactionTypes = ['buy-machine', 'buy-worker', 'buy-building', 'claim-reward'];
   // calculate bonus & penalty
   for (let gamePlay of usersWithWarEnabled) {
     logger.info(`${gamePlay.userId}`);
@@ -57,7 +60,7 @@ export const takeDailyWarSnapshot = async () => {
     } else {
       const txnsSinceLastWarSnapshot = await firestore
         .collection('transaction')
-        .where('type', 'in', transactionTypes)
+        .where('type', 'in', userPendingRewardChangedTypes)
         .where('createdAt', '>=', lastWarAt)
         .orderBy('createdAt', 'desc')
         .get();
@@ -81,6 +84,10 @@ export const takeDailyWarSnapshot = async () => {
           end = txn.createdAt.toDate().getTime();
           if (txn.type === 'buy-machine') numberOfMachines -= txn.amount;
           if (txn.type === 'buy-worker') numberOfWorkers -= txn.amount;
+          if (txn.type === 'war-penalty') {
+            numberOfMachines += txn.machinesDeadCount;
+            numberOfWorkers += txn.workersDeadCount;
+          }
           const generatedReward = await calculateGeneratedReward(gamePlay.userId, {
             start,
             end,

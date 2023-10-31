@@ -44,14 +44,7 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       txnData.prices = buildingPrices.prices;
       break;
     case 'war-switch':
-      const gamePlaySnapshot = await firestore
-        .collection('gamePlay')
-        .where('userId', '==', userId)
-        .where('seasonId', '==', activeSeason.id)
-        .get();
-      const gamePlay = gamePlaySnapshot.docs[0];
-      const { war } = gamePlay.data();
-      txnData.isWarEnabled = war;
+      txnData.isWarEnabled = data.isWarEnabled;
       break;
     case 'war-bonus':
       txnData.value = data.value;
@@ -177,7 +170,7 @@ const updateSeasonState = async (transactionId) => {
       break;
   }
 
-  // type 'war-bonus' | 'war-penalty'
+  // type 'war-switch' | 'war-bonus' | 'war-penalty'
   if (!newData) return;
 
   await firestore
@@ -244,6 +237,10 @@ const updateUserGamePlay = async (userId, transactionId) => {
       gamePlayData = { numberOfBuildings: admin.firestore.FieldValue.increment(amount) };
       assets.numberOfBuildings += amount;
       break;
+    case 'war-switch':
+      const { isWarEnabled } = snapshot.data();
+      gamePlayData = { war: isWarEnabled };
+      break;
     case 'war-penalty':
       const { machinesDeadCount, workersDeadCount } = snapshot.data();
       assets.numberOfMachines -= machinesDeadCount;
@@ -258,16 +255,22 @@ const updateUserGamePlay = async (userId, transactionId) => {
       break;
   }
 
-  const generatedReward = await calculateGeneratedReward(userId);
-  gamePlayData.pendingReward = admin.firestore.FieldValue.increment(generatedReward);
-  gamePlayData.startRewardCountingTime = admin.firestore.FieldValue.serverTimestamp();
+  /* recalculate `pendingReward` */
+  if (userTokenGenerationRateChangedTypes.includes(type)) {
+    const generatedReward = await calculateGeneratedReward(userId);
+    gamePlayData.pendingReward = admin.firestore.FieldValue.increment(generatedReward);
+    gamePlayData.startRewardCountingTime = admin.firestore.FieldValue.serverTimestamp();
+  }
 
-  const networth =
-    assets.numberOfBuildings * building.networth +
-    assets.numberOfMachines * machine.networth +
-    assets.numberOfWorkers * worker.networth;
+  /* recalculate `networth` */
+  if (userNetworthChangedTypes.includes(type)) {
+    gamePlayData.networth =
+      assets.numberOfBuildings * building.networth +
+      assets.numberOfMachines * machine.networth +
+      assets.numberOfWorkers * worker.networth;
+  }
 
-  await userGamePlay.ref.update({ ...gamePlayData, networth });
+  await userGamePlay.ref.update({ ...gamePlayData });
 };
 
 const sendUserBonus = async (userId, transactionId) => {
@@ -321,6 +324,17 @@ export const validateTxnHash = async ({ userId, transactionId, txnHash }) => {
   await updateUserBalance(userId, transactionId);
   await updateUserGamePlay(userId, transactionId);
   await sendUserBonus(userId, transactionId);
+};
+
+// for non web3 transactions: war-switch
+export const validateNonWeb3Transaction = async ({ userId, transactionId }) => {
+  // update txnHash and status for transaction doc in firestore
+  await firestore.collection('transaction').doc(transactionId).update({
+    status: 'success',
+  });
+
+  // TODO: move this logic to trigger later
+  await updateUserGamePlay(userId, transactionId);
 };
 
 export const claimToken = async ({ userId }) => {
@@ -417,3 +431,8 @@ export const calculateGeneratedReward = async (userId, { start, end, numberOfMac
   const generatedReward = diffInDays * (numberOfMachines * machine.dailyReward + numberOfWorkers * worker.dailyReward);
   return Math.round(generatedReward * 1000) / 1000;
 };
+
+/* all txn types that change user's token generation rate */
+const userTokenGenerationRateChangedTypes = ['buy-machine', 'buy-worker', 'war-penalty'];
+const userNetworthChangedTypes = userTokenGenerationRateChangedTypes.concat('buy-building');
+export const userPendingRewardChangedTypes = userTokenGenerationRateChangedTypes.concat('claim-token');
