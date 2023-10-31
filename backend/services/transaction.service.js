@@ -170,7 +170,7 @@ const updateSeasonState = async (transactionId) => {
       break;
   }
 
-  // type 'war-switch' | 'war-bonus' | 'war-penalty'
+  // type 'war-switch' | 'war-penalty'
   if (!newData) return;
 
   await firestore

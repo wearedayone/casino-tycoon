@@ -7,6 +7,7 @@ import {
   userPendingRewardChangedTypes,
   validateTxnHash,
 } from './transaction.service.js';
+import { claimToken as claimTokenTask } from './worker.service.js';
 
 const BONUS_CHANCE = 0.5;
 const BONUS_MULTIPLIER = 1;
@@ -138,23 +139,28 @@ export const takeDailyWarSnapshot = async () => {
         userId: gamePlay.userId,
       });
 
-      // create 'war-bonus' transaction
+      // send user war bonus
       if (bonus) {
         const txn = await initTransaction({
           userId: gamePlay.userId,
           type: 'war-bonus',
           value: bonus,
         });
-        // TODO: on-chain transfer of war bonus
 
-        await validateTxnHash({
-          userId: gamePlay.userId,
-          transactionId: txn.id,
-          txnHash: '',
+        const userSnapshot = await firestore.collection('user').doc(gamePlay.userId).get();
+        const { address } = userSnapshot.data();
+        const { txnHash, status } = await claimTokenTask({
+          address,
+          amount: BigInt(bonus * 1e18),
+        });
+
+        await firestore.collection('transaction').doc(txn.id).update({
+          txnHash,
+          status,
         });
       }
 
-      // create 'war-penalty' transaction
+      // burn user assets as penalty
       if (penalty?.gangster || penalty?.goon) {
         const txn = await initTransaction({
           userId: gamePlay.userId,
