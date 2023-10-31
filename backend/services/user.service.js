@@ -28,6 +28,7 @@ export const createUserIfNotExist = async (userId) => {
       avatarURL,
       tokenBalance: 0,
       ETHBalance: 0,
+      walletPasswordAsked: false,
     });
 
     // create gamePlay
@@ -77,4 +78,8 @@ export const toggleWarStatus = async (userId, war) => {
   await gamePlay.ref.update({ war });
 
   await initTransaction({ userId, type: 'war-switch', amount: 0 });
+};
+
+export const updateWalletPasswordAsked = async (userId) => {
+  await firestore.collection('user').doc(userId).update({ walletPasswordAsked: true });
 };

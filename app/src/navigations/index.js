@@ -7,7 +7,6 @@ import useSystem from '../hooks/useSystem';
 import useUserProfile from '../hooks/useUserProfile';
 import useUserGamePlay from '../hooks/useUserGamePlay';
 import useUserStore from '../stores/user.store';
-import useUserWallet from '../hooks/useUserWallet';
 
 const Navigations = () => {
   const { ready, authenticated, user } = usePrivy();
@@ -17,7 +16,6 @@ const Navigations = () => {
   useSystem();
   useUserProfile(ready, user);
   useUserGamePlay();
-  useUserWallet();
 
   if (!ready) return null;
 
