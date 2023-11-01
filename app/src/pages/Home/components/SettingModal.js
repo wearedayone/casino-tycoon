@@ -8,6 +8,8 @@ import SettingModalWithdrawETH from './SettingModalWithdrawETH';
 import SettingModalSwap from './SettingModalSwap';
 import SettingModalDepositNFT from './SettingModalDepositNFT';
 import SettingModalWithdrawNFT from './SettingModalWithdrawNFT';
+import SettingModalDeposit from './SettingModalDeposit';
+import SettingModalWithdraw from './SettingModalWithdraw';
 import RoundedButton from './RoundedButton';
 import useUserWallet from '../../../hooks/useUserWallet';
 import useUserStore from '../../../stores/user.store';
@@ -33,27 +35,19 @@ const SettingModal = ({ open, setOpenUpdate }) => {
 
   const btns1 = [
     {
-      text: 'Deposit ETH',
-      onClick: () => setMode('deposit-eth'),
+      text: 'Withdraw',
+      onClick: () => setMode('withdraw'),
     },
     {
-      text: 'Withdraw ETH',
-      onClick: () => setMode('withdraw-eth'),
-    },
-    {
-      text: 'Swap',
-      onClick: () => setMode('swap'),
+      text: 'Deposit',
+      onClick: () => setMode('deposit'),
     },
   ];
 
   const btns2 = [
     {
-      text: 'Deposit NFT',
-      onClick: () => setMode('deposit-nft'),
-    },
-    {
-      text: 'Withdraw NFT',
-      onClick: () => setMode('withdraw-nft'),
+      text: 'Swap',
+      onClick: () => setMode('swap'),
     },
   ];
 
@@ -65,11 +59,14 @@ const SettingModal = ({ open, setOpenUpdate }) => {
 
   if (!profile) return null;
 
+  if (mode === 'deposit') return <SettingModalDeposit open onBack={() => setMode('menu')} setMode={setMode} />;
+  if (mode === 'withdraw') return <SettingModalWithdraw open onBack={() => setMode('menu')} setMode={setMode} />;
+
   if (mode === 'deposit-eth') return <SettingModalDepositETH open onBack={() => setMode('menu')} />;
   if (mode === 'withdraw-eth') return <SettingModalWithdrawETH open onBack={() => setMode('menu')} />;
   if (mode === 'swap') return <SettingModalSwap open onBack={() => setMode('menu')} />;
-  if (mode === 'deposit-nft') return <SettingModalDepositNFT open onBack={() => setMode('menu')} />;
-  if (mode === 'withdraw-nft') return <SettingModalWithdrawNFT open onBack={() => setMode('menu')} />;
+  if (mode === 'deposit-nft') return <SettingModalDepositNFT open onBack={() => setMode('deposit')} />;
+  if (mode === 'withdraw-nft') return <SettingModalWithdrawNFT open onBack={() => setMode('withdraw')} />;
 
   return (
     <Dialog
@@ -129,17 +126,17 @@ const SettingModal = ({ open, setOpenUpdate }) => {
                 onClick={exportWallet}
                 disabled={!isAuthenticated || !hasEmbeddedWallet}
               />
-              <RoundedButton label="Logout" onClick={logout} />
+              <RoundedButton label="Logout" color="error" onClick={logout} />
             </Box>
             <Divider />
             <Box display="flex" flexDirection="column" gap={1}>
-              <Box display="flex" justifyContent="space-between" gap={1}>
+              <Box display="flex" gap={1}>
                 {btns1.map((item) => (
                   <RoundedButton
                     key={item.text}
                     label={item.text}
                     onClick={item.onClick}
-                    sx={{ fontSize: 10, textTransform: 'none' }}
+                    sx={{ flex: 1, fontSize: 14, textTransform: 'none' }}
                   />
                 ))}
               </Box>
@@ -149,7 +146,7 @@ const SettingModal = ({ open, setOpenUpdate }) => {
                     key={item.text}
                     label={item.text}
                     onClick={item.onClick}
-                    sx={{ fontSize: 10, textTransform: 'none', flex: 1 }}
+                    sx={{ fontSize: 14, textTransform: 'none', flex: 1 }}
                   />
                 ))}
               </Box>

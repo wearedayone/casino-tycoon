@@ -5,7 +5,7 @@ const RoundedButton = ({ label, sx, ...props }) => {
     <Button
       variant="outlined"
       {...props}
-      sx={{ color: 'black', textTransform: 'none', borderColor: 'black', borderRadius: 8, ...sx }}>
+      sx={{ color: 'black', textTransform: 'none', borderColor: 'black', borderRadius: 2, ...sx }}>
       {label}
     </Button>
   );

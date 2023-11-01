@@ -1,11 +1,18 @@
+import { useState } from 'react';
 import { Box, Dialog, Typography, Button } from '@mui/material';
 import RemoveRoundedIcon from '@mui/icons-material/RemoveRounded';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 
 import RoundedButton from './RoundedButton';
 import Input from './Input';
+import useUserStore from '../../../stores/user.store';
 
 const SettingModalWithdrawNFT = ({ open, onBack }) => {
+  const profile = useUserStore((state) => state.profile);
+  const gamePlay = useUserStore((state) => state.gamePlay);
+  const [address, setAddress] = useState(profile?.address);
+  const [quantity, setQuantity] = useState(0);
+
   const transfer = () => {};
 
   return (
@@ -31,9 +38,10 @@ const SettingModalWithdrawNFT = ({ open, onBack }) => {
             <Box display="flex" flexDirection="column" alignItems="center" gap={1}>
               <img src="/images/smile-face.png" alt="smile-face" maxWidth={100} />
               <Box width="150px" display="flex" alignItems="center" gap={1}>
-                <RemoveRoundedIcon />
+                <RemoveRoundedIcon sx={{ cursor: 'pointer' }} onClick={() => setQuantity(Math.max(0, quantity - 1))} />
                 <input
-                  value={0}
+                  value={quantity}
+                  onChange={() => {}}
                   style={{
                     border: '1px solid black',
                     borderRadius: 4,
@@ -45,13 +53,16 @@ const SettingModalWithdrawNFT = ({ open, onBack }) => {
                     minWidth: 0,
                   }}
                 />
-                <AddRoundedIcon />
+                <AddRoundedIcon
+                  sx={{ cursor: 'pointer' }}
+                  onClick={() => setQuantity(Math.min(gamePlay?.numberOfMachines, quantity + 1))}
+                />
               </Box>
               <Typography fontSize={12} fontStyle="italic" align="center">
-                Available units: 2
+                Available units: {gamePlay?.numberOfMachines}
               </Typography>
             </Box>
-            <Input placeholder="Enter Address" />
+            <Input placeholder="Enter Address" value={address} onChange={(e) => setAddress(e.target.value)} />
             <Box display="flex" justifyContent="center">
               <RoundedButton label="Transfer" onClick={transfer} sx={{ fontSize: 10 }} />
             </Box>

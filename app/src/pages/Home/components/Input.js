@@ -5,7 +5,7 @@ const Input = ({ sx, ...rest }) => {
       style={{
         width: '100%',
         border: '1px solid #555',
-        borderRadius: 16,
+        borderRadius: 4,
         padding: '8px 16px',
         outline: 'none',
         ...sx,
