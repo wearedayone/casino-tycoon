@@ -14,9 +14,6 @@ contract GangsterArena is Ownable, IGangsterArena {
 
   mapping(uint256 => uint256) public tokenMaxSupply;
   mapping(address => bool) public mintedAddess;
-  mapping(address => uint256) public goon;
-  mapping(address => uint256) public gangster;
-  mapping(address => uint256) public building;
 
   constructor(address initialOwner) Ownable(initialOwner) {}
 
@@ -43,8 +40,8 @@ contract GangsterArena is Ownable, IGangsterArena {
     require(msg.value >= BASE_PRICE * amount, 'Need to send more ether');
 
     if (amount == 1) {
-      token.mint(address(this), tokenId, 1, '');
-      gangster[to] += 1;
+      token.mint(to, tokenId, 1, '');
+      mintedAddess[to] = true;
     }
 
     if (amount > 1) {
@@ -52,46 +49,9 @@ contract GangsterArena is Ownable, IGangsterArena {
       tokenIds[0] = tokenId;
       uint256[] memory amounts = new uint256[](1);
       amounts[0] = amount;
-      token.mintBatch(address(this), tokenIds, amounts, '');
-      gangster[to] += amount;
+      token.mintBatch(to, tokenIds, amounts, '');
+      mintedAddess[to] = true;
     }
-    if (!mintedAddess[to]) mintedAddess[to] = true;
-  }
-
-  function mintWL(address to, uint256 tokenId, uint256 amount, bytes32[] calldata merkleProof) external payable {}
-
-  function depositNFT(address from, uint256 tokenId, uint256 amount) external {
-    token.safeTransferFrom(msg.sender, address(this), tokenId, amount, '');
-    gangster[from] += amount;
-  }
-
-  function withdrawNFT(address to, uint256 tokenId, uint256 amount) external {
-    require(gangster[msg.sender] >= amount, 'Insufficient balance');
-    token.safeTransferFrom(address(this), to, tokenId, amount, '');
-    gangster[msg.sender] -= amount;
-  }
-
-  function burnNFT(address[] memory to, uint256[] memory tokenId, uint256[] memory amount) external onlyOwner {
-    for (uint256 i = 0; i < to.length; i++) {
-      token.burn(address(this), tokenId[i], amount[i]);
-      gangster[to[i]] -= amount[i];
-    }
-  }
-
-  function withdraw() external onlyOwner {
-    require(address(this).balance > 0, 'Nothing to withdraw');
-    address payable receiver = payable(msg.sender);
-    receiver.transfer(address(this).balance);
-  }
-
-  function onERC1155Received(
-    address operator,
-    address from,
-    uint256 id,
-    uint256 value,
-    bytes calldata data
-  ) external returns (bytes4) {
-    return bytes4(keccak256('onERC1155Received(address,address,uint256,uint256,bytes)'));
   }
 
   /**
