@@ -9,6 +9,9 @@ import RoundedButton from './RoundedButton';
 import Input from './Input';
 import useUserStore from '../../../stores/user.store';
 import useSmartContract from '../../../hooks/useSmartContract';
+import environments from '../../../utils/environments';
+
+const { NETWORK_ID } = environments;
 
 const SettingModalWithdrawNFT = ({ open, onBack }) => {
   const { withdrawNFT } = useSmartContract();
@@ -19,6 +22,11 @@ const SettingModalWithdrawNFT = ({ open, onBack }) => {
   const [quantity, setQuantity] = useState(0);
   const [status, setStatus] = useState('idle');
   const [txnHash, setTxnHash] = useState(null);
+
+  const txnLink =
+    NETWORK_ID === '8453'
+      ? `https://basescan.org/tx/${txnHash || ''}`
+      : `https://goerli.basescan.org/tx/${txnHash || ''}`;
 
   useEffect(() => {
     if (!open) {
@@ -72,7 +80,13 @@ const SettingModalWithdrawNFT = ({ open, onBack }) => {
                     Withdrawal may take a few minutes.
                   </Typography>
                 </Box>
-                <Box display="flex" alignItems="center" justifyContent="center" gap={0.5} sx={{ cursor: 'pointer' }}>
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  gap={0.5}
+                  sx={{ cursor: 'pointer' }}
+                  onClick={() => window.open(txnLink)}>
                   <Typography fontSize={12}>View transaction</Typography>
                   <OpenInNewIcon sx={{ fontSize: 14 }} />
                 </Box>
