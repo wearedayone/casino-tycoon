@@ -35,6 +35,7 @@ const SettingModalWithdrawNFT = ({ open, onBack }) => {
   }, [open]);
 
   const transfer = async () => {
+    if (status === 'loading') return;
     setStatus('loading');
     try {
       if (!address?.trim()) throw new Error('Please enter your address');
@@ -129,7 +130,12 @@ const SettingModalWithdrawNFT = ({ open, onBack }) => {
               </Box>
               <Input placeholder="Enter Address" value={address} onChange={(e) => setAddress(e.target.value)} />
               <Box display="flex" justifyContent="center">
-                <RoundedButton label="Transfer" onClick={transfer} sx={{ fontSize: 10 }} />
+                <RoundedButton
+                  disabled={status === 'loading'}
+                  label={status === 'loading' ? 'Transfering...' : 'Transfer'}
+                  onClick={transfer}
+                  sx={{ fontSize: 10 }}
+                />
               </Box>
             </Box>
           )}

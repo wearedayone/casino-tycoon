@@ -40,6 +40,7 @@ const SettingModalStake = ({ open, onBack }) => {
   }, []);
 
   const stake = async () => {
+    if (status === 'loading') return;
     setStatus('loading');
     try {
       if (!address?.trim()) throw new Error('Please enter your address');
@@ -134,7 +135,12 @@ const SettingModalStake = ({ open, onBack }) => {
               </Box>
               {/* <Input placeholder="Enter Address" value={address} onChange={(e) => setAddress(e.target.value)} /> */}
               <Box display="flex" justifyContent="center">
-                <RoundedButton label="Stake" onClick={stake} sx={{ fontSize: 10 }} />
+                <RoundedButton
+                  disabled={status === 'loading'}
+                  label={status === 'loading' ? 'Staking...' : 'Stake'}
+                  onClick={stake}
+                  sx={{ fontSize: 10 }}
+                />
               </Box>
             </Box>
           )}
