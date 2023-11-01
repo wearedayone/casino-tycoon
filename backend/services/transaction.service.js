@@ -100,7 +100,7 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
     const userSnapshot = await firestore.collection('user').doc(userId).get();
     const { address } = userSnapshot.data();
 
-    if (address?.toLowerCase() !== from.toLowerCase())
+    if (address?.toLowerCase() !== from.toLowerCase() && SYSTEM_ADDRESS?.toLowerCase() !== from.toLowerCase())
       throw new Error(`Bad request: invalid sender, txn: ${JSON.stringify(receipt)}`);
 
     const snapshot = await firestore.collection('transaction').doc(transactionId).get();
@@ -326,11 +326,11 @@ export const validateTxnHash = async ({ userId, transactionId, txnHash }) => {
   await sendUserBonus(userId, transactionId);
 };
 
-// for non web3 transactions: war-switch
+// for non web3 transactions: war-switch | war-penalty when no NFTs are burned
 export const validateNonWeb3Transaction = async ({ userId, transactionId }) => {
   // update txnHash and status for transaction doc in firestore
   await firestore.collection('transaction').doc(transactionId).update({
-    status: 'success',
+    status: 'Success',
   });
 
   // TODO: move this logic to trigger later

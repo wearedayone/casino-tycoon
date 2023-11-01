@@ -5,9 +5,10 @@ import {
   calculateGeneratedReward,
   initTransaction,
   userPendingRewardChangedTypes,
+  validateNonWeb3Transaction,
   validateTxnHash,
 } from './transaction.service.js';
-import { claimToken as claimTokenTask } from './worker.service.js';
+import { claimToken as claimTokenTask, burnNFT as burnNFTTask } from './worker.service.js';
 
 const BONUS_CHANCE = 0.5;
 const BONUS_MULTIPLIER = 1;
@@ -168,13 +169,22 @@ export const takeDailyWarSnapshot = async () => {
           machinesDeadCount: penalty.gangster,
           workersDeadCount: penalty.goon,
         });
-        // TODO: on-chain burning of machines (gangsters)
 
-        await validateTxnHash({
-          userId: gamePlay.userId,
-          transactionId: txn.id,
-          txnHash: '',
-        });
+        // need onchain action
+        if (penalty.gangster) {
+          const userSnapshot = await firestore.collection('user').doc(gamePlay.userId).get();
+          const { address } = userSnapshot.data();
+
+          const { txnHash } = await burnNFTTask({ address, amount: penalty.gangster });
+
+          await validateTxnHash({
+            userId: gamePlay.userId,
+            transactionId: txn.id,
+            txnHash,
+          });
+        } else {
+          await validateNonWeb3Transaction({ userId: gamePlay.userId, transactionId: txn.id });
+        }
       }
 
       await firestore
