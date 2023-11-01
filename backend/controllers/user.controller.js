@@ -1,4 +1,9 @@
-import { createUserIfNotExist, toggleWarStatus, updateWalletPasswordAsked } from '../services/user.service.js';
+import {
+  createUserIfNotExist,
+  toggleWarStatus,
+  updateWalletPasswordAsked,
+  updateBalance as updateBalanceService,
+} from '../services/user.service.js';
 import { getWarHistory } from '../services/warSnapshot.service.js';
 
 export const getMe = async (req, res) => {
@@ -34,6 +39,16 @@ export const getUserWarHistory = async (req, res) => {
 export const completeAskingWalletPassword = async (req, res) => {
   try {
     await updateWalletPasswordAsked(req.userId);
+    return res.sendStatus(200);
+  } catch (err) {
+    console.log({ err });
+    return res.status(400).send(err);
+  }
+};
+
+export const updateBalance = async (req, res) => {
+  try {
+    await updateBalanceService(req.userId);
     return res.sendStatus(200);
   } catch (err) {
     console.log({ err });

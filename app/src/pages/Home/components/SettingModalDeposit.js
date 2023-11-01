@@ -1,16 +1,35 @@
+import { useState } from 'react';
 import { Box, Dialog, Typography, Button } from '@mui/material';
 import CachedIcon from '@mui/icons-material/Cached';
 import { useSnackbar } from 'notistack';
 
 import useUserWallet from '../../../hooks/useUserWallet';
+import useUserStore from '../../../stores/user.store';
+import { formatter } from '../../../utils/numbers';
+import { updateBalance } from '../../../services/user.service';
 
 const SettingModalDeposit = ({ open, onBack, setMode }) => {
   const { enqueueSnackbar } = useSnackbar();
   const embeddedWallet = useUserWallet();
+  const profile = useUserStore((state) => state.profile);
+  const [loading, setLoading] = useState(false);
 
   const onCopyAddress = () => {
     navigator.clipboard.writeText(embeddedWallet?.address);
     enqueueSnackbar('Copied address', { variant: 'success' });
+  };
+
+  const reloadBalance = async () => {
+    if (loading) return;
+    setLoading(true);
+
+    try {
+      await updateBalance();
+    } catch (err) {
+      console.error(err);
+    }
+
+    setLoading(false);
   };
 
   return (
@@ -77,9 +96,11 @@ const SettingModalDeposit = ({ open, onBack, setMode }) => {
                 <Typography fontSize={12}>Copy address</Typography>
               </Box>
             </Box>
-            <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
-              <Typography fontSize={14}>GangsterArena Wallet Balance: 0 ETH</Typography>
-              <CachedIcon sx={{ fontSize: 18, cursor: 'pointer' }} />
+            <Box display="flex" justifyContent="center" alignItems="center" gap={0.5}>
+              <Typography fontSize={14}>
+                GangsterArena Wallet Balance: {formatter.format(profile?.ETHBalance)} ETH
+              </Typography>
+              <CachedIcon sx={{ fontSize: 18, cursor: 'pointer' }} onClick={reloadBalance} />
             </Box>
           </Box>
         </Box>

@@ -10,6 +10,7 @@ import SettingModalDepositNFT from './SettingModalDepositNFT';
 import SettingModalWithdrawNFT from './SettingModalWithdrawNFT';
 import SettingModalDeposit from './SettingModalDeposit';
 import SettingModalWithdraw from './SettingModalWithdraw';
+import SettingModalStake from './SettingModalStake';
 import RoundedButton from './RoundedButton';
 import useUserWallet from '../../../hooks/useUserWallet';
 import useUserStore from '../../../stores/user.store';
@@ -46,6 +47,10 @@ const SettingModal = ({ open, setOpenUpdate }) => {
 
   const btns2 = [
     {
+      text: 'Stake',
+      onClick: () => setMode('stake'),
+    },
+    {
       text: 'Swap',
       onClick: () => setMode('swap'),
     },
@@ -61,6 +66,7 @@ const SettingModal = ({ open, setOpenUpdate }) => {
 
   if (mode === 'deposit') return <SettingModalDeposit open onBack={() => setMode('menu')} setMode={setMode} />;
   if (mode === 'withdraw') return <SettingModalWithdraw open onBack={() => setMode('menu')} setMode={setMode} />;
+  if (mode === 'stake') return <SettingModalStake open onBack={() => setMode('menu')} setMode={setMode} />;
 
   if (mode === 'deposit-eth') return <SettingModalDepositETH open onBack={() => setMode('menu')} />;
   if (mode === 'withdraw-eth') return <SettingModalWithdrawETH open onBack={() => setMode('menu')} />;
@@ -140,7 +146,7 @@ const SettingModal = ({ open, setOpenUpdate }) => {
                   />
                 ))}
               </Box>
-              <Box display="flex" justifyContent="space-between" gap={1}>
+              <Box display="flex" flexDirection="column" gap={1}>
                 {btns2.map((item) => (
                   <RoundedButton
                     key={item.text}

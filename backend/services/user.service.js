@@ -78,3 +78,19 @@ export const getUserDisplayInfos = async (userId) => {
   const { avatarURL, username } = snapshot.data();
   return { id: snapshot.id, avatarURL, username };
 };
+
+export const updateBalance = async (userId) => {
+  const snapshot = await firestore.collection('user').doc(userId).get();
+  const { ETHBalance, address } = snapshot.data();
+  const ethersProvider = await alchemy.config.getProvider();
+  const value = await ethersProvider.getBalance(address);
+
+  if (ETHBalance !== formatEther(value)) {
+    await firestore
+      .collection('user')
+      .doc(userId)
+      .update({
+        ETHBalance: formatEther(value),
+      });
+  }
+};

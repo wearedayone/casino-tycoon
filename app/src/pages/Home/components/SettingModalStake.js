@@ -6,19 +6,18 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { useSnackbar } from 'notistack';
 
 import RoundedButton from './RoundedButton';
-import Input from './Input';
 import useUserStore from '../../../stores/user.store';
 import useSmartContract from '../../../hooks/useSmartContract';
 
-const SettingModalWithdrawNFT = ({ open, onBack }) => {
-  const { withdrawNFT } = useSmartContract();
+const SettingModalStake = ({ open, onBack }) => {
+  const { stakeNFT, getNFTBalance } = useSmartContract();
   const { enqueueSnackbar } = useSnackbar();
   const profile = useUserStore((state) => state.profile);
-  const gamePlay = useUserStore((state) => state.gamePlay);
   const [address, setAddress] = useState(profile?.address);
   const [quantity, setQuantity] = useState(0);
   const [status, setStatus] = useState('idle');
   const [txnHash, setTxnHash] = useState(null);
+  const [availableUnits, setAvailableUnits] = useState(0);
 
   useEffect(() => {
     if (!open) {
@@ -26,12 +25,18 @@ const SettingModalWithdrawNFT = ({ open, onBack }) => {
     }
   }, [open]);
 
-  const transfer = async () => {
+  useEffect(() => {
+    getNFTBalance(profile?.address)
+      .then((data) => setAvailableUnits(data))
+      .catch((err) => console.error(err));
+  }, []);
+
+  const stake = async () => {
     setStatus('loading');
     try {
       if (!address?.trim()) throw new Error('Please enter your address');
-      if (quantity < 0 || quantity > gamePlay?.numberOfMachines) throw new Error('Maximum number of gangsters reached');
-      const receipt = await withdrawNFT(address, quantity);
+      if (quantity < 0 || quantity > availableUnits) throw new Error('Maximum number of gangsters reached');
+      const receipt = await stakeNFT(address, quantity);
       if (receipt.status === 1) {
         // call server to validate txn hash  && create txn in firestore
         setTxnHash(receipt.transactionHash);
@@ -57,7 +62,7 @@ const SettingModalWithdrawNFT = ({ open, onBack }) => {
         <Box display="flex" flexDirection="column" bgcolor="white" borderRadius={1}>
           <Box py={1} sx={{ borderBottom: '1px solid #555' }}>
             <Typography fontSize={20} fontWeight={600} align="center">
-              Withdraw NFT
+              Staking NFT
             </Typography>
           </Box>
           {status === 'success' ? (
@@ -66,10 +71,10 @@ const SettingModalWithdrawNFT = ({ open, onBack }) => {
                 <img src="/images/smile-face.png" alt="smile-face" maxWidth={100} />
                 <Box>
                   <Typography fontSize={14} align="center">
-                    NFT Withdrawal Success!
+                    Staking Success!
                   </Typography>
                   <Typography fontSize={14} align="center">
-                    Withdrawal may take a few minutes.
+                    Staking may take a few minutes.
                   </Typography>
                 </Box>
                 <Box display="flex" alignItems="center" justifyContent="center" gap={0.5} sx={{ cursor: 'pointer' }}>
@@ -81,7 +86,7 @@ const SettingModalWithdrawNFT = ({ open, onBack }) => {
           ) : (
             <Box p={2} display="flex" flexDirection="column" gap={2}>
               <Typography fontSize={14} align="center">
-                Enter the number of NFTs to withdraw
+                NFTs have to be staked to be used in the game.
               </Typography>
               <Box display="flex" flexDirection="column" alignItems="center" gap={1}>
                 <img src="/images/smile-face.png" alt="smile-face" maxWidth={100} />
@@ -106,16 +111,16 @@ const SettingModalWithdrawNFT = ({ open, onBack }) => {
                   />
                   <AddRoundedIcon
                     sx={{ cursor: 'pointer' }}
-                    onClick={() => setQuantity(Math.min(gamePlay?.numberOfMachines, quantity + 1))}
+                    onClick={() => setQuantity(Math.min(availableUnits, quantity + 1))}
                   />
                 </Box>
                 <Typography fontSize={12} fontStyle="italic" align="center">
-                  Available units: {gamePlay?.numberOfMachines}
+                  Available units: 0
                 </Typography>
               </Box>
-              <Input placeholder="Enter Address" value={address} onChange={(e) => setAddress(e.target.value)} />
+              {/* <Input placeholder="Enter Address" value={address} onChange={(e) => setAddress(e.target.value)} /> */}
               <Box display="flex" justifyContent="center">
-                <RoundedButton label="Transfer" onClick={transfer} sx={{ fontSize: 10 }} />
+                <RoundedButton label="Stake" onClick={stake} sx={{ fontSize: 10 }} />
               </Box>
             </Box>
           )}
@@ -132,4 +137,4 @@ const SettingModalWithdrawNFT = ({ open, onBack }) => {
   );
 };
 
-export default SettingModalWithdrawNFT;
+export default SettingModalStake;

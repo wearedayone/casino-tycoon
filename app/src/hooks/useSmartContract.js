@@ -4,10 +4,11 @@ import { usePrivy } from '@privy-io/react-auth';
 import useUserWallet from './useUserWallet';
 import gameContractAbi from '../assets/abis/GameContract.json';
 import tokenAbi from '../assets/abis/Token.json';
+import nftAbi from '../assets/abis/NFT.json';
 import { formatter } from '../utils/numbers';
 import environments from '../utils/environments';
 
-const { NETWORK_ID, GAME_CONTRACT_ADDRESS, TOKEN_ADDRESS, SYSTEM_ADDRESS } = environments;
+const { NETWORK_ID, GAME_CONTRACT_ADDRESS, TOKEN_ADDRESS, NFT_ADDRESS, SYSTEM_ADDRESS } = environments;
 
 const useSmartContract = () => {
   const { sendTransaction } = usePrivy();
@@ -63,7 +64,69 @@ const useSmartContract = () => {
     return receipt;
   };
 
-  return { buyMachine, buyWorkerOrBuilding };
+  const withdrawNFT = async (address, amount) => {
+    const privyProvider = await embeddedWallet.getEthereumProvider();
+    const nftContract = new Contract(NFT_ADDRESS, nftAbi.abi, privyProvider.provider);
+
+    const approveData = nftContract.interface.encodeFunctionData('setApprovalForAll', [GAME_CONTRACT_ADDRESS, true]);
+
+    const approveUnsignedTx = {
+      to: NFT_ADDRESS,
+      chainId: Number(NETWORK_ID),
+      data: approveData,
+    };
+
+    // console.log({ NFT_ADDRESS, GAME_CONTRACT_ADDRESS, approveData });
+    const approveReceipt = await sendTransaction(approveUnsignedTx);
+    if (approveReceipt.status === 1) {
+      const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
+      const data = gameContract.interface.encodeFunctionData('withdrawNFT', [address, 1, amount]);
+      const unsignedTx = {
+        to: GAME_CONTRACT_ADDRESS,
+        chainId: Number(NETWORK_ID),
+        data,
+      };
+      const receipt = await sendTransaction(unsignedTx);
+      return receipt;
+    }
+  };
+
+  const stakeNFT = async (address, amount) => {
+    const privyProvider = await embeddedWallet.getEthereumProvider();
+    const nftContract = new Contract(NFT_ADDRESS, nftAbi.abi, privyProvider.provider);
+
+    const approveData = nftContract.interface.encodeFunctionData('setApprovalForAll', [GAME_CONTRACT_ADDRESS, true]);
+
+    const approveUnsignedTx = {
+      to: NFT_ADDRESS,
+      chainId: Number(NETWORK_ID),
+      data: approveData,
+    };
+
+    // console.log({ NFT_ADDRESS, GAME_CONTRACT_ADDRESS, approveData });
+    const approveReceipt = await sendTransaction(approveUnsignedTx);
+    if (approveReceipt.status === 1) {
+      const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
+      const data = gameContract.interface.encodeFunctionData('depositNFT', [address, 1, amount]);
+      const unsignedTx = {
+        to: GAME_CONTRACT_ADDRESS,
+        chainId: Number(NETWORK_ID),
+        data,
+      };
+      const receipt = await sendTransaction(unsignedTx);
+      return receipt;
+    }
+  };
+
+  const getNFTBalance = async (address) => {
+    const privyProvider = await embeddedWallet.getEthereumProvider();
+    const nftContract = new Contract(NFT_ADDRESS, nftAbi.abi, privyProvider.provider);
+
+    const res = await nftContract.balanceOf(address, 1);
+    return Number(res.toString());
+  };
+
+  return { buyMachine, buyWorkerOrBuilding, withdrawNFT, stakeNFT, getNFTBalance };
 };
 
 export default useSmartContract;
