@@ -65,3 +65,41 @@ export const claimToken = async ({ address, amount }) => {
     return { txnHash, status: 'Failed' };
   }
 };
+
+export const claimTokenBonus = async ({ address, amount }) => {
+  let txnHash;
+  try {
+    logger.info('start claimToken');
+    logger.info({ address, amount });
+    const workerWallet = await getWorkerWallet();
+    const tokenContract = await getTokenContract(workerWallet);
+    logger.info('start Transaction:');
+    const tx = await tokenContract.transferFrom(workerWallet.address, address, amount, { gasLimit: 200000 });
+    logger.info('Transaction:' + tx.hash);
+    const receipt = await tx.wait();
+
+    txnHash = receipt.transactionHash;
+
+    if (receipt.status !== 1) {
+      logger.info(`error: ${JSON.stringify(receipt)}`);
+      logger.error(`error: ${JSON.stringify(receipt)}`);
+      throw new Error(`error: ${JSON.stringify(receipt)}`);
+    }
+
+    return { txnHash, status: 'Success' };
+  } catch (err) {
+    const newError = getParsedEthersError(err);
+    const regex = /(execution reverted: )([A-Za-z\s])*/;
+    if (newError.context) {
+      const message = newError.context.match(regex);
+      if (message) {
+        const error = new Error(message[0]);
+        log.error(error.message);
+      }
+    } else {
+      log.error(err.message);
+    }
+
+    return { txnHash, status: 'Failed' };
+  }
+};
