@@ -14,12 +14,15 @@ import SettingModalStake from './SettingModalStake';
 import RoundedButton from './RoundedButton';
 import useUserWallet from '../../../hooks/useUserWallet';
 import useUserStore from '../../../stores/user.store';
+import useSettingStore from '../../../stores/setting.store';
 
 const SettingModal = ({ open, setOpenUpdate }) => {
   const [mode, setMode] = useState('menu');
   const { ready, authenticated, user, exportWallet: exportWalletPrivy, logout } = usePrivy();
   const embeddedWallet = useUserWallet();
   const profile = useUserStore((state) => state.profile);
+  const sound = useSettingStore((state) => state.sound);
+  const setSound = useSettingStore((state) => state.setSound);
 
   // Check that your user is authenticated
   const isAuthenticated = useMemo(() => ready && authenticated, [ready, authenticated]);
@@ -156,6 +159,14 @@ const SettingModal = ({ open, setOpenUpdate }) => {
                   />
                 ))}
               </Box>
+            </Box>
+            <Divider />
+            <Box display="flex" flexDirection="column">
+              <RoundedButton
+                label={`Game sound: ${sound === 'on' ? 'On' : 'Off'}`}
+                onClick={() => setSound(sound === 'on' ? 'off' : 'on')}
+                sx={{ fontSize: 14, textTransform: 'none' }}
+              />
             </Box>
           </Box>
         </Box>

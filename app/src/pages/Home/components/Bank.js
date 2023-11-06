@@ -8,14 +8,11 @@ import VolumeUpRoundedIcon from '@mui/icons-material/VolumeUpRounded';
 import VolumeOffRoundedIcon from '@mui/icons-material/VolumeOffRounded';
 
 import IconButton from './IconButton';
-import useSettingStore from '../../../stores/setting.store';
 import useUserStore from '../../../stores/user.store';
 import { getRank } from '../../../services/user.service';
 import QueryKeys from '../../../utils/queryKeys';
 
 const Bank = ({ setOpeningModal }) => {
-  const sound = useSettingStore((state) => state.sound);
-  const setSound = useSettingStore((state) => state.setSound);
   const profile = useUserStore((state) => state.profile);
   const { status, data: rankData } = useQuery({
     queryFn: getRank,
@@ -46,14 +43,8 @@ const Bank = ({ setOpeningModal }) => {
             onClick={() => setOpeningModal('SETTING')}
           />
           <IconButton
-            Icon={
-              sound === 'on' ? (
-                <VolumeUpRoundedIcon sx={{ fontSize: 24 }} />
-              ) : (
-                <VolumeOffRoundedIcon sx={{ fontSize: 24 }} />
-              )
-            }
-            onClick={() => setSound(sound === 'on' ? 'off' : 'on')}
+            Icon={<img src="/images/icons/gift-box.png" alt="gift" style={{ width: 20 }} />}
+            onClick={() => {}}
           />
         </Box>
         <img src="/images/tree.png" alt="tree" maxWidth={80} maxHeight="100%" />
