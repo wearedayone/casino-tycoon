@@ -1,12 +1,13 @@
 import { faker } from '@faker-js/faker';
+import { formatEther } from '@ethersproject/units';
 
 import admin, { firestore } from '../configs/firebase.config.js';
-import { getActiveSeasonId } from './season.service.js';
-import { initTransaction, validateNonWeb3Transaction } from './transaction.service.js';
-import environments from '../utils/environments.js';
 import privy from '../configs/privy.config.js';
 import alchemy from '../configs/alchemy.config.js';
-import { formatEther } from '@ethersproject/units';
+import { getActiveSeason, getActiveSeasonId } from './season.service.js';
+import { initTransaction, validateNonWeb3Transaction } from './transaction.service.js';
+import environments from '../utils/environments.js';
+import { calculateReward } from '../utils/formulas.js';
 
 const { NETWORK_ID } = environments;
 
@@ -93,4 +94,25 @@ export const updateBalance = async (userId) => {
         ETHBalance: formatEther(value),
       });
   }
+};
+
+// TODO: might need update flow to store leaderboard
+// in another collection for easier query and snapshot listen
+export const getUserRankAndReward = async (userId) => {
+  const activeSeason = await getActiveSeason();
+
+  const gamePlaySnapshot = await firestore
+    .collection('gamePlay')
+    .where('seasonId', '==', activeSeason.id)
+    .orderBy('networth', 'desc')
+    .orderBy('createdAt', 'asc')
+    .get();
+
+  const rank = gamePlaySnapshot.docs.findIndex((item) => item.data().userId === userId);
+  if (rank !== -1) {
+    const reward = calculateReward(activeSeason.prizePool, rank);
+    return { rank, reward };
+  }
+
+  return null;
 };

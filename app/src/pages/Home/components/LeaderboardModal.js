@@ -10,6 +10,7 @@ import ReputationModal from './ReputationModal';
 import useSystemStore from '../../../stores/system.store';
 import QueryKeys from '../../../utils/queryKeys';
 import { getLeaderboard } from '../../../services/gamePlay.service';
+import { formatter } from '../../../utils/numbers';
 
 const LeaderboardModal = ({ open, setOpenUpdate }) => {
   const activeSeason = useSystemStore((state) => state.activeSeason);
@@ -176,8 +177,6 @@ const LeaderboardList = () => {
     refetchInterval: 30 * 1000,
   });
 
-  console.log({ data });
-
   return (
     <Box display="flex" flexDirection="column" gap={0.5}>
       <Grid container spacing={0.5}>
@@ -241,7 +240,7 @@ const LeaderboardList = () => {
             </Grid>
             <Grid item xs={3}>
               <Box height="100%" overflow="hidden" display="flex" justifyContent="flex-end" alignItems="center">
-                <Typography fontSize={12}>~{item.reward}</Typography>
+                <Typography fontSize={12}>~{formatter.format(item.reward)}</Typography>
               </Box>
             </Grid>
           </Grid>

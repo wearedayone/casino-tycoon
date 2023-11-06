@@ -7,6 +7,7 @@ import {
   toggleWar,
   completeAskingWalletPassword,
   updateBalance,
+  getRank,
 } from '../controllers/user.controller.js';
 
 const router = Router();
@@ -16,5 +17,6 @@ router.put('/me/war', auth, toggleWar);
 router.get('/me/war-history', auth, getUserWarHistory);
 router.put('/me/wallet-password-ask', auth, completeAskingWalletPassword);
 router.put('/me/balances', auth, updateBalance);
+router.get('/me/rank', auth, getRank);
 
 export default router;

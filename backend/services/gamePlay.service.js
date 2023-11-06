@@ -1,14 +1,15 @@
 import { firestore } from '../configs/firebase.config.js';
 
-import { getActiveSeasonId } from './season.service.js';
+import { getActiveSeason } from './season.service.js';
 import { getUserDisplayInfos } from './user.service.js';
+import { calculateReward } from '../utils/formulas.js';
 
 export const getLeaderboard = async () => {
-  const seasonId = await getActiveSeasonId();
+  const season = await getActiveSeason();
 
   const snapshot = await firestore
     .collection('gamePlay')
-    .where('seasonId', '==', seasonId)
+    .where('seasonId', '==', season.id)
     .orderBy('networth', 'desc')
     .orderBy('createdAt', 'asc')
     .get();
@@ -23,6 +24,6 @@ export const getLeaderboard = async () => {
     userId: userDatas[index].id,
     id: doc.id,
     networth: doc.networth,
-    reward: 0,
+    reward: calculateReward(season.prizePool, index),
   }));
 };

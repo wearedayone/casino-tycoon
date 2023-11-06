@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+import { formatEther } from '@ethersproject/units';
 import { Box, Dialog, Typography, Button } from '@mui/material';
 
 import { CopyIcon } from '../../../components/Icons';
@@ -6,9 +8,7 @@ import useUserStore from '../../../stores/user.store';
 import useSystemStore from '../../../stores/system.store';
 import { formatter } from '../../../utils/numbers';
 import { calculateMachineSellPrice } from '../../../utils/formulas';
-import { useEffect, useState } from 'react';
-import { useWallets } from '@privy-io/react-auth';
-import { formatEther } from '@ethersproject/units';
+import { getRank } from '../../../services/user.service';
 
 const PortfolioModal = ({ open, setOpenUpdate }) => {
   const profile = useUserStore((state) => state.profile);
@@ -17,22 +17,28 @@ const PortfolioModal = ({ open, setOpenUpdate }) => {
   const embeddedWallet = useUserWallet();
   const [latestETHBalance, setETHBalance] = useState(0);
   const [tokenPrice, setTokenPrice] = useState(0.000001);
-  const { wallets } = useWallets();
+  const [rankInfo, setRankInfo] = useState({ rank: 0, reward: 0 });
 
-  const embeddedWallet1 = wallets.find((wallet) => wallet.walletClientType === 'privy');
   const onCopyAddress = () => {
     navigator.clipboard.writeText(embeddedWallet?.address);
   };
   const getLatestBalance = async () => {
     const provider = await embeddedWallet?.getEthereumProvider();
-    console.log({ wallets, embeddedWallet, embeddedWallet1, provider });
     const value = await provider?.provider?.getBalance(embeddedWallet?.address);
     if (value) setETHBalance(formatEther(value));
   };
-  console.log({ latestETHBalance });
+
   useEffect(() => {
     getLatestBalance();
   }, []);
+
+  useEffect(() => {
+    if (open) {
+      getRank()
+        .then((res) => setRankInfo(res.data))
+        .catch((err) => console.error(err));
+    }
+  }, [open]);
 
   if (!profile || !gamePlay || !activeSeason) return null;
 
@@ -41,11 +47,9 @@ const PortfolioModal = ({ open, setOpenUpdate }) => {
   const { machine } = activeSeason;
 
   // TODO: implement logic calculate token value in eth
-
   const tokenValueInETH = tokenPrice * tokenBalance;
   const estimatedMachinesValueInETH = numberOfMachines * calculateMachineSellPrice(machine.basePrice);
-  // TODO: implement logic calculate networth rank reward
-  const networthRankReward = 0;
+  const networthRankReward = rankInfo.reward;
   const totalPortfolioValue =
     parseFloat(ETHBalance) +
     parseFloat(tokenValueInETH) +

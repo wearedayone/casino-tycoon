@@ -3,6 +3,7 @@ import {
   toggleWarStatus,
   updateWalletPasswordAsked,
   updateBalance as updateBalanceService,
+  getUserRankAndReward,
 } from '../services/user.service.js';
 import { getWarHistory } from '../services/warSnapshot.service.js';
 
@@ -50,6 +51,16 @@ export const updateBalance = async (req, res) => {
   try {
     await updateBalanceService(req.userId);
     return res.sendStatus(200);
+  } catch (err) {
+    console.log({ err });
+    return res.status(400).send(err);
+  }
+};
+
+export const getRank = async (req, res) => {
+  try {
+    const data = await getUserRankAndReward(req.userId);
+    return res.status(200).send(data);
   } catch (err) {
     console.log({ err });
     return res.status(400).send(err);
