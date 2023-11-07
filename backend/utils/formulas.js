@@ -57,7 +57,13 @@ export const calculateReversePoolBonus = (reversePool, quantity) => {
 };
 
 export const calculateReward = (prizePool, rankingRewards, rankIndex) => {
-  console.log({ prizePool, rankingRewards, rankIndex });
+  // check ranking rewards
+  const totalPercentages = rankingRewards.reduce(
+    (total, rankingReward) => total + rankingReward.share * (rankingReward.rankEnd - rankingReward.rankStart + 1),
+    0
+  );
+  if (totalPercentages >= 100) throw new Error('Invalid ranking reward');
+
   const rank = rankIndex + 1;
   const rankingReward = rankingRewards.find((item) => item.rankStart <= rank && rank <= item.rankEnd);
   if (!rankingReward) return 0;
