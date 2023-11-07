@@ -9,7 +9,7 @@ contract GangsterArena is Ownable, IGangsterArena {
   Gangster private token;
   address private contractAddress;
 
-  uint256 public BASE_PRICE = 0.069 ether;
+  uint256 public BASE_PRICE = 0.00069 ether;
   uint256 public MAX_PER_BATCH = 1000;
 
   mapping(uint256 => uint256) public tokenMaxSupply;
@@ -38,6 +38,7 @@ contract GangsterArena is Ownable, IGangsterArena {
     // require whitelisted for genesis token
     uint256 maxSully = tokenMaxSupply[tokenId];
     require(maxSully != 0, 'Invalid token id');
+    require(amount != 0, 'Invalid amount');
     require(amount <= MAX_PER_BATCH, 'Max per batch reached');
     require(token.totalSupply(tokenId) + amount <= tokenMaxSupply[tokenId], 'Max supply reached');
     require(msg.value >= BASE_PRICE * amount, 'Need to send more ether');
@@ -84,6 +85,20 @@ contract GangsterArena is Ownable, IGangsterArena {
     receiver.transfer(address(this).balance);
   }
 
+  function setWinner(address[] memory to, uint256[] memory points) external onlyOwner {
+    require(address(this).balance > 0, 'Nothing to withdraw');
+    require(to.length == points.length, 'Invalid input array length');
+
+    uint256 total = reduce(points);
+    require(total > 0, 'Invalid points input');
+
+    for (uint256 i = 0; i < to.length; i++) {
+      address payable receiver = payable(to[i]);
+      uint256 reward = (address(this).balance * points[i]) / total;
+      receiver.transfer(reward);
+    }
+  }
+
   function onERC1155Received(
     address operator,
     address from,
@@ -92,6 +107,14 @@ contract GangsterArena is Ownable, IGangsterArena {
     bytes calldata data
   ) external returns (bytes4) {
     return bytes4(keccak256('onERC1155Received(address,address,uint256,uint256,bytes)'));
+  }
+
+  //
+  function reduce(uint256[] memory arr) internal pure returns (uint256 result) {
+    for (uint256 i = 0; i < arr.length; i++) {
+      result += arr[i];
+    }
+    return result;
   }
 
   /**
@@ -113,5 +136,9 @@ contract GangsterArena is Ownable, IGangsterArena {
 
   function setMaxPerBatch(uint256 _maxPerBatch) public onlyOwner {
     MAX_PER_BATCH = _maxPerBatch;
+  }
+
+  function setBasePrice(uint256 _basePrice) public onlyOwner {
+    BASE_PRICE = _basePrice;
   }
 }

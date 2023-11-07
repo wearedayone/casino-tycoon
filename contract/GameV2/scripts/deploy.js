@@ -14,10 +14,10 @@ async function main() {
   // const FIATTokenAddress = await FIATToken.getAddress();
   // console.log(`FIATToken is deployed to ${FIATTokenAddress}`);
 
-  const Gangster = await ethers.getContractFactory('Gangster');
-  const GangsterNFT = await Gangster.deploy(workerAddress, workerAddress);
-  const GangsterNFTAddress = await GangsterNFT.getAddress();
-  console.log(`NFT contract is deployed to ${GangsterNFTAddress}`);
+  // const Gangster = await ethers.getContractFactory('Gangster');
+  // const GangsterNFT = await Gangster.deploy(workerAddress, workerAddress);
+  // const GangsterNFTAddress = await GangsterNFT.getAddress();
+  // console.log(`NFT contract is deployed to ${GangsterNFTAddress}`);
 
   const GangsterArena = await ethers.getContractFactory('GangsterArena');
   const GangsterArenaContract = await GangsterArena.deploy(workerAddress);
