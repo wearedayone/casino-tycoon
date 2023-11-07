@@ -379,19 +379,22 @@ export const claimToken = async ({ userId }) => {
 
       const generatedReward = await calculateGeneratedReward(userId);
 
+      const rawAmount = Number(pendingReward) + Number(generatedReward);
+      const claimedAmount = Math.floor(rawAmount);
+
       await firestore
         .collection('gamePlay')
         .doc(gamePlayId)
         .update({
           lastClaimTime: admin.firestore.Timestamp.fromMillis(now),
           startRewardCountingTime: admin.firestore.Timestamp.fromMillis(now),
-          pendingReward: 0,
+          pendingReward: rawAmount - claimedAmount,
         });
       await firestore
         .collection('user')
         .doc(userId)
         .update({
-          tokenBalance: Number(tokenBalance) + Number(pendingReward) + Number(generatedReward),
+          tokenBalance: Number(tokenBalance) + claimedAmount,
         });
 
       const newTransaction = await firestore.collection('transaction').add({
@@ -400,14 +403,14 @@ export const claimToken = async ({ userId }) => {
         seasonId: activeSeason.id,
         type: 'claim-token',
         token: 'FIAT',
-        value: Math.floor(Number(pendingReward) + Number(generatedReward)),
+        value: claimedAmount,
         status: 'Pending',
         txnHash: '',
       });
 
       const { txnHash, status } = await claimTokenTask({
         address,
-        amount: BigInt(Math.floor(Number(pendingReward) + Number(generatedReward)) * 1e12) * BigInt(1e6),
+        amount: BigInt(claimedAmount * 1e12) * BigInt(1e6),
       });
 
       await firestore.collection('transaction').doc(newTransaction.id).update({
