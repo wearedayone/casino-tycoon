@@ -1,6 +1,6 @@
 import { Box, Dialog, Typography, Button } from '@mui/material';
 
-import RoundedButton from './RoundedButton';
+import RoundedButton from '../../../components/RoundedButton';
 import Input from './Input';
 
 const SettingModalWithdrawETH = ({ open, onBack }) => {

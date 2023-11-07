@@ -1,18 +1,18 @@
 import { useEffect } from 'react';
 import { onSnapshot, doc } from 'firebase/firestore';
-import { usePrivy } from '@privy-io/react-auth';
 
 import { firestore } from '../configs/firebase.config';
 import useUserStore from '../stores/user.store';
+import useModalStore from '../stores/modal.store';
 import useUserWallet from './useUserWallet';
-import { getMe, completeAskingWalletPassword } from '../services/user.service';
+import { getMe } from '../services/user.service';
 
 const useUserProfile = (ready, user) => {
-  const { setWalletPassword } = usePrivy();
   const embeddedWallet = useUserWallet();
   const setInitialized = useUserStore((state) => state.setInitialized);
   const setProfile = useUserStore((state) => state.setProfile);
   const profile = useUserStore((state) => state.profile);
+  const setOpenSetWalletPassword = useModalStore((state) => state.setOpenSetWalletPassword);
 
   useEffect(() => {
     let unsubscribe;
@@ -43,10 +43,7 @@ const useUserProfile = (ready, user) => {
   useEffect(() => {
     if (embeddedWallet && profile) {
       if (!profile.walletPasswordAsked) {
-        setWalletPassword()
-          .then((wallet) => console.log({ wallet }))
-          .catch((err) => console.error(err))
-          .finally(() => completeAskingWalletPassword());
+        setOpenSetWalletPassword(true);
       }
     }
   }, [embeddedWallet, profile]);

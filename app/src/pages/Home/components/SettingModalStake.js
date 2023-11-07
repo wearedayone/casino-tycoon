@@ -5,7 +5,7 @@ import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { useSnackbar } from 'notistack';
 
-import RoundedButton from './RoundedButton';
+import RoundedButton from '../../../components/RoundedButton';
 import useUserStore from '../../../stores/user.store';
 import useSmartContract from '../../../hooks/useSmartContract';
 import environments from '../../../utils/environments';

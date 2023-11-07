@@ -1,7 +1,7 @@
 import { Box, Dialog, Typography, Button } from '@mui/material';
 import ArrowDownwardRoundedIcon from '@mui/icons-material/ArrowDownwardRounded';
 
-import RoundedButton from './RoundedButton';
+import RoundedButton from '../../../components/RoundedButton';
 
 const SettingModalSwap = ({ open, onBack }) => {
   const approve = () => {};

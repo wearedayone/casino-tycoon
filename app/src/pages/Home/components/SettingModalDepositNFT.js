@@ -2,7 +2,7 @@ import { Box, Dialog, Typography, Button } from '@mui/material';
 import RemoveRoundedIcon from '@mui/icons-material/RemoveRounded';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 
-import RoundedButton from './RoundedButton';
+import RoundedButton from '../../../components/RoundedButton';
 import Input from './Input';
 
 const SettingModalDepositNFT = ({ open, onBack }) => {

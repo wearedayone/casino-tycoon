@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Box, Dialog, Typography, Button } from '@mui/material';
 
 import { CopyIcon } from '../../../components/Icons';
-import RoundedButton from './RoundedButton';
+import RoundedButton from '../../../components/RoundedButton';
 
 const SettingModalDepositETH = ({ open, onBack }) => {
   const [code, setCode] = useState('123456');

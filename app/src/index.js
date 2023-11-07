@@ -10,6 +10,7 @@ import './index.css';
 import App from './App';
 import InstallGuideModal from './components/InstallGuideModal';
 import UpdateDetectedModal from './components/UpdateDetectedModal';
+import SetWalletPasswordModal from './components/SetWalletPasswordModal';
 import environments from './utils/environments';
 
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
@@ -59,6 +60,7 @@ root.render(
               <App />
               <InstallGuideModal />
               <UpdateDetectedModal />
+              <SetWalletPasswordModal />
             </ThemeProvider>
           </SnackbarProvider>
         </BrowserRouter>

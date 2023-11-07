@@ -11,7 +11,7 @@ import SettingModalWithdrawNFT from './SettingModalWithdrawNFT';
 import SettingModalDeposit from './SettingModalDeposit';
 import SettingModalWithdraw from './SettingModalWithdraw';
 import SettingModalStake from './SettingModalStake';
-import RoundedButton from './RoundedButton';
+import RoundedButton from '../../../components/RoundedButton';
 import useUserWallet from '../../../hooks/useUserWallet';
 import useUserStore from '../../../stores/user.store';
 import useSettingStore from '../../../stores/setting.store';
