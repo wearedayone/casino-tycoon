@@ -5,6 +5,7 @@ import { usePrivy } from '@privy-io/react-auth';
 import { CopyIcon } from '../../../components/Icons';
 import SettingModalDepositETH from './SettingModalDepositETH';
 import SettingModalWithdrawETH from './SettingModalWithdrawETH';
+import SettingModalWithdrawToken from './SettingModalWithdrawToken';
 import SettingModalSwap from './SettingModalSwap';
 import SettingModalDepositNFT from './SettingModalDepositNFT';
 import SettingModalWithdrawNFT from './SettingModalWithdrawNFT';
@@ -71,8 +72,9 @@ const SettingModal = ({ open, setOpenUpdate }) => {
   if (mode === 'withdraw') return <SettingModalWithdraw open onBack={() => setMode('menu')} setMode={setMode} />;
   if (mode === 'stake') return <SettingModalStake open onBack={() => setMode('menu')} setMode={setMode} />;
 
-  if (mode === 'deposit-eth') return <SettingModalDepositETH open onBack={() => setMode('menu')} />;
-  if (mode === 'withdraw-eth') return <SettingModalWithdrawETH open onBack={() => setMode('menu')} />;
+  if (mode === 'deposit-eth') return <SettingModalDepositETH open onBack={() => setMode('withdraw')} />;
+  if (mode === 'withdraw-token') return <SettingModalWithdrawToken open onBack={() => setMode('withdraw')} />;
+  if (mode === 'withdraw-eth') return <SettingModalWithdrawETH open onBack={() => setMode('withdraw')} />;
   if (mode === 'swap') return <SettingModalSwap open onBack={() => setMode('menu')} />;
   if (mode === 'deposit-nft') return <SettingModalDepositNFT open onBack={() => setMode('deposit')} />;
   if (mode === 'withdraw-nft') return <SettingModalWithdrawNFT open onBack={() => setMode('withdraw')} />;
@@ -82,7 +84,7 @@ const SettingModal = ({ open, setOpenUpdate }) => {
       maxWidth="sm"
       fullWidth
       open={open}
-      onClose={() => {}}
+      onClose={() => setOpenUpdate(null)}
       PaperProps={{
         sx: { borderRadius: 1, backgroundColor: 'transparent', boxShadow: 'none' },
       }}>

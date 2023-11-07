@@ -20,6 +20,11 @@ export const initTransaction = async ({ userId, type, ...data }) => {
   const { machine, machineSold, workerSold, buildingSold } = activeSeason;
   const txnData = {};
   switch (type) {
+    case 'withdraw':
+      txnData.value = data.value;
+      txnData.to = data.to;
+      txnData.token = data.token;
+      break;
     case 'buy-machine':
       txnData.amount = data.amount;
       txnData.token = 'ETH';
@@ -68,6 +73,8 @@ export const initTransaction = async ({ userId, type, ...data }) => {
     ...txnData,
   };
 
+  console.log('transaction', transaction);
+
   const newTransaction = await firestore.collection('transaction').add({
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
     ...transaction,
@@ -104,7 +111,17 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
       throw new Error(`Bad request: invalid sender, txn: ${JSON.stringify(receipt)}`);
 
     const snapshot = await firestore.collection('transaction').doc(transactionId).get();
-    const { type, value } = snapshot.data();
+    const { type, value, token } = snapshot.data();
+
+    if (type === 'withdraw') {
+      if (token === 'FIAT' && to.toLowerCase() !== TOKEN_ADDRESS.toLowerCase())
+        throw new Error(`Bad request: invalid receiver for ${type}, txn: ${JSON.stringify(receipt)}`);
+
+      const transactionValue =
+        token === 'ETH' ? Number(tx.value.toString()) / 1e18 : Number(logs[0].data.toString()) / 1e18;
+      if (transactionValue !== value)
+        throw new Error(`Bad request: Value doesnt match, ${JSON.stringify({ transactionValue, value })}`);
+    }
 
     if (['buy-worker', 'buy-building'].includes(type)) {
       if (to.toLowerCase() !== TOKEN_ADDRESS.toLowerCase())
@@ -270,7 +287,8 @@ const updateUserGamePlay = async (userId, transactionId) => {
       assets.numberOfWorkers * worker.networth;
   }
 
-  await userGamePlay.ref.update({ ...gamePlayData });
+  const isGamePlayChanged = Object.keys(gamePlayData).length > 0;
+  if (isGamePlayChanged) await userGamePlay.ref.update({ ...gamePlayData });
 };
 
 const sendUserBonus = async (userId, transactionId) => {

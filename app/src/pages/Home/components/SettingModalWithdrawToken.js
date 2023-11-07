@@ -4,41 +4,39 @@ import { isAddress } from '@ethersproject/address';
 import { useSnackbar } from 'notistack';
 import LaunchIcon from '@mui/icons-material/Launch';
 
-import { BASESCAN_PREFIX } from './SettingModalWithdrawToken';
 import RoundedButton from '../../../components/RoundedButton';
 import useSmartContract from '../../../hooks/useSmartContract';
 import { create, validate } from '../../../services/transaction.service';
 import useUserStore from '../../../stores/user.store';
-import { formatter } from '../../../utils/numbers';
 import environments from '../../../utils/environments';
 
 const { NETWORK_ID } = environments;
 
-const SettingModalWithdrawETH = ({ open, onBack }) => {
+const SettingModalWithdrawToken = ({ open, onBack }) => {
   const [amount, setAmount] = useState(0);
   const [address, setAddress] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [txnHash, setTxnHash] = useState(null);
   const profile = useUserStore((state) => state.profile);
-  const { withdrawETH } = useSmartContract();
+  const { withdrawToken } = useSmartContract();
   const { enqueueSnackbar } = useSnackbar();
 
-  const { ETHBalance } = profile;
+  const { tokenBalance } = profile;
 
   const transfer = async () => {
     try {
       setIsLoading(true);
       const value = Number(amount);
-      const res = await create({ type: 'withdraw', token: 'ETH', value, to: address });
+      const res = await create({ type: 'withdraw', token: 'FIAT', value, to: address });
       const { id } = res.data;
-      const receipt = await withdrawETH(address, value);
+      const receipt = await withdrawToken(address, value);
       // for test only
       // const receipt = { status: 1, transactionHash: 'test-txn-hash' };
       if (receipt.status === 1) {
         setTxnHash(receipt.transactionHash);
         await validate({ transactionId: id, txnHash: receipt.transactionHash });
       }
-      enqueueSnackbar('Transferred ETH successfully', { variant: 'success' });
+      enqueueSnackbar('Transferred $FIAT successfully', { variant: 'success' });
     } catch (err) {
       enqueueSnackbar(err.message, { variant: 'error' });
       console.error(err);
@@ -60,14 +58,14 @@ const SettingModalWithdrawETH = ({ open, onBack }) => {
         <Box display="flex" flexDirection="column" bgcolor="white" borderRadius={1}>
           <Box py={1} sx={{ borderBottom: '1px solid #555' }}>
             <Typography fontSize={20} fontWeight={600} align="center">
-              Withdraw ETH
+              {txnHash ? 'Success' : 'Withdraw $FIAT'}{' '}
             </Typography>
           </Box>
           {txnHash ? (
             <Box height="312px" py={4} px={2} display="flex" flexDirection="column" alignItems="center" gap={3}>
-              <img src="/images/icons/eth.png" alt="token" width={60} />
+              <img src="/images/icons/coin.png" alt="token" width={60} />
               <Typography textAlign="center">
-                ETH Withdrawal Success! <br />
+                $FIAT Withdrawal Success! <br />
                 Withdrawal may take a few minutes.
               </Typography>
               <Button
@@ -81,11 +79,11 @@ const SettingModalWithdrawETH = ({ open, onBack }) => {
               </Button>
             </Box>
           ) : (
-            <Box p={2} display="flex" flexDirection="column" alignItems="center" gap={2}>
+            <Box height="312px" p={2} display="flex" flexDirection="column" alignItems="center" gap={2}>
               <Typography fontSize={14} align="center">
                 Enter the amount to withdraw.
               </Typography>
-              <img src="/images/icons/eth.png" alt="eth" width={60} />
+              <img src="/images/icons/coin.png" alt="token" width={60} />
               <Box display="flex" flexDirection="column" gap={1}>
                 <TextField
                   size="small"
@@ -98,7 +96,7 @@ const SettingModalWithdrawETH = ({ open, onBack }) => {
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
-                        <Button onClick={() => setAmount(ETHBalance)} size="small">
+                        <Button onClick={() => setAmount(tokenBalance)} size="small">
                           Max
                         </Button>
                       </InputAdornment>
@@ -106,7 +104,7 @@ const SettingModalWithdrawETH = ({ open, onBack }) => {
                   }}
                 />
                 <Typography fontSize={12} color="grey">
-                  Your balance: {formatter.format(ETHBalance)} ETH
+                  Your balance: {Number(tokenBalance).toLocaleString()} $FIAT
                 </Typography>
               </Box>
               <TextField
@@ -125,7 +123,7 @@ const SettingModalWithdrawETH = ({ open, onBack }) => {
                   label="Confirm"
                   onClick={transfer}
                   sx={{ fontSize: 10 }}
-                  disabled={!isAddress(address) || !Number(amount) || Number(amount) > ETHBalance || isLoading}
+                  disabled={!isAddress(address) || !Number(amount) || Number(amount) > tokenBalance || isLoading}
                 />
               </Box>
             </Box>
@@ -147,4 +145,9 @@ const SettingModalWithdrawETH = ({ open, onBack }) => {
   );
 };
 
-export default SettingModalWithdrawETH;
+export const BASESCAN_PREFIX = {
+  1: '',
+  84531: 'goerli.',
+};
+
+export default SettingModalWithdrawToken;

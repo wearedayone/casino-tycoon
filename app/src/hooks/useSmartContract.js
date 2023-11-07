@@ -14,6 +14,55 @@ const useSmartContract = () => {
   const { sendTransaction } = usePrivy();
   const embeddedWallet = useUserWallet();
 
+  const withdrawToken = async (to, value) => {
+    try {
+      const privyProvider = await embeddedWallet.getEthereumProvider();
+      const tokenContract = new Contract(TOKEN_ADDRESS, tokenAbi.abi, privyProvider.provider);
+
+      const valueInWei = (value * 1e18).toLocaleString('fullwide', { useGrouping: false });
+      const data = tokenContract.interface.encodeFunctionData('transfer', [to, valueInWei]);
+
+      const unsignedTx = {
+        to: TOKEN_ADDRESS,
+        chainId: Number(NETWORK_ID),
+        data,
+      };
+
+      const uiConfig = {
+        header: `Send ${value.toLocaleString()} $FIAT to ${to}?`,
+        description: '',
+        buttonText: 'Transfer',
+      };
+
+      const receipt = await sendTransaction(unsignedTx, uiConfig);
+
+      return receipt;
+    } catch (err) {
+      console.error(err.message);
+    }
+  };
+
+  const withdrawETH = async (to, value) => {
+    try {
+      const unsignedTx = {
+        to,
+        chainId: Number(NETWORK_ID),
+        // eslint-disable-next-line
+        value: BigInt(value * 1e18),
+      };
+
+      const uiConfig = {
+        header: `Send ${formatter.format(value)} ETH to ${to}?`,
+        description: '',
+        buttonText: 'Transfer',
+      };
+      const txReceipt = await sendTransaction(unsignedTx, uiConfig);
+      return txReceipt;
+    } catch (err) {
+      console.error(err.message);
+    }
+  };
+
   const buyMachine = async (amount, value) => {
     console.log({ amount, value });
     const privyProvider = await embeddedWallet.getEthereumProvider();
@@ -126,7 +175,7 @@ const useSmartContract = () => {
     return Number(res.toString());
   };
 
-  return { buyMachine, buyWorkerOrBuilding, withdrawNFT, stakeNFT, getNFTBalance };
+  return { buyMachine, buyWorkerOrBuilding, withdrawETH, withdrawToken, withdrawNFT, stakeNFT, getNFTBalance };
 };
 
 export default useSmartContract;
