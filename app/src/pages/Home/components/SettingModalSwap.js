@@ -8,6 +8,7 @@ const SettingModalSwap = ({ open, onBack }) => {
 
   return (
     <Dialog
+      disablePortal
       maxWidth="sm"
       fullWidth
       open={open}

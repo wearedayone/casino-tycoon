@@ -34,6 +34,7 @@ const SettingModalDeposit = ({ open, onBack, setMode }) => {
 
   return (
     <Dialog
+      disablePortal
       maxWidth="sm"
       fullWidth
       open={open}

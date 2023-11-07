@@ -34,6 +34,7 @@ const SettingModalWithdraw = ({ open, onBack, setMode }) => {
 
   return (
     <Dialog
+      disablePortal
       maxWidth="sm"
       fullWidth
       open={open}

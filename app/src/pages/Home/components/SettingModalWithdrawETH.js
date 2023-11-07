@@ -40,7 +40,7 @@ const SettingModalWithdrawETH = ({ open, onBack }) => {
       }
       enqueueSnackbar('Transferred ETH successfully', { variant: 'success' });
     } catch (err) {
-      enqueueSnackbar(err.message, { variant: 'error' });
+      err.message && enqueueSnackbar(err.message, { variant: 'error' });
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -49,6 +49,7 @@ const SettingModalWithdrawETH = ({ open, onBack }) => {
 
   return (
     <Dialog
+      disablePortal
       maxWidth="sm"
       fullWidth
       open={open}

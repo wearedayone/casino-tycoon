@@ -81,6 +81,7 @@ const SettingModal = ({ open, setOpenUpdate }) => {
 
   return (
     <Dialog
+      disablePortal
       maxWidth="sm"
       fullWidth
       open={open}

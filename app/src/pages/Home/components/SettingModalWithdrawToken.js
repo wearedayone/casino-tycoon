@@ -38,7 +38,7 @@ const SettingModalWithdrawToken = ({ open, onBack }) => {
       }
       enqueueSnackbar('Transferred $FIAT successfully', { variant: 'success' });
     } catch (err) {
-      enqueueSnackbar(err.message, { variant: 'error' });
+      err.message && enqueueSnackbar(err.message, { variant: 'error' });
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -47,6 +47,7 @@ const SettingModalWithdrawToken = ({ open, onBack }) => {
 
   return (
     <Dialog
+      disablePortal
       maxWidth="sm"
       fullWidth
       open={open}

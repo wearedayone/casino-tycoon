@@ -55,13 +55,14 @@ const SettingModalStake = ({ open, onBack }) => {
       }
     } catch (err) {
       setStatus('idle');
-      enqueueSnackbar(err.message, { variant: 'error' });
+      err.message && enqueueSnackbar(err.message, { variant: 'error' });
       console.error(err);
     }
   };
 
   return (
     <Dialog
+      disablePortal
       maxWidth="sm"
       fullWidth
       open={open}

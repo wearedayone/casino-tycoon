@@ -10,6 +10,7 @@ const SettingModalDepositNFT = ({ open, onBack }) => {
 
   return (
     <Dialog
+      disablePortal
       maxWidth="sm"
       fullWidth
       open={open}
