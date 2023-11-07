@@ -29,7 +29,7 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       txnData.amount = data.amount;
       txnData.token = 'ETH';
       txnData.currentSold = machineSold;
-      txnData.value = Math.round(machine.basePrice * data.amount * 1000) / 1000;
+      txnData.value = Math.ceil(machine.basePrice * data.amount * 1000000) / 1000000;
       txnData.prices = Array.from({ length: data.amount }, () => machine.basePrice);
       break;
     case 'buy-worker':

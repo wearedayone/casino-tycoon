@@ -48,7 +48,7 @@ const useSmartContract = () => {
         to,
         chainId: Number(NETWORK_ID),
         // eslint-disable-next-line
-        value: BigInt(value * 1e18),
+        value: BigInt(Math.ceil(value * 1e18)),
       };
 
       const uiConfig = {
@@ -75,7 +75,7 @@ const useSmartContract = () => {
       chainId: Number(NETWORK_ID),
       data,
       // eslint-disable-next-line
-      value: BigInt(value * 1e18),
+      value: BigInt(Math.ceil(value * 1e18)),
     };
 
     const uiConfig = {
