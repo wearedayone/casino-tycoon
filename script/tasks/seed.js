@@ -12,7 +12,7 @@ const main = async () => {
     .doc('default')
     .set({
       machine: {
-        basePrice: 0.069,
+        basePrice: 0.00069, // for staging
         dailyReward: 500,
         networth: 6,
       },
@@ -42,13 +42,28 @@ const main = async () => {
       workerSold: 0,
       buildingSold: 0,
       machine: {
-        basePrice: 0.069,
+        basePrice: 0.00069, // for staging
         dailyReward: 500,
         networth: 6,
       },
       worker: { basePrice: 1000, dailyReward: 1000, networth: 1 },
       building: { basePrice: 1000, dailyReward: 0, networth: 10 },
       status: 'open',
+      rankingRewards: [
+        { rankStart: 1, rankEnd: 1, share: 0.2 },
+        { rankStart: 2, rankEnd: 2, share: 0.14 },
+        { rankStart: 3, rankEnd: 3, share: 0.1 },
+        { rankStart: 4, rankEnd: 4, share: 0.07 },
+        { rankStart: 5, rankEnd: 5, share: 0.05 },
+        { rankStart: 6, rankEnd: 6, share: 0.04 },
+        { rankStart: 7, rankEnd: 7, share: 0.03 },
+        { rankStart: 8, rankEnd: 8, share: 0.015 },
+        { rankStart: 9, rankEnd: 9, share: 0.01 },
+        { rankStart: 10, rankEnd: 15, share: 0.0075 },
+        { rankStart: 16, rankEnd: 25, share: 0.005 },
+        { rankStart: 26, rankEnd: 50, share: 0.003 },
+        { rankStart: 51, rankEnd: 100, share: 0.0015 },
+      ],
     });
   console.log('created season');
 

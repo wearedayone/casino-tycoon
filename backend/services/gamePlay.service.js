@@ -24,6 +24,6 @@ export const getLeaderboard = async () => {
     userId: userDatas[index].id,
     id: doc.id,
     networth: doc.networth,
-    reward: calculateReward(season.prizePool, index),
+    reward: calculateReward(season.prizePool, season.rankingRewards, index),
   }));
 };

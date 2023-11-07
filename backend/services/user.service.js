@@ -11,11 +11,36 @@ import { calculateReward } from '../utils/formulas.js';
 
 const { NETWORK_ID } = environments;
 
+const createGamePlayIfNotExist = async (userId) => {
+  const seasonId = await getActiveSeasonId();
+  const snapshot = await firestore
+    .collection('gamePlay')
+    .where('userId', '==', userId)
+    .where('seasonId', '==', seasonId)
+    .get();
+  if (snapshot.empty) {
+    await firestore.collection('gamePlay').add({
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      userId,
+      seasonId,
+      networth: 0,
+      numberOfMachines: 0,
+      numberOfWorkers: 0,
+      numberOfBuildings: 0,
+      lastClaimTime: admin.firestore.FieldValue.serverTimestamp(),
+      point: 0,
+      war: false,
+      pendingReward: 0,
+      startRewardCountingTime: admin.firestore.FieldValue.serverTimestamp(),
+    });
+  }
+};
+
 export const createUserIfNotExist = async (userId) => {
   console.log({ function: 'createUserIfNotExist', userId });
   const snapshot = await firestore.collection('user').doc(userId).get();
   const user = await privy.getUser(userId);
-  console.log({ user });
+  // console.log({ user });
   if (!snapshot.exists) {
     const { wallet, twitter } = user;
     // create user
@@ -31,23 +56,6 @@ export const createUserIfNotExist = async (userId) => {
       ETHBalance: 0,
       walletPasswordAsked: false,
     });
-
-    // create gamePlay
-    const seasonId = await getActiveSeasonId();
-    await firestore.collection('gamePlay').add({
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      userId,
-      seasonId,
-      networth: 0,
-      numberOfMachines: 0,
-      numberOfWorkers: 0,
-      numberOfBuildings: 0,
-      lastClaimTime: admin.firestore.FieldValue.serverTimestamp(),
-      point: 0,
-      war: false,
-      pendingReward: 0,
-      startRewardCountingTime: admin.firestore.FieldValue.serverTimestamp(),
-    });
   } else {
     const ethersProvider = await alchemy.config.getProvider();
     const value = await ethersProvider.getBalance(user.wallet.address);
@@ -62,6 +70,8 @@ export const createUserIfNotExist = async (userId) => {
         });
     }
   }
+
+  await createGamePlayIfNotExist(userId);
 };
 
 export const toggleWarStatus = async (userId, isWarEnabled) => {
@@ -108,10 +118,10 @@ export const getUserRankAndReward = async (userId) => {
     .orderBy('createdAt', 'asc')
     .get();
 
-  const rank = gamePlaySnapshot.docs.findIndex((item) => item.data().userId === userId);
-  if (rank !== -1) {
-    const reward = calculateReward(activeSeason.prizePool, rank);
-    return { rank, reward };
+  const rankIndex = gamePlaySnapshot.docs.findIndex((item) => item.data().userId === userId);
+  if (rankIndex !== -1) {
+    const reward = calculateReward(activeSeason.prizePool, activeSeason.rankingRewards, rankIndex);
+    return { rank: rankIndex + 1, reward };
   }
 
   return null;

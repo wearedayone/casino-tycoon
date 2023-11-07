@@ -56,23 +56,11 @@ export const calculateReversePoolBonus = (reversePool, quantity) => {
   return (reversePool * percentage) / 100;
 };
 
-export const calculateReward = (prizePool, rank) => {
-  const percentageShares = [
-    0.2, // 1st
-    0.14, // 2nd
-    0.1, // 3rd
-    0.07, // 4th
-    0.05, // 5th
-    0.04, // 6th
-    0.03, // 7th
-    0.015, // 8th
-    0.01, // 9th
-    ...Array.from({ length: 6 }, () => 0.0075), // 10th -> 15th
-    ...Array.from({ length: 10 }, () => 0.005), // 16th -> 25th
-    ...Array.from({ length: 25 }, () => 0.003), // 26th -> 50th
-    ...Array.from({ length: 50 }, () => 0.0015), // 51st -> 100th
-  ];
-  let percentage = percentageShares[rank];
+export const calculateReward = (prizePool, rankingRewards, rankIndex) => {
+  console.log({ prizePool, rankingRewards, rankIndex });
+  const rank = rankIndex + 1;
+  const rankingReward = rankingRewards.find((item) => item.rankStart <= rank && rank <= item.rankEnd);
+  if (!rankingReward) return 0;
 
-  return prizePool * percentage;
+  return prizePool * rankingReward.share;
 };
