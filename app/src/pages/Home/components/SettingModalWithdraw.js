@@ -1,11 +1,22 @@
+import { useState, useEffect } from 'react';
 import { Box, Dialog, Typography, Button } from '@mui/material';
 
 import useUserStore from '../../../stores/user.store';
+import useSmartContract from '../../../hooks/useSmartContract';
 import { formatter } from '../../../utils/numbers';
 
 const SettingModalWithdraw = ({ open, onBack, setMode }) => {
+  const { getStakedNFTBalance } = useSmartContract();
   const profile = useUserStore((state) => state.profile);
-  const gamePlay = useUserStore((state) => state.gamePlay);
+  const [gangsters, setGangsters] = useState(0);
+
+  useEffect(() => {
+    if (open) {
+      getStakedNFTBalance(profile?.address)
+        .then((data) => setGangsters(data))
+        .catch((err) => console.error(err));
+    }
+  }, [open]);
 
   const items = [
     {
@@ -16,7 +27,7 @@ const SettingModalWithdraw = ({ open, onBack, setMode }) => {
     { title: 'ETH', value: `${formatter.format(profile?.ETHBalance)} ETH`, onClick: () => setMode('withdraw-eth') },
     {
       title: 'Gangster NFTs',
-      value: `${gamePlay?.numberOfMachines} Gangsters`,
+      value: `${gangsters} Gangsters`,
       onClick: () => setMode('withdraw-nft'),
     },
   ];

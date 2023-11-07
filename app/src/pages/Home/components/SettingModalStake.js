@@ -34,10 +34,12 @@ const SettingModalStake = ({ open, onBack }) => {
   }, [open]);
 
   useEffect(() => {
-    getNFTBalance(profile?.address)
-      .then((data) => setAvailableUnits(data))
-      .catch((err) => console.error(err));
-  }, []);
+    if (open) {
+      getNFTBalance(profile?.address)
+        .then((data) => setAvailableUnits(data))
+        .catch((err) => console.error(err));
+    }
+  }, [open]);
 
   const stake = async () => {
     if (status === 'loading') return;
@@ -130,7 +132,7 @@ const SettingModalStake = ({ open, onBack }) => {
                   />
                 </Box>
                 <Typography fontSize={12} fontStyle="italic" align="center">
-                  Available units: 0
+                  Available units: {availableUnits}
                 </Typography>
               </Box>
               {/* <Input placeholder="Enter Address" value={address} onChange={(e) => setAddress(e.target.value)} /> */}

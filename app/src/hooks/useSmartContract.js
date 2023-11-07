@@ -175,7 +175,24 @@ const useSmartContract = () => {
     return Number(res.toString());
   };
 
-  return { buyMachine, buyWorkerOrBuilding, withdrawETH, withdrawToken, withdrawNFT, stakeNFT, getNFTBalance };
+  const getStakedNFTBalance = async (address) => {
+    const privyProvider = await embeddedWallet.getEthereumProvider();
+    const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
+
+    const res = await gameContract.gangster(address);
+    return Number(res.toString());
+  };
+
+  return {
+    buyMachine,
+    buyWorkerOrBuilding,
+    withdrawETH,
+    withdrawToken,
+    withdrawNFT,
+    stakeNFT,
+    getNFTBalance,
+    getStakedNFTBalance,
+  };
 };
 
 export default useSmartContract;

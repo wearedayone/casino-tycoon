@@ -14,7 +14,7 @@ import environments from '../../../utils/environments';
 const { NETWORK_ID } = environments;
 
 const SettingModalWithdrawNFT = ({ open, onBack }) => {
-  const { withdrawNFT } = useSmartContract();
+  const { withdrawNFT, getStakedNFTBalance } = useSmartContract();
   const { enqueueSnackbar } = useSnackbar();
   const profile = useUserStore((state) => state.profile);
   const gamePlay = useUserStore((state) => state.gamePlay);
@@ -22,6 +22,15 @@ const SettingModalWithdrawNFT = ({ open, onBack }) => {
   const [quantity, setQuantity] = useState(0);
   const [status, setStatus] = useState('idle');
   const [txnHash, setTxnHash] = useState(null);
+  const [availableUnits, setAvailableUnits] = useState(0);
+
+  useEffect(() => {
+    if (open) {
+      getStakedNFTBalance(profile?.address)
+        .then((data) => setAvailableUnits(data))
+        .catch((err) => console.error(err));
+    }
+  }, [open]);
 
   const txnLink =
     NETWORK_ID === '8453'
@@ -121,11 +130,11 @@ const SettingModalWithdrawNFT = ({ open, onBack }) => {
                   />
                   <AddRoundedIcon
                     sx={{ cursor: 'pointer' }}
-                    onClick={() => setQuantity(Math.min(gamePlay?.numberOfMachines, quantity + 1))}
+                    onClick={() => setQuantity(Math.min(availableUnits, quantity + 1))}
                   />
                 </Box>
                 <Typography fontSize={12} fontStyle="italic" align="center">
-                  Available units: {gamePlay?.numberOfMachines}
+                  Available units: {availableUnits}
                 </Typography>
               </Box>
               <Input placeholder="Enter Address" value={address} onChange={(e) => setAddress(e.target.value)} />
