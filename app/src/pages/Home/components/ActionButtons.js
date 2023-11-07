@@ -16,6 +16,23 @@ const ActionButtons = () => {
   const activeSeason = useSystemStore((state) => state.activeSeason);
   const [isGangWarMenuOpen, setGangWarOpen] = useState(false);
   const [isBuyMenuOpen, setBuyMenuOpen] = useState(false);
+  const [isEnded, setIsEnded] = useState(false);
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      const now = Date.now();
+      if (activeSeason) {
+        const { estimatedEndTime } = activeSeason;
+
+        const endTimeUnix = estimatedEndTime.toDate().getTime();
+        const seasonEnded = now > endTimeUnix;
+
+        setIsEnded(seasonEnded);
+      }
+    }, 1000);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [activeSeason]);
 
   const hasOneMenuOpen = useMemo(() => isGangWarMenuOpen || isBuyMenuOpen, [isGangWarMenuOpen, isBuyMenuOpen]);
 
@@ -25,6 +42,7 @@ const ActionButtons = () => {
   }, []);
 
   if (!gamePlay || !activeSeason) return null;
+
   return (
     <>
       <Box
@@ -48,15 +66,17 @@ const ActionButtons = () => {
         <BuyMenu isOpen={isBuyMenuOpen} closeMenus={closeMenus} />
         <IconButton
           Icon={<img src="/images/clock.png" height={30} />}
+          disabled={isEnded}
           onClick={() => {
             closeMenus();
             setGangWarOpen(!isGangWarMenuOpen);
           }}
           sx={{ aspectRatio: 'auto', height: 50, width: 100 }}
         />
-        <ClaimButton />
+        <ClaimButton isEnded={isEnded} />
         <IconButton
           Icon={<img src="/images/cash.png" height={30} />}
+          disabled={isEnded}
           onClick={() => {
             closeMenus();
             setBuyMenuOpen(!isBuyMenuOpen);
@@ -68,18 +88,25 @@ const ActionButtons = () => {
   );
 };
 
-const ClaimButton = () => {
+const ClaimButton = ({ isEnded }) => {
   const gamePlay = useUserStore((state) => state.gamePlay);
   const activeSeason = useSystemStore((state) => state.activeSeason);
   const [totalClaimableReward, setTotalClaimableReward] = useState(0);
   const [isClaiming, setClaiming] = useState(false);
   const [isClaimable, setClaimable] = useState(true);
+
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       const now = Date.now();
       if (gamePlay && activeSeason) {
         const { numberOfMachines, numberOfWorkers, startRewardCountingTime, pendingReward, lastClaimTime } = gamePlay;
         const { machine, worker, claimGapInSeconds } = activeSeason;
+
+        if (isEnded) {
+          clearTimeout(delayDebounceFn);
+          return;
+        }
+
         const startRewardCountingDateUnix = startRewardCountingTime.toDate().getTime();
         const diffInDays = (now - startRewardCountingDateUnix) / (24 * 60 * 60 * 1000);
 
@@ -91,7 +118,7 @@ const ClaimButton = () => {
     }, 1000);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [totalClaimableReward, gamePlay, activeSeason]);
+  }, [totalClaimableReward, gamePlay, activeSeason, isEnded]);
 
   const claim = async () => {
     try {
@@ -115,7 +142,7 @@ const ClaimButton = () => {
           <Typography align="center">{parseFloat(totalClaimableReward).toFixed(2)} $FIAT</Typography>
         </Box>
       }
-      disabled={isClaiming || !isClaimable}
+      disabled={isClaiming || !isClaimable || isEnded}
       onClick={claim}
       sx={{ aspectRatio: 'auto', height: 60, width: 120 }}
     />
