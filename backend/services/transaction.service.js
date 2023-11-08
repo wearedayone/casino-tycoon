@@ -8,7 +8,7 @@ import {
 } from '../utils/formulas.js';
 import alchemy from '../configs/alchemy.config.js';
 import { formatEther } from '@ethersproject/units';
-import { claimToken as claimTokenTask, claimTokenBonus, decodeTokenTxnLogs } from './worker.service.js';
+import { claimToken as claimTokenTask, claimTokenBonus, decodeTokenTxnLogs, isMinted } from './worker.service.js';
 import logger from '../utils/logger.js';
 import environments from '../utils/environments.js';
 
@@ -364,6 +364,9 @@ export const claimToken = async ({ userId }) => {
 
   if (userSnapshot.exists) {
     const { address, tokenBalance } = userSnapshot.data();
+    const minted = await isMinted(address);
+    if (!minted) throw new Error('You need to buy an Gangster before claiming');
+
     const gamePlaySnapshot = await firestore
       .collection('gamePlay')
       .where('userId', '==', userId)

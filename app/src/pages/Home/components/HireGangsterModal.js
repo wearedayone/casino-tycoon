@@ -25,6 +25,7 @@ const HireGangsterModal = ({ open, onBack }) => {
   const activeSeason = useSystemStore((state) => state.activeSeason);
   const gamePlay = useUserStore((state) => state.gamePlay);
   const profile = useUserStore((state) => state.profile);
+  const setClaimable = useUserStore((state) => state.setClaimable);
 
   const { buyMachine } = useSmartContract();
   const [quantity, setQuantity] = useState(0);
@@ -47,6 +48,7 @@ const HireGangsterModal = ({ open, onBack }) => {
       // const receipt = { status: 1, transactionHash: 'test-txn-hash' };
       if (receipt.status === 1) {
         await validate({ transactionId: id, txnHash: receipt.transactionHash });
+        setClaimable(true);
       }
       enqueueSnackbar('Buy Gangster successfully', { variant: 'success' });
     } catch (err) {

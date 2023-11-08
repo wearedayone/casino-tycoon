@@ -6,13 +6,16 @@ import useUserStore from '../stores/user.store';
 import useModalStore from '../stores/modal.store';
 import useUserWallet from './useUserWallet';
 import { getMe } from '../services/user.service';
+import useSmartContract from './useSmartContract';
 
 const useUserProfile = (ready, user) => {
   const embeddedWallet = useUserWallet();
   const setInitialized = useUserStore((state) => state.setInitialized);
   const setProfile = useUserStore((state) => state.setProfile);
   const profile = useUserStore((state) => state.profile);
+  const setClaimable = useUserStore((state) => state.setClaimable);
   const setOpenSetWalletPassword = useModalStore((state) => state.setOpenSetWalletPassword);
+  const { isMinted } = useSmartContract();
 
   useEffect(() => {
     let unsubscribe;
@@ -27,6 +30,7 @@ const useUserProfile = (ready, user) => {
               } else {
                 setProfile(null);
                 setInitialized(true);
+                setClaimable(false);
               }
             });
           })
@@ -42,6 +46,8 @@ const useUserProfile = (ready, user) => {
 
   useEffect(() => {
     if (embeddedWallet && profile) {
+      isMinted(profile.address).then((minted) => setClaimable(minted));
+
       if (!profile.walletPasswordAsked) {
         setOpenSetWalletPassword(true);
       }

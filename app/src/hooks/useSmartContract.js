@@ -64,7 +64,6 @@ const useSmartContract = () => {
   };
 
   const buyMachine = async (amount, value) => {
-    console.log({ amount, value });
     const privyProvider = await embeddedWallet.getEthereumProvider();
     const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
 
@@ -183,6 +182,14 @@ const useSmartContract = () => {
     return Number(res.toString());
   };
 
+  const isMinted = async (address) => {
+    const privyProvider = await embeddedWallet.getEthereumProvider();
+    const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
+
+    const minted = await gameContract.mintedAddess(address);
+    return minted;
+  };
+
   return {
     buyMachine,
     buyWorkerOrBuilding,
@@ -192,6 +199,7 @@ const useSmartContract = () => {
     stakeNFT,
     getNFTBalance,
     getStakedNFTBalance,
+    isMinted,
   };
 };
 

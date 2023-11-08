@@ -90,6 +90,7 @@ const ActionButtons = () => {
 
 const ClaimButton = ({ isEnded }) => {
   const gamePlay = useUserStore((state) => state.gamePlay);
+  const claimable = useUserStore((state) => state.claimable);
   const activeSeason = useSystemStore((state) => state.activeSeason);
   const [totalClaimableReward, setTotalClaimableReward] = useState(0);
   const [isClaiming, setClaiming] = useState(false);
@@ -142,7 +143,7 @@ const ClaimButton = ({ isEnded }) => {
           <Typography align="center">{parseFloat(totalClaimableReward).toFixed(2)} $FIAT</Typography>
         </Box>
       }
-      disabled={isClaiming || !isClaimable || isEnded}
+      disabled={isClaiming || !isClaimable || isEnded || !claimable}
       onClick={claim}
       sx={{ aspectRatio: 'auto', height: 60, width: 120 }}
     />

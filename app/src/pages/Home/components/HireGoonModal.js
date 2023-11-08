@@ -24,7 +24,6 @@ const HireGoonModal = ({ open, onBack }) => {
   const { numberOfWorkers } = gamePlay;
   const { worker, workerSold } = activeSeason;
   const estimateMaxPurchase = estimateNumberOfWorkerCanBuy(workerSold, profile?.tokenBalance ?? 0);
-  console.log({ workerSold, estimateMaxPurchase });
   const estimatedPrice = calculateNextWorkerBuyPriceBatch(workerSold, quantity);
 
   const buy = async () => {

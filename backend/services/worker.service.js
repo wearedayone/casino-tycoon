@@ -147,3 +147,11 @@ export const burnNFT = async ({ address, amount }) => {
     return { txnHash, status: 'Failed' };
   }
 };
+
+export const isMinted = async (address) => {
+  const workerWallet = await getWorkerWallet();
+  const gameContract = await getGameContract(workerWallet);
+
+  const minted = await gameContract.mintedAddess(address);
+  return minted;
+};
