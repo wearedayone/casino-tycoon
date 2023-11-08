@@ -5,6 +5,7 @@ import cors from 'cors';
 import routes from './routes/index.js';
 import environments from './utils/environments.js';
 import { takeDailyWarSnapshot } from './services/warSnapshot.service.js';
+import { updateSeasonSnapshotSchedule } from './services/season.service.js';
 
 const { PORT } = environments;
 
@@ -21,6 +22,9 @@ const main = () => {
   app.use('/api', routes);
 
   app.listen(PORT, () => console.log(`server is running on port ${PORT}`));
+
+  // set a schedule in case server restarted
+  updateSeasonSnapshotSchedule();
 };
 
 main();

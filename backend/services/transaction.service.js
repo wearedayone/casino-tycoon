@@ -1,5 +1,5 @@
 import admin, { firestore } from '../configs/firebase.config.js';
-import { getActiveSeason } from './season.service.js';
+import { getActiveSeason, updateSeasonSnapshotSchedule } from './season.service.js';
 import {
   calculateNextBuildingBuyPriceBatch,
   calculateNextWorkerBuyPriceBatch,
@@ -195,6 +195,9 @@ const updateSeasonState = async (transactionId) => {
     .collection('season')
     .doc(activeSeason.id)
     .update({ ...newData });
+
+  // end time changed
+  if (newData.estimatedEndTime) await updateSeasonSnapshotSchedule().catch((e) => logger.error(e));
 };
 
 const updateUserBalance = async (userId, transactionId) => {
