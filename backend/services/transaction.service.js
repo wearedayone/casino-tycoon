@@ -45,7 +45,7 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       txnData.amount = data.amount;
       txnData.token = 'FIAT';
       txnData.currentSold = buildingSold;
-      const buildingPrices = calculateNextBuildingBuyPriceBatch(workerSold, data.amount);
+      const buildingPrices = calculateNextBuildingBuyPriceBatch(buildingSold, data.amount);
       txnData.value = buildingPrices.total;
       txnData.prices = buildingPrices.prices;
       break;
