@@ -34,20 +34,20 @@ export const calculateNextBuildingBuyPriceBatch = (buildingSold, quantity, baseP
   };
 };
 
-export const calculateNewEstimatedEndTimeUnix = (currentEndTimeUnix, newMachineAddedQuantity) => {
-  return currentEndTimeUnix + newMachineAddedQuantity * 60 * 60 * 1000;
+export const calculateNewEstimatedEndTimeUnix = (currentEndTimeUnix, newMachineAddedQuantity, timeStepInHours) => {
+  return currentEndTimeUnix + newMachineAddedQuantity * timeStepInHours * 60 * 60 * 1000;
 };
 
-export const calculateReversePoolBonus = (reversePool, quantity) => {
+export const calculateReservePoolBonus = (reservePool, reservePoolReward, quantity) => {
   let totalPercentages = 100;
   let percentage = 0;
 
   for (let i = 1; i <= quantity; i++) {
-    percentage += totalPercentages * 0.01;
+    percentage += totalPercentages * reservePoolReward;
     totalPercentages -= percentage;
   }
 
-  return (reversePool * percentage) / 100;
+  return (reservePool * percentage) / 100;
 };
 
 export const calculateReward = (prizePool, rankingRewards, rankIndex) => {

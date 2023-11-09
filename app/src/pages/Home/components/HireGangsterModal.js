@@ -35,7 +35,7 @@ const HireGangsterModal = ({ open, onBack }) => {
   if (!activeSeason || !gamePlay) return null;
 
   const { numberOfMachines } = gamePlay;
-  const { machine, reversePool } = activeSeason;
+  const { machine, reservePool, reservePoolReward } = activeSeason;
   const { ETHBalance } = profile;
   const maxPurchase = Math.floor(ETHBalance / machine.basePrice);
   const buy = async () => {
@@ -170,7 +170,7 @@ const HireGangsterModal = ({ open, onBack }) => {
                 </Box>
                 <img src="/images/icons/coin.png" alt="coin" width={20} />
                 <Typography fontSize={14} fontWeight={600}>
-                  {formatter.format((reversePool * 1) / 100)}
+                  {formatter.format(reservePool * reservePoolReward)}
                 </Typography>
               </Box>
             </Box>

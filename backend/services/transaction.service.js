@@ -6,7 +6,7 @@ import {
   calculateNextBuildingBuyPriceBatch,
   calculateNextWorkerBuyPriceBatch,
   calculateNewEstimatedEndTimeUnix,
-  calculateReversePoolBonus,
+  calculateReservePoolBonus,
 } from '../utils/formulas.js';
 import alchemy from '../configs/alchemy.config.js';
 import { formatEther } from '@ethersproject/units';
@@ -170,7 +170,7 @@ const updateSeasonState = async (transactionId) => {
   const { type, value, amount } = snapshot.data();
 
   const activeSeason = await getActiveSeason();
-  const { estimatedEndTime } = activeSeason;
+  const { estimatedEndTime, timeStepInHours } = activeSeason;
   const estimatedEndTimeUnix = estimatedEndTime.toDate().getTime();
 
   let newData;
@@ -178,7 +178,7 @@ const updateSeasonState = async (transactionId) => {
     case 'buy-machine':
       newData = {
         estimatedEndTime: admin.firestore.Timestamp.fromMillis(
-          calculateNewEstimatedEndTimeUnix(estimatedEndTimeUnix, amount)
+          calculateNewEstimatedEndTimeUnix(estimatedEndTimeUnix, amount, timeStepInHours)
         ),
         machineSold: admin.firestore.FieldValue.increment(1),
       };
@@ -186,13 +186,13 @@ const updateSeasonState = async (transactionId) => {
     case 'buy-worker':
       newData = {
         workerSold: admin.firestore.FieldValue.increment(amount),
-        reversePool: admin.firestore.FieldValue.increment(value),
+        reservePool: admin.firestore.FieldValue.increment(value),
       };
       break;
     case 'buy-building':
       newData = {
         buildingSold: admin.firestore.FieldValue.increment(amount),
-        reversePool: admin.firestore.FieldValue.increment(value),
+        reservePool: admin.firestore.FieldValue.increment(value),
       };
       break;
     default:
@@ -314,8 +314,8 @@ const sendUserBonus = async (userId, transactionId) => {
 
   if (type === 'buy-machine') {
     const activeSeason = await getActiveSeason();
-    const { reversePool } = activeSeason;
-    const bonus = calculateReversePoolBonus(reversePool, amount);
+    const { reservePool, reservePoolReward } = activeSeason;
+    const bonus = calculateReservePoolBonus(reservePool, reservePoolReward, amount);
 
     const newTransaction = await firestore.collection('transaction').add({
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -332,6 +332,8 @@ const sendUserBonus = async (userId, transactionId) => {
       address,
       amount: BigInt(bonus * 1e18),
     });
+
+    console.log('claimed bonus', { txnHash, status });
 
     await firestore.collection('transaction').doc(newTransaction.id).update({
       txnHash,

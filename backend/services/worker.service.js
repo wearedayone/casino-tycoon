@@ -75,12 +75,12 @@ export const claimToken = async ({ address, amount }) => {
 export const claimTokenBonus = async ({ address, amount }) => {
   let txnHash = '';
   try {
-    logger.info('start claimToken');
+    logger.info('start claimToken bonus');
     logger.info({ address, amount });
     const workerWallet = await getWorkerWallet();
     const tokenContract = await getTokenContract(workerWallet);
     logger.info('start Transaction:');
-    const tx = await tokenContract.transferFrom(workerWallet.address, address, amount, { gasLimit: 200000 });
+    const tx = await tokenContract.transfer(address, amount, { gasLimit: 200000 });
     logger.info('Transaction:' + tx.hash);
     const receipt = await tx.wait();
 
