@@ -62,7 +62,7 @@ const main = async () => {
         { rankStart: 10, rankEnd: 15, share: 0.0075 },
         { rankStart: 16, rankEnd: 25, share: 0.005 },
         { rankStart: 26, rankEnd: 50, share: 0.003 },
-        { rankStart: 51, rankEnd: 100, share: 0.0008 },
+        { rankStart: 51, rankEnd: 100, share: 0.0015 },
       ],
     });
   console.log('created season');
