@@ -63,6 +63,7 @@ export const takeDailyWarSnapshot = async () => {
       const txnsSinceLastWarSnapshot = await firestore
         .collection('transaction')
         .where('type', 'in', userPendingRewardChangedTypes)
+        .where('status', '==', 'Success')
         .where('createdAt', '>=', lastWarAt)
         .orderBy('createdAt', 'desc')
         .get();
