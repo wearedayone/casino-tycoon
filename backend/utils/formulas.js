@@ -1,15 +1,12 @@
-export const calculateNextWorkerBuyPrice = (workerSold) => {
-  const x = 100;
-  const y = 2000;
-
-  return workerSold * x + y;
+export const calculateNextWorkerBuyPrice = (workerSold, basePrice, priceStep) => {
+  return workerSold * priceStep + basePrice;
 };
 
-export const calculateNextWorkerBuyPriceBatch = (workerSold, quantity) => {
+export const calculateNextWorkerBuyPriceBatch = (workerSold, quantity, basePrice, priceStep) => {
   let soldCount = workerSold;
   const prices = [];
   while (soldCount < workerSold + quantity) {
-    prices.push(calculateNextWorkerBuyPrice(soldCount));
+    prices.push(calculateNextWorkerBuyPrice(soldCount, basePrice, priceStep));
     soldCount++;
   }
 
@@ -19,18 +16,15 @@ export const calculateNextWorkerBuyPriceBatch = (workerSold, quantity) => {
   };
 };
 
-export const calculateNextBuildingBuyPrice = (buildingSold) => {
-  const x = 100;
-  const y = 2000;
-
-  return buildingSold * x + y;
+export const calculateNextBuildingBuyPrice = (buildingSold, basePrice, priceStep) => {
+  return buildingSold * priceStep + basePrice;
 };
 
-export const calculateNextBuildingBuyPriceBatch = (buildingSold, quantity) => {
+export const calculateNextBuildingBuyPriceBatch = (buildingSold, quantity, basePrice, priceStep) => {
   let soldCount = buildingSold;
   const prices = [];
   while (soldCount < buildingSold + quantity) {
-    prices.push(calculateNextBuildingBuyPrice(soldCount));
+    prices.push(calculateNextBuildingBuyPrice(soldCount, basePrice, priceStep));
     soldCount++;
   }
 

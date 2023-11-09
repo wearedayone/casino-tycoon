@@ -18,7 +18,7 @@ export const initTransaction = async ({ userId, type, ...data }) => {
   const activeSeason = await getActiveSeason();
   if (activeSeason.status !== 'open') throw new Error('Season ended');
 
-  const { machine, machineSold, workerSold, buildingSold } = activeSeason;
+  const { machine, machineSold, workerSold, buildingSold, worker, building } = activeSeason;
   const txnData = {};
   switch (type) {
     case 'withdraw':
@@ -37,7 +37,12 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       txnData.amount = data.amount;
       txnData.token = 'FIAT';
       txnData.currentSold = workerSold;
-      const workerPrices = calculateNextWorkerBuyPriceBatch(workerSold, data.amount);
+      const workerPrices = calculateNextWorkerBuyPriceBatch(
+        workerSold,
+        data.amount,
+        worker.basePrice,
+        worker.priceStep
+      );
       txnData.value = workerPrices.total;
       txnData.prices = workerPrices.prices;
       break;
@@ -45,7 +50,12 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       txnData.amount = data.amount;
       txnData.token = 'FIAT';
       txnData.currentSold = buildingSold;
-      const buildingPrices = calculateNextBuildingBuyPriceBatch(buildingSold, data.amount);
+      const buildingPrices = calculateNextBuildingBuyPriceBatch(
+        buildingSold,
+        data.amount,
+        building.basePrice,
+        building.priceStep
+      );
       txnData.value = buildingPrices.total;
       txnData.prices = buildingPrices.prices;
       break;

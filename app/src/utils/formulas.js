@@ -1,9 +1,9 @@
 // TODO: update logic calculateMachineSellPrice later
 // will get sell price from opensea
 
-export const estimateNumberOfBuildingCanBuy = (buildingSold, balance) => {
-  const x = 100;
-  const y = 2000;
+export const estimateNumberOfBuildingCanBuy = (buildingSold, balance, basePrice, priceStep) => {
+  const x = priceStep;
+  const y = basePrice;
 
   const A = x / 2;
   const B = buildingSold * x + y - (3 * x) / 2;
@@ -14,9 +14,9 @@ export const estimateNumberOfBuildingCanBuy = (buildingSold, balance) => {
   return value > 0 ? value : 0;
 };
 
-export const estimateNumberOfWorkerCanBuy = (workerSold, balance) => {
-  const x = 100;
-  const y = 2000;
+export const estimateNumberOfWorkerCanBuy = (workerSold, balance, basePrice, priceStep) => {
+  const x = priceStep;
+  const y = basePrice;
 
   const A = x / 2;
   const B = workerSold * x + y - (3 * x) / 2;
@@ -27,22 +27,20 @@ export const estimateNumberOfWorkerCanBuy = (workerSold, balance) => {
   return value > 0 ? value : 0;
 };
 
+// TODO: update this formula
 export const calculateMachineSellPrice = (machinePrice) => {
   return machinePrice * 0.6;
 };
 
-export const calculateNextWorkerBuyPrice = (workerSold) => {
-  const x = 100;
-  const y = 2000;
-
-  return workerSold * x + y;
+export const calculateNextWorkerBuyPrice = (workerSold, basePrice, priceStep) => {
+  return workerSold * priceStep + basePrice;
 };
 
-export const calculateNextWorkerBuyPriceBatch = (workerSold, quantity) => {
+export const calculateNextWorkerBuyPriceBatch = (workerSold, quantity, basePrice, priceStep) => {
   let soldCount = workerSold;
   const prices = [];
   while (soldCount < workerSold + quantity) {
-    prices.push(calculateNextWorkerBuyPrice(soldCount));
+    prices.push(calculateNextWorkerBuyPrice(soldCount, basePrice, priceStep));
     soldCount++;
   }
 
@@ -52,18 +50,15 @@ export const calculateNextWorkerBuyPriceBatch = (workerSold, quantity) => {
   };
 };
 
-export const calculateNextBuildingBuyPrice = (buildingSold) => {
-  const x = 100;
-  const y = 2000;
-
-  return buildingSold * x + y;
+export const calculateNextBuildingBuyPrice = (buildingSold, basePrice, priceStep) => {
+  return buildingSold * priceStep + basePrice;
 };
 
-export const calculateNextBuildingBuyPriceBatch = (buildingSold, quantity) => {
+export const calculateNextBuildingBuyPriceBatch = (buildingSold, quantity, basePrice, priceStep) => {
   let soldCount = buildingSold;
   const prices = [];
   while (soldCount < buildingSold + quantity) {
-    prices.push(calculateNextBuildingBuyPrice(soldCount));
+    prices.push(calculateNextBuildingBuyPrice(soldCount, basePrice, priceStep));
     soldCount++;
   }
 

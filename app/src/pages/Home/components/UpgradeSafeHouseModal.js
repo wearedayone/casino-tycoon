@@ -42,8 +42,18 @@ const UpgradeSafehouseModal = ({ open, onBack }) => {
 
   const { numberOfBuildings } = gamePlay;
   const { building, buildingSold } = activeSeason;
-  const estimateMaxPurchase = estimateNumberOfBuildingCanBuy(buildingSold, profile?.tokenBalance ?? 0);
-  const estimatedPrice = calculateNextBuildingBuyPriceBatch(buildingSold, quantity);
+  const estimateMaxPurchase = estimateNumberOfBuildingCanBuy(
+    buildingSold,
+    profile?.tokenBalance ?? 0,
+    building.basePrice,
+    building.priceStep
+  );
+  const estimatedPrice = calculateNextBuildingBuyPriceBatch(
+    buildingSold,
+    quantity,
+    building.basePrice,
+    building.priceStep
+  );
 
   return (
     <Dialog

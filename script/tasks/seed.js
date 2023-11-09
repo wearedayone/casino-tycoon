@@ -16,8 +16,8 @@ const main = async () => {
         dailyReward: 500,
         networth: 6,
       },
-      worker: { basePrice: 1000, dailyReward: 1000, networth: 1 },
-      building: { basePrice: 1000, dailyReward: 0, networth: 10 },
+      worker: { basePrice: 1000, priceStep: 100, dailyReward: 1000, networth: 1 },
+      building: { basePrice: 1000, priceStep: 100, dailyReward: 0, networth: 10 },
       activeSeasonId,
       appVersion: '1.0.0',
     });
@@ -46,8 +46,8 @@ const main = async () => {
         dailyReward: 500,
         networth: 6,
       },
-      worker: { basePrice: 1000, dailyReward: 1000, networth: 1 },
-      building: { basePrice: 1000, dailyReward: 0, networth: 10 },
+      worker: { basePrice: 1000, priceStep: 100, dailyReward: 1000, networth: 1 },
+      building: { basePrice: 1000, priceStep: 100, dailyReward: 0, networth: 10 },
       status: 'open',
       rankingRewards: [
         { rankStart: 1, rankEnd: 1, share: 0.2 },
@@ -89,8 +89,8 @@ const main = async () => {
           dailyReward: 500,
           networth: 6,
         },
-        worker: { basePrice: 1000, dailyReward: 1000, networth: 1 },
-        building: { basePrice: 1000, dailyReward: 0, networth: 10 },
+        worker: { basePrice: 1000, priceStep: 100, dailyReward: 1000, networth: 1 },
+        building: { basePrice: 1000, priceStep: 100, dailyReward: 0, networth: 10 },
       },
     });
   console.log('created season log');
