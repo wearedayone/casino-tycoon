@@ -73,7 +73,7 @@ export const claimToken = async ({ address, amount }) => {
 };
 
 export const claimTokenBonus = async ({ address, amount }) => {
-  let txnHash;
+  let txnHash = '';
   try {
     logger.info('start claimToken');
     logger.info({ address, amount });

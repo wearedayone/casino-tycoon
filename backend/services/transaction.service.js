@@ -1,3 +1,5 @@
+import { BigNumber } from 'alchemy-sdk';
+
 import admin, { firestore } from '../configs/firebase.config.js';
 import { getActiveSeason, updateSeasonSnapshotSchedule } from './season.service.js';
 import {
@@ -124,14 +126,15 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
     const snapshot = await firestore.collection('transaction').doc(transactionId).get();
     const { type, value, token } = snapshot.data();
 
+    const transactionValue = token === 'ETH' ? tx.value : logs[0].data;
+    const bnValue = BigNumber.from(BigInt(value * 1e18));
+
     if (type === 'withdraw') {
       if (token === 'FIAT' && to.toLowerCase() !== TOKEN_ADDRESS.toLowerCase())
         throw new Error(`Bad request: invalid receiver for ${type}, txn: ${JSON.stringify(receipt)}`);
 
-      const transactionValue =
-        token === 'ETH' ? Number(tx.value.toString()) / 1e18 : Number(logs[0].data.toString()) / 1e18;
-      if (transactionValue !== value)
-        throw new Error(`Bad request: Value doesnt match, ${JSON.stringify({ transactionValue, value })}`);
+      if (!bnValue.eq(transactionValue))
+        throw new Error(`Bad request: Value doesnt match, ${JSON.stringify({ transactionValue, bnValue })}`);
     }
 
     if (['buy-worker', 'buy-building'].includes(type)) {
@@ -142,18 +145,16 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
       if (decodedData.to.toLowerCase() !== SYSTEM_ADDRESS.toLowerCase())
         throw new Error(`Bad request: invalid token receiver for ${type}, txn: ${JSON.stringify(receipt)}`);
 
-      const transactionValue = Number(logs[0].data.toString()) / 1e18;
-      if (transactionValue !== value)
-        throw new Error(`Bad request: Value doesnt match, ${JSON.stringify({ transactionValue, value })}`);
+      if (!bnValue.eq(transactionValue))
+        throw new Error(`Bad request: Value doesnt match, ${JSON.stringify({ transactionValue, bnValue })}`);
     }
 
     if (type === 'buy-machine') {
       if (to.toLowerCase() !== GAME_CONTRACT_ADDRESS.toLowerCase())
         throw new Error(`Bad request: invalid receiver for ${type}, txn: ${JSON.stringify(receipt)}`);
 
-      const transactionValue = Number(tx.value.toString()) / 1e18;
-      if (transactionValue !== value)
-        throw new Error(`Bad request: Value doesnt match, ${JSON.stringify({ transactionValue, value })}`);
+      if (!bnValue.eq(transactionValue))
+        throw new Error(`Bad request: Value doesnt match, ${JSON.stringify({ transactionValue, bnValue })}`);
     }
 
     return true;
