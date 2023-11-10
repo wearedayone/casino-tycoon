@@ -10,7 +10,7 @@ import {
 } from './transaction.service.js';
 import { claimToken as claimTokenTask, burnNFT as burnNFTTask } from './worker.service.js';
 
-const BONUS_CHANCE = 0.5;
+const BONUS_LIMIT = 0.5;
 const BONUS_MULTIPLIER = 1;
 const PENALTY_CHANCE = 0.1;
 
@@ -23,7 +23,7 @@ export const takeDailyWarSnapshot = async () => {
   const usersWithWarEnabledCount = usersWithWarEnabled.length;
 
   const voteRatio = usersWithWarEnabledCount / usersGamePlaySnapshot.size;
-  const isPenalty = Math.round(voteRatio * 100) / 100 >= BONUS_CHANCE;
+  const isPenalty = Math.round(voteRatio * 100) / 100 >= BONUS_LIMIT;
 
   const bonusMap = {};
   const generatedRewardMap = {}; // update when calc bonus
@@ -208,10 +208,9 @@ export const getWarHistory = async (userId) => {
   const seasonId = await getActiveSeasonId();
 
   const warHistorySnapshot = await firestore
-    .collection('user')
-    .doc(userId)
-    .collection('warHistory')
+    .collectionGroup('warResult')
     .where('seasonId', '==', seasonId)
+    .where('userId', '==', userId)
     .orderBy('createdAt', 'desc')
     .get();
 
