@@ -1,7 +1,7 @@
 import schedule from 'node-schedule';
 
 import { firestore } from '../configs/firebase.config.js';
-import { setWinner } from './worker.service.js';
+import { setGameClosed, setWinner } from './worker.service.js';
 import logger from '../utils/logger.js';
 import environments from '../utils/environments.js';
 
@@ -41,6 +41,7 @@ const takeSeasonLeaderboardSnapshot = async () => {
   // freeze season state
   const seasonRef = firestore.collection('season').doc(activeSeasonId);
   await seasonRef.update({ status: 'closed' });
+  await setGameClosed(true);
 
   // get rewards allocation config
   const seasonSnapshot = await seasonRef.get();

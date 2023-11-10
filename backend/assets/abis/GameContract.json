@@ -1,7 +1,10 @@
 {
   "abi": [
     {
-      "inputs": [{ "internalType": "address", "name": "initialOwner", "type": "address" }],
+      "inputs": [
+        { "internalType": "address", "name": "initialOwner", "type": "address" },
+        { "internalType": "address", "name": "gangsterAddress", "type": "address" }
+      ],
       "stateMutability": "nonpayable",
       "type": "constructor"
     },
@@ -33,6 +36,16 @@
         { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" }
       ],
       "name": "Deposit",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        { "indexed": false, "internalType": "address", "name": "to", "type": "address" },
+        { "indexed": false, "internalType": "uint256", "name": "tokenId", "type": "uint256" },
+        { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" }
+      ],
+      "name": "Mint",
       "type": "event"
     },
     {
@@ -70,13 +83,6 @@
       "type": "function"
     },
     {
-      "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
-      "name": "building",
-      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
       "inputs": [
         { "internalType": "address[]", "name": "to", "type": "address[]" },
         { "internalType": "uint256[]", "name": "tokenId", "type": "uint256[]" },
@@ -89,13 +95,20 @@
     },
     {
       "inputs": [
-        { "internalType": "address", "name": "from", "type": "address" },
+        { "internalType": "address", "name": "to", "type": "address" },
         { "internalType": "uint256", "name": "tokenId", "type": "uint256" },
         { "internalType": "uint256", "name": "amount", "type": "uint256" }
       ],
       "name": "depositNFT",
       "outputs": [],
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "gameClosed",
+      "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -108,13 +121,6 @@
     {
       "inputs": [],
       "name": "getBalance",
-      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
-      "name": "goon",
       "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
       "stateMutability": "view",
       "type": "function"
@@ -178,8 +184,8 @@
       "type": "function"
     },
     {
-      "inputs": [{ "internalType": "address payable", "name": "_address", "type": "address" }],
-      "name": "setContractAddress",
+      "inputs": [{ "internalType": "bool", "name": "value", "type": "bool" }],
+      "name": "setGameClosed",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -206,6 +212,13 @@
       "name": "setWinner",
       "outputs": [],
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "token",
+      "outputs": [{ "internalType": "contract Gangster", "name": "", "type": "address" }],
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -236,4 +249,5 @@
     },
     { "stateMutability": "payable", "type": "receive" }
   ]
+
 }

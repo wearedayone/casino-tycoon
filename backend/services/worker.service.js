@@ -148,6 +148,44 @@ export const burnNFT = async ({ address, amount }) => {
   }
 };
 
+export const setGameClosed = async (isGameClosed) => {
+  let txnHash;
+  try {
+    logger.info('start setGameClosed');
+    logger.info({ isGameClosed });
+    const workerWallet = await getWorkerWallet();
+    const gameContract = await getGameContract(workerWallet);
+    logger.info('start Transaction:');
+    const tx = await gameContract.setGameClosed(Boolean(isGameClosed));
+    logger.info('Transaction:' + tx.hash);
+    const receipt = await tx.wait();
+
+    txnHash = receipt.transactionHash;
+
+    if (receipt.status !== 1) {
+      logger.error(`Unsuccessful txn: ${JSON.stringify(receipt)}`);
+      throw new Error(`Unsuccessful txn: ${JSON.stringify(receipt)}`);
+    }
+
+    return { txnHash, status: 'Success' };
+  } catch (err) {
+    console.error(err);
+    const newError = getParsedEthersError(err);
+    const regex = /(execution reverted: )([A-Za-z\s])*/;
+    if (newError.context) {
+      const message = newError.context.match(regex);
+      if (message) {
+        const error = new Error(message[0]);
+        logger.error(error.message);
+      }
+    } else {
+      logger.error(err.message);
+    }
+
+    return { txnHash, status: 'Failed' };
+  }
+};
+
 export const setWinner = async ({ winners, points }) => {
   let txnHash;
   try {
