@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Box, Dialog, Typography, Button, Switch, styled } from '@mui/material';
+import { Box, Dialog, Typography, Button, Switch, styled, Divider } from '@mui/material';
 import Countdown from 'react-countdown';
 
 import { toggleWarStatus } from '../../../services/user.service';
@@ -103,17 +103,53 @@ const WarModal = ({ open, onClose, onGoToHistory }) => {
                 </Typography>
               </Box>
             </Box>
-            <Box display="flex" flexDirection="column" alignItems="center" gap={0.5}>
-              <Typography fontSize={12} textAlign="center">
-                *Outcome depends on whether a majority % of <br /> other players also choose to <strong>War</strong>.
+            <Box width="100%" display="flex" flexDirection="column" gap={1}>
+              <Divider flexItem />
+              <Typography fontSize={14} textAlign="center">
+                Potential War Outcomes
               </Typography>
-              <Typography fontSize={12} textAlign="center">
-                See{' '}
-                <span style={{ cursor: 'pointer', textDecoration: 'underline' }} onClick={onGoToHistory}>
-                  daily history & outcomes
-                </span>
-                .
-              </Typography>
+              <Box width="100%" display="flex" gap={1}>
+                <Box flex={1} display="flex" flexDirection="column" justifyContent="space-between" alignItems="center">
+                  <Typography fontSize={12}>Outcome 1:</Typography>
+                  <Box
+                    width="100%"
+                    display="flex"
+                    flexDirection="column"
+                    justifyContent="space-between"
+                    bgcolor="#d9d9d9"
+                    alignItems="center"
+                    p={1}
+                    gap={0.5}>
+                    <Typography fontSize={12}>&lt;50% votes for War</Typography>
+                    <Box display="flex" alignItems="center">
+                      <Typography fontSize={22} fontWeight="bold">
+                        2x
+                      </Typography>
+                      <img src="/images/icons/coin.png" alt="coin" width={20} height={20} />
+                    </Box>
+                    <Typography fontSize={12}>last 24h $FIAT yield*</Typography>
+                  </Box>
+                </Box>
+                <Box flex={1} display="flex" flexDirection="column" justifyContent="space-between" alignItems="center">
+                  <Typography fontSize={12}>Outcome 2:</Typography>
+                  <Box
+                    width="100%"
+                    display="flex"
+                    flexDirection="column"
+                    justifyContent="space-between"
+                    bgcolor="#d9d9d9"
+                    alignItems="center"
+                    p={1}
+                    gap={0.5}>
+                    <Typography fontSize={12}>&gt;= 50% votes for War</Typography>
+                    <Box display="flex" alignItems="center">
+                      <img src="/images/goon.png" alt="" width={32} style={{ transform: 'scaleX(-1)' }} />
+                      <img src="/images/gangster.png" alt="" width={30} />
+                    </Box>
+                    <Typography fontSize={12}>10% chance dying</Typography>
+                  </Box>
+                </Box>
+              </Box>
             </Box>
           </Box>
         </Box>

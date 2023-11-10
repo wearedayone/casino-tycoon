@@ -90,58 +90,6 @@ const WarHistoryModal = ({ open, onClose }) => {
                 )}
               </table>
             </Box>
-            <Box display="flex" flexDirection="column">
-              <Typography fontSize={14}>Potential Outcomes</Typography>
-              <Box display="flex" gap={0.5} bgcolor="#d9d9d9">
-                <Box
-                  flex={1}
-                  height="100%"
-                  display="flex"
-                  flexDirection="column"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  p={1}
-                  gap={0.5}>
-                  <Typography fontSize={12}>&lt;40% War</Typography>
-                  <Box display="flex" alignItems="center">
-                    <Typography fontSize={22} fontWeight="bold">
-                      2x
-                    </Typography>
-                    <img src="/images/icons/coin.png" alt="coin" width={20} height={20} />
-                  </Box>
-                  <Typography fontSize={12}>from last 24h</Typography>
-                </Box>
-                <Box
-                  flex={1}
-                  height="100%"
-                  display="flex"
-                  flexDirection="column"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  p={1}
-                  gap={0.5}>
-                  <Typography fontSize={12}>&gt;60% War</Typography>
-                  <Box display="flex" alignItems="center">
-                    <img src="/images/goon.png" alt="" width={32} style={{ transform: 'scaleX(-1)' }} />
-                    <img src="/images/gangster.png" alt="" width={30} />
-                  </Box>
-                  <Typography fontSize={12}>10% die</Typography>
-                </Box>
-                <Box
-                  flex={1}
-                  height="100%"
-                  display="flex"
-                  flexDirection="column"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  p={1}
-                  gap={0.5}>
-                  <Typography fontSize={12}>40-60% War</Typography>
-                  <img src="/images/icons/shield.png" alt="" width={30} />
-                  <Typography fontSize={12}>Nothing</Typography>
-                </Box>
-              </Box>
-            </Box>
           </Box>
         </Box>
         <Box display="flex" flexDirection="column" gap={2} bgcolor="white" borderRadius={2}>
