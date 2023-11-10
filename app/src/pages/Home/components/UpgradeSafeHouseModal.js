@@ -157,7 +157,7 @@ const UpgradeSafehouseModal = ({ open, onBack }) => {
             <Box flex={1} px={1.5} pt={0.75}>
               <Slider
                 min={0}
-                max={estimateMaxPurchase}
+                max={Math.min(estimateMaxPurchase, 25)}
                 valueLabelDisplay="on"
                 value={quantity}
                 onChange={(_e, value) => setQuantity(value)}

@@ -40,15 +40,15 @@ const processTransferEvent = async ({ from, to, value, event, contract }) => {
       newBalance: parseFloat(formatEther(newBalanceFrom)).toFixed(6),
     });
 
-    await createTransaction({
-      address: from.toLowerCase(),
-      type: 'withdraw',
-      txnHash: transactionHash,
-      token: 'FIAT',
-      amount: Number(parseFloat(formatEther(value)).toFixed(6)),
-      status: 'Success',
-      value: 0,
-    });
+    // await createTransaction({
+    //   address: from.toLowerCase(),
+    //   type: 'withdraw',
+    //   txnHash: transactionHash,
+    //   token: 'FIAT',
+    //   amount: Number(parseFloat(formatEther(value)).toFixed(6)),
+    //   status: 'Success',
+    //   value: 0,
+    // });
 
     const newBalanceTo = await contract.balanceOf(to);
     await updateBalance({

@@ -2,23 +2,14 @@ import { useState } from 'react';
 import { Box, Dialog, Typography, Button, Slider } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 import StarBorderRoundedIcon from '@mui/icons-material/StarBorderRounded';
-import { usePrivy } from '@privy-io/react-auth';
-import { Contract } from '@ethersproject/contracts';
 import { useSnackbar } from 'notistack';
 
 import { formatter } from '../../../utils/numbers';
 import BuyBonusModal from './BuyBonusModal';
 import useSystemStore from '../../../stores/system.store';
 import useUserStore from '../../../stores/user.store';
-import useUserWallet from '../../../hooks/useUserWallet';
-import environments from '../../../utils/environments';
-import gameAbi from '../../../assets/abis/GameContract.json';
 import useSmartContract from '../../../hooks/useSmartContract';
 import { create, validate } from '../../../services/transaction.service';
-
-const { NFT_ADDRESS, GAME_CONTRACT_ADDRESS, NETWORK_ID } = environments;
-
-const maxPerPurchase = 10;
 
 const HireGangsterModal = ({ open, onBack }) => {
   const { enqueueSnackbar } = useSnackbar();
@@ -180,7 +171,7 @@ const HireGangsterModal = ({ open, onBack }) => {
             <Box flex={1} px={1.5} pt={0.75}>
               <Slider
                 min={0}
-                max={maxPurchase}
+                max={Math.min(maxPurchase, 25)}
                 valueLabelDisplay="on"
                 value={quantity}
                 onChange={(_e, value) => setQuantity(value)}
