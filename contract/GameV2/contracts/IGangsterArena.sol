@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 interface IGangsterArena {
   /// Event
+  event Mint(address to, uint256 tokenId, uint256 amount);
   event Deposit(address to, uint256 tokenId, uint256 amount);
   event Withdraw(address to, uint256 tokenId, uint256 amount);
   event Burn(address[] to, uint256[] tokenId, uint256[] amount);

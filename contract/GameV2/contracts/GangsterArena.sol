@@ -6,19 +6,17 @@ import './Gangster.sol';
 import './IGangsterArena.sol';
 
 contract GangsterArena is Ownable, IGangsterArena {
-  Gangster private token;
-  address private contractAddress;
-
+  Gangster public token;
   uint256 public BASE_PRICE = 0.00069 ether;
-  uint256 public MAX_PER_BATCH = 1000;
-
+  uint256 public MAX_PER_BATCH = 25;
+  bool public gameClosed;
   mapping(uint256 => uint256) public tokenMaxSupply;
   mapping(address => bool) public mintedAddess;
-  mapping(address => uint256) public goon;
   mapping(address => uint256) public gangster;
-  mapping(address => uint256) public building;
 
-  constructor(address initialOwner) Ownable(initialOwner) {}
+  constructor(address initialOwner, address gangsterAddress) Ownable(initialOwner) {
+    token = Gangster(gangsterAddress);
+  }
 
   receive() external payable {}
 
@@ -36,6 +34,7 @@ contract GangsterArena is Ownable, IGangsterArena {
 
   function mint(address to, uint256 tokenId, uint256 amount) public payable {
     // require whitelisted for genesis token
+    require(!gameClosed, 'Game is closed');
     uint256 maxSully = tokenMaxSupply[tokenId];
     require(maxSully != 0, 'Invalid token id');
     require(amount != 0, 'Invalid amount');
@@ -57,35 +56,51 @@ contract GangsterArena is Ownable, IGangsterArena {
       gangster[to] += amount;
     }
     if (!mintedAddess[to]) mintedAddess[to] = true;
+    emit Mint(to, tokenId, amount);
   }
 
-  function mintWL(address to, uint256 tokenId, uint256 amount, bytes32[] calldata merkleProof) external payable {}
+  function mintWL(address to, uint256 tokenId, uint256 amount, bytes32[] calldata merkleProof) external payable {
+    require(!gameClosed, 'Game is closed');
+  }
 
-  function depositNFT(address from, uint256 tokenId, uint256 amount) external {
+  function depositNFT(address to, uint256 tokenId, uint256 amount) external {
+    require(!gameClosed, 'Game is closed');
     token.safeTransferFrom(msg.sender, address(this), tokenId, amount, '');
-    gangster[from] += amount;
+    gangster[to] += amount;
+    emit Deposit(to, tokenId, amount);
   }
 
   function withdrawNFT(address to, uint256 tokenId, uint256 amount) external {
+    require(!gameClosed, 'Game is closed');
     require(gangster[msg.sender] >= amount, 'Insufficient balance');
     token.safeTransferFrom(address(this), to, tokenId, amount, '');
     gangster[msg.sender] -= amount;
+    emit Withdraw(to, tokenId, amount);
   }
 
   function burnNFT(address[] memory to, uint256[] memory tokenId, uint256[] memory amount) external onlyOwner {
+    require(!gameClosed, 'Game is closed');
+    require(to.length == tokenId.length && tokenId.length == amount.length, 'Input array is not match');
+    for (uint256 i = 0; i < to.length; i++) {
+      require(gangster[to[i]] >= amount[i], 'Invalid amount to burn');
+    }
+
     for (uint256 i = 0; i < to.length; i++) {
       token.burn(address(this), tokenId[i], amount[i]);
       gangster[to[i]] -= amount[i];
     }
+    emit Burn(to, tokenId, amount);
   }
 
   function withdraw() external onlyOwner {
+    require(gameClosed, 'Game is not closed');
     require(address(this).balance > 0, 'Nothing to withdraw');
     address payable receiver = payable(msg.sender);
     receiver.transfer(address(this).balance);
   }
 
   function setWinner(address[] memory to, uint256[] memory points) external onlyOwner {
+    require(gameClosed, 'Game is not closed');
     require(address(this).balance > 0, 'Nothing to withdraw');
     require(to.length == points.length, 'Invalid input array length');
 
@@ -109,7 +124,7 @@ contract GangsterArena is Ownable, IGangsterArena {
     return bytes4(keccak256('onERC1155Received(address,address,uint256,uint256,bytes)'));
   }
 
-  //
+  // internal function
   function reduce(uint256[] memory arr) internal pure returns (uint256 result) {
     for (uint256 i = 0; i < arr.length; i++) {
       result += arr[i];
@@ -123,9 +138,8 @@ contract GangsterArena is Ownable, IGangsterArena {
   ***************************
    */
 
-  function setContractAddress(address payable _address) external onlyOwner {
-    contractAddress = _address;
-    token = Gangster(_address);
+  function setGameClosed(bool value) external onlyOwner {
+    gameClosed = value;
   }
 
   function setTokenMaxSupply(uint256[] calldata _tokenMaxSupplies) public onlyOwner {

@@ -1,6 +1,6 @@
 import { Contract } from '@ethersproject/contracts';
 import { formatEther } from '@ethersproject/units';
-import gangsterABI from '../assets/abis/Gangster.json' assert { type: 'json' };
+import GangsterArenaABI from '../assets/abis/GangsterArena.json' assert { type: 'json' };
 import admin, { firestore } from '../configs/firebase.config.js';
 import alchemy from '../configs/alchemy.config.js';
 import environments from '../utils/environments.js';
@@ -9,28 +9,30 @@ import { GangsterEvent } from '../utils/constants.js';
 
 const { GAME_CONTRACT_ADDRESS, NETWORK_ID } = environments;
 
-const nftListener = async () => {
+const gangsterArenaListener = async () => {
   const ethersProvider = await alchemy.config.getWebSocketProvider();
-  const contract = new Contract(GAME_CONTRACT_ADDRESS, gangsterABI.abi, ethersProvider);
+  const contract = new Contract(GAME_CONTRACT_ADDRESS, GangsterArenaABI.abi, ethersProvider);
 
   contract.on(GangsterEvent.Mint, async (from, to, amount, event) => {
     await firestore.collection('web3Listener').doc(NETWORK_ID).update({ lastBlock: event.blockNumber });
-    await processMintEvent({ from, to, amount, event, contract });
+    await processEvent({ from, to, amount, event, contract });
   });
 
   contract.on(GangsterEvent.Deposit, async (from, to, amount, event) => {
     await firestore.collection('web3Listener').doc(NETWORK_ID).update({ lastBlock: event.blockNumber });
-    await processTransferEvent({ from, to, amount, event, contract });
+    await processEvent({ from, to, amount, event, contract });
   });
 
   contract.on(GangsterEvent.Withdraw, async (from, to, amount, event) => {
     await firestore.collection('web3Listener').doc(NETWORK_ID).update({ lastBlock: event.blockNumber });
-    await processTransferEvent({ from, to, amount, event, contract });
+    await processEvent({ from, to, amount, event, contract });
   });
 
   contract.on(GangsterEvent.Burn, async (from, to, amount, event) => {
     await firestore.collection('web3Listener').doc(NETWORK_ID).update({ lastBlock: event.blockNumber });
-    await processTransferEvent({ from, to, amount, event, contract });
+    for (let i = 0; i < from.length(); i++) {
+      await processEvent({ from: from[i], to: to[i], amount: amount[i], event, contract });
+    }
   });
 };
 
@@ -45,36 +47,41 @@ const nftListener = async () => {
 //   }
 // };
 
-const processMintEvent = async ({ from, to, amount, event, contract }) => {
+const processEvent = async ({ from, to, amount, event, contract }) => {
   try {
     logger.info('NFT minted');
     logger.info({ from, to, amount, event });
     const { transactionHash } = event;
-    const newBalanceFrom = await contract.balanceOf(from);
-    await updateBalance({
-      address: from.toLowerCase(),
-      newBalance: parseFloat(formatEther(newBalanceFrom)).toFixed(6),
-    });
 
-    const newBalanceTo = await contract.balanceOf(to);
+    const gangsterNumber = await contract.gangster(to);
 
-    await updateBalance({
+    await updateNumberOfGangster({
       address: to.toLowerCase(),
-      newBalance: parseFloat(formatEther(newBalanceTo)).toFixed(6),
+      newBalance: parseFloat(formatEther(gangsterNumber)).toFixed(6),
     });
   } catch (err) {
     logger.error(err);
   }
 };
 
-const updateBalance = async ({ address, newBalance }) => {
+const updateNumberOfGangster = async ({ address, newBalance }) => {
   logger.info({ address, newBalance: Number(newBalance) });
+  const system = await firestore.collection('system').doc('default').get();
+  const { activeSeasonId } = system.data();
   const user = await firestore.collection('user').where('address', '==', address).limit(1).get();
-  if (user.empty) return;
-  const userId = user.docs[0].id;
-  await firestore.collection('user').doc(userId).update({
-    tokenBalance: newBalance,
-  });
+  if (!user.empty) {
+    const gamePlay = await firestore
+      .collection('gamePlay')
+      .where('userId', '==', user.docs[0].id)
+      .where('seasonId', '==', activeSeasonId)
+      .limit(1)
+      .get();
+    if (!gamePlay.empty) {
+      await firestore.collection('gamePlay').doc(gamePlay.id).update({
+        numberOfMachines: newBalance,
+      });
+    }
+  }
 };
 
-export default nftListener;
+export default gangsterArenaListener;

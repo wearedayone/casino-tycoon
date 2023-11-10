@@ -40,9 +40,9 @@ describe('Rakku Bank', function () {
     const GangsterNFT = await ethers.getContractFactory('Gangster');
     const GangsterNFTContract = await GangsterNFT.deploy(owner.address, acc1.address);
     await GangsterNFTContract.waitForDeployment();
-
+    const GangsterNFTContractAddress = await GangsterNFTContract.getAddress();
     const GangsterArena = await ethers.getContractFactory('GangsterArena');
-    const GangsterArenaContract = await GangsterArena.deploy(owner.address);
+    const GangsterArenaContract = await GangsterArena.deploy(owner.address, GangsterNFTContractAddress);
     await GangsterArenaContract.waitForDeployment();
     GangsterArenaContract.set;
 
@@ -50,7 +50,7 @@ describe('Rakku Bank', function () {
     await GangsterNFTContract.grantRole(MINTER_ROLE, GangsterArenaContract.getAddress());
     await GangsterNFTContract.setRoyalties(GangsterArenaContract.getAddress(), 4200);
     // update config for gangster arena
-    await GangsterArenaContract.setContractAddress(GangsterNFTContract.getAddress());
+    // await GangsterArenaContract.setContractAddress(GangsterNFTContract.getAddress());
     await GangsterArenaContract.setTokenMaxSupply([0, 1000]);
 
     const promises = [];
