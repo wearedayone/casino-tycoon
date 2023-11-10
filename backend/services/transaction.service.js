@@ -258,7 +258,7 @@ const updateUserGamePlay = async (userId, transactionId) => {
   let gamePlayData = {};
   switch (type) {
     case 'buy-machine':
-      gamePlayData = { numberOfMachines: admin.firestore.FieldValue.increment(amount) };
+      // gamePlayData = { numberOfMachines: admin.firestore.FieldValue.increment(amount) };
       assets.numberOfMachines += amount;
       break;
     case 'buy-worker':

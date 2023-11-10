@@ -5,7 +5,8 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "start": "env-cmd -f .env.stg node index.js"
+    "start": "env-cmd -f .env.stg node index.js",
+    "dev": "env-cmd -f .env.stg nodemon index.js"
   },
   "dependencies": {
     "alchemy-sdk": "^2.10.1",
@@ -14,5 +15,8 @@
     "firebase-admin": "^11.11.0",
     "winston": "^3.11.0",
     "winston-daily-rotate-file": "^4.7.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
 }

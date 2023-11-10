@@ -10,6 +10,7 @@ const environments = {
   PRIVY_VERIFICATION_KEY: process.env.PRIVY_VERIFICATION_KEY,
   ALCHEMY_API_KEY: process.env.ALCHEMY_API_KEY,
   TOKEN_ADDRESS: process.env.TOKEN_ADDRESS,
+  GAME_CONTRACT_ADDRESS: process.env.GAME_CONTRACT_ADDRESS,
 };
 
 export default environments;
