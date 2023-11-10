@@ -27,14 +27,14 @@ const SettingModalWithdrawToken = ({ open, onBack }) => {
     try {
       setIsLoading(true);
       const value = Number(amount);
-      const res = await create({ type: 'withdraw', token: 'FIAT', value, to: address });
-      const { id } = res.data;
+      // const res = await create({ type: 'withdraw', token: 'FIAT', value, to: address });
+      // const { id } = res.data;
       const receipt = await withdrawToken(address, value);
       // for test only
       // const receipt = { status: 1, transactionHash: 'test-txn-hash' };
       if (receipt.status === 1) {
         setTxnHash(receipt.transactionHash);
-        await validate({ transactionId: id, txnHash: receipt.transactionHash });
+        // await validate({ transactionId: id, txnHash: receipt.transactionHash });
       }
       enqueueSnackbar('Transferred $FIAT successfully', { variant: 'success' });
     } catch (err) {

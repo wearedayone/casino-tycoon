@@ -40,8 +40,17 @@ const processTransferEvent = async ({ from, to, value, event, contract }) => {
       newBalance: parseFloat(formatEther(newBalanceFrom)).toFixed(6),
     });
 
-    const newBalanceTo = await contract.balanceOf(to);
+    await createTransaction({
+      address: from.toLowerCase(),
+      type: 'withdraw',
+      txnHash: transactionHash,
+      token: 'FIAT',
+      amount: Number(parseFloat(formatEther(value)).toFixed(6)),
+      status: 'Success',
+      value: 0,
+    });
 
+    const newBalanceTo = await contract.balanceOf(to);
     await updateBalance({
       address: to.toLowerCase(),
       newBalance: parseFloat(formatEther(newBalanceTo)).toFixed(6),
@@ -62,6 +71,21 @@ const updateBalance = async ({ address, newBalance }) => {
     .update({
       tokenBalance: Number(newBalance),
     });
+};
+
+const createTransaction = async ({ address, ...data }) => {
+  const system = await firestore.collection('system').doc('default').get();
+  const { activeSeasonId } = system.data();
+
+  const user = await firestore.collection('user').where('address', '==', address).limit(1).get();
+  if (!user.empty) {
+    await firestore.collection('transaction').add({
+      userId: user.docs[0].id,
+      seasonId: activeSeasonId,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      ...data,
+    });
+  }
 };
 
 export default tokenListener;

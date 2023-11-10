@@ -112,7 +112,7 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
 
     const tx = await alchemy.core.getTransaction(txnHash);
     const receipt = await tx.wait();
-    console.log(`transaction ${txnHash}`, tx, 'receipt', receipt);
+    // console.log(`transaction ${txnHash}`, tx, 'receipt', receipt);
     const { from, to, status, logs } = receipt;
 
     if (status !== 1) throw new Error('Invalid txn status');
