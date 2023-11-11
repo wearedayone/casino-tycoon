@@ -1,8 +1,23 @@
 import { Box, Dialog, Typography, Button } from '@mui/material';
 import LeaderboardOutlinedIcon from '@mui/icons-material/LeaderboardOutlined';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
+import useUserStore from '../../../stores/user.store';
+import { useQuery } from '@tanstack/react-query';
+import QueryKeys from '../../../utils/queryKeys';
+import { getLeaderboard } from '../../../services/gamePlay.service';
 
 const StatisticsModal = ({ open, setOpenUpdate }) => {
+  const gamePlay = useUserStore((state) => state.gamePlay);
+  const { data } = useQuery({
+    queryKey: [QueryKeys.Leaderboard],
+    queryFn: getLeaderboard,
+    refetchInterval: 30 * 1000,
+  });
+  console.log({ data: data.data });
+  let position = data.data.filter((d) => d.networth >= gamePlay.networth).length;
+  let reward = data.data.find((d) => d.userId == gamePlay.userId).reward;
+  console.log({ reward, position });
+
   return (
     <Dialog
       maxWidth="sm"
@@ -25,14 +40,14 @@ const StatisticsModal = ({ open, setOpenUpdate }) => {
               <StatisticsItem
                 renderIcon={() => <LeaderboardOutlinedIcon />}
                 title="End game ranking"
-                content="52/1,321"
+                content={`${position}/${data?.data?.length}`}
               />
               <StatisticsItem
                 renderIcon={() => <StarBorderIcon />}
                 title="Gang reputation"
                 content={
                   <>
-                    41
+                    {gamePlay.networth}
                     <StarBorderIcon sx={{ fontSize: 12 }} />
                   </>
                 }
@@ -43,20 +58,20 @@ const StatisticsModal = ({ open, setOpenUpdate }) => {
               <StatisticsItem
                 renderIcon={() => <img src="/images/gangster.png" alt="" width={20} />}
                 title="Gangsters owned:"
-                content="6 units"
+                content={`${gamePlay.numberOfMachines} units`}
               />
               <StatisticsItem
                 renderIcon={() => <img src="/images/goon.png" alt="" width={20} />}
                 title="Goons owned:"
-                content="42 units"
+                content={`${gamePlay.numberOfWorkers} units`}
               />
               <StatisticsItem
                 renderIcon={() => <img src="/images/house.png" alt="" width={20} />}
                 title="Safehouse upgrade:"
-                content="17 upgrade"
+                content={`${gamePlay.numberOfBuildings} upgrade`}
               />
             </Box>
-            <Box display="flex" flexDirection="column" gap={0.5}>
+            {/* <Box display="flex" flexDirection="column" gap={0.5}>
               <Typography fontSize={14}>Total Points</Typography>
               <StatisticsItem
                 renderIcon={() => <LeaderboardOutlinedIcon />}
@@ -68,7 +83,7 @@ const StatisticsModal = ({ open, setOpenUpdate }) => {
                 title="Total points obtained:"
                 content="12,321"
               />
-            </Box>
+            </Box> */}
           </Box>
         </Box>
         <Box display="flex" flexDirection="column" gap={2} bgcolor="white" borderRadius={2}>

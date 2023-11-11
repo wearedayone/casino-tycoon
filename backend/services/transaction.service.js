@@ -126,8 +126,9 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
     const snapshot = await firestore.collection('transaction').doc(transactionId).get();
     const { type, value, token } = snapshot.data();
 
-    const transactionValue = token === 'ETH' ? tx.value : logs[0].data;
-    const bnValue = BigNumber.from(BigInt(value * 1e18));
+    const transactionValue = token === 'ETH' ? tx.value : BigNumber.from(logs[0].data);
+    const bnValue = BigNumber.from(BigInt(value * 1e12)).mul(BigNumber.from(1e6));
+    console.log({ value, bnValue, v1: BigNumber.from(BigInt(value * 1e12)) });
 
     if (type === 'withdraw') {
       if (token === 'FIAT' && to.toLowerCase() !== TOKEN_ADDRESS.toLowerCase())
@@ -144,7 +145,8 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
       const decodedData = await decodeTokenTxnLogs('Transfer', logs[0]);
       if (decodedData.to.toLowerCase() !== SYSTEM_ADDRESS.toLowerCase())
         throw new Error(`Bad request: invalid token receiver for ${type}, txn: ${JSON.stringify(receipt)}`);
-
+      console.log({ value, bnValue, transactionValue });
+      console.log(bnValue.eq(transactionValue));
       if (!bnValue.eq(transactionValue))
         throw new Error(`Bad request: Value doesnt match, ${JSON.stringify({ transactionValue, bnValue })}`);
     }
