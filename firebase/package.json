@@ -4,6 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "deploy": "firebase deploy --only hosting"
+    "deploy-prd": "firebase deploy --only hosting:app-prd",
+    "deploy-stg": "firebase deploy --only hosting:app-stg"
   }
 }

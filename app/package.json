@@ -25,6 +25,7 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.17.0",
     "react-scripts": "5.0.1",
+    "source-map-loader": "^4.0.1",
     "superstruct": "^1.0.3",
     "web-vitals": "^2.1.4",
     "workbox-background-sync": "^6.4.2",
@@ -42,13 +43,14 @@
     "zustand": "^4.4.3"
   },
   "scripts": {
-    "dev": "react-scripts start",
-    "start": "react-scripts start",
+    "dev": "env-cmd -f .env.stg react-scripts start",
+    "start": "env-cmd -f .env.prd react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "serve": "npx serve -s build",
-    "build-stg": "env-cmd -f .env.stg react-scripts build"
+    "build-stg": "env-cmd -f .env.stg react-scripts build",
+    "build-prd": "env-cmd -f .env.prd react-scripts build"
   },
   "eslintConfig": {
     "extends": [

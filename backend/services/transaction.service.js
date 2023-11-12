@@ -128,7 +128,7 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
 
     const transactionValue = token === 'ETH' ? tx.value : BigNumber.from(logs[0].data);
     const bnValue = BigNumber.from(BigInt(value * 1e12)).mul(BigNumber.from(1e6));
-    console.log({ value, bnValue, v1: BigNumber.from(BigInt(value * 1e12)) });
+    console.log({ logdata: logs[0].data, value, bnValue, v1: BigNumber.from(BigInt(value * 1e12)) });
 
     if (type === 'withdraw') {
       if (token === 'FIAT' && to.toLowerCase() !== TOKEN_ADDRESS.toLowerCase())
@@ -151,13 +151,13 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
         throw new Error(`Bad request: Value doesnt match, ${JSON.stringify({ transactionValue, bnValue })}`);
     }
 
-    if (type === 'buy-machine') {
-      if (to.toLowerCase() !== GAME_CONTRACT_ADDRESS.toLowerCase())
-        throw new Error(`Bad request: invalid receiver for ${type}, txn: ${JSON.stringify(receipt)}`);
+    // if (type === 'buy-machine') {
+    //   if (to.toLowerCase() !== GAME_CONTRACT_ADDRESS.toLowerCase())
+    //     throw new Error(`Bad request: invalid receiver for ${type}, txn: ${JSON.stringify(receipt)}`);
 
-      if (!bnValue.eq(transactionValue))
-        throw new Error(`Bad request: Value doesnt match, ${JSON.stringify({ transactionValue, bnValue })}`);
-    }
+    //   if (!bnValue.eq(transactionValue))
+    //     throw new Error(`Bad request: Value doesnt match, ${JSON.stringify({ transactionValue, bnValue })}`);
+    // }
 
     return true;
   } catch (err) {

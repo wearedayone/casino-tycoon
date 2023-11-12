@@ -5,7 +5,8 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "dev": "env-cmd -f .env.stg nodemon index.js"
+    "dev": "env-cmd -f .env.stg nodemon index.js",
+    "start": "env-cmd -f .env.prd nodemon index.js"
   },
   "dependencies": {
     "@enzoferey/ethers-error-parser": "^0.2.3",

@@ -4,11 +4,19 @@ import Countdown from 'react-countdown';
 
 import { toggleWarStatus } from '../../../services/user.service';
 import useUserStore from '../../../stores/user.store';
+import useSystemStore from '../../../stores/system.store';
 
 const WarModal = ({ open, onClose, onGoToHistory }) => {
   const gamePlay = useUserStore((state) => state.gamePlay);
   const [isWarEnabled, setWarEnabled] = useState(false);
   const [nextWar, setNextWar] = useState(new Date());
+
+  const activeSeason = useSystemStore((state) => state.activeSeason);
+
+  const { numberOfMachines, numberOfWorkers } = gamePlay;
+  const { machine, worker } = activeSeason;
+
+  const totalDailyReward = numberOfMachines * machine.dailyReward + numberOfWorkers * worker.dailyReward;
 
   useEffect(() => {
     const date = new Date();
@@ -82,7 +90,7 @@ const WarModal = ({ open, onClose, onGoToHistory }) => {
                   Risk 10% of your <br /> forces to get bonus*
                 </Typography>
                 <Typography sx={{ mt: -0.5 }} fontSize={12} textAlign="center">
-                  <strong>~ 2500</strong> $FIAT / d
+                  <strong>~ {totalDailyReward}</strong> $FIAT / d
                 </Typography>
               </Box>
             </Box>

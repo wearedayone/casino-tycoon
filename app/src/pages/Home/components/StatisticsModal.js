@@ -13,9 +13,9 @@ const StatisticsModal = ({ open, setOpenUpdate }) => {
     queryFn: getLeaderboard,
     refetchInterval: 30 * 1000,
   });
-  console.log({ data: data.data });
-  let position = data.data.filter((d) => d.networth >= gamePlay.networth).length;
-  let reward = data.data.find((d) => d.userId == gamePlay.userId).reward;
+  console.log({ data: data?.data });
+  let position = data?.data?.filter((d) => d.networth >= gamePlay?.networth).length;
+  let reward = data?.data?.find((d) => d.userId == gamePlay?.userId).reward;
   console.log({ reward, position });
 
   return (
@@ -47,7 +47,7 @@ const StatisticsModal = ({ open, setOpenUpdate }) => {
                 title="Gang reputation"
                 content={
                   <>
-                    {gamePlay.networth}
+                    {gamePlay?.networth}
                     <StarBorderIcon sx={{ fontSize: 12 }} />
                   </>
                 }
@@ -58,17 +58,17 @@ const StatisticsModal = ({ open, setOpenUpdate }) => {
               <StatisticsItem
                 renderIcon={() => <img src="/images/gangster.png" alt="" width={20} />}
                 title="Gangsters owned:"
-                content={`${gamePlay.numberOfMachines} units`}
+                content={`${gamePlay?.numberOfMachines} units`}
               />
               <StatisticsItem
                 renderIcon={() => <img src="/images/goon.png" alt="" width={20} />}
                 title="Goons owned:"
-                content={`${gamePlay.numberOfWorkers} units`}
+                content={`${gamePlay?.numberOfWorkers} units`}
               />
               <StatisticsItem
                 renderIcon={() => <img src="/images/house.png" alt="" width={20} />}
                 title="Safehouse upgrade:"
-                content={`${gamePlay.numberOfBuildings} upgrade`}
+                content={`${gamePlay?.numberOfBuildings} upgrade`}
               />
             </Box>
             {/* <Box display="flex" flexDirection="column" gap={0.5}>

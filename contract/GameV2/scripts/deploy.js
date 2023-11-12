@@ -10,18 +10,18 @@ const { ethers } = require('hardhat');
 async function main() {
   const FIAT = await ethers.getContractFactory('FIAT');
   const workerAddress = '0x890611302Ee344d5bD94DA9811C18e2De5588077';
-  const nftAddress = '0x87377767C46D79aEfc9364EBDf0e00334d2269b9';
-  // const FIATToken = await FIAT.deploy(workerAddress);
-  // const FIATTokenAddress = await FIATToken.getAddress();
-  // console.log(`FIATToken is deployed to ${FIATTokenAddress}`);
+  // const nftAddress = '0x87377767C46D79aEfc9364EBDf0e00334d2269b9';
+  const FIATToken = await FIAT.deploy(workerAddress);
+  const FIATTokenAddress = await FIATToken.getAddress();
+  console.log(`FIATToken is deployed to ${FIATTokenAddress}`);
 
-  // const Gangster = await ethers.getContractFactory('Gangster');
-  // const GangsterNFT = await Gangster.deploy(workerAddress, workerAddress);
-  // const GangsterNFTAddress = await GangsterNFT.getAddress();
-  // console.log(`NFT contract is deployed to ${GangsterNFTAddress}`);
+  const Gangster = await ethers.getContractFactory('Gangster');
+  const GangsterNFT = await Gangster.deploy(workerAddress, workerAddress);
+  const GangsterNFTAddress = await GangsterNFT.getAddress();
+  console.log(`NFT contract is deployed to ${GangsterNFTAddress}`);
 
   const GangsterArena = await ethers.getContractFactory('GangsterArena');
-  const GangsterArenaContract = await GangsterArena.deploy(workerAddress, nftAddress);
+  const GangsterArenaContract = await GangsterArena.deploy(workerAddress, GangsterNFTAddress);
   const GangsterArenaContractAddress = await GangsterArenaContract.getAddress();
   console.log(`Game contract is deployed to ${GangsterArenaContractAddress}`);
 
