@@ -21,8 +21,9 @@ class LoadingScene extends Phaser.Scene {
       y: height / 2 - 200,
       text: 'Loading...',
       style: {
+        // font: 'bold 85px WixMadeforDisplay',
         fontSize: '85px',
-        fontFamily: "'Wix Madefor Display', sans-serif",
+        fontFamily: "'WixMadeforDisplay', sans-serif",
         fill: '#ffffff',
       },
     });
@@ -34,7 +35,7 @@ class LoadingScene extends Phaser.Scene {
       text: '0%',
       style: {
         fontSize: '85px',
-        fontFamily: "'Wix Madefor Display', sans-serif",
+        fontFamily: "'WixMadeforDisplay', sans-serif",
         fill: '#ffffff',
       },
     });
@@ -59,10 +60,30 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('gangster-house-2', '/images/gangster-house-2.png');
     this.load.image('gangster-house-3', '/images/gangster-house-3.png');
 
+    this.load.image('daily-money', '/images/daily-money.png');
+    this.load.image('eth-balance', '/images/eth-balance.png');
+    this.load.image('fiat-balance', '/images/fiat-balance.png');
+
     this.load.image('popup', '/images/popup.png');
     this.load.image('popup-title', '/images/popup-title.png');
+    this.load.image('popup-welcome-nowar', '/images/popup-welcome-nowar.png');
+
+    this.load.image('ribbon-welcome', '/images/ribbon-welcome.png');
+
     this.load.image('button-close', '/images/button-close.png');
     this.load.image('button-close-pressed', '/images/button-close-pressed.png');
+    this.load.image('button-buy', '/images/button-buy.png');
+    this.load.image('button-buy-pressed', '/images/button-buy-pressed.png');
+    this.load.image('button-war', '/images/button-war.png');
+    this.load.image('button-war-pressed', '/images/button-war-pressed.png');
+    this.load.image('button-portfolio', '/images/button-portfolio.png');
+    this.load.image('button-rank', '/images/button-rank.png');
+    this.load.image('button-referral', '/images/button-referral.png');
+    this.load.image('button-setting', '/images/button-setting.png');
+    this.load.image('button-add', '/images/button-add.png');
+    this.load.image('button-add-pressed', '/images/button-add-pressed.png');
+    this.load.image('button-claim', '/images/button-claim.png');
+    this.load.image('button-claim-pressed', '/images/button-claim-pressed.png');
   }
 
   create() {

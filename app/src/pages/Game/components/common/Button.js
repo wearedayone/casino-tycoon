@@ -15,13 +15,13 @@ class Button extends Phaser.GameObjects.Container {
 
     this.setInteractive()
       .on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
-        onClick?.();
         this.defaultImage.setVisible(false);
         this.pressedImage.setVisible(true);
       })
       .on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
         this.defaultImage.setVisible(true);
         this.pressedImage.setVisible(false);
+        onClick?.();
       });
   }
 }

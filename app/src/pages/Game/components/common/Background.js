@@ -1,11 +1,11 @@
 import Phaser from 'phaser';
 
-import configs from '../configs/configs.json';
+import configs from '../../configs/configs.json';
 
 const { width, height } = configs;
 
 class Background extends Phaser.GameObjects.Container {
-  constructor(scene, img) {
+  constructor(scene) {
     super(scene, 0, 0);
 
     this.background = scene.add.image(0, 0, 'bg').setOrigin(0, 0);
