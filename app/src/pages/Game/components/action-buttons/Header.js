@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 
+import { formatter, customFormat } from '../../../../utils/numbers';
 import configs from '../../configs/configs.json';
 import DailyMoney from './DailyMoney';
 import Balance from './Balance';
@@ -29,8 +30,8 @@ class Header extends Phaser.GameObjects.Container {
 
   updateValues({ dailyMoney, ETHBalance, tokenBalance }) {
     this.dailyMoney.updateValue(dailyMoney);
-    this.ethBalance.updateValue(ETHBalance);
-    this.fiatBalance.updateValue(tokenBalance);
+    this.ethBalance.updateValue(formatter.format(ETHBalance));
+    this.fiatBalance.updateValue(customFormat(tokenBalance || 0, 1));
   }
 }
 

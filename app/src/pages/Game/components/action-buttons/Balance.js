@@ -1,6 +1,5 @@
 import Phaser from 'phaser';
 
-import { formatter } from '../../../../utils/numbers';
 import Button from '../button/Button';
 
 const buttonWidth = 77;
@@ -21,7 +20,7 @@ class Balance extends Phaser.GameObjects.Container {
       () => console.log('clicked')
     );
     this.valueText = scene.add
-      .text(x + 10, y - 5, formatter.format(value), {
+      .text(x + 10, y - 5, value, {
         // font: 'bold 60px Arial',
         fontSize: '60px',
         // fontWeight: 'bold',
@@ -36,7 +35,7 @@ class Balance extends Phaser.GameObjects.Container {
   }
 
   updateValue(newValue) {
-    this.valueText.text = formatter.format(newValue);
+    this.valueText.text = newValue;
   }
 }
 
