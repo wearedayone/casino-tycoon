@@ -70,6 +70,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('popup-welcome-nowar', '/images/popup-welcome-nowar.png');
 
     this.load.image('ribbon-welcome', '/images/ribbon-welcome.png');
+    this.load.image('coin', '/images/coin.png');
 
     this.load.image('button-blue', '/images/button-blue.png');
     this.load.image('button-blue-pressed', '/images/button-blue-pressed.png');

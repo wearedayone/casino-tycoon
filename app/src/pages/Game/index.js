@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import useUserStore from '../../stores/user.store';
 import useSystemStore from '../../stores/system.store';
 import { getRank } from '../../services/user.service';
+import { claimToken } from '../../services/transaction.service';
 import QueryKeys from '../../utils/queryKeys';
 
 import configs from './configs/configs.json';
@@ -13,6 +14,7 @@ import LoadingScene from './scenes/LoadingScene';
 import MainScene from './scenes/MainScene';
 
 const { width, height } = configs;
+const MILISECONDS_IN_A_DAY = 86400 * 1000;
 
 const Game = () => {
   const gameRef = useRef();
@@ -69,20 +71,50 @@ const Game = () => {
       };
 
       const game = new Phaser.Game(config);
-      game.events.on('', () => {});
 
-      gameRef.current = game;
-      gameRef.current.events.on('request-balances', () => {
+      // listeners
+      game.events.on('request-balances', () => {
         gameRef.current.events.emit('update-balances', { dailyMoney, ETHBalance, tokenBalance });
       });
 
-      gameRef.current.events.on('request-rank', () => {
+      game.events.on('request-rank', () => {
         gameRef.current.events.emit('update-rank', { rank: rankData?.data?.rank || '' });
       });
 
-      gameRef.current.events.on('request-networth', () => {
+      game.events.on('request-networth', () => {
         gameRef.current.events.emit('update-networth', { networth: gamePlay.networth });
       });
+
+      game.events.on('request-claim-time', () => {
+        gameRef.current.events.emit('update-claim-time', {
+          claimGapInSeconds: activeSeason.claimGapInSeconds,
+          lastClaimTime: gamePlay.lastClaimTime.toDate().getTime(),
+        });
+      });
+
+      game.events.on('request-claimable-reward', () => {
+        const diffInDays = (Date.now() - gamePlay.lastClaimTime.toDate().getTime()) / MILISECONDS_IN_A_DAY;
+        const claimableReward = gamePlay.pendingReward + diffInDays * dailyMoney;
+        gameRef.current.events.emit('update-claimable-reward', { reward: claimableReward });
+      });
+
+      game.events.on('request-claimable-status', () => {
+        console.log('request claimable stauts');
+        const nextClaimTime = gamePlay.lastClaimTime.toDate().getTime() + activeSeason.claimGapInSeconds * 1000;
+        const claimable = Date.now() > nextClaimTime;
+        gameRef.current.events.emit('update-claimable-status', { claimable });
+      });
+
+      game.events.on('claim', async () => {
+        try {
+          await claimToken();
+        } catch (err) {
+          console.error(err);
+        }
+        game.events.emit('claim-completed');
+      });
+
+      gameRef.current = game;
 
       return () => {
         try {
@@ -97,6 +129,29 @@ const Game = () => {
   useEffect(() => {
     gameRef.current?.events.emit('update-balances', { dailyMoney, ETHBalance, tokenBalance });
   }, [tokenBalance, ETHBalance, dailyMoney]);
+
+  useEffect(() => {
+    if (activeSeason?.claimGapInSeconds && gamePlay?.lastClaimTime) {
+      gameRef.current?.events.emit('update-claim-time', {
+        claimGapInSeconds: activeSeason?.claimGapInSeconds,
+        lastClaimTime: gamePlay?.lastClaimTime?.toDate().getTime(),
+      });
+
+      const nextClaimTime = gamePlay?.lastClaimTime.toDate().getTime() + activeSeason.claimGapInSeconds * 1000;
+      const now = Date.now();
+      const claimable = now > nextClaimTime;
+      console.log(new Date(now), new Date(nextClaimTime), claimable);
+      gameRef.current?.events.emit('update-claimable-status', { claimable });
+    }
+  }, [activeSeason?.claimGapInSeconds, gamePlay?.lastClaimTime]);
+
+  useEffect(() => {
+    if (gamePlay?.lastClaimTime && gamePlay?.pendingReward) {
+      const diffInDays = (Date.now() - gamePlay?.lastClaimTime.toDate().getTime()) / MILISECONDS_IN_A_DAY;
+      const claimableReward = gamePlay?.pendingReward + diffInDays * dailyMoney;
+      gameRef.current?.events.emit('update-claimable-reward', { reward: claimableReward });
+    }
+  }, [gamePlay?.lastClaimTime, gamePlay?.pendingreward, dailyMoney]);
 
   return (
     <Box minHeight="100vh" overflow="auto" display="flex" justifyContent="center" alignItems="center">

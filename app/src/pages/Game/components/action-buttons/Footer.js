@@ -2,6 +2,9 @@ import Phaser from 'phaser';
 
 import Button from '../button/Button';
 import configs from '../../configs/configs.json';
+import DisabledClaimButton from '../button/DiabledClaimButton';
+import ActiveClaimButton from '../button/ActiveClaimButton';
+import ClaimButton from '../button/ClaimButton';
 
 const { width } = configs;
 
@@ -20,9 +23,7 @@ class Footer extends Phaser.GameObjects.Container {
       console.log('btn buy clicked')
     );
 
-    this.buttonClaim = new Button(scene, width / 2, y, 'button-claim', 'button-claim-pressed', () =>
-      console.log('btn claim clicked')
-    );
+    this.buttonClaim = new ClaimButton(scene, width / 2, y);
 
     this.add(this.buttonWar);
     this.add(this.buttonBuy);

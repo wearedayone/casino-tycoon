@@ -28,7 +28,6 @@ class Header extends Phaser.GameObjects.Container {
   }
 
   updateValues({ dailyMoney, ETHBalance, tokenBalance }) {
-    console.log('update values', { dailyMoney, ETHBalance, tokenBalance });
     this.dailyMoney.updateValue(dailyMoney);
     this.ethBalance.updateValue(ETHBalance);
     this.fiatBalance.updateValue(tokenBalance);

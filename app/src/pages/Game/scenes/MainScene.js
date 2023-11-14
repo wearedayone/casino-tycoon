@@ -31,8 +31,8 @@ class MainScene extends Phaser.Scene {
     this.add.existing(footer);
 
     // test
-    const popup = new PopupWelcomeNoWar(this, 2500);
-    this.add.existing(popup);
+    // const popup = new PopupWelcomeNoWar(this, 2500);
+    // this.add.existing(popup);
   }
 
   update() {}
