@@ -34,42 +34,64 @@ const Login = () => {
   };
 
   return (
-    <Box minHeight="100vh" p={2} display="flex" flexDirection="column" justifyContent="center">
-      <Box flex={1} display="flex" flexDirection="column" justifyContent="center" gap={4}>
-        <Typography
-          fontSize={48}
-          fontWeight={700}
-          fontFamily="'Inknut Antiqua', serif"
-          align="center"
-          lineHeight={1.25}>
-          Gangster <br /> Arena
-        </Typography>
+    <Box
+      minHeight="100vh"
+      bgcolor="#6123ff"
+      p={2}
+      display="flex"
+      flexDirection="column"
+      justifyContent="center"
+      position="relative"
+      sx={{
+        backgroundImage: 'url(/images/bullet-holes.png)',
+        backgroundSize: '80%',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center',
+      }}>
+      <Box flex={1} display="flex" flexDirection="column" justifyContent="center" gap={10}>
+        <img src="/images/logo.svg" />
         <Box display="flex" flexDirection="column" gap={1}>
-          <Typography fontSize={14} fontWeight={600}>
+          <Typography fontSize={14} fontWeight={600} color="#ffbc00" sx={{ pl: 3 }}>
             Connect with
           </Typography>
-          <Box p={2} border="1px solid black" borderRadius={2} display="flex" flexDirection="column" gap={1}>
-            <Typography fontSize={14} fontWeight={600}>
-              Social
+          <Box
+            p={2}
+            px={3}
+            borderRadius={2}
+            display="flex"
+            flexDirection="column"
+            gap={1}
+            sx={{
+              backgroundImage: 'url(/images/login-small-frame.png)',
+              backgroundSize: '100%',
+              aspectRatio: 2.86 / 1,
+            }}>
+            <Typography fontSize={14} color="#7c2828" fontWeight={600}>
+              Twitter
             </Typography>
             <Button
               fullWidth
               variant="contained"
               onClick={onClickLoginBtn}
               sx={{
-                bgcolor: '#019EF7',
+                borderRadius: 3,
+                backgroundColor: 'black',
+                backgroundImage: 'url(/images/button-black.png)',
+                backgroundSize: '100%',
+                aspectRatio: 5.62 / 1,
                 boxShadow: 'none',
-                height: '40px',
                 '&:hover': {
                   boxShadow: 'none',
+                  backgroundColor: 'black',
+                  backgroundImage: 'url(/images/button-black-pressed.png)',
                 },
               }}>
-              <img src="/images/icons/twitter.png" alt="twitter" width={24} />
+              <img src="/images/icons/x.png" alt="x" width={30} />
             </Button>
           </Box>
-          <Box display="flex" alignItems="center" justifyContent="center" gap={1}>
-            <img src="/images/icons/privy.png" alt="privy" width={20} />
-            <Typography fontSize={12} color="grey" align="center">
+          <Box display="flex" alignItems="center" justifyContent="center" gap={0.5}>
+            <img src="/images/icons/privy.png" alt="privy" width={12} />
+            <Typography fontSize={12} color="#ffbc00" align="center">
               Protected by Privy
             </Typography>
           </Box>
@@ -80,10 +102,11 @@ const Login = () => {
           fontSize={14}
           fontWeight={600}
           align="center"
+          color="white"
           sx={{
             '& span': {
               cursor: 'pointer',
-              color: '#019EF7',
+              color: '#ffbc00',
               textDecoration: 'underline',
             },
           }}>

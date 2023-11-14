@@ -18,7 +18,11 @@ import reportWebVitals from './reportWebVitals';
 
 const { PRIVY_APP_ID } = environments;
 
-const theme = createTheme();
+const theme = createTheme({
+  typography: {
+    fontFamily: "'Wix Madefor Display', sans-serif",
+  },
+});
 
 // default: 10s for stale time, 10m for cache time
 const queryClient = new QueryClient({

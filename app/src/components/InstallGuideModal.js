@@ -1,24 +1,15 @@
 import { useState, useEffect } from 'react';
-import { Box, Grid, Dialog, Typography, IconButton } from '@mui/material';
-import HighlightOffRoundedIcon from '@mui/icons-material/HighlightOffRounded';
+import { Box, Dialog, Typography } from '@mui/material';
 
 import { getPWADisplayMode, getUserOS } from '../utils/pwa';
 
-const guideSteps = {
-  Android: [
-    {
-      text: 'Click ellipse button',
-      img: '/images/guides/android-1.png',
-    },
-    { text: `Click "Install App"`, img: '/images/guides/android-2.png' },
-  ],
-  iOS: [
-    {
-      text: 'Tap on Share',
-      img: '/images/guides/ios-1.png',
-    },
-    { text: `Add to Homescreen`, img: '/images/guides/ios-2.png' },
-  ],
+const guideMap = {
+  Android: {
+    image: '/images/guides/ios.png',
+    step1Text: 'Tap ellipse button',
+    step2Text: 'Install App',
+  },
+  iOS: { image: '/images/guides/ios.png', step1Text: 'Tap on Share', step2Text: 'Add to Home Screen' },
 };
 
 const InstallGuideModal = () => {
@@ -37,62 +28,77 @@ const InstallGuideModal = () => {
     }
   }, []);
 
-  const steps = guideSteps[modalStatus?.os || ''];
+  const guide = guideMap[modalStatus?.os] || {};
 
   return (
     <Dialog
       maxWidth="sm"
       fullWidth
       open={modalStatus.open}
-      onClose={() => {}}
+      onClose={() => setModalStatus({ open: false, os: null })}
       PaperProps={{
-        sx: { borderRadius: 4 },
-      }}
-    >
-      <Box p={2}>
-        <Box display="flex" justifyContent="flex-end">
-          <IconButton onClick={() => setModalStatus({ open: false, os: null })}>
-            <HighlightOffRoundedIcon />
-          </IconButton>
-        </Box>
-        <Box display="flex" flexDirection="column" gap={1}>
-          <Typography fontSize={20} fontWeight={600} align="center">
-            Add to home page
-          </Typography>
-          <Typography fontWeight={600} align="center">
+        sx: {
+          borderRadius: 4,
+          position: 'relative',
+          bgcolor: 'transparent',
+          backgroundImage: 'url(/images/popup.png)',
+          backgroundSize: '100%',
+          overflow: 'visible',
+        },
+      }}>
+      <Box position="absolute" width="75%" sx={{ top: -24, left: '50%', transform: 'translateX(-50%)' }}>
+        <img src="/images/popup-title.png" width="100%" alt="" />
+        <img
+          src="/images/texts/add-to-home-page.png"
+          width="100%"
+          alt="Add to home page"
+          style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}
+        />
+      </Box>
+      <Box p={3} pt={6} pb={4}>
+        <Box display="flex" flexDirection="column" gap={3}>
+          <Typography color="#29000b" fontWeight={700} align="center">
             To start playing, you need to add this website to your home screen.
           </Typography>
-        </Box>
-        <Grid container spacing={1} sx={{ marginTop: 4 }}>
-          {steps?.map((step, index) => (
-            <Grid key={step.text} item xs={6}>
-              <Box
-                display="flex"
-                flexDirection="column"
-                alignItems="center"
-                gap={1}
-                sx={{
-                  '& img': {
-                    display: 'block',
-                    width: '100%',
-                  },
-                }}
-              >
-                <Typography
-                  fontWeight={600}
-                  align="center"
-                  sx={{ textDecoration: 'underline' }}
-                >
-                  Step {index + 1}
+          <Box display="flex" gap={2} sx={{ '& .MuiTypography-root': { fontWeight: 800, fontSize: '1.2rem' } }}>
+            <Box flex={1} display="flex" justifyContent="center" gap={0.75}>
+              <Typography color="#29000b">Step </Typography>
+              <Box bgcolor="#bf5837" borderRadius="50%" width="1.7rem" height="1.7rem">
+                <Typography color="white" textAlign="center">
+                  1
                 </Typography>
-                <Typography fontSize={12} fontWeight={600} align="center">
-                  {step.text}
-                </Typography>
-                <img src={step.img} />
               </Box>
-            </Grid>
-          ))}
-        </Grid>
+            </Box>
+            <Box flex={1} display="flex" justifyContent="center" gap={0.75}>
+              <Typography color="#29000b">Step </Typography>
+              <Box bgcolor="#bf5837" borderRadius="50%" width="1.7rem" height="1.7rem">
+                <Typography color="white" textAlign="center">
+                  2
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+          <img src={guide.image} width="100%" alt="Tap on Share & Add to Home Screen" />
+          <Box
+            display="flex"
+            gap={2}
+            sx={{
+              '& .MuiTypography-root': {
+                fontWeight: 700,
+                fontSize: '1.2rem',
+                textAlign: 'center',
+                color: '#29000b',
+                lineHeight: '1.2em',
+              },
+            }}>
+            <Box flex={1}>
+              <Typography>{guide.step1Text}</Typography>
+            </Box>
+            <Box flex={1}>
+              <Typography>{guide.step2Text}</Typography>
+            </Box>
+          </Box>
+        </Box>
       </Box>
     </Dialog>
   );
