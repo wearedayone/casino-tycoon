@@ -6,13 +6,12 @@ import configs from '../../configs/configs.json';
 
 const { width } = configs;
 
-const y = 550;
 const px = 40;
 const buttonSize = 186;
 const verticalGap = buttonSize + 50;
 
 class InfoButtons extends Phaser.GameObjects.Container {
-  constructor(scene) {
+  constructor(scene, y) {
     super(scene, 0, 0);
 
     this.settingButton = new Button(scene, buttonSize / 2 + px, y, 'button-setting', 'button-setting-pressed', () =>

@@ -6,12 +6,11 @@ import Balance from './Balance';
 
 const { width } = configs;
 
-const y = 250;
 const buttonWidth = 400;
 const gap = buttonWidth + 20;
 
 class Header extends Phaser.GameObjects.Container {
-  constructor(scene) {
+  constructor(scene, y) {
     super(scene, 0, 0);
 
     this.dailyMoney = new DailyMoney(scene, width / 2 - gap, y, '10k');
