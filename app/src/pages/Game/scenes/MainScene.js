@@ -29,15 +29,15 @@ class MainScene extends Phaser.Scene {
     const gangsterHouse = new GangsterHouse(this, 2200, 1, 200);
     this.add.existing(gangsterHouse);
 
-    const popupBuy = new PopupBuy(this, 955, 1650);
+    const popupBuy = new PopupBuy(this, 955, 1600);
     this.add.existing(popupBuy);
 
-    const popupWar = new PopupWar(this, 35, 1900);
+    const popupWar = new PopupWar(this, 35, 1850);
     this.add.existing(popupWar);
 
     const footer = new Footer(
       this,
-      2650,
+      2600,
       () => popupWar.setVisible(!popupWar.visible),
       () => popupBuy.setVisible(!popupBuy.visible)
     );
