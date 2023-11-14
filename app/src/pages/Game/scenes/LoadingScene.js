@@ -68,6 +68,8 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('popup', '/images/popup.png');
     this.load.image('popup-title', '/images/popup-title.png');
     this.load.image('popup-welcome-nowar', '/images/popup-welcome-nowar.png');
+    this.load.image('popup-buy', '/images/popup-buy.png');
+    this.load.image('popup-war', '/images/popup-war.png');
 
     this.load.image('ribbon-welcome', '/images/ribbon-welcome.png');
     this.load.image('coin', '/images/coin.png');
@@ -92,6 +94,9 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-add-pressed', '/images/button-add-pressed.png');
     this.load.image('button-claim', '/images/button-claim.png');
     this.load.image('button-claim-pressed', '/images/button-claim-pressed.png');
+
+    this.load.image('icon-history', '/images/icon-history.png');
+    this.load.image('icon-war', '/images/icon-war.png');
   }
 
   create() {
