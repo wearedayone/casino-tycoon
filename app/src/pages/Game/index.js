@@ -80,6 +80,10 @@ const Game = () => {
         gameRef.current.events.emit('update-rank', { rank: rankData?.data?.rank || '' });
       });
 
+      gameRef.current.events.on('request-networth', () => {
+        gameRef.current.events.emit('update-networth', { networth: gamePlay.networth });
+      });
+
       return () => {
         try {
           // game.scene.destroy();
