@@ -78,7 +78,9 @@ const Game = () => {
       });
 
       game.events.on('request-rank', () => {
-        gameRef.current.events.emit('update-rank', { rank: rankData?.data?.rank || '' });
+        getRank()
+          .then((res) => gameRef.current.events.emit('update-rank', { rank: res.data.rank }))
+          .catch((err) => console.error(err));
       });
 
       game.events.on('request-networth', () => {
