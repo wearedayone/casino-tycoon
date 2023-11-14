@@ -2,7 +2,8 @@ import Phaser from 'phaser';
 
 import Background from '../components/common/Background';
 import PopupWelcomeNoWar from '../components/popup/PopupWelcomeNoWar';
-import Header from '../components/header/Header';
+import Header from '../components/action-buttons/Header';
+import InfoButtons from '../components/action-buttons/InfoButtons';
 
 class MainScene extends Phaser.Scene {
   constructor() {
@@ -17,6 +18,9 @@ class MainScene extends Phaser.Scene {
 
     const header = new Header(this);
     this.add.existing(header);
+
+    const infoButtons = new InfoButtons(this);
+    this.add.existing(infoButtons);
 
     // test
     const popup = new PopupWelcomeNoWar(this, 2500);
