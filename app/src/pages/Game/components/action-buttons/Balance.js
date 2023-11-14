@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 
+import { formatter } from '../../../../utils/numbers';
 import Button from '../button/Button';
 
 const buttonWidth = 77;
@@ -7,7 +8,7 @@ const px = 15;
 const py = 5;
 
 class Balance extends Phaser.GameObjects.Container {
-  constructor(scene, x, y, img, text) {
+  constructor(scene, x, y, img, value) {
     super(scene, 0, 0);
 
     this.container = scene.add.image(x, y, img).setOrigin(0.5, 0.5);
@@ -19,8 +20,8 @@ class Balance extends Phaser.GameObjects.Container {
       'button-add-pressed',
       () => console.log('clicked')
     );
-    this.text = scene.add
-      .text(x + 10, y - 5, text, {
+    this.valueText = scene.add
+      .text(x + 10, y - 5, formatter.format(value), {
         // font: 'bold 60px Arial',
         fontSize: '60px',
         // fontWeight: 'bold',
@@ -31,11 +32,11 @@ class Balance extends Phaser.GameObjects.Container {
 
     this.add(this.container);
     this.add(this.addButton);
-    this.add(this.text);
+    this.add(this.valueText);
   }
 
-  updateText(newText) {
-    this.text.text = newText;
+  updateValue(newValue) {
+    this.valueText.text = formatter.format(newValue);
   }
 }
 

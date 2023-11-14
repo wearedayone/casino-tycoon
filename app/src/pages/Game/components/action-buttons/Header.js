@@ -10,16 +10,28 @@ const buttonWidth = 400;
 const gap = buttonWidth + 20;
 
 class Header extends Phaser.GameObjects.Container {
+  timeout;
+
   constructor(scene, y) {
     super(scene, 0, 0);
 
-    this.dailyMoney = new DailyMoney(scene, width / 2 - gap, y, '10k');
-    this.ethBalance = new Balance(scene, width / 2, y, 'eth-balance', '10k');
-    this.fiatBalance = new Balance(scene, width / 2 + gap, y, 'fiat-balance', '10k');
+    this.dailyMoney = new DailyMoney(scene, width / 2 - gap, y, 0);
+    this.ethBalance = new Balance(scene, width / 2, y, 'eth-balance', 0);
+    this.fiatBalance = new Balance(scene, width / 2 + gap, y, 'fiat-balance', 0);
 
     this.add(this.dailyMoney);
     this.add(this.ethBalance);
     this.add(this.fiatBalance);
+
+    scene.game.events.on('update-balances', (data) => this.updateValues(data));
+    scene.game.events.emit('request-balances');
+  }
+
+  updateValues({ dailyMoney, ETHBalance, tokenBalance }) {
+    console.log('update values', { dailyMoney, ETHBalance, tokenBalance });
+    this.dailyMoney.updateValue(dailyMoney);
+    this.ethBalance.updateValue(ETHBalance);
+    this.fiatBalance.updateValue(tokenBalance);
   }
 }
 

@@ -25,14 +25,8 @@ class InfoButtons extends Phaser.GameObjects.Container {
       'button-referral-pressed',
       () => console.log('referral clicked')
     );
-    this.rankButton = new RankButton(
-      scene,
-      width - px - buttonSize / 2,
-      y,
-      'button-rank',
-      'button-rank-pressed',
-      () => console.log('rank clicked'),
-      57
+    this.rankButton = new RankButton(scene, width - px - buttonSize / 2, y, 'button-rank', 'button-rank-pressed', () =>
+      console.log('rank clicked')
     );
     this.portfolioButton = new Button(
       scene,

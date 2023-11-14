@@ -61,12 +61,12 @@ export const createUserIfNotExist = async (userId) => {
     const value = await ethersProvider.getBalance(user.wallet.address);
     console.log(formatEther(value));
     const { ETHBalance } = snapshot.data();
-    if (ETHBalance !== formatEther(value)) {
+    if (ETHBalance !== Number(formatEther(value))) {
       await firestore
         .collection('user')
         .doc(userId)
         .update({
-          ETHBalance: formatEther(value),
+          ETHBalance: Number(formatEther(value)),
         });
     }
   }
