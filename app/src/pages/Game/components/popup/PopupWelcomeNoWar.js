@@ -1,5 +1,5 @@
 import Popup from './Popup';
-import Button from '../common/Button';
+import Button from '../button/Button';
 import configs from '../../configs/configs.json';
 import { formatter } from '../../../../utils/numbers';
 
@@ -23,7 +23,7 @@ class PopupWelcomeNoWar extends Popup {
       .text(width / 2, height / 2 + 150, `+${formatter.format(value)}`, {
         fontSize: '128px',
         color: '#fff',
-        fontFamily: 'WixMadeforDisplay',
+        fontFamily: 'WixMadeforDisplayBold',
       })
       .setOrigin(0.5, 0.5);
     this.valueText.setStroke('#7C2828', 20);

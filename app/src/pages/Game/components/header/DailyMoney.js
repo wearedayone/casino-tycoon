@@ -9,8 +9,8 @@ class DailyMoney extends Phaser.GameObjects.Container {
       .text(x + 20, y - 10, text, {
         // font: 'bold 60px Arial',
         fontSize: '60px',
-        fontWeight: 'bold',
-        fontFamily: "'WixMadeforDisplay', sans-serif",
+        // fontWeight: 'bold',
+        fontFamily: 'WixMadeforDisplayBold',
         color: '#7C2828',
       })
       .setOrigin(0.5, 0.5);

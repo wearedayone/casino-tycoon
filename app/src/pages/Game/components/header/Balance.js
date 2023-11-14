@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 
-import Button from '../common/Button';
+import Button from '../button/Button';
 
 const buttonWidth = 77;
 const px = 15;
@@ -23,8 +23,8 @@ class Balance extends Phaser.GameObjects.Container {
       .text(x + 10, y - 5, text, {
         // font: 'bold 60px Arial',
         fontSize: '60px',
-        fontWeight: 'bold',
-        fontFamily: 'WixMadeforDisplay',
+        // fontWeight: 'bold',
+        fontFamily: 'WixMadeforDisplayBold',
         color: '#7C2828',
       })
       .setOrigin(0.5, 0.5);
