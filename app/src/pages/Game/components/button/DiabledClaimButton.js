@@ -12,7 +12,7 @@ class DisabledClaimButton extends Button {
       .text(0, -40, 'Claimed', {
         fontSize: '82px',
         color: '#5895fd',
-        fontFamily: 'WixMadeforDisplayBold',
+        fontFamily: 'WixMadeforDisplayExtraBold',
       })
       .setOrigin(0.5, 0.5);
 
@@ -20,7 +20,7 @@ class DisabledClaimButton extends Button {
       .text(0, 35, '', {
         fontSize: '60px',
         color: '#fff',
-        fontFamily: 'WixMadeforDisplayBold',
+        fontFamily: 'WixMadeforDisplayExtraBold',
       })
       .setOrigin(0.5, 0.5);
     this.countdownText.setStroke('#0004A0', 3);

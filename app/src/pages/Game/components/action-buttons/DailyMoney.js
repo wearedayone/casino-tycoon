@@ -10,9 +10,9 @@ class DailyMoney extends Phaser.GameObjects.Container {
     this.valueText = scene.add
       .text(x + 20, y - 10, formatter.format(value), {
         // font: 'bold 60px Arial',
-        fontSize: '60px',
+        fontSize: '50px',
         // fontWeight: 'bold',
-        fontFamily: 'WixMadeforDisplayBold',
+        fontFamily: 'WixMadeforDisplayExtraBold',
         color: '#7C2828',
       })
       .setOrigin(0.5, 0.5);

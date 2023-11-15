@@ -9,7 +9,7 @@ class RankButton extends Button {
     this.valueText = scene.add
       .text(0, buttonSize / 4 + 10, ``, {
         fontSize: '42px',
-        fontFamily: 'WixMadeforDisplayBold',
+        fontFamily: 'WixMadeforDisplayExtraBold',
         color: '#7C2828',
       })
       .setOrigin(0.5, 0.5);

@@ -31,7 +31,7 @@ class PopupSettings extends Popup {
     this.username = scene.add.text(x + 20, usernameY, 'username', {
       fontSize: '60px',
       color: '#29000b',
-      fontFamily: 'WixMadeforDisplayBold',
+      fontFamily: 'WixMadeforDisplayExtraBold',
     });
     this.walletContainer = scene.add.image(width / 2, walletContainerY, 'settings-wallet-container');
     this.avatar = scene.add.image(x, walletContainerY, 'avatar');

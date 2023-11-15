@@ -22,9 +22,9 @@ class Balance extends Phaser.GameObjects.Container {
     this.valueText = scene.add
       .text(x + 10, y - 5, value, {
         // font: 'bold 60px Arial',
-        fontSize: '60px',
+        fontSize: '50px',
         // fontWeight: 'bold',
-        fontFamily: 'WixMadeforDisplayBold',
+        fontFamily: 'WixMadeforDisplayExtraBold',
         color: '#7C2828',
       })
       .setOrigin(0.5, 0.5);

@@ -18,7 +18,7 @@ class TextButton extends Button {
       .text(textX, 0, text, {
         fontSize,
         color,
-        fontFamily: 'WixMadeforDisplayBold',
+        fontFamily: 'WixMadeforDisplayExtraBold',
       })
       .setOrigin(0.5, 0.5);
 

@@ -17,7 +17,7 @@ class ActiveClaimButton extends Button {
       .text(-30, -40, 'Claim', {
         fontSize: '82px',
         color: '#fff',
-        fontFamily: 'WixMadeforDisplayBold',
+        fontFamily: 'WixMadeforDisplayExtraBold',
       })
       .setOrigin(0.5, 0.5);
     this.text.setStroke('#0004A0', 3);
@@ -26,7 +26,7 @@ class ActiveClaimButton extends Button {
       .text(0, 35, '', {
         fontSize: '60px',
         color: '#fff',
-        fontFamily: 'WixMadeforDisplayBold',
+        fontFamily: 'WixMadeforDisplayExtraBold',
       })
       .setOrigin(0.5, 0.5);
     this.rewardText.setStroke('#0004A0', 3);

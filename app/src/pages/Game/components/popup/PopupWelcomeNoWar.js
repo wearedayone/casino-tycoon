@@ -23,7 +23,7 @@ class PopupWelcomeNoWar extends Popup {
       .text(width / 2, height / 2 + 150, `+${formatter.format(value)}`, {
         fontSize: '128px',
         color: '#fff',
-        fontFamily: 'WixMadeforDisplayBold',
+        fontFamily: 'WixMadeforDisplayExtraBold',
       })
       .setOrigin(0.5, 0.5);
     this.valueText.setStroke('#7C2828', 20);

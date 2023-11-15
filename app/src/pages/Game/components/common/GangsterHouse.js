@@ -15,7 +15,7 @@ class GangsterHouse extends Phaser.GameObjects.Container {
     this.sign = scene.add.image(width / 2, y, 'gangster-house-sign').setOrigin(0.5, 0.5);
     this.valueText = scene.add.text(width / 2, this.sign.y - 30, ``, {
       fontSize: '82px',
-      fontFamily: 'WixMadeforDisplayBold',
+      fontFamily: 'WixMadeforDisplayExtraBold',
       color: '#fff',
     });
 

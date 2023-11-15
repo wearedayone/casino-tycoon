@@ -53,7 +53,7 @@ class Popup extends Phaser.GameObjects.Container {
       this.add(this.ribbon);
 
       const fontSize = '84px',
-        fontFamily = 'WixMadeforDisplayBold';
+        fontFamily = 'WixMadeforDisplayExtraBold';
 
       const titleY = this.ribbon.y - 18;
       this.title = scene.add
