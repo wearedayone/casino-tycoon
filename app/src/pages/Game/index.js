@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Box } from '@mui/material';
 import Phaser from 'phaser';
 import { useQuery } from '@tanstack/react-query';
@@ -6,8 +7,9 @@ import { useQuery } from '@tanstack/react-query';
 import useUserStore from '../../stores/user.store';
 import useSystemStore from '../../stores/system.store';
 import useSettingStore from '../../stores/setting.store';
-import { getRank } from '../../services/user.service';
+import { getRank, toggleWarStatus } from '../../services/user.service';
 import { claimToken } from '../../services/transaction.service';
+import { getNextWarSnapshotUnixTime } from '../../services/gamePlay.service';
 import QueryKeys from '../../utils/queryKeys';
 
 import configs from './configs/configs.json';
@@ -18,6 +20,7 @@ const { width, height } = configs;
 const MILISECONDS_IN_A_DAY = 86400 * 1000;
 
 const Game = () => {
+  const navigate = useNavigate();
   const gameRef = useRef();
   const gameLoaded = useRef();
   const [loaded, setLoaded] = useState(false);
@@ -110,10 +113,29 @@ const Game = () => {
       });
 
       game.events.on('request-claimable-status', () => {
-        console.log('request claimable stauts');
         const nextClaimTime = gamePlay.lastClaimTime.toDate().getTime() + activeSeason.claimGapInSeconds * 1000;
         const claimable = Date.now() > nextClaimTime;
         gameRef.current.events.emit('update-claimable-status', { claimable });
+      });
+
+      game.events.on('request-war-status', () => {
+        gameRef.current.events.emit('update-war-status', { war: gamePlay.war });
+      });
+
+      game.events.on('change-war-status', ({ war }) => {
+        gameRef.current.events.emit('update-war-status', { war });
+        toggleWarStatus({ war }).catch((err) => {
+          console.error(err);
+          gameRef.current.events.emit('update-war-status', { war: !war });
+        });
+      });
+
+      game.events.on('request-next-war-time', () => {
+        getNextWarSnapshotUnixTime()
+          .then((res) => {
+            gameRef.current.events.emit('update-next-war-time', { time: res.data.time });
+          })
+          .catch((err) => console.error(err));
       });
 
       game.events.on('claim', async () => {
@@ -159,7 +181,6 @@ const Game = () => {
       const nextClaimTime = gamePlay?.lastClaimTime.toDate().getTime() + activeSeason.claimGapInSeconds * 1000;
       const now = Date.now();
       const claimable = now > nextClaimTime;
-      console.log(new Date(now), new Date(nextClaimTime), claimable);
       gameRef.current?.events.emit('update-claimable-status', { claimable });
     }
   }, [activeSeason?.claimGapInSeconds, gamePlay?.lastClaimTime]);
@@ -172,8 +193,17 @@ const Game = () => {
     }
   }, [gamePlay?.lastClaimTime, gamePlay?.pendingreward, dailyMoney]);
 
+  useEffect(() => {
+    if (gamePlay) {
+      gameRef.current?.events.emit('update-war-status', { war: gamePlay.war });
+    }
+  }, [gamePlay?.war]);
+
   return (
     <Box display="flex" justifyContent="center" alignItems="center">
+      <button style={{ position: 'fixed', top: 20, left: 20 }} onClick={() => navigate('/')}>
+        Home
+      </button>
       <Box
         id="game-container"
         width="100vw"

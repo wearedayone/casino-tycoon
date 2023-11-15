@@ -1,5 +1,6 @@
-import { firestore } from '../configs/firebase.config.js';
+import moment from 'moment';
 
+import { firestore } from '../configs/firebase.config.js';
 import { getActiveSeason } from './season.service.js';
 import { getUserDisplayInfos } from './user.service.js';
 import { calculateReward } from '../utils/formulas.js';
@@ -26,4 +27,15 @@ export const getLeaderboard = async () => {
     networth: doc.networth,
     reward: calculateReward(season.prizePool, season.rankingRewards, index),
   }));
+};
+
+export const getNextWarSnapshotUnixTime = async () => {
+  const dayNow = moment().format('DD/MM/YYYY');
+  const warSnapshotToday = moment(`${dayNow} 01:00:00`, 'DD/MM/YYYY HH:mm:ss'); // TODO: update war snapshot time
+
+  const isDoneToday = moment().isAfter(warSnapshotToday);
+  if (!isDoneToday) return warSnapshotToday.toDate().getTime();
+
+  const nextWarSnapshot = warSnapshotToday.add(1, 'day');
+  return nextWarSnapshot.toDate().getTime();
 };

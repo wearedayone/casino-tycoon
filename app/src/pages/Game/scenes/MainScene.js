@@ -9,6 +9,7 @@ import Footer from '../components/action-buttons/Footer';
 import PopupBuy from '../components/popup/PopupBuy';
 import PopupWar from '../components/popup/PopupWar';
 import PopupSettings from '../components/popup/PopupSettings';
+import PopupDailyGangWar from '../components/popup/PopupDailyGangWar';
 
 class MainScene extends Phaser.Scene {
   constructor() {
@@ -30,7 +31,7 @@ class MainScene extends Phaser.Scene {
     const popupBuy = new PopupBuy(this, 955, 1600);
     this.add.existing(popupBuy);
 
-    const popupWar = new PopupWar(this, 35, 1850);
+    const popupWar = new PopupWar(this, 30, 1850);
     this.add.existing(popupWar);
 
     const footer = new Footer(
@@ -48,6 +49,9 @@ class MainScene extends Phaser.Scene {
     const popupSettings = new PopupSettings(this, 2500);
     this.add.existing(popupSettings);
     popupSettings.setVisible(false);
+
+    this.popupDailyGangWar = new PopupDailyGangWar(this);
+    this.add.existing(this.popupDailyGangWar);
 
     const infoButtons = new InfoButtons(this, 550, () => popupSettings.setVisible(!popupSettings.visible));
     this.add.existing(infoButtons);

@@ -71,8 +71,10 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('popup-welcome-nowar', '/images/popup-welcome-nowar.png');
     this.load.image('popup-buy', '/images/popup-buy.png');
     this.load.image('popup-war', '/images/popup-war.png');
+    this.load.image('popup-daily-gang-war', '/images/popup-daily-gang-war.png');
 
     this.load.image('ribbon-welcome', '/images/ribbon-welcome.png');
+    this.load.image('ribbon-daily-gang-war', '/images/ribbon-daily-gang-war.png');
     this.load.image('coin', '/images/coin.png');
 
     this.load.image('button-blue', '/images/button-blue.png');
@@ -115,6 +117,8 @@ class LoadingScene extends Phaser.Scene {
 
     this.load.image('icon-history', '/images/icon-history.png');
     this.load.image('icon-war', '/images/icon-war.png');
+    this.load.image('icon-checked', '/images/icon-checked.png');
+    this.load.image('icon-unchecked', '/images/icon-unchecked.png');
   }
 
   create() {

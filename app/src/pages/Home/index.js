@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Box } from '@mui/material';
 
 import Header from './components/Header';
@@ -11,10 +12,14 @@ import LeaderboardModal from './components/LeaderboardModal';
 import StatisticsModal from './components/StatisticsModal';
 
 const Home = () => {
+  const navigate = useNavigate();
   const [openingModal, setOpeningModal] = useState(null);
 
   return (
     <Box height="100vh" display="flex" flexDirection="column">
+      <button style={{ position: 'fixed', top: 20, left: 20 }} onClick={() => navigate('/game')}>
+        Game
+      </button>
       <Box
         display="flex"
         flexDirection="column"
