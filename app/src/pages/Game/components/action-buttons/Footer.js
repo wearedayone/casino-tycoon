@@ -12,18 +12,15 @@ const px = 40;
 const buttonWidth = 287;
 
 class Footer extends Phaser.GameObjects.Container {
-  constructor(scene, y, onButtonWarClick, onButtonBuyClick) {
+  constructor(scene, y) {
     super(scene, 0, 0);
 
-    this.buttonWar = new Button(scene, buttonWidth / 2 + px, y, 'button-war', 'button-war-pressed', onButtonWarClick);
+    this.buttonWar = new Button(scene, buttonWidth / 2 + px, y, 'button-war', 'button-war-pressed', () =>
+      scene.popupWar.setVisible(!scene.popupWar.visible)
+    );
 
-    this.buttonBuy = new Button(
-      scene,
-      width - px - buttonWidth / 2,
-      y,
-      'button-buy',
-      'button-buy-pressed',
-      onButtonBuyClick
+    this.buttonBuy = new Button(scene, width - px - buttonWidth / 2, y, 'button-buy', 'button-buy-pressed', () =>
+      scene.popupBuy.setVisible(!scene.popupBuy.visible)
     );
 
     this.buttonClaim = new ClaimButton(scene, width / 2, y);

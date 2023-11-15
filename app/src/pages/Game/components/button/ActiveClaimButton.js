@@ -4,7 +4,6 @@ import { formatter } from '../../../../utils/numbers';
 class ActiveClaimButton extends Button {
   constructor(scene, x, y) {
     super(scene, x, y, 'button-blue', 'button-blue-pressed', () => {
-      console.log('Claim');
       if (this.loading) return;
       this.loading = true;
       this.coinImage?.setVisible(false);

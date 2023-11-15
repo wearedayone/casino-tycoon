@@ -10,13 +10,20 @@ import PopupBuy from '../components/popup/PopupBuy';
 import PopupWar from '../components/popup/PopupWar';
 import PopupSettings from '../components/popup/PopupSettings';
 import PopupDailyGangWar from '../components/popup/PopupDailyGangWar';
+import PopupSafeHouseUpgrade from '../components/popup/PopupSafeHouseUpgrade';
 
 class MainScene extends Phaser.Scene {
   constructor() {
     super('MainScene');
   }
 
-  preload() {}
+  preload() {
+    this.load.scenePlugin({
+      key: 'rexuiplugin',
+      url: '/libs/rexui.min.js',
+      sceneKey: 'rexUI',
+    });
+  }
 
   create() {
     this.background = new Background(this, 'bg');
@@ -28,18 +35,13 @@ class MainScene extends Phaser.Scene {
     const gangsterHouse = new GangsterHouse(this, 2200, 1, 200);
     this.add.existing(gangsterHouse);
 
-    const popupBuy = new PopupBuy(this, 955, 1600);
-    this.add.existing(popupBuy);
+    this.popupBuy = new PopupBuy(this, 955, 1600);
+    this.add.existing(this.popupBuy);
 
-    const popupWar = new PopupWar(this, 30, 1850);
-    this.add.existing(popupWar);
+    this.popupWar = new PopupWar(this, 30, 1850);
+    this.add.existing(this.popupWar);
 
-    const footer = new Footer(
-      this,
-      2600,
-      () => popupWar.setVisible(!popupWar.visible),
-      () => popupBuy.setVisible(!popupBuy.visible)
-    );
+    const footer = new Footer(this, 2600);
     footer.setDepth(1);
     this.add.existing(footer);
 
@@ -52,6 +54,9 @@ class MainScene extends Phaser.Scene {
 
     this.popupDailyGangWar = new PopupDailyGangWar(this);
     this.add.existing(this.popupDailyGangWar);
+
+    this.popupSafeHouseUpgrade = new PopupSafeHouseUpgrade(this);
+    this.add.existing(this.popupSafeHouseUpgrade);
 
     const infoButtons = new InfoButtons(this, 550, () => popupSettings.setVisible(!popupSettings.visible));
     this.add.existing(infoButtons);

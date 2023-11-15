@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Box } from '@mui/material';
 import Phaser from 'phaser';
 import { useQuery } from '@tanstack/react-query';
+import { useSnackbar } from 'notistack';
 
 import useUserStore from '../../stores/user.store';
 import useSystemStore from '../../stores/system.store';
@@ -11,6 +11,8 @@ import { getRank, toggleWarStatus } from '../../services/user.service';
 import { claimToken } from '../../services/transaction.service';
 import { getNextWarSnapshotUnixTime } from '../../services/gamePlay.service';
 import QueryKeys from '../../utils/queryKeys';
+import useSmartContract from '../../hooks/useSmartContract';
+import { create, validate } from '../../services/transaction.service';
 
 import configs from './configs/configs.json';
 import LoadingScene from './scenes/LoadingScene';
@@ -20,7 +22,7 @@ const { width, height } = configs;
 const MILISECONDS_IN_A_DAY = 86400 * 1000;
 
 const Game = () => {
-  const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
   const gameRef = useRef();
   const gameLoaded = useRef();
   const [loaded, setLoaded] = useState(false);
@@ -29,6 +31,7 @@ const Game = () => {
   const activeSeason = useSystemStore((state) => state.activeSeason);
   const sound = useSettingStore((state) => state.sound);
   const toggleSound = useSettingStore((state) => state.toggleSound);
+  const { buyWorkerOrBuilding } = useSmartContract();
 
   const { status, data: rankData } = useQuery({
     queryFn: getRank,
@@ -38,10 +41,35 @@ const Game = () => {
   });
 
   const { username, address, avatarURL, tokenBalance, ETHBalance } = profile || { tokenBalance: 0, ETHBalance: 0 };
-  const { numberOfMachines, numberOfWorkers } = gamePlay || { numberOfMachines: 0, numberOfWorkers: 0 };
-  const { machine, worker } = activeSeason || { machine: { dailyReward: 0 }, worker: { dailyReward: 0 } };
+  const { numberOfMachines, numberOfWorkers, numberOfBuildings, networth } = gamePlay || {
+    numberOfMachines: 0,
+    numberOfWorkers: 0,
+    numberOfBuildings: 0,
+    networth: 0,
+  };
+  const { machine, worker, building, buildingSold } = activeSeason || {
+    machine: { dailyReward: 0 },
+    worker: { dailyReward: 0 },
+    building: { basePrice: 0, priceStep: 0 },
+    buildingSold: 0,
+  };
 
   const dailyMoney = numberOfMachines * machine.dailyReward + numberOfWorkers * worker.dailyReward;
+
+  const buy = async (quantity) => {
+    try {
+      const res = await create({ type: 'buy-building', amount: quantity });
+      const { id, amount, value, type } = res.data;
+      const receipt = await buyWorkerOrBuilding(amount, value, type);
+      if (receipt.status === 1) {
+        await validate({ transactionId: id, txnHash: receipt.transactionHash });
+      }
+      enqueueSnackbar('Upgrade safehouse successfully', { variant: 'success' });
+    } catch (err) {
+      enqueueSnackbar(err.message, { variant: 'error' });
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
     if (profile && gamePlay && activeSeason && !loaded) {
@@ -147,6 +175,26 @@ const Game = () => {
         game.events.emit('claim-completed');
       });
 
+      game.events.on('upgrade-safehouse', async ({ quantity }) => {
+        try {
+          await buy(quantity);
+          game.events.emit('upgrade-safehouse-completed');
+        } catch (err) {
+          console.error(err);
+        }
+      });
+
+      game.events.on('request-buildings', () => {
+        game.events.emit('update-buildings', {
+          numberOfBuildings,
+          networth,
+          balance: tokenBalance,
+          sold: buildingSold,
+          basePrice: building.basePrice,
+          priceStep: building.priceStep,
+        });
+      });
+
       gameRef.current = game;
 
       return () => {
@@ -199,11 +247,19 @@ const Game = () => {
     }
   }, [gamePlay?.war]);
 
+  useEffect(() => {
+    gameRef.current?.events.emit('update-buildings', {
+      numberOfBuildings,
+      networth,
+      balance: tokenBalance,
+      sold: buildingSold,
+      basePrice: building.basePrice,
+      priceStep: building.priceStep,
+    });
+  }, [numberOfBuildings, networth, tokenBalance, building, buildingSold]);
+
   return (
     <Box display="flex" justifyContent="center" alignItems="center">
-      <button style={{ position: 'fixed', top: 20, left: 20 }} onClick={() => navigate('/')}>
-        Home
-      </button>
       <Box
         id="game-container"
         width="100vw"

@@ -45,6 +45,10 @@ class TextButton extends Button {
       this.add(this.icon);
     }
   }
+
+  updateText(newText) {
+    this.text.text = newText;
+  }
 }
 
 export default TextButton;
