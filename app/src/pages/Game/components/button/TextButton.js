@@ -29,6 +29,12 @@ class TextButton extends Button {
       case 'button-blue-long':
         textStrokeColor = '#0004a0';
         break;
+      case 'button-red-med':
+        textStrokeColor = '#9e0a2e';
+        break;
+      case 'button-green-long':
+        textStrokeColor = '#0c661e';
+        break;
     }
     if (textStrokeColor) this.text.setStroke(textStrokeColor, 10);
 
