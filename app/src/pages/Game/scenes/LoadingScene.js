@@ -66,6 +66,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('fiat-balance', '/images/fiat-balance.png');
 
     this.load.image('popup', '/images/popup.png');
+    this.load.image('popup-large', '/images/popup-large.png');
     this.load.image('popup-title', '/images/popup-title.png');
     this.load.image('popup-welcome-nowar', '/images/popup-welcome-nowar.png');
     this.load.image('popup-buy', '/images/popup-buy.png');
@@ -76,8 +77,18 @@ class LoadingScene extends Phaser.Scene {
 
     this.load.image('button-blue', '/images/button-blue.png');
     this.load.image('button-blue-pressed', '/images/button-blue-pressed.png');
+    this.load.image('button-blue-med', '/images/button-blue-med.png');
+    this.load.image('button-blue-med-pressed', '/images/button-blue-med-pressed.png');
+    this.load.image('button-red-med', '/images/button-red-med.png');
+    this.load.image('button-red-med-pressed', '/images/button-red-med-pressed.png');
+    this.load.image('button-blue-long', '/images/button-blue-long.png');
+    this.load.image('button-blue-long-pressed', '/images/button-blue-long-pressed.png');
+    this.load.image('button-green-long', '/images/button-green-long.png');
+    this.load.image('button-green-long-pressed', '/images/button-green-long-pressed.png');
     this.load.image('button-close', '/images/button-close.png');
     this.load.image('button-close-pressed', '/images/button-close-pressed.png');
+    this.load.image('button-copy', '/images/button-copy.png');
+    this.load.image('button-copy-pressed', '/images/button-copy-pressed.png');
     this.load.image('button-buy', '/images/button-buy.png');
     this.load.image('button-buy-pressed', '/images/button-buy-pressed.png');
     this.load.image('button-war', '/images/button-war.png');
@@ -94,6 +105,13 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-add-pressed', '/images/button-add-pressed.png');
     this.load.image('button-claim', '/images/button-claim.png');
     this.load.image('button-claim-pressed', '/images/button-claim-pressed.png');
+
+    // settings
+    this.load.image('settings-wallet-container', '/images/settings-wallet-container.png');
+    this.load.image('icon-settings', '/images/icons/settings.png');
+    this.load.image('icon-logout', '/images/icons/logout.png');
+    this.load.image('icon-sound-on', '/images/icons/sound-on.png');
+    this.load.image('icon-sound-off', '/images/icons/sound-off.png');
 
     this.load.image('icon-history', '/images/icon-history.png');
     this.load.image('icon-war', '/images/icon-war.png');

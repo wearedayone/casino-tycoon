@@ -31,7 +31,7 @@ const Game = () => {
     refetchInterval: 30 * 1000,
   });
 
-  const { tokenBalance, ETHBalance } = profile || { tokenBalance: 0, ETHBalance: 0 };
+  const { username, address, avatarURL, tokenBalance, ETHBalance } = profile || { tokenBalance: 0, ETHBalance: 0 };
   const { numberOfMachines, numberOfWorkers } = gamePlay || { numberOfMachines: 0, numberOfWorkers: 0 };
   const { machine, worker } = activeSeason || { machine: { dailyReward: 0 }, worker: { dailyReward: 0 } };
 
@@ -73,6 +73,10 @@ const Game = () => {
       const game = new Phaser.Game(config);
 
       // listeners
+      game.events.on('request-profile', () => {
+        gameRef.current.events.emit('update-profile', { username, address, avatarURL });
+      });
+
       game.events.on('request-balances', () => {
         gameRef.current.events.emit('update-balances', { dailyMoney, ETHBalance, tokenBalance });
       });
@@ -131,6 +135,10 @@ const Game = () => {
   useEffect(() => {
     gameRef.current?.events.emit('update-balances', { dailyMoney, ETHBalance, tokenBalance });
   }, [tokenBalance, ETHBalance, dailyMoney]);
+
+  useEffect(() => {
+    gameRef.current?.events.emit('update-profile', { username, address, avatarURL });
+  }, [username, address, avatarURL]);
 
   useEffect(() => {
     if (activeSeason?.claimGapInSeconds && gamePlay?.lastClaimTime) {

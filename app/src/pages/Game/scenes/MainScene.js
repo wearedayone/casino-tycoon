@@ -8,6 +8,7 @@ import GangsterHouse from '../components/common/GangsterHouse';
 import Footer from '../components/action-buttons/Footer';
 import PopupBuy from '../components/popup/PopupBuy';
 import PopupWar from '../components/popup/PopupWar';
+import PopupSettings from '../components/popup/PopupSettings';
 
 class MainScene extends Phaser.Scene {
   constructor() {
@@ -22,9 +23,6 @@ class MainScene extends Phaser.Scene {
 
     const header = new Header(this, 250);
     this.add.existing(header);
-
-    const infoButtons = new InfoButtons(this, 550);
-    this.add.existing(infoButtons);
 
     const gangsterHouse = new GangsterHouse(this, 2200, 1, 200);
     this.add.existing(gangsterHouse);
@@ -47,6 +45,12 @@ class MainScene extends Phaser.Scene {
     // test
     // const popup = new PopupWelcomeNoWar(this, 2500);
     // this.add.existing(popup);
+    const popupSettings = new PopupSettings(this, 2500);
+    this.add.existing(popupSettings);
+    popupSettings.setVisible(false);
+
+    const infoButtons = new InfoButtons(this, 550, () => popupSettings.setVisible(!popupSettings.visible));
+    this.add.existing(infoButtons);
   }
 
   update() {}

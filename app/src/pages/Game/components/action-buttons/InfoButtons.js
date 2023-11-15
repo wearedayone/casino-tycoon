@@ -11,12 +11,18 @@ const buttonSize = 186;
 const verticalGap = buttonSize + 50;
 
 class InfoButtons extends Phaser.GameObjects.Container {
-  constructor(scene, y) {
+  constructor(scene, y, onClickSettingsBtn) {
     super(scene, 0, 0);
 
-    this.settingButton = new Button(scene, buttonSize / 2 + px, y, 'button-setting', 'button-setting-pressed', () =>
-      console.log('setting clicked')
+    this.settingButton = new Button(
+      scene,
+      buttonSize / 2 + px,
+      y,
+      'button-setting',
+      'button-setting-pressed',
+      onClickSettingsBtn
     );
+
     this.referralButton = new Button(
       scene,
       buttonSize / 2 + px,
