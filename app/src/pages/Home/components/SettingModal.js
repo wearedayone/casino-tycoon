@@ -23,7 +23,7 @@ const SettingModal = ({ open, setOpenUpdate }) => {
   const embeddedWallet = useUserWallet();
   const profile = useUserStore((state) => state.profile);
   const sound = useSettingStore((state) => state.sound);
-  const setSound = useSettingStore((state) => state.setSound);
+  const toggleSound = useSettingStore((state) => state.toggleSound);
 
   // Check that your user is authenticated
   const isAuthenticated = useMemo(() => ready && authenticated, [ready, authenticated]);
@@ -167,7 +167,7 @@ const SettingModal = ({ open, setOpenUpdate }) => {
             <Box display="flex" flexDirection="column">
               <RoundedButton
                 label={`Game sound: ${sound === 'on' ? 'On' : 'Off'}`}
-                onClick={() => setSound(sound === 'on' ? 'off' : 'on')}
+                onClick={toggleSound}
                 sx={{ fontSize: 14, textTransform: 'none' }}
               />
             </Box>

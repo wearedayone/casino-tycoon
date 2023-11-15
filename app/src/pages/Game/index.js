@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import useUserStore from '../../stores/user.store';
 import useSystemStore from '../../stores/system.store';
+import useSettingStore from '../../stores/setting.store';
 import { getRank } from '../../services/user.service';
 import { claimToken } from '../../services/transaction.service';
 import QueryKeys from '../../utils/queryKeys';
@@ -23,6 +24,8 @@ const Game = () => {
   const profile = useUserStore((state) => state.profile);
   const gamePlay = useUserStore((state) => state.gamePlay);
   const activeSeason = useSystemStore((state) => state.activeSeason);
+  const sound = useSettingStore((state) => state.sound);
+  const toggleSound = useSettingStore((state) => state.toggleSound);
 
   const { status, data: rankData } = useQuery({
     queryFn: getRank,
@@ -73,6 +76,8 @@ const Game = () => {
       const game = new Phaser.Game(config);
 
       // listeners
+      game.events.on('toggle-game-sound', toggleSound);
+
       game.events.on('request-profile', () => {
         gameRef.current.events.emit('update-profile', { username, address, avatarURL });
       });
@@ -139,6 +144,10 @@ const Game = () => {
   useEffect(() => {
     gameRef.current?.events.emit('update-profile', { username, address, avatarURL });
   }, [username, address, avatarURL]);
+
+  useEffect(() => {
+    gameRef.current?.events.emit('game-sound-changed', { sound });
+  }, [sound]);
 
   useEffect(() => {
     if (activeSeason?.claimGapInSeconds && gamePlay?.lastClaimTime) {
