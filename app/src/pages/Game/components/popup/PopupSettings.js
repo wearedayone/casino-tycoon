@@ -17,6 +17,9 @@ class PopupSettings extends Popup {
     const longBtnX = width / 2;
     const medBtnX = x + width * 0.21;
     const secondMedBtnX = width * 0.71;
+    const avatarSize = width * 0.08;
+    const avatarPadding = width * 0.07;
+    const avatarX = x + avatarPadding + avatarSize / 2;
     const startingY = this.popup.y - this.popup.height / 2;
     const usernameY = startingY + 150;
     const walletContainerY = usernameY + 210;
@@ -34,7 +37,12 @@ class PopupSettings extends Popup {
       fontFamily: 'WixMadeforDisplayExtraBold',
     });
     this.walletContainer = scene.add.image(width / 2, walletContainerY, 'settings-wallet-container');
-    this.avatar = scene.add.image(x, walletContainerY, 'avatar');
+    this.circle = scene.add
+      .graphics()
+      .setPosition(avatarX, walletContainerY)
+      .fillCircle(0, 0, avatarSize);
+    this.avatar = scene.add.image(avatarX, walletContainerY, 'avatar').setSize(avatarSize, avatarSize);
+
     this.iconSettings = scene.add.image(x + 200, walletContainerY + 90, 'icon-settings');
     this.myWallet = scene.add.text(x + 300, walletContainerY - 80, 'My Wallet:', {
       fontSize: '60px',
@@ -72,6 +80,7 @@ class PopupSettings extends Popup {
     this.add(this.username);
     this.add(this.walletContainer);
     this.add(this.avatar);
+    this.avatar.setMask(this.circle.createGeometryMask());
     this.add(this.iconSettings);
     this.add(this.myWallet);
     this.add(this.addressText);
@@ -84,7 +93,6 @@ class PopupSettings extends Popup {
       .rectangle(this.popup.x + 12, withdrawBtnY, this.popup.width - 56, this.popup.height * 0.34, 0xf9cb73, 0.2)
       .setOrigin(0.5, 0.21);
     // this.balanceBtnsContainer.setStroke('#d08563', 5);
-    // .setOrigin(0, 0);
     this.buttonWithdraw = new TextButton(
       scene,
       medBtnX,
@@ -175,15 +183,13 @@ class PopupSettings extends Popup {
     this.username.text = username;
     this.addressText.text = `${address.slice(0, 5)}...${address.slice(-7)}`;
     this.address = address;
-    this.avatar.setTexture(avatarURL);
 
-    // TODO: load avatar
-    // scene.game.load.image('avatar', avatarURL);
-    // scene.game.load.onLoadComplete.add(() => {
-    //   this.avatar.setTexture('avatar');
-    // }, this);
-
-    // scene.game.load.start();
+    // load avatar
+    let loader = new Phaser.Loader.LoaderPlugin(this.scene);
+    // ask the LoaderPlugin to load the texture
+    loader.image('avatarURL', avatarURL);
+    loader.once(Phaser.Loader.Events.COMPLETE, () => this.avatar.setTexture('avatarURL'));
+    loader.start();
   }
 }
 
