@@ -173,8 +173,15 @@ const Game = () => {
   }, [gamePlay?.lastClaimTime, gamePlay?.pendingreward, dailyMoney]);
 
   return (
-    <Box minHeight="100vh" overflow="auto" display="flex" justifyContent="center" alignItems="center">
-      <Box id="game-container" width="600px" maxWidth="100vw" sx={{ aspectRatio: '1290/2796' }} />
+    <Box display="flex" justifyContent="center" alignItems="center">
+      <Box
+        id="game-container"
+        width="100vw"
+        height="100vh"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+      />
     </Box>
   );
 };
