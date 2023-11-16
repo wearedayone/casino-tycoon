@@ -32,7 +32,7 @@ class PopupBuyGoon extends Popup {
         this.upgradeBtn.updateText('Upgrading...');
         scene.game.events.emit('buy-goon', { quantity: this.quantity });
       },
-      'Upgrade'
+      'Buy'
     );
     this.add(this.upgradeBtn);
 
