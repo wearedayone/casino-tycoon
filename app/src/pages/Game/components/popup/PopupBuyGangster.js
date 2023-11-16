@@ -15,7 +15,7 @@ class PopupBuyGangster extends Popup {
   constructor(scene) {
     super(scene, 'popup-buy-gangster', { ribbon: 'ribbon-buy-gangster' });
 
-    // this.setVisible(false);
+    this.setVisible(false);
 
     this.upgradeBtn = new TextButton(
       scene,
