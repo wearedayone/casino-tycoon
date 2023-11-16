@@ -3,8 +3,8 @@ import Button from '../button/Button';
 const buttonSize = 186;
 
 class RankButton extends Button {
-  constructor(scene, x, y, defaultImage, pressedImage, onClick) {
-    super(scene, x, y, defaultImage, pressedImage, onClick);
+  constructor(scene, x, y, defaultImage, pressedImage, onClick, sound) {
+    super(scene, x, y, defaultImage, pressedImage, onClick, sound);
 
     this.valueText = scene.add
       .text(0, buttonSize / 4 + 10, ``, {

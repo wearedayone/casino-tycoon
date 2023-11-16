@@ -9,8 +9,14 @@ class PopupBuy extends Phaser.GameObjects.Container {
     super(scene, x, y);
 
     this.popup = scene.add.image(0, 0, 'popup-buy').setOrigin(0, 0);
-    this.addSafeHouseBtn = new Button(scene, this.popup.width - 70, 160, 'button-add', 'button-add-pressed', () =>
-      scene.popupSafeHouseUpgrade.setVisible(true)
+    this.addSafeHouseBtn = new Button(
+      scene,
+      this.popup.width - 70,
+      160,
+      'button-add',
+      'button-add-pressed',
+      () => scene.popupSafeHouseUpgrade.setVisible(true),
+      'open'
     );
     this.addGangsterBtn = new Button(
       scene,
@@ -18,7 +24,8 @@ class PopupBuy extends Phaser.GameObjects.Container {
       this.addSafeHouseBtn.y + verticalGap,
       'button-add',
       'button-add-pressed',
-      () => scene.popupBuyGangster.setVisible(true)
+      () => scene.popupBuyGangster.setVisible(true),
+      'open'
     );
     this.addGoonBtn = new Button(
       scene,
@@ -26,7 +33,8 @@ class PopupBuy extends Phaser.GameObjects.Container {
       this.addGangsterBtn.y + verticalGap,
       'button-add',
       'button-add-pressed',
-      () => scene.popupBuyGoon.setVisible(true)
+      () => scene.popupBuyGoon.setVisible(true),
+      'open'
     );
 
     this.add(this.popup);

@@ -20,7 +20,8 @@ class InfoButtons extends Phaser.GameObjects.Container {
       y,
       'button-setting',
       'button-setting-pressed',
-      onClickSettingsBtn
+      onClickSettingsBtn,
+      'button-1'
     );
 
     this.referralButton = new Button(
@@ -29,10 +30,17 @@ class InfoButtons extends Phaser.GameObjects.Container {
       y + verticalGap,
       'button-referral',
       'button-referral-pressed',
-      () => console.log('referral clicked')
+      () => console.log('referral clicked'),
+      'button-1'
     );
-    this.rankButton = new RankButton(scene, width - px - buttonSize / 2, y, 'button-rank', 'button-rank-pressed', () =>
-      console.log('rank clicked')
+    this.rankButton = new RankButton(
+      scene,
+      width - px - buttonSize / 2,
+      y,
+      'button-rank',
+      'button-rank-pressed',
+      () => console.log('rank clicked'),
+      'button-1'
     );
     this.portfolioButton = new Button(
       scene,
@@ -40,7 +48,8 @@ class InfoButtons extends Phaser.GameObjects.Container {
       y + verticalGap,
       'button-portfolio',
       'button-portfolio-pressed',
-      () => console.log('portfolio clicked')
+      () => console.log('portfolio clicked'),
+      'button-1'
     );
 
     this.add(this.settingButton);

@@ -56,8 +56,14 @@ class PopupSettings extends Popup {
       color: '#7d2e00',
       fontFamily: 'WixMadeforDisplayBold',
     });
-    this.buttonCopy = new Button(scene, width * 0.82, walletContainerY, 'button-copy', 'button-copy-pressed', () =>
-      navigator.clipboard.writeText(this.address)
+    this.buttonCopy = new Button(
+      scene,
+      width * 0.82,
+      walletContainerY,
+      'button-copy',
+      'button-copy-pressed',
+      () => navigator.clipboard.writeText(this.address),
+      'button-2'
     );
     this.buttonExportWallet = new TextButton(
       scene,
@@ -66,7 +72,8 @@ class PopupSettings extends Popup {
       'button-blue-med',
       'button-blue-med-pressed',
       () => console.log('export wallet'),
-      'Export Wallet'
+      'Export Wallet',
+      { sound: 'open' }
     );
     this.buttonLogOut = new TextButton(
       scene,
@@ -76,7 +83,7 @@ class PopupSettings extends Popup {
       'button-red-med-pressed',
       () => console.log('logout'),
       'Logout',
-      { icon: 'icon-logout' }
+      { icon: 'icon-logout', sound: 'close' }
     );
 
     this.add(this.username);
@@ -105,7 +112,8 @@ class PopupSettings extends Popup {
         this.onClose();
         popupWithdraw.open();
       },
-      'Withdraw'
+      'Withdraw',
+      { sound: 'open' }
     );
     this.buttonDeposit = new TextButton(
       scene,
@@ -114,7 +122,8 @@ class PopupSettings extends Popup {
       'button-blue-med',
       'button-blue-med-pressed',
       () => console.log('deposit'),
-      'Deposit'
+      'Deposit',
+      { sound: 'open' }
     );
     this.buttonStaking = new TextButton(
       scene,
@@ -123,7 +132,8 @@ class PopupSettings extends Popup {
       'button-blue-long',
       'button-blue-long-pressed',
       () => console.log('staking'),
-      'Staking'
+      'Staking',
+      { sound: 'open' }
     );
     this.buttonSwap = new TextButton(
       scene,
@@ -132,7 +142,8 @@ class PopupSettings extends Popup {
       'button-blue-long',
       'button-blue-long-pressed',
       () => console.log('swap'),
-      'Swap'
+      'Swap',
+      { sound: 'open' }
     );
     this.add(this.balanceBtnsContainer);
     this.add(this.buttonWithdraw);
@@ -149,7 +160,7 @@ class PopupSettings extends Popup {
       'button-green-long-pressed',
       () => scene.game.events.emit('toggle-game-sound'),
       'Game Sound: On',
-      { icon: 'icon-sound-on' }
+      { icon: 'icon-sound-on', sound: 'toggle-2' }
     );
     this.credit = scene.add.text(width / 2, creditTextY, 'v1.0.0. Gangster Arena. Copyright.', {
       fontSize: '36px',
@@ -168,7 +179,7 @@ class PopupSettings extends Popup {
       'button-blue-pressed',
       () => this.onClose(),
       'Back',
-      { fontSize: '82px' }
+      { fontSize: '82px', sound: 'close' }
     );
     this.add(this.buttonBack);
 

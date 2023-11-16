@@ -109,13 +109,13 @@ class PopupWithdraw extends Popup {
         parentModal.open();
       },
       'Back',
-      { fontSize: '82px' }
+      { fontSize: '82px', sound: 'close' }
     );
     this.add(buttonBack);
 
     this.tokenContainer.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
       this.onClose();
-      console.log('open withdraw fiat modal')
+      console.log('open withdraw fiat modal');
     });
     this.ethContainer.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
       this.onClose();

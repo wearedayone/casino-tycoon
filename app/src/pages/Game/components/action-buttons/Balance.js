@@ -17,7 +17,8 @@ class Balance extends Phaser.GameObjects.Container {
       y - py,
       'button-add',
       'button-add-pressed',
-      () => console.log('clicked')
+      () => console.log('clicked'),
+      'button-2'
     );
     this.valueText = scene.add
       .text(x + 10, y - 5, value, {

@@ -12,8 +12,16 @@ class PopupWar extends Phaser.GameObjects.Container {
       .image(x + this.popup.width / 2, this.historyBtn.y + verticalGap, 'icon-war')
       .setOrigin(0.5, 0.5);
 
-    this.historyBtn.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => console.log('history'));
-    this.warBtn.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => scene.popupDailyGangWar.open());
+    this.btnSound = scene.sound.add('open', { loop: false });
+
+    this.historyBtn.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
+      this.btnSound.play();
+      console.log('war history');
+    });
+    this.warBtn.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
+      this.btnSound.play();
+      scene.popupDailyGangWar.open();
+    });
 
     this.add(this.popup);
     this.add(this.historyBtn);

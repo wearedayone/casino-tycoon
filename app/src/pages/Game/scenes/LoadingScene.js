@@ -55,6 +55,21 @@ class LoadingScene extends Phaser.Scene {
       percentText.destroy();
     });
 
+    // sounds
+    this.load.audio('bg', '/audios/bg.mp3');
+    this.load.audio('button-1', '/audios/button-1.wav');
+    this.load.audio('button-2', '/audios/button-2.wav');
+    this.load.audio('buy', '/audios/buy.wav');
+    this.load.audio('open', '/audios/open.wav');
+    this.load.audio('close', '/audios/close.wav');
+    this.load.audio('coin', '/audios/coin.wav');
+    this.load.audio('gangster', '/audios/gangster.wav');
+    this.load.audio('house', '/audios/house.wav');
+    this.load.audio('minion', '/audios/minion.wav');
+    this.load.audio('war', '/audios/war.wav');
+    this.load.audio('toggle-1', '/audios/toggle-1.wav');
+    this.load.audio('toggle-2', '/audios/toggle-2.wav');
+
     this.load.image('bg', '/images/bg.png');
     this.load.image('gangster-house-1', '/images/gangster-house-1.png');
     this.load.image('gangster-house-2', '/images/gangster-house-2.png');

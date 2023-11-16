@@ -18,9 +18,13 @@ class PopupDailyGangWar extends Popup {
       'button-blue',
       'button-blue-pressed',
       () => this.setVisible(false),
-      'Back'
+      'Back',
+      { sound: 'close' }
     );
     this.add(this.backBtn);
+
+    this.peaceSound = scene.sound.add('toggle-1', { loop: false });
+    this.warSound = scene.sound.add('toggle-2', { loop: false });
 
     this.checkedIconPeace = scene.add.image(this.popup.x - 380, this.popup.y + 50, 'icon-checked').setOrigin(0.5, 0.5);
     this.uncheckedIconPeace = scene.add
@@ -28,6 +32,7 @@ class PopupDailyGangWar extends Popup {
       .setOrigin(0.5, 0.5);
     this.uncheckedIconPeace.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
       scene.game.events.emit('change-war-status', { war: false });
+      this.peaceSound.play();
     });
 
     this.checkedIconWar = scene.add.image(this.popup.x + 220, this.popup.y + 50, 'icon-checked').setOrigin(0.5, 0.5);
@@ -36,6 +41,7 @@ class PopupDailyGangWar extends Popup {
       .setOrigin(0.5, 0.5);
     this.uncheckedIconWar.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
       scene.game.events.emit('change-war-status', { war: true });
+      this.warSound.play();
     });
 
     this.checkedIconPeace.setVisible(false);

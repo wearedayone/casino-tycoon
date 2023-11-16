@@ -3,14 +3,22 @@ import { formatter } from '../../../../utils/numbers';
 
 class ActiveClaimButton extends Button {
   constructor(scene, x, y) {
-    super(scene, x, y, 'button-blue', 'button-blue-pressed', () => {
-      if (this.loading) return;
-      this.loading = true;
-      this.coinImage?.setVisible(false);
-      this.text.text = 'Claiming...';
-      this.text.x = 0;
-      scene.game.events.emit('claim');
-    });
+    super(
+      scene,
+      x,
+      y,
+      'button-blue',
+      'button-blue-pressed',
+      () => {
+        if (this.loading) return;
+        this.loading = true;
+        this.coinImage?.setVisible(false);
+        this.text.text = 'Claiming...';
+        this.text.x = 0;
+        scene.game.events.emit('claim');
+      },
+      'coin'
+    );
 
     this.text = scene.add
       .text(-30, -40, 'Claim', {

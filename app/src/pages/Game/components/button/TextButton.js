@@ -9,9 +9,9 @@ class TextButton extends Button {
     pressedImage,
     onClick,
     text,
-    { color = '#fff', fontSize = '60px', icon } = {}
+    { color = '#fff', fontSize = '60px', icon, sound } = {}
   ) {
-    super(scene, x, y, defaultImage, pressedImage, onClick);
+    super(scene, x, y, defaultImage, pressedImage, onClick, sound);
 
     const textX = icon ? 80 : 0;
     this.text = scene.add

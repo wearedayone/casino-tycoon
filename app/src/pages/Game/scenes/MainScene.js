@@ -28,6 +28,9 @@ class MainScene extends Phaser.Scene {
   }
 
   create() {
+    // this.bgMusic = this.sound.add('bg', { loop: true });
+    // this.bgMusic.play();
+
     this.background = new Background(this, 'bg');
     this.add.existing(this.background);
 

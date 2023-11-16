@@ -32,7 +32,8 @@ class PopupSafeHouseUpgrade extends Popup {
         this.upgradeBtn.updateText('Upgrading...');
         scene.game.events.emit('upgrade-safehouse', { quantity: this.quantity });
       },
-      'Upgrade'
+      'Upgrade',
+      { sound: 'buy' }
     );
     this.add(this.upgradeBtn);
 
@@ -154,6 +155,8 @@ class PopupSafeHouseUpgrade extends Popup {
     this.coin = scene.add.image(this.priceText.x + this.priceText.width + 40, sliderY, 'coin2').setOrigin(0, 0.5);
     this.add(this.coin);
 
+    this.houseSound = scene.sound.add('house', { loop: false });
+
     scene.game.events.on('update-buildings', ({ numberOfBuildings, networth, balance, sold, basePrice, priceStep }) => {
       this.balance = balance;
       this.sold = sold;
@@ -167,6 +170,7 @@ class PopupSafeHouseUpgrade extends Popup {
       this.loading = false;
       this.upgradeBtn.updateText('Upgrade');
       this.slider.value = 0;
+      this.houseSound.play();
     });
 
     scene.game.events.emit('request-buildings');

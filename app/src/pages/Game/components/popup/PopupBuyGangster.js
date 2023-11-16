@@ -29,7 +29,8 @@ class PopupBuyGangster extends Popup {
         this.upgradeBtn.updateText('Upgrading...');
         scene.game.events.emit('buy-gangster', { quantity: this.quantity });
       },
-      'Buy'
+      'Buy',
+      { sound: 'buy' }
     );
     this.add(this.upgradeBtn);
 
@@ -167,6 +168,8 @@ class PopupBuyGangster extends Popup {
     this.coin = scene.add.image(this.priceText.x + this.priceText.width + 40, sliderY, 'eth-coin').setOrigin(0, 0.5);
     this.add(this.coin);
 
+    this.gangsterSound = scene.sound.add('gangster', { loop: false });
+
     scene.game.events.on(
       'update-machines',
       ({ numberOfMachines, networth, balance, basePrice, dailyReward, bonus }) => {
@@ -184,6 +187,7 @@ class PopupBuyGangster extends Popup {
       this.loading = false;
       this.upgradeBtn.updateText('Upgrade');
       this.slider.value = 0;
+      this.gangsterSound.play();
     });
 
     scene.game.events.emit('request-machines');

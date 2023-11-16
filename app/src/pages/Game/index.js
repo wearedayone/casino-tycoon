@@ -17,6 +17,7 @@ import { create, validate } from '../../services/transaction.service';
 import configs from './configs/configs.json';
 import LoadingScene from './scenes/LoadingScene';
 import MainScene from './scenes/MainScene';
+// import ExampleScene from './scenes/TestScene';
 
 const { width, height } = configs;
 const MILISECONDS_IN_A_DAY = 86400 * 1000;
@@ -62,7 +63,6 @@ const Game = () => {
 
   const buy = async (buyType, quantity) => {
     try {
-      console.log({ quantity });
       const res = await create({ type: buyType, amount: quantity });
       const { id, amount, value, type } = res.data;
       const receipt = await buyWorkerOrBuilding(amount, value, type);

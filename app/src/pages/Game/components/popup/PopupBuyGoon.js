@@ -32,7 +32,8 @@ class PopupBuyGoon extends Popup {
         this.upgradeBtn.updateText('Upgrading...');
         scene.game.events.emit('buy-goon', { quantity: this.quantity });
       },
-      'Buy'
+      'Buy',
+      { sound: 'buy' }
     );
     this.add(this.upgradeBtn);
 
@@ -163,6 +164,8 @@ class PopupBuyGoon extends Popup {
     this.coin = scene.add.image(this.priceText.x + this.priceText.width + 40, sliderY, 'coin2').setOrigin(0, 0.5);
     this.add(this.coin);
 
+    this.minionSound = scene.sound.add('minion', { loop: false });
+
     scene.game.events.on(
       'update-workers',
       ({ numberOfWorkers, networth, balance, sold, basePrice, priceStep, dailyReward }) => {
@@ -180,6 +183,7 @@ class PopupBuyGoon extends Popup {
       this.loading = false;
       this.upgradeBtn.updateText('Upgrade');
       this.slider.value = 0;
+      this.minionSound.play();
     });
 
     scene.game.events.emit('request-workers');

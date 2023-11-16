@@ -15,7 +15,8 @@ class PopupWelcomeNoWar extends Popup {
       height / 2 + this.popup.height / 2 - 20,
       'button-claim',
       'button-claim-pressed',
-      () => console.log('claim btn clicked')
+      () => console.log('claim btn clicked'),
+      'button-1'
     );
     this.add(this.buttonClaim);
 
