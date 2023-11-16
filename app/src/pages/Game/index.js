@@ -24,6 +24,7 @@ const MILISECONDS_IN_A_DAY = 86400 * 1000;
 
 const Game = () => {
   const { enqueueSnackbar } = useSnackbar();
+  const [userHasInteractive, setUserHasInteracted] = useState(false);
   const gameRef = useRef();
   const gameLoaded = useRef();
   const [loaded, setLoaded] = useState(false);
@@ -364,8 +365,20 @@ const Game = () => {
     gameRef.current?.events.emit('update-networth', { networth: gamePlay.networth });
   }, [networth]);
 
+  useEffect(() => {
+    if (userHasInteractive) {
+      gameRef.current?.events.emit('music-on');
+    }
+  }, [userHasInteractive]);
+
   return (
-    <Box display="flex" justifyContent="center" alignItems="center">
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      onClick={() => {
+        !userHasInteractive && setUserHasInteracted(true);
+      }}>
       <Box
         id="game-container"
         width="100vw"

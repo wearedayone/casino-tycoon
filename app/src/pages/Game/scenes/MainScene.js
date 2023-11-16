@@ -28,8 +28,7 @@ class MainScene extends Phaser.Scene {
   }
 
   create() {
-    // this.bgMusic = this.sound.add('bg', { loop: true });
-    // this.bgMusic.play();
+    this.bgMusic = this.sound.add('bg', { loop: true, volume: 0.25 });
 
     this.background = new Background(this, 'bg');
     this.add.existing(this.background);
@@ -71,6 +70,14 @@ class MainScene extends Phaser.Scene {
     // test
     // const popup = new PopupWelcomeNoWar(this, 2500);
     // this.add.existing(popup);
+
+    this.game.events.on('music-on', () => {
+      this.bgMusic.play();
+    });
+
+    this.game.events.on('music-off', () => {
+      this.bgMusic.stop();
+    });
   }
 
   update() {}

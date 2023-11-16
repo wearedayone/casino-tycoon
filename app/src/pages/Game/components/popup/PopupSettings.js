@@ -197,6 +197,7 @@ class PopupSettings extends Popup {
     const icon = isSoundOn ? 'icon-sound-on' : 'icon-sound-off';
     this.buttonSound.text.text = text;
     this.buttonSound.icon.setTexture(icon);
+    this.scene.game.events.emit(isSoundOn ? 'music-on' : 'music-off');
   }
 
   updateValues({ username, address, avatarURL }) {
