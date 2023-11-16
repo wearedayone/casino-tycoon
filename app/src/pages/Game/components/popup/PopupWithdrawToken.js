@@ -1,4 +1,7 @@
+import { isAddress } from '@ethersproject/address';
+
 import Popup from './Popup';
+import PopupTxnProcessing from './PopupTxnProcessing';
 import Button from '../button/Button';
 import TextInput from '../inputs/TextInput';
 import TextButton from '../button/TextButton';
@@ -6,13 +9,14 @@ import configs from '../../configs/configs.json';
 import {
   addressCharacterRegex,
   addressInputRegex,
-  numberCharacterRegex,
-  numberInputRegex,
+  integerCharacterRegex,
+  integerInputRegex,
 } from '../../../../utils/strings';
 
 const { width, height } = configs;
 
 class PopupWithdrawToken extends Popup {
+  loading = false;
   balance = 0;
 
   constructor(scene, parentModal) {
@@ -35,10 +39,10 @@ class PopupWithdrawToken extends Popup {
     this.add(subtitle);
 
     this.amountInput = new TextInput(scene, width / 2, amountInputY, {
-      icon: 'icon-eth',
+      icon: 'icon-coin',
       placeholder: '0',
-      valueRegex: numberInputRegex,
-      characterRegex: numberCharacterRegex,
+      valueRegex: integerInputRegex,
+      characterRegex: integerCharacterRegex,
       maxDisplayedCharacters: 13,
     });
     const buttonMax = new Button(scene, width * 0.77, amountInputY, 'button-max', 'button-max-pressed', () => {
@@ -89,7 +93,7 @@ class PopupWithdrawToken extends Popup {
       'Back',
       { fontSize: '82px' }
     );
-    const buttonConfirm = new Button(
+    this.buttonConfirm = new Button(
       scene,
       width * 0.75 - x / 2,
       height / 2 + this.popup.height / 2 - 20,
@@ -97,10 +101,52 @@ class PopupWithdrawToken extends Popup {
       'button-confirm-pressed',
       () => {
         console.log('confirm');
-      }
+        if (this.loading) return;
+
+        // TODO: show validation to user
+        const isValid = this.validate();
+        if (!isValid) return;
+
+        this.setLoading(true);
+        scene.game.events.emit('withdraw-token', {
+          amount: Number(this.amountInput.value),
+          address: this.addressInput.value,
+        });
+      },
+      { disabledImage: 'button-confirm-disabled' }
     );
     this.add(buttonBack);
-    this.add(buttonConfirm);
+    this.add(this.buttonConfirm);
+
+    scene.game.events.on('withdraw-token-started', ({ txnHash, amount }) => {
+      this.setLoading(false);
+      this.popupTxnProcessing = new PopupTxnProcessing(
+        scene,
+        'icon-coin-done',
+        `${amount.toLocaleString()} $FIAT`,
+        'Withdrawal may take few minutes.',
+        txnHash
+      );
+      scene.add.existing(this.popupTxnProcessing);
+      this.close();
+    });
+  }
+
+  validate() {
+    let isValid = true;
+    const amount = Number(this.amountInput.value);
+    const address = this.addressInput.value.trim();
+
+    if (!amount || amount > this.balance) isValid = false;
+    if (!address || !isAddress(address)) isValid = false;
+
+    return isValid;
+  }
+
+  setLoading(state) {
+    console.log('setLoading', state);
+    this.loading = state;
+    this.buttonConfirm.setDisabledState(state);
   }
 
   cleanup() {

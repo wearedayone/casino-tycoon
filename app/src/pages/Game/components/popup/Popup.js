@@ -88,6 +88,9 @@ class Popup extends Phaser.GameObjects.Container {
     this.onOpen();
   }
   close = () => {
+    // cant close while loading
+    if (this.loading) return;
+
     this.cleanup();
     if (this.destroyWhenClosed) this.destroy(true);
     else this.setVisible(false);

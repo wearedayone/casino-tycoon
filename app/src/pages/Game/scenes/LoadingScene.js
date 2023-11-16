@@ -156,6 +156,7 @@ class LoadingScene extends Phaser.Scene {
 
     // settings
     this.load.image('settings-wallet-container', '/images/settings-wallet-container.png');
+    this.load.image('view-transaction', '/images/texts/view-transaction.png');
     this.load.image('text-container', '/images/text-container.png');
     this.load.image('icon-settings', '/images/icons/settings.png');
     this.load.image('icon-logout', '/images/icons/logout.png');
@@ -164,6 +165,9 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-coin', '/images/icons/coin.png');
     this.load.image('icon-eth', '/images/icons/eth.png');
     this.load.image('icon-gangster', '/images/icons/gangster.png');
+    this.load.image('icon-coin-done', '/images/icons/coin-done.png');
+    this.load.image('icon-eth-done', '/images/icons/eth-done.png');
+    this.load.image('icon-nft-done', '/images/icons/nft-done.png');
     this.load.image('icon-chevron-right', '/images/icons/chevron-right.png');
 
     this.load.image('icon-history', '/images/icon-history.png');

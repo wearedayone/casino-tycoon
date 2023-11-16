@@ -36,7 +36,7 @@ const Game = () => {
   const activeSeason = useSystemStore((state) => state.activeSeason);
   const sound = useSettingStore((state) => state.sound);
   const toggleSound = useSettingStore((state) => state.toggleSound);
-  const { buyWorkerOrBuilding, buyMachine } = useSmartContract();
+  const { withdrawToken, withdrawETH, withdrawNFT, buyWorkerOrBuilding, buyMachine } = useSmartContract();
 
   const { status, data: rankData } = useQuery({
     queryFn: getRank,
@@ -66,6 +66,46 @@ const Game = () => {
     };
 
   const dailyMoney = numberOfMachines * machine.dailyReward + numberOfWorkers * worker.dailyReward;
+
+  const transfer = async ({ amount, address, tokenType }) => {
+    try {
+      let web3Withdraw, txnStartedEvent;
+      switch (tokenType) {
+        case 'FIAT':
+          web3Withdraw = withdrawToken;
+          txnStartedEvent = 'withdraw-token-started';
+          break;
+        case 'ETH':
+          web3Withdraw = withdrawETH;
+          txnStartedEvent = 'withdraw-eth-started';
+          break;
+        case 'NFT':
+          web3Withdraw = withdrawNFT;
+          txnStartedEvent = 'withdraw-nft-started';
+          break;
+      }
+
+      if (!web3Withdraw) throw new Error(`Invalid tokenType. Must be one of 'ETH' | 'FIAT' | 'NFT'`);
+
+      const value = Number(amount);
+      let txnId;
+      if (tokenType === 'ETH') {
+        const res = await create({ type: 'withdraw', token: tokenType, value, to: address });
+        txnId = res.data.id;
+      }
+      const receipt = await web3Withdraw(address, value);
+      // for test only
+      // const receipt = { status: 1, transactionHash: 'test-txn-hash' };
+      gameRef.current?.events.emit(txnStartedEvent, { amount, txnHash: receipt.transactionHash });
+      if (receipt.status === 1) {
+        if (txnId) await validate({ transactionId: txnId, txnHash: receipt.transactionHash });
+        enqueueSnackbar(`Transferred ${tokenType} successfully`, { variant: 'success' });
+      }
+    } catch (err) {
+      err.message && enqueueSnackbar(err.message, { variant: 'error' });
+      console.error(err);
+    }
+  };
 
   const buy = async (buyType, quantity) => {
     try {
@@ -203,6 +243,16 @@ const Game = () => {
             gameRef.current.events.emit('update-next-war-time', { time: res.data.time });
           })
           .catch((err) => console.error(err));
+      });
+
+      game.events.on('withdraw-token', ({ amount, address }) => {
+        transfer({ amount, address, tokenType: 'FIAT' });
+      });
+      game.events.on('withdraw-eth', ({ amount, address }) => {
+        transfer({ amount, address, tokenType: 'ETH' });
+      });
+      game.events.on('withdraw-nft', ({ amount, address }) => {
+        transfer({ amount, address, tokenType: 'NFT' });
       });
 
       game.events.on('claim', async () => {
