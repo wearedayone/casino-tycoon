@@ -176,16 +176,15 @@ export const takeDailyWarSnapshot = async () => {
           const userSnapshot = await firestore.collection('user').doc(gamePlay.userId).get();
           const { address } = userSnapshot.data();
 
-          const { txnHash } = await burnNFTTask({ address, amount: penalty.gangster });
+          const { txnHash, status } = await burnNFTTask({ address, amount: penalty.gangster });
 
-          await validateTxnHash({
-            userId: gamePlay.userId,
-            transactionId: txn.id,
+          await firestore.collection('transaction').doc(txn.id).update({
             txnHash,
+            status,
           });
-        } else {
-          await validateNonWeb3Transaction({ userId: gamePlay.userId, transactionId: txn.id });
         }
+
+        await validateNonWeb3Transaction({ userId: gamePlay.userId, transactionId: txn.id });
       }
 
       await firestore

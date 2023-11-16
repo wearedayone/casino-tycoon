@@ -363,7 +363,8 @@ export const validateTxnHash = async ({ userId, transactionId, txnHash }) => {
   await sendUserBonus(userId, transactionId);
 };
 
-// for non web3 transactions: war-switch | war-penalty when no NFTs are burned
+// for non web3 transactions: war-switch
+// OR self-triggered web3 txns: war-penalty
 export const validateNonWeb3Transaction = async ({ userId, transactionId }) => {
   // update txnHash and status for transaction doc in firestore
   await firestore.collection('transaction').doc(transactionId).update({
