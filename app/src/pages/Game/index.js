@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Box } from '@mui/material';
 import Phaser from 'phaser';
 import { useQuery } from '@tanstack/react-query';
 import { useSnackbar } from 'notistack';
+import { usePrivy } from '@privy-io/react-auth';
 
 import useUserStore from '../../stores/user.store';
 import useSystemStore from '../../stores/system.store';
@@ -37,6 +38,16 @@ const Game = () => {
   const sound = useSettingStore((state) => state.sound);
   const toggleSound = useSettingStore((state) => state.toggleSound);
   const { withdrawToken, withdrawETH, withdrawNFT, buyWorkerOrBuilding, buyMachine } = useSmartContract();
+  const { ready, authenticated, user, exportWallet: exportWalletPrivy, logout } = usePrivy();
+
+  // Check that your user is authenticated
+  const isAuthenticated = useMemo(() => ready && authenticated, [ready, authenticated]);
+
+  // Check that your user has an embedded wallet
+  const hasEmbeddedWallet = useMemo(
+    () => !!user.linkedAccounts.find((account) => account.type === 'wallet' && account.walletClientType === 'privy'),
+    [user]
+  );
 
   const { status, data: rankData } = useQuery({
     queryFn: getRank,
@@ -66,6 +77,13 @@ const Game = () => {
     };
 
   const dailyMoney = numberOfMachines * machine.dailyReward + numberOfWorkers * worker.dailyReward;
+
+  const exportWallet = async () => {
+    if (!isAuthenticated || !hasEmbeddedWallet) return;
+    try {
+      await exportWalletPrivy();
+    } catch (error) {}
+  };
 
   const transfer = async ({ amount, address, tokenType }) => {
     try {
@@ -175,6 +193,8 @@ const Game = () => {
       const game = new Phaser.Game(config);
 
       // listeners
+      game.events.on('export-wallet', exportWallet);
+      game.events.on('log-out', logout);
       game.events.on('toggle-game-sound', toggleSound);
 
       game.events.on('request-profile', () => {

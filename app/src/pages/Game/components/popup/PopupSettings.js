@@ -71,7 +71,7 @@ class PopupSettings extends Popup {
       exportWalletBtnY,
       'button-blue-med',
       'button-blue-med-pressed',
-      () => console.log('export wallet'),
+      () => scene.game.events.emit('export-wallet'),
       'Export Wallet',
       { sound: 'open' }
     );
@@ -81,7 +81,7 @@ class PopupSettings extends Popup {
       exportWalletBtnY,
       'button-red-med',
       'button-red-med-pressed',
-      () => console.log('logout'),
+      () => scene.game.events.emit('log-out'),
       'Logout',
       { icon: 'icon-logout', sound: 'close' }
     );
