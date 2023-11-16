@@ -89,8 +89,7 @@ class PopupDailyGangWar extends Popup {
     scene.game.events.emit('request-next-war-time');
   }
 
-  open() {
-    this.setVisible(true);
+  onOpen() {
     this.scene.game.events.emit('request-next-war-time');
   }
 }

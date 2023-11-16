@@ -26,7 +26,7 @@ class Popup extends Phaser.GameObjects.Container {
       .on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, (pointer, localX, localY, event) => {
         // TODO: fix popup cannot be closed when click on backdrop over open button position
         // example: open settings popup -> click on backdrop where settings btn is
-        this.onClose();
+        this.close();
       });
     this.popup.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, emptyListener);
 
@@ -37,7 +37,7 @@ class Popup extends Phaser.GameObjects.Container {
         configs.height / 2 - this.popup.height / 2 + 50,
         'button-close',
         'button-close-pressed',
-        this.onClose,
+        this.close,
         'close'
       );
       this.add(this.closeButton);
@@ -77,7 +77,18 @@ class Popup extends Phaser.GameObjects.Container {
     }
   }
 
-  onClose = () => {
+  /* effects */
+  // override to run effects after opening popup
+  onOpen() {}
+  // override to run effects before closing popup
+  cleanup() {}
+
+  open() {
+    this.setVisible(true);
+    this.onOpen();
+  }
+  close = () => {
+    this.cleanup();
     if (this.destroyWhenClosed) this.destroy(true);
     else this.setVisible(false);
   };

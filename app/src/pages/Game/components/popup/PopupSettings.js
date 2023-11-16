@@ -109,7 +109,7 @@ class PopupSettings extends Popup {
       'button-blue-med',
       'button-blue-med-pressed',
       () => {
-        this.onClose();
+        this.close();
         popupWithdraw.open();
       },
       'Withdraw',
@@ -177,7 +177,7 @@ class PopupSettings extends Popup {
       height / 2 + this.popup.height / 2 - 20,
       'button-blue',
       'button-blue-pressed',
-      () => this.onClose(),
+      () => this.close(),
       'Back',
       { fontSize: '82px', sound: 'close' }
     );
@@ -187,8 +187,7 @@ class PopupSettings extends Popup {
     scene.game.events.on('update-profile', (data) => this.updateValues(data));
   }
 
-  open() {
-    this.setVisible(true);
+  onOpen() {
     this.scene.game.events.emit('request-profile');
   }
 

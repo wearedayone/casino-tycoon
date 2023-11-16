@@ -105,7 +105,7 @@ class PopupWithdraw extends Popup {
       'button-blue',
       'button-blue-pressed',
       () => {
-        this.onClose();
+        this.close();
         parentModal.open();
       },
       'Back',
@@ -114,23 +114,22 @@ class PopupWithdraw extends Popup {
     this.add(buttonBack);
 
     this.tokenContainer.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
-      this.onClose();
+      this.close();
       console.log('open withdraw fiat modal');
     });
     this.ethContainer.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
-      this.onClose();
+      this.close();
       console.log('open withdraw eth modal');
     });
     this.gangsterContainer.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
-      this.onClose();
+      this.close();
       console.log('open withdraw nft modal');
     });
 
     scene.game.events.on('update-balances-for-withdraw', (data) => this.updateValues(data));
   }
 
-  open() {
-    this.setVisible(true);
+  onOpen() {
     this.scene.game.events.emit('request-balances-for-withdraw');
   }
 
