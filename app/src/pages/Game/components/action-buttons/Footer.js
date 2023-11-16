@@ -22,7 +22,7 @@ class Footer extends Phaser.GameObjects.Container {
       'button-war',
       'button-war-pressed',
       () => scene.popupWar.setVisible(!scene.popupWar.visible),
-      'button-1'
+      { sound: 'button-1' }
     );
 
     this.buttonBuy = new Button(
@@ -32,7 +32,7 @@ class Footer extends Phaser.GameObjects.Container {
       'button-buy',
       'button-buy-pressed',
       () => scene.popupBuy.setVisible(!scene.popupBuy.visible),
-      'button-1'
+      { sound: 'button-1' }
     );
 
     this.buttonClaim = new ClaimButton(scene, width / 2, y);

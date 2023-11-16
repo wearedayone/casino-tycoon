@@ -63,7 +63,7 @@ class PopupSettings extends Popup {
       'button-copy',
       'button-copy-pressed',
       () => navigator.clipboard.writeText(this.address),
-      'button-2'
+      { sound: 'button-2' }
     );
     this.buttonExportWallet = new TextButton(
       scene,

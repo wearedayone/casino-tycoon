@@ -16,7 +16,7 @@ class PopupBuy extends Phaser.GameObjects.Container {
       'button-add',
       'button-add-pressed',
       () => scene.popupSafeHouseUpgrade.setVisible(true),
-      'open'
+      { sound: 'open' }
     );
     this.addGangsterBtn = new Button(
       scene,
@@ -25,7 +25,7 @@ class PopupBuy extends Phaser.GameObjects.Container {
       'button-add',
       'button-add-pressed',
       () => scene.popupBuyGangster.setVisible(true),
-      'open'
+      { sound: 'open' }
     );
     this.addGoonBtn = new Button(
       scene,
@@ -34,7 +34,7 @@ class PopupBuy extends Phaser.GameObjects.Container {
       'button-add',
       'button-add-pressed',
       () => scene.popupBuyGoon.setVisible(true),
-      'open'
+      { sound: 'open' }
     );
 
     this.add(this.popup);

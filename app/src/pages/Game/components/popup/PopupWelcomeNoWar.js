@@ -16,7 +16,7 @@ class PopupWelcomeNoWar extends Popup {
       'button-claim',
       'button-claim-pressed',
       () => console.log('claim btn clicked'),
-      'button-1'
+      { sound: 'button-1' }
     );
     this.add(this.buttonClaim);
 

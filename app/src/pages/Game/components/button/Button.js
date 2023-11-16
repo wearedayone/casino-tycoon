@@ -1,7 +1,9 @@
 import Phaser from 'phaser';
 
 class Button extends Phaser.GameObjects.Container {
-  constructor(scene, x, y, defaultImage, pressedImage, onClick, sound) {
+  disabled = false;
+
+  constructor(scene, x, y, defaultImage, pressedImage, onClick, { sound, disabledImage } = {}) {
     super(scene, x, y);
 
     this.defaultImage = scene.add.image(0, 0, defaultImage);
@@ -13,12 +15,20 @@ class Button extends Phaser.GameObjects.Container {
 
     this.pressedImage.setVisible(false);
 
+    if (disabledImage) {
+      this.disabledImage = scene.add.image(0, 0, disabledImage);
+      this.add(this.disabledImage);
+      this.disabledImage.setVisible(false);
+    }
+
     if (sound) {
       this.btnSound = scene.sound.add(sound, { loop: false });
     }
 
     this.setInteractive()
       .on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
+        if (this.disabled) return;
+
         this.defaultImage.setVisible(false);
         this.pressedImage.setVisible(true);
         if (this.btnSound) {
@@ -26,10 +36,20 @@ class Button extends Phaser.GameObjects.Container {
         }
       })
       .on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
+        if (this.disabled) return;
+
         this.defaultImage.setVisible(true);
         this.pressedImage.setVisible(false);
         onClick?.();
       });
+  }
+
+  setDisabledState(state) {
+    this.disabled = state;
+    if (this.disabledImage) {
+      this.defaultImage.setVisible(!state);
+      this.disabledImage.setVisible(state);
+    }
   }
 }
 

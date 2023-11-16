@@ -38,7 +38,7 @@ class Popup extends Phaser.GameObjects.Container {
         'button-close',
         'button-close-pressed',
         this.close,
-        'close'
+        { sound: 'close' }
       );
       this.add(this.closeButton);
     }

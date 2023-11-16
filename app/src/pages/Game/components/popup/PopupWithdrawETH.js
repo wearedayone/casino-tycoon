@@ -98,7 +98,8 @@ class PopupWithdrawETH extends Popup {
       'button-confirm-pressed',
       () => {
         console.log('confirm');
-      }
+      },
+      { disabledImage: 'button-confirm-disabled' }
     );
     this.add(buttonBack);
     this.add(buttonConfirm);
