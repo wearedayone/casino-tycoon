@@ -31,7 +31,7 @@ const Game = () => {
   const activeSeason = useSystemStore((state) => state.activeSeason);
   const sound = useSettingStore((state) => state.sound);
   const toggleSound = useSettingStore((state) => state.toggleSound);
-  const { buyWorkerOrBuilding } = useSmartContract();
+  const { buyWorkerOrBuilding, buyMachine } = useSmartContract();
 
   const { status, data: rankData } = useQuery({
     queryFn: getRank,
@@ -47,11 +47,15 @@ const Game = () => {
     numberOfBuildings: 0,
     networth: 0,
   };
-  const { machine, worker, building, workerSold, buildingSold } = activeSeason || {
-    machine: { dailyReward: 0 },
+  const { machine, worker, building, workerSold, buildingSold, reservePool, reservePoolReward } = activeSeason || {
+    machine: { dailyReward: 0, basePrice: 0 },
     worker: { dailyReward: 0, basePrice: 0, priceStep: 0 },
     building: { basePrice: 0, priceStep: 0 },
     buildingSold: 0,
+    workerSold: 0,
+    machineSold: 0,
+    reservePool: 0,
+    reservePoolReward: 0,
   };
 
   const dailyMoney = numberOfMachines * machine.dailyReward + numberOfWorkers * worker.dailyReward;
@@ -68,6 +72,21 @@ const Game = () => {
       enqueueSnackbar(`${buyType === 'buy-building' ? 'Upgrade safehouse' : 'Buy goon'} successfully`, {
         variant: 'success',
       });
+    } catch (err) {
+      enqueueSnackbar(err.message, { variant: 'error' });
+      console.error(err);
+    }
+  };
+
+  const buyGangster = async (quantity) => {
+    try {
+      const res = await create({ type: 'buy-machine', amount: quantity });
+      const { id, amount, value } = res.data;
+      const receipt = await buyMachine(amount, value);
+      if (receipt.status === 1) {
+        await validate({ transactionId: id, txnHash: receipt.transactionHash });
+      }
+      enqueueSnackbar('Buy Gangster successfully', { variant: 'success' });
     } catch (err) {
       enqueueSnackbar(err.message, { variant: 'error' });
       console.error(err);
@@ -215,6 +234,15 @@ const Game = () => {
         }
       });
 
+      game.events.on('buy-gangster', async ({ quantity }) => {
+        try {
+          await buyGangster(quantity);
+          game.events.emit('buy-gangster-completed');
+        } catch (err) {
+          console.error(err);
+        }
+      });
+
       game.events.on('request-workers', () => {
         game.events.emit('update-workers', {
           numberOfWorkers,
@@ -224,6 +252,17 @@ const Game = () => {
           basePrice: worker.basePrice,
           priceStep: worker.priceStep,
           dailyReward: worker.dailyReward,
+        });
+      });
+
+      game.events.on('request-machines', () => {
+        game.events.emit('update-machines', {
+          numberOfMachines,
+          networth,
+          balance: ETHBalance,
+          basePrice: machine.basePrice,
+          dailyReward: machine.dailyReward,
+          bonus: reservePool * reservePoolReward,
         });
       });
 
@@ -309,6 +348,17 @@ const Game = () => {
       dailyReward: worker.dailyReward,
     });
   }, [numberOfWorkers, networth, tokenBalance, worker, workerSold]);
+
+  useEffect(() => {
+    gameRef.current?.events.emit('update-machines', {
+      numberOfMachines,
+      networth,
+      balance: tokenBalance,
+      basePrice: machine.basePrice,
+      dailyReward: machine.dailyReward,
+      bonus: reservePool * reservePoolReward,
+    });
+  }, [numberOfMachines, networth, ETHBalance, machine, reservePool, reservePoolReward]);
 
   useEffect(() => {
     gameRef.current?.events.emit('update-networth', { networth: gamePlay.networth });

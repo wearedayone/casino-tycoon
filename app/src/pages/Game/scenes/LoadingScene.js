@@ -75,13 +75,16 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('popup-daily-gang-war', '/images/popup-daily-gang-war.png');
     this.load.image('popup-safehouse-upgrade', '/images/popup-safehouse-upgrade.png');
     this.load.image('popup-buy-goon', '/images/popup-buy-goon.png');
+    this.load.image('popup-buy-gangster', '/images/popup-buy-gangster.png');
 
     this.load.image('ribbon-welcome', '/images/ribbon-welcome.png');
     this.load.image('ribbon-daily-gang-war', '/images/ribbon-daily-gang-war.png');
     this.load.image('ribbon-safehouse-upgrade', '/images/ribbon-safehouse-upgrade.png');
     this.load.image('ribbon-buy-goon', '/images/ribbon-buy-goon.png');
+    this.load.image('ribbon-buy-gangster', '/images/ribbon-buy-gangster.png');
     this.load.image('coin', '/images/coin.png');
     this.load.image('coin2', '/images/coin-2.png');
+    this.load.image('eth-coin', '/images/eth-coin.png');
     this.load.image('slider-thumb', '/images/slider-thumb.png');
 
     this.load.image('button-blue', '/images/button-blue.png');
@@ -131,6 +134,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-war', '/images/icon-war.png');
     this.load.image('icon-checked', '/images/icon-checked.png');
     this.load.image('icon-unchecked', '/images/icon-unchecked.png');
+    this.load.image('icon-info', '/images/icon-info.png');
   }
 
   create() {

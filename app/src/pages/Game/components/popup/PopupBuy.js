@@ -18,7 +18,7 @@ class PopupBuy extends Phaser.GameObjects.Container {
       this.addSafeHouseBtn.y + verticalGap,
       'button-add',
       'button-add-pressed',
-      () => console.log('gangster')
+      () => scene.popupBuyGangster.setVisible(true)
     );
     this.addGoonBtn = new Button(
       scene,

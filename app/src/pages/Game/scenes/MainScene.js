@@ -12,6 +12,7 @@ import PopupSettings from '../components/popup/PopupSettings';
 import PopupDailyGangWar from '../components/popup/PopupDailyGangWar';
 import PopupSafeHouseUpgrade from '../components/popup/PopupSafeHouseUpgrade';
 import PopupBuyGoon from '../components/popup/PopupBuyGoon';
+import PopupBuyGangster from '../components/popup/PopupBuyGangster';
 
 class MainScene extends Phaser.Scene {
   constructor() {
@@ -46,10 +47,6 @@ class MainScene extends Phaser.Scene {
     footer.setDepth(1);
     this.add.existing(footer);
 
-    // test
-    // const popup = new PopupWelcomeNoWar(this, 2500);
-    // this.add.existing(popup);
-
     const popupSettings = new PopupSettings(this);
     this.add.existing(popupSettings);
 
@@ -62,8 +59,15 @@ class MainScene extends Phaser.Scene {
     this.popupBuyGoon = new PopupBuyGoon(this);
     this.add.existing(this.popupBuyGoon);
 
+    this.popupBuyGangster = new PopupBuyGangster(this);
+    this.add.existing(this.popupBuyGangster);
+
     const infoButtons = new InfoButtons(this, 550, () => popupSettings.open());
     this.add.existing(infoButtons);
+
+    // test
+    // const popup = new PopupWelcomeNoWar(this, 2500);
+    // this.add.existing(popup);
   }
 
   update() {}
