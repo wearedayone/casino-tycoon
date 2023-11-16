@@ -11,6 +11,7 @@ import PopupWar from '../components/popup/PopupWar';
 import PopupSettings from '../components/popup/PopupSettings';
 import PopupDailyGangWar from '../components/popup/PopupDailyGangWar';
 import PopupSafeHouseUpgrade from '../components/popup/PopupSafeHouseUpgrade';
+import PopupBuyGoon from '../components/popup/PopupBuyGoon';
 
 class MainScene extends Phaser.Scene {
   constructor() {
@@ -57,6 +58,9 @@ class MainScene extends Phaser.Scene {
 
     this.popupSafeHouseUpgrade = new PopupSafeHouseUpgrade(this);
     this.add.existing(this.popupSafeHouseUpgrade);
+
+    this.popupBuyGoon = new PopupBuyGoon(this);
+    this.add.existing(this.popupBuyGoon);
 
     const infoButtons = new InfoButtons(this, 550, () => popupSettings.setVisible(!popupSettings.visible));
     this.add.existing(infoButtons);

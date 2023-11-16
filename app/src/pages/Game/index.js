@@ -47,24 +47,27 @@ const Game = () => {
     numberOfBuildings: 0,
     networth: 0,
   };
-  const { machine, worker, building, buildingSold } = activeSeason || {
+  const { machine, worker, building, workerSold, buildingSold } = activeSeason || {
     machine: { dailyReward: 0 },
-    worker: { dailyReward: 0 },
+    worker: { dailyReward: 0, basePrice: 0, priceStep: 0 },
     building: { basePrice: 0, priceStep: 0 },
     buildingSold: 0,
   };
 
   const dailyMoney = numberOfMachines * machine.dailyReward + numberOfWorkers * worker.dailyReward;
 
-  const buy = async (quantity) => {
+  const buy = async (buyType, quantity) => {
     try {
-      const res = await create({ type: 'buy-building', amount: quantity });
+      console.log({ quantity });
+      const res = await create({ type: buyType, amount: quantity });
       const { id, amount, value, type } = res.data;
       const receipt = await buyWorkerOrBuilding(amount, value, type);
       if (receipt.status === 1) {
         await validate({ transactionId: id, txnHash: receipt.transactionHash });
       }
-      enqueueSnackbar('Upgrade safehouse successfully', { variant: 'success' });
+      enqueueSnackbar(`${buyType === 'buy-building' ? 'Upgrade safehouse' : 'Buy goon'} successfully`, {
+        variant: 'success',
+      });
     } catch (err) {
       enqueueSnackbar(err.message, { variant: 'error' });
       console.error(err);
@@ -177,7 +180,7 @@ const Game = () => {
 
       game.events.on('upgrade-safehouse', async ({ quantity }) => {
         try {
-          await buy(quantity);
+          await buy('buy-building', quantity);
           game.events.emit('upgrade-safehouse-completed');
         } catch (err) {
           console.error(err);
@@ -192,6 +195,27 @@ const Game = () => {
           sold: buildingSold,
           basePrice: building.basePrice,
           priceStep: building.priceStep,
+        });
+      });
+
+      game.events.on('buy-goon', async ({ quantity }) => {
+        try {
+          await buy('buy-worker', quantity);
+          game.events.emit('buy-goon-completed');
+        } catch (err) {
+          console.error(err);
+        }
+      });
+
+      game.events.on('request-workers', () => {
+        game.events.emit('update-workers', {
+          numberOfWorkers,
+          networth,
+          balance: tokenBalance,
+          sold: workerSold,
+          basePrice: worker.basePrice,
+          priceStep: worker.priceStep,
+          dailyReward: worker.dailyReward,
         });
       });
 
@@ -257,6 +281,22 @@ const Game = () => {
       priceStep: building.priceStep,
     });
   }, [numberOfBuildings, networth, tokenBalance, building, buildingSold]);
+
+  useEffect(() => {
+    gameRef.current?.events.emit('update-workers', {
+      numberOfWorkers,
+      networth,
+      balance: tokenBalance,
+      sold: workerSold,
+      basePrice: worker.basePrice,
+      priceStep: worker.priceStep,
+      dailyReward: worker.dailyReward,
+    });
+  }, [numberOfWorkers, networth, tokenBalance, worker, workerSold]);
+
+  useEffect(() => {
+    gameRef.current?.events.emit('update-networth', { networth: gamePlay.networth });
+  }, [networth]);
 
   return (
     <Box display="flex" justifyContent="center" alignItems="center">
