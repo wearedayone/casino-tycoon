@@ -18,13 +18,15 @@ import { create, validate } from '../../services/transaction.service';
 import configs from './configs/configs.json';
 import LoadingScene from './scenes/LoadingScene';
 import MainScene from './scenes/MainScene';
-// import ExampleScene from './scenes/TestScene';
+import ExampleScene from './scenes/TestScene';
+import useUserWallet from '../../hooks/useUserWallet';
 
 const { width, height } = configs;
 const MILISECONDS_IN_A_DAY = 86400 * 1000;
 
 const Game = () => {
   const { enqueueSnackbar } = useSnackbar();
+  const embeddedWallet = useUserWallet();
   const [userHasInteractive, setUserHasInteracted] = useState(false);
   const gameRef = useRef();
   const gameLoaded = useRef();
@@ -98,10 +100,10 @@ const Game = () => {
   };
 
   useEffect(() => {
-    if (profile && gamePlay && activeSeason && !loaded) {
+    if (profile && gamePlay && activeSeason && !loaded && !!embeddedWallet) {
       setLoaded(true);
     }
-  }, [loaded, profile, gamePlay, activeSeason]);
+  }, [loaded, profile, gamePlay, activeSeason, embeddedWallet]);
 
   useEffect(() => {
     if (rankData && rankData.data) {
