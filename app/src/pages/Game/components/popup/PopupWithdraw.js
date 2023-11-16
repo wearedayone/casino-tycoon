@@ -1,6 +1,9 @@
 import Phaser from 'phaser';
 
 import Popup from './Popup';
+import PopupWithdrawToken from './PopupWithdrawToken';
+import PopupWithdrawETH from './PopupWithdrawETH';
+import PopupWithdrawNFT from './PopupWithdrawNFT';
 import TextButton from '../button/TextButton';
 import configs from '../../configs/configs.json';
 import { formatter } from '../../../../utils/numbers';
@@ -26,6 +29,19 @@ class PopupWithdraw extends Popup {
       color: '#29000b',
       fontFamily: 'WixMadeforDisplayBold',
     };
+    const availableTextStyle = {
+      color: '#7c2828',
+      fontFamily: 'WixMadeforDisplayBold',
+      fontSize: '48px',
+    };
+
+    // child modals
+    this.popupWithdrawToken = new PopupWithdrawToken(scene, this);
+    this.popupWithdrawETH = new PopupWithdrawETH(scene, this);
+    this.popupWithdrawNFT = new PopupWithdrawNFT(scene, this);
+    scene.add.existing(this.popupWithdrawToken);
+    scene.add.existing(this.popupWithdrawETH);
+    scene.add.existing(this.popupWithdrawNFT);
 
     // user details
     const subtitle = scene.add.text(width / 2, subtitleY, 'Select assets to withdraw', resourceNameStyle);
@@ -38,11 +54,7 @@ class PopupWithdraw extends Popup {
       .text(resourceValueX, tokenContainerY, '0', { ...resourceNameStyle, fontSize: '48px' })
       .setOrigin(1, 1);
     const tokenAvailable = scene.add
-      .text(resourceValueX, tokenContainerY, 'Available', {
-        color: '#7C2828',
-        fontFamily: 'WixMadeforDisplayBold',
-        fontSize: '48px',
-      })
+      .text(resourceValueX, tokenContainerY, 'Available', availableTextStyle)
       .setOrigin(1, 0);
     const tokenArrow = scene.add.image(resourceArrowIconX, tokenContainerY, 'icon-chevron-right');
 
@@ -52,13 +64,7 @@ class PopupWithdraw extends Popup {
     this.ethAmount = scene.add
       .text(resourceValueX, ethContainerY, '0', { ...resourceNameStyle, fontSize: '48px' })
       .setOrigin(1, 1);
-    const ethAvailable = scene.add
-      .text(resourceValueX, ethContainerY, 'Available', {
-        color: '#7C2828',
-        fontFamily: 'WixMadeforDisplayBold',
-        fontSize: '48px',
-      })
-      .setOrigin(1, 0);
+    const ethAvailable = scene.add.text(resourceValueX, ethContainerY, 'Available', availableTextStyle).setOrigin(1, 0);
     const ethArrow = scene.add.image(resourceArrowIconX, ethContainerY, 'icon-chevron-right');
 
     this.gangsterContainer = scene.add.image(width / 2, gangsterContainerY, 'text-container');
@@ -70,11 +76,7 @@ class PopupWithdraw extends Popup {
       .text(resourceValueX, gangsterContainerY, '0 Gangster', { ...resourceNameStyle, fontSize: '48px' })
       .setOrigin(1, 1);
     const gangsterAvailable = scene.add
-      .text(resourceValueX, gangsterContainerY, 'Available', {
-        color: '#7C2828',
-        fontFamily: 'WixMadeforDisplayBold',
-        fontSize: '48px',
-      })
+      .text(resourceValueX, gangsterContainerY, 'Available', availableTextStyle)
       .setOrigin(1, 0);
     const gangsterArrow = scene.add.image(resourceArrowIconX, gangsterContainerY, 'icon-chevron-right');
 
@@ -115,15 +117,15 @@ class PopupWithdraw extends Popup {
 
     this.tokenContainer.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
       this.close();
-      console.log('open withdraw fiat modal');
+      this.popupWithdrawToken.open();
     });
     this.ethContainer.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
       this.close();
-      console.log('open withdraw eth modal');
+      this.popupWithdrawETH.open();
     });
     this.gangsterContainer.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
       this.close();
-      console.log('open withdraw nft modal');
+      this.popupWithdrawNFT.open();
     });
 
     scene.game.events.on('update-balances-for-withdraw', (data) => this.updateValues(data));
@@ -137,6 +139,10 @@ class PopupWithdraw extends Popup {
     this.tokenAmount.text = tokenBalance.toLocaleString();
     this.ethAmount.text = formatter.format(ETHBalance);
     this.gangsterAmount.text = `${NFTBalance} Gangster${NFTBalance > 1 ? 's' : ''}`;
+
+    this.popupWithdrawToken.updateBalance(tokenBalance);
+    this.popupWithdrawETH.updateBalance(ETHBalance);
+    this.popupWithdrawNFT.updateBalance(NFTBalance);
   }
 }
 

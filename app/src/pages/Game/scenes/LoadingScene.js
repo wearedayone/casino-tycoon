@@ -126,12 +126,18 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-green-long-pressed', '/images/button-green-long-pressed.png');
     this.load.image('button-close', '/images/button-close.png');
     this.load.image('button-close-pressed', '/images/button-close-pressed.png');
+    this.load.image('button-confirm', '/images/button-confirm.png');
+    this.load.image('button-confirm-pressed', '/images/button-confirm-pressed.png');
     this.load.image('button-copy', '/images/button-copy.png');
     this.load.image('button-copy-pressed', '/images/button-copy-pressed.png');
     this.load.image('button-buy', '/images/button-buy.png');
     this.load.image('button-buy-pressed', '/images/button-buy-pressed.png');
     this.load.image('button-war', '/images/button-war.png');
     this.load.image('button-war-pressed', '/images/button-war-pressed.png');
+    this.load.image('button-max', '/images/button-max.png');
+    this.load.image('button-max-pressed', '/images/button-max-pressed.png');
+    this.load.image('button-paste', '/images/button-paste.png');
+    this.load.image('button-paste-pressed', '/images/button-paste-pressed.png');
     this.load.image('button-portfolio', '/images/button-portfolio.png');
     this.load.image('button-portfolio-pressed', '/images/button-portfolio-pressed.png');
     this.load.image('button-rank', '/images/button-rank.png');
@@ -144,6 +150,8 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-add-pressed', '/images/button-add-pressed.png');
     this.load.image('button-claim', '/images/button-claim.png');
     this.load.image('button-claim-pressed', '/images/button-claim-pressed.png');
+
+    this.load.image('text-input', '/images/text-input.png');
 
     // settings
     this.load.image('settings-wallet-container', '/images/settings-wallet-container.png');
