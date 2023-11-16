@@ -27,7 +27,7 @@ class PopupSafeHouseUpgrade extends Popup {
       'button-blue',
       'button-blue-pressed',
       () => {
-        if (this.loading) return;
+        if (this.loading || !this.quantity) return;
         this.loading = true;
         this.upgradeBtn.updateText('Upgrading...');
         scene.game.events.emit('upgrade-safehouse', { quantity: this.quantity });
