@@ -11,6 +11,7 @@ import { getRank, toggleWarStatus } from '../../services/user.service';
 import { claimToken } from '../../services/transaction.service';
 import { getNextWarSnapshotUnixTime } from '../../services/gamePlay.service';
 import QueryKeys from '../../utils/queryKeys';
+import { calculateHouseLevel } from '../../utils/formulas';
 import useSmartContract from '../../hooks/useSmartContract';
 import { create, validate } from '../../services/transaction.service';
 
@@ -49,16 +50,18 @@ const Game = () => {
     numberOfBuildings: 0,
     networth: 0,
   };
-  const { machine, worker, building, workerSold, buildingSold, reservePool, reservePoolReward } = activeSeason || {
-    machine: { dailyReward: 0, basePrice: 0 },
-    worker: { dailyReward: 0, basePrice: 0, priceStep: 0 },
-    building: { basePrice: 0, priceStep: 0 },
-    buildingSold: 0,
-    workerSold: 0,
-    machineSold: 0,
-    reservePool: 0,
-    reservePoolReward: 0,
-  };
+  const { machine, worker, building, workerSold, buildingSold, reservePool, reservePoolReward, houseLevels } =
+    activeSeason || {
+      machine: { dailyReward: 0, basePrice: 0 },
+      worker: { dailyReward: 0, basePrice: 0, priceStep: 0 },
+      building: { basePrice: 0, priceStep: 0 },
+      buildingSold: 0,
+      workerSold: 0,
+      machineSold: 0,
+      reservePool: 0,
+      reservePoolReward: 0,
+      houseLevels: [],
+    };
 
   const dailyMoney = numberOfMachines * machine.dailyReward + numberOfWorkers * worker.dailyReward;
 
@@ -155,7 +158,10 @@ const Game = () => {
       });
 
       game.events.on('request-networth', () => {
-        gameRef.current.events.emit('update-networth', { networth: gamePlay.networth });
+        gameRef.current.events.emit('update-networth', {
+          networth,
+          level: calculateHouseLevel(houseLevels, networth),
+        });
       });
 
       game.events.on('request-claim-time', () => {
@@ -362,8 +368,11 @@ const Game = () => {
   }, [numberOfMachines, networth, ETHBalance, machine, reservePool, reservePoolReward]);
 
   useEffect(() => {
-    gameRef.current?.events.emit('update-networth', { networth: gamePlay.networth });
-  }, [networth]);
+    gameRef.current?.events.emit('update-networth', {
+      networth,
+      level: calculateHouseLevel(houseLevels, networth),
+    });
+  }, [networth, houseLevels]);
 
   useEffect(() => {
     if (userHasInteractive) {

@@ -66,6 +66,23 @@ const main = async () => {
         { rankStart: 26, rankEnd: 50, share: 0.003 },
         { rankStart: 51, rankEnd: 100, share: 0.0015 },
       ],
+      houseLevels: [
+        { networthStart: 0, networthEnd: 24, level: 1 },
+        { networthStart: 25, networthEnd: 49, level: 2 },
+        { networthStart: 50, networthEnd: 74, level: 3 },
+        { networthStart: 75, networthEnd: 99, level: 4 },
+        { networthStart: 100, networthEnd: 124, level: 5 },
+        { networthStart: 125, networthEnd: 149, level: 6 },
+        { networthStart: 150, networthEnd: 199, level: 7 },
+        { networthStart: 200, networthEnd: 249, level: 8 },
+        { networthStart: 250, networthEnd: 349, level: 9 },
+        { networthStart: 350, networthEnd: 499, level: 10 },
+        { networthStart: 500, networthEnd: 749, level: 11 },
+        { networthStart: 750, networthEnd: 1249, level: 12 },
+        { networthStart: 1250, networthEnd: 1999, level: 13 },
+        { networthStart: 2000, networthEnd: 4999, level: 14 },
+        { networthStart: 5000, level: 15 },
+      ],
     });
   console.log('created season');
 

@@ -74,6 +74,18 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('gangster-house-1', '/images/gangster-house-1.png');
     this.load.image('gangster-house-2', '/images/gangster-house-2.png');
     this.load.image('gangster-house-3', '/images/gangster-house-3.png');
+    this.load.image('gangster-house-4', '/images/gangster-house-4.png');
+    this.load.image('gangster-house-5', '/images/gangster-house-5.png');
+    this.load.image('gangster-house-6', '/images/gangster-house-6.png');
+    this.load.image('gangster-house-7', '/images/gangster-house-7.png');
+    this.load.image('gangster-house-8', '/images/gangster-house-8.png');
+    this.load.image('gangster-house-9', '/images/gangster-house-9.png');
+    this.load.image('gangster-house-10', '/images/gangster-house-10.png');
+    this.load.image('gangster-house-11', '/images/gangster-house-11.png');
+    this.load.image('gangster-house-12', '/images/gangster-house-12.png');
+    this.load.image('gangster-house-13', '/images/gangster-house-13.png');
+    this.load.image('gangster-house-14', '/images/gangster-house-14.png');
+    this.load.image('gangster-house-15', '/images/gangster-house-15.png');
     this.load.image('gangster-house-sign', '/images/gangster-house-sign.png');
 
     this.load.image('daily-money', '/images/daily-money.png');

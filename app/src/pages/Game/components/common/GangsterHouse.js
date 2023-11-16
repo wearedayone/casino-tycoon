@@ -6,11 +6,10 @@ import configs from '../../configs/configs.json';
 const { width } = configs;
 
 class GangsterHouse extends Phaser.GameObjects.Container {
-  constructor(scene, y, level) {
+  constructor(scene, y) {
     super(scene, 0, 0);
 
-    const houseImg = `gangster-house-${level}`;
-    this.house = scene.add.image(width / 2, y, houseImg).setOrigin(0.5, 0.5);
+    this.house = scene.add.sprite(width / 2, y, '').setOrigin(0.5, 0.5);
 
     this.sign = scene.add.image(width / 2, y, 'gangster-house-sign').setOrigin(0.5, 0.5);
     this.valueText = scene.add.text(width / 2, this.sign.y - 30, ``, {
@@ -23,8 +22,11 @@ class GangsterHouse extends Phaser.GameObjects.Container {
     this.add(this.sign);
     this.add(this.valueText);
 
-    scene.game.events.on('update-networth', ({ networth }) => {
+    scene.game.events.on('update-networth', ({ networth, level }) => {
       this.valueText.text = `${formatter.format(networth)}`;
+      if (level) {
+        this.house.setTexture(`gangster-house-${level}`);
+      }
     });
     scene.game.events.emit('request-networth');
   }

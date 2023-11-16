@@ -36,7 +36,7 @@ class MainScene extends Phaser.Scene {
     const header = new Header(this, 250);
     this.add.existing(header);
 
-    const gangsterHouse = new GangsterHouse(this, 2200, 1, 200);
+    const gangsterHouse = new GangsterHouse(this, 2200);
     this.add.existing(gangsterHouse);
 
     this.popupBuy = new PopupBuy(this, 955, 1600);

@@ -67,3 +67,18 @@ export const calculateNextBuildingBuyPriceBatch = (buildingSold, quantity, baseP
     prices,
   };
 };
+
+export const calculateHouseLevel = (houseLevels, networth) => {
+  const levelItem = houseLevels.find((item) => {
+    let valid = networth >= item.networthStart;
+    if (!valid) return false;
+
+    if (item.networthEnd) {
+      valid = networth <= item.networthEnd;
+    }
+
+    return valid;
+  });
+
+  return levelItem?.level;
+};
