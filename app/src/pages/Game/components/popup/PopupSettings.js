@@ -1,9 +1,10 @@
 import Phaser from 'phaser';
 
 import Popup from './Popup';
+import PopupWithdraw from './PopupWithdraw';
 import Button from '../button/Button';
-import configs from '../../configs/configs.json';
 import TextButton from '../button/TextButton';
+import configs from '../../configs/configs.json';
 
 const { width, height } = configs;
 
@@ -30,6 +31,10 @@ class PopupSettings extends Popup {
     const soundBtnY = swapBtnY + 280;
     const creditTextY = soundBtnY + 100;
 
+    // child modals
+    const popupWithdraw = new PopupWithdraw(scene, this);
+    scene.add.existing(popupWithdraw);
+
     // user details
     this.username = scene.add.text(x + 20, usernameY, 'username', {
       fontSize: '60px',
@@ -37,22 +42,19 @@ class PopupSettings extends Popup {
       fontFamily: 'WixMadeforDisplayExtraBold',
     });
     this.walletContainer = scene.add.image(width / 2, walletContainerY, 'settings-wallet-container');
-    this.circle = scene.add
-      .graphics()
-      .setPosition(avatarX, walletContainerY)
-      .fillCircle(0, 0, avatarSize);
+    this.circle = scene.add.graphics().setPosition(avatarX, walletContainerY).fillCircle(0, 0, avatarSize);
     this.avatar = scene.add.image(avatarX, walletContainerY, 'avatar').setSize(avatarSize, avatarSize);
 
     this.iconSettings = scene.add.image(x + 200, walletContainerY + 90, 'icon-settings');
     this.myWallet = scene.add.text(x + 300, walletContainerY - 80, 'My Wallet:', {
       fontSize: '60px',
       color: '#29000b',
-      fontFamily: 'WixMadeforDisplay',
+      fontFamily: 'WixMadeforDisplayBold',
     });
     this.addressText = scene.add.text(x + 300, walletContainerY, 'address', {
       fontSize: '60px',
       color: '#7d2e00',
-      fontFamily: 'WixMadeforDisplay',
+      fontFamily: 'WixMadeforDisplayBold',
     });
     this.buttonCopy = new Button(scene, width * 0.82, walletContainerY, 'button-copy', 'button-copy-pressed', () =>
       navigator.clipboard.writeText(this.address)
@@ -99,7 +101,10 @@ class PopupSettings extends Popup {
       withdrawBtnY,
       'button-blue-med',
       'button-blue-med-pressed',
-      () => console.log('withdraw'),
+      () => {
+        this.onClose();
+        popupWithdraw.open();
+      },
       'Withdraw'
     );
     this.buttonDeposit = new TextButton(
@@ -149,7 +154,7 @@ class PopupSettings extends Popup {
     this.credit = scene.add.text(width / 2, creditTextY, 'v1.0.0. Gangster Arena. Copyright.', {
       fontSize: '36px',
       color: '#7c2828',
-      fontFamily: 'WixMadeforDisplay',
+      fontFamily: 'WixMadeforDisplayBold',
     });
     this.credit.setOrigin(0.5, 0);
     this.add(this.buttonSound);
@@ -169,7 +174,11 @@ class PopupSettings extends Popup {
 
     scene.game.events.on('game-sound-changed', ({ sound }) => this.updateGameSoundBtn(sound === 'on'));
     scene.game.events.on('update-profile', (data) => this.updateValues(data));
-    scene.game.events.emit('request-profile');
+  }
+
+  open() {
+    this.setVisible(true);
+    this.scene.game.events.emit('request-profile');
   }
 
   updateGameSoundBtn(isSoundOn) {

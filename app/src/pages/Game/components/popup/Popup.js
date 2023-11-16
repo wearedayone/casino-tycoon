@@ -6,7 +6,11 @@ import configs from '../../configs/configs.json';
 class Popup extends Phaser.GameObjects.Container {
   destroyWhenClosed = false;
 
-  constructor(scene, img = 'popup', { ribbon, title, destroyWhenClosed = false, noCloseBtn = false } = {}) {
+  constructor(
+    scene,
+    img = 'popup',
+    { ribbon, title, openOnCreate = false, destroyWhenClosed = false, noCloseBtn = false } = {}
+  ) {
     super(scene, 0, 0);
     this.destroyWhenClosed = destroyWhenClosed;
 
@@ -67,8 +71,8 @@ class Popup extends Phaser.GameObjects.Container {
       this.add(this.titleShadow);
       this.add(this.title);
 
+      if (!openOnCreate) this.setVisible(false);
       this.ribbon.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, emptyListener);
-      this.title.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, emptyListener);
     }
   }
 

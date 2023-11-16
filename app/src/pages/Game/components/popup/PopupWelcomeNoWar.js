@@ -7,7 +7,7 @@ const { width, height } = configs;
 
 class PopupWelcomeNoWar extends Popup {
   constructor(scene, value) {
-    super(scene, 'popup-welcome-nowar', { destroyWhenClosed: true, ribbon: 'ribbon-welcome' });
+    super(scene, 'popup-welcome-nowar', { openOnCreate: true, destroyWhenClosed: true, ribbon: 'ribbon-welcome' });
 
     this.buttonClaim = new Button(
       scene,

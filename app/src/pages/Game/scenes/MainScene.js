@@ -49,9 +49,9 @@ class MainScene extends Phaser.Scene {
     // test
     // const popup = new PopupWelcomeNoWar(this, 2500);
     // this.add.existing(popup);
-    const popupSettings = new PopupSettings(this, 2500);
+
+    const popupSettings = new PopupSettings(this);
     this.add.existing(popupSettings);
-    popupSettings.setVisible(false);
 
     this.popupDailyGangWar = new PopupDailyGangWar(this);
     this.add.existing(this.popupDailyGangWar);
@@ -62,7 +62,7 @@ class MainScene extends Phaser.Scene {
     this.popupBuyGoon = new PopupBuyGoon(this);
     this.add.existing(this.popupBuyGoon);
 
-    const infoButtons = new InfoButtons(this, 550, () => popupSettings.setVisible(!popupSettings.visible));
+    const infoButtons = new InfoButtons(this, 550, () => popupSettings.open());
     this.add.existing(infoButtons);
   }
 

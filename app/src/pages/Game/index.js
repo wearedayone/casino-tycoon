@@ -120,6 +120,14 @@ const Game = () => {
         gameRef.current.events.emit('update-balances', { dailyMoney, ETHBalance, tokenBalance });
       });
 
+      game.events.on('request-balances-for-withdraw', () => {
+        gameRef.current.events.emit('update-balances-for-withdraw', {
+          NFTBalance: numberOfMachines,
+          ETHBalance,
+          tokenBalance,
+        });
+      });
+
       game.events.on('request-rank', () => {
         getRank()
           .then((res) => gameRef.current.events.emit('update-rank', { rank: res.data.rank }))
@@ -234,6 +242,14 @@ const Game = () => {
   useEffect(() => {
     gameRef.current?.events.emit('update-balances', { dailyMoney, ETHBalance, tokenBalance });
   }, [tokenBalance, ETHBalance, dailyMoney]);
+
+  useEffect(() => {
+    gameRef.current?.events.emit('update-balances-for-withdraw', {
+      NFTBalance: numberOfMachines,
+      ETHBalance,
+      tokenBalance,
+    });
+  }, [numberOfMachines, ETHBalance, tokenBalance]);
 
   useEffect(() => {
     gameRef.current?.events.emit('update-profile', { username, address, avatarURL });
