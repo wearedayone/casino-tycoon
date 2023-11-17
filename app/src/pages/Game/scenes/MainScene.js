@@ -14,6 +14,7 @@ import PopupDailyGangWar from '../components/popup/PopupDailyGangWar';
 import PopupSafeHouseUpgrade from '../components/popup/PopupSafeHouseUpgrade';
 import PopupBuyGoon from '../components/popup/PopupBuyGoon';
 import PopupBuyGangster from '../components/popup/PopupBuyGangster';
+import PopupPortfolio from '../components/popup/PopupPortfolio';
 import Animation from '../components/common/Animation';
 
 const { goonAnimation, gangsterAnimation } = configs;
@@ -81,8 +82,11 @@ class MainScene extends Phaser.Scene {
     footer.setDepth(1);
     this.add.existing(footer);
 
-    const popupSettings = new PopupSettings(this);
-    this.add.existing(popupSettings);
+    this.popupSettings = new PopupSettings(this);
+    this.add.existing(this.popupSettings);
+
+    this.popupPortfolio = new PopupPortfolio(this);
+    this.add.existing(this.popupPortfolio);
 
     this.popupDailyGangWar = new PopupDailyGangWar(this);
     this.add.existing(this.popupDailyGangWar);
@@ -96,7 +100,7 @@ class MainScene extends Phaser.Scene {
     this.popupBuyGangster = new PopupBuyGangster(this);
     this.add.existing(this.popupBuyGangster);
 
-    const infoButtons = new InfoButtons(this, 550, () => popupSettings.open());
+    const infoButtons = new InfoButtons(this, 550);
     this.add.existing(infoButtons);
 
     this.game.events.on('music-on', () => {

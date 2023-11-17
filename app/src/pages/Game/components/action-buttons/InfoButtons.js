@@ -11,7 +11,7 @@ const buttonSize = 186;
 const verticalGap = buttonSize + 50;
 
 class InfoButtons extends Phaser.GameObjects.Container {
-  constructor(scene, y, onClickSettingsBtn) {
+  constructor(scene, y) {
     super(scene, 0, 0);
 
     this.settingButton = new Button(
@@ -20,7 +20,7 @@ class InfoButtons extends Phaser.GameObjects.Container {
       y,
       'button-setting',
       'button-setting-pressed',
-      onClickSettingsBtn,
+      () => scene.popupSettings.open(),
       { sound: 'button-1' }
     );
 
@@ -48,7 +48,7 @@ class InfoButtons extends Phaser.GameObjects.Container {
       y + verticalGap,
       'button-portfolio',
       'button-portfolio-pressed',
-      () => console.log('portfolio clicked'),
+      () => scene.popupPortfolio.open(),
       { sound: 'button-1' }
     );
 

@@ -165,6 +165,27 @@ const Game = () => {
     gameRef.current?.events.emit('update-claimable-reward', { reward: claimableReward });
   };
 
+  const fetchPortfolioRef = useRef();
+  fetchPortfolioRef.current = () => {
+    getRank().then((res) => {
+      const { rank, reward: rankReward } = res.data;
+      const address = profile.address;
+      const tokenValue = tokenBalance * 0.000001; // TODO: update formulas to calculate token value
+      const machineValue = numberOfMachines * 0.041; // TODO: update formulas to calculate machine value
+      const totalBalance = ETHBalance + tokenValue + machineValue + rankReward;
+      gameRef.current?.events.emit('update-portfolio', {
+        address,
+        totalBalance,
+        ETHBalance,
+        tokenBalance,
+        tokenValue,
+        numberOfMachines,
+        machineValue,
+        rankReward,
+      });
+    });
+  };
+
   useEffect(() => {
     if (profile && gamePlay && activeSeason && !loaded && !!embeddedWallet) {
       setLoaded(true);
@@ -173,8 +194,8 @@ const Game = () => {
 
   useEffect(() => {
     if (rankData && rankData.data) {
-      const { rank } = rankData.data;
-      gameRef.current?.events.emit('update-rank', { rank });
+      const { rank, reward } = rankData.data;
+      gameRef.current?.events.emit('update-rank', { rank, reward });
     }
   }, [rankData]);
 
@@ -223,7 +244,7 @@ const Game = () => {
 
       game.events.on('request-rank', () => {
         getRank()
-          .then((res) => gameRef.current.events.emit('update-rank', { rank: res.data.rank }))
+          .then((res) => gameRef.current.events.emit('update-rank', { rank: res.data.rank, reward: res.data.reward }))
           .catch((err) => console.error(err));
       });
 
@@ -355,6 +376,8 @@ const Game = () => {
           numberOfMachines,
         });
       });
+
+      game.events.on('request-portfolio', () => fetchPortfolioRef.current?.());
 
       gameRef.current = game;
 
