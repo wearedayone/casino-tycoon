@@ -16,6 +16,7 @@ import PopupBuyGoon from '../components/popup/PopupBuyGoon';
 import PopupBuyGangster from '../components/popup/PopupBuyGangster';
 import PopupPortfolio from '../components/popup/PopupPortfolio';
 import Animation from '../components/common/Animation';
+import PopupStatistic from '../components/popup/PopupStatistic';
 
 const { goonAnimation, gangsterAnimation } = configs;
 
@@ -88,6 +89,9 @@ class MainScene extends Phaser.Scene {
     this.popupPortfolio = new PopupPortfolio(this);
     this.add.existing(this.popupPortfolio);
 
+    this.popupStatistic = new PopupStatistic(this);
+    this.add.existing(this.popupStatistic);
+
     this.popupDailyGangWar = new PopupDailyGangWar(this);
     this.add.existing(this.popupDailyGangWar);
 
@@ -112,7 +116,6 @@ class MainScene extends Phaser.Scene {
     });
 
     this.game.events.on('update-workers-machines', ({ numberOfWorkers, numberOfMachines }) => {
-      console.log({ numberOfWorkers, numberOfMachines });
       this.game.events.emit('update-gangster-animation', { numberOfMachines });
       this.game.events.emit('update-goon-animation', { numberOfWorkers });
     });

@@ -104,6 +104,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('popup-buy-goon', '/images/popup-buy-goon.png');
     this.load.image('popup-buy-gangster', '/images/popup-buy-gangster.png');
     this.load.image('popup-portfolio', '/images/popup-portfolio.png');
+    this.load.image('popup-statistic', '/images/popup-statistic.png');
 
     this.load.image('ribbon-welcome', '/images/ribbon-welcome.png');
     this.load.image('ribbon-daily-gang-war', '/images/ribbon-daily-gang-war.png');
@@ -111,6 +112,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('ribbon-buy-goon', '/images/ribbon-buy-goon.png');
     this.load.image('ribbon-buy-gangster', '/images/ribbon-buy-gangster.png');
     this.load.image('ribbon-portfolio', '/images/ribbon-portfolio.png');
+    this.load.image('ribbon-statistic', '/images/ribbon-statistic.png');
 
     this.load.image('coin', '/images/coin.png');
     this.load.image('coin2', '/images/coin-2.png');
@@ -159,6 +161,8 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-add-pressed', '/images/button-add-pressed.png');
     this.load.image('button-claim', '/images/button-claim.png');
     this.load.image('button-claim-pressed', '/images/button-claim-pressed.png');
+    this.load.image('button-back-portfolio', '/images/button-back-portfolio.png');
+    this.load.image('button-back-portfolio-pressed', '/images/button-back-portfolio-pressed.png');
 
     this.load.image('text-input', '/images/text-input.png');
 

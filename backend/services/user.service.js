@@ -121,7 +121,7 @@ export const getUserRankAndReward = async (userId) => {
   const rankIndex = gamePlaySnapshot.docs.findIndex((item) => item.data().userId === userId);
   if (rankIndex !== -1) {
     const reward = calculateReward(activeSeason.prizePool, activeSeason.rankingRewards, rankIndex);
-    return { rank: rankIndex + 1, reward };
+    return { rank: rankIndex + 1, reward, totalPlayers: gamePlaySnapshot.docs.length };
   }
 
   return null;

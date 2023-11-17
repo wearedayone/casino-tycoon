@@ -34,7 +34,10 @@ class PopupPortfolio extends Popup {
       height / 2 + this.popup.height / 2 - 20,
       'button-blue',
       'button-blue-pressed',
-      () => {},
+      () => {
+        this.close();
+        scene.popupStatistic.open();
+      },
       'Statistic',
       { sound: 'button-1' }
     );
@@ -126,16 +129,6 @@ class PopupPortfolio extends Popup {
     scene.game.events.on(
       'update-portfolio',
       ({ address, totalBalance, ETHBalance, tokenBalance, tokenValue, numberOfMachines, machineValue, rankReward }) => {
-        console.log(
-          address,
-          totalBalance,
-          ETHBalance,
-          tokenBalance,
-          tokenValue,
-          numberOfMachines,
-          machineValue,
-          rankReward
-        );
         this.addressText.text = this.formatAddress(address);
         this.copyBtn.x = this.addressText.x + this.addressText.width + 120;
         this.totalBalanceText.text = formatter.format(totalBalance);
@@ -149,11 +142,6 @@ class PopupPortfolio extends Popup {
     );
 
     scene.game.events.emit('request-portfolio');
-    this.scene = scene;
-  }
-
-  onOpen() {
-    this.scene.game.events.emit('request-portfolio');
   }
 
   formatAddress(address) {
