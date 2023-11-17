@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 
 import Popup from './Popup';
 import PopupWithdraw from './PopupWithdraw';
+import PopupDeposit from './PopupDeposit';
 import Button from '../button/Button';
 import TextButton from '../button/TextButton';
 import configs from '../../configs/configs.json';
@@ -33,7 +34,9 @@ class PopupSettings extends Popup {
 
     // child modals
     const popupWithdraw = new PopupWithdraw(scene, this);
+    this.popupDeposit = new PopupDeposit(scene, this);
     scene.add.existing(popupWithdraw);
+    scene.add.existing(this.popupDeposit);
 
     // user details
     this.username = scene.add.text(x + 20, usernameY, 'username', {
@@ -121,7 +124,10 @@ class PopupSettings extends Popup {
       withdrawBtnY,
       'button-blue-med',
       'button-blue-med-pressed',
-      () => console.log('deposit'),
+      () => {
+        this.close();
+        this.popupDeposit.open();
+      },
       'Deposit',
       { sound: 'open' }
     );
@@ -203,6 +209,7 @@ class PopupSettings extends Popup {
     this.username.text = username;
     this.addressText.text = `${address.slice(0, 5)}...${address.slice(-7)}`;
     this.address = address;
+    this.popupDeposit.updateAddress(address);
 
     // load avatar
     let loader = new Phaser.Loader.LoaderPlugin(this.scene);

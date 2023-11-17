@@ -234,6 +234,10 @@ const Game = () => {
         gameRef.current.events.emit('update-balances', { dailyMoney, ETHBalance, tokenBalance });
       });
 
+      game.events.on('request-eth-balance', () => {
+        gameRef.current.events.emit('update-eth-balance', ETHBalance);
+      });
+
       game.events.on('request-balances-for-withdraw', () => {
         gameRef.current.events.emit('update-balances-for-withdraw', {
           NFTBalance: numberOfMachines,
@@ -390,6 +394,10 @@ const Game = () => {
       };
     }
   }, [loaded]);
+
+  useEffect(() => {
+    gameRef.current?.events.emit('update-eth-balance', ETHBalance);
+  }, [ETHBalance]);
 
   useEffect(() => {
     gameRef.current?.events.emit('update-balances', { dailyMoney, ETHBalance, tokenBalance });

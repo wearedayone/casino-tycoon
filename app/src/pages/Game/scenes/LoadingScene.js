@@ -135,6 +135,8 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-confirm-disabled', '/images/button-confirm-disabled.png');
     this.load.image('button-copy', '/images/button-copy.png');
     this.load.image('button-copy-pressed', '/images/button-copy-pressed.png');
+    this.load.image('button-deposit', '/images/button-deposit.png');
+    this.load.image('button-deposit-pressed', '/images/button-deposit-pressed.png');
     this.load.image('button-buy', '/images/button-buy.png');
     this.load.image('button-buy-pressed', '/images/button-buy-pressed.png');
     this.load.image('button-war', '/images/button-war.png');
@@ -149,6 +151,8 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-rank-pressed', '/images/button-rank-pressed.png');
     this.load.image('button-referral', '/images/button-referral.png');
     this.load.image('button-referral-pressed', '/images/button-referral-pressed.png');
+    this.load.image('button-refresh', '/images/button-refresh.png');
+    this.load.image('button-refresh-pressed', '/images/button-refresh-pressed.png');
     this.load.image('button-setting', '/images/button-setting.png');
     this.load.image('button-setting-pressed', '/images/button-setting-pressed.png');
     this.load.image('button-add', '/images/button-add.png');
@@ -173,6 +177,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-eth-done', '/images/icons/eth-done.png');
     this.load.image('icon-nft-done', '/images/icons/nft-done.png');
     this.load.image('icon-chevron-right', '/images/icons/chevron-right.png');
+    this.load.image('icon-wallet', '/images/icons/wallet.png');
 
     this.load.image('icon-history', '/images/icon-history.png');
     this.load.image('icon-war', '/images/icon-war.png');
