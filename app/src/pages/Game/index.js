@@ -157,6 +157,14 @@ const Game = () => {
     }
   };
 
+  const calculateClaimableRewardRef = useRef();
+  calculateClaimableRewardRef.current = () => {
+    if (!gamePlay.lastClaimTime) return;
+    const diffInDays = (Date.now() - gamePlay.lastClaimTime.toDate().getTime()) / MILISECONDS_IN_A_DAY;
+    const claimableReward = gamePlay.pendingReward + diffInDays * dailyMoney;
+    gameRef.current?.events.emit('update-claimable-reward', { reward: claimableReward });
+  };
+
   useEffect(() => {
     if (profile && gamePlay && activeSeason && !loaded && !!embeddedWallet) {
       setLoaded(true);
@@ -233,11 +241,7 @@ const Game = () => {
         });
       });
 
-      game.events.on('request-claimable-reward', () => {
-        const diffInDays = (Date.now() - gamePlay.lastClaimTime.toDate().getTime()) / MILISECONDS_IN_A_DAY;
-        const claimableReward = gamePlay.pendingReward + diffInDays * dailyMoney;
-        gameRef.current.events.emit('update-claimable-reward', { reward: claimableReward });
-      });
+      game.events.on('request-claimable-reward', () => calculateClaimableRewardRef.current?.());
 
       game.events.on('request-claimable-status', () => {
         const nextClaimTime = gamePlay.lastClaimTime.toDate().getTime() + activeSeason.claimGapInSeconds * 1000;
@@ -345,6 +349,13 @@ const Game = () => {
         });
       });
 
+      game.events.on('request-workers-machines', () => {
+        game.events.emit('update-workers-machines', {
+          numberOfWorkers,
+          numberOfMachines,
+        });
+      });
+
       gameRef.current = game;
 
       return () => {
@@ -445,6 +456,10 @@ const Game = () => {
       level: calculateHouseLevel(houseLevels, networth),
     });
   }, [networth, houseLevels]);
+
+  useEffect(() => {
+    gameRef.current?.events.emit('update-workers-machines', { numberOfWorkers, numberOfMachines });
+  }, [numberOfWorkers, numberOfMachines]);
 
   useEffect(() => {
     if (userHasInteractive) {

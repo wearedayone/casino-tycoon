@@ -113,6 +113,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('coin2', '/images/coin-2.png');
     this.load.image('eth-coin', '/images/eth-coin.png');
     this.load.image('slider-thumb', '/images/slider-thumb.png');
+    this.load.image('counter', '/images/counter.png');
 
     this.load.image('button-blue', '/images/button-blue.png');
     this.load.image('button-blue-pressed', '/images/button-blue-pressed.png');
@@ -175,6 +176,12 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-checked', '/images/icon-checked.png');
     this.load.image('icon-unchecked', '/images/icon-unchecked.png');
     this.load.image('icon-info', '/images/icon-info.png');
+
+    this.load.path = '/images/animation/';
+    this.load.multiatlas('gangster-front', 'gangster_front.json');
+    this.load.multiatlas('gangster-back', 'gangster_back.json');
+    this.load.multiatlas('goon-front', 'goon_front.json');
+    this.load.multiatlas('goon-back', 'goon_back.json');
   }
 
   create() {
