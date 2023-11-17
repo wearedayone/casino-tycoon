@@ -56,7 +56,7 @@ class ActiveClaimButton extends Button {
 
     scene.game.events.on('update-claimable-reward', ({ reward }) => {
       this.rewardText.text = formatter.format(reward);
-      this.coinSound.play();
+      // this.coinSound.play();
     });
     scene.game.events.emit('request-claimable-reward');
   }

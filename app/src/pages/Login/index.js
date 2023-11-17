@@ -55,15 +55,17 @@ const Login = () => {
             Connect with
           </Typography>
           <Box
-            p={2}
+            p={{ xs: 2, sm: 5 }}
             px={3}
+            pt={{ xs: 3, sm: 5 }}
             borderRadius={2}
             display="flex"
             flexDirection="column"
             gap={1}
             sx={{
               backgroundImage: 'url(/images/login-small-frame.png)',
-              backgroundSize: '100%',
+              backgroundSize: '100% 100%',
+              backgroundRepeat: 'no-repeat',
               aspectRatio: 2.86 / 1,
             }}>
             <Typography fontSize={14} color="#7c2828" fontWeight={600}>
@@ -74,7 +76,7 @@ const Login = () => {
               variant="contained"
               onClick={onClickLoginBtn}
               sx={{
-                borderRadius: 3,
+                borderRadius: '4%/24%',
                 backgroundColor: 'black',
                 backgroundImage: 'url(/images/button-black.png)',
                 backgroundSize: '100%',

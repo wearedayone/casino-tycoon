@@ -42,7 +42,8 @@ const InstallGuideModal = () => {
           position: 'relative',
           bgcolor: 'transparent',
           backgroundImage: 'url(/images/popup.png)',
-          backgroundSize: '100%',
+          backgroundRepeat: 'no-repeat',
+          backgroundSize: '100% 100%',
           overflow: 'visible',
         },
       }}>
@@ -55,7 +56,13 @@ const InstallGuideModal = () => {
           style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}
         />
       </Box>
-      <Box p={3} pt={6} pb={4}>
+      <Box
+        p={3}
+        pt={{
+          xs: 8,
+          sm: 12,
+        }}
+        pb={4}>
         <Box display="flex" flexDirection="column" gap={3}>
           <Typography color="#29000b" fontWeight={700} align="center">
             To start playing, you need to add this website to your home screen.
