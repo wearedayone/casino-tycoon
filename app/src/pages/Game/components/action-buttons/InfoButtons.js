@@ -40,7 +40,7 @@ class InfoButtons extends Phaser.GameObjects.Container {
       'button-rank',
       'button-rank-pressed',
       () => console.log('rank clicked'),
-      'button-1'
+      { sound: 'button-1' }
     );
     this.portfolioButton = new Button(
       scene,
