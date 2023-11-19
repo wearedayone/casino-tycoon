@@ -125,7 +125,7 @@ class PopupWithdrawETH extends Popup {
         scene,
         'icon-eth-done',
         `${formatter.format(amount)} ETH`,
-        'Withdrawal may take few minutes.',
+        'Withdrawal may take a few minutes.',
         txnHash
       );
       scene.add.existing(this.popupTxnProcessing);

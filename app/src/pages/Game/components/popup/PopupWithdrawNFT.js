@@ -124,7 +124,7 @@ class PopupWithdrawNFT extends Popup {
         scene,
         'icon-nft-done',
         `${amount.toLocaleString()} NFT${amount > 1 ? 's' : ''}`,
-        'Withdrawal may take few minutes.',
+        'Withdrawal may take a few minutes.',
         txnHash
       );
       scene.add.existing(this.popupTxnProcessing);
