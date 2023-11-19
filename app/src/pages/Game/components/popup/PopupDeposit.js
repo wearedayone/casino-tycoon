@@ -1,4 +1,5 @@
 import Popup from './Popup';
+import PopupDepositETH from './PopupDepositETH';
 import TextButton from '../button/TextButton';
 import configs from '../../configs/configs.json';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
@@ -13,6 +14,10 @@ class PopupDeposit extends Popup {
 
   constructor(scene, parentModal) {
     super(scene, 'popup-small', { title: 'Deposit' });
+
+    // child modals
+    this.popupDepositETH = new PopupDepositETH(scene, this);
+    scene.add.existing(this.popupDepositETH);
 
     const x = width * 0.12;
     const imageX = x + width * 0.07;
@@ -29,7 +34,7 @@ class PopupDeposit extends Popup {
     // user details
     const subtitle = scene.add
       .text(width / 2, subtitleY, 'Deposit ETH or NFTs here', {
-        fontSize: fontSizes.big,
+        fontSize: fontSizes.large,
         color: colors.black,
         fontFamily: fontFamilies.bold,
       })
@@ -50,7 +55,10 @@ class PopupDeposit extends Popup {
       mainNetContainerY,
       'button-deposit',
       'button-deposit-pressed',
-      () => console.log('open deposit modal')
+      () => {
+        this.close();
+        this.popupDepositETH.open();
+      }
     );
 
     const baseName = scene.add

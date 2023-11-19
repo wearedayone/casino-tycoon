@@ -219,6 +219,9 @@ const Game = () => {
         gameRef.current.events.emit('update-balances', { dailyMoney, ETHBalance, tokenBalance });
       });
 
+      game.events.on('request-deposit-code', () => {
+        gameRef.current.events.emit('update-deposit-code', '683382');
+      });
       game.events.on('request-eth-balance', () => {
         gameRef.current.events.emit('update-eth-balance', ETHBalance);
       });
