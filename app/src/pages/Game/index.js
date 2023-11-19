@@ -8,7 +8,7 @@ import { usePrivy } from '@privy-io/react-auth';
 import useUserStore from '../../stores/user.store';
 import useSystemStore from '../../stores/system.store';
 import useSettingStore from '../../stores/setting.store';
-import { getRank, toggleWarStatus } from '../../services/user.service';
+import { getRank, toggleWarStatus, updateBalance } from '../../services/user.service';
 import { claimToken } from '../../services/transaction.service';
 import { getNextWarSnapshotUnixTime } from '../../services/gamePlay.service';
 import QueryKeys from '../../utils/queryKeys';
@@ -83,6 +83,12 @@ const Game = () => {
     try {
       await exportWalletPrivy();
     } catch (error) {}
+  };
+  const reloadBalance = async () => {
+    try {
+      console.log('refreshing eth balance');
+      await updateBalance();
+    } catch (err) {}
   };
 
   const transfer = async ({ amount, address, tokenType }) => {
@@ -215,6 +221,9 @@ const Game = () => {
 
       game.events.on('request-eth-balance', () => {
         gameRef.current.events.emit('update-eth-balance', ETHBalance);
+      });
+      game.events.on('refresh-eth-balance', () => {
+        reloadBalance();
       });
 
       game.events.on('request-balances-for-withdraw', () => {

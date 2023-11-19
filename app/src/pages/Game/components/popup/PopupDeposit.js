@@ -1,5 +1,4 @@
 import Popup from './Popup';
-import PopupWithdrawToken from './PopupWithdrawToken';
 import TextButton from '../button/TextButton';
 import configs from '../../configs/configs.json';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
@@ -9,6 +8,7 @@ import { formatter } from '../../../../utils/numbers';
 const { width, height } = configs;
 
 class PopupDeposit extends Popup {
+  loading = false;
   address = '';
 
   constructor(scene, parentModal) {
@@ -61,9 +61,7 @@ class PopupDeposit extends Popup {
     const baseTitle = scene.add
       .text(sectionTextX, baseContainerY, 'Receive on Base', sectionTitleStyle)
       .setOrigin(0, 1.1);
-    this.baseDescription = scene.add
-      .text(sectionTextX, baseContainerY, '', sectionDescriptionStyle)
-      .setOrigin(0, -0.1);
+    this.baseDescription = scene.add.text(sectionTextX, baseContainerY, '', sectionDescriptionStyle).setOrigin(0, -0.1);
     const copyButton = new Button(scene, width * 0.82, baseContainerY, 'button-copy', 'button-copy-pressed', () =>
       navigator.clipboard.writeText(this.address)
     );
@@ -85,7 +83,9 @@ class PopupDeposit extends Popup {
       'button-refresh',
       'button-refresh-pressed',
       () => {
-        scene.game.events.emit('request-eth-balance');
+        if (this.loading) return;
+        this.loading = true;
+        scene.game.events.emit('refresh-eth-balance');
       }
     );
 
@@ -122,6 +122,7 @@ class PopupDeposit extends Popup {
     this.add(buttonBack);
 
     scene.game.events.on('update-eth-balance', (balance) => {
+      this.loading = false;
       this.balanceText.text = `${formatter.format(balance)} ETH`;
     });
   }
