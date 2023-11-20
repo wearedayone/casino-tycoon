@@ -37,7 +37,8 @@ const Game = () => {
   const activeSeason = useSystemStore((state) => state.activeSeason);
   const sound = useSettingStore((state) => state.sound);
   const toggleSound = useSettingStore((state) => state.toggleSound);
-  const { withdrawToken, withdrawETH, withdrawNFT, buyWorkerOrBuilding, buyMachine } = useSmartContract();
+  const { getNFTBalance, withdrawToken, withdrawETH, withdrawNFT, stakeNFT, buyWorkerOrBuilding, buyMachine } =
+    useSmartContract();
   const { ready, authenticated, user, exportWallet: exportWalletPrivy, logout } = usePrivy();
 
   // Check that your user is authenticated
@@ -125,6 +126,19 @@ const Game = () => {
         if (txnId) await validate({ transactionId: txnId, txnHash: receipt.transactionHash });
         enqueueSnackbar(`Transferred ${tokenType} successfully`, { variant: 'success' });
       }
+    } catch (err) {
+      err.message && enqueueSnackbar(err.message, { variant: 'error' });
+      console.error(err);
+    }
+  };
+
+  const stake = async (amount) => {
+    try {
+      const receipt = await stakeNFT(address, amount);
+      if (receipt.status === 1) {
+        gameRef.current?.events.emit('deposit-nft-started', { amount, txnHash: receipt.transactionHash });
+      }
+      enqueueSnackbar(`Staked gangster successfully`, { variant: 'success' });
     } catch (err) {
       err.message && enqueueSnackbar(err.message, { variant: 'error' });
       console.error(err);
@@ -236,6 +250,12 @@ const Game = () => {
           tokenBalance,
         });
       });
+      game.events.on('request-wallet-nft-balance', () => {
+        getNFTBalance(address).then((balance) => {
+          console.log('balance', balance);
+          gameRef.current.events.emit('update-wallet-nft-balance', balance);
+        });
+      });
 
       game.events.on('request-rank', () => {
         getRank()
@@ -293,6 +313,9 @@ const Game = () => {
       });
       game.events.on('withdraw-nft', ({ amount, address }) => {
         transfer({ amount, address, tokenType: 'NFT' });
+      });
+      game.events.on('deposit-nft', ({ amount }) => {
+        stake(amount);
       });
 
       game.events.on('claim', async () => {

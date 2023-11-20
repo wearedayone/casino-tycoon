@@ -3,6 +3,7 @@ import Phaser from 'phaser';
 import Popup from './Popup';
 import PopupWithdraw from './PopupWithdraw';
 import PopupDeposit from './PopupDeposit';
+import PopupDepositNFT from './PopupDepositNFT';
 import Button from '../button/Button';
 import TextButton from '../button/TextButton';
 import configs from '../../configs/configs.json';
@@ -35,8 +36,10 @@ class PopupSettings extends Popup {
     // child modals
     const popupWithdraw = new PopupWithdraw(scene, this);
     this.popupDeposit = new PopupDeposit(scene, this);
+    const popupStaking = new PopupDepositNFT(scene, this);
     scene.add.existing(popupWithdraw);
     scene.add.existing(this.popupDeposit);
+    scene.add.existing(popupStaking);
 
     // user details
     this.username = scene.add.text(x + 20, usernameY, 'username', {
@@ -137,7 +140,10 @@ class PopupSettings extends Popup {
       stakingBtnY,
       'button-blue-long',
       'button-blue-long-pressed',
-      () => console.log('staking'),
+      () => {
+        this.close();
+        popupStaking.open();
+      },
       'Staking',
       { sound: 'open' }
     );
