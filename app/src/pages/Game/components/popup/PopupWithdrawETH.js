@@ -119,8 +119,8 @@ class PopupWithdrawETH extends Popup {
     this.add(buttonBack);
     this.add(this.buttonConfirm);
 
+    scene.game.events.on('withdraw-eth-completed', () => this.setLoading(false));
     scene.game.events.on('withdraw-eth-started', ({ txnHash, amount }) => {
-      this.setLoading(false);
       this.popupTxnProcessing = new PopupTxnProcessing(
         scene,
         'icon-eth-done',

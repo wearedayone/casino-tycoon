@@ -118,8 +118,8 @@ class PopupWithdrawToken extends Popup {
     this.add(buttonBack);
     this.add(this.buttonConfirm);
 
+    scene.game.events.on('withdraw-token-completed', () => this.setLoading(false));
     scene.game.events.on('withdraw-token-started', ({ txnHash, amount }) => {
-      this.setLoading(false);
       this.popupTxnProcessing = new PopupTxnProcessing(
         scene,
         'icon-coin-done',

@@ -89,27 +89,32 @@ const Game = () => {
     try {
       console.log('refreshing eth balance');
       await updateBalance();
-    } catch (err) {}
+    } catch (err) {
+    } finally {
+      gameRef.current?.events.emit('refresh-eth-balance-completed');
+    }
   };
 
   const transfer = async ({ amount, address, tokenType }) => {
+    let web3Withdraw, txnStartedEvent, txnCompletedEvent;
+    switch (tokenType) {
+      case 'FIAT':
+        web3Withdraw = withdrawToken;
+        txnStartedEvent = 'withdraw-token-started';
+        txnCompletedEvent = 'withdraw-token-completed';
+        break;
+      case 'ETH':
+        web3Withdraw = withdrawETH;
+        txnStartedEvent = 'withdraw-eth-started';
+        txnCompletedEvent = 'withdraw-eth-completed';
+        break;
+      case 'NFT':
+        web3Withdraw = withdrawNFT;
+        txnStartedEvent = 'withdraw-nft-started';
+        txnCompletedEvent = 'withdraw-nft-completed';
+        break;
+    }
     try {
-      let web3Withdraw, txnStartedEvent;
-      switch (tokenType) {
-        case 'FIAT':
-          web3Withdraw = withdrawToken;
-          txnStartedEvent = 'withdraw-token-started';
-          break;
-        case 'ETH':
-          web3Withdraw = withdrawETH;
-          txnStartedEvent = 'withdraw-eth-started';
-          break;
-        case 'NFT':
-          web3Withdraw = withdrawNFT;
-          txnStartedEvent = 'withdraw-nft-started';
-          break;
-      }
-
       if (!web3Withdraw) throw new Error(`Invalid tokenType. Must be one of 'ETH' | 'FIAT' | 'NFT'`);
 
       const value = Number(amount);
@@ -129,6 +134,8 @@ const Game = () => {
     } catch (err) {
       err.message && enqueueSnackbar(err.message, { variant: 'error' });
       console.error(err);
+    } finally {
+      gameRef.current?.events.emit(txnCompletedEvent);
     }
   };
 
@@ -142,6 +149,8 @@ const Game = () => {
     } catch (err) {
       err.message && enqueueSnackbar(err.message, { variant: 'error' });
       console.error(err);
+    } finally {
+      gameRef.current?.events.emit('deposit-nft-completed');
     }
   };
 

@@ -129,8 +129,10 @@ class PopupDeposit extends Popup {
     );
     this.add(buttonBack);
 
-    scene.game.events.on('update-eth-balance', (balance) => {
+    scene.game.events.on('refresh-eth-balance-completed', () => {
       this.loading = false;
+    });
+    scene.game.events.on('update-eth-balance', (balance) => {
       this.balanceText.text = `${formatter.format(balance)} ETH`;
     });
   }

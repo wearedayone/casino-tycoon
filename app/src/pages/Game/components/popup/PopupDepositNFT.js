@@ -90,8 +90,8 @@ class PopupDepositNFT extends Popup {
 
     scene.game.events.on('update-wallet-nft-balance', (balance) => this.updateBalance(balance));
 
+    scene.game.events.on('deposit-nft-completed', () => this.setLoading(false));
     scene.game.events.on('deposit-nft-started', ({ txnHash, amount }) => {
-      this.setLoading(false);
       this.popupTxnProcessing = new PopupTxnProcessing(
         scene,
         'icon-nft-done',
