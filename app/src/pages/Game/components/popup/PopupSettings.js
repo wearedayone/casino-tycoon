@@ -208,6 +208,7 @@ class PopupSettings extends Popup {
 
   onOpen() {
     this.scene.game.events.emit('request-profile');
+    this.scene.game.events.emit('request-game-sound');
     this.scene.game.events.emit('request-app-version');
   }
 
