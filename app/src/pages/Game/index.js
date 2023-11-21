@@ -35,11 +35,13 @@ const Game = () => {
   const profile = useUserStore((state) => state.profile);
   const gamePlay = useUserStore((state) => state.gamePlay);
   const activeSeason = useSystemStore((state) => state.activeSeason);
+  const configs = useSystemStore((state) => state.configs);
   const sound = useSettingStore((state) => state.sound);
   const toggleSound = useSettingStore((state) => state.toggleSound);
   const { getNFTBalance, withdrawToken, withdrawETH, withdrawNFT, stakeNFT, buyWorkerOrBuilding, buyMachine } =
     useSmartContract();
   const { ready, authenticated, user, exportWallet: exportWalletPrivy, logout } = usePrivy();
+  const { appVersion } = configs || {};
 
   // Check that your user is authenticated
   const isAuthenticated = useMemo(() => ready && authenticated, [ready, authenticated]);
@@ -234,6 +236,9 @@ const Game = () => {
       game.events.on('log-out', logout);
       game.events.on('toggle-game-sound', toggleSound);
 
+      game.events.on('request-app-version', () => {
+        gameRef.current.events.emit('update-app-version', appVersion);
+      });
       game.events.on('request-profile', () => {
         gameRef.current.events.emit('update-profile', { username, address, avatarURL });
       });
@@ -451,6 +456,10 @@ const Game = () => {
       };
     }
   }, [loaded]);
+
+  useEffect(() => {
+    gameRef.current?.events.emit('update-app-version', appVersion);
+  }, [appVersion]);
 
   useEffect(() => {
     gameRef.current?.events.emit('update-eth-balance', ETHBalance);

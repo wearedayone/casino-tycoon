@@ -203,10 +203,12 @@ class PopupSettings extends Popup {
 
     scene.game.events.on('game-sound-changed', ({ sound }) => this.updateGameSoundBtn(sound === 'on'));
     scene.game.events.on('update-profile', (data) => this.updateValues(data));
+    scene.game.events.on('update-app-version', (data) => this.updateAppVersion(data));
   }
 
   onOpen() {
     this.scene.game.events.emit('request-profile');
+    this.scene.game.events.emit('request-app-version');
   }
 
   updateGameSoundBtn(isSoundOn) {
@@ -229,6 +231,10 @@ class PopupSettings extends Popup {
     loader.image('avatarURL', avatarURL);
     loader.once(Phaser.Loader.Events.COMPLETE, () => this.avatar.setTexture('avatarURL'));
     loader.start();
+  }
+
+  updateAppVersion(appVersion) {
+    this.credit.text = `v${appVersion}. Gangster Arena. Copyright.`;
   }
 }
 
