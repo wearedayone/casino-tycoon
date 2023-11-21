@@ -326,6 +326,9 @@ const Game = () => {
       game.events.on('deposit-nft', ({ amount }) => {
         stake(amount);
       });
+      game.events.on('swap', ({ amount }) => {
+        gameRef.current.events.emit('swap-started', { amount, txnHash: '' });
+      });
 
       game.events.on('claim', async () => {
         try {

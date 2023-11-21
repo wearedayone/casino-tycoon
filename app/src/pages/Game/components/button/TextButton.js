@@ -9,11 +9,12 @@ class TextButton extends Button {
     pressedImage,
     onClick,
     text,
-    { color = '#fff', fontSize = '60px', icon, sound } = {}
+    { color = '#fff', fontSize = '60px', icon, iconPosition = 'start', sound } = {}
   ) {
-    super(scene, x, y, defaultImage, pressedImage, onClick, sound);
+    super(scene, x, y, defaultImage, pressedImage, onClick, { sound });
 
-    const textX = icon ? 80 : 0;
+    const textOffset = iconPosition === 'start' ? 80 : -80;
+    const textX = icon ? textOffset : 0;
     this.text = scene.add
       .text(textX, 0, text, {
         fontSize,
@@ -41,7 +42,8 @@ class TextButton extends Button {
     this.add(this.text);
 
     if (icon) {
-      this.icon = scene.add.image(-this.text.width / 2, 0, icon);
+      const iconX = iconPosition === 'start' ? -this.text.width / 2 : this.text.width / 2;
+      this.icon = scene.add.image(iconX, 0, icon);
       this.add(this.icon);
     }
   }

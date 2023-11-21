@@ -120,6 +120,9 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('slider-thumb', '/images/slider-thumb.png');
     this.load.image('counter', '/images/counter.png');
 
+    this.load.image('button-approve', '/images/button-approve.png');
+    this.load.image('button-approve-pressed', '/images/button-approve-pressed.png');
+    this.load.image('button-approve-disabled', '/images/button-approve-disabled.png');
     this.load.image('button-blue', '/images/button-blue.png');
     this.load.image('button-blue-pressed', '/images/button-blue-pressed.png');
     this.load.image('button-blue-med', '/images/button-blue-med.png');
@@ -175,6 +178,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('deposit-instruction', '/images/texts/deposit-instruction.png');
     this.load.image('deposit-link', '/images/texts/deposit-link.png');
     this.load.image('text-container', '/images/text-container.png');
+    this.load.image('swap', '/images/swap.png');
     this.load.image('icon-settings', '/images/icons/settings.png');
     this.load.image('icon-logout', '/images/icons/logout.png');
     this.load.image('icon-sound-on', '/images/icons/sound-on.png');
@@ -187,6 +191,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-nft-done', '/images/icons/nft-done.png');
     this.load.image('icon-chevron-right', '/images/icons/chevron-right.png');
     this.load.image('icon-wallet', '/images/icons/wallet.png');
+    this.load.image('icon-open-link', '/images/icons/open-link.png');
 
     this.load.image('icon-history', '/images/icon-history.png');
     this.load.image('icon-war', '/images/icon-war.png');
