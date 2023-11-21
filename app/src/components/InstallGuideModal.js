@@ -5,7 +5,7 @@ import { getPWADisplayMode, getUserOS } from '../utils/pwa';
 
 const guideMap = {
   Android: {
-    image: '/images/guides/ios.png',
+    image: '/images/guides/android.png',
     step1Text: 'Tap ellipse button',
     step2Text: 'Install App',
   },
