@@ -257,7 +257,7 @@ const Game = () => {
       game.events.on('request-profile', () => {
         gameRef.current.events.emit('update-profile', { username, address, avatarURL });
       });
-      game.events.on('request-season', () => {
+      game.events.on('open-leaderboard-modal', () => {
         setLeaderboardModalOpen(true);
         gameRef.current.events.emit('update-season', activeSeason);
       });
@@ -504,17 +504,14 @@ const Game = () => {
   }, [username, address, avatarURL]);
 
   useEffect(() => {
-    if (isLeaderboardModalOpen) gameRef.current?.events.emit('update-season', activeSeason);
-  }, [isLeaderboardModalOpen, activeSeason]);
+    if (isLeaderboardModalOpen) gameRef.current?.events.emit('update-season', { ...activeSeason, isEnded });
+  }, [isLeaderboardModalOpen, activeSeason, isEnded]);
   useEffect(() => {
     if (isLeaderboardModalOpen) gameRef.current?.events.emit('update-leaderboard', leaderboardData?.data || []);
   }, [isLeaderboardModalOpen, leaderboardData?.data]);
   useEffect(() => {
     gameRef.current?.events.emit('update-season-countdown', countdownString);
   }, [countdownString]);
-  useEffect(() => {
-    gameRef.current?.events.emit('update-season-ended', isEnded);
-  }, [isEnded]);
 
   useEffect(() => {
     gameRef.current?.events.emit('game-sound-changed', { sound });

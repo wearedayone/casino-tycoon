@@ -7,18 +7,24 @@ import TextButton from '../button/TextButton';
 import configs from '../../configs/configs.json';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
 import { formatter } from '../../../../utils/numbers';
+import { getOrdinalSuffix } from '../../../../utils/strings';
 
 const { width, height } = configs;
 const rowHeight = 86.3;
-const tableTextStyle = {
-  fontSize: fontSizes.small,
+const largeBlackExtraBold = { fontSize: fontSizes.large, color: colors.black, fontFamily: fontFamilies.extraBold };
+const largeBlackBold = { fontSize: fontSizes.large, color: colors.black, fontFamily: fontFamilies.bold };
+const mediumBlackBoldRight = {
+  fontSize: fontSizes.medium,
   color: colors.black,
   fontFamily: fontFamilies.bold,
-  lineSpacing: 2,
+  align: 'right',
 };
-const playerRankTextStyle = { ...tableTextStyle, color: colors.brown, fontFamily: fontFamilies.extraBold };
+const smallBrownExtraBold = { fontSize: fontSizes.small, color: colors.brown, fontFamily: fontFamilies.extraBold };
+const smallBrownBold = { fontSize: fontSizes.small, color: colors.brown, fontFamily: fontFamilies.bold };
+const smallBlackBold = { fontSize: fontSizes.small, color: colors.black, fontFamily: fontFamilies.bold };
 
 class PopupLeaderboard extends Popup {
+  isEnded = false;
   numberOfRows = 0;
   stars = [];
 
@@ -38,40 +44,42 @@ class PopupLeaderboard extends Popup {
     const popupWithdraw = new PopupWithdraw(scene, this);
     scene.add.existing(popupWithdraw);
 
-    const gameEndsIn = scene.add
-      .text(width / 2, gameEndsY, 'GAME ENDS IN: ', {
-        fontSize: fontSizes.large,
-        color: colors.black,
-        fontFamily: fontFamilies.extraBold,
-      })
-      .setOrigin(1, 0);
-    const clockIcon = scene.add.image(width / 2, gameEndsY, 'icon-clock').setOrigin(0, 0);
-    this.gameEndTime = scene.add.text(width * 0.57, gameEndsY, '--d --h --m --s', {
-      fontSize: fontSizes.large,
-      color: colors.black,
-      fontFamily: fontFamilies.extraBold,
-    });
+    this.gameEndsIn = scene.add.text(width / 2, gameEndsY, 'GAME ENDS IN: ', largeBlackExtraBold).setOrigin(1, 0);
+    this.clockIcon = scene.add.image(width / 2, gameEndsY, 'icon-clock').setOrigin(0, 0);
+    this.gameEndTime = scene.add.text(width * 0.57, gameEndsY, '--d --h --m --s', largeBlackExtraBold);
     this.endTimeExtension = scene.add
-      .text(width / 2, endTimeExtensionY, 'Every Gangster purchased increases time by - hour', {
-        fontSize: fontSizes.small,
-        color: colors.brown,
-        fontFamily: fontFamilies.bold,
-      })
+      .text(width / 2, endTimeExtensionY, 'Every Gangster purchased increases time by - hour', smallBrownBold)
       .setOrigin(0.5, 0);
-    this.add(gameEndsIn);
-    this.add(clockIcon);
+    this.add(this.gameEndsIn);
+    this.add(this.clockIcon);
     this.add(this.gameEndTime);
     this.add(this.endTimeExtension);
+
+    this.youFinished = scene.add
+      .text(width / 2, gameEndsY, `You finished at`, mediumBlackBoldRight)
+      .setOrigin(1, -0.13)
+      .setVisible(false);
+    this.with = scene.add
+      .text(width / 2, endTimeExtensionY, `with`, mediumBlackBoldRight)
+      .setOrigin(1, -0.12)
+      .setVisible(false);
+    this.finishedAt = scene.add.text(width * 0.51, gameEndsY, '', largeBlackExtraBold).setVisible(false);
+    this.finishedReward = scene.add.text(width * 0.51, endTimeExtensionY, '', largeBlackBold).setVisible(false);
+    this.ethIcon = scene.add
+      .image(width * 0.66, endTimeExtensionY, 'eth-coin')
+      .setOrigin(0, 0)
+      .setVisible(false);
+    this.add(this.youFinished);
+    this.add(this.with);
+    this.add(this.finishedAt);
+    this.add(this.finishedReward);
+    this.add(this.ethIcon);
 
     const prizePoolContainer = scene.add
       .image(width / 2, prizePoolContainerY, 'text-container-outlined')
       .setOrigin(0.5, 0.5);
     const totalPrizePool = scene.add
-      .text(paddedX, prizePoolContainerY, 'Total Prize Pool', {
-        fontSize: fontSizes.large,
-        color: colors.black,
-        fontFamily: fontFamilies.extraBold,
-      })
+      .text(paddedX, prizePoolContainerY, 'Total Prize Pool', largeBlackExtraBold)
       .setOrigin(0, 0.5);
     const infoButton = new Button(
       scene,
@@ -83,11 +91,7 @@ class PopupLeaderboard extends Popup {
       { sound: 'open' }
     );
     this.prizePool = scene.add
-      .text(width - paddedX - 140, prizePoolContainerY, '0.00', {
-        fontSize: fontSizes.large,
-        color: colors.black,
-        fontFamily: fontFamilies.extraBold,
-      })
+      .text(width - paddedX - 140, prizePoolContainerY, '0.00', largeBlackExtraBold)
       .setOrigin(1, 0.5);
     const ethIcon = scene.add.image(width - paddedX, prizePoolContainerY, 'icon-eth').setOrigin(1, 0.5);
     this.add(prizePoolContainer);
@@ -97,25 +101,14 @@ class PopupLeaderboard extends Popup {
     this.add(ethIcon);
 
     const reputationContainer = scene.add.image(width / 2, reputationY, 'text-container-large').setOrigin(0.5, 0.5);
-    const reputationTitle = scene.add
-      .text(width / 2, reputationY, 'Reputation', {
-        fontSize: fontSizes.large,
-        color: colors.black,
-        fontFamily: fontFamilies.bold,
-      })
-      .setOrigin(0.5, 0.5);
+    const reputationTitle = scene.add.text(width / 2, reputationY, 'Reputation', largeBlackBold).setOrigin(0.5, 0.5);
     this.add(reputationContainer);
     this.add(reputationTitle);
 
-    const tableHeaderTextStyle = {
-      fontSize: fontSizes.small,
-      color: colors.brown,
-      fontFamily: fontFamilies.bold,
-    };
-    const rank = scene.add.text(paddedX, leaderboardHeaderY, 'Rank', tableHeaderTextStyle);
-    const name = scene.add.text(width * 0.33, leaderboardHeaderY, 'Name', tableHeaderTextStyle);
-    const reputation = scene.add.text(width * 0.53, leaderboardHeaderY, 'Reputation', tableHeaderTextStyle);
-    const ethRewards = scene.add.text(width * 0.72, leaderboardHeaderY, 'ETH Rewards', tableHeaderTextStyle);
+    const rank = scene.add.text(paddedX, leaderboardHeaderY, 'Rank', smallBrownBold);
+    const name = scene.add.text(width * 0.33, leaderboardHeaderY, 'Name', smallBrownBold);
+    const reputation = scene.add.text(width * 0.53, leaderboardHeaderY, 'Reputation', smallBrownBold);
+    const ethRewards = scene.add.text(width * 0.72, leaderboardHeaderY, 'ETH Rewards', smallBrownBold);
     this.add(rank);
     this.add(name);
     this.add(reputation);
@@ -127,10 +120,10 @@ class PopupLeaderboard extends Popup {
     this.crownGold = scene.add.image(0, 0, 'icon-crown-gold').setOrigin(0, 0);
     this.crownSilver = scene.add.image(0, rowHeight, 'icon-crown-silver').setOrigin(0, 0);
     this.crownCopper = scene.add.image(0, rowHeight * 2, 'icon-crown-copper').setOrigin(0, 0);
-    this.rankNumbers = scene.add.text(width * 0.06, 0, '', { ...tableTextStyle, align: 'center' }).setOrigin(0.5, 0);
-    this.usernames = scene.add.text(width * 0.25, 0, '', { ...tableTextStyle, align: 'center' }).setOrigin(0.5, 0);
-    this.networths = scene.add.text(width * 0.45, 0, '', { ...tableTextStyle, align: 'right' });
-    this.ethRewards = scene.add.text(width * 0.67, 0, '', { ...tableTextStyle, align: 'center' }).setOrigin(0.5, 0);
+    this.rankNumbers = scene.add.text(width * 0.06, 0, '', { ...smallBlackBold, align: 'center' }).setOrigin(0.5, 0);
+    this.usernames = scene.add.text(width * 0.25, 0, '', { ...smallBlackBold, align: 'center' }).setOrigin(0.5, 0);
+    this.networths = scene.add.text(width * 0.45, 0, '', { ...smallBlackBold, align: 'right' });
+    this.ethRewards = scene.add.text(width * 0.67, 0, '', { ...smallBlackBold, align: 'center' }).setOrigin(0.5, 0);
     this.contentContainer = scene.add
       .container()
       .add([
@@ -148,17 +141,17 @@ class PopupLeaderboard extends Popup {
     const playerOriginY = 2;
     this.playerRankContainer = scene.add.image(width / 2, playerRankY, 'player-rank-container').setOrigin(0.52, 1.2);
     this.playerRank = scene.add
-      .text(paddedX + width * 0.06, playerRankY, '', { ...playerRankTextStyle, align: 'center' })
+      .text(paddedX + width * 0.06, playerRankY, '', { ...smallBrownExtraBold, align: 'center' })
       .setOrigin(0.5, playerOriginY);
     this.playerUsername = scene.add
-      .text(paddedX + width * 0.25, playerRankY, 'YOU', { ...playerRankTextStyle, align: 'center' })
+      .text(paddedX + width * 0.25, playerRankY, 'YOU', { ...smallBrownExtraBold, align: 'center' })
       .setOrigin(0.5, playerOriginY);
     this.playerNetworth = scene.add
-      .text(paddedX + width * 0.45, playerRankY, '', { ...playerRankTextStyle, align: 'right' })
+      .text(paddedX + width * 0.45, playerRankY, '', { ...smallBrownExtraBold, align: 'right' })
       .setOrigin(0, playerOriginY);
     this.playerStar = scene.add.image(paddedX + width * 0.52, playerRankY, 'icon-star').setOrigin(0, playerOriginY);
     this.playerReward = scene.add
-      .text(paddedX + width * 0.67, playerRankY, '', { ...playerRankTextStyle, align: 'center' })
+      .text(paddedX + width * 0.67, playerRankY, '', { ...smallBrownExtraBold, align: 'center' })
       .setOrigin(0.5, playerOriginY);
     this.add(this.playerRankContainer);
     this.add(this.playerRank);
@@ -179,13 +172,23 @@ class PopupLeaderboard extends Popup {
     );
     this.add(this.buttonBack);
 
+    this.nextSeason = scene.add
+      .text(width / 2, height / 2 + this.popup.height / 2 - 80, 'Next season will begin soon', {
+        fontSize: fontSizes.large,
+        color: colors.brown,
+        fontFamily: fontFamilies.bold,
+      })
+      .setOrigin(0.5, 1)
+      .setVisible(false);
+    this.add(this.nextSeason);
+
     scene.game.events.on('update-season', (data) => this.updateValues(data));
     scene.game.events.on('update-leaderboard', (data) => this.updateLeaderboard(data));
     scene.game.events.on('update-season-countdown', (string) => (this.gameEndTime.text = string));
   }
 
   onOpen() {
-    this.scene.game.events.emit('request-season');
+    this.scene.game.events.emit('open-leaderboard-modal');
   }
 
   cleanup() {
@@ -194,11 +197,35 @@ class PopupLeaderboard extends Popup {
 
   updateValues(season) {
     console.log('season', season);
-    const { name, timeStepInHours, prizePool } = season;
-    this.setTitle(`${name} Leaderboard`);
+    const { name, timeStepInHours, prizePool, isEnded } = season;
+    this.updateEndedState(isEnded);
+
+    const title = this.isEnded ? `${name} Ended` : `${name} Leaderboard`;
+    this.setTitle(title);
     this.endTimeExtension.text = `Every Gangster purchased increases time by ${timeStepInHours} hour`;
     this.prizePool.text = formatter.format(prizePool);
   }
+
+  updateEndedState(isEnded) {
+    if (this.isEnded === isEnded) return;
+    this.isEnded = isEnded;
+
+    this.gameEndsIn.setVisible(!isEnded);
+    this.clockIcon.setVisible(!isEnded);
+    this.gameEndTime.setVisible(!isEnded);
+    this.endTimeExtension.setVisible(!isEnded);
+    this.buttonBack.setVisible(!isEnded);
+    if (isEnded) this.remove(this.buttonBack);
+    else this.add(this.buttonBack);
+
+    this.youFinished.setVisible(isEnded);
+    this.finishedAt.setVisible(isEnded);
+    this.with.setVisible(isEnded);
+    this.finishedReward.setVisible(isEnded);
+    this.ethIcon.setVisible(isEnded);
+    this.nextSeason.setVisible(isEnded);
+  }
+
   updateLeaderboard(leaderboard) {
     console.log('leaderboard', leaderboard);
     const displayedLeaderboard = leaderboard.filter(({ reward }) => reward > 0);
@@ -215,6 +242,8 @@ class PopupLeaderboard extends Popup {
     this.playerRank.text = userRecord.rank.toLocaleString();
     this.playerNetworth.text = userRecord.networth;
     this.playerReward.text = `~${formatter.format(userRecord.reward)}`;
+    this.finishedAt.text = `${userRecord.rank.toLocaleString()}${getOrdinalSuffix(userRecord.rank)} place`;
+    this.finishedReward.text = formatter.format(userRecord.reward);
 
     if (this.numberOfRows === displayedLeaderboard.length) return;
     this.numberOfRows = displayedLeaderboard.length;
