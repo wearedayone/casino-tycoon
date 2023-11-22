@@ -2,7 +2,7 @@ import { getLeaderboard, getNextWarSnapshotUnixTime } from '../services/gamePlay
 
 export const getGamePlayLeaderboard = async (req, res) => {
   try {
-    const data = await getLeaderboard();
+    const data = await getLeaderboard(req.userId);
     return res.status(200).send(data);
   } catch (err) {
     return res.status(400).send(err.message);

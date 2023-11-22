@@ -187,6 +187,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('text-container-large', '/images/text-container-large.png');
     this.load.image('text-container-outlined', '/images/text-container-outlined.png');
     this.load.image('container-large', '/images/container-large.png');
+    this.load.image('player-rank-container', '/images/player-rank-container.png');
 
     // settings
     this.load.image('settings-wallet-container', '/images/settings-wallet-container.png');

@@ -16,6 +16,7 @@ const tableTextStyle = {
   fontFamily: fontFamilies.bold,
   lineSpacing: 2,
 };
+const playerRankTextStyle = { ...tableTextStyle, color: colors.brown, fontFamily: fontFamilies.extraBold };
 
 class PopupLeaderboard extends Popup {
   numberOfRows = 0;
@@ -143,6 +144,29 @@ class PopupLeaderboard extends Popup {
       ])
       .setSize(200, this.rankNumbers.height);
 
+    const playerRankY = this.leaderboardY + this.leaderboardContainer.height;
+    const playerOriginY = 2;
+    this.playerRankContainer = scene.add.image(width / 2, playerRankY, 'player-rank-container').setOrigin(0.52, 1.2);
+    this.playerRank = scene.add
+      .text(paddedX + width * 0.06, playerRankY, '', { ...playerRankTextStyle, align: 'center' })
+      .setOrigin(0.5, playerOriginY);
+    this.playerUsername = scene.add
+      .text(paddedX + width * 0.25, playerRankY, 'YOU', { ...playerRankTextStyle, align: 'center' })
+      .setOrigin(0.5, playerOriginY);
+    this.playerNetworth = scene.add
+      .text(paddedX + width * 0.45, playerRankY, '', { ...playerRankTextStyle, align: 'right' })
+      .setOrigin(0, playerOriginY);
+    this.playerStar = scene.add.image(paddedX + width * 0.52, playerRankY, 'icon-star').setOrigin(0, playerOriginY);
+    this.playerReward = scene.add
+      .text(paddedX + width * 0.67, playerRankY, '', { ...playerRankTextStyle, align: 'center' })
+      .setOrigin(0.5, playerOriginY);
+    this.add(this.playerRankContainer);
+    this.add(this.playerRank);
+    this.add(this.playerUsername);
+    this.add(this.playerStar);
+    this.add(this.playerNetworth);
+    this.add(this.playerReward);
+
     this.buttonBack = new TextButton(
       scene,
       width / 2,
@@ -182,10 +206,15 @@ class PopupLeaderboard extends Popup {
     this.crownGold.setVisible(displayedLeaderboard.length >= 1);
     this.crownSilver.setVisible(displayedLeaderboard.length >= 2);
     this.crownCopper.setVisible(displayedLeaderboard.length >= 3);
-    this.rankNumbers.text = displayedLeaderboard.map((_, index) => index + 1).join('\n\n');
+    this.rankNumbers.text = displayedLeaderboard.map(({ rank }) => rank).join('\n\n');
     this.usernames.text = displayedLeaderboard.map(({ username }) => `@${username}`).join('\n\n');
     this.networths.text = displayedLeaderboard.map(({ networth }) => networth).join('\n\n');
     this.ethRewards.text = displayedLeaderboard.map(({ reward }) => `~${formatter.format(reward)}`).join('\n\n');
+
+    const userRecord = leaderboard.find(({ isUser }) => isUser);
+    this.playerRank.text = userRecord.rank.toLocaleString();
+    this.playerNetworth.text = userRecord.networth;
+    this.playerReward.text = `~${formatter.format(userRecord.reward)}`;
 
     if (this.numberOfRows === displayedLeaderboard.length) return;
     this.numberOfRows = displayedLeaderboard.length;
@@ -207,10 +236,11 @@ class PopupLeaderboard extends Popup {
     }
     this.contentContainer.add(this.stars);
 
-    const visibleRatio = this.leaderboardContainer.height / this.contentContainer.height;
+    const tableHeight = this.leaderboardContainer.height - this.playerRankContainer.height;
+    const visibleRatio = tableHeight / this.contentContainer.height;
     this.leaderboardThumb = this.scene.rexUI.add
       .roundRectangle({
-        height: visibleRatio < 1 ? this.leaderboardContainer.height * visibleRatio : 0,
+        height: visibleRatio < 1 ? tableHeight * visibleRatio : 0,
         radius: 13,
         color: 0xe3d6c7,
       })
@@ -218,9 +248,9 @@ class PopupLeaderboard extends Popup {
 
     this.table = new ScrollablePanel(this.scene, {
       x: width / 2,
-      y: this.leaderboardY + this.leaderboardContainer.height / 2,
+      y: this.leaderboardY + tableHeight / 2,
       width: this.leaderboardContainer.width,
-      height: this.leaderboardContainer.height,
+      height: tableHeight,
       scrollMode: 'y',
       background: this.scene.rexUI.add.roundRectangle({ radius: 10 }),
       panel: { child: this.contentContainer, mask: { padding: 1 } },

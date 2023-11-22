@@ -5,7 +5,7 @@ import { getActiveSeason } from './season.service.js';
 import { getUserDisplayInfos } from './user.service.js';
 import { calculateReward } from '../utils/formulas.js';
 
-export const getLeaderboard = async () => {
+export const getLeaderboard = async (userId) => {
   const season = await getActiveSeason();
 
   const snapshot = await firestore
@@ -24,6 +24,8 @@ export const getLeaderboard = async () => {
     ...userDatas[index],
     userId: userDatas[index].id,
     id: doc.id,
+    isUser: userDatas[index].id === userId,
+    rank: index + 1,
     networth: doc.networth,
     reward: calculateReward(season.prizePool, season.rankingRewards, index),
   }));
