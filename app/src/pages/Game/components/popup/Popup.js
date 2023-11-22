@@ -97,6 +97,12 @@ class Popup extends Phaser.GameObjects.Container {
     if (this.destroyWhenClosed) this.destroy(true);
     else this.setVisible(false);
   };
+
+  setTitle(string) {
+    if (!this.title) return;
+    this.title.text = string;
+    this.titleShadow.text = string;
+  }
 }
 
 // setup a listener to prevent popup/ribbon closing when clicked

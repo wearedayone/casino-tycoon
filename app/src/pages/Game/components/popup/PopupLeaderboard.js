@@ -10,8 +10,16 @@ import { formatter } from '../../../../utils/numbers';
 
 const { width, height } = configs;
 const rowHeight = 86.3;
+const tableTextStyle = {
+  fontSize: fontSizes.small,
+  color: colors.black,
+  fontFamily: fontFamilies.bold,
+  lineSpacing: 2,
+};
+
 class PopupLeaderboard extends Popup {
-  season = {};
+  numberOfRows = 0;
+  stars = [];
 
   constructor(scene) {
     super(scene, 'popup-extra-large', { title: 'Season Leaderboard', noCloseBtn: true });
@@ -23,7 +31,7 @@ class PopupLeaderboard extends Popup {
     const prizePoolContainerY = endTimeExtensionY + 180;
     const reputationY = prizePoolContainerY + 210;
     const leaderboardHeaderY = reputationY + 140;
-    const leaderboardY = leaderboardHeaderY + 80;
+    this.leaderboardY = leaderboardHeaderY + 80;
 
     // child modals
     const popupWithdraw = new PopupWithdraw(scene, this);
@@ -112,34 +120,28 @@ class PopupLeaderboard extends Popup {
     this.add(reputation);
     this.add(ethRewards);
 
-    this.leaderboardContainer = scene.add.image(width / 2, leaderboardY, 'container-large').setOrigin(0.5, 0);
-    this.contentContainer = createPanel(scene, this);
-    this.leaderboardThumb = scene.rexUI.add.roundRectangle({
-      height: 10,
-      radius: 13,
-      color: 0xe3d6c7,
-    });
-
-    this.table = new ScrollablePanel(scene, {
-      x: width / 2,
-      y: leaderboardY + this.leaderboardContainer.height / 2,
-      width: this.leaderboardContainer.width,
-      height: this.leaderboardContainer.height,
-      scrollMode: 'y',
-      background: scene.rexUI.add.roundRectangle({ radius: 10 }),
-      panel: { child: this.contentContainer, mask: { padding: 1 } },
-      slider: {
-        track: scene.rexUI.add.roundRectangle({ width: 20, radius: 10, color: 0xffffff }),
-        thumb: scene.rexUI.add.roundRectangle({ radius: 13, color: 0xe3d6c7 }).setDisplaySize(10, 10),
-        adaptThumbSize: true,
-        minThumbSize: 10,
-      },
-      mouseWheelScroller: { focus: false, speed: 0.1 },
-      space: { left: 50, right: 40, top: 40, bottom: 40, panel: 20, header: 10, footer: 10 },
-    }).layout();
-
+    this.leaderboardContainer = scene.add.image(width / 2, this.leaderboardY, 'container-large').setOrigin(0.5, 0);
     this.add(this.leaderboardContainer);
-    this.add(this.table);
+
+    this.crownGold = scene.add.image(0, 0, 'icon-crown-gold').setOrigin(0, 0);
+    this.crownSilver = scene.add.image(0, rowHeight, 'icon-crown-silver').setOrigin(0, 0);
+    this.crownCopper = scene.add.image(0, rowHeight * 2, 'icon-crown-copper').setOrigin(0, 0);
+    this.rankNumbers = scene.add.text(width * 0.06, 0, '', { ...tableTextStyle, align: 'center' }).setOrigin(0.5, 0);
+    this.usernames = scene.add.text(width * 0.25, 0, '', { ...tableTextStyle, align: 'center' }).setOrigin(0.5, 0);
+    this.networths = scene.add.text(width * 0.45, 0, '', { ...tableTextStyle, align: 'right' });
+    this.ethRewards = scene.add.text(width * 0.67, 0, '', { ...tableTextStyle, align: 'center' }).setOrigin(0.5, 0);
+    this.contentContainer = scene.add
+      .container()
+      .add([
+        this.crownGold,
+        this.crownSilver,
+        this.crownCopper,
+        this.rankNumbers,
+        this.usernames,
+        this.networths,
+        this.ethRewards,
+      ])
+      .setSize(200, this.rankNumbers.height);
 
     this.buttonBack = new TextButton(
       scene,
@@ -168,66 +170,71 @@ class PopupLeaderboard extends Popup {
 
   updateValues(season) {
     console.log('season', season);
-    const { timeStepInHours, prizePool } = season;
+    const { name, timeStepInHours, prizePool } = season;
+    this.setTitle(`${name} Leaderboard`);
     this.endTimeExtension.text = `Every Gangster purchased increases time by ${timeStepInHours} hour`;
     this.prizePool.text = formatter.format(prizePool);
   }
   updateLeaderboard(leaderboard) {
     console.log('leaderboard', leaderboard);
-    this.crownGold.setVisible(leaderboard.length >= 1);
-    this.crownSilver.setVisible(leaderboard.length >= 2);
-    this.crownCopper.setVisible(leaderboard.length >= 3);
+    const displayedLeaderboard = leaderboard.filter(({ reward }) => reward > 0);
 
-    this.rankNumbers.text = leaderboard.map((_, index) => index + 1).join('\n\n');
-    this.usernames.text = leaderboard.map(({ username }) => `@${username}`).join('\n\n');
-    this.networths.text = leaderboard.map(({ networth }) => networth).join('\n\n');
-    this.ethRewards.text = leaderboard.map(({ reward }) => `~${formatter.format(reward)}`).join('\n\n');
-    // this.contentContainer.setSize(200, this.rankNumbers.height);
+    this.crownGold.setVisible(displayedLeaderboard.length >= 1);
+    this.crownSilver.setVisible(displayedLeaderboard.length >= 2);
+    this.crownCopper.setVisible(displayedLeaderboard.length >= 3);
+    this.rankNumbers.text = displayedLeaderboard.map((_, index) => index + 1).join('\n\n');
+    this.usernames.text = displayedLeaderboard.map(({ username }) => `@${username}`).join('\n\n');
+    this.networths.text = displayedLeaderboard.map(({ networth }) => networth).join('\n\n');
+    this.ethRewards.text = displayedLeaderboard.map(({ reward }) => `~${formatter.format(reward)}`).join('\n\n');
 
-    for (let i = 0; i < leaderboard.length; i++) {
+    if (this.numberOfRows === displayedLeaderboard.length) return;
+    this.numberOfRows = displayedLeaderboard.length;
+
+    // redraw table if numberOfRows changed
+    this.contentContainer.setSize(200, this.rankNumbers.height);
+    if (this.table) this.remove(this.table);
+    if (this.stars.length) {
+      for (let star of this.stars) {
+        this.remove(star);
+      }
+    }
+
+    this.stars = [];
+    for (let i = 0; i < displayedLeaderboard.length; i++) {
       const y = i * rowHeight;
       const star = this.scene.add.image(width * 0.52, y, 'icon-star').setOrigin(0, 0);
-      this.contentContainer.add(star);
+      this.stars.push(star);
     }
-    // this.leaderboardThumb.setHeight(
-    //   this.contentContainer.height > this.leaderboardContainer.height
-    //     ? (this.leaderboardContainer.height * this.leaderboardContainer.height) / this.contentContainer.height
-    //     : 0
-    // );
+    this.contentContainer.add(this.stars);
+
+    const visibleRatio = this.leaderboardContainer.height / this.contentContainer.height;
+    this.leaderboardThumb = this.scene.rexUI.add
+      .roundRectangle({
+        height: visibleRatio < 1 ? this.leaderboardContainer.height * visibleRatio : 0,
+        radius: 13,
+        color: 0xe3d6c7,
+      })
+      .setVisible(false);
+
+    this.table = new ScrollablePanel(this.scene, {
+      x: width / 2,
+      y: this.leaderboardY + this.leaderboardContainer.height / 2,
+      width: this.leaderboardContainer.width,
+      height: this.leaderboardContainer.height,
+      scrollMode: 'y',
+      background: this.scene.rexUI.add.roundRectangle({ radius: 10 }),
+      panel: { child: this.contentContainer, mask: { padding: 1 } },
+      slider: { thumb: this.leaderboardThumb },
+      mouseWheelScroller: { focus: false, speed: 0.3 },
+      space: { left: 50, right: 40, top: 40, bottom: 40, panel: 20, header: 10, footer: 10 },
+    }).layout();
+    this.add(this.table);
+
+    this.table.on('scroll', () => {
+      if (this.leaderboardThumb.visible) return;
+      this.leaderboardThumb.setVisible(true);
+    });
   }
 }
 
-const createPanel = function (scene, modal) {
-  const textStyle = { fontSize: fontSizes.small, color: colors.black, fontFamily: fontFamilies.bold, lineSpacing: 2 };
-
-  modal.crownGold = scene.add.image(0, 0, 'icon-crown-gold').setOrigin(0, 0);
-  modal.crownSilver = scene.add.image(0, rowHeight, 'icon-crown-silver').setOrigin(0, 0);
-  modal.crownCopper = scene.add.image(0, rowHeight * 2, 'icon-crown-copper').setOrigin(0, 0);
-  modal.rankNumbers = scene.add.text(width * 0.05, 0, CreateContent(30), textStyle);
-  modal.usernames = scene.add.text(width * 0.25, 0, '', { ...textStyle, align: 'center' }).setOrigin(0.5, 0);
-  modal.networths = scene.add.text(width * 0.45, 0, '', { ...textStyle, align: 'right' });
-  modal.ethRewards = scene.add.text(width * 0.67, 0, '', { ...textStyle, align: 'center' }).setOrigin(0.5, 0);
-  const container = scene.add
-    .container()
-    .add([
-      modal.crownGold,
-      modal.crownSilver,
-      modal.crownCopper,
-      modal.rankNumbers,
-      modal.usernames,
-      modal.networths,
-      modal.ethRewards,
-    ])
-    .setSize(200, modal.rankNumbers.height);
-
-  return container;
-};
-
-var CreateContent = function (linesCount) {
-  var numbers = [];
-  for (var i = 0; i < linesCount; i++) {
-    numbers.push(i.toString());
-  }
-  return numbers.join('\n');
-};
 export default PopupLeaderboard;
