@@ -32,6 +32,7 @@ const main = async () => {
     .collection('season')
     .doc(activeSeasonId)
     .set({
+      name: 'Season 1',
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       startTime,
       estimatedEndTime,
