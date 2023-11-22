@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Box } from '@mui/material';
 import Phaser from 'phaser';
+import UIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
 import { useQuery } from '@tanstack/react-query';
 import { useSnackbar } from 'notistack';
 import { usePrivy } from '@privy-io/react-auth';
@@ -10,7 +11,7 @@ import useSystemStore from '../../stores/system.store';
 import useSettingStore from '../../stores/setting.store';
 import { getRank, toggleWarStatus, updateBalance } from '../../services/user.service';
 import { claimToken } from '../../services/transaction.service';
-import { getNextWarSnapshotUnixTime } from '../../services/gamePlay.service';
+import { getLeaderboard, getNextWarSnapshotUnixTime } from '../../services/gamePlay.service';
 import QueryKeys from '../../utils/queryKeys';
 import { calculateHouseLevel } from '../../utils/formulas';
 import useSmartContract from '../../hooks/useSmartContract';
@@ -21,6 +22,7 @@ import LoadingScene from './scenes/LoadingScene';
 import MainScene from './scenes/MainScene';
 import ExampleScene from './scenes/TestScene';
 import useUserWallet from '../../hooks/useUserWallet';
+import useSeasonCountdown from '../../hooks/useSeasonCountdown';
 
 const { width, height } = configs;
 const MILISECONDS_IN_A_DAY = 86400 * 1000;
@@ -41,6 +43,8 @@ const Game = () => {
   const { getNFTBalance, withdrawToken, withdrawETH, withdrawNFT, stakeNFT, buyWorkerOrBuilding, buyMachine } =
     useSmartContract();
   const { ready, authenticated, user, exportWallet: exportWalletPrivy, logout } = usePrivy();
+  const [isLeaderboardModalOpen, setLeaderboardModalOpen] = useState(false);
+  const { isEnded, countdownString } = useSeasonCountdown({ open: isLeaderboardModalOpen });
   const { appVersion } = configs || {};
 
   // Check that your user is authenticated
@@ -56,6 +60,11 @@ const Game = () => {
     queryFn: getRank,
     queryKey: [QueryKeys.Rank, profile?.id],
     enabled: !!profile?.id,
+    refetchInterval: 30 * 1000,
+  });
+  const { data: leaderboardData } = useQuery({
+    queryKey: [QueryKeys.Leaderboard],
+    queryFn: getLeaderboard,
     refetchInterval: 30 * 1000,
   });
 
@@ -227,6 +236,9 @@ const Game = () => {
         },
         scene: [LoadingScene, MainScene],
         debug: true,
+        // plugins: {
+        //   scene: [{ key: 'rexUI', plugin: UIPlugin, mapping: 'rexUI' }],
+        // },
       };
 
       const game = new Phaser.Game(config);
@@ -244,6 +256,13 @@ const Game = () => {
       });
       game.events.on('request-profile', () => {
         gameRef.current.events.emit('update-profile', { username, address, avatarURL });
+      });
+      game.events.on('request-season', () => {
+        setLeaderboardModalOpen(true);
+        gameRef.current.events.emit('update-season', activeSeason);
+      });
+      game.events.on('close-leaderboard-modal', () => {
+        setLeaderboardModalOpen(false);
       });
 
       game.events.on('request-balances', () => {
@@ -483,6 +502,19 @@ const Game = () => {
   useEffect(() => {
     gameRef.current?.events.emit('update-profile', { username, address, avatarURL });
   }, [username, address, avatarURL]);
+
+  useEffect(() => {
+    if (isLeaderboardModalOpen) gameRef.current?.events.emit('update-season', activeSeason);
+  }, [isLeaderboardModalOpen, activeSeason]);
+  useEffect(() => {
+    if (isLeaderboardModalOpen) gameRef.current?.events.emit('update-leaderboard', leaderboardData?.data || []);
+  }, [isLeaderboardModalOpen, leaderboardData?.data]);
+  useEffect(() => {
+    gameRef.current?.events.emit('update-season-countdown', countdownString);
+  }, [countdownString]);
+  useEffect(() => {
+    gameRef.current?.events.emit('update-season-ended', isEnded);
+  }, [isEnded]);
 
   useEffect(() => {
     gameRef.current?.events.emit('game-sound-changed', { sound });

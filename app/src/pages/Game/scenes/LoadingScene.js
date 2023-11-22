@@ -55,6 +55,13 @@ class LoadingScene extends Phaser.Scene {
       percentText.destroy();
     });
 
+    this.load.scenePlugin(
+      'rexuiplugin',
+      'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js',
+      'rexUI',
+      'rexUI'
+    );
+
     // sounds
     this.load.audio('bg', '/audios/bg.mp3');
     this.load.audio('button-1', '/audios/button-1.wav');
@@ -95,7 +102,9 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('popup', '/images/popup.png');
     this.load.image('popup-small', '/images/popup-small.png');
     this.load.image('popup-large', '/images/popup-large.png');
+    this.load.image('popup-extra-large', '/images/popup-extra-large.png');
     this.load.image('popup-title', '/images/popup-title.png');
+    this.load.image('popup-title-large', '/images/popup-title-large.png');
     this.load.image('popup-welcome-nowar', '/images/popup-welcome-nowar.png');
     this.load.image('popup-buy', '/images/popup-buy.png');
     this.load.image('popup-war', '/images/popup-war.png');
@@ -142,6 +151,8 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-copy-pressed', '/images/button-copy-pressed.png');
     this.load.image('button-deposit', '/images/button-deposit.png');
     this.load.image('button-deposit-pressed', '/images/button-deposit-pressed.png');
+    this.load.image('button-info', '/images/button-info.png');
+    this.load.image('button-info-pressed', '/images/button-info-pressed.png');
     this.load.image('button-buy', '/images/button-buy.png');
     this.load.image('button-buy-pressed', '/images/button-buy-pressed.png');
     this.load.image('button-war', '/images/button-war.png');
@@ -172,26 +183,36 @@ class LoadingScene extends Phaser.Scene {
 
     this.load.image('text-input', '/images/text-input.png');
 
+    this.load.image('text-container', '/images/text-container.png');
+    this.load.image('text-container-large', '/images/text-container-large.png');
+    this.load.image('text-container-outlined', '/images/text-container-outlined.png');
+    this.load.image('container-large', '/images/container-large.png');
+
     // settings
     this.load.image('settings-wallet-container', '/images/settings-wallet-container.png');
     this.load.image('view-transaction', '/images/texts/view-transaction.png');
     this.load.image('deposit-instruction', '/images/texts/deposit-instruction.png');
     this.load.image('deposit-link', '/images/texts/deposit-link.png');
-    this.load.image('text-container', '/images/text-container.png');
     this.load.image('swap', '/images/swap.png');
-    this.load.image('icon-settings', '/images/icons/settings.png');
+
+    this.load.image('icon-chevron-right', '/images/icons/chevron-right.png');
+    this.load.image('icon-clock', '/images/icons/clock.png');
+    this.load.image('icon-coin', '/images/icons/coin.png');
+    this.load.image('icon-coin-done', '/images/icons/coin-done.png');
+    this.load.image('icon-crown-gold', '/images/icons/crown-gold.png');
+    this.load.image('icon-crown-silver', '/images/icons/crown-silver.png');
+    this.load.image('icon-crown-copper', '/images/icons/crown-copper.png');
+    this.load.image('icon-eth', '/images/icons/eth.png');
+    this.load.image('icon-eth-done', '/images/icons/eth-done.png');
+    this.load.image('icon-gangster', '/images/icons/gangster.png');
     this.load.image('icon-logout', '/images/icons/logout.png');
+    this.load.image('icon-nft-done', '/images/icons/nft-done.png');
+    this.load.image('icon-open-link', '/images/icons/open-link.png');
+    this.load.image('icon-settings', '/images/icons/settings.png');
     this.load.image('icon-sound-on', '/images/icons/sound-on.png');
     this.load.image('icon-sound-off', '/images/icons/sound-off.png');
-    this.load.image('icon-coin', '/images/icons/coin.png');
-    this.load.image('icon-eth', '/images/icons/eth.png');
-    this.load.image('icon-gangster', '/images/icons/gangster.png');
-    this.load.image('icon-coin-done', '/images/icons/coin-done.png');
-    this.load.image('icon-eth-done', '/images/icons/eth-done.png');
-    this.load.image('icon-nft-done', '/images/icons/nft-done.png');
-    this.load.image('icon-chevron-right', '/images/icons/chevron-right.png');
+    this.load.image('icon-star', '/images/icons/star.png');
     this.load.image('icon-wallet', '/images/icons/wallet.png');
-    this.load.image('icon-open-link', '/images/icons/open-link.png');
 
     this.load.image('icon-history', '/images/icon-history.png');
     this.load.image('icon-war', '/images/icon-war.png');
