@@ -53,13 +53,14 @@ class Popup extends Phaser.GameObjects.Container {
     }
 
     if (title) {
-      const titleRibbon = title.length > LARGE_TITLE_LIMIT ? 'popup-title-large' : 'popup-title';
+      const isTitleTooLong = title.length > LARGE_TITLE_LIMIT;
+      const titleRibbon = isTitleTooLong ? 'popup-title-large' : 'popup-title';
       this.ribbon = scene.add
         .image(configs.width / 2, configs.height / 2 - this.popup.height / 2, titleRibbon)
         .setOrigin(0.5, 0.5);
       this.add(this.ribbon);
 
-      const fontSize = '84px',
+      const fontSize = isTitleTooLong ? '76px' : '84px',
         fontFamily = 'WixMadeforDisplayExtraBold';
 
       const titleY = this.ribbon.y - 18;
