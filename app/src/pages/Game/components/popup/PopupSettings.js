@@ -178,10 +178,10 @@ class PopupSettings extends Popup {
       'button-green-long',
       'button-green-long-pressed',
       () => scene.game.events.emit('toggle-game-sound'),
-      this.scene.game.sound.mute ? 'Game Sound: Off' : 'Game Sound: On',
+      this.scene.game.config.audio.mute ? 'Game Sound: Off' : 'Game Sound: On',
       {
-        icon: this.scene.game.sound.mute ? 'icon-sound-off' : 'icon-sound-on',
-        sound: this.scene.game.sound.mute ? 'toggle-1' : 'toggle-2',
+        icon: this.scene.game.config.audio.mute ? 'icon-sound-off' : 'icon-sound-on',
+        sound: this.scene.game.config.audio.mute ? 'toggle-1' : 'toggle-2',
       }
     );
     this.credit = scene.add.text(width / 2, creditTextY, 'v1.0.0. Gangster Arena. Copyright.', {
@@ -221,7 +221,7 @@ class PopupSettings extends Popup {
     this.buttonSound.text.text = text;
     this.buttonSound.icon.setTexture(icon);
     this.scene.game.events.emit(isSoundOn ? 'music-on' : 'music-off');
-    this.scene.game.sound.mute = !isSoundOn;
+    this.scene.game.sound.setMute(!isSoundOn);
   }
 
   updateValues({ username, address, avatarURL }) {

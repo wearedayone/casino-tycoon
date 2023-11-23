@@ -236,10 +236,13 @@ const Game = () => {
         },
         scene: [LoadingScene, MainScene],
         debug: true,
+        audio: {
+          mute: sound !== 'on',
+        },
       };
 
       const game = new Phaser.Game(config);
-      game.sound.mute = sound !== 'on';
+      game.sound.setMute(sound !== 'on');
       // listeners
       game.events.on('export-wallet', exportWallet);
       game.events.on('log-out', logout);
