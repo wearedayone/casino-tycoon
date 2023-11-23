@@ -177,8 +177,11 @@ class PopupSettings extends Popup {
       'button-green-long',
       'button-green-long-pressed',
       () => scene.game.events.emit('toggle-game-sound'),
-      'Game Sound: On',
-      { icon: 'icon-sound-on', sound: 'toggle-2' }
+      this.scene.game.sound.mute ? 'Game Sound: Off' : 'Game Sound: On',
+      {
+        icon: this.scene.game.sound.mute ? 'icon-sound-off' : 'icon-sound-on',
+        sound: this.scene.game.sound.mute ? 'toggle-1' : 'toggle-2',
+      }
     );
     this.credit = scene.add.text(width / 2, creditTextY, 'v1.0.0. Gangster Arena. Copyright.', {
       fontSize: '36px',
@@ -208,7 +211,6 @@ class PopupSettings extends Popup {
 
   onOpen() {
     this.scene.game.events.emit('request-profile');
-    this.scene.game.events.emit('request-game-sound');
     this.scene.game.events.emit('request-app-version');
   }
 
@@ -218,6 +220,7 @@ class PopupSettings extends Popup {
     this.buttonSound.text.text = text;
     this.buttonSound.icon.setTexture(icon);
     this.scene.game.events.emit(isSoundOn ? 'music-on' : 'music-off');
+    this.scene.game.sound.mute = !isSoundOn;
   }
 
   updateValues({ username, address, avatarURL }) {

@@ -239,15 +239,12 @@ const Game = () => {
       };
 
       const game = new Phaser.Game(config);
-
+      game.sound.mute = sound !== 'on';
       // listeners
       game.events.on('export-wallet', exportWallet);
       game.events.on('log-out', logout);
       game.events.on('toggle-game-sound', toggleSound);
 
-      game.events.on('request-game-sound', () => {
-        gameRef.current.events.emit('game-sound-changed', { sound });
-      });
       game.events.on('request-app-version', () => {
         gameRef.current.events.emit('update-app-version', appVersion);
       });

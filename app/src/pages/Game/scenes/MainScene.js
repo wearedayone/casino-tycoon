@@ -125,6 +125,11 @@ class MainScene extends Phaser.Scene {
     });
 
     this.game.events.emit('request-workers-machines');
+    if (this.game.sound.mute) {
+      this.bgMusic.stop();
+    } else {
+      this.bgMusic.play();
+    }
   }
 
   updateAnimationPositions(delta) {
