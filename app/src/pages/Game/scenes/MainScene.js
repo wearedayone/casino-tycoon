@@ -11,6 +11,7 @@ import PopupBuy from '../components/popup/PopupBuy';
 import PopupWar from '../components/popup/PopupWar';
 import PopupSettings from '../components/popup/PopupSettings';
 import PopupDailyGangWar from '../components/popup/PopupDailyGangWar';
+import PopupWarHistory from '../components/popup/PopupWarHistory';
 import PopupSafeHouseUpgrade from '../components/popup/PopupSafeHouseUpgrade';
 import PopupBuyGoon from '../components/popup/PopupBuyGoon';
 import PopupBuyGangster from '../components/popup/PopupBuyGangster';
@@ -98,6 +99,9 @@ class MainScene extends Phaser.Scene {
 
     this.popupDailyGangWar = new PopupDailyGangWar(this);
     this.add.existing(this.popupDailyGangWar);
+
+    this.popupWarHistory = new PopupWarHistory(this);
+    this.add.existing(this.popupWarHistory);
 
     this.popupSafeHouseUpgrade = new PopupSafeHouseUpgrade(this);
     this.add.existing(this.popupSafeHouseUpgrade);

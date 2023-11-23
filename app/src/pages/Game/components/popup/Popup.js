@@ -4,6 +4,7 @@ import Button from '../button/Button';
 import configs from '../../configs/configs';
 
 const LARGE_TITLE_LIMIT = 15;
+const XL_TITLE_LIMIT = 20;
 class Popup extends Phaser.GameObjects.Container {
   destroyWhenClosed = false;
 
@@ -54,13 +55,14 @@ class Popup extends Phaser.GameObjects.Container {
 
     if (title) {
       const isTitleTooLong = title.length > LARGE_TITLE_LIMIT;
+      const isTitleWayTooLong = title.length > XL_TITLE_LIMIT;
       const titleRibbon = isTitleTooLong ? 'popup-title-large' : 'popup-title';
       this.ribbon = scene.add
         .image(configs.width / 2, configs.height / 2 - this.popup.height / 2, titleRibbon)
         .setOrigin(0.5, 0.5);
       this.add(this.ribbon);
 
-      const fontSize = isTitleTooLong ? '76px' : '84px',
+      const fontSize = isTitleTooLong ? (isTitleWayTooLong ? '70px' : '76px') : '84px',
         fontFamily = 'WixMadeforDisplayExtraBold';
 
       const titleY = this.ribbon.y - 18;

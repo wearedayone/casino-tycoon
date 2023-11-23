@@ -214,17 +214,8 @@ export const getWarHistory = async (userId) => {
     .get();
 
   const warHistory = warHistorySnapshot.docs.map((doc) => {
-    const { bonus, penalty, createdAt, ...rest } = doc.data();
-    let outcome = null;
-
-    if (bonus) outcome = `+${bonus} $FIAT`;
-    else if (penalty) {
-      const strings = [];
-      if (penalty.gangster) strings.push(`-${penalty.gangster} gangster${penalty.gangster > 1 ? 's' : ''}`);
-      if (penalty.goon) strings.push(`-${penalty.goon} goon${penalty.goon > 1 ? 's' : ''}`);
-      outcome = penalty.gangster || penalty.goon ? strings.join(', ') : null;
-    }
-    return { id: doc.id, outcome, createdAt: createdAt.toDate(), ...rest };
+    const { createdAt, ...rest } = doc.data();
+    return { id: doc.id, createdAt: createdAt.toDate(), ...rest };
   });
   return warHistory;
 };

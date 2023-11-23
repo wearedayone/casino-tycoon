@@ -9,7 +9,7 @@ import { usePrivy } from '@privy-io/react-auth';
 import useUserStore from '../../stores/user.store';
 import useSystemStore from '../../stores/system.store';
 import useSettingStore from '../../stores/setting.store';
-import { getRank, toggleWarStatus, updateBalance } from '../../services/user.service';
+import { getRank, getWarHistory, toggleWarStatus, updateBalance } from '../../services/user.service';
 import { claimToken } from '../../services/transaction.service';
 import { getLeaderboard, getNextWarSnapshotUnixTime } from '../../services/gamePlay.service';
 import QueryKeys from '../../utils/queryKeys';
@@ -313,6 +313,12 @@ const Game = () => {
         const nextClaimTime = gamePlay.lastClaimTime.toDate().getTime() + activeSeason.claimGapInSeconds * 1000;
         const claimable = Date.now() > nextClaimTime;
         gameRef.current.events.emit('update-claimable-status', { claimable });
+      });
+
+      game.events.on('request-war-history', () => {
+        getWarHistory()
+          .then((res) => gameRef.current.events.emit('update-war-history', res.data))
+          .catch((err) => console.error(err));
       });
 
       game.events.on('request-war-status', () => {

@@ -16,7 +16,7 @@ class PopupWar extends Phaser.GameObjects.Container {
 
     this.historyBtn.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
       this.btnSound.play();
-      console.log('war history');
+      scene.popupWarHistory.open();
     });
     this.warBtn.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
       this.btnSound.play();

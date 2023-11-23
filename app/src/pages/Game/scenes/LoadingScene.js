@@ -101,6 +101,7 @@ class LoadingScene extends Phaser.Scene {
 
     this.load.image('popup', '/images/popup.png');
     this.load.image('popup-small', '/images/popup-small.png');
+    this.load.image('popup-medium', '/images/popup-medium.png');
     this.load.image('popup-large', '/images/popup-large.png');
     this.load.image('popup-extra-large', '/images/popup-extra-large.png');
     this.load.image('popup-title', '/images/popup-title.png');
@@ -187,6 +188,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('text-container-large', '/images/text-container-large.png');
     this.load.image('text-container-outlined', '/images/text-container-outlined.png');
     this.load.image('container-large', '/images/container-large.png');
+    this.load.image('container-large-2', '/images/container-large-2.png');
     this.load.image('player-rank-container', '/images/player-rank-container.png');
 
     // settings
@@ -199,6 +201,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-chevron-right', '/images/icons/chevron-right.png');
     this.load.image('icon-clock', '/images/icons/clock.png');
     this.load.image('icon-coin', '/images/icons/coin.png');
+    this.load.image('icon-coin-mini', '/images/icons/coin-mini.png');
     this.load.image('icon-coin-done', '/images/icons/coin-done.png');
     this.load.image('icon-crown-gold', '/images/icons/crown-gold.png');
     this.load.image('icon-crown-silver', '/images/icons/crown-silver.png');
@@ -206,6 +209,8 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-eth', '/images/icons/eth.png');
     this.load.image('icon-eth-done', '/images/icons/eth-done.png');
     this.load.image('icon-gangster', '/images/icons/gangster.png');
+    this.load.image('icon-gangster-mini', '/images/icons/gangster-mini.png');
+    this.load.image('icon-goon-mini', '/images/icons/goon-mini.png');
     this.load.image('icon-info', '/images/icons/info.png');
     this.load.image('icon-logout', '/images/icons/logout.png');
     this.load.image('icon-nft-done', '/images/icons/nft-done.png');
