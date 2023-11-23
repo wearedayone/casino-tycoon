@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 
-import configs from '../../configs/configs.json';
+import configs from '../../configs/configs';
 
 const { gangsterAnimation, goonAnimation } = configs;
 

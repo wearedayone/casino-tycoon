@@ -5,7 +5,7 @@ import PopupWithdrawToken from './PopupWithdrawToken';
 import PopupWithdrawETH from './PopupWithdrawETH';
 import PopupWithdrawNFT from './PopupWithdrawNFT';
 import TextButton from '../button/TextButton';
-import configs from '../../configs/configs.json';
+import configs from '../../configs/configs';
 import { formatter } from '../../../../utils/numbers';
 
 const { width, height } = configs;

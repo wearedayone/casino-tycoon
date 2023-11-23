@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 
 import Button from '../button/Button';
 import RankButton from './RankButton';
-import configs from '../../configs/configs.json';
+import configs from '../../configs/configs';
 
 const { width } = configs;
 

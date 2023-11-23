@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 
-import configs from '../configs/configs.json';
+import configs from '../configs/configs';
 import Background from '../components/common/Background';
 import PopupWelcomeNoWar from '../components/popup/PopupWelcomeNoWar';
 import Header from '../components/action-buttons/Header';

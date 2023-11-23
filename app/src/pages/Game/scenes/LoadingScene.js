@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 
-import configs from '../configs/configs.json';
+import configs from '../configs/configs';
 
 class LoadingScene extends Phaser.Scene {
   constructor() {
@@ -77,7 +77,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.audio('toggle-1', '/audios/toggle-1.wav');
     this.load.audio('toggle-2', '/audios/toggle-2.wav');
 
-    this.load.image('bg', '/images/bg.png');
+    this.load.image('bg', '/images/bg_full.png');
     this.load.image('gangster-house-1', '/images/gangster-house-1.png');
     this.load.image('gangster-house-2', '/images/gangster-house-2.png');
     this.load.image('gangster-house-3', '/images/gangster-house-3.png');

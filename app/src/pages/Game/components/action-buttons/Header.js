@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 
 import { formatter, customFormat } from '../../../../utils/numbers';
-import configs from '../../configs/configs.json';
+import configs from '../../configs/configs';
 import DailyMoney from './DailyMoney';
 import Balance from './Balance';
 

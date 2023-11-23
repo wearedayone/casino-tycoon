@@ -1,6 +1,6 @@
 import Popup from './Popup';
 import TextButton from '../button/TextButton';
-import configs from '../../configs/configs.json';
+import configs from '../../configs/configs';
 import { formatter } from '../../../../utils/numbers';
 
 const { width, height } = configs;

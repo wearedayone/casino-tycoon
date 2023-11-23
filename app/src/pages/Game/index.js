@@ -17,14 +17,14 @@ import { calculateHouseLevel } from '../../utils/formulas';
 import useSmartContract from '../../hooks/useSmartContract';
 import { create, validate } from '../../services/transaction.service';
 
-import configs from './configs/configs.json';
+import gameConfigs from './configs/configs';
 import LoadingScene from './scenes/LoadingScene';
 import MainScene from './scenes/MainScene';
 import ExampleScene from './scenes/TestScene';
 import useUserWallet from '../../hooks/useUserWallet';
 import useSeasonCountdown from '../../hooks/useSeasonCountdown';
 
-const { width, height } = configs;
+const { width, height } = gameConfigs;
 const MILISECONDS_IN_A_DAY = 86400 * 1000;
 
 const Game = () => {

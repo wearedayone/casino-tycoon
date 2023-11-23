@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 
 import Button from '../button/Button';
-import configs from '../../configs/configs.json';
+import configs from '../../configs/configs';
 import DisabledClaimButton from '../button/DiabledClaimButton';
 import ActiveClaimButton from '../button/ActiveClaimButton';
 import ClaimButton from '../button/ClaimButton';

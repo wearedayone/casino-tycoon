@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 
 import Button from '../button/Button';
-import configs from '../../configs/configs.json';
+import configs from '../../configs/configs';
 
 const LARGE_TITLE_LIMIT = 15;
 class Popup extends Phaser.GameObjects.Container {

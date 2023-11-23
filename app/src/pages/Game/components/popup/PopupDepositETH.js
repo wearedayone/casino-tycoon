@@ -3,7 +3,7 @@ import Phaser from 'phaser';
 import Popup from './Popup';
 import TextButton from '../button/TextButton';
 import Button from '../button/Button';
-import configs from '../../configs/configs.json';
+import configs from '../../configs/configs';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
 
 const { width, height } = configs;

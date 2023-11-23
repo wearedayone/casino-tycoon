@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 
 import Popup from './Popup';
 import TextButton from '../button/TextButton';
-import configs from '../../configs/configs.json';
+import configs from '../../configs/configs';
 
 const { width, height } = configs;
 

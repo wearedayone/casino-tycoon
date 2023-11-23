@@ -1,7 +1,7 @@
 import Popup from './Popup';
 import PopupDepositETH from './PopupDepositETH';
 import TextButton from '../button/TextButton';
-import configs from '../../configs/configs.json';
+import configs from '../../configs/configs';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
 import Button from '../button/Button';
 import { formatter } from '../../../../utils/numbers';

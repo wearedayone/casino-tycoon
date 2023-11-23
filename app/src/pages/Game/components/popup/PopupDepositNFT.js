@@ -3,7 +3,7 @@ import PopupTxnProcessing from './PopupTxnProcessing';
 import Button from '../button/Button';
 import TextInput from '../inputs/TextInput';
 import TextButton from '../button/TextButton';
-import configs from '../../configs/configs.json';
+import configs from '../../configs/configs';
 import { integerCharacterRegex, integerInputRegex } from '../../../../utils/strings';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
 

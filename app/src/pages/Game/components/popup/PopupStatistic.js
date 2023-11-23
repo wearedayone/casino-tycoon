@@ -1,6 +1,6 @@
 import Popup from './Popup';
 import Button from '../button/Button';
-import configs from '../../configs/configs.json';
+import configs from '../../configs/configs';
 import { formatter } from '../../../../utils/numbers';
 
 const { width, height } = configs;

@@ -6,7 +6,7 @@ import PopupDeposit from './PopupDeposit';
 import PopupDepositNFT from './PopupDepositNFT';
 import Button from '../button/Button';
 import TextButton from '../button/TextButton';
-import configs from '../../configs/configs.json';
+import configs from '../../configs/configs';
 import PopupSwap from './PopupSwap';
 
 const { width, height } = configs;

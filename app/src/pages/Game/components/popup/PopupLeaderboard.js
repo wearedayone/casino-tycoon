@@ -4,7 +4,7 @@ import Popup from './Popup';
 import PopupWithdraw from './PopupWithdraw';
 import Button from '../button/Button';
 import TextButton from '../button/TextButton';
-import configs from '../../configs/configs.json';
+import configs from '../../configs/configs';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
 import { formatter } from '../../../../utils/numbers';
 import { getOrdinalSuffix } from '../../../../utils/strings';

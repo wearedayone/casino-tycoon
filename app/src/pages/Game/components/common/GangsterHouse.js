@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 
 import { formatter } from '../../../../utils/numbers';
-import configs from '../../configs/configs.json';
+import configs from '../../configs/configs';
 
 const { width } = configs;
 
