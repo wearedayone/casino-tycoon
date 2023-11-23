@@ -10,7 +10,7 @@ class Popup extends Phaser.GameObjects.Container {
   constructor(
     scene,
     img = 'popup',
-    { ribbon, title, openOnCreate = false, destroyWhenClosed = false, noCloseBtn = false } = {}
+    { ribbon, title, titleIcon, openOnCreate = false, destroyWhenClosed = false, noCloseBtn = false } = {}
   ) {
     super(scene, 0, 0);
     this.destroyWhenClosed = destroyWhenClosed;
@@ -63,20 +63,27 @@ class Popup extends Phaser.GameObjects.Container {
         fontFamily = 'WixMadeforDisplayExtraBold';
 
       const titleY = this.ribbon.y - 18;
+      const titleX = titleIcon ? this.ribbon.x + 70 : this.ribbon.x;
       this.title = scene.add
-        .text(this.ribbon.x, titleY, title, { fontSize, color: '#fff', fontFamily })
+        .text(titleX, titleY, title, { fontSize, color: '#fff', fontFamily })
         .setOrigin(0.5, 0.5)
         .setStroke('#9e0a2e', 12);
       this.titleShadow = scene.add
-        .text(this.ribbon.x, titleY + 5, title, { fontSize, color: '#9e0a2e', fontFamily })
+        .text(titleX, titleY + 5, title, { fontSize, color: '#9e0a2e', fontFamily })
         .setOrigin(0.5, 0.5)
         .setStroke('#9e0a2e', 12);
       this.add(this.titleShadow);
       this.add(this.title);
 
-      if (!openOnCreate) this.setVisible(false);
+      if (titleIcon) {
+        this.titleIcon = scene.add.image(this.ribbon.x - this.title.width / 2, titleY, titleIcon);
+        this.add(this.titleIcon);
+      }
+
       this.ribbon.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, emptyListener);
     }
+
+    if (!openOnCreate) this.setVisible(false);
   }
 
   /* effects */

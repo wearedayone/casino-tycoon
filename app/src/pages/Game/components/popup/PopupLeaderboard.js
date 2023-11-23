@@ -1,7 +1,7 @@
 import { ScrollablePanel } from 'phaser3-rex-plugins/templates/ui/ui-components.js';
 
 import Popup from './Popup';
-import PopupWithdraw from './PopupWithdraw';
+import PopupPrizePool from './PopupPrizePool';
 import Button from '../button/Button';
 import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
@@ -41,8 +41,8 @@ class PopupLeaderboard extends Popup {
     this.leaderboardY = leaderboardHeaderY + 80;
 
     // child modals
-    const popupWithdraw = new PopupWithdraw(scene, this);
-    scene.add.existing(popupWithdraw);
+    const popupPrizePool = new PopupPrizePool(scene, this);
+    scene.add.existing(popupPrizePool);
 
     this.gameEndsIn = scene.add.text(width / 2, gameEndsY, 'GAME ENDS IN: ', largeBlackExtraBold).setOrigin(1, 0);
     this.clockIcon = scene.add.image(width / 2, gameEndsY, 'icon-clock').setOrigin(0, 0);
@@ -87,7 +87,10 @@ class PopupLeaderboard extends Popup {
       prizePoolContainerY - 20,
       'button-info',
       'button-info-pressed',
-      () => console.log('open info modal'),
+      () => {
+        this.close();
+        popupPrizePool.open();
+      },
       { sound: 'open' }
     );
     this.prizePool = scene.add

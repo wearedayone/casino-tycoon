@@ -236,9 +236,6 @@ const Game = () => {
         },
         scene: [LoadingScene, MainScene],
         debug: true,
-        // plugins: {
-        //   scene: [{ key: 'rexUI', plugin: UIPlugin, mapping: 'rexUI' }],
-        // },
       };
 
       const game = new Phaser.Game(config);
@@ -504,11 +501,18 @@ const Game = () => {
   }, [username, address, avatarURL]);
 
   useEffect(() => {
-    if (isLeaderboardModalOpen) gameRef.current?.events.emit('update-season', { ...activeSeason, isEnded });
-  }, [isLeaderboardModalOpen, activeSeason, isEnded]);
+    if (isLeaderboardModalOpen) {
+      const { name, timeStepInHours, prizePool } = activeSeason || {};
+      gameRef.current?.events.emit('update-season', { name, timeStepInHours, prizePool, isEnded });
+    }
+  }, [isLeaderboardModalOpen, activeSeason?.name, activeSeason?.timeStepInHours, activeSeason?.prizePool, isEnded]);
   useEffect(() => {
     if (isLeaderboardModalOpen) gameRef.current?.events.emit('update-leaderboard', leaderboardData?.data || []);
   }, [isLeaderboardModalOpen, leaderboardData?.data]);
+  useEffect(() => {
+    if (isLeaderboardModalOpen)
+      gameRef.current?.events.emit('update-ranking-rewards', activeSeason?.rankingRewards || []);
+  }, [isLeaderboardModalOpen, activeSeason?.rankingRewards]);
   useEffect(() => {
     gameRef.current?.events.emit('update-season-countdown', countdownString);
   }, [countdownString]);

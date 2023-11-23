@@ -59,7 +59,7 @@ class PopupBuyGangster extends Popup {
       .setOrigin(1, 0);
     this.add(this.networthText);
 
-    this.infoIcon = scene.add.image(this.popup.x + 40, this.popup.y + 290, 'icon-info').setOrigin(0.5, 0.5);
+    this.infoIcon = scene.add.image(this.popup.x + 40, this.popup.y + 290, 'button-info').setOrigin(0.5, 0.5);
     this.add(this.infoIcon);
 
     this.bonusText = scene.add

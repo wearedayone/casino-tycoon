@@ -206,6 +206,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-eth', '/images/icons/eth.png');
     this.load.image('icon-eth-done', '/images/icons/eth-done.png');
     this.load.image('icon-gangster', '/images/icons/gangster.png');
+    this.load.image('icon-info', '/images/icons/info.png');
     this.load.image('icon-logout', '/images/icons/logout.png');
     this.load.image('icon-nft-done', '/images/icons/nft-done.png');
     this.load.image('icon-open-link', '/images/icons/open-link.png');
@@ -219,7 +220,6 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-war', '/images/icon-war.png');
     this.load.image('icon-checked', '/images/icon-checked.png');
     this.load.image('icon-unchecked', '/images/icon-unchecked.png');
-    this.load.image('icon-info', '/images/icon-info.png');
 
     this.load.path = '/images/animation/';
     this.load.multiatlas('gangster-front', 'gangster_front.json');
