@@ -613,7 +613,7 @@ const Game = () => {
       const { reward: rankReward } = rankData.data;
       const tokenValue = tokenBalance * 0.000001; // TODO: update formulas to calculate token value
       const machineValue = numberOfMachines * 0.041; // TODO: update formulas to calculate machine value
-      const totalBalance = ETHBalance + tokenValue + machineValue + rankReward;
+      const totalBalance = parseFloat(ETHBalance) + tokenValue + machineValue + rankReward;
       gameRef.current?.events.emit('update-portfolio', {
         address,
         totalBalance,

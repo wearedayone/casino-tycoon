@@ -8,31 +8,31 @@ class PopupBuy extends Phaser.GameObjects.Container {
   constructor(scene, x, y) {
     super(scene, x, y);
 
-    this.popup = scene.add.image(0, 0, 'popup-buy').setOrigin(0, 0);
+    this.popup = scene.add.image(0, 0, 'buy_plane_1').setOrigin(0, 0);
     this.addSafeHouseBtn = new Button(
       scene,
-      this.popup.width - 70,
-      160,
-      'button-add',
-      'button-add-pressed',
+      this.popup.width - 150,
+      140,
+      'button-buy-safehouse',
+      'button-buy-safehouse-pressed',
       () => scene.popupSafeHouseUpgrade.setVisible(true),
       { sound: 'open' }
     );
     this.addGangsterBtn = new Button(
       scene,
-      this.popup.width - 70,
+      this.popup.width - 150,
       this.addSafeHouseBtn.y + verticalGap,
-      'button-add',
-      'button-add-pressed',
+      'button-buy-gangster',
+      'button-buy-gangster-pressed',
       () => scene.popupBuyGangster.setVisible(true),
       { sound: 'open' }
     );
     this.addGoonBtn = new Button(
       scene,
-      this.popup.width - 70,
+      this.popup.width - 150,
       this.addGangsterBtn.y + verticalGap,
-      'button-add',
-      'button-add-pressed',
+      'button-buy-goon',
+      'button-buy-goon-pressed',
       () => scene.popupBuyGoon.setVisible(true),
       { sound: 'open' }
     );

@@ -9,7 +9,7 @@ import ClaimButton from '../button/ClaimButton';
 const { width } = configs;
 
 const px = 40;
-const buttonWidth = 287;
+const buttonWidth = 288;
 
 class Footer extends Phaser.GameObjects.Container {
   constructor(scene, y) {
@@ -21,7 +21,10 @@ class Footer extends Phaser.GameObjects.Container {
       y,
       'button-war',
       'button-war-pressed',
-      () => scene.popupWar.setVisible(!scene.popupWar.visible),
+      () => {
+        scene.popupBuy.setVisible(false);
+        scene.popupWar.setVisible(!scene.popupWar.visible);
+      },
       { sound: 'button-1' }
     );
 
@@ -31,7 +34,10 @@ class Footer extends Phaser.GameObjects.Container {
       y,
       'button-buy',
       'button-buy-pressed',
-      () => scene.popupBuy.setVisible(!scene.popupBuy.visible),
+      () => {
+        scene.popupWar.setVisible(false);
+        scene.popupBuy.setVisible(!scene.popupBuy.visible);
+      },
       { sound: 'button-1' }
     );
 

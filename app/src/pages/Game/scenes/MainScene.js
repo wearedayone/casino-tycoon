@@ -20,7 +20,7 @@ import Animation from '../components/common/Animation';
 import PopupStatistic from '../components/popup/PopupStatistic';
 import PopupLeaderboard from '../components/popup/PopupLeaderboard';
 
-const { goonAnimation, gangsterAnimation } = configs;
+const { goonAnimation, gangsterAnimation, width } = configs;
 
 const gangsterBackAnimationSpeed = {
   x: Math.abs(gangsterAnimation.back.end.x - gangsterAnimation.back.start.x) / gangsterAnimation.back.time,
@@ -75,10 +75,10 @@ class MainScene extends Phaser.Scene {
     const gangsterHouse = new GangsterHouse(this, 2200);
     this.add.existing(gangsterHouse);
 
-    this.popupBuy = new PopupBuy(this, 955, 1600);
+    this.popupBuy = new PopupBuy(this, width - 335, 1600);
     this.add.existing(this.popupBuy);
 
-    this.popupWar = new PopupWar(this, 30, 1850);
+    this.popupWar = new PopupWar(this, 35, 1850);
     this.add.existing(this.popupWar);
 
     const footer = new Footer(this, 2600);

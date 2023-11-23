@@ -182,6 +182,14 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-back-portfolio', '/images/button-back-portfolio.png');
     this.load.image('button-back-portfolio-pressed', '/images/button-back-portfolio-pressed.png');
 
+    this.load.image('button-buy-safehouse', '/images/button-buy-safehouse.png');
+    this.load.image('button-buy-safehouse-pressed', '/images/button-buy-safehouse-pressed.png');
+    this.load.image('button-buy-gangster', '/images/button-buy-gangster.png');
+    this.load.image('button-buy-gangster-pressed', '/images/button-buy-gangster-pressed.png');
+    this.load.image('button-buy-goon', '/images/button-buy-goon.png');
+    this.load.image('button-buy-goon-pressed', '/images/button-buy-goon-pressed.png');
+    this.load.image('buy_plane_1', '/images/buy_plane_1.png');
+
     this.load.image('text-input', '/images/text-input.png');
 
     this.load.image('text-container', '/images/text-container.png');
