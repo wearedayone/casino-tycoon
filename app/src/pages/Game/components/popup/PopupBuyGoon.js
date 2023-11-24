@@ -1,4 +1,5 @@
 import Popup from './Popup';
+import PopupBuyProcessing from './PopupBuyProcessing';
 import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
 import { estimateNumberOfWorkerCanBuy, calculateNextWorkerBuyPriceBatch } from '../../../../utils/formulas';
@@ -18,8 +19,6 @@ class PopupBuyGoon extends Popup {
   constructor(scene) {
     super(scene, 'popup-buy-goon', { ribbon: 'ribbon-buy-goon' });
 
-    this.setVisible(false);
-
     this.upgradeBtn = new TextButton(
       scene,
       width / 2,
@@ -27,9 +26,16 @@ class PopupBuyGoon extends Popup {
       'button-blue',
       'button-blue-pressed',
       () => {
-        if (this.loading || !this.quantity) return;
-        this.loading = true;
-        this.upgradeBtn.updateText('Upgrading...');
+        if (!this.quantity) return;
+        this.popupBuyProcessing = new PopupBuyProcessing(scene, {
+          sound: 'minion',
+          buyCompletedEvent: 'buy-goon-completed',
+          buyCompletedIcon: 'icon-goon-buy-done',
+          buyingText: `Hiring ${this.quantity} Goon${this.quantity > 1 ? 's' : ''}`,
+        });
+        scene.add.existing(this.popupBuyProcessing);
+        this.close();
+
         scene.game.events.emit('buy-goon', { quantity: this.quantity });
       },
       'Buy',
@@ -164,8 +170,6 @@ class PopupBuyGoon extends Popup {
     this.coin = scene.add.image(this.priceText.x + this.priceText.width + 40, sliderY, 'coin2').setOrigin(0, 0.5);
     this.add(this.coin);
 
-    this.minionSound = scene.sound.add('minion', { loop: false });
-
     scene.game.events.on(
       'update-workers',
       ({ numberOfWorkers, networth, balance, sold, basePrice, priceStep, dailyReward }) => {
@@ -178,13 +182,6 @@ class PopupBuyGoon extends Popup {
         this.rateText.text = `${formatter.format(numberOfWorkers * dailyReward)}`;
       }
     );
-
-    scene.game.events.on('buy-goon-completed', () => {
-      this.loading = false;
-      this.upgradeBtn.updateText('Upgrade');
-      this.slider.value = 0;
-      this.minionSound.play();
-    });
 
     scene.game.events.emit('request-workers');
   }

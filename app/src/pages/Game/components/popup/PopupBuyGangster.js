@@ -1,4 +1,5 @@
 import Popup from './Popup';
+import PopupBuyProcessing from './PopupBuyProcessing';
 import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
 import { formatter } from '../../../../utils/numbers';
@@ -15,8 +16,6 @@ class PopupBuyGangster extends Popup {
   constructor(scene) {
     super(scene, 'popup-buy-gangster', { ribbon: 'ribbon-buy-gangster' });
 
-    this.setVisible(false);
-
     this.upgradeBtn = new TextButton(
       scene,
       width / 2,
@@ -24,9 +23,16 @@ class PopupBuyGangster extends Popup {
       'button-blue',
       'button-blue-pressed',
       () => {
-        if (this.loading || !this.quantity) return;
-        this.loading = true;
-        this.upgradeBtn.updateText('Upgrading...');
+        if (!this.quantity) return;
+        this.popupBuyProcessing = new PopupBuyProcessing(scene, {
+          sound: 'gangster',
+          buyCompletedEvent: 'buy-gangster-completed',
+          buyCompletedIcon: 'icon-gangster-buy-done',
+          buyingText: `Hiring ${this.quantity} Gangster${this.quantity > 1 ? 's' : ''}`,
+        });
+        scene.add.existing(this.popupBuyProcessing);
+        this.close();
+
         scene.game.events.emit('buy-gangster', { quantity: this.quantity });
       },
       'Buy',
@@ -168,8 +174,6 @@ class PopupBuyGangster extends Popup {
     this.coin = scene.add.image(this.priceText.x + this.priceText.width + 40, sliderY, 'eth-coin').setOrigin(0, 0.5);
     this.add(this.coin);
 
-    this.gangsterSound = scene.sound.add('gangster', { loop: false });
-
     scene.game.events.on(
       'update-machines',
       ({ numberOfMachines, networth, balance, basePrice, dailyReward, bonus }) => {
@@ -182,13 +186,6 @@ class PopupBuyGangster extends Popup {
         this.bonusCoin.x = this.bonusText.x + this.bonusText.width + 50;
       }
     );
-
-    scene.game.events.on('buy-gangster-completed', () => {
-      this.loading = false;
-      this.upgradeBtn.updateText('Upgrade');
-      this.slider.value = 0;
-      this.gangsterSound.play();
-    });
 
     scene.game.events.emit('request-machines');
   }

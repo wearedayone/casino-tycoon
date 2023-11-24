@@ -1,4 +1,5 @@
 import Popup from './Popup';
+import PopupBuyProcessing from './PopupBuyProcessing';
 import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
 import { estimateNumberOfBuildingCanBuy, calculateNextBuildingBuyPriceBatch } from '../../../../utils/formulas';
@@ -18,8 +19,6 @@ class PopupSafeHouseUpgrade extends Popup {
   constructor(scene) {
     super(scene, 'popup-safehouse-upgrade', { ribbon: 'ribbon-safehouse-upgrade' });
 
-    this.setVisible(false);
-
     this.upgradeBtn = new TextButton(
       scene,
       width / 2,
@@ -27,9 +26,16 @@ class PopupSafeHouseUpgrade extends Popup {
       'button-blue',
       'button-blue-pressed',
       () => {
-        if (this.loading || !this.quantity) return;
-        this.loading = true;
-        this.upgradeBtn.updateText('Upgrading...');
+        if (!this.quantity) return;
+        this.popupBuyProcessing = new PopupBuyProcessing(scene, {
+          sound: 'house',
+          buyCompletedEvent: 'upgrade-safehouse-completed',
+          buyCompletedIcon: 'icon-safehouse-upgrade-done',
+          buyingText: `Upgrading Safehouse`,
+        });
+        scene.add.existing(this.popupBuyProcessing);
+        this.close();
+
         scene.game.events.emit('upgrade-safehouse', { quantity: this.quantity });
       },
       'Upgrade',
@@ -155,8 +161,6 @@ class PopupSafeHouseUpgrade extends Popup {
     this.coin = scene.add.image(this.priceText.x + this.priceText.width + 40, sliderY, 'coin2').setOrigin(0, 0.5);
     this.add(this.coin);
 
-    this.houseSound = scene.sound.add('house', { loop: false });
-
     scene.game.events.on('update-buildings', ({ numberOfBuildings, networth, balance, sold, basePrice, priceStep }) => {
       this.balance = balance;
       this.sold = sold;
@@ -164,13 +168,6 @@ class PopupSafeHouseUpgrade extends Popup {
       this.priceStep = priceStep;
       this.numberOfBuildingsText.text = `${numberOfBuildings}`;
       this.networthText.text = `${networth}`;
-    });
-
-    scene.game.events.on('upgrade-safehouse-completed', () => {
-      this.loading = false;
-      this.upgradeBtn.updateText('Upgrade');
-      this.slider.value = 0;
-      this.houseSound.play();
     });
 
     scene.game.events.emit('request-buildings');

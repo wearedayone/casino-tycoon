@@ -67,19 +67,19 @@ class Popup extends Phaser.GameObjects.Container {
 
       const titleY = this.ribbon.y - 18;
       const titleX = titleIcon ? this.ribbon.x + 70 : this.ribbon.x;
-      this.title = scene.add
+      this.popupTitle = scene.add
         .text(titleX, titleY, title, { fontSize, color: '#fff', fontFamily })
         .setOrigin(0.5, 0.5)
         .setStroke('#9e0a2e', 12);
-      this.titleShadow = scene.add
+      this.popupTitleShadow = scene.add
         .text(titleX, titleY + 5, title, { fontSize, color: '#9e0a2e', fontFamily })
         .setOrigin(0.5, 0.5)
         .setStroke('#9e0a2e', 12);
-      this.add(this.titleShadow);
-      this.add(this.title);
+      this.add(this.popupTitleShadow);
+      this.add(this.popupTitle);
 
       if (titleIcon) {
-        this.titleIcon = scene.add.image(this.ribbon.x - this.title.width / 2, titleY, titleIcon);
+        this.titleIcon = scene.add.image(this.ribbon.x - this.popupTitle.width / 2, titleY, titleIcon);
         this.add(this.titleIcon);
       }
 
@@ -109,9 +109,9 @@ class Popup extends Phaser.GameObjects.Container {
   };
 
   setTitle(string) {
-    if (!this.title) return;
-    this.title.text = string;
-    this.titleShadow.text = string;
+    if (!this.popupTitle) return;
+    this.popupTitle.text = string;
+    this.popupTitleShadow.text = string;
   }
 }
 

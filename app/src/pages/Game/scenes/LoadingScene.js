@@ -210,11 +210,15 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-eth-done', '/images/icons/eth-done.png');
     this.load.image('icon-gangster', '/images/icons/gangster.png');
     this.load.image('icon-gangster-mini', '/images/icons/gangster-mini.png');
+    this.load.image('icon-gangster-buy-done', '/images/icons/gangster-buy-done.png');
     this.load.image('icon-goon-mini', '/images/icons/goon-mini.png');
+    this.load.image('icon-goon-buy-done', '/images/icons/goon-buy-done.png');
     this.load.image('icon-info', '/images/icons/info.png');
+    this.load.image('icon-loading', '/images/icons/loading.png');
     this.load.image('icon-logout', '/images/icons/logout.png');
     this.load.image('icon-nft-done', '/images/icons/nft-done.png');
     this.load.image('icon-open-link', '/images/icons/open-link.png');
+    this.load.image('icon-safehouse-upgrade-done', '/images/icons/safehouse-upgrade-done.png');
     this.load.image('icon-settings', '/images/icons/settings.png');
     this.load.image('icon-sound-on', '/images/icons/sound-on.png');
     this.load.image('icon-sound-off', '/images/icons/sound-off.png');
