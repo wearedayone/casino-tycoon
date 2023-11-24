@@ -1,5 +1,7 @@
 import Popup from './Popup';
+import PopupBuyBonusInfo from './PopupBuyBonusInfo';
 import PopupBuyProcessing from './PopupBuyProcessing';
+import Button from '../button/Button';
 import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
 import { formatter } from '../../../../utils/numbers';
@@ -15,6 +17,10 @@ class PopupBuyGangster extends Popup {
 
   constructor(scene) {
     super(scene, 'popup-buy-gangster', { ribbon: 'ribbon-buy-gangster' });
+
+    // child modals
+    const popupBuyBonusInfo = new PopupBuyBonusInfo(scene, this);
+    scene.add.existing(popupBuyBonusInfo);
 
     this.upgradeBtn = new TextButton(
       scene,
@@ -65,8 +71,19 @@ class PopupBuyGangster extends Popup {
       .setOrigin(1, 0);
     this.add(this.networthText);
 
-    this.infoIcon = scene.add.image(this.popup.x + 40, this.popup.y + 290, 'button-info').setOrigin(0.5, 0.5);
-    this.add(this.infoIcon);
+    const infoButton = new Button(
+      scene,
+      width / 2 + 40,
+      this.popup.y + 290,
+      'button-info',
+      'button-info-pressed',
+      () => {
+        this.close();
+        popupBuyBonusInfo.open();
+      },
+      { sound: 'open' }
+    );
+    this.add(infoButton);
 
     this.bonusText = scene.add
       .text(this.popup.x + 90, this.popup.y + 325, '0', {

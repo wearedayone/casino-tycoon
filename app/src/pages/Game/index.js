@@ -404,6 +404,10 @@ const Game = () => {
         }
       });
 
+      game.events.on('request-reserve-pool', () => {
+        game.events.emit('update-reserve-pool', { reservePool, reservePoolReward });
+      });
+
       game.events.on('request-workers', () => {
         game.events.emit('update-workers', {
           numberOfWorkers,
@@ -562,6 +566,10 @@ const Game = () => {
       priceStep: building.priceStep,
     });
   }, [numberOfBuildings, networth, tokenBalance, building, buildingSold]);
+
+  useEffect(() => {
+    gameRef.current?.events.emit('update-reserve-pool', { reservePool, reservePoolReward });
+  }, [reservePool, reservePoolReward]);
 
   useEffect(() => {
     gameRef.current?.events.emit('update-workers', {
