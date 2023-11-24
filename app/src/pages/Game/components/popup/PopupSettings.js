@@ -17,13 +17,14 @@ class PopupSettings extends Popup {
   constructor(scene) {
     super(scene, 'popup-large', { title: 'Settings' });
 
-    const x = width * 0.08;
+    const leftMargin = this.popup.x - this.popup.width / 2;
+    const paddedX = leftMargin + this.popup.width * 0.1;
     const longBtnX = width / 2;
-    const medBtnX = x + width * 0.21;
-    const secondMedBtnX = width * 0.71;
-    const avatarSize = width * 0.08;
-    const avatarPadding = width * 0.07;
-    const avatarX = x + avatarPadding + avatarSize / 2;
+    const medBtnX = width / 2 - this.popup.width * 0.23;
+    const secondMedBtnX = width / 2 + this.popup.width * 0.23;
+    const avatarSize = this.popup.width * 0.08;
+    const avatarPadding = this.popup.width * 0.02;
+    const avatarX = paddedX + avatarPadding + avatarSize / 2;
     const startingY = this.popup.y - this.popup.height / 2;
     const usernameY = startingY + 150;
     const walletContainerY = usernameY + 210;
@@ -45,7 +46,7 @@ class PopupSettings extends Popup {
     scene.add.existing(popupSwap);
 
     // user details
-    this.username = scene.add.text(x + 20, usernameY, 'username', {
+    this.username = scene.add.text(paddedX, usernameY, 'username', {
       fontSize: '60px',
       color: '#29000b',
       fontFamily: 'WixMadeforDisplayExtraBold',
@@ -54,20 +55,20 @@ class PopupSettings extends Popup {
     this.circle = scene.add.graphics().setPosition(avatarX, walletContainerY).fillCircle(0, 0, avatarSize);
     this.avatar = scene.add.image(avatarX, walletContainerY, 'avatar').setSize(avatarSize, avatarSize);
 
-    this.iconSettings = scene.add.image(x + 200, walletContainerY + 90, 'icon-settings');
-    this.myWallet = scene.add.text(x + 300, walletContainerY - 80, 'My Wallet:', {
+    this.iconSettings = scene.add.image(paddedX + this.popup.width * 0.12, walletContainerY + 90, 'icon-settings');
+    this.myWallet = scene.add.text(paddedX + 300, walletContainerY - 80, 'My Wallet:', {
       fontSize: '60px',
       color: '#29000b',
       fontFamily: 'WixMadeforDisplayBold',
     });
-    this.addressText = scene.add.text(x + 300, walletContainerY, 'address', {
+    this.addressText = scene.add.text(paddedX + 300, walletContainerY, 'address', {
       fontSize: '60px',
       color: '#7d2e00',
       fontFamily: 'WixMadeforDisplayBold',
     });
     this.buttonCopy = new Button(
       scene,
-      width * 0.82,
+      leftMargin + this.popup.width * 0.85,
       walletContainerY,
       'button-copy',
       'button-copy-pressed',
