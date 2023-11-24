@@ -1,16 +1,19 @@
+const width =
+  window.innerWidth / window.innerHeight >= 1700 / 2796 ? 1700 : (window.innerWidth * 2796) / window.innerHeight;
+
 const configs = {
-  width: window.innerWidth / window.innerHeight >= 1700 / 2796 ? 1700 : (window.innerWidth * 2796) / window.innerHeight,
+  width: width,
   height: 2796,
   gangsterAnimation: {
     back: {
-      start: { x: 100, y: 2000, scale: 0.4 },
-      end: { x: 645, y: 880, scale: 0.15 },
+      start: { x: 150, y: 2000, scale: 0.4 },
+      end: { x: width / 2 - 50, y: 880, scale: 0.15 },
       time: 3000,
     },
     front: {
-      start: { x: 645, y: 880, scale: 0.15 },
+      start: { x: width / 2 - 50, y: 880, scale: 0.15 },
       end: {
-        x: 645,
+        x: width / 2 - 50,
         y: 2100,
         scale: 0.4,
       },
@@ -19,18 +22,18 @@ const configs = {
   },
   goonAnimation: {
     back: {
-      start: { x: 1190, y: 2000, scale: 0.4 },
-      end: { x: 645, y: 880, scale: 0.15 },
-      time: 2000,
+      start: { x: width - 150, y: 2000, scale: 0.4 },
+      end: { x: width / 2 + 50, y: 880, scale: 0.15 },
+      time: 3000,
     },
     front: {
-      start: { x: 645, y: 880, scale: 0.15 },
+      start: { x: width / 2 + 50, y: 880, scale: 0.15 },
       end: {
-        x: 645,
+        x: width / 2 + 50,
         y: 2100,
         scale: 0.4,
       },
-      time: 2000,
+      time: 3000,
     },
   },
 };
