@@ -38,6 +38,7 @@ const Game = () => {
   const gamePlay = useUserStore((state) => state.gamePlay);
   const activeSeason = useSystemStore((state) => state.activeSeason);
   const configs = useSystemStore((state) => state.configs);
+  const market = useSystemStore((state) => state.market);
   const sound = useSettingStore((state) => state.sound);
   const toggleSound = useSettingStore((state) => state.toggleSound);
   const { getNFTBalance, withdrawToken, withdrawETH, withdrawNFT, stakeNFT, buyWorkerOrBuilding, buyMachine } =
@@ -46,6 +47,7 @@ const Game = () => {
   const [isLeaderboardModalOpen, setLeaderboardModalOpen] = useState(false);
   const { isEnded, countdownString } = useSeasonCountdown({ open: isLeaderboardModalOpen });
   const { appVersion } = configs || {};
+  const { tokenPrice } = market || {};
 
   // Check that your user is authenticated
   const isAuthenticated = useMemo(() => ready && authenticated, [ready, authenticated]);
@@ -77,9 +79,9 @@ const Game = () => {
   };
   const { machine, worker, building, workerSold, buildingSold, reservePool, reservePoolReward, houseLevels } =
     activeSeason || {
-      machine: { dailyReward: 0, basePrice: 0 },
-      worker: { dailyReward: 0, basePrice: 0, priceStep: 0 },
-      building: { basePrice: 0, priceStep: 0 },
+      machine: { dailyReward: 0, basePrice: 0, networth: 0 },
+      worker: { dailyReward: 0, basePrice: 0, networth: 0, priceStep: 0 },
+      building: { basePrice: 0, priceStep: 0, networth: 0 },
       buildingSold: 0,
       workerSold: 0,
       machineSold: 0,
@@ -386,6 +388,7 @@ const Game = () => {
           sold: buildingSold,
           basePrice: building.basePrice,
           priceStep: building.priceStep,
+          networthIncrease: building.networth,
         });
       });
 
@@ -420,6 +423,7 @@ const Game = () => {
           basePrice: worker.basePrice,
           priceStep: worker.priceStep,
           dailyReward: worker.dailyReward,
+          networthIncrease: worker.networth,
         });
       });
 
@@ -430,7 +434,10 @@ const Game = () => {
           balance: ETHBalance,
           basePrice: machine.basePrice,
           dailyReward: machine.dailyReward,
-          bonus: reservePool * reservePoolReward,
+          reservePool,
+          reservePoolReward,
+          networthIncrease: machine.networth,
+          tokenPrice,
         });
       });
 
@@ -567,6 +574,7 @@ const Game = () => {
       sold: buildingSold,
       basePrice: building.basePrice,
       priceStep: building.priceStep,
+      networthIncrease: building.networth,
     });
   }, [numberOfBuildings, networth, tokenBalance, building, buildingSold]);
 
@@ -583,6 +591,7 @@ const Game = () => {
       basePrice: worker.basePrice,
       priceStep: worker.priceStep,
       dailyReward: worker.dailyReward,
+      networthIncrease: worker.networth,
     });
   }, [numberOfWorkers, networth, tokenBalance, worker, workerSold]);
 
@@ -593,9 +602,12 @@ const Game = () => {
       balance: tokenBalance,
       basePrice: machine.basePrice,
       dailyReward: machine.dailyReward,
-      bonus: reservePool * reservePoolReward,
+      reservePool,
+      reservePoolReward,
+      networthIncrease: machine.networth,
+      tokenPrice,
     });
-  }, [numberOfMachines, networth, ETHBalance, machine, reservePool, reservePoolReward]);
+  }, [numberOfMachines, networth, ETHBalance, machine, reservePool, reservePoolReward, tokenPrice]);
 
   useEffect(() => {
     gameRef.current?.events.emit('update-networth', {

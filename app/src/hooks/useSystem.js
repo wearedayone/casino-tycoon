@@ -9,6 +9,7 @@ const useSystem = () => {
   const configs = useSystemStore((state) => state.configs);
   const setConfigs = useSystemStore((state) => state.setConfigs);
   const setActiveSeason = useSystemStore((state) => state.setActiveSeason);
+  const setMarket = useSystemStore((state) => state.setMarket);
   const setOpenUpdate = useModalStore((state) => state.setOpenUpdate);
 
   useEffect(() => {
@@ -17,6 +18,18 @@ const useSystem = () => {
         setConfigs(snapshot.data());
       } else {
         setConfigs(null);
+      }
+    });
+
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(doc(firestore, 'system', 'market'), (snapshot) => {
+      if (snapshot.exists()) {
+        setMarket(snapshot.data());
+      } else {
+        setMarket(null);
       }
     });
 

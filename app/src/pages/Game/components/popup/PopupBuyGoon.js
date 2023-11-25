@@ -4,11 +4,22 @@ import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
 import { estimateNumberOfWorkerCanBuy, calculateNextWorkerBuyPriceBatch } from '../../../../utils/formulas';
 import { formatter } from '../../../../utils/numbers';
+import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
 
 const { width, height } = configs;
 const sliderWidth = 500;
+const largeBlackExtraBold = {
+  fontSize: fontSizes.large,
+  color: colors.black,
+  fontFamily: fontFamilies.extraBold,
+};
+const smallGreenBold = { fontSize: fontSizes.small, color: colors.green, fontFamily: fontFamilies.bold };
 
 class PopupBuyGoon extends Popup {
+  numberOfWorkers = 0;
+  networth = 0;
+  networthIncrease = 0;
+  rateIncrease = 0;
   balance = 0;
   sold = 0;
   basePrice = 0;
@@ -45,35 +56,40 @@ class PopupBuyGoon extends Popup {
 
     this.numberOfWorkersText = scene.add.text(this.popup.x + 390, this.popup.y - 535, '0', {
       fontSize: '76px',
-      color: '#29000B',
-      fontFamily: 'WixMadeforDisplayExtraBold',
+      color: colors.black,
+      fontFamily: fontFamilies.extraBold,
     });
     this.add(this.numberOfWorkersText);
 
-    this.rateText = scene.add
-      .text(this.popup.x + 320, this.popup.y - 205, '0', {
-        fontSize: '60px',
-        color: '#29000B',
-        fontFamily: 'WixMadeforDisplayExtraBold',
-      })
+    this.rateText = scene.add.text(this.popup.x + 320, this.popup.y - 205, '0', largeBlackExtraBold).setOrigin(1, 0);
+    this.rateIncreaseText = scene.add
+      .text(this.popup.x + this.popup.width * 0.4, this.popup.y - 125, '+0 /d', smallGreenBold)
       .setOrigin(1, 0);
     this.add(this.rateText);
+    this.add(this.rateIncreaseText);
 
-    this.networthText = scene.add
-      .text(this.popup.x + 380, this.popup.y - 20, '0', {
-        fontSize: '60px',
-        color: '#29000B',
-        fontFamily: 'WixMadeforDisplayExtraBold',
-      })
+    this.networthText = scene.add.text(this.popup.x + 380, this.popup.y - 20, '0', largeBlackExtraBold).setOrigin(1, 0);
+    this.networthIncreaseText = scene.add
+      .text(this.popup.x + this.popup.width * 0.4, this.popup.y + 60, '+0', smallGreenBold)
       .setOrigin(1, 0);
     this.add(this.networthText);
+    this.add(this.networthIncreaseText);
+
+    this.roiText = scene.add
+      .text(this.popup.x + this.popup.width * 0.4, this.popup.y + 180, '+0%', {
+        fontSize: fontSizes.large,
+        color: colors.green,
+        fontFamily: fontFamilies.extraBold,
+      })
+      .setOrigin(1, 0);
+    this.add(this.roiText);
 
     const sliderY = this.popup.y + this.popup.height / 2 - 220;
     this.qtyText = scene.add
       .text(this.popup.x - this.popup.width / 2 + 150, sliderY, 'Qty:', {
         fontSize: '52px',
-        color: '#29000B',
-        fontFamily: 'WixMadeforDisplayBold',
+        color: colors.black,
+        fontFamily: fontFamilies.bold,
       })
       .setOrigin(0.5, 0.5);
     this.add(this.qtyText);
@@ -125,6 +141,15 @@ class PopupBuyGoon extends Popup {
             const quantity = Math.floor(value * maxPurchase);
             this.sliderThumbText.text = `+${quantity}`;
             this.quantity = quantity;
+            const totalWorkers = this.numberOfWorkers + quantity;
+            this.numberOfWorkersText.text = totalWorkers;
+
+            const increasedNetworth = this.networthIncrease * quantity;
+            this.networthText.text = `${this.networth + increasedNetworth}`;
+            this.networthIncreaseText.text = `+${increasedNetworth}`;
+
+            this.rateText.text = `${(this.rateIncrease * totalWorkers).toLocaleString()}`;
+            this.rateIncreaseText.text = `+${(this.rateIncrease * quantity).toLocaleString()} /d`;
 
             const estimatedPrice = calculateNextWorkerBuyPriceBatch(
               this.sold,
@@ -133,8 +158,11 @@ class PopupBuyGoon extends Popup {
               this.priceStep
             ).total;
 
+            const roi = estimatedPrice ? (((this.rateIncrease * quantity) / estimatedPrice) * 100).toFixed(1) : 0;
+
+            this.roiText.text = `${roi}%`;
             this.priceText.text = `${formatter.format(estimatedPrice)}`;
-            this.coin.x = this.priceText.x + this.priceText.width + 40;
+            this.coin.x = this.priceText.x + this.priceText.width + 20;
           }
         },
         space: {
@@ -148,22 +176,17 @@ class PopupBuyGoon extends Popup {
 
     this.sliderThumb = scene.add.image(sliderThumbX, sliderY + 35, 'slider-thumb').setOrigin(0.5, 1);
     this.sliderThumb.setDepth(5);
-    this.sliderThumbText = scene.add
-      .text(sliderThumbX, sliderY - 85, `+0`, {
-        fontSize: '60px',
-        color: '#29000B',
-        fontFamily: 'WixMadeforDisplayExtraBold',
-      })
-      .setOrigin(0.5, 0.5);
+    this.sliderThumbText = scene.add.text(sliderThumbX, sliderY - 85, `+0`, largeBlackExtraBold).setOrigin(0.5, 0.5);
     this.add(this.sliderThumb);
     this.add(this.sliderThumbText);
 
     this.priceText = scene.add
-      .text(this.popup.x - this.popup.width / 2 + 170 + this.qtyText.width + sliderWidth, sliderY, '0', {
-        fontSize: '60px',
-        color: '#29000B',
-        fontFamily: 'WixMadeforDisplayExtraBold',
-      })
+      .text(
+        this.popup.x - this.popup.width / 2 + 170 + this.qtyText.width + sliderWidth,
+        sliderY,
+        '0',
+        largeBlackExtraBold
+      )
       .setOrigin(0, 0.5);
     this.add(this.priceText);
 
@@ -172,11 +195,16 @@ class PopupBuyGoon extends Popup {
 
     scene.game.events.on(
       'update-workers',
-      ({ numberOfWorkers, networth, balance, sold, basePrice, priceStep, dailyReward }) => {
+      ({ numberOfWorkers, networth, balance, sold, basePrice, priceStep, dailyReward, networthIncrease }) => {
         this.balance = balance;
         this.sold = sold;
         this.basePrice = basePrice;
         this.priceStep = priceStep;
+        this.numberOfWorkers = numberOfWorkers;
+        this.networth = networth;
+        this.networthIncrease = networthIncrease;
+        this.rateIncrease = dailyReward;
+
         this.numberOfWorkersText.text = `${numberOfWorkers}`;
         this.networthText.text = `${networth}`;
         this.rateText.text = `${formatter.format(numberOfWorkers * dailyReward)}`;
