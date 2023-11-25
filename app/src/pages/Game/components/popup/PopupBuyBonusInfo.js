@@ -17,7 +17,7 @@ class PopupBuyBonusInfo extends Popup {
     const firstParagraphY = startingY + 220;
     const secondParagraphY = firstParagraphY + 400;
 
-    this.reservePoolHidden = scene.add.text(this.paddedX, firstParagraphY, '---', largeBlackBold);
+    this.reservePoolHidden = scene.add.text(this.paddedX, firstParagraphY, '---', largeBlackBold).setVisible(false);
     this.coinIcon = scene.add
       .image(this.paddedX + this.reservePoolHidden.width + 50, firstParagraphY, 'coin')
       .setOrigin(0.5, 0);
