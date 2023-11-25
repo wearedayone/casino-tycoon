@@ -25,6 +25,7 @@ const smallBlackBold = { fontSize: fontSizes.small, color: colors.black, fontFam
 
 class PopupLeaderboard extends Popup {
   isEnded = false;
+  minNetworth = 0; // players' networth must be more than this to be displayed
   numberOfRows = 0;
   stars = [];
 
@@ -227,11 +228,12 @@ class PopupLeaderboard extends Popup {
 
   updateValues(season) {
     console.log('season', season);
-    const { name, timeStepInHours, prizePool, isEnded } = season;
+    const { name, timeStepInHours, prizePool, isEnded, minNetworth } = season;
     this.updateEndedState(isEnded);
 
     const title = this.isEnded ? `${name} Ended` : `${name} Leaderboard`;
     this.setTitle(title);
+    this.minNetworth = minNetworth;
     this.endTimeExtension.text = `Every Gangster purchased increases time by ${timeStepInHours} hour`;
     this.prizePool.text = formatter.format(prizePool);
   }
@@ -258,7 +260,9 @@ class PopupLeaderboard extends Popup {
 
   updateLeaderboard(leaderboard) {
     console.log('leaderboard', leaderboard);
-    const displayedLeaderboard = leaderboard.filter(({ reward }) => reward > 0);
+    const displayedLeaderboard = leaderboard.filter(
+      ({ reward, networth }) => reward > 0 && networth >= this.minNetworth
+    );
 
     this.crownGold.setVisible(displayedLeaderboard.length >= 1);
     this.crownSilver.setVisible(displayedLeaderboard.length >= 2);

@@ -258,7 +258,14 @@ const Game = () => {
       });
       game.events.on('open-leaderboard-modal', () => {
         setLeaderboardModalOpen(true);
-        gameRef.current.events.emit('update-season', activeSeason);
+        const { name, timeStepInHours, prizePool } = activeSeason || {};
+        gameRef.current.events.emit('update-season', {
+          name,
+          timeStepInHours,
+          prizePool,
+          isEnded,
+          minNetworth: machine.networth,
+        });
       });
       game.events.on('close-leaderboard-modal', () => {
         setLeaderboardModalOpen(false);
@@ -520,9 +527,22 @@ const Game = () => {
   useEffect(() => {
     if (isLeaderboardModalOpen) {
       const { name, timeStepInHours, prizePool } = activeSeason || {};
-      gameRef.current?.events.emit('update-season', { name, timeStepInHours, prizePool, isEnded });
+      gameRef.current?.events.emit('update-season', {
+        name,
+        timeStepInHours,
+        prizePool,
+        isEnded,
+        minNetworth: machine.networth,
+      });
     }
-  }, [isLeaderboardModalOpen, activeSeason?.name, activeSeason?.timeStepInHours, activeSeason?.prizePool, isEnded]);
+  }, [
+    isLeaderboardModalOpen,
+    activeSeason?.name,
+    activeSeason?.timeStepInHours,
+    activeSeason?.prizePool,
+    machine.networth,
+    isEnded,
+  ]);
   useEffect(() => {
     if (isLeaderboardModalOpen) gameRef.current?.events.emit('update-leaderboard', leaderboardData?.data || []);
   }, [isLeaderboardModalOpen, leaderboardData?.data]);
