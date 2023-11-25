@@ -7,7 +7,7 @@ const px = 15;
 const py = 5;
 
 class Balance extends Phaser.GameObjects.Container {
-  constructor(scene, x, y, img, value) {
+  constructor(scene, x, y, onClickAdd, img, value) {
     super(scene, 0, 0);
 
     this.container = scene.add.image(x, y, img).setOrigin(0.5, 0.5);
@@ -17,7 +17,7 @@ class Balance extends Phaser.GameObjects.Container {
       y - py,
       'button-add',
       'button-add-pressed',
-      () => console.log('clicked'),
+      onClickAdd,
       { sound: 'button-2' }
     );
     this.valueText = scene.add

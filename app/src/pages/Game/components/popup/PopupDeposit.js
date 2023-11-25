@@ -81,12 +81,7 @@ class PopupDeposit extends Popup {
     );
 
     const balanceSubtitle = scene.add
-      .text(
-        paddedX + this.popup.width * 0.02,
-        balanceTextY,
-        'GangsterArena Wallet Balance: ',
-        sectionDescriptionStyle
-      )
+      .text(paddedX + this.popup.width * 0.02, balanceTextY, 'GangsterArena Wallet Balance: ', sectionDescriptionStyle)
       .setOrigin(0, 0.5);
     this.balanceText = scene.add
       .text(width / 2 + this.popup.width * 0.08, balanceTextY, '0 ETH', {
@@ -133,7 +128,7 @@ class PopupDeposit extends Popup {
       'button-blue-pressed',
       () => {
         this.close();
-        parentModal.open();
+        parentModal?.open();
       },
       'Back',
       { fontSize: '82px', sound: 'close' }
