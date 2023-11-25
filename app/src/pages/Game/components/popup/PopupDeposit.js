@@ -19,9 +19,10 @@ class PopupDeposit extends Popup {
     this.popupDepositETH = new PopupDepositETH(scene, this);
     scene.add.existing(this.popupDepositETH);
 
-    const x = width * 0.12;
-    const imageX = x + width * 0.07;
-    const sectionTextX = imageX + width * 0.07;
+    const leftMargin = this.popup.x - this.popup.width / 2;
+    const paddedX = leftMargin + this.popup.width * 0.1;
+    const imageX = paddedX + this.popup.width * 0.07;
+    const sectionTextX = imageX + this.popup.width * 0.08;
     const startingY = this.popup.y - this.popup.height / 2;
     const subtitleY = startingY + 150;
     const mainNetContainerY = subtitleY + 320;
@@ -40,7 +41,7 @@ class PopupDeposit extends Popup {
       })
       .setOrigin(0.5, 0);
 
-    const mainNetName = scene.add.text(x, mainNetContainerY, 'Deposit ETH', sectionNameStyle).setOrigin(0, 3.5);
+    const mainNetName = scene.add.text(paddedX, mainNetContainerY, 'Deposit ETH', sectionNameStyle).setOrigin(0, 3.5);
     const mainNetContainer = scene.add.image(width / 2, mainNetContainerY, 'text-container');
     const mainNetIcon = scene.add.image(imageX, mainNetContainerY, 'icon-eth');
     const mainNetTitle = scene.add
@@ -51,7 +52,7 @@ class PopupDeposit extends Popup {
       .setOrigin(0, -0.1);
     const depositButton = new Button(
       scene,
-      width * 0.75,
+      width / 2 + this.popup.width * 0.27,
       mainNetContainerY,
       'button-deposit',
       'button-deposit-pressed',
@@ -62,7 +63,7 @@ class PopupDeposit extends Popup {
     );
 
     const baseName = scene.add
-      .text(x, baseContainerY, 'Deposit ETH, Coins or NFTs', sectionNameStyle)
+      .text(paddedX, baseContainerY, 'Deposit ETH, Coins or NFTs', sectionNameStyle)
       .setOrigin(0, 3.5);
     const baseContainer = scene.add.image(width / 2, baseContainerY, 'text-container');
     const baseIcon = scene.add.image(imageX, baseContainerY, 'icon-wallet');
@@ -70,15 +71,25 @@ class PopupDeposit extends Popup {
       .text(sectionTextX, baseContainerY, 'Receive on Base', sectionTitleStyle)
       .setOrigin(0, 1.1);
     this.baseDescription = scene.add.text(sectionTextX, baseContainerY, '', sectionDescriptionStyle).setOrigin(0, -0.1);
-    const copyButton = new Button(scene, width * 0.82, baseContainerY, 'button-copy', 'button-copy-pressed', () =>
-      navigator.clipboard.writeText(this.address)
+    const copyButton = new Button(
+      scene,
+      leftMargin + this.popup.width * 0.83,
+      baseContainerY,
+      'button-copy',
+      'button-copy-pressed',
+      () => navigator.clipboard.writeText(this.address)
     );
 
     const balanceSubtitle = scene.add
-      .text(width * 0.15, balanceTextY, 'GangsterArena Wallet Balance: ', sectionDescriptionStyle)
+      .text(
+        paddedX + this.popup.width * 0.02,
+        balanceTextY,
+        'GangsterArena Wallet Balance: ',
+        sectionDescriptionStyle
+      )
       .setOrigin(0, 0.5);
     this.balanceText = scene.add
-      .text(width * 0.58, balanceTextY, '0 ETH', {
+      .text(width / 2 + this.popup.width * 0.08, balanceTextY, '0 ETH', {
         ...sectionDescriptionStyle,
         fontFamily: fontFamilies.extraBold,
       })
@@ -86,7 +97,7 @@ class PopupDeposit extends Popup {
 
     const refreshButton = new Button(
       scene,
-      width * 0.77,
+      width / 2 + this.popup.width * 0.27,
       balanceTextY,
       'button-refresh',
       'button-refresh-pressed',

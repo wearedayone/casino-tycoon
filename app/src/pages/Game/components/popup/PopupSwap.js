@@ -14,6 +14,11 @@ import { formatter } from '../../../../utils/numbers';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
 
 const { width, height } = configs;
+const mediumBrownBold = {
+  fontSize: fontSizes.medium,
+  color: colors.brown,
+  fontFamily: fontFamilies.bold,
+};
 
 class PopupSwap extends Popup {
   loading = false;
@@ -22,8 +27,8 @@ class PopupSwap extends Popup {
   constructor(scene, parentModal) {
     super(scene, 'popup-small', { title: 'Swap' });
 
-    const x = width * 0.08;
-    const textX = width * 0.12;
+    const leftMargin = this.popup.x - this.popup.width / 2;
+    const textX = leftMargin + this.popup.width * 0.1;
     const startingY = this.popup.y - this.popup.height / 2;
     const youPayY = startingY + 170;
     const ethAmountInputY = youPayY + 200;
@@ -51,13 +56,7 @@ class PopupSwap extends Popup {
         fontFamily: fontFamilies.bold,
       })
       .setOrigin(1, 1);
-    const available = scene.add
-      .text(width - textX, ethAmountInputY, 'Available', {
-        fontSize: fontSizes.medium,
-        color: colors.brown,
-        fontFamily: fontFamilies.bold,
-      })
-      .setOrigin(1, 0);
+    const available = scene.add.text(width - textX, ethAmountInputY, 'Available', mediumBrownBold).setOrigin(1, 0);
     this.add(youPay);
     this.add(this.ethAmountInput);
     this.add(this.balanceText);
@@ -78,30 +77,10 @@ class PopupSwap extends Popup {
     this.add(youReceive);
     this.add(this.tokenAmountInput);
 
-    const priceImpact = scene.add.text(textX, priceImpactY, 'Price Impact:', {
-      fontSize: fontSizes.medium,
-      color: colors.brown,
-      fontFamily: fontFamilies.bold,
-    });
-    this.priceImpact = scene.add
-      .text(width - textX, priceImpactY, '0.312%', {
-        fontSize: fontSizes.medium,
-        color: colors.brown,
-        fontFamily: fontFamilies.bold,
-      })
-      .setOrigin(1, 0);
-    const maxSlippage = scene.add.text(textX, maxSlippageY, 'Max. Slippage:', {
-      fontSize: fontSizes.medium,
-      color: colors.brown,
-      fontFamily: fontFamilies.bold,
-    });
-    this.maxSlippage = scene.add
-      .text(width - textX, maxSlippageY, '(Auto) 0.5%', {
-        fontSize: fontSizes.medium,
-        color: colors.brown,
-        fontFamily: fontFamilies.bold,
-      })
-      .setOrigin(1, 0);
+    const priceImpact = scene.add.text(textX, priceImpactY, 'Price Impact:', mediumBrownBold);
+    this.priceImpact = scene.add.text(width - textX, priceImpactY, '0.312%', mediumBrownBold).setOrigin(1, 0);
+    const maxSlippage = scene.add.text(textX, maxSlippageY, 'Max. Slippage:', mediumBrownBold);
+    this.maxSlippage = scene.add.text(width - textX, maxSlippageY, '(Auto) 0.5%', mediumBrownBold).setOrigin(1, 0);
     this.add(priceImpact);
     this.add(this.priceImpact);
     this.add(maxSlippage);
@@ -109,7 +88,7 @@ class PopupSwap extends Popup {
 
     const buttonBack = new TextButton(
       scene,
-      width / 4 + x / 2,
+      width / 2 - this.popup.width * 0.23,
       height / 2 + this.popup.height / 2 - 20,
       'button-blue',
       'button-blue-pressed',
@@ -122,7 +101,7 @@ class PopupSwap extends Popup {
     );
     this.buttonApprove = new Button(
       scene,
-      width * 0.75 - x / 2,
+      width / 2 + this.popup.width * 0.23,
       height / 2 + this.popup.height / 2 - 20,
       'button-approve',
       'button-approve-pressed',

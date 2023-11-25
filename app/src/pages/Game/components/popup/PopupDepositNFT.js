@@ -16,7 +16,6 @@ class PopupDepositNFT extends Popup {
   constructor(scene, parentModal) {
     super(scene, 'popup-small', { title: 'Deposit NFT' });
 
-    const x = width * 0.08;
     const startingY = this.popup.y - this.popup.height / 2;
     const subtitleY = startingY + 200;
     const amountInputY = subtitleY + 450;
@@ -38,9 +37,16 @@ class PopupDepositNFT extends Popup {
       characterRegex: integerCharacterRegex,
       maxDisplayedCharacters: 13,
     });
-    const buttonMax = new Button(scene, width * 0.77, amountInputY, 'button-max', 'button-max-pressed', () => {
-      this.amountInput.updateValue(Math.floor(this.balance));
-    });
+    const buttonMax = new Button(
+      scene,
+      width / 2 + this.popup.width * 0.3,
+      amountInputY,
+      'button-max',
+      'button-max-pressed',
+      () => {
+        this.amountInput.updateValue(Math.floor(this.balance));
+      }
+    );
     this.add(this.amountInput);
     this.add(buttonMax);
 
@@ -55,7 +61,7 @@ class PopupDepositNFT extends Popup {
 
     const buttonBack = new TextButton(
       scene,
-      width / 4 + x / 2,
+      width / 2 - this.popup.width * 0.23,
       height / 2 + this.popup.height / 2 - 20,
       'button-blue',
       'button-blue-pressed',
@@ -68,7 +74,7 @@ class PopupDepositNFT extends Popup {
     );
     this.buttonStake = new Button(
       scene,
-      width * 0.75 - x / 2,
+      width / 2 + this.popup.width * 0.23,
       height / 2 + this.popup.height / 2 - 20,
       'button-stake',
       'button-stake-pressed',

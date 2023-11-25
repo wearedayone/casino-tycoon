@@ -9,11 +9,12 @@ import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
 const { width, height } = configs;
 
 class PopupDepositETH extends Popup {
-  code = '000000';
+  code = '-----';
 
   constructor(scene, parentModal) {
     super(scene, 'popup-small', { title: 'Deposit ETH' });
 
+    const leftMargin = this.popup.x - this.popup.width / 2;
     const startingY = this.popup.y - this.popup.height / 2;
     const instructionY = startingY + 400;
     const depositCodeY = instructionY + 340;
@@ -22,14 +23,19 @@ class PopupDepositETH extends Popup {
     const depositLink = scene.add.image(width / 2, instructionY, 'deposit-link');
     const textContainer = scene.add.image(width / 2, depositCodeY, 'text-container');
     const depositCode = scene.add
-      .text(width / 2, depositCodeY, '0 0 0  0 0 0', {
+      .text(width / 2, depositCodeY, '- - -  - - -', {
         fontSize: fontSizes.extraLarge,
         color: colors.black,
         fontFamily: fontFamilies.extraBold,
       })
       .setOrigin(0.5, 0.5);
-    const copyButton = new Button(scene, width * 0.82, depositCodeY, 'button-copy', 'button-copy-pressed', () =>
-      navigator.clipboard.writeText(this.code)
+    const copyButton = new Button(
+      scene,
+      leftMargin + this.popup.width * 0.83,
+      depositCodeY,
+      'button-copy',
+      'button-copy-pressed',
+      () => navigator.clipboard.writeText(this.code)
     );
 
     this.add(instruction);

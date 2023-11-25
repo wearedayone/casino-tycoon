@@ -14,11 +14,11 @@ class PopupWithdraw extends Popup {
   constructor(scene, parentModal) {
     super(scene, 'popup-small', { title: 'Withdraw' });
 
-    const x = width * 0.08;
-    const imageX = x + width * 0.11;
-    const resourceNameX = x + width * 0.2;
-    const resourceValueX = width * 0.77;
-    const resourceArrowIconX = width * 0.82;
+    const leftMargin = this.popup.x - this.popup.width / 2;
+    const imageX = leftMargin + this.popup.width * 0.17;
+    const resourceNameX = imageX + this.popup.width * 0.09;
+    const resourceValueX = leftMargin + this.popup.width * 0.78;
+    const resourceArrowIconX = leftMargin + this.popup.width * 0.84;
     const startingY = this.popup.y - this.popup.height / 2;
     const subtitleY = startingY + 150;
     const tokenContainerY = subtitleY + 240;

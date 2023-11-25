@@ -33,7 +33,7 @@ class TextInput extends Phaser.GameObjects.Container {
     this.add(this.container);
 
     const textStyle = { fontSize, color, fontFamily: 'WixMadeforDisplayBold' };
-    const inputStartX = this.container.width * 0.15;
+    const inputStartX = this.container.x - this.container.width / 2 + this.container.width * 0.05;
     this.textBeginningX = inputStartX;
 
     // icon
