@@ -20,6 +20,7 @@ import Animation from '../components/common/Animation';
 import PopupStatistic from '../components/popup/PopupStatistic';
 import PopupLeaderboard from '../components/popup/PopupLeaderboard';
 import PopupDeposit from '../components/popup/PopupDeposit';
+import PopupReferralProgram from '../components/popup/PopupReferralProgram';
 
 const { goonAnimation, gangsterAnimation, width } = configs;
 
@@ -91,6 +92,9 @@ class MainScene extends Phaser.Scene {
 
     this.popupSettings = new PopupSettings(this);
     this.add.existing(this.popupSettings);
+
+    this.popupReferralProgram = new PopupReferralProgram(this);
+    this.add.existing(this.popupReferralProgram);
 
     this.popupPortfolio = new PopupPortfolio(this);
     this.add.existing(this.popupPortfolio);

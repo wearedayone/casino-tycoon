@@ -115,6 +115,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('popup-buy-gangster', '/images/popup-buy-gangster.png');
     this.load.image('popup-portfolio', '/images/popup-portfolio.png');
     this.load.image('popup-statistic', '/images/popup-statistic.png');
+    this.load.image('popup_referral', '/images/popup_referral.png');
 
     this.load.image('ribbon-welcome', '/images/ribbon-welcome.png');
     this.load.image('ribbon-daily-gang-war', '/images/ribbon-daily-gang-war.png');
@@ -123,6 +124,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('ribbon-buy-gangster', '/images/ribbon-buy-gangster.png');
     this.load.image('ribbon-portfolio', '/images/ribbon-portfolio.png');
     this.load.image('ribbon-statistic', '/images/ribbon-statistic.png');
+    this.load.image('ribbon-referral', '/images/ribbon-referral.png');
 
     this.load.image('coin', '/images/coin.png');
     this.load.image('coin2', '/images/coin-2.png');

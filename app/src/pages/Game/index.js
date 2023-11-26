@@ -490,6 +490,10 @@ const Game = () => {
         });
       });
 
+      game.events.on('request-referral-code', () => {
+        gameRef.current?.events.emit('update-referral-code', profile.referralCode);
+      });
+
       gameRef.current = game;
 
       return () => {

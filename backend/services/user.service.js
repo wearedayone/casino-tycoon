@@ -7,9 +7,10 @@ import alchemy from '../configs/alchemy.config.js';
 import { getActiveSeason, getActiveSeasonId } from './season.service.js';
 import { initTransaction, validateNonWeb3Transaction } from './transaction.service.js';
 import environments from '../utils/environments.js';
-import { calculateReward } from '../utils/formulas.js';
+import { calculateReward, generateCode } from '../utils/formulas.js';
 
 const { NETWORK_ID } = environments;
+const CODE_LENGTH = 10;
 
 const createGamePlayIfNotExist = async (userId) => {
   const seasonId = await getActiveSeasonId();
@@ -47,6 +48,16 @@ export const createUserIfNotExist = async (userId) => {
     // create user
     const username = twitter ? twitter.username : faker.internet.userName();
     const avatarURL = `https://placehold.co/400x400/1e90ff/FFF?text=${username[0].toUpperCase()}`;
+    let validReferralCode = false;
+    let referralCode = generateCode(CODE_LENGTH);
+    while (!validReferralCode) {
+      const code = await firestore.collection('user').where('referralCode', '==', referralCode).limit(1).get();
+      if (code.empty) {
+        validReferralCode = true;
+      } else {
+        referralCode = generateCode(CODE_LENGTH);
+      }
+    }
 
     await firestore.collection('user').doc(userId).set({
       address: wallet.address.toLocaleLowerCase(),
@@ -56,6 +67,7 @@ export const createUserIfNotExist = async (userId) => {
       tokenBalance: 0,
       ETHBalance: 0,
       walletPasswordAsked: false,
+      referralCode,
     });
   } else {
     const ethersProvider = await alchemy.config.getProvider();

@@ -64,3 +64,12 @@ export const calculateReward = (prizePool, rankingRewards, rankIndex) => {
 
   return prizePool * rankingReward.share;
 };
+
+export const generateCode = (length) => {
+  const charset = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let retVal = '';
+  for (let i = 0, n = charset.length; i < length; ++i) {
+    retVal += charset.charAt(Math.floor(Math.random() * n)).toLowerCase();
+  }
+  return retVal;
+};

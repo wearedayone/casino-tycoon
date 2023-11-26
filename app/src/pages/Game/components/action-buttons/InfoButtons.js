@@ -30,7 +30,7 @@ class InfoButtons extends Phaser.GameObjects.Container {
       y + verticalGap,
       'button-referral',
       'button-referral-pressed',
-      () => console.log('referral clicked'),
+      () => scene.popupReferralProgram.open(),
       { sound: 'button-1' }
     );
     this.rankButton = new RankButton(

@@ -21,7 +21,6 @@ class ClaimButton extends Phaser.GameObjects.Container {
     this.add(this.inactiveClaimButton);
 
     scene.game.events.on('update-claimable-status', ({ claimable, active }) => {
-      console.log({ claimable, active });
       if (!active) {
         this.inactiveClaimButton.setVisible(true);
       } else if (claimable) {

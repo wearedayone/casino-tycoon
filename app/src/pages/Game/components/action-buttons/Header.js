@@ -17,7 +17,7 @@ class Header extends Phaser.GameObjects.Container {
     super(scene, 0, 0);
 
     this.dailyMoney = new DailyMoney(scene, width / 2 - gap, y, 0);
-    this.fiatBalance = new Balance(scene, width / 2, y, () => scene.popupBuy.setVisible(true), 'fiat-balance', 0);
+    this.fiatBalance = new Balance(scene, width / 2, y, () => scene.popupDeposit.open(), 'fiat-balance', 0);
     this.ethBalance = new Balance(scene, width / 2 + gap, y, () => scene.popupDeposit.open(), 'eth-balance', 0);
 
     this.add(this.dailyMoney);
