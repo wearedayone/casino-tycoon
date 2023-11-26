@@ -130,7 +130,7 @@ class PopupSafeHouseUpgrade extends Popup {
             this.numberOfBuildingsText.text = `${this.numberOfBuildings + quantity}`;
 
             const increasedNetworth = this.networthIncrease * quantity;
-            this.networthText.text = `${this.networth + increasedNetworth}`;
+            // this.networthText.text = `${this.networth + increasedNetworth}`;
             this.networthIncreaseText.text = `+${increasedNetworth}`;
 
             const estimatedPrice = calculateNextBuildingBuyPriceBatch(

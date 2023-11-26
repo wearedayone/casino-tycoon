@@ -145,10 +145,10 @@ class PopupBuyGoon extends Popup {
             this.numberOfWorkersText.text = totalWorkers;
 
             const increasedNetworth = this.networthIncrease * quantity;
-            this.networthText.text = `${this.networth + increasedNetworth}`;
+            // this.networthText.text = `${this.networth + increasedNetworth}`;
             this.networthIncreaseText.text = `+${increasedNetworth}`;
 
-            this.rateText.text = `${(this.rateIncrease * totalWorkers).toLocaleString()}`;
+            // this.rateText.text = `${(this.rateIncrease * totalWorkers).toLocaleString()}`;
             this.rateIncreaseText.text = `+${(this.rateIncrease * quantity).toLocaleString()} /d`;
 
             const estimatedPrice = calculateNextWorkerBuyPriceBatch(

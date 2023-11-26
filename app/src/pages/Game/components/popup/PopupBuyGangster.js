@@ -169,10 +169,10 @@ class PopupBuyGangster extends Popup {
             this.numberOfMachinesText.text = totalMachines;
 
             const increasedNetworth = this.networthIncrease * quantity;
-            this.networthText.text = `${this.networth + increasedNetworth}`;
+            // this.networthText.text = `${this.networth + increasedNetworth}`;
             this.networthIncreaseText.text = `+${increasedNetworth}`;
 
-            this.rateText.text = `${(this.rateIncrease * totalMachines).toLocaleString()}`;
+            // this.rateText.text = `${(this.rateIncrease * totalMachines).toLocaleString()}`;
             this.rateIncreaseText.text = `+${(this.rateIncrease * quantity).toLocaleString()} /d`;
 
             const estimatedPrice = quantity * this.basePrice;
