@@ -26,7 +26,7 @@ const EVENT = {
   ReceiveERC20: 'ReceiveERC20',
 };
 
-describe('Rakku Bank', function () {
+describe('Gangster Arena', function () {
   // We define a fixture to reuse the same setup in every test.
   // We use loadFixture to run this setup once, snapshot that state,
   // and reset Hardhat Network to that snapshopt in every test.
@@ -90,19 +90,19 @@ describe('Rakku Bank', function () {
         deployStakingFixture
       );
       const nftPrice = 69000000000000000n;
-      await GangsterArenaContract.mint(owner.address, 1, 10, { from: owner.address, value: nftPrice * 10n });
+      await GangsterArenaContract.mint(1, 10, { from: owner.address, value: nftPrice * 10n });
 
       const balance = await GangsterNFTContract.balanceOf(await GangsterArenaContract.getAddress(), 1);
       expect(balance).to.be.equal(10);
       const gangsterCount = await GangsterArenaContract.gangster(owner.address);
       expect(gangsterCount).to.be.equal(10);
-      await GangsterArenaContract.mint(owner.address, 1, 10, { from: owner.address, value: nftPrice * 10n });
-      await GangsterArenaContract.mint(owner.address, 1, 10, { from: owner.address, value: nftPrice * 10n });
-      await GangsterArenaContract.mint(owner.address, 1, 10, { from: owner.address, value: nftPrice * 10n });
-      await GangsterArenaContract.mint(owner.address, 1, 10, { from: owner.address, value: nftPrice * 10n });
-      await GangsterArenaContract.mint(owner.address, 1, 10, { from: owner.address, value: nftPrice * 10n });
-      await GangsterArenaContract.mint(owner.address, 1, 10, { from: owner.address, value: nftPrice * 10n });
-      await GangsterArenaContract.mint(owner.address, 1, 10, { from: owner.address, value: nftPrice * 10n });
+      await GangsterArenaContract.mint(1, 10, { from: owner.address, value: nftPrice * 10n });
+      await GangsterArenaContract.mint(1, 10, { from: owner.address, value: nftPrice * 10n });
+      await GangsterArenaContract.mint(1, 10, { from: owner.address, value: nftPrice * 10n });
+      await GangsterArenaContract.mint(1, 10, { from: owner.address, value: nftPrice * 10n });
+      await GangsterArenaContract.mint(1, 10, { from: owner.address, value: nftPrice * 10n });
+      await GangsterArenaContract.mint(1, 10, { from: owner.address, value: nftPrice * 10n });
+      await GangsterArenaContract.mint(1, 10, { from: owner.address, value: nftPrice * 10n });
     });
   });
 
@@ -112,7 +112,7 @@ describe('Rakku Bank', function () {
         deployStakingFixture
       );
       const nftPrice = 69000000000000000n;
-      await GangsterArenaContract.mint(owner.address, 1, 10, { from: owner.address, value: nftPrice * 10n });
+      await GangsterArenaContract.mint(1, 10, { from: owner.address, value: nftPrice * 10n });
 
       const gangsterCount = await GangsterArenaContract.gangster(owner.address);
       expect(gangsterCount).to.be.equal(10);
@@ -137,6 +137,46 @@ describe('Rakku Bank', function () {
 
       const gangsterCount2 = await GangsterArenaContract.gangster(acc1.address);
       expect(gangsterCount2).to.be.equal(0);
+    });
+  });
+  describe('Test WL mint', function () {
+    it('deploy contract', async function () {
+      const { GangsterNFTContract, GangsterArenaContract, token, owner, acc1 } = await loadFixture(
+        deployStakingFixture
+      );
+      await GangsterArenaContract.setSignerAddress(owner.address);
+
+      const message = ethers.solidityPackedKeccak256(
+        // Array of types: declares the data types in the message.
+        ['address', 'uint256', 'uint256', 'uint256'],
+        // Array of values: actual values of the parameters to be hashed.
+        [acc1.address, 1, 2, 1]
+      );
+      const signature = await owner.signMessage(ethers.toBeArray(message));
+
+      const nftPrice = 420000000000000n;
+      await GangsterArenaContract.connect(acc1).mintWL(1, 2, 1, signature, {
+        from: acc1.address,
+        value: nftPrice * 2n,
+      });
+
+      const balance = await GangsterNFTContract.balanceOf(await GangsterArenaContract.getAddress(), 1);
+      expect(balance).to.be.equal(2);
+      const gangsterCount = await GangsterArenaContract.gangster(acc1.address);
+      expect(gangsterCount).to.be.equal(2);
+
+      const message1 = ethers.solidityPackedKeccak256(
+        // Array of types: declares the data types in the message.
+        ['address', 'uint256', 'uint256', 'uint256'],
+        // Array of values: actual values of the parameters to be hashed.
+        [acc1.address, 1, 3, 3]
+      );
+      const signature1 = await acc1.signMessage(ethers.toBeArray(message1));
+
+      await GangsterArenaContract.connect(acc1).mintWL(1, 3, 3, signature1, {
+        from: acc1.address,
+        value: nftPrice * 3n,
+      });
     });
   });
 });

@@ -9,9 +9,17 @@ interface IGangsterArena {
   event Burn(address[] to, uint256[] tokenId, uint256[] amount);
 
   /// Function
-  function mint(address to, uint256 tokenId, uint256 amount) external payable;
+  function mint(uint256 tokenId, uint256 amount) external payable;
 
-  function mintWL(address to, uint256 tokenId, uint256 amount, bytes32[] calldata merkleProof) external payable;
+  function mintReferral(
+    uint256 tokenId,
+    uint256 amount,
+    uint256 nonce,
+    address referral,
+    bytes memory sig
+  ) external payable;
+
+  function mintWL(uint256 tokenId, uint256 amount, uint256 nonce, bytes memory sig) external payable;
 
   function depositNFT(address to, uint256 tokenId, uint256 amount) external;
 
