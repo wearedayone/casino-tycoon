@@ -4,7 +4,9 @@ import admin, { firestore } from '../configs/admin.config.js';
 
 const main = async () => {
   console.log('init data');
-
+  // web3Listener
+  await firestore.collection('web3Listener').doc('84531').set({ lastBlock: 0 });
+  // system config
   console.log('create system configs');
   const activeSeasonId = firestore.collection('season').doc().id;
   await firestore
@@ -12,15 +14,19 @@ const main = async () => {
     .doc('default')
     .set({
       machine: {
-        basePrice: 0.00069, // for staging
-        dailyReward: 500,
-        networth: 6,
+        basePrice: 0.0069, // for staging
+        dailyReward: 1000,
+        networth: 10,
       },
-      worker: { basePrice: 1000, priceStep: 100, dailyReward: 1000, networth: 1 },
-      building: { basePrice: 1000, priceStep: 100, dailyReward: 0, networth: 10 },
+      worker: { basePrice: 1000, priceStep: 5, dailyReward: 500, networth: 3 },
+      building: { basePrice: 3000, priceStep: 10, dailyReward: 0, networth: 8 },
       activeSeasonId,
-      appVersion: '1.0.0',
+      appVersion: '0.9.1',
     });
+  await firestore.collection('system').doc('market').set({
+    nftPrice: '0.0042',
+    tokenPrice: '0.00001',
+  });
   console.log('created system configs');
 
   console.log('create season');
@@ -32,7 +38,7 @@ const main = async () => {
     .collection('season')
     .doc(activeSeasonId)
     .set({
-      name: 'Season 1',
+      name: 'Season #1',
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       startTime,
       estimatedEndTime,
@@ -45,12 +51,12 @@ const main = async () => {
       workerSold: 0,
       buildingSold: 0,
       machine: {
-        basePrice: 0.00069, // for staging
-        dailyReward: 500,
-        networth: 6,
+        basePrice: 0.0069, // for staging
+        dailyReward: 1000,
+        networth: 10,
       },
-      worker: { basePrice: 1000, priceStep: 100, dailyReward: 1000, networth: 1 },
-      building: { basePrice: 1000, priceStep: 100, dailyReward: 0, networth: 10 },
+      worker: { basePrice: 1000, priceStep: 5, dailyReward: 500, networth: 3 },
+      building: { basePrice: 3000, priceStep: 10, dailyReward: 0, networth: 8 },
       status: 'open',
       rankingRewards: [
         { rankStart: 1, rankEnd: 1, share: 0.2 },
@@ -105,12 +111,12 @@ const main = async () => {
         workerSold: 0,
         buildingSold: 0,
         machine: {
-          basePrice: 0.069,
-          dailyReward: 500,
-          networth: 6,
+          basePrice: 0.0069,
+          dailyReward: 1000,
+          networth: 10,
         },
-        worker: { basePrice: 1000, priceStep: 100, dailyReward: 1000, networth: 1 },
-        building: { basePrice: 1000, priceStep: 100, dailyReward: 0, networth: 10 },
+        worker: { basePrice: 1000, priceStep: 5, dailyReward: 500, networth: 3 },
+        building: { basePrice: 3000, priceStep: 10, dailyReward: 0, networth: 8 },
       },
     });
   console.log('created season log');

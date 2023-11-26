@@ -296,14 +296,6 @@ const updateUserGamePlay = async (userId, transactionId) => {
     gamePlayData.startRewardCountingTime = admin.firestore.FieldValue.serverTimestamp();
   }
 
-  /* recalculate `networth` */
-  if (userNetworthChangedTypes.includes(type)) {
-    gamePlayData.networth =
-      assets.numberOfBuildings * building.networth +
-      assets.numberOfMachines * machine.networth +
-      assets.numberOfWorkers * worker.networth;
-  }
-
   const isGamePlayChanged = Object.keys(gamePlayData).length > 0;
   if (isGamePlayChanged) await userGamePlay.ref.update({ ...gamePlayData });
 };

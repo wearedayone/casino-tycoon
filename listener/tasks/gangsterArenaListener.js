@@ -58,6 +58,7 @@ const processMintEvent = async ({ from, to, amount, event, contract }) => {
     await updateNumberOfGangster({
       address: from.toLowerCase(),
       newBalance,
+      active: true,
     });
 
     const prizePool = await contract.getBalance();
@@ -148,7 +149,7 @@ const createTransaction = async ({ address, ...data }) => {
   }
 };
 
-const updateNumberOfGangster = async ({ address, newBalance }) => {
+const updateNumberOfGangster = async ({ address, newBalance, active = false }) => {
   logger.info({ address, newBalance: Number(newBalance) });
   const system = await firestore.collection('system').doc('default').get();
   const { activeSeasonId } = system.data();
@@ -163,15 +164,26 @@ const updateNumberOfGangster = async ({ address, newBalance }) => {
     if (!gamePlay.empty) {
       const now = Date.now();
       const generatedReward = await calculateGeneratedReward(user.docs[0].id);
-
-      await firestore
-        .collection('gamePlay')
-        .doc(gamePlay.docs[0].id)
-        .update({
-          numberOfMachines: Number(newBalance),
-          startRewardCountingTime: admin.firestore.Timestamp.fromMillis(now),
-          pendingReward: admin.firestore.FieldValue.increment(generatedReward),
-        });
+      if (active) {
+        await firestore
+          .collection('gamePlay')
+          .doc(gamePlay.docs[0].id)
+          .update({
+            numberOfMachines: Number(newBalance),
+            startRewardCountingTime: admin.firestore.Timestamp.fromMillis(now),
+            pendingReward: admin.firestore.FieldValue.increment(generatedReward),
+            active: true,
+          });
+      } else {
+        await firestore
+          .collection('gamePlay')
+          .doc(gamePlay.docs[0].id)
+          .update({
+            numberOfMachines: Number(newBalance),
+            startRewardCountingTime: admin.firestore.Timestamp.fromMillis(now),
+            pendingReward: admin.firestore.FieldValue.increment(generatedReward),
+          });
+      }
     }
   }
 };

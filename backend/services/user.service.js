@@ -32,6 +32,7 @@ const createGamePlayIfNotExist = async (userId) => {
       war: false,
       pendingReward: 0,
       startRewardCountingTime: admin.firestore.FieldValue.serverTimestamp(),
+      active: false,
     });
   }
 };

@@ -67,7 +67,7 @@ const useSmartContract = () => {
     const privyProvider = await embeddedWallet.getEthereumProvider();
     const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
 
-    const data = gameContract.interface.encodeFunctionData('mint', [embeddedWallet.address, 1, amount]);
+    const data = gameContract.interface.encodeFunctionData('mint', [1, amount]);
 
     const unsignedTx = {
       to: GAME_CONTRACT_ADDRESS,

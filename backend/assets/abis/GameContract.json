@@ -77,7 +77,35 @@
     },
     {
       "inputs": [],
+      "name": "BASE_PRICE_WL",
+      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "BASE_REFERRAL",
+      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "BASE_REFERRAL_DISCOUNT",
+      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
       "name": "MAX_PER_BATCH",
+      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MAX_PER_WL",
       "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
       "stateMutability": "view",
       "type": "function"
@@ -127,7 +155,6 @@
     },
     {
       "inputs": [
-        { "internalType": "address", "name": "to", "type": "address" },
         { "internalType": "uint256", "name": "tokenId", "type": "uint256" },
         { "internalType": "uint256", "name": "amount", "type": "uint256" }
       ],
@@ -138,10 +165,23 @@
     },
     {
       "inputs": [
-        { "internalType": "address", "name": "to", "type": "address" },
         { "internalType": "uint256", "name": "tokenId", "type": "uint256" },
         { "internalType": "uint256", "name": "amount", "type": "uint256" },
-        { "internalType": "bytes32[]", "name": "merkleProof", "type": "bytes32[]" }
+        { "internalType": "uint256", "name": "nonce", "type": "uint256" },
+        { "internalType": "address", "name": "referral", "type": "address" },
+        { "internalType": "bytes", "name": "sig", "type": "bytes" }
+      ],
+      "name": "mintReferral",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        { "internalType": "uint256", "name": "tokenId", "type": "uint256" },
+        { "internalType": "uint256", "name": "amount", "type": "uint256" },
+        { "internalType": "uint256", "name": "nonce", "type": "uint256" },
+        { "internalType": "bytes", "name": "sig", "type": "bytes" }
       ],
       "name": "mintWL",
       "outputs": [],
@@ -152,6 +192,13 @@
       "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
       "name": "mintedAddess",
       "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
+      "name": "mintedAddessWL",
+      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
       "stateMutability": "view",
       "type": "function"
     },
@@ -184,6 +231,27 @@
       "type": "function"
     },
     {
+      "inputs": [{ "internalType": "uint256", "name": "_basePrice", "type": "uint256" }],
+      "name": "setBasePriceWL",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "uint256", "name": "_refferral", "type": "uint256" }],
+      "name": "setBaseReferral",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "uint256", "name": "refferral_discount", "type": "uint256" }],
+      "name": "setBaseReferralDiscount",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
       "inputs": [{ "internalType": "bool", "name": "value", "type": "bool" }],
       "name": "setGameClosed",
       "outputs": [],
@@ -193,6 +261,20 @@
     {
       "inputs": [{ "internalType": "uint256", "name": "_maxPerBatch", "type": "uint256" }],
       "name": "setMaxPerBatch",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "uint256", "name": "_maxPerWL", "type": "uint256" }],
+      "name": "setMaxPerWL",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "address", "name": "_signer", "type": "address" }],
+      "name": "setSignerAddress",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -249,5 +331,4 @@
     },
     { "stateMutability": "payable", "type": "receive" }
   ]
-
 }

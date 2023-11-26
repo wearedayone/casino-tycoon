@@ -28,7 +28,7 @@ class DisabledClaimButton extends Button {
     this.add(this.text);
     this.add(this.countdownText);
 
-    scene.game.events.on('update-claim-time', ({ claimGapInSeconds, lastClaimTime }) => {
+    scene.game.events.on('update-claim-time', ({ claimGapInSeconds, lastClaimTime, active }) => {
       if (this.interval) {
         clearInterval(this.interval);
         this.interval = null;
@@ -42,7 +42,8 @@ class DisabledClaimButton extends Button {
         if (now >= nextClaimTime) {
           clearInterval(this.interval);
           this.countdownText.text = `00:00:00`;
-          scene.game.events.emit('update-claimable-status', { claimable: true });
+          console.log({ btn: 'DisabledClaimButton', active });
+          if (active) scene.game.events.emit('update-claimable-status', { claimable: true, active: true });
         } else {
           const diffInSeconds = (nextClaimTime - now) / 1000;
           const hours = Math.floor(diffInSeconds / 3600);

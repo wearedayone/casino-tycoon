@@ -47,7 +47,7 @@ const Game = () => {
   const [isLeaderboardModalOpen, setLeaderboardModalOpen] = useState(false);
   const { isEnded, countdownString } = useSeasonCountdown({ open: isLeaderboardModalOpen });
   const { appVersion } = configs || {};
-  const { tokenPrice } = market || {};
+  const { tokenPrice, nftPrice } = market || {};
 
   // Check that your user is authenticated
   const isAuthenticated = useMemo(() => ready && authenticated, [ready, authenticated]);
@@ -316,15 +316,17 @@ const Game = () => {
         gameRef.current.events.emit('update-claim-time', {
           claimGapInSeconds: activeSeason.claimGapInSeconds,
           lastClaimTime: gamePlay.lastClaimTime.toDate().getTime(),
+          active: gamePlay.active,
         });
       });
 
       game.events.on('request-claimable-reward', () => calculateClaimableRewardRef.current?.());
 
       game.events.on('request-claimable-status', () => {
+        console.log({ gamePlay });
         const nextClaimTime = gamePlay.lastClaimTime.toDate().getTime() + activeSeason.claimGapInSeconds * 1000;
         const claimable = Date.now() > nextClaimTime;
-        gameRef.current.events.emit('update-claimable-status', { claimable });
+        gameRef.current.events.emit('update-claimable-status', { claimable, active: gamePlay.active });
       });
 
       game.events.on('request-war-history', () => {
@@ -563,12 +565,13 @@ const Game = () => {
       gameRef.current?.events.emit('update-claim-time', {
         claimGapInSeconds: activeSeason?.claimGapInSeconds,
         lastClaimTime: gamePlay?.lastClaimTime?.toDate().getTime(),
+        active: gamePlay.active,
       });
 
       const nextClaimTime = gamePlay?.lastClaimTime.toDate().getTime() + activeSeason.claimGapInSeconds * 1000;
       const now = Date.now();
       const claimable = now > nextClaimTime;
-      gameRef.current?.events.emit('update-claimable-status', { claimable });
+      gameRef.current?.events.emit('update-claimable-status', { claimable, active: gamePlay.active });
     }
   }, [activeSeason?.claimGapInSeconds, gamePlay?.lastClaimTime]);
 
@@ -643,8 +646,9 @@ const Game = () => {
   useEffect(() => {
     if (rankData?.data) {
       const { reward: rankReward } = rankData.data;
-      const tokenValue = tokenBalance * 0.000001; // TODO: update formulas to calculate token value
-      const machineValue = numberOfMachines * 0.041; // TODO: update formulas to calculate machine value
+
+      const tokenValue = tokenBalance * parseFloat(tokenPrice);
+      const machineValue = numberOfMachines * parseFloat(nftPrice);
       const totalBalance = parseFloat(ETHBalance) + tokenValue + machineValue + rankReward;
       gameRef.current?.events.emit('update-portfolio', {
         address,
