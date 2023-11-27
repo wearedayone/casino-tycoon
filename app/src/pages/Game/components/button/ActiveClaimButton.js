@@ -1,6 +1,8 @@
 import Button from './Button';
+import configs from '../../configs/configs';
 import { formatter } from '../../../../utils/numbers';
 
+const { width, height } = configs;
 class ActiveClaimButton extends Button {
   constructor(scene, x, y) {
     super(
@@ -11,6 +13,7 @@ class ActiveClaimButton extends Button {
       'button-blue-pressed',
       () => {
         if (this.loading) return;
+        this.startCoinAnimation();
         this.loading = true;
         this.coinImage?.setVisible(false);
         this.text.text = 'Claiming...';
@@ -20,6 +23,7 @@ class ActiveClaimButton extends Button {
       'coin'
     );
 
+    this.coinIcon = scene.add.image(x, y, 'icon-coin-glowing');
     this.text = scene.add
       .text(-30, -40, 'Claim', {
         fontSize: '82px',
@@ -59,6 +63,26 @@ class ActiveClaimButton extends Button {
       // this.coinSound.play();
     });
     scene.game.events.emit('request-claimable-reward');
+  }
+
+  startCoinAnimation() {
+    this.scene.tweens.add({
+      targets: this.coinIcon,
+      x: [
+        width / 2 + 80,
+        width / 2 + 120,
+        width / 2 + 120,
+        width / 2 + 100,
+        width / 2 + 50,
+        width / 2,
+        width / 2 - 140,
+      ],
+      y: [this.y, height * 0.7, height / 2, height * 0.35, height * 0.2, height * 0.15, 250],
+      duration: 2000,
+      ease: 'Cubic.out',
+      interpolation: 'bezier', // turn the points into curve
+      hideOnComplete: true,
+    });
   }
 }
 

@@ -1,10 +1,14 @@
 import Phaser from 'phaser';
 
 class Button extends Phaser.GameObjects.Container {
+  x = 0;
+  y = 0;
   disabled = false;
 
   constructor(scene, x, y, defaultImage, pressedImage, onClick, { sound, disabledImage } = {}) {
     super(scene, x, y);
+    this.x = x;
+    this.y = y;
 
     this.defaultImage = scene.add.image(0, 0, defaultImage);
     this.pressedImage = scene.add.image(0, 0, pressedImage);

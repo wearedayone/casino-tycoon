@@ -213,6 +213,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-coin', '/images/icons/coin.png');
     this.load.image('icon-coin-mini', '/images/icons/coin-mini.png');
     this.load.image('icon-coin-done', '/images/icons/coin-done.png');
+    this.load.image('icon-coin-glowing', '/images/icons/coin-glowing.png');
     this.load.image('icon-crown-gold', '/images/icons/crown-gold.png');
     this.load.image('icon-crown-silver', '/images/icons/crown-silver.png');
     this.load.image('icon-crown-copper', '/images/icons/crown-copper.png');
