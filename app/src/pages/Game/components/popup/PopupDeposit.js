@@ -59,8 +59,10 @@ class PopupDeposit extends Popup {
       () => {
         this.close();
         this.popupDepositETH.open();
-      }
+      },
+      { sound: 'open', disabledImage: 'button-deposit-disabled' }
     );
+    depositButton.setDisabledState(true);
 
     const baseName = scene.add
       .text(paddedX, baseContainerY, 'Deposit ETH, Coins or NFTs', sectionNameStyle)

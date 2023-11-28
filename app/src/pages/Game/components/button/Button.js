@@ -54,6 +54,10 @@ class Button extends Phaser.GameObjects.Container {
       this.defaultImage.setVisible(!state);
       this.disabledImage.setVisible(state);
     }
+
+    if (this.text && state) {
+      this.text.setStroke('#515372', 10);
+    }
   }
 }
 

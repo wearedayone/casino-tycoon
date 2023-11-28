@@ -81,8 +81,10 @@ class PopupReferralProgram extends Popup {
       async () => {
         const text = await navigator.clipboard.readText();
         this.inviteCode.updateValue(text.trim());
-      }
+      },
+      { disabledImage: 'button-apply-disabled' }
     );
+    buttonPaste.setDisabledState(true);
     this.add(this.inviteCode);
     this.add(buttonPaste);
 
@@ -116,7 +118,7 @@ class PopupReferralProgram extends Popup {
 
     scene.game.events.on('update-referral-code', (referralCode) => {
       this.referralCode = referralCode;
-      this.referralText.text = referralCode.toUpperCase();
+      this.referralText.text = referralCode?.toUpperCase();
     });
   }
 

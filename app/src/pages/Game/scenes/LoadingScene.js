@@ -145,6 +145,8 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-blue-long-pressed', '/images/button-blue-long-pressed.png');
     this.load.image('button-green-long', '/images/button-green-long.png');
     this.load.image('button-green-long-pressed', '/images/button-green-long-pressed.png');
+    this.load.image('button-long-disabled', '/images/button-long-disabled.png');
+    this.load.image('button-apply-disabled', '/images/button-apply-disabled.png');
     this.load.image('button-close', '/images/button-close.png');
     this.load.image('button-close-pressed', '/images/button-close-pressed.png');
     this.load.image('button-confirm', '/images/button-confirm.png');
@@ -154,6 +156,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-copy-pressed', '/images/button-copy-pressed.png');
     this.load.image('button-deposit', '/images/button-deposit.png');
     this.load.image('button-deposit-pressed', '/images/button-deposit-pressed.png');
+    this.load.image('button-deposit-disabled', '/images/button-deposit-disabled.png');
     this.load.image('button-info', '/images/button-info.png');
     this.load.image('button-info-pressed', '/images/button-info-pressed.png');
     this.load.image('button-buy', '/images/button-buy.png');
