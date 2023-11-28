@@ -626,7 +626,7 @@ const Game = () => {
     gameRef.current?.events.emit('update-machines', {
       numberOfMachines,
       networth,
-      balance: tokenBalance,
+      balance: ETHBalance,
       basePrice: machine.basePrice,
       dailyReward: machine.dailyReward,
       reservePool,
