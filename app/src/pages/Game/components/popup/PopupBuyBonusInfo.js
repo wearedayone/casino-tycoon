@@ -17,19 +17,19 @@ class PopupBuyBonusInfo extends Popup {
     const firstParagraphY = startingY + 220;
     const secondParagraphY = firstParagraphY + 400;
 
-    this.reservePoolHidden = scene.add.text(this.paddedX, firstParagraphY, '---', largeBlackBold).setVisible(false);
+    this.reservePoolHidden = scene.add.text(this.paddedX, secondParagraphY, '---', largeBlackBold).setVisible(false);
     this.coinIcon = scene.add
-      .image(this.paddedX + this.reservePoolHidden.width + 50, firstParagraphY, 'coin')
+      .image(width / 2 + this.reservePoolHidden.width + 80, secondParagraphY, 'coin')
       .setOrigin(0.5, 0);
     this.reservePool = scene.add.text(
       this.paddedX,
-      firstParagraphY,
-      '---         $FIAT has been spent \non upgrading Safehouses or \nbuying Goons. This spending have \nbeen sent to a reserve pool.',
+      secondParagraphY,
+      'There is currently ---         \n$FIAT in the reserve pool, which \nwill increase with every Goon \nand Safehouse purchase',
       largeBlackBold
     );
     this.bonusPercent = scene.add.text(
       this.paddedX,
-      secondParagraphY,
+      firstParagraphY,
       'Players receive -% of the reserve \npool as a bonus for buying \nGangsters.',
       largeBlackBold
     );
@@ -52,22 +52,19 @@ class PopupBuyBonusInfo extends Popup {
     );
     this.add(this.buttonBack);
 
+    scene.game.events.emit('request-reserve-pool');
     scene.game.events.on('update-reserve-pool', (data) => this.updateData(data));
-  }
-
-  onOpen() {
-    this.scene.game.events.emit('request-reserve-pool');
   }
 
   updateData({ reservePool, reservePoolReward }) {
     const amount = formatter.format(reservePool);
     this.reservePoolHidden.text = amount;
-    this.reservePool.text = `${amount}         $FIAT has been spent \non upgrading Safehouses or \nbuying Goons. This spending have \nbeen sent to a reserve pool.`;
+    this.reservePool.text = `There is currently ${amount}         \n$FIAT in the reserve pool, which \nwill increase with every Goon \nand Safehouse purchase.`;
     this.bonusPercent.text = `Players receive ${
       reservePoolReward * 100
     }% of the reserve\npool as a bonus for buying\nGangsters.`;
 
-    this.coinIcon.setX(this.paddedX + this.reservePoolHidden.width + 50);
+    this.coinIcon.setX(width / 2 + this.reservePoolHidden.width + 80);
   }
 }
 
