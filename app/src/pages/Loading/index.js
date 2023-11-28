@@ -12,7 +12,7 @@ const Loading = () => {
     >
       <CircularProgress />
       <Typography fontSize={18} fontWeight={600} align="center">
-        Loading user informations...
+        Loading Account...
       </Typography>
     </Box>
   );

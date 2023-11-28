@@ -19,7 +19,7 @@ class LoadingScene extends Phaser.Scene {
     const loadingText = this.make.text({
       x: width / 2,
       y: height / 2 - 200,
-      text: 'Loading...',
+      text: 'Loading Game...',
       style: {
         // font: 'bold 85px WixMadeforDisplay',
         fontSize: '85px',
