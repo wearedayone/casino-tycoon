@@ -63,7 +63,7 @@ class LoadingScene extends Phaser.Scene {
     );
 
     // sounds
-    this.load.audio('bg', '/audios/bg.mp3');
+    this.load.audio('bg', '/audios/bg.wav');
     this.load.audio('button-1', '/audios/button-1.wav');
     this.load.audio('button-2', '/audios/button-2.wav');
     this.load.audio('buy', '/audios/buy.wav');
