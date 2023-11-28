@@ -1,7 +1,38 @@
 import moment from 'moment';
 
 import admin, { firestore } from '../configs/admin.config.js';
+import environments from '../utils/environments.js';
 
+const { ENVIRONMENT } = environments;
+const rankingRewards =
+  ENVIRONMENT === 'production'
+    ? [
+        { rankStart: 1, rankEnd: 1, share: 0.2 },
+        { rankStart: 2, rankEnd: 2, share: 0.14 },
+        { rankStart: 3, rankEnd: 3, share: 0.1 },
+        { rankStart: 4, rankEnd: 4, share: 0.07 },
+        { rankStart: 5, rankEnd: 5, share: 0.05 },
+        { rankStart: 6, rankEnd: 6, share: 0.04 },
+        { rankStart: 7, rankEnd: 7, share: 0.03 },
+        { rankStart: 8, rankEnd: 8, share: 0.015 },
+        { rankStart: 9, rankEnd: 9, share: 0.01 },
+        { rankStart: 10, rankEnd: 15, share: 0.0075 },
+        { rankStart: 16, rankEnd: 25, share: 0.005 },
+        { rankStart: 26, rankEnd: 50, share: 0.003 },
+        { rankStart: 51, rankEnd: 100, share: 0.0015 },
+      ]
+    : [
+        { rankStart: 1, rankEnd: 1, share: 0.3 },
+        { rankStart: 2, rankEnd: 2, share: 0.2 },
+        { rankStart: 3, rankEnd: 3, share: 0.14 },
+        { rankStart: 4, rankEnd: 4, share: 0.1 },
+        { rankStart: 5, rankEnd: 5, share: 0.07 },
+        { rankStart: 6, rankEnd: 6, share: 0.06 },
+        { rankStart: 7, rankEnd: 7, share: 0.05 },
+        { rankStart: 8, rankEnd: 8, share: 0.04 },
+        { rankStart: 9, rankEnd: 9, share: 0.03 },
+        { rankStart: 10, rankEnd: 10, share: 0.02 },
+      ];
 const main = async () => {
   console.log('init data');
   // web3Listener
@@ -58,21 +89,7 @@ const main = async () => {
       worker: { basePrice: 1000, priceStep: 5, dailyReward: 500, networth: 3 },
       building: { basePrice: 3000, priceStep: 10, dailyReward: 0, networth: 8 },
       status: 'open',
-      rankingRewards: [
-        { rankStart: 1, rankEnd: 1, share: 0.2 },
-        { rankStart: 2, rankEnd: 2, share: 0.14 },
-        { rankStart: 3, rankEnd: 3, share: 0.1 },
-        { rankStart: 4, rankEnd: 4, share: 0.07 },
-        { rankStart: 5, rankEnd: 5, share: 0.05 },
-        { rankStart: 6, rankEnd: 6, share: 0.04 },
-        { rankStart: 7, rankEnd: 7, share: 0.03 },
-        { rankStart: 8, rankEnd: 8, share: 0.015 },
-        { rankStart: 9, rankEnd: 9, share: 0.01 },
-        { rankStart: 10, rankEnd: 15, share: 0.0075 },
-        { rankStart: 16, rankEnd: 25, share: 0.005 },
-        { rankStart: 26, rankEnd: 50, share: 0.003 },
-        { rankStart: 51, rankEnd: 100, share: 0.0015 },
-      ],
+      rankingRewards,
       houseLevels: [
         { networthStart: 0, networthEnd: 24, level: 1 },
         { networthStart: 25, networthEnd: 49, level: 2 },
