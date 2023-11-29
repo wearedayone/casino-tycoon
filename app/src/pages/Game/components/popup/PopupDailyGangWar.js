@@ -8,6 +8,7 @@ import { formatter } from '../../../../utils/numbers';
 
 const { width, height } = configs;
 const largeBlackExtraBold = { fontSize: fontSizes.large, color: colors.black, fontFamily: fontFamilies.extraBold };
+const largeBlackBold = { fontSize: fontSizes.large, color: colors.black, fontFamily: fontFamilies.bold };
 
 class PopupDailyGangWar extends Popup {
   constructor(scene) {
@@ -36,26 +37,33 @@ class PopupDailyGangWar extends Popup {
     this.add(this.warBonus);
     this.add(this.warBonusCoin);
 
-    this.checkedIconPeace = scene.add.image(this.popup.x - 380, this.popup.y + 50, 'icon-checked').setOrigin(0.5, 0.5);
-    this.uncheckedIconPeace = scene.add
-      .image(this.popup.x - 380, this.popup.y + 50, 'icon-unchecked')
-      .setOrigin(0.5, 0.5);
-    this.uncheckedIconPeace.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
-      scene.game.events.emit('change-war-status', { war: false });
-      this.peaceSound.play();
-    });
-    this.checkedIconWar = scene.add.image(this.popup.x + 220, this.popup.y + 50, 'icon-checked').setOrigin(0.5, 0.5);
-    this.uncheckedIconWar = scene.add
-      .image(this.popup.x + 220, this.popup.y + 50, 'icon-unchecked')
-      .setOrigin(0.5, 0.5);
-    this.uncheckedIconWar.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
-      scene.game.events.emit('change-war-status', { war: true });
-      this.warSound.play();
-    });
+    const contentY = this.popup.y + 50;
+    const peaceX = this.popup.x - 380;
+    const warX = this.popup.x + 220;
+    const changeWarStatus = (war) => {
+      const sound = war ? this.warSound : this.peaceSound;
+      scene.game.events.emit('change-war-status', { war });
+      sound.play();
+    };
+
+    this.checkedIconPeace = scene.add.image(peaceX, contentY, 'icon-checked').setOrigin(0.5, 0.5);
+    this.uncheckedIconPeace = scene.add.image(peaceX, contentY, 'icon-unchecked').setOrigin(0.5, 0.5);
+    const peaceText = scene.add.text(peaceX + 50, contentY, 'Peace', largeBlackBold).setOrigin(0, 0.5);
+    this.uncheckedIconPeace
+      .setInteractive()
+      .on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => changeWarStatus(false));
+    peaceText.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => changeWarStatus(false));
+    this.checkedIconWar = scene.add.image(warX, contentY, 'icon-checked').setOrigin(0.5, 0.5);
+    this.uncheckedIconWar = scene.add.image(warX, contentY, 'icon-unchecked').setOrigin(0.5, 0.5);
+    const warText = scene.add.text(warX + 50, contentY, 'War', largeBlackBold).setOrigin(0, 0.5);
+    this.uncheckedIconWar.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => changeWarStatus(true));
+    warText.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => changeWarStatus(true));
     this.add(this.checkedIconPeace);
     this.add(this.uncheckedIconPeace);
     this.add(this.checkedIconWar);
     this.add(this.uncheckedIconWar);
+    this.add(peaceText);
+    this.add(warText);
 
     this.timeText = scene.add.text(this.popup.x + 120, this.popup.y + 185, '0h 00m', {
       fontSize: '50px',
