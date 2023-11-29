@@ -1,4 +1,5 @@
 import Popup from './Popup';
+import PopupTxnCompleted from './PopupTxnCompleted';
 import configs from '../../configs/configs';
 import { colors, fontFamilies } from '../../../../utils/styles';
 
@@ -49,7 +50,7 @@ class PopupBuyProcessing extends Popup {
     });
     this.loadingAnimation.play();
 
-    scene.game.events.on(buyCompletedEvent, () => {
+    scene.game.events.on(buyCompletedEvent, (data) => {
       this.loading = false;
       this.setTitle('Success');
       this.title.text = 'All done!';
@@ -60,6 +61,19 @@ class PopupBuyProcessing extends Popup {
       this.loadingAnimation.stop();
       this.icon.setVisible(false);
       this.add(this.iconDone);
+
+      if (buyCompletedEvent === 'buy-gangster-completed') {
+        const { txnHash, quantity } = data;
+        this.popupTxnCompleted = new PopupTxnCompleted(
+          scene,
+          buyCompletedIcon,
+          `${quantity.toLocaleString()} Gangster${quantity > 1 ? 's' : ''}`,
+          'Gangsters hired successfully.',
+          txnHash
+        );
+        scene.add.existing(this.popupTxnCompleted);
+        this.close();
+      }
     });
   }
 }

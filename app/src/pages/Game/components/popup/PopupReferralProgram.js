@@ -1,18 +1,9 @@
-import { isAddress } from '@ethersproject/address';
-
 import Popup from './Popup';
-import PopupTxnProcessing from './PopupTxnProcessing';
 import Button from '../button/Button';
 import TextInput from '../inputs/TextInput';
 import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
-import {
-  addressCharacterRegex,
-  addressInputRegex,
-  numberCharacterRegex,
-  numberInputRegex,
-} from '../../../../utils/strings';
-import { formatter } from '../../../../utils/numbers';
+import { addressCharacterRegex, addressInputRegex } from '../../../../utils/strings';
 
 const { width, height } = configs;
 
@@ -102,19 +93,6 @@ class PopupReferralProgram extends Popup {
     );
 
     this.add(buttonBack);
-
-    scene.game.events.on('withdraw-eth-completed', () => this.setLoading(false));
-    scene.game.events.on('withdraw-eth-started', ({ txnHash, amount }) => {
-      this.popupTxnProcessing = new PopupTxnProcessing(
-        scene,
-        'icon-eth-done',
-        `${formatter.format(amount)} ETH`,
-        'Withdrawal may take a few minutes.',
-        txnHash
-      );
-      scene.add.existing(this.popupTxnProcessing);
-      this.close();
-    });
 
     scene.game.events.on('update-referral-code', (referralCode) => {
       this.referralCode = referralCode;

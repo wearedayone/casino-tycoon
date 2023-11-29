@@ -1,7 +1,7 @@
 import { isAddress } from '@ethersproject/address';
 
 import Popup from './Popup';
-import PopupTxnProcessing from './PopupTxnProcessing';
+import PopupTxnCompleted from './PopupTxnCompleted';
 import Button from '../button/Button';
 import TextInput from '../inputs/TextInput';
 import TextButton from '../button/TextButton';
@@ -124,7 +124,7 @@ class PopupWithdrawToken extends Popup {
 
     scene.game.events.on('withdraw-token-completed', () => this.setLoading(false));
     scene.game.events.on('withdraw-token-started', ({ txnHash, amount }) => {
-      this.popupTxnProcessing = new PopupTxnProcessing(
+      this.popupTxnProcessing = new PopupTxnCompleted(
         scene,
         'icon-coin-done',
         `${amount.toLocaleString()} $FIAT`,

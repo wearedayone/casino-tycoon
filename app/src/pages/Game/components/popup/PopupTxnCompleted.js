@@ -8,9 +8,9 @@ import environments from '../../../../utils/environments';
 const { width, height } = configs;
 const { NETWORK_ID } = environments;
 
-class PopupTxnProcessing extends Popup {
+class PopupTxnCompleted extends Popup {
   constructor(scene, icon, title, description, txnHash) {
-    super(scene, 'popup-small', { title: 'Processing', openOnCreate: true });
+    super(scene, 'popup-small', { title: 'Completed', openOnCreate: true });
 
     const startingY = this.popup.y - this.popup.height / 2;
     const iconY = startingY + 300;
@@ -74,4 +74,4 @@ export const BASESCAN_PREFIX = {
   84531: 'goerli.',
 };
 
-export default PopupTxnProcessing;
+export default PopupTxnCompleted;

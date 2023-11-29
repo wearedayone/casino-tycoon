@@ -191,6 +191,7 @@ const Game = () => {
       const receipt = await buyMachine(amount, value);
       if (receipt.status === 1) {
         await validate({ transactionId: id, txnHash: receipt.transactionHash });
+        return receipt.transactionHash;
       }
       enqueueSnackbar('Buy Gangster successfully', { variant: 'success' });
     } catch (err) {
@@ -412,8 +413,8 @@ const Game = () => {
 
       game.events.on('buy-gangster', async ({ quantity }) => {
         try {
-          await buyGangster(quantity);
-          game.events.emit('buy-gangster-completed');
+          const txnHash = await buyGangster(quantity);
+          game.events.emit('buy-gangster-completed', { txnHash, quantity });
         } catch (err) {
           console.error(err);
         }

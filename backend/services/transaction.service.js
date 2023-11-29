@@ -127,8 +127,8 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
     const { type, value, token } = snapshot.data();
 
     const transactionValue = token === 'ETH' ? tx.value : BigNumber.from(logs[0].data);
-    const bnValue = BigNumber.from(BigInt(value * 1e12)).mul(BigNumber.from(1e6));
-    console.log({ logdata: logs[0]?.data, value, bnValue, v1: BigNumber.from(BigInt(value * 1e12)) });
+    const bnValue = BigNumber.from(BigInt(Math.round(value * 1e12))).mul(BigNumber.from(1e6));
+    console.log({ logdata: logs[0]?.data, value, bnValue, v1: BigNumber.from(BigInt(Math.round(value * 1e12))) });
 
     if (type === 'withdraw') {
       if (token === 'FIAT' && to.toLowerCase() !== TOKEN_ADDRESS.toLowerCase())
