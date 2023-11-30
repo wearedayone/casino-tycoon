@@ -225,7 +225,7 @@ const Game = () => {
     if (loaded && !gameLoaded.current) {
       gameLoaded.current = true;
       const config = {
-        type: Phaser.AUTO,
+        type: Phaser.CANVAS,
         width,
         height,
         pixelArt: true,
@@ -238,7 +238,7 @@ const Game = () => {
           mode: Phaser.Scale.FIT,
         },
         scene: [LoadingScene, MainScene],
-        debug: true,
+        debug: false,
         audio: {
           mute: sound !== 'on',
         },
