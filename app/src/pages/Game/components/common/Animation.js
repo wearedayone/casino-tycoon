@@ -65,7 +65,7 @@ class Animation extends Phaser.GameObjects.Container {
       start: 1,
       end: 78,
       zeroPad: 5,
-      prefix: 'goon_back_view_running_cycle_black_shadow_',
+      prefix: 'goon back view and front view_',
       suffix: '.png',
     });
 
