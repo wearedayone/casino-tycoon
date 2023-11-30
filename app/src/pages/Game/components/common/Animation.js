@@ -11,6 +11,8 @@ class Animation extends Phaser.GameObjects.Container {
   constructor(scene) {
     super(scene, 0, 0);
 
+    this.coinbagPickupSound = scene.sound.add('coinbag-pickup', { loop: false });
+
     this.gangsterCounterContainer = scene.add.image(0, 0, 'counter').setOrigin(0.5, 0.5);
     this.gangsterCounterText = scene.add
       .text(0, 0, '0', {
@@ -108,6 +110,7 @@ class Animation extends Phaser.GameObjects.Container {
     });
 
     scene.game.events.on('animation-gangster-front', () => {
+      this.coinbagPickupSound.play()
       this.gangsterAction = 'front';
       this.gangsterBack.anims.stop();
       this.gangsterBack.setVisible(false);
@@ -132,6 +135,7 @@ class Animation extends Phaser.GameObjects.Container {
     });
 
     scene.game.events.on('animation-goon-front', () => {
+      this.coinbagPickupSound.play();
       this.goonAction = 'front';
       this.goonBack.anims.stop();
       this.goonBack.setVisible(false);

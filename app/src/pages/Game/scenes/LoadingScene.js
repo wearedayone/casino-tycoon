@@ -70,6 +70,8 @@ class LoadingScene extends Phaser.Scene {
     this.load.audio('open', '/audios/open.wav');
     this.load.audio('close', '/audios/close.wav');
     this.load.audio('coin', '/audios/coin.wav');
+    this.load.audio('coinbag-dropoff', '/audios/coinbag-dropoff.mp3');
+    this.load.audio('coinbag-pickup', '/audios/coinbag-pickup.mp3');
     this.load.audio('gangster', '/audios/gangster.wav');
     this.load.audio('house', '/audios/house.wav');
     this.load.audio('minion', '/audios/minion.wav');

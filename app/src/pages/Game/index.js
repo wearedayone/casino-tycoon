@@ -206,6 +206,7 @@ const Game = () => {
     const diffInDays = (Date.now() - gamePlay.lastClaimTime.toDate().getTime()) / MILISECONDS_IN_A_DAY;
     const claimableReward = gamePlay.pendingReward + diffInDays * dailyMoney;
     gameRef.current?.events.emit('update-claimable-reward', { reward: claimableReward });
+    gameRef.current?.events.emit('claimable-reward-added');
   };
 
   useEffect(() => {
