@@ -171,6 +171,7 @@ const updateSeasonState = async (transactionId) => {
   const snapshot = await firestore.collection('transaction').doc(transactionId).get();
   const { type, value, amount } = snapshot.data();
 
+  console.log('\n\nupdateSeasonState', { type, value, amount });
   const activeSeason = await getActiveSeason();
   const { estimatedEndTime, timeStepInHours } = activeSeason;
   const estimatedEndTimeUnix = estimatedEndTime.toDate().getTime();
@@ -376,7 +377,7 @@ export const claimToken = async ({ userId }) => {
   if (userSnapshot.exists) {
     const { address, tokenBalance } = userSnapshot.data();
     const minted = await isMinted(address);
-    if (!minted) throw new Error('You need to buy an Gangster before claiming');
+    if (!minted) throw new Error('You need to buy a Gangster before claiming');
 
     const gamePlaySnapshot = await firestore
       .collection('gamePlay')
@@ -424,17 +425,21 @@ export const claimToken = async ({ userId }) => {
         txnHash: '',
       });
 
-      const { txnHash, status } = await claimTokenTask({
-        address,
-        amount: BigInt(claimedAmount * 1e12) * BigInt(1e6),
-      });
-
-      await firestore.collection('transaction').doc(newTransaction.id).update({
-        txnHash,
-        status,
-      });
+      return { address, claimedAmount, transactionId: newTransaction.id };
     }
   }
+};
+
+export const finishClaimToken = async ({ address, claimedAmount, transactionId }) => {
+  const { txnHash, status } = await claimTokenTask({
+    address,
+    amount: BigInt(claimedAmount * 1e12) * BigInt(1e6),
+  });
+
+  await firestore.collection('transaction').doc(transactionId).update({
+    txnHash,
+    status,
+  });
 };
 
 // utils

@@ -374,12 +374,14 @@ const Game = () => {
       });
 
       game.events.on('claim', async () => {
+        let amount;
         try {
-          await claimToken();
+          const res = await claimToken();
+          amount = res.data.claimedAmount;
         } catch (err) {
           console.error(err);
         }
-        game.events.emit('claim-completed');
+        game.events.emit('claim-completed', { amount });
       });
 
       game.events.on('upgrade-safehouse', async ({ quantity }) => {

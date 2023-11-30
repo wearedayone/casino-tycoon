@@ -75,7 +75,7 @@ class ActiveClaimButton extends Button {
         width / 2 - 140,
       ],
       y: [this.y, height * 0.7, height / 2, height * 0.35, height * 0.2, height * 0.15, 250],
-      duration: 2000,
+      duration: 2400,
       ease: 'Cubic.out',
       interpolation: 'bezier', // turn the points into curve
       hideOnComplete: true,
