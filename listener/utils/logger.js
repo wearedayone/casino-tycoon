@@ -1,5 +1,8 @@
 import winston from 'winston';
 import 'winston-daily-rotate-file';
+import environments from './environments.js';
+
+const { LOG_PATH } = environments;
 BigInt.prototype.toJSON = function () {
   return this.toString();
 };
@@ -31,7 +34,7 @@ const logger = winston.createLogger({
     new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
     // new winston.transports.File({ filename: 'logs/combined.log' }),
     new winston.transports.DailyRotateFile({
-      filename: 'logs/application-%DATE%.log',
+      filename: `${LOG_PATH}/application-%DATE%.log`,
       datePattern: 'YYYY-MM-DD',
       zippedArchive: true,
       maxSize: '20m',

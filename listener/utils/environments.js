@@ -11,6 +11,7 @@ const environments = {
   ALCHEMY_API_KEY: process.env.ALCHEMY_API_KEY,
   TOKEN_ADDRESS: process.env.TOKEN_ADDRESS,
   GAME_CONTRACT_ADDRESS: process.env.GAME_CONTRACT_ADDRESS,
+  LOG_PATH: process.env.LOG_PATH,
 };
 
 export default environments;
