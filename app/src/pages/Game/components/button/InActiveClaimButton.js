@@ -3,7 +3,7 @@ import { formatter } from '../../../../utils/numbers';
 
 class InActiveClaimButton extends Button {
   constructor(scene, x, y) {
-    super(scene, x, y, 'button-blue', 'button-blue', () => {}, 'coin');
+    super(scene, x, y, 'button-blue', 'button-blue', () => {}, { sound: 'coin' });
 
     this.text = scene.add
       .text(-30, -40, 'Claim', {
@@ -28,8 +28,6 @@ class InActiveClaimButton extends Button {
     this.add(this.text);
     this.add(this.rewardText);
     this.add(this.coinImage);
-
-    this.coinSound = scene.sound.add('coin', { loop: false });
 
     scene.game.events.on('claim-activated', () => {
       this.loading = false;

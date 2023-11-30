@@ -20,7 +20,7 @@ class ActiveClaimButton extends Button {
         this.text.x = 0;
         scene.game.events.emit('claim');
       },
-      'coin'
+      { sound: 'coin' }
     );
 
     this.coinIcon = scene.add.image(x, y, 'icon-coin-glowing');
@@ -48,8 +48,6 @@ class ActiveClaimButton extends Button {
     this.add(this.rewardText);
     this.add(this.coinImage);
 
-    this.coinSound = scene.sound.add('coin', { loop: false });
-
     scene.game.events.on('claim-completed', () => {
       this.loading = false;
       this.coinImage?.setVisible(true);
@@ -60,7 +58,6 @@ class ActiveClaimButton extends Button {
 
     scene.game.events.on('update-claimable-reward', ({ reward }) => {
       this.rewardText.text = formatter.format(reward);
-      // this.coinSound.play();
     });
     scene.game.events.emit('request-claimable-reward');
   }
