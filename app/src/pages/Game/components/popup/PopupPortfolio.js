@@ -58,7 +58,7 @@ class PopupPortfolio extends Popup {
       this.addressText.y,
       'button-copy',
       'button-copy-pressed',
-      () => navigator.clipboard.writeText(this.addressText.text),
+      () => navigator.clipboard.writeText(this.address || ''),
       { sound: 'button-2' }
     );
     this.add(this.copyBtn);
@@ -129,6 +129,7 @@ class PopupPortfolio extends Popup {
     scene.game.events.on(
       'update-portfolio',
       ({ address, totalBalance, ETHBalance, tokenBalance, tokenValue, numberOfMachines, machineValue, rankReward }) => {
+        this.address = address;
         this.addressText.text = this.formatAddress(address);
         this.copyBtn.x = this.addressText.x + this.addressText.width + 120;
         this.totalBalanceText.text = formatter.format(totalBalance);
