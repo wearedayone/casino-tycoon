@@ -5,7 +5,7 @@ import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
 import environments from '../../../../utils/environments';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
-import { BASESCAN_PREFIX } from './PopupTxnProcessing';
+import { BASESCAN_PREFIX } from './PopupTxnCompleted';
 
 const { width, height } = configs;
 const { NETWORK_ID } = environments;
