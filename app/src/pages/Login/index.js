@@ -34,89 +34,113 @@ const Login = () => {
   };
 
   return (
-    <Box
-      minHeight="100vh"
-      bgcolor="#6123ff"
-      p={2}
-      display="flex"
-      flexDirection="column"
-      justifyContent="center"
-      position="relative"
-      sx={{
-        backgroundImage: 'url(/images/bullet-holes.png)',
-        backgroundSize: '80%',
-        backgroundRepeat: 'no-repeat',
-        backgroundPosition: 'center',
-      }}>
-      <Box flex={1} display="flex" flexDirection="column" justifyContent="center" gap={10}>
-        <img src="/images/logo.svg" />
-        <Box display="flex" flexDirection="column" gap={1}>
-          <Typography fontSize={14} fontWeight={600} color="#ffbc00" sx={{ pl: 3 }}>
-            Connect with
-          </Typography>
+    <>
+      <Box
+        width="100vw"
+        minHeight="100vh"
+        position="absolute"
+        sx={{
+          zIndex: -1,
+          top: 0,
+          backgroundImage: 'url(/images/bg-login.png)',
+          backgroundSize: 'cover',
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'center',
+        }}
+      />
+      <Box
+        minHeight="100vh"
+        p={2}
+        display="flex"
+        flexDirection="column"
+        justifyContent="center"
+        bgcolor="rgba(0, 0, 0, 0.2)">
+        <Box flex={1} display="flex" flexDirection="column" justifyContent="center" gap={10}>
           <Box
-            p={{ xs: 2, sm: 5 }}
-            px={3}
-            pt={{ xs: 3, sm: 5 }}
-            borderRadius={2}
+            flex={1}
+            mx="auto"
+            width={{ xs: '100%', sm: '600px' }}
             display="flex"
             flexDirection="column"
-            gap={1}
-            sx={{
-              backgroundImage: 'url(/images/login-small-frame.png)',
-              backgroundSize: '100% 100%',
-              backgroundRepeat: 'no-repeat',
-              // aspectRatio: 2.86 / 1,
-            }}>
-            <Typography fontSize={14} color="#7c2828" fontWeight={600}>
-              Twitter
-            </Typography>
-            <Button
-              fullWidth
-              variant="contained"
-              onClick={onClickLoginBtn}
+            justifyContent="flex-end">
+            <img src="/images/logo.svg" />
+          </Box>
+          <Box
+            flex={1}
+            mx="auto"
+            width={{ xs: '100%', sm: '400px' }}
+            display="flex"
+            flexDirection="column"
+            justifyContent="space-around">
+            <Box display="flex" flexDirection="column" gap={1}>
+              <Typography fontSize={14} fontWeight={600} color="white" sx={{ pl: 3 }}>
+                Connect with
+              </Typography>
+              <Box
+                p={{ xs: 2, sm: 5 }}
+                px={3}
+                pt={{ xs: 3, sm: 5 }}
+                borderRadius={2}
+                display="flex"
+                flexDirection="column"
+                gap={1}
+                sx={{
+                  backgroundImage: 'url(/images/login-small-frame.png)',
+                  backgroundSize: '100% 100%',
+                  backgroundRepeat: 'no-repeat',
+                }}>
+                <Typography fontSize={14} color="#7c2828" fontWeight={600}>
+                  Twitter
+                </Typography>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  onClick={onClickLoginBtn}
+                  sx={{
+                    borderRadius: '4%/24%',
+                    backgroundColor: 'black',
+                    backgroundImage: 'url(/images/button-black.png)',
+                    backgroundSize: '100% 100%',
+                    backgroundRepeat: 'no-repeat',
+                    aspectRatio: 5.62 / 1,
+                    boxShadow: 'none',
+                    '&:hover': {
+                      boxShadow: 'none',
+                      backgroundColor: 'black',
+                      backgroundImage: 'url(/images/button-black-pressed.png)',
+                    },
+                  }}>
+                  <img src="/images/icons/x.png" alt="x" width={30} />
+                </Button>
+              </Box>
+              <Box display="flex" alignItems="center" justifyContent="center" gap={0.5}>
+                <img src="/images/icons/privy.png" alt="privy" width={12} />
+                <Typography fontSize={12} color="white" align="center">
+                  Protected by Privy
+                </Typography>
+              </Box>
+            </Box>
+            <Typography
+              fontSize={14}
+              fontWeight={700}
+              align="center"
+              color="white"
               sx={{
-                borderRadius: '4%/24%',
-                backgroundColor: 'black',
-                backgroundImage: 'url(/images/button-black.png)',
-                backgroundSize: '100% 100%',
-                backgroundRepeat: 'no-repeat',
-                aspectRatio: 5.62 / 1,
-                boxShadow: 'none',
-                '&:hover': {
-                  boxShadow: 'none',
-                  backgroundColor: 'black',
-                  backgroundImage: 'url(/images/button-black-pressed.png)',
+                '& span': {
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
                 },
               }}>
-              <img src="/images/icons/x.png" alt="x" width={30} />
-            </Button>
-          </Box>
-          <Box display="flex" alignItems="center" justifyContent="center" gap={0.5}>
-            <img src="/images/icons/privy.png" alt="privy" width={12} />
-            <Typography fontSize={12} color="#ffbc00" align="center">
-              Protected by Privy
+              Login Tips: Have X logged in and open in the background. <br />
+              Close and restart if needed.
+              <br />
+              <br />
+              <span>Read more</span>
             </Typography>
           </Box>
         </Box>
       </Box>
-      <Box display="flex" flexDirection="column" justifyContent="flex-end" alignItems="center">
-        <Typography
-          fontSize={14}
-          fontWeight={600}
-          align="center"
-          color="white"
-          sx={{
-            '& span': {
-              cursor: 'pointer',
-              color: '#ffbc00',
-              textDecoration: 'underline',
-            },
-          }}>
-          Need help? Troubleshoot <span>here</span>
-        </Typography>
-      </Box>
-    </Box>
+    </>
   );
 };
 
