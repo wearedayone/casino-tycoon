@@ -23,7 +23,7 @@ class PopupReferralProgram extends Popup {
     this.walletContainer = scene.add.image(width / 2, walletContainerY, 'text-container-large');
     this.add(this.walletContainer);
 
-    this.referralText = scene.add.text(paddedX + 200, walletContainerY - 20, '', {
+    this.referralText = scene.add.text(paddedX + 200, walletContainerY - 30, '', {
       fontSize: '60px',
       color: '#7d2e00',
       fontFamily: 'WixMadeforDisplayBold',
