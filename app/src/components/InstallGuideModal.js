@@ -35,7 +35,7 @@ const InstallGuideModal = () => {
       maxWidth="sm"
       fullWidth
       open={modalStatus.open}
-      onClose={() => setModalStatus({ open: false, os: null })}
+      onClose={() => {}}
       PaperProps={{
         sx: {
           borderRadius: 4,
