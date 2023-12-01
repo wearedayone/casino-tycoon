@@ -264,11 +264,13 @@ class LoadingScene extends Phaser.Scene {
   create() {
     this.cameras.main.setBackgroundColor('#6123ff');
     this.cameras.main.fadeOut(1000, 30, 195, 255);
-    // this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
-    //   this.time.delayedCall(100, () => {
-    //     this.scene.start('MainScene');
-    //   });
-    // });
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
+      this.time.delayedCall(100, () => {
+        if (this.assetLoaded && this.userInfoLoaded) {
+          this.scene.start('MainScene');
+        }
+      });
+    });
 
     this.game.events.on('user-info-loaded', () => {
       this.userInfoLoaded = true;
