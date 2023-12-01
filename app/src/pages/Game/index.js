@@ -179,7 +179,7 @@ const Game = () => {
         variant: 'success',
       });
     } catch (err) {
-      enqueueSnackbar(err.message, { variant: 'error' });
+      enqueueSnackbar('Insufficient $FIAT or ETH', { variant: 'error' });
       console.error(err);
     }
   };
@@ -195,7 +195,7 @@ const Game = () => {
       }
       enqueueSnackbar('Buy Gangster successfully', { variant: 'success' });
     } catch (err) {
-      enqueueSnackbar(err.message, { variant: 'error' });
+      enqueueSnackbar('Insufficient ETH', { variant: 'error' });
       console.error(err);
     }
   };
@@ -556,13 +556,16 @@ const Game = () => {
     machine.networth,
     isEnded,
   ]);
+
   useEffect(() => {
     if (isLeaderboardModalOpen) gameRef.current?.events.emit('update-leaderboard', leaderboardData?.data || []);
   }, [isLeaderboardModalOpen, leaderboardData?.data]);
+
   useEffect(() => {
     if (isLeaderboardModalOpen)
       gameRef.current?.events.emit('update-ranking-rewards', activeSeason?.rankingRewards || []);
   }, [isLeaderboardModalOpen, activeSeason?.rankingRewards]);
+
   useEffect(() => {
     gameRef.current?.events.emit('update-season-countdown', countdownString);
   }, [countdownString]);

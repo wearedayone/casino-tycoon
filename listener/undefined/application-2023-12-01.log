@@ -40,3 +40,171 @@
    "address": "0xd88a3d28c2a04b39a6c6521f8d8037c3c3b5e96c",
    "newBalance": 595748.620264
 }
+2023-12-01T08:17:49.205Z info: Token Transfer
+2023-12-01T08:17:49.207Z info: {
+   "from": "0x0000000000000000000000000000000000000000",
+   "to": "0xd88A3D28c2a04b39A6c6521F8D8037C3c3B5e96c",
+   "value": {
+      "type": "BigNumber",
+      "hex": "0x097c9ce4cf6d5c0000"
+   },
+   "event": {
+      "blockNumber": 13112526,
+      "blockHash": "0x5bc6cc60fb444e35098e809a2c3681336b2a801fb4cf9dc8b0e9c9042bcda4c3",
+      "transactionIndex": 1,
+      "removed": false,
+      "address": "0x50fEDFdB6FeFFB725DB572243DD04DE5795AC090",
+      "data": "0x0000000000000000000000000000000000000000000000097c9ce4cf6d5c0000",
+      "topics": [
+         "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+         "0x0000000000000000000000000000000000000000000000000000000000000000",
+         "0x000000000000000000000000d88a3d28c2a04b39a6c6521f8d8037c3c3b5e96c"
+      ],
+      "transactionHash": "0x7d91aaa82fcd5a0e7ba4bd4f1067003e218988a1a14786369990b2219e217aba",
+      "logIndex": 0,
+      "event": "Transfer",
+      "eventSignature": "Transfer(address,address,uint256)",
+      "args": [
+         "0x0000000000000000000000000000000000000000",
+         "0xd88A3D28c2a04b39A6c6521F8D8037C3c3B5e96c",
+         {
+            "type": "BigNumber",
+            "hex": "0x097c9ce4cf6d5c0000"
+         }
+      ]
+   }
+}
+2023-12-01T08:17:49.703Z info: {
+   "address": "0x0000000000000000000000000000000000000000",
+   "newBalance": 0
+}
+2023-12-01T08:17:50.139Z info: {
+   "address": "0xd88a3d28c2a04b39a6c6521f8d8037c3c3b5e96c",
+   "newBalance": 595923.620264
+}
+2023-12-01T08:18:22.806Z info: Token Transfer
+2023-12-01T08:18:22.807Z info: {
+   "from": "0xd88A3D28c2a04b39A6c6521F8D8037C3c3B5e96c",
+   "to": "0x890611302Ee344d5bD94DA9811C18e2De5588077",
+   "value": {
+      "type": "BigNumber",
+      "hex": "0x3635c9adc5dea00000"
+   },
+   "event": {
+      "blockNumber": 13112543,
+      "blockHash": "0xcc2bb2625bfa92046ad442e74b29389392c71af24b627c5866b37a7cef1e29ed",
+      "transactionIndex": 1,
+      "removed": false,
+      "address": "0x50fEDFdB6FeFFB725DB572243DD04DE5795AC090",
+      "data": "0x00000000000000000000000000000000000000000000003635c9adc5dea00000",
+      "topics": [
+         "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+         "0x000000000000000000000000d88a3d28c2a04b39a6c6521f8d8037c3c3b5e96c",
+         "0x000000000000000000000000890611302ee344d5bd94da9811c18e2de5588077"
+      ],
+      "transactionHash": "0xc8d5c735b2eb5c5b5c81fc8729f99e5044de32c88f01c036abe60fb3e18afc1a",
+      "logIndex": 0,
+      "event": "Transfer",
+      "eventSignature": "Transfer(address,address,uint256)",
+      "args": [
+         "0xd88A3D28c2a04b39A6c6521F8D8037C3c3B5e96c",
+         "0x890611302Ee344d5bD94DA9811C18e2De5588077",
+         {
+            "type": "BigNumber",
+            "hex": "0x3635c9adc5dea00000"
+         }
+      ]
+   }
+}
+2023-12-01T08:18:23.185Z info: {
+   "address": "0xd88a3d28c2a04b39a6c6521f8d8037c3c3b5e96c",
+   "newBalance": 594923.620264
+}
+2023-12-01T08:18:23.768Z info: {
+   "address": "0x890611302ee344d5bd94da9811c18e2de5588077",
+   "newBalance": 2269596.347714
+}
+2023-12-01T08:31:35.179Z info: Token Transfer
+2023-12-01T08:31:35.180Z info: {
+   "from": "0xd88A3D28c2a04b39A6c6521F8D8037C3c3B5e96c",
+   "to": "0x890611302Ee344d5bD94DA9811C18e2De5588077",
+   "value": {
+      "type": "BigNumber",
+      "hex": "0xa2a15d09519be00000"
+   },
+   "event": {
+      "blockNumber": 13112939,
+      "blockHash": "0x4e6945153e006b05adca78719176dff5df8b7ca3bdb8546a66632ee97a1f8233",
+      "transactionIndex": 1,
+      "removed": false,
+      "address": "0x50fEDFdB6FeFFB725DB572243DD04DE5795AC090",
+      "data": "0x0000000000000000000000000000000000000000000000a2a15d09519be00000",
+      "topics": [
+         "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+         "0x000000000000000000000000d88a3d28c2a04b39a6c6521f8d8037c3c3b5e96c",
+         "0x000000000000000000000000890611302ee344d5bd94da9811c18e2de5588077"
+      ],
+      "transactionHash": "0x2a52155fc8e788787fcc9f5419aa71a18efda4d613741d10eabd8c1252cf307e",
+      "logIndex": 0,
+      "event": "Transfer",
+      "eventSignature": "Transfer(address,address,uint256)",
+      "args": [
+         "0xd88A3D28c2a04b39A6c6521F8D8037C3c3B5e96c",
+         "0x890611302Ee344d5bD94DA9811C18e2De5588077",
+         {
+            "type": "BigNumber",
+            "hex": "0xa2a15d09519be00000"
+         }
+      ]
+   }
+}
+2023-12-01T08:31:35.493Z info: {
+   "address": "0xd88a3d28c2a04b39a6c6521f8d8037c3c3b5e96c",
+   "newBalance": 591923.620264
+}
+2023-12-01T08:31:36.113Z info: {
+   "address": "0x890611302ee344d5bd94da9811c18e2de5588077",
+   "newBalance": 2272596.347714
+}
+2023-12-01T08:32:06.534Z info: Token Transfer
+2023-12-01T08:32:06.534Z info: {
+   "from": "0xd88A3D28c2a04b39A6c6521F8D8037C3c3B5e96c",
+   "to": "0x890611302Ee344d5bD94DA9811C18e2De5588077",
+   "value": {
+      "type": "BigNumber",
+      "hex": "0xa32c242c5625c80000"
+   },
+   "event": {
+      "blockNumber": 13112955,
+      "blockHash": "0x404907574b1dbfb0c5084ec193731afd630f8c01ebb5ec2bcedcd770b6740db6",
+      "transactionIndex": 1,
+      "removed": false,
+      "address": "0x50fEDFdB6FeFFB725DB572243DD04DE5795AC090",
+      "data": "0x0000000000000000000000000000000000000000000000a32c242c5625c80000",
+      "topics": [
+         "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+         "0x000000000000000000000000d88a3d28c2a04b39a6c6521f8d8037c3c3b5e96c",
+         "0x000000000000000000000000890611302ee344d5bd94da9811c18e2de5588077"
+      ],
+      "transactionHash": "0x6817553dde50632ed7f775f0b80f7f6eb9b0d47ec5f33943384662f54d049481",
+      "logIndex": 0,
+      "event": "Transfer",
+      "eventSignature": "Transfer(address,address,uint256)",
+      "args": [
+         "0xd88A3D28c2a04b39A6c6521F8D8037C3c3B5e96c",
+         "0x890611302Ee344d5bD94DA9811C18e2De5588077",
+         {
+            "type": "BigNumber",
+            "hex": "0xa32c242c5625c80000"
+         }
+      ]
+   }
+}
+2023-12-01T08:32:06.874Z info: {
+   "address": "0xd88a3d28c2a04b39a6c6521f8d8037c3c3b5e96c",
+   "newBalance": 588913.620264
+}
+2023-12-01T08:32:07.482Z info: {
+   "address": "0x890611302ee344d5bd94da9811c18e2de5588077",
+   "newBalance": 2275606.347714
+}
