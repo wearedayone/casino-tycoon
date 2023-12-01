@@ -67,7 +67,7 @@ class Animation extends Phaser.GameObjects.Container {
       start: 1,
       end: 78,
       zeroPad: 5,
-      prefix: 'goon back view and front view_',
+      prefix: 'goon_back_view_running_cycle_',
       suffix: '.png',
     });
 
@@ -110,7 +110,7 @@ class Animation extends Phaser.GameObjects.Container {
     });
 
     scene.game.events.on('animation-gangster-front', () => {
-      this.coinbagPickupSound.play()
+      this.coinbagPickupSound.play();
       this.gangsterAction = 'front';
       this.gangsterBack.anims.stop();
       this.gangsterBack.setVisible(false);
