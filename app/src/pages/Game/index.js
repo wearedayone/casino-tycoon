@@ -33,6 +33,7 @@ const Game = () => {
   const [userHasInteractive, setUserHasInteracted] = useState(false);
   const gameRef = useRef();
   const gameLoaded = useRef();
+  const gameEventListened = useRef();
   const [loaded, setLoaded] = useState(false);
   const profile = useUserStore((state) => state.profile);
   const gamePlay = useUserStore((state) => state.gamePlay);
@@ -251,7 +252,8 @@ const Game = () => {
       gameRef.current = game;
     }
 
-    if (loaded) {
+    if (loaded && !gameEventListened.current) {
+      gameEventListened.current = true;
       gameRef.current?.events.on('export-wallet', exportWallet);
       gameRef.current?.events.on('log-out', logout);
       gameRef.current?.events.on('toggle-game-sound', toggleSound);
