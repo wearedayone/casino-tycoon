@@ -1,5 +1,5 @@
 import Popup from './Popup';
-import PopupTxnCompleted from './PopupTxnCompleted';
+import PopupProcessing from './PopupProcessing';
 import Button from '../button/Button';
 import TextInput from '../inputs/TextInput';
 import TextButton from '../button/TextButton';
@@ -8,17 +8,22 @@ import { integerCharacterRegex, integerInputRegex } from '../../../../utils/stri
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
 
 const { width, height } = configs;
+const subtitleStyle = {
+  color: colors.brown,
+  fontFamily: fontFamilies.bold,
+  align: 'center',
+};
 
 class PopupDepositNFT extends Popup {
   loading = false;
   balance = 0;
 
   constructor(scene, parentModal) {
-    super(scene, 'popup-small', { title: 'Deposit NFT' });
+    super(scene, 'popup-small', { title: 'Stake NFT' });
 
     const startingY = this.popup.y - this.popup.height / 2;
     const subtitleY = startingY + 200;
-    const amountInputY = subtitleY + 450;
+    const amountInputY = subtitleY + 420;
     const balanceY = amountInputY + 130;
 
     const subtitle = scene.add.text(width / 2, subtitleY, 'Enter the number of NFTs\nthat you wish to stake', {
@@ -50,14 +55,18 @@ class PopupDepositNFT extends Popup {
     this.add(this.amountInput);
     this.add(buttonMax);
 
-    this.balanceText = scene.add.text(width / 2, balanceY, `Available units: 0`, {
-      fontSize: '50px',
-      color: '#7c2828',
-      fontFamily: 'WixMadeforDisplayBold',
-      align: 'center',
-    });
-    this.balanceText.setOrigin(0.5, 0);
+    this.balanceText = scene.add
+      .text(width / 2, balanceY, `- of - Gangsters unstaked`, { ...subtitleStyle, fontSize: '50px' })
+      .setOrigin(0.5, 0);
     this.add(this.balanceText);
+
+    const note = scene.add
+      .text(width / 2, balanceY + 120, `Gangsters bought in-app are automatically \nstaked`, {
+        ...subtitleStyle,
+        fontSize: '42px',
+      })
+      .setOrigin(0.5, 0);
+    this.add(note);
 
     const buttonBack = new TextButton(
       scene,
@@ -94,18 +103,14 @@ class PopupDepositNFT extends Popup {
     this.add(buttonBack);
     this.add(this.buttonStake);
 
-    scene.game.events.on('update-wallet-nft-balance', (balance) => this.updateBalance(balance));
-
-    scene.game.events.on('deposit-nft-completed', () => this.setLoading(false));
-    scene.game.events.on('deposit-nft-started', ({ txnHash, amount }) => {
-      this.popupTxnProcessing = new PopupTxnCompleted(
-        scene,
-        'icon-nft-done',
-        `${amount.toLocaleString()} NFT${amount > 1 ? 's' : ''}`,
-        'Deposit may take a few minutes.',
-        txnHash
-      );
-      scene.add.existing(this.popupTxnProcessing);
+    scene.game.events.on('update-wallet-nft-balance', (data) => this.updateBalance(data));
+    scene.game.events.on('deposit-nft-started', () => {
+      this.popupProcessing = new PopupProcessing(scene, {
+        completedEvent: 'deposit-nft-completed',
+        completedIcon: 'icon-nft-done',
+        description: `Staking may take a few minutes.`,
+      });
+      scene.add.existing(this.popupProcessing);
       this.close();
     });
   }
@@ -122,7 +127,6 @@ class PopupDepositNFT extends Popup {
   setLoading(state) {
     console.log('setLoading', state);
     this.loading = state;
-    this.buttonStake.setDisabledState(state);
   }
 
   onOpen() {
@@ -134,9 +138,10 @@ class PopupDepositNFT extends Popup {
     this.amountInput.updateValue('');
   }
 
-  updateBalance(balance) {
+  updateBalance({ balance, numberOfMachines }) {
+    const total = balance + numberOfMachines;
     this.balance = balance;
-    this.balanceText.text = `Available units: ${balance.toLocaleString()}`;
+    this.balanceText.text = `${balance.toLocaleString()} of ${total.toLocaleString()} Gangsters unstaked`;
   }
 }
 

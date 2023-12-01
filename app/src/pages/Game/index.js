@@ -154,16 +154,16 @@ const Game = () => {
 
   const stake = async (amount) => {
     try {
+      gameRef.current?.events.emit('deposit-nft-started');
+
       const receipt = await stakeNFT(address, amount);
       if (receipt.status === 1) {
-        gameRef.current?.events.emit('deposit-nft-started', { amount, txnHash: receipt.transactionHash });
+        gameRef.current?.events.emit('deposit-nft-completed', { amount, txnHash: receipt.transactionHash });
       }
       enqueueSnackbar(`Staked gangster successfully`, { variant: 'success' });
     } catch (err) {
       err.message && enqueueSnackbar(err.message, { variant: 'error' });
       console.error(err);
-    } finally {
-      gameRef.current?.events.emit('deposit-nft-completed');
     }
   };
 
@@ -301,7 +301,7 @@ const Game = () => {
       gameRef.current?.events.on('request-wallet-nft-balance', () => {
         getNFTBalance(address).then((balance) => {
           console.log('balance', balance);
-          gameRef.current.events.emit('update-wallet-nft-balance', balance);
+          gameRef.current.events.emit('update-wallet-nft-balance', { balance, numberOfMachines });
         });
       });
 

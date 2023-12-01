@@ -1,6 +1,6 @@
 import Popup from './Popup';
 import PopupBuyBonusInfo from './PopupBuyBonusInfo';
-import PopupBuyProcessing from './PopupBuyProcessing';
+import PopupProcessing from './PopupProcessing';
 import Button from '../button/Button';
 import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
@@ -44,11 +44,11 @@ class PopupBuyGangster extends Popup {
       'button-blue-pressed',
       () => {
         if (!this.quantity) return;
-        this.popupBuyProcessing = new PopupBuyProcessing(scene, {
+        this.popupBuyProcessing = new PopupProcessing(scene, {
           sound: 'gangster',
-          buyCompletedEvent: 'buy-gangster-completed',
-          buyCompletedIcon: 'icon-gangster-buy-done',
-          buyingText: `Hiring ${this.quantity} Gangster${this.quantity > 1 ? 's' : ''}`,
+          completedEvent: 'buy-gangster-completed',
+          completedIcon: 'icon-gangster-buy-done',
+          description: `Hiring ${this.quantity} Gangster${this.quantity > 1 ? 's' : ''}.\nPlease, wait`,
         });
         scene.add.existing(this.popupBuyProcessing);
         this.close();

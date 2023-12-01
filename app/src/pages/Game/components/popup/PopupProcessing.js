@@ -5,8 +5,8 @@ import { colors, fontFamilies } from '../../../../utils/styles';
 
 const { width } = configs;
 
-class PopupBuyProcessing extends Popup {
-  constructor(scene, { sound, buyCompletedEvent, buyCompletedIcon, buyingText }) {
+class PopupProcessing extends Popup {
+  constructor(scene, { sound, completedEvent, completedIcon, description }) {
     super(scene, 'popup-small', { title: 'Almost done', openOnCreate: true });
 
     const startingY = this.popup.y - this.popup.height / 2;
@@ -15,9 +15,9 @@ class PopupBuyProcessing extends Popup {
     const descriptionY = titleY + 320;
 
     this.loading = true;
-    this.doneSound = scene.sound.add(sound, { loop: false });
+    if (sound) this.doneSound = scene.sound.add(sound, { loop: false });
     this.icon = scene.add.image(width / 2, iconY, 'icon-loading');
-    this.iconDone = scene.add.image(width / 2, iconY, buyCompletedIcon);
+    this.iconDone = scene.add.image(width / 2, iconY, completedIcon);
     this.title = scene.add
       .text(width / 2, titleY, 'Processing...', {
         fontSize: '100px',
@@ -28,7 +28,7 @@ class PopupBuyProcessing extends Popup {
       .setOrigin(0.5, 0);
     const descriptionContainer = scene.add.image(width / 2, descriptionY, 'text-container');
     this.description = scene.add
-      .text(width / 2, descriptionY, `${buyingText}.\nPlease, wait.`, {
+      .text(width / 2, descriptionY, description, {
         fontSize: '52px',
         color: colors.black,
         fontFamily: fontFamilies.bold,
@@ -50,25 +50,37 @@ class PopupBuyProcessing extends Popup {
     });
     this.loadingAnimation.play();
 
-    scene.game.events.on(buyCompletedEvent, (data) => {
+    scene.game.events.on(completedEvent, (data) => {
       this.loading = false;
       this.setTitle('Success');
       this.title.text = 'All done!';
       this.description.text = 'Your reputation & earnings \n are updated';
-      this.doneSound.play();
+      this.doneSound?.play();
 
       // icons
       this.loadingAnimation.stop();
       this.icon.setVisible(false);
       this.add(this.iconDone);
 
-      if (buyCompletedEvent === 'buy-gangster-completed') {
+      if (completedEvent === 'buy-gangster-completed') {
         const { txnHash, quantity } = data;
         this.popupTxnCompleted = new PopupTxnCompleted(
           scene,
-          buyCompletedIcon,
+          completedIcon,
           `${quantity.toLocaleString()} Gangster${quantity > 1 ? 's' : ''}`,
           'Gangsters hired successfully.',
+          txnHash
+        );
+        scene.add.existing(this.popupTxnCompleted);
+        this.close();
+      }
+      if (completedEvent === 'deposit-nft-completed') {
+        const { txnHash, amount } = data;
+        this.popupTxnCompleted = new PopupTxnCompleted(
+          scene,
+          completedIcon,
+          `${amount.toLocaleString()} NFT${amount > 1 ? 's' : ''}`,
+          'Staking completed.',
           txnHash
         );
         scene.add.existing(this.popupTxnCompleted);
@@ -78,4 +90,4 @@ class PopupBuyProcessing extends Popup {
   }
 }
 
-export default PopupBuyProcessing;
+export default PopupProcessing;

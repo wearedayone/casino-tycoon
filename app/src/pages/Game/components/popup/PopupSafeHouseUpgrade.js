@@ -1,5 +1,5 @@
 import Popup from './Popup';
-import PopupBuyProcessing from './PopupBuyProcessing';
+import PopupProcessing from './PopupProcessing';
 import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
 import { estimateNumberOfBuildingCanBuy, calculateNextBuildingBuyPriceBatch } from '../../../../utils/formulas';
@@ -36,11 +36,11 @@ class PopupSafeHouseUpgrade extends Popup {
       'button-blue-pressed',
       () => {
         if (!this.quantity) return;
-        this.popupBuyProcessing = new PopupBuyProcessing(scene, {
+        this.popupBuyProcessing = new PopupProcessing(scene, {
           sound: 'house',
-          buyCompletedEvent: 'upgrade-safehouse-completed',
-          buyCompletedIcon: 'icon-safehouse-upgrade-done',
-          buyingText: `Upgrading Safehouse`,
+          completedEvent: 'upgrade-safehouse-completed',
+          completedIcon: 'icon-safehouse-upgrade-done',
+          description: `Upgrading Safehouse.\nPlease, wait`,
         });
         scene.add.existing(this.popupBuyProcessing);
         this.close();

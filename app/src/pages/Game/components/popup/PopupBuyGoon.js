@@ -1,5 +1,5 @@
 import Popup from './Popup';
-import PopupBuyProcessing from './PopupBuyProcessing';
+import PopupProcessing from './PopupProcessing';
 import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
 import { estimateNumberOfWorkerCanBuy, calculateNextWorkerBuyPriceBatch } from '../../../../utils/formulas';
@@ -38,11 +38,11 @@ class PopupBuyGoon extends Popup {
       'button-blue-pressed',
       () => {
         if (!this.quantity) return;
-        this.popupBuyProcessing = new PopupBuyProcessing(scene, {
+        this.popupBuyProcessing = new PopupProcessing(scene, {
           sound: 'minion',
-          buyCompletedEvent: 'buy-goon-completed',
-          buyCompletedIcon: 'icon-goon-buy-done',
-          buyingText: `Hiring ${this.quantity} Goon${this.quantity > 1 ? 's' : ''}`,
+          completedEvent: 'buy-goon-completed',
+          completedIcon: 'icon-goon-buy-done',
+          description: `Hiring ${this.quantity} Goon${this.quantity > 1 ? 's' : ''}.\nPlease, wait`,
         });
         scene.add.existing(this.popupBuyProcessing);
         this.close();
