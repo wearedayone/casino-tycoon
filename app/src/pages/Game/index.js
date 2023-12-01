@@ -202,7 +202,7 @@ const Game = () => {
 
   const calculateClaimableRewardRef = useRef();
   calculateClaimableRewardRef.current = () => {
-    if (!gamePlay.lastClaimTime) return;
+    if (!gamePlay?.lastClaimTime) return;
     const diffInDays = (Date.now() - gamePlay.lastClaimTime.toDate().getTime()) / MILISECONDS_IN_A_DAY;
     const claimableReward = gamePlay.pendingReward + diffInDays * dailyMoney;
     gameRef.current?.events.emit('update-claimable-reward', { reward: claimableReward });
@@ -223,8 +223,9 @@ const Game = () => {
   }, [rankData]);
 
   useEffect(() => {
-    if (loaded && !gameLoaded.current) {
+    if (!gameLoaded.current) {
       gameLoaded.current = true;
+
       const config = {
         type: Phaser.CANVAS,
         width,
@@ -247,18 +248,21 @@ const Game = () => {
 
       const game = new Phaser.Game(config);
       game.sound.setMute(sound !== 'on');
-      // listeners
-      game.events.on('export-wallet', exportWallet);
-      game.events.on('log-out', logout);
-      game.events.on('toggle-game-sound', toggleSound);
+      gameRef.current = game;
+    }
 
-      game.events.on('request-app-version', () => {
+    if (loaded) {
+      gameRef.current?.events.on('export-wallet', exportWallet);
+      gameRef.current?.events.on('log-out', logout);
+      gameRef.current?.events.on('toggle-game-sound', toggleSound);
+
+      gameRef.current?.events.on('request-app-version', () => {
         gameRef.current.events.emit('update-app-version', appVersion);
       });
-      game.events.on('request-profile', () => {
+      gameRef.current?.events.on('request-profile', () => {
         gameRef.current.events.emit('update-profile', { username, address, avatarURL });
       });
-      game.events.on('open-leaderboard-modal', () => {
+      gameRef.current?.events.on('open-leaderboard-modal', () => {
         setLeaderboardModalOpen(true);
         const { name, timeStepInHours, prizePool } = activeSeason || {};
         gameRef.current.events.emit('update-season', {
@@ -269,52 +273,52 @@ const Game = () => {
           minNetworth: machine.networth,
         });
       });
-      game.events.on('close-leaderboard-modal', () => {
+      gameRef.current?.events.on('close-leaderboard-modal', () => {
         setLeaderboardModalOpen(false);
       });
 
-      game.events.on('request-balances', () => {
+      gameRef.current?.events.on('request-balances', () => {
         gameRef.current.events.emit('update-balances', { dailyMoney, ETHBalance, tokenBalance });
       });
 
-      game.events.on('request-deposit-code', () => {
+      gameRef.current?.events.on('request-deposit-code', () => {
         gameRef.current.events.emit('update-deposit-code', '683382');
       });
-      game.events.on('request-eth-balance', () => {
+      gameRef.current?.events.on('request-eth-balance', () => {
         gameRef.current.events.emit('update-eth-balance', ETHBalance);
       });
-      game.events.on('refresh-eth-balance', () => {
+      gameRef.current?.events.on('refresh-eth-balance', () => {
         reloadBalance();
       });
 
-      game.events.on('request-balances-for-withdraw', () => {
+      gameRef.current?.events.on('request-balances-for-withdraw', () => {
         gameRef.current.events.emit('update-balances-for-withdraw', {
           NFTBalance: numberOfMachines,
           ETHBalance,
           tokenBalance,
         });
       });
-      game.events.on('request-wallet-nft-balance', () => {
+      gameRef.current?.events.on('request-wallet-nft-balance', () => {
         getNFTBalance(address).then((balance) => {
           console.log('balance', balance);
           gameRef.current.events.emit('update-wallet-nft-balance', balance);
         });
       });
 
-      game.events.on('request-rank', () => {
+      gameRef.current?.events.on('request-rank', () => {
         getRank()
           .then((res) => gameRef.current.events.emit('update-rank', { rank: res.data.rank, reward: res.data.reward }))
           .catch((err) => console.error(err));
       });
 
-      game.events.on('request-networth', () => {
+      gameRef.current?.events.on('request-networth', () => {
         gameRef.current.events.emit('update-networth', {
           networth,
           level: calculateHouseLevel(houseLevels, networth),
         });
       });
 
-      game.events.on('request-claim-time', () => {
+      gameRef.current?.events.on('request-claim-time', () => {
         gameRef.current.events.emit('update-claim-time', {
           claimGapInSeconds: activeSeason.claimGapInSeconds,
           lastClaimTime: gamePlay.lastClaimTime.toDate().getTime(),
@@ -322,26 +326,25 @@ const Game = () => {
         });
       });
 
-      game.events.on('request-claimable-reward', () => calculateClaimableRewardRef.current?.());
+      gameRef.current?.events.on('request-claimable-reward', () => calculateClaimableRewardRef.current?.());
 
-      game.events.on('request-claimable-status', () => {
-        console.log({ gamePlay });
+      gameRef.current?.events.on('request-claimable-status', () => {
         const nextClaimTime = gamePlay.lastClaimTime.toDate().getTime() + activeSeason.claimGapInSeconds * 1000;
         const claimable = Date.now() > nextClaimTime;
         gameRef.current.events.emit('update-claimable-status', { claimable, active: gamePlay.active });
       });
 
-      game.events.on('request-war-history', () => {
+      gameRef.current?.events.on('request-war-history', () => {
         getWarHistory()
           .then((res) => gameRef.current.events.emit('update-war-history', res.data))
           .catch((err) => console.error(err));
       });
 
-      game.events.on('request-war-status', () => {
+      gameRef.current?.events.on('request-war-status', () => {
         gameRef.current.events.emit('update-war-status', { war: gamePlay.war });
       });
 
-      game.events.on('change-war-status', ({ war }) => {
+      gameRef.current?.events.on('change-war-status', ({ war }) => {
         gameRef.current.events.emit('update-war-status', { war });
         toggleWarStatus({ war }).catch((err) => {
           console.error(err);
@@ -349,7 +352,7 @@ const Game = () => {
         });
       });
 
-      game.events.on('request-next-war-time', () => {
+      gameRef.current?.events.on('request-next-war-time', () => {
         getNextWarSnapshotUnixTime()
           .then((res) => {
             gameRef.current.events.emit('update-next-war-time', { time: res.data.time });
@@ -357,23 +360,23 @@ const Game = () => {
           .catch((err) => console.error(err));
       });
 
-      game.events.on('withdraw-token', ({ amount, address }) => {
+      gameRef.current?.events.on('withdraw-token', ({ amount, address }) => {
         transfer({ amount, address, tokenType: 'FIAT' });
       });
-      game.events.on('withdraw-eth', ({ amount, address }) => {
+      gameRef.current?.events.on('withdraw-eth', ({ amount, address }) => {
         transfer({ amount, address, tokenType: 'ETH' });
       });
-      game.events.on('withdraw-nft', ({ amount, address }) => {
+      gameRef.current?.events.on('withdraw-nft', ({ amount, address }) => {
         transfer({ amount, address, tokenType: 'NFT' });
       });
-      game.events.on('deposit-nft', ({ amount }) => {
+      gameRef.current?.events.on('deposit-nft', ({ amount }) => {
         stake(amount);
       });
-      game.events.on('swap', ({ amount }) => {
+      gameRef.current?.events.on('swap', ({ amount }) => {
         gameRef.current.events.emit('swap-started', { amount, txnHash: '' });
       });
 
-      game.events.on('claim', async () => {
+      gameRef.current?.events.on('claim', async () => {
         let amount;
         try {
           const res = await claimToken();
@@ -381,20 +384,20 @@ const Game = () => {
         } catch (err) {
           console.error(err);
         }
-        game.events.emit('claim-completed', { amount });
+        gameRef.current?.events.emit('claim-completed', { amount });
       });
 
-      game.events.on('upgrade-safehouse', async ({ quantity }) => {
+      gameRef.current?.events.on('upgrade-safehouse', async ({ quantity }) => {
         try {
           await buy('buy-building', quantity);
-          game.events.emit('upgrade-safehouse-completed');
+          gameRef.current?.events.emit('upgrade-safehouse-completed');
         } catch (err) {
           console.error(err);
         }
       });
 
-      game.events.on('request-buildings', () => {
-        game.events.emit('update-buildings', {
+      gameRef.current?.events.on('request-buildings', () => {
+        gameRef.current?.events.emit('update-buildings', {
           numberOfBuildings,
           networth,
           balance: tokenBalance,
@@ -405,30 +408,30 @@ const Game = () => {
         });
       });
 
-      game.events.on('buy-goon', async ({ quantity }) => {
+      gameRef.current?.events.on('buy-goon', async ({ quantity }) => {
         try {
           await buy('buy-worker', quantity);
-          game.events.emit('buy-goon-completed');
+          gameRef.current?.events.emit('buy-goon-completed');
         } catch (err) {
           console.error(err);
         }
       });
 
-      game.events.on('buy-gangster', async ({ quantity }) => {
+      gameRef.current?.events.on('buy-gangster', async ({ quantity }) => {
         try {
           const txnHash = await buyGangster(quantity);
-          game.events.emit('buy-gangster-completed', { txnHash, quantity });
+          gameRef.current?.events.emit('buy-gangster-completed', { txnHash, quantity });
         } catch (err) {
           console.error(err);
         }
       });
 
-      game.events.on('request-reserve-pool', () => {
-        game.events.emit('update-reserve-pool', { reservePool, reservePoolReward });
+      gameRef.current?.events.on('request-reserve-pool', () => {
+        gameRef.current?.events.emit('update-reserve-pool', { reservePool, reservePoolReward });
       });
 
-      game.events.on('request-workers', () => {
-        game.events.emit('update-workers', {
+      gameRef.current?.events.on('request-workers', () => {
+        gameRef.current?.events.emit('update-workers', {
           numberOfWorkers,
           networth,
           balance: tokenBalance,
@@ -440,8 +443,8 @@ const Game = () => {
         });
       });
 
-      game.events.on('request-machines', () => {
-        game.events.emit('update-machines', {
+      gameRef.current?.events.on('request-machines', () => {
+        gameRef.current?.events.emit('update-machines', {
           numberOfMachines,
           networth,
           balance: ETHBalance,
@@ -454,14 +457,14 @@ const Game = () => {
         });
       });
 
-      game.events.on('request-workers-machines', () => {
-        game.events.emit('update-workers-machines', {
+      gameRef.current?.events.on('request-workers-machines', () => {
+        gameRef.current?.events.emit('update-workers-machines', {
           numberOfWorkers,
           numberOfMachines,
         });
       });
 
-      game.events.on('request-portfolio', () => {
+      gameRef.current?.events.on('request-portfolio', () => {
         getRank().then((res) => {
           const { rank, reward: rankReward } = res.data;
           const tokenValue = tokenBalance * 0.000001; // TODO: update formulas to calculate token value
@@ -480,7 +483,7 @@ const Game = () => {
         });
       });
 
-      game.events.on('request-statistic', () => {
+      gameRef.current?.events.on('request-statistic', () => {
         getRank().then((res) => {
           const { rank, totalPlayers } = res.data;
           gameRef.current?.events.emit('update-statistic', {
@@ -494,15 +497,15 @@ const Game = () => {
         });
       });
 
-      game.events.on('request-referral-code', () => {
+      gameRef.current?.events.on('request-referral-code', () => {
         gameRef.current?.events.emit('update-referral-code', profile.referralCode);
       });
 
-      gameRef.current = game;
+      gameRef.current?.events.emit('user-info-loaded');
 
       return () => {
         try {
-          // game.scene.destroy();
+          // gameRef.current?.scene.destroy();
         } catch (err) {
           console.error(err);
         }

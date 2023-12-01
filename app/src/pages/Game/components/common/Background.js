@@ -9,7 +9,6 @@ class Background extends Phaser.GameObjects.Container {
     super(scene, 0, 0);
 
     this.background = scene.add.image((width - 1700) / 2, 0, 'bg').setOrigin(0, 0);
-    console.log({ width, height, bgWidth: this.background.width, bgHeight: this.background.height });
     const scaleX = width / this.background.width;
     const scaleY = height / this.background.height;
     const scale = Math.max(scaleX, scaleY);

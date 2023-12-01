@@ -61,7 +61,7 @@ class PopupBuyGangster extends Popup {
     this.add(this.upgradeBtn);
 
     this.numberOfMachinesText = scene.add.text(this.popup.x + 370, this.popup.y - 595, '0', {
-      fontSize: fontSizes.large,
+      fontSize: fontSizes.extraLarge,
       color: colors.black,
       fontFamily: fontFamilies.extraBold,
     });

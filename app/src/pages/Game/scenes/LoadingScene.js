@@ -3,6 +3,9 @@ import Phaser from 'phaser';
 import configs from '../configs/configs';
 
 class LoadingScene extends Phaser.Scene {
+  assetLoaded = false;
+  userInfoLoaded = false;
+
   constructor() {
     super('LoadingScene');
   }
@@ -251,15 +254,27 @@ class LoadingScene extends Phaser.Scene {
     this.load.multiatlas('gangster-back', 'gangster_back.json');
     this.load.multiatlas('goon-front', 'goon_front.json');
     this.load.multiatlas('goon-back', 'goon_back.json');
+
+    this.assetLoaded = true;
+    if (this.userInfoLoaded) {
+      this.scene.start('MainScene');
+    }
   }
 
   create() {
     this.cameras.main.setBackgroundColor('#6123ff');
     this.cameras.main.fadeOut(1000, 30, 195, 255);
-    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
-      this.time.delayedCall(100, () => {
+    // this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
+    //   this.time.delayedCall(100, () => {
+    //     this.scene.start('MainScene');
+    //   });
+    // });
+
+    this.game.events.on('user-info-loaded', () => {
+      this.userInfoLoaded = true;
+      if (this.assetLoaded) {
         this.scene.start('MainScene');
-      });
+      }
     });
   }
 }

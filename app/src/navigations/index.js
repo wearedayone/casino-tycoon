@@ -21,7 +21,7 @@ const Navigations = () => {
 
   if (!authenticated) return <AuthRoutes />;
 
-  if (!initialized) return <LoadingRoutes />;
+  // if (!initialized) return <LoadingRoutes />;
 
   return <MainRoutes />;
 };

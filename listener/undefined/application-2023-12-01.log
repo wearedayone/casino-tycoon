@@ -1,0 +1,42 @@
+2023-12-01T04:05:48.033Z info: Token Transfer
+2023-12-01T04:05:48.046Z info: {
+   "from": "0x890611302Ee344d5bD94DA9811C18e2De5588077",
+   "to": "0xd88A3D28c2a04b39A6c6521F8D8037C3c3B5e96c",
+   "value": {
+      "type": "BigNumber",
+      "hex": "0x00"
+   },
+   "event": {
+      "blockNumber": 13104965,
+      "blockHash": "0x6c8dd0a866726057fa88d202b7efd82232865319211cb154adb4325f71a42060",
+      "transactionIndex": 1,
+      "removed": false,
+      "address": "0x50fEDFdB6FeFFB725DB572243DD04DE5795AC090",
+      "data": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "topics": [
+         "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+         "0x000000000000000000000000890611302ee344d5bd94da9811c18e2de5588077",
+         "0x000000000000000000000000d88a3d28c2a04b39a6c6521f8d8037c3c3b5e96c"
+      ],
+      "transactionHash": "0xd65617cb4e0a1ef59cf28d6b805d9252eca5a57da51195b19c9c9b35cd839f87",
+      "logIndex": 0,
+      "event": "Transfer",
+      "eventSignature": "Transfer(address,address,uint256)",
+      "args": [
+         "0x890611302Ee344d5bD94DA9811C18e2De5588077",
+         "0xd88A3D28c2a04b39A6c6521F8D8037C3c3B5e96c",
+         {
+            "type": "BigNumber",
+            "hex": "0x00"
+         }
+      ]
+   }
+}
+2023-12-01T04:05:48.430Z info: {
+   "address": "0x890611302ee344d5bd94da9811c18e2de5588077",
+   "newBalance": 2268596.347714
+}
+2023-12-01T04:05:48.876Z info: {
+   "address": "0xd88a3d28c2a04b39a6c6521f8d8037c3c3b5e96c",
+   "newBalance": 595748.620264
+}
