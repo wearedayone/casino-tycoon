@@ -9,7 +9,7 @@ import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
 
 const { width, height } = configs;
 const sliderWidth = 500;
-
+const DEFAULT_QUANTITY = 1;
 const largeBlackExtraBold = {
   fontSize: fontSizes.large,
   color: colors.black,
@@ -26,7 +26,7 @@ class PopupBuyGangster extends Popup {
   reservePoolReward = 0;
   balance = 0;
   basePrice = 0;
-  quantity = 0;
+  quantity = DEFAULT_QUANTITY;
   slideValue = 0;
 
   constructor(scene) {
@@ -56,7 +56,7 @@ class PopupBuyGangster extends Popup {
         scene.game.events.emit('buy-gangster', { quantity: this.quantity });
       },
       'Buy',
-      { sound: 'buy' }
+      { sound: 'buy', disabledImage: 'button-disabled' }
     );
     this.add(this.upgradeBtn);
 
@@ -144,8 +144,8 @@ class PopupBuyGangster extends Popup {
             }
             return;
           }
-          const estimatedMaxPurchase = this.balance && this.basePrice ? Math.floor(this.balance / this.basePrice) : 0;
-          const maxPurchase = Math.min(25, estimatedMaxPurchase);
+          this.estimatedMaxPurchase = this.balance && this.basePrice ? Math.floor(this.balance / this.basePrice) : 0;
+          const maxPurchase = Math.min(24, this.estimatedMaxPurchase);
 
           if (maxPurchase === 0) {
             if (this.slider) {
@@ -162,31 +162,10 @@ class PopupBuyGangster extends Popup {
             this.sliderThumb.x = sliderThumbX + increaseX;
             this.sliderThumbText.x = sliderThumbX + increaseX;
 
-            const quantity = Math.floor(value * maxPurchase);
+            const quantity = Math.floor(value * maxPurchase) + 1;
             this.sliderThumbText.text = `+${quantity}`;
             this.quantity = quantity;
-            const totalMachines = this.numberOfMachines + quantity;
-            this.numberOfMachinesText.text = totalMachines;
-
-            const increasedNetworth = this.networthIncrease * quantity;
-            // this.networthText.text = `${this.networth + increasedNetworth}`;
-            this.networthIncreaseText.text = `+${increasedNetworth}`;
-
-            // this.rateText.text = `${(this.rateIncrease * totalMachines).toLocaleString()}`;
-            this.rateIncreaseText.text = `+${(this.rateIncrease * quantity).toLocaleString()} /d`;
-
-            const estimatedPrice = quantity * this.basePrice;
-            const roi = estimatedPrice
-              ? (((this.rateIncrease * quantity * this.tokenPrice) / estimatedPrice) * 100).toFixed(1)
-              : 0;
-            const remainingReservePercent = Math.pow(1 - this.reservePoolReward, quantity);
-            const bonus = this.reservePool * (1 - remainingReservePercent);
-
-            this.roiText.text = `${roi}%`;
-            this.bonusText.text = `${formatter.format(bonus)}`;
-            this.bonusCoin.x = this.bonusText.x + this.bonusText.width + 20;
-            this.priceText.text = `${formatter.format(estimatedPrice)}`;
-            this.coin.x = this.priceText.x + this.priceText.width + 20;
+            this.updateValues();
           }
         },
         space: {
@@ -201,23 +180,23 @@ class PopupBuyGangster extends Popup {
     this.sliderThumb = scene.add.image(sliderThumbX, sliderY + 35, 'slider-thumb').setOrigin(0.5, 1);
     this.sliderThumb.setDepth(5);
     this.sliderThumbText = scene.add
-      .text(sliderThumbX, sliderY - 85, `+0`, {
-        fontSize: '60px',
-        color: colors.black,
-        fontFamily: 'WixMadeforDisplayExtraBold',
-      })
+      .text(sliderThumbX, sliderY - 85, `+${DEFAULT_QUANTITY}`, largeBlackExtraBold)
       .setOrigin(0.5, 0.5);
     this.add(this.sliderThumb);
     this.add(this.sliderThumbText);
 
-    this.priceText = scene.add
-      .text(this.popup.x - this.popup.width / 2 + 170 + this.qtyText.width + sliderWidth, sliderY, '0', {
-        fontSize: '60px',
-        color: colors.black,
-        fontFamily: 'WixMadeforDisplayExtraBold',
-      })
-      .setOrigin(0, 0.5);
+    const priceTextX = this.popup.x - this.popup.width / 2 + 170 + this.qtyText.width + sliderWidth;
+    this.priceText = scene.add.text(priceTextX, sliderY, '0', largeBlackExtraBold).setOrigin(0, 0.5);
     this.add(this.priceText);
+    this.insufficientBalance = scene.add
+      .text(priceTextX, sliderY, 'Insufficient ETH', {
+        fontSize: fontSizes.small,
+        color: colors.black,
+        fontFamily: fontFamilies.bold,
+      })
+      .setOrigin(0, -1)
+      .setVisible(false);
+    this.add(this.insufficientBalance);
 
     this.coin = scene.add.image(this.priceText.x + this.priceText.width + 40, sliderY, 'eth-coin').setOrigin(0, 0.5);
     this.add(this.coin);
@@ -245,15 +224,36 @@ class PopupBuyGangster extends Popup {
         this.reservePool = reservePool;
         this.reservePoolReward = reservePoolReward;
 
-        this.numberOfMachinesText.text = `${numberOfMachines}`;
-        this.networthText.text = `${networth}`;
+        this.networthText.text = `${networth.toLocaleString()}`;
         this.rateText.text = `${formatter.format(numberOfMachines * dailyReward)}`;
-        this.bonusText.text = `${formatter.format(reservePool * reservePoolReward)}`;
-        this.bonusCoin.x = this.bonusText.x + this.bonusText.width + 50;
+        this.estimatedMaxPurchase = balance && basePrice ? Math.floor(balance / basePrice) : 0;
+        this.updateValues();
       }
     );
 
     scene.game.events.emit('request-machines');
+  }
+
+  updateValues() {
+    this.numberOfMachinesText.text = `${this.numberOfMachines + this.quantity}`;
+    this.networthIncreaseText.text = `+${(this.networthIncrease * this.quantity).toLocaleString()}`;
+    this.rateIncreaseText.text = `+${(this.rateIncrease * this.quantity).toLocaleString()} /d`;
+
+    const estimatedPrice = this.quantity * this.basePrice;
+    const roi = estimatedPrice
+      ? (((this.rateIncrease * this.quantity * this.tokenPrice) / estimatedPrice) * 100).toFixed(1)
+      : 0;
+    const remainingReservePercent = Math.pow(1 - this.reservePoolReward, this.quantity);
+    const bonus = this.reservePool * (1 - remainingReservePercent);
+
+    this.roiText.text = `${roi}%`;
+    this.bonusText.text = `${formatter.format(bonus)}`;
+    this.bonusCoin.x = this.bonusText.x + this.bonusText.width + 20;
+    this.priceText.text = `${formatter.format(estimatedPrice)}`;
+    this.coin.x = this.priceText.x + this.priceText.width + 20;
+
+    this.insufficientBalance.setVisible(this.quantity > this.estimatedMaxPurchase);
+    this.upgradeBtn.setDisabledState(this.quantity > this.estimatedMaxPurchase);
   }
 }
 

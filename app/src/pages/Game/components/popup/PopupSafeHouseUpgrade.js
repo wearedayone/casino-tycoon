@@ -7,6 +7,7 @@ import { formatter } from '../../../../utils/numbers';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
 
 const { width, height } = configs;
+const DEFAULT_QUANTITY = 1;
 const sliderWidth = 500;
 const largeBlackExtraBold = {
   fontSize: fontSizes.large,
@@ -22,7 +23,7 @@ class PopupSafeHouseUpgrade extends Popup {
   sold = 0;
   basePrice = 0;
   priceStep = 0;
-  quantity = 0;
+  quantity = DEFAULT_QUANTITY;
   slideValue = 0;
 
   constructor(scene) {
@@ -48,7 +49,7 @@ class PopupSafeHouseUpgrade extends Popup {
         scene.game.events.emit('upgrade-safehouse', { quantity: this.quantity });
       },
       'Upgrade',
-      { sound: 'buy' }
+      { sound: 'buy', disabledImage: 'button-disabled' }
     );
     this.add(this.upgradeBtn);
 
@@ -101,13 +102,13 @@ class PopupSafeHouseUpgrade extends Popup {
             }
             return;
           }
-          const estimatedMaxPurchase = estimateNumberOfBuildingCanBuy(
+          this.estimatedMaxPurchase = estimateNumberOfBuildingCanBuy(
             this.sold,
             this.balance,
             this.basePrice,
             this.priceStep
           );
-          const maxPurchase = Math.min(25, estimatedMaxPurchase);
+          const maxPurchase = Math.min(24, this.estimatedMaxPurchase);
 
           if (maxPurchase === 0) {
             if (this.slider) {
@@ -124,24 +125,10 @@ class PopupSafeHouseUpgrade extends Popup {
             this.sliderThumb.x = sliderThumbX + increaseX;
             this.sliderThumbText.x = sliderThumbX + increaseX;
 
-            const quantity = Math.floor(value * maxPurchase);
+            const quantity = Math.floor(value * maxPurchase) + 1;
             this.sliderThumbText.text = `+${quantity}`;
             this.quantity = quantity;
-            this.numberOfBuildingsText.text = `${this.numberOfBuildings + quantity}`;
-
-            const increasedNetworth = this.networthIncrease * quantity;
-            // this.networthText.text = `${this.networth + increasedNetworth}`;
-            this.networthIncreaseText.text = `+${increasedNetworth}`;
-
-            const estimatedPrice = calculateNextBuildingBuyPriceBatch(
-              this.sold,
-              quantity,
-              this.basePrice,
-              this.priceStep
-            ).total;
-
-            this.priceText.text = `${formatter.format(estimatedPrice)}`;
-            this.coin.x = this.priceText.x + this.priceText.width + 20;
+            this.updateValues();
           }
         },
         space: {
@@ -155,19 +142,24 @@ class PopupSafeHouseUpgrade extends Popup {
 
     this.sliderThumb = scene.add.image(sliderThumbX, sliderY + 35, 'slider-thumb').setOrigin(0.5, 1);
     this.sliderThumb.setDepth(5);
-    this.sliderThumbText = scene.add.text(sliderThumbX, sliderY - 85, `+0`, largeBlackExtraBold).setOrigin(0.5, 0.5);
+    this.sliderThumbText = scene.add
+      .text(sliderThumbX, sliderY - 85, `+${DEFAULT_QUANTITY}`, largeBlackExtraBold)
+      .setOrigin(0.5, 0.5);
     this.add(this.sliderThumb);
     this.add(this.sliderThumbText);
 
-    this.priceText = scene.add
-      .text(
-        this.popup.x - this.popup.width / 2 + 170 + this.qtyText.width + sliderWidth,
-        sliderY,
-        '0',
-        largeBlackExtraBold
-      )
-      .setOrigin(0, 0.5);
+    const priceTextX = this.popup.x - this.popup.width / 2 + 170 + this.qtyText.width + sliderWidth;
+    this.priceText = scene.add.text(priceTextX, sliderY, '0', largeBlackExtraBold).setOrigin(0, 0.5);
     this.add(this.priceText);
+    this.insufficientBalance = scene.add
+      .text(priceTextX, sliderY, 'Insufficient $FIAT', {
+        fontSize: fontSizes.small,
+        color: colors.black,
+        fontFamily: fontFamilies.bold,
+      })
+      .setOrigin(0, -1)
+      .setVisible(false);
+    this.add(this.insufficientBalance);
 
     this.coin = scene.add.image(this.priceText.x + this.priceText.width + 40, sliderY, 'coin2').setOrigin(0, 0.5);
     this.add(this.coin);
@@ -183,12 +175,31 @@ class PopupSafeHouseUpgrade extends Popup {
         this.networth = networth;
         this.networthIncrease = networthIncrease;
 
-        this.numberOfBuildingsText.text = `${numberOfBuildings}`;
-        this.networthText.text = `${networth}`;
+        this.networthText.text = `${networth.toLocaleString()}`;
+        this.estimatedMaxPurchase = estimateNumberOfBuildingCanBuy(sold, balance, basePrice, priceStep);
+        this.updateValues();
       }
     );
 
     scene.game.events.emit('request-buildings');
+  }
+
+  updateValues() {
+    this.numberOfBuildingsText.text = this.numberOfBuildings + this.quantity;
+    this.networthIncreaseText.text = `+${(this.networthIncrease * this.quantity).toLocaleString()}`;
+
+    const estimatedPrice = calculateNextBuildingBuyPriceBatch(
+      this.sold,
+      this.quantity,
+      this.basePrice,
+      this.priceStep
+    ).total;
+
+    this.priceText.text = `${formatter.format(estimatedPrice)}`;
+    this.coin.x = this.priceText.x + this.priceText.width + 20;
+
+    this.insufficientBalance.setVisible(this.quantity > this.estimatedMaxPurchase);
+    this.upgradeBtn.setDisabledState(this.quantity > this.estimatedMaxPurchase);
   }
 }
 
