@@ -102,39 +102,49 @@ class PopupWarHistory extends Popup {
         .setOrigin(0.5, -0.5);
 
       this.items.push(date, userVote, votePercent);
-
-      if (bonus) {
-        const userBonus = this.scene.add
-          .text(outcomeX - iconWidth, y, `+${customFormat(bonus || 0, 1)}`, {
-            ...smallBlackBoldCenter,
-            fontFamily: fontFamilies.extraBold,
-          })
-          .setOrigin(0.5, -0.5);
-        const coin = this.scene.add.image(outcomeX + userBonus.width / 2, y, 'icon-coin-mini').setOrigin(0.5, 0);
-
-        this.items.push(userBonus, coin);
-      } else if (penalty) {
-        const hasTwoPenalties = penalty.gangster * penalty.goon > 0;
-        const gangsterX = hasTwoPenalties ? outcomeX - penaltyOutcomeOffset : outcomeX;
-        const goonX = hasTwoPenalties ? outcomeX + penaltyOutcomeOffset : outcomeX;
-
-        if (penalty.gangster) {
-          const userPenalty = this.scene.add
-            .text(gangsterX - iconWidth, y, `-${penalty.gangster.toLocaleString()}`, smallBlackBoldCenter)
+      if (isWarEnabled) {
+        if (bonus) {
+          const userBonus = this.scene.add
+            .text(outcomeX - iconWidth, y, `+${customFormat(bonus || 0, 1)}`, {
+              ...smallBlackBoldCenter,
+              fontFamily: fontFamilies.extraBold,
+            })
             .setOrigin(0.5, -0.5);
-          const gangster = this.scene.add
-            .image(gangsterX + userPenalty.width / 2, y, 'icon-gangster-mini')
-            .setOrigin(0.5, 0);
+          const coin = this.scene.add.image(outcomeX + userBonus.width / 2, y, 'icon-coin-mini').setOrigin(0.5, 0);
 
-          this.items.push(userPenalty, gangster);
-        }
-        if (penalty.goon) {
-          const userPenalty = this.scene.add
-            .text(goonX - iconWidth, y, `-${penalty.goon.toLocaleString()}`, smallBlackBoldCenter)
+          this.items.push(userBonus, coin);
+        } else if (penalty) {
+          const hasTwoPenalties = penalty.gangster * penalty.goon > 0;
+          const gangsterX = hasTwoPenalties ? outcomeX - penaltyOutcomeOffset : outcomeX;
+          const goonX = hasTwoPenalties ? outcomeX + penaltyOutcomeOffset : outcomeX;
+
+          if (penalty.gangster) {
+            const userPenalty = this.scene.add
+              .text(gangsterX - iconWidth, y, `-${penalty.gangster.toLocaleString()}`, smallBlackBoldCenter)
+              .setOrigin(0.5, -0.5);
+            const gangster = this.scene.add
+              .image(gangsterX + userPenalty.width / 2, y, 'icon-gangster-mini')
+              .setOrigin(0.5, 0);
+
+            this.items.push(userPenalty, gangster);
+          }
+          if (penalty.goon) {
+            const userPenalty = this.scene.add
+              .text(goonX - iconWidth, y, `-${penalty.goon.toLocaleString()}`, smallBlackBoldCenter)
+              .setOrigin(0.5, -0.5);
+
+            const goon = this.scene.add.image(goonX + userPenalty.width / 2, y, 'icon-goon-mini').setOrigin(0.5, 0);
+            this.items.push(userPenalty, goon);
+          }
+        } else {
+          const userBonus = this.scene.add
+            .text(outcomeX, y, `War but safe`, {
+              ...smallBlackBoldCenter,
+              fontFamily: fontFamilies.extraBold,
+            })
             .setOrigin(0.5, -0.5);
 
-          const goon = this.scene.add.image(goonX + userPenalty.width / 2, y, 'icon-goon-mini').setOrigin(0.5, 0);
-          this.items.push(userPenalty, goon);
+          this.items.push(userBonus);
         }
       }
     }

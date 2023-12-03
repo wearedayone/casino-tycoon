@@ -27,7 +27,7 @@ class PopupDailyGangWar extends Popup {
     this.add(this.backBtn);
 
     this.peaceSound = scene.sound.add('toggle-1', { loop: false });
-    this.warSound = scene.sound.add('toggle-2', { loop: false });
+    this.warSound = scene.sound.add('war', { loop: false });
 
     this.warBonusX = this.popup.x + this.popup.width * 0.25;
     const warBonusY = this.popup.y - this.popup.height / 2 + this.popup.height * 0.455;

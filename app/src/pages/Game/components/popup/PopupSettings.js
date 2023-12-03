@@ -178,7 +178,9 @@ class PopupSettings extends Popup {
       soundBtnY,
       'button-green-long',
       'button-green-long-pressed',
-      () => scene.game.events.emit('toggle-game-sound'),
+      () => {
+        scene.game.events.emit('toggle-game-sound');
+      },
       this.scene.game.config.audio.mute ? 'Game Sound: Off' : 'Game Sound: On',
       {
         icon: this.scene.game.config.audio.mute ? 'icon-sound-off' : 'icon-sound-on',
@@ -223,6 +225,9 @@ class PopupSettings extends Popup {
     this.buttonSound.icon.setTexture(icon);
     this.scene.game.events.emit(isSoundOn ? 'music-on' : 'music-off');
     this.scene.game.sound.setMute(!isSoundOn);
+
+    this.btnSound = this.scene.sound.add('button-2', { loop: false });
+    this.btnSound.play();
   }
 
   updateValues({ username, address, avatarURL }) {

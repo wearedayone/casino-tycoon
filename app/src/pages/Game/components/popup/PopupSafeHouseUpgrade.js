@@ -28,6 +28,13 @@ class PopupSafeHouseUpgrade extends Popup {
 
   constructor(scene) {
     super(scene, 'popup-safehouse-upgrade', { ribbon: 'ribbon-safehouse-upgrade' });
+    this.popupBuyProcessing = new PopupProcessing(scene, {
+      sound: 'house',
+      completedEvent: 'upgrade-safehouse-completed',
+      completedIcon: 'icon-safehouse-upgrade-done',
+      description: `Upgrading Safehouse.\nPlease, wait`,
+    });
+    scene.add.existing(this.popupBuyProcessing);
 
     this.upgradeBtn = new TextButton(
       scene,
@@ -37,13 +44,7 @@ class PopupSafeHouseUpgrade extends Popup {
       'button-blue-pressed',
       () => {
         if (!this.quantity) return;
-        this.popupBuyProcessing = new PopupProcessing(scene, {
-          sound: 'house',
-          completedEvent: 'upgrade-safehouse-completed',
-          completedIcon: 'icon-safehouse-upgrade-done',
-          description: `Upgrading Safehouse.\nPlease, wait`,
-        });
-        scene.add.existing(this.popupBuyProcessing);
+        this.popupBuyProcessing.initLoading(`Upgrading Safehouse.\nPlease, wait`);
         this.close();
 
         scene.game.events.emit('upgrade-safehouse', { quantity: this.quantity });

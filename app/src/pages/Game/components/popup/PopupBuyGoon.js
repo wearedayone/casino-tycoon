@@ -31,7 +31,13 @@ class PopupBuyGoon extends Popup {
 
   constructor(scene) {
     super(scene, 'popup-buy-goon', { ribbon: 'ribbon-buy-goon' });
-
+    this.popupBuyProcessing = new PopupProcessing(scene, {
+      sound: 'minion',
+      completedEvent: 'buy-goon-completed',
+      completedIcon: 'icon-goon-buy-done',
+      description: ``,
+    });
+    scene.add.existing(this.popupBuyProcessing);
     this.upgradeBtn = new TextButton(
       scene,
       width / 2,
@@ -40,13 +46,9 @@ class PopupBuyGoon extends Popup {
       'button-blue-pressed',
       () => {
         if (!this.quantity) return;
-        this.popupBuyProcessing = new PopupProcessing(scene, {
-          sound: 'minion',
-          completedEvent: 'buy-goon-completed',
-          completedIcon: 'icon-goon-buy-done',
-          description: `Hiring ${this.quantity} Goon${this.quantity > 1 ? 's' : ''}.\nPlease, wait`,
-        });
-        scene.add.existing(this.popupBuyProcessing);
+        this.popupBuyProcessing.initLoading(
+          `Hiring ${this.quantity} Goon${this.quantity > 1 ? 's' : ''}.\nPlease, wait`
+        );
         this.close();
 
         scene.game.events.emit('buy-goon', { quantity: this.quantity });

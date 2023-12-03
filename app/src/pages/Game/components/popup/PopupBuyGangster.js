@@ -35,6 +35,13 @@ class PopupBuyGangster extends Popup {
     // child modals
     const popupBuyBonusInfo = new PopupBuyBonusInfo(scene, this);
     scene.add.existing(popupBuyBonusInfo);
+    this.popupBuyProcessing = new PopupProcessing(scene, {
+      sound: 'gangster',
+      completedEvent: 'buy-gangster-completed',
+      completedIcon: 'icon-gangster-buy-done',
+      description: '',
+    });
+    scene.add.existing(this.popupBuyProcessing);
 
     this.upgradeBtn = new TextButton(
       scene,
@@ -44,13 +51,9 @@ class PopupBuyGangster extends Popup {
       'button-blue-pressed',
       () => {
         if (!this.quantity) return;
-        this.popupBuyProcessing = new PopupProcessing(scene, {
-          sound: 'gangster',
-          completedEvent: 'buy-gangster-completed',
-          completedIcon: 'icon-gangster-buy-done',
-          description: `Hiring ${this.quantity} Gangster${this.quantity > 1 ? 's' : ''}.\nPlease, wait`,
-        });
-        scene.add.existing(this.popupBuyProcessing);
+        this.popupBuyProcessing.initLoading(
+          `Hiring ${this.quantity} Gangster${this.quantity > 1 ? 's' : ''}.\nPlease, wait`
+        );
         this.close();
 
         scene.game.events.emit('buy-gangster', { quantity: this.quantity });

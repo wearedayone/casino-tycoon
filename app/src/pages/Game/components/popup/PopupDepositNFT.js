@@ -102,15 +102,16 @@ class PopupDepositNFT extends Popup {
     );
     this.add(buttonBack);
     this.add(this.buttonStake);
+    this.popupProcessing = new PopupProcessing(scene, {
+      completedEvent: 'deposit-nft-completed',
+      completedIcon: 'icon-nft-done',
+      description: `Staking may take a few minutes.`,
+    });
+    scene.add.existing(this.popupProcessing);
 
     scene.game.events.on('update-wallet-nft-balance', (data) => this.updateBalance(data));
     scene.game.events.on('deposit-nft-started', () => {
-      this.popupProcessing = new PopupProcessing(scene, {
-        completedEvent: 'deposit-nft-completed',
-        completedIcon: 'icon-nft-done',
-        description: `Staking may take a few minutes.`,
-      });
-      scene.add.existing(this.popupProcessing);
+      this.popupProcessing.initLoading(`Staking may take a few minutes.`);
       this.close();
     });
   }

@@ -7,8 +7,7 @@ const { width } = configs;
 
 class PopupProcessing extends Popup {
   constructor(scene, { sound, completedEvent, completedIcon, description }) {
-    super(scene, 'popup-small', { title: 'Almost done', openOnCreate: true });
-
+    super(scene, 'popup-small', { title: 'Almost done', openOnCreate: false });
     const startingY = this.popup.y - this.popup.height / 2;
     const iconY = startingY + 320;
     const titleY = iconY + 160;
@@ -18,6 +17,7 @@ class PopupProcessing extends Popup {
     if (sound) this.doneSound = scene.sound.add(sound, { loop: false });
     this.icon = scene.add.image(width / 2, iconY, 'icon-loading');
     this.iconDone = scene.add.image(width / 2, iconY, completedIcon);
+    this.iconDone.setVisible(false);
     this.title = scene.add
       .text(width / 2, titleY, 'Processing...', {
         fontSize: '100px',
@@ -37,6 +37,7 @@ class PopupProcessing extends Popup {
       .setOrigin(0.5, 0.5);
 
     this.add(this.icon);
+    this.add(this.iconDone);
     this.add(this.title);
     this.add(descriptionContainer);
     this.add(this.description);
@@ -58,10 +59,9 @@ class PopupProcessing extends Popup {
       this.doneSound?.play();
 
       // icons
-      this.loadingAnimation.stop();
+      this.loadingAnimation.pause();
       this.icon.setVisible(false);
-      this.add(this.iconDone);
-
+      this.iconDone.setVisible(true);
       if (completedEvent === 'buy-gangster-completed') {
         const { txnHash, quantity } = data;
         this.popupTxnCompleted = new PopupTxnCompleted(
@@ -87,6 +87,18 @@ class PopupProcessing extends Popup {
         this.close();
       }
     });
+  }
+
+  initLoading(description) {
+    console.log('init loading');
+    this.loading = true;
+    this.description.text = description;
+    this.setTitle(`Processing`);
+    this.title.text = 'Processing...';
+    this.loadingAnimation.resume();
+    this.icon.setVisible(true);
+    this.iconDone.setVisible(false);
+    this.setVisible(true);
   }
 }
 
