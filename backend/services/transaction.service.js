@@ -19,8 +19,6 @@ import {
 } from './worker.service.js';
 import logger from '../utils/logger.js';
 import environments from '../utils/environments.js';
-import { ethers } from 'ethers';
-import { use } from 'chai';
 
 const { TOKEN_ADDRESS, SYSTEM_ADDRESS, GAME_CONTRACT_ADDRESS } = environments;
 
