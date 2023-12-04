@@ -1,20 +1,28 @@
 {
   "projects": {
-    "default": "casino-tycoon-14684",
-    "prd": "gangster-arena-d53fa"
+    "dev": "casino-tycoon-14684",
+    "prd": "gangster-arena-prd",
+    "stg": "gangster-arena-d53fa"
   },
   "targets": {
     "casino-tycoon-14684": {
       "hosting": {
-        "app-stg": [
+        "app-dev": [
           "casino-tycoon-14684"
         ]
       }
     },
     "gangster-arena-d53fa": {
       "hosting": {
-        "app-prd": [
+        "app-stg": [
           "gangster-arena-d53fa"
+        ]
+      }
+    },
+    "gangster-arena-prd": {
+      "hosting": {
+        "app-prd": [
+          "gangster-arena-prd"
         ]
       }
     }

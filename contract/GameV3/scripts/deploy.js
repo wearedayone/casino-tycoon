@@ -30,6 +30,11 @@ async function main() {
   const GangsterArenaContractAddress = await GangsterArenaContract.getAddress();
   console.log(`Game contract is deployed to ${GangsterArenaContractAddress}`);
 
+  // Pre-config
+  await GangsterArenaContract.setTokenMaxSupply([0, 10000]);
+  const minterRole = await GangsterNFT.MINTER_ROLE();
+  await GangsterNFT.grantRole(minterRole, GangsterArenaContractAddress);
+
   fs.writeFileSync(
     './contracts.txt',
     `FIATToken = ${FIATTokenAddress}\nNFT contract = ${GangsterNFTAddress}\nGame contract = ${GangsterArenaContractAddress}`,

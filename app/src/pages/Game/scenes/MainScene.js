@@ -55,7 +55,7 @@ class MainScene extends Phaser.Scene {
   }
 
   preload() {
-    this.bgMusic = this.sound.add('bg', { loop: true, volume: 0.25 });
+    this.bgMusic = this.sound.add('bg', { loop: true, volume: 0.15 });
 
     this.background = new Background(this, 'bg');
     this.add.existing(this.background);

@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "start": "env-cmd -f .env.prd node index.js",
-    "dev": "env-cmd -f .env.stg nodemon index.js"
+    "stg": "env-cmd -f .env.stg nodemon index.js",
+    "dev": "env-cmd -f .env.dev nodemon index.js"
   },
   "dependencies": {
     "alchemy-sdk": "^2.10.1",

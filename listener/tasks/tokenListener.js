@@ -6,7 +6,7 @@ import alchemy from '../configs/alchemy.config.js';
 import environments from '../utils/environments.js';
 import logger from '../utils/logger.js';
 
-const { TOKEN_ADDRESS, NETWORK_ID } = environments;
+const { TOKEN_ADDRESS, NETWORK_ID, GAME_CONTRACT_ADDRESS } = environments;
 
 const tokenListener = async () => {
   const ethersProvider = await alchemy.config.getWebSocketProvider();
@@ -35,26 +35,28 @@ const processTransferEvent = async ({ from, to, value, event, contract }) => {
     logger.info({ from, to, value, event });
     const { transactionHash } = event;
     const newBalanceFrom = await contract.balanceOf(from);
-    await updateBalance({
-      address: from.toLowerCase(),
-      newBalance: parseFloat(formatEther(newBalanceFrom)).toFixed(6),
-    });
-
-    // await createTransaction({
-    //   address: from.toLowerCase(),
-    //   type: 'withdraw',
-    //   txnHash: transactionHash,
-    //   token: 'FIAT',
-    //   amount: Number(parseFloat(formatEther(value)).toFixed(6)),
-    //   status: 'Success',
-    //   value: 0,
-    // });
+    if (from.toLowerCase() == GAME_CONTRACT_ADDRESS.toLowerCase()) {
+      updatePoolReserve({
+        newBalance: parseFloat(formatEther(newBalanceFrom)).toFixed(6),
+      });
+    } else {
+      await updateBalance({
+        address: from.toLowerCase(),
+        newBalance: parseFloat(formatEther(newBalanceFrom)).toFixed(6),
+      });
+    }
 
     const newBalanceTo = await contract.balanceOf(to);
-    await updateBalance({
-      address: to.toLowerCase(),
-      newBalance: parseFloat(formatEther(newBalanceTo)).toFixed(6),
-    });
+    if (to.toLowerCase() == GAME_CONTRACT_ADDRESS.toLowerCase()) {
+      updatePoolReserve({
+        newBalance: parseFloat(formatEther(newBalanceTo)).toFixed(6),
+      });
+    } else {
+      await updateBalance({
+        address: to.toLowerCase(),
+        newBalance: parseFloat(formatEther(newBalanceTo)).toFixed(6),
+      });
+    }
   } catch (err) {
     logger.error(err);
   }
@@ -70,6 +72,19 @@ const updateBalance = async ({ address, newBalance }) => {
     .doc(userId)
     .update({
       tokenBalance: Number(newBalance),
+    });
+};
+
+const updatePoolReserve = async ({ newBalance }) => {
+  logger.info({ newBalance: Number(newBalance) });
+  const system = await firestore.collection('system').doc('default').get();
+  if (!system.exists) return;
+  const { activeSeasonId } = system.data();
+  await firestore
+    .collection('season')
+    .doc(activeSeasonId)
+    .update({
+      reservePool: Number(newBalance),
     });
 };
 

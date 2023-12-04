@@ -4,6 +4,11 @@
   "main": "index.js",
   "type": "module",
   "license": "MIT",
+  "scripts": {
+    "stg": "env-cmd -f .env.stg node tasks/seed.js",
+    "prd": "env-cmd -f .env.prd node tasks/seed.js",
+    "dev": "env-cmd -f .env.dev node tasks/seed.js"
+  },
   "dependencies": {
     "dotenv": "^16.3.1",
     "firebase-admin": "^11.11.0",

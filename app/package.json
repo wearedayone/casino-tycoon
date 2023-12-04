@@ -2,6 +2,17 @@
   "name": "app",
   "version": "0.1.0",
   "private": true,
+  "scripts": {
+    "dev": "env-cmd -f .env.dev react-scripts start",
+    "stg": "env-cmd -f .env.stg react-scripts start",
+    "start": "env-cmd -f .env.prd react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "serve": "npx serve -s build",
+    "build-stg": "env-cmd -f .env.stg react-scripts build",
+    "build-prd": "env-cmd -f .env.prd react-scripts build"
+  },
   "dependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@emotion/react": "^11.11.1",
@@ -43,16 +54,6 @@
     "workbox-strategies": "^6.4.2",
     "workbox-streams": "^6.4.2",
     "zustand": "^4.4.3"
-  },
-  "scripts": {
-    "dev": "env-cmd -f .env.stg react-scripts start",
-    "start": "env-cmd -f .env.prd react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "serve": "npx serve -s build",
-    "build-stg": "env-cmd -f .env.stg react-scripts build",
-    "build-prd": "env-cmd -f .env.prd react-scripts build"
   },
   "eslintConfig": {
     "extends": [

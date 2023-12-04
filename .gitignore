@@ -1,6 +1,7 @@
 */.env
 */.env.stg
 */.env.prd
+*/.env.dev
 */secret.json
 
 # contract secrets

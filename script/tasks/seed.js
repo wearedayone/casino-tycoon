@@ -21,9 +21,22 @@ const rankingRewards =
         { rankStart: 26, rankEnd: 50, share: 0.003 },
         { rankStart: 51, rankEnd: 100, share: 0.0015 },
       ]
+    : ENVIRONMENT === 'staging'
+    ? [
+        { rankStart: 1, rankEnd: 1, share: 0.3 },
+        { rankStart: 2, rankEnd: 2, share: 0.19 },
+        { rankStart: 3, rankEnd: 3, share: 0.14 },
+        { rankStart: 4, rankEnd: 4, share: 0.1 },
+        { rankStart: 5, rankEnd: 5, share: 0.07 },
+        { rankStart: 6, rankEnd: 6, share: 0.06 },
+        { rankStart: 7, rankEnd: 7, share: 0.05 },
+        { rankStart: 8, rankEnd: 8, share: 0.04 },
+        { rankStart: 9, rankEnd: 9, share: 0.03 },
+        { rankStart: 10, rankEnd: 10, share: 0.02 },
+      ]
     : [
         { rankStart: 1, rankEnd: 1, share: 0.3 },
-        { rankStart: 2, rankEnd: 2, share: 0.2 },
+        { rankStart: 2, rankEnd: 2, share: 0.19 },
         { rankStart: 3, rankEnd: 3, share: 0.14 },
         { rankStart: 4, rankEnd: 4, share: 0.1 },
         { rankStart: 5, rankEnd: 5, share: 0.07 },
@@ -44,18 +57,14 @@ const main = async () => {
     .collection('system')
     .doc('default')
     .set({
-      machine: {
-        basePrice: 0.0069, // for staging
-        dailyReward: 1000,
-        networth: 10,
-      },
-      worker: { basePrice: 1000, priceStep: 5, dailyReward: 500, networth: 3 },
-      building: { basePrice: 3000, priceStep: 10, dailyReward: 0, networth: 8 },
+      machine: { basePrice: 0.001, dailyReward: 1000, networth: 5 },
+      worker: { basePrice: 250, priceStep: 5, dailyReward: 100, networth: 3 },
+      building: { basePrice: 500, priceStep: 10, dailyReward: 0, networth: 4 },
       activeSeasonId,
-      appVersion: '0.9.1',
+      appVersion: '0.9.9',
     });
   await firestore.collection('system').doc('market').set({
-    nftPrice: '0.0042',
+    nftPrice: '0.001',
     tokenPrice: '0.00001',
   });
   await firestore.collection('system').doc('data').set({ nonce: 0 });
@@ -78,17 +87,13 @@ const main = async () => {
       prizePool: 0,
       reservePool: 0,
       reservePoolReward: 0.01,
-      timeStepInHours: 1,
+      timeStepInHours: 0.25,
       machineSold: 0,
       workerSold: 0,
       buildingSold: 0,
-      machine: {
-        basePrice: 0.0069, // for staging
-        dailyReward: 1000,
-        networth: 10,
-      },
-      worker: { basePrice: 1000, priceStep: 5, dailyReward: 500, networth: 3 },
-      building: { basePrice: 3000, priceStep: 10, dailyReward: 0, networth: 8 },
+      machine: { basePrice: 0.001, dailyReward: 1000, networth: 5 },
+      worker: { basePrice: 250, priceStep: 5, dailyReward: 100, networth: 3 },
+      building: { basePrice: 500, priceStep: 10, dailyReward: 0, networth: 4 },
       status: 'open',
       rankingRewards,
       houseLevels: [
@@ -128,13 +133,9 @@ const main = async () => {
         machineSold: 0,
         workerSold: 0,
         buildingSold: 0,
-        machine: {
-          basePrice: 0.0069,
-          dailyReward: 1000,
-          networth: 10,
-        },
-        worker: { basePrice: 1000, priceStep: 5, dailyReward: 500, networth: 3 },
-        building: { basePrice: 3000, priceStep: 10, dailyReward: 0, networth: 8 },
+        machine: { basePrice: 0.001, dailyReward: 1000, networth: 5 },
+        worker: { basePrice: 250, priceStep: 5, dailyReward: 100, networth: 3 },
+        building: { basePrice: 500, priceStep: 10, dailyReward: 0, networth: 4 },
       },
     });
   console.log('created season log');

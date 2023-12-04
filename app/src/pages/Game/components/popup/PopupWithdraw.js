@@ -129,10 +129,11 @@ class PopupWithdraw extends Popup {
     });
 
     scene.game.events.on('update-balances-for-withdraw', (data) => this.updateValues(data));
+    scene.game.events.emit('request-balances-for-withdraw');
   }
 
   onOpen() {
-    this.scene.game.events.emit('request-balances-for-withdraw');
+    // this.scene.game.events.emit('request-balances-for-withdraw');
   }
 
   updateValues({ ETHBalance, tokenBalance, NFTBalance }) {

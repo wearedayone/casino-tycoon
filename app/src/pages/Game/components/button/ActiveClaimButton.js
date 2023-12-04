@@ -53,7 +53,7 @@ class ActiveClaimButton extends Button {
       this.coinImage?.setVisible(true);
       this.text.text = 'Claim';
       this.text.x = -30;
-      scene.game.events.emit('update-claimable-status', { claimable: false });
+      scene.game.events.emit('update-claimable-status', { claimable: false, active: true });
     });
 
     scene.game.events.on('update-claimable-reward', ({ reward }) => {
