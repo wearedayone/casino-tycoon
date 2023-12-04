@@ -113,12 +113,13 @@ class PopupWarHistory extends Popup {
           const coin = this.scene.add.image(outcomeX + userBonus.width / 2, y, 'icon-coin-mini').setOrigin(0.5, 0);
 
           this.items.push(userBonus, coin);
-        } else if (penalty) {
-          const hasTwoPenalties = penalty.gangster * penalty.goon > 0;
-          const gangsterX = hasTwoPenalties ? outcomeX - penaltyOutcomeOffset : outcomeX;
-          const goonX = hasTwoPenalties ? outcomeX + penaltyOutcomeOffset : outcomeX;
+        } else {
+          const hasNoPenalties = penalty?.gangster + penalty?.goon === 0;
+          const hasTwoPenalties = penalty?.gangster * penalty?.goon > 0;
+          const gangsterX = hasTwoPenalties || hasNoPenalties ? outcomeX - penaltyOutcomeOffset : outcomeX;
+          const goonX = hasTwoPenalties || hasNoPenalties ? outcomeX + penaltyOutcomeOffset : outcomeX;
 
-          if (penalty.gangster) {
+          if (penalty?.gangster) {
             const userPenalty = this.scene.add
               .text(gangsterX - iconWidth, y, `-${penalty.gangster.toLocaleString()}`, smallBlackBoldCenter)
               .setOrigin(0.5, -0.5);
@@ -128,7 +129,7 @@ class PopupWarHistory extends Popup {
 
             this.items.push(userPenalty, gangster);
           }
-          if (penalty.goon) {
+          if (penalty?.goon) {
             const userPenalty = this.scene.add
               .text(goonX - iconWidth, y, `-${penalty.goon.toLocaleString()}`, smallBlackBoldCenter)
               .setOrigin(0.5, -0.5);
@@ -136,16 +137,26 @@ class PopupWarHistory extends Popup {
             const goon = this.scene.add.image(goonX + userPenalty.width / 2, y, 'icon-goon-mini').setOrigin(0.5, 0);
             this.items.push(userPenalty, goon);
           }
-        } else {
-          const userBonus = this.scene.add
-            .text(outcomeX, y, `War but safe`, {
-              ...smallBlackBoldCenter,
-              fontFamily: fontFamilies.extraBold,
-            })
-            .setOrigin(0.5, -0.5);
 
-          this.items.push(userBonus);
+          if (hasNoPenalties) {
+            const gangsterPenalty = this.scene.add
+              .text(gangsterX - iconWidth, y, `-0`, smallBlackBoldCenter)
+              .setOrigin(0.5, -0.5);
+            const gangster = this.scene.add
+              .image(gangsterX + gangsterPenalty.width / 2, y, 'icon-gangster-mini')
+              .setOrigin(0.5, 0);
+            const goonPenalty = this.scene.add
+              .text(goonX - iconWidth, y, `-0`, smallBlackBoldCenter)
+              .setOrigin(0.5, -0.5);
+            const goon = this.scene.add.image(goonX + goonPenalty.width / 2, y, 'icon-goon-mini').setOrigin(0.5, 0);
+
+            this.items.push(gangsterPenalty, gangster);
+            this.items.push(goonPenalty, goon);
+          }
         }
+      } else {
+        const safeText = this.scene.add.text(outcomeX, y, `Safe`, smallBlackBoldCenter).setOrigin(0.5, -0.5);
+        this.items.push(safeText);
       }
     }
     this.contentContainer.add(this.items);
