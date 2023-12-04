@@ -42,7 +42,7 @@ const Game = () => {
   const market = useSystemStore((state) => state.market);
   const sound = useSettingStore((state) => state.sound);
   const toggleSound = useSettingStore((state) => state.toggleSound);
-  const { getNFTBalance, withdrawToken, withdrawETH, withdrawNFT, stakeNFT, buyWorkerOrBuilding, buyMachine } =
+  const { getNFTBalance, withdrawToken, withdrawETH, withdrawNFT, stakeNFT, buySafeHouse, buyMachine, buyGoon } =
     useSmartContract();
   const { ready, authenticated, user, exportWallet: exportWalletPrivy, logout } = usePrivy();
   const [isLeaderboardModalOpen, setLeaderboardModalOpen] = useState(false);
@@ -167,17 +167,35 @@ const Game = () => {
     }
   };
 
-  const buy = async (buyType, quantity) => {
+  const buyBuilding = async (quantity) => {
     try {
-      const res = await create({ type: buyType, amount: quantity });
-      const { id, amount, value, type } = res.data;
-      const receipt = await buyWorkerOrBuilding(amount, value, type);
+      const res = await create({ type: 'buy-building', amount: quantity });
+      console.log(res);
+      const { amount, value, nonce, signature } = res.data;
+      const receipt = await buySafeHouse(amount, value, nonce, signature);
+
       if (receipt.status === 1) {
-        await validate({ transactionId: id, txnHash: receipt.transactionHash });
+        enqueueSnackbar(`Upgrade safehouse successfully`, {
+          variant: 'success',
+        });
       }
-      enqueueSnackbar(`${buyType === 'buy-building' ? 'Upgrade safehouse' : 'Buy goon'} successfully`, {
-        variant: 'success',
-      });
+    } catch (err) {
+      enqueueSnackbar('Insufficient $FIAT or ETH', { variant: 'error' });
+      console.error(err);
+    }
+  };
+
+  const buyWorker = async (quantity) => {
+    try {
+      const res = await create({ type: 'buy-worker', amount: quantity });
+      console.log(res);
+      const { amount, value, nonce, signature } = res.data;
+      const receipt = await buyGoon({ amount, value, nonce, signature });
+      if (receipt.status === 1) {
+        enqueueSnackbar(`Buy goon successfully`, {
+          variant: 'success',
+        });
+      }
     } catch (err) {
       enqueueSnackbar('Insufficient $FIAT or ETH', { variant: 'error' });
       console.error(err);
@@ -390,7 +408,7 @@ const Game = () => {
 
       gameRef.current?.events.on('upgrade-safehouse', async ({ quantity }) => {
         try {
-          await buy('buy-building', quantity);
+          await buyBuilding(quantity);
           gameRef.current?.events.emit('upgrade-safehouse-completed');
         } catch (err) {
           console.error(err);
@@ -411,7 +429,7 @@ const Game = () => {
 
       gameRef.current?.events.on('buy-goon', async ({ quantity }) => {
         try {
-          await buy('buy-worker', quantity);
+          await buyWorker(quantity);
           gameRef.current?.events.emit('buy-goon-completed');
         } catch (err) {
           console.error(err);

@@ -1,5 +1,6 @@
 import { Contract } from '@ethersproject/contracts';
 import { Wallet } from '@ethersproject/wallet';
+import { ethers } from 'ethers';
 import { formatBytes32String } from '@ethersproject/strings';
 import { getParsedEthersError } from '@enzoferey/ethers-error-parser';
 
@@ -230,4 +231,24 @@ export const isMinted = async (address) => {
 
   const minted = await gameContract.mintedAddess(address);
   return minted;
+};
+
+export const signMessage = async (message) => {
+  const workerWallet = await getWorkerWallet();
+  const signature = await workerWallet.signMessage(ethers.toBeArray(message));
+  return signature;
+};
+
+export const signMessageBuyGoon = async ({ address, amount, value, nonce }) => {
+  const workerWallet = await getWorkerWallet();
+  console.log({ address, amount, value: value.toString(10), nonce });
+  let message = ethers.solidityPackedKeccak256(
+    // Array of types: declares the data types in the message.
+    ['address', 'uint256', 'uint256', 'uint256'],
+    // Array of values: actual values of the parameters to be hashed.
+    [address, amount, value.toString(10), nonce]
+  );
+
+  const signature = await workerWallet.signMessage(ethers.toBeArray(message));
+  return signature;
 };

@@ -3,7 +3,9 @@
     {
       "inputs": [
         { "internalType": "address", "name": "initialOwner", "type": "address" },
-        { "internalType": "address", "name": "gangsterAddress", "type": "address" }
+        { "internalType": "address", "name": "_signerAddress", "type": "address" },
+        { "internalType": "address", "name": "gangsterAddress", "type": "address" },
+        { "internalType": "address", "name": "fiatAddress", "type": "address" }
       ],
       "stateMutability": "nonpayable",
       "type": "constructor"
@@ -26,6 +28,26 @@
         { "indexed": false, "internalType": "uint256[]", "name": "amount", "type": "uint256[]" }
       ],
       "name": "Burn",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        { "indexed": false, "internalType": "address", "name": "to", "type": "address" },
+        { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" },
+        { "indexed": false, "internalType": "uint256", "name": "nonce", "type": "uint256" }
+      ],
+      "name": "BuyGoon",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        { "indexed": false, "internalType": "address", "name": "to", "type": "address" },
+        { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" },
+        { "indexed": false, "internalType": "uint256", "name": "nonce", "type": "uint256" }
+      ],
+      "name": "BuySafeHouse",
       "type": "event"
     },
     {
@@ -117,6 +139,30 @@
         { "internalType": "uint256[]", "name": "amount", "type": "uint256[]" }
       ],
       "name": "burnNFT",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        { "internalType": "uint256", "name": "amount", "type": "uint256" },
+        { "internalType": "uint256", "name": "value", "type": "uint256" },
+        { "internalType": "uint256", "name": "nonce", "type": "uint256" },
+        { "internalType": "bytes", "name": "sig", "type": "bytes" }
+      ],
+      "name": "buyGoon",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        { "internalType": "uint256", "name": "amount", "type": "uint256" },
+        { "internalType": "uint256", "name": "value", "type": "uint256" },
+        { "internalType": "uint256", "name": "nonce", "type": "uint256" },
+        { "internalType": "bytes", "name": "sig", "type": "bytes" }
+      ],
+      "name": "buySafeHouse",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -273,13 +319,6 @@
       "type": "function"
     },
     {
-      "inputs": [{ "internalType": "address", "name": "_signer", "type": "address" }],
-      "name": "setSignerAddress",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
       "inputs": [{ "internalType": "uint256[]", "name": "_tokenMaxSupplies", "type": "uint256[]" }],
       "name": "setTokenMaxSupply",
       "outputs": [],
@@ -298,8 +337,8 @@
     },
     {
       "inputs": [],
-      "name": "token",
-      "outputs": [{ "internalType": "contract Gangster", "name": "", "type": "address" }],
+      "name": "tokenFiat",
+      "outputs": [{ "internalType": "contract FIAT", "name": "", "type": "address" }],
       "stateMutability": "view",
       "type": "function"
     },
@@ -307,6 +346,13 @@
       "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
       "name": "tokenMaxSupply",
       "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "tokenNFT",
+      "outputs": [{ "internalType": "contract Gangster", "name": "", "type": "address" }],
       "stateMutability": "view",
       "type": "function"
     },

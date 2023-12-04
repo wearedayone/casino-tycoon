@@ -9,10 +9,18 @@ import {
   calculateReservePoolBonus,
 } from '../utils/formulas.js';
 import alchemy from '../configs/alchemy.config.js';
-import { formatEther } from '@ethersproject/units';
-import { claimToken as claimTokenTask, claimTokenBonus, decodeTokenTxnLogs, isMinted } from './worker.service.js';
+import { formatEther, parseEther } from '@ethersproject/units';
+import {
+  claimToken as claimTokenTask,
+  claimTokenBonus,
+  decodeTokenTxnLogs,
+  isMinted,
+  signMessageBuyGoon,
+} from './worker.service.js';
 import logger from '../utils/logger.js';
 import environments from '../utils/environments.js';
+import { ethers } from 'ethers';
+import { use } from 'chai';
 
 const { TOKEN_ADDRESS, SYSTEM_ADDRESS, GAME_CONTRACT_ADDRESS } = environments;
 
@@ -77,21 +85,44 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       break;
   }
 
+  // TODO: fix duplicate nonce
+  await firestore
+    .collection('system')
+    .doc('data')
+    .update({
+      nonce: admin.firestore.FieldValue.increment(1),
+    });
+  const systemData = await firestore.collection('system').doc('data').get();
+  const { nonce } = systemData.data();
   const transaction = {
     userId,
     seasonId: activeSeason.id,
     type,
     txnHash: '',
     status: 'Pending',
+    nonce,
     ...txnData,
   };
-
   console.log('transaction', transaction);
 
   const newTransaction = await firestore.collection('transaction').add({
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
     ...transaction,
   });
+
+  if (type === 'buy-worker' || type === 'buy-building') {
+    const userData = await firestore.collection('user').doc(userId).get();
+    if (userData.exists) {
+      const { address } = userData.data();
+      const signature = await signMessageBuyGoon({
+        address: address,
+        amount: txnData.amount,
+        value: parseEther(txnData.value + ''),
+        nonce: nonce,
+      });
+      return { id: newTransaction.id, ...transaction, signature };
+    }
+  }
 
   return { id: newTransaction.id, ...transaction };
 };

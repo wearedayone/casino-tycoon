@@ -34,6 +34,15 @@ const gangsterArenaListener = async () => {
       await processBurnEvent({ from: from[i], to: to[i], amount: amount[i], event, contract });
     }
   });
+
+  contract.on(GangsterEvent.BuyGoon, async (to, amount, nonce, event) => {
+    await firestore.collection('web3Listener').doc(NETWORK_ID).update({ lastBlock: event.blockNumber });
+    await processBuyGoonEvent({ to, amount, nonce, event, contract });
+  });
+  contract.on(GangsterEvent.BuySafeHouse, async (to, amount, nonce, event) => {
+    await firestore.collection('web3Listener').doc(NETWORK_ID).update({ lastBlock: event.blockNumber });
+    await processBuySafeHouseEvent({ to, amount, nonce, event, contract });
+  });
 };
 
 // export const queryEvent = async (fromBlock) => {
@@ -134,6 +143,42 @@ const processBurnEvent = async ({ from, to, amount, event, contract }) => {
   }
 };
 
+const processBuyGoonEvent = async ({ to, amount, nonce, event, contract }) => {
+  try {
+    logger.info('process event');
+    logger.info({ to, amount, nonce, event });
+    const { transactionHash } = event;
+    console.log(Number(nonce.toString()));
+    await increaseGoon({ address: to, amount: Number(amount.toString()) });
+    // handle in backend
+    const txn = await firestore.collection('transaction').where('nonce', '==', Number(nonce.toString())).limit(1).get();
+    if (!txn.empty) {
+      const txnId = txn.docs[0].id;
+      const txnData = txn.docs[0].data();
+    }
+  } catch (err) {
+    logger.error(err);
+  }
+};
+
+const processBuySafeHouseEvent = async ({ to, amount, nonce, event, contract }) => {
+  try {
+    logger.info('process event');
+    logger.info({ to, amount, nonce, event });
+    const { transactionHash } = event;
+    console.log(Number(nonce.toString()));
+    await increaseSafeHouse({ address: to, amount: Number(amount.toString()) });
+    // handle in backend
+    const txn = await firestore.collection('transaction').where('nonce', '==', Number(nonce.toString())).limit(1).get();
+    if (!txn.empty) {
+      const txnId = txn.docs[0].id;
+      const txnData = txn.docs[0].data();
+    }
+  } catch (err) {
+    logger.error(err);
+  }
+};
+
 const createTransaction = async ({ address, ...data }) => {
   const system = await firestore.collection('system').doc('default').get();
   const { activeSeasonId } = system.data();
@@ -184,6 +229,64 @@ const updateNumberOfGangster = async ({ address, newBalance, active = false }) =
             pendingReward: admin.firestore.FieldValue.increment(generatedReward),
           });
       }
+    }
+  }
+};
+
+const increaseGoon = async ({ address, amount }) => {
+  console.log({ address, amount });
+  const system = await firestore.collection('system').doc('default').get();
+  const { activeSeasonId } = system.data();
+  const user = await firestore.collection('user').where('address', '==', address.toLowerCase()).limit(1).get();
+  if (!user.empty) {
+    console.log('get Game play');
+    const gamePlay = await firestore
+      .collection('gamePlay')
+      .where('userId', '==', user.docs[0].id)
+      .where('seasonId', '==', activeSeasonId)
+      .limit(1)
+      .get();
+    if (!gamePlay.empty) {
+      const now = Date.now();
+      const generatedReward = await calculateGeneratedReward(user.docs[0].id);
+      console.log('Update Game play');
+      await firestore
+        .collection('gamePlay')
+        .doc(gamePlay.docs[0].id)
+        .update({
+          numberOfWorkers: admin.firestore.FieldValue.increment(amount),
+          startRewardCountingTime: admin.firestore.Timestamp.fromMillis(now),
+          pendingReward: admin.firestore.FieldValue.increment(generatedReward),
+        });
+    }
+  }
+};
+
+const increaseSafeHouse = async ({ address, amount }) => {
+  console.log({ address, amount });
+  const system = await firestore.collection('system').doc('default').get();
+  const { activeSeasonId } = system.data();
+  const user = await firestore.collection('user').where('address', '==', address.toLowerCase()).limit(1).get();
+  if (!user.empty) {
+    console.log('get Game play');
+    const gamePlay = await firestore
+      .collection('gamePlay')
+      .where('userId', '==', user.docs[0].id)
+      .where('seasonId', '==', activeSeasonId)
+      .limit(1)
+      .get();
+    if (!gamePlay.empty) {
+      const now = Date.now();
+      const generatedReward = await calculateGeneratedReward(user.docs[0].id);
+      console.log('Update Game play');
+      await firestore
+        .collection('gamePlay')
+        .doc(gamePlay.docs[0].id)
+        .update({
+          numberOfBuildings: admin.firestore.FieldValue.increment(amount),
+          startRewardCountingTime: admin.firestore.Timestamp.fromMillis(now),
+          pendingReward: admin.firestore.FieldValue.increment(generatedReward),
+        });
     }
   }
 };
