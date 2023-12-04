@@ -203,8 +203,8 @@ const Game = () => {
 
   const calculateClaimableRewardRef = useRef();
   calculateClaimableRewardRef.current = () => {
-    if (!gamePlay?.lastClaimTime) return;
-    const diffInDays = (Date.now() - gamePlay.lastClaimTime.toDate().getTime()) / MILISECONDS_IN_A_DAY;
+    if (!gamePlay?.startRewardCountingTime) return;
+    const diffInDays = (Date.now() - gamePlay.startRewardCountingTime.toDate().getTime()) / MILISECONDS_IN_A_DAY;
     const claimableReward = gamePlay.pendingReward + diffInDays * dailyMoney;
     gameRef.current?.events.emit('update-claimable-reward', { reward: claimableReward });
     gameRef.current?.events.emit('claimable-reward-added');
@@ -592,12 +592,12 @@ const Game = () => {
   }, [activeSeason?.claimGapInSeconds, gamePlay?.lastClaimTime]);
 
   useEffect(() => {
-    if (gamePlay?.lastClaimTime && gamePlay?.pendingReward) {
-      const diffInDays = (Date.now() - gamePlay?.lastClaimTime.toDate().getTime()) / MILISECONDS_IN_A_DAY;
+    if (gamePlay?.startRewardCountingTime && gamePlay?.pendingReward) {
+      const diffInDays = (Date.now() - gamePlay?.startRewardCountingTime.toDate().getTime()) / MILISECONDS_IN_A_DAY;
       const claimableReward = gamePlay?.pendingReward + diffInDays * dailyMoney;
       gameRef.current?.events.emit('update-claimable-reward', { reward: claimableReward });
     }
-  }, [gamePlay?.lastClaimTime, gamePlay?.pendingreward, dailyMoney]);
+  }, [gamePlay?.startRewardCountingTime, gamePlay?.pendingreward, dailyMoney]);
 
   useEffect(() => {
     if (gamePlay) {
