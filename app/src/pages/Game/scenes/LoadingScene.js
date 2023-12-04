@@ -267,9 +267,7 @@ class LoadingScene extends Phaser.Scene {
     this.cameras.main.fadeOut(1000, 30, 195, 255);
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
       this.time.delayedCall(100, () => {
-        if (this.assetLoaded && this.userInfoLoaded) {
-          this.scene.start('MainScene');
-        }
+        this.scene.start('MainScene');
       });
     });
 
