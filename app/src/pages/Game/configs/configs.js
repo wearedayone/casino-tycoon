@@ -1,5 +1,16 @@
-const width =
-  window.innerWidth / window.innerHeight >= 1700 / 2796 ? 1700 : (window.innerWidth * 2796) / window.innerHeight;
+const savedWindowHeight =
+  localStorage.getItem('windowHeight') && !isNaN(+localStorage.getItem('windowHeight'))
+    ? +localStorage.getItem('windowHeight')
+    : null;
+
+if (!savedWindowHeight) {
+  localStorage.setItem('windowHeight', window.innerHeight);
+}
+
+const windowWidth = window.innerWidth;
+const windowHeight = savedWindowHeight || window.innerHeight;
+
+const width = windowWidth / windowHeight >= 1700 / 2796 ? 1700 : (windowWidth * 2796) / windowHeight;
 
 const configs = {
   width: width,

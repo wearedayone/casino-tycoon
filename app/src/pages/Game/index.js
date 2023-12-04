@@ -721,13 +721,14 @@ const Game = () => {
       display="flex"
       justifyContent="center"
       alignItems="center"
+      height={`${localStorage.getItem('windowHeight')}px`}
       onClick={() => {
         !userHasInteractive && setUserHasInteracted(true);
       }}>
       <Box
         id="game-container"
         width="100vw"
-        height="100vh"
+        height={`${localStorage.getItem('windowHeight')}px`}
         display="flex"
         alignItems="center"
         justifyContent="center"
