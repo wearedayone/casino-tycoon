@@ -14,8 +14,8 @@ const StatisticsModal = ({ open, setOpenUpdate }) => {
     refetchInterval: 30 * 1000,
   });
   console.log({ data: data?.data });
-  let position = data?.data?.filter((d) => d.networth >= gamePlay?.networth).length;
-  let reward = data?.data?.find((d) => d.userId == gamePlay?.userId).reward;
+  let position = data?.data?.filter((d) => d.networth >= gamePlay?.networth)?.length;
+  let reward = data?.data?.find((d) => d.userId == gamePlay?.userId)?.reward;
   console.log({ reward, position });
 
   return (

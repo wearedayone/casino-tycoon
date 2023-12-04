@@ -130,6 +130,7 @@ const Game = () => {
     }
     try {
       if (!web3Withdraw) throw new Error(`Invalid tokenType. Must be one of 'ETH' | 'FIAT' | 'NFT'`);
+      gameRef.current?.events.emit(txnStartedEvent);
 
       const value = Number(amount);
       let txnId;
@@ -140,7 +141,7 @@ const Game = () => {
       const receipt = await web3Withdraw(address, value);
       // for test only
       // const receipt = { status: 1, transactionHash: 'test-txn-hash' };
-      gameRef.current?.events.emit(txnStartedEvent, { amount, txnHash: receipt.transactionHash });
+      gameRef.current?.events.emit(txnCompletedEvent, { amount, txnHash: receipt.transactionHash });
       if (receipt.status === 1) {
         if (txnId) await validate({ transactionId: txnId, txnHash: receipt.transactionHash });
         enqueueSnackbar(`Transferred ${tokenType} successfully`, { variant: 'success' });
@@ -148,8 +149,6 @@ const Game = () => {
     } catch (err) {
       err.message && enqueueSnackbar(err.message, { variant: 'error' });
       console.error(err);
-    } finally {
-      gameRef.current?.events.emit(txnCompletedEvent);
     }
   };
 
@@ -422,7 +421,7 @@ const Game = () => {
       gameRef.current?.events.on('buy-gangster', async ({ quantity }) => {
         try {
           const txnHash = await buyGangster(quantity);
-          gameRef.current?.events.emit('buy-gangster-completed', { txnHash, quantity });
+          gameRef.current?.events.emit('buy-gangster-completed', { txnHash, amount: quantity });
         } catch (err) {
           console.error(err);
         }

@@ -1,7 +1,7 @@
 import { isAddress } from '@ethersproject/address';
 
 import Popup from './Popup';
-import PopupTxnCompleted from './PopupTxnCompleted';
+import PopupProcessing from './PopupProcessing';
 import Button from '../button/Button';
 import TextInput from '../inputs/TextInput';
 import TextButton from '../button/TextButton';
@@ -105,14 +105,10 @@ class PopupWithdrawETH extends Popup {
       'button-confirm',
       'button-confirm-pressed',
       () => {
-        console.log('confirm');
-        if (this.loading) return;
-
         // TODO: show validation to user
         const isValid = this.validate();
         if (!isValid) return;
 
-        this.setLoading(true);
         scene.game.events.emit('withdraw-eth', {
           amount: Number(this.amountInput.value),
           address: this.addressInput.value,
@@ -122,17 +118,15 @@ class PopupWithdrawETH extends Popup {
     );
     this.add(buttonBack);
     this.add(this.buttonConfirm);
+    this.popupProcessing = new PopupProcessing(scene, {
+      completedEvent: 'withdraw-eth-completed',
+      completedIcon: 'icon-eth-done',
+      description: `Withdrawal may take a few minutes.`,
+    });
+    scene.add.existing(this.popupProcessing);
 
-    scene.game.events.on('withdraw-eth-completed', () => this.setLoading(false));
-    scene.game.events.on('withdraw-eth-started', ({ txnHash, amount }) => {
-      this.popupTxnProcessing = new PopupTxnCompleted(
-        scene,
-        'icon-eth-done',
-        `${formatter.format(amount)} ETH`,
-        'Withdrawal may take a few minutes.',
-        txnHash
-      );
-      scene.add.existing(this.popupTxnProcessing);
+    scene.game.events.on('withdraw-eth-started', () => {
+      this.popupProcessing.initLoading(`Withdrawal may take a few minutes.`);
       this.close();
     });
   }
@@ -146,12 +140,6 @@ class PopupWithdrawETH extends Popup {
     if (!address || !isAddress(address)) isValid = false;
 
     return isValid;
-  }
-
-  setLoading(state) {
-    console.log('setLoading', state);
-    this.loading = state;
-    this.buttonConfirm.setDisabledState(state);
   }
 
   cleanup() {

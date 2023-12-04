@@ -88,14 +88,10 @@ class PopupDepositNFT extends Popup {
       'button-stake',
       'button-stake-pressed',
       () => {
-        console.log('stake');
-        if (this.loading) return;
-
         // TODO: show validation to user
         const isValid = this.validate();
         if (!isValid) return;
 
-        this.setLoading(true);
         scene.game.events.emit('deposit-nft', { amount: Number(this.amountInput.value) });
       },
       { disabledImage: 'button-stake-disabled' }
@@ -123,11 +119,6 @@ class PopupDepositNFT extends Popup {
     if (!amount || amount > this.balance) isValid = false;
 
     return isValid;
-  }
-
-  setLoading(state) {
-    console.log('setLoading', state);
-    this.loading = state;
   }
 
   onOpen() {
