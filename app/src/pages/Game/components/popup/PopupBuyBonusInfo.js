@@ -30,7 +30,7 @@ class PopupBuyBonusInfo extends Popup {
     this.bonusPercent = scene.add.text(
       this.paddedX,
       firstParagraphY,
-      'Players receive -% of the reserve \npool as a bonus for buying \nGangsters.',
+      'Players receive -% of the reserve \npool as a bonus for buying 1\nGangster.',
       largeBlackBold
     );
     this.add(this.reservePool);
@@ -52,8 +52,8 @@ class PopupBuyBonusInfo extends Popup {
     );
     this.add(this.buttonBack);
 
-    scene.game.events.emit('request-reserve-pool');
     scene.game.events.on('update-reserve-pool', (data) => this.updateData(data));
+    scene.game.events.emit('request-reserve-pool');
   }
 
   updateData({ reservePool, reservePoolReward }) {
@@ -62,7 +62,7 @@ class PopupBuyBonusInfo extends Popup {
     this.reservePool.text = `There is currently ${amount}         \n$FIAT in the reserve pool, which \nwill increase with every Goon \nand Safehouse purchase.`;
     this.bonusPercent.text = `Players receive ${
       reservePoolReward * 100
-    }% of the reserve\npool as a bonus for buying\nGangsters.`;
+    }% of the reserve\npool as a bonus for buying 1\nGangster.`;
 
     this.coinIcon.setX(width / 2 + this.reservePoolHidden.width + 80);
   }
