@@ -227,6 +227,7 @@ class PopupBuyGangster extends Popup {
         this.reservePool = reservePool;
         this.reservePoolReward = reservePoolReward;
 
+        this.numberOfMachinesText.text = numberOfMachines.toLocaleString();
         this.networthText.text = `${networth.toLocaleString()}`;
         this.rateText.text = `${formatter.format(numberOfMachines * dailyReward)}`;
         this.estimatedMaxPurchase = balance && basePrice ? Math.floor(balance / basePrice) : 0;
@@ -238,7 +239,6 @@ class PopupBuyGangster extends Popup {
   }
 
   updateValues() {
-    this.numberOfMachinesText.text = `${this.numberOfMachines + this.quantity}`;
     this.networthIncreaseText.text = `+${(this.networthIncrease * this.quantity).toLocaleString()}`;
     this.rateIncreaseText.text = `+${(this.rateIncrease * this.quantity).toLocaleString()} /d`;
 

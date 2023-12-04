@@ -58,7 +58,7 @@ class PopupBuyGoon extends Popup {
     );
     this.add(this.upgradeBtn);
 
-    this.numberOfWorkersText = scene.add.text(this.popup.x + 390, this.popup.y - 535, '0', {
+    this.numberOfWorkersText = scene.add.text(this.popup.x + 320, this.popup.y - 535, '0', {
       fontSize: '76px',
       color: colors.black,
       fontFamily: fontFamilies.extraBold,
@@ -193,6 +193,7 @@ class PopupBuyGoon extends Popup {
         this.networthIncrease = networthIncrease;
         this.rateIncrease = dailyReward;
 
+        this.numberOfWorkersText.text = numberOfWorkers.toLocaleString();
         this.networthText.text = `${networth.toLocaleString()}`;
         this.rateText.text = `${formatter.format(numberOfWorkers * dailyReward)}`;
         this.estimatedMaxPurchase = estimateNumberOfWorkerCanBuy(sold, balance, basePrice, priceStep);
@@ -204,7 +205,6 @@ class PopupBuyGoon extends Popup {
   }
 
   updateValues() {
-    this.numberOfWorkersText.text = this.numberOfWorkers + this.quantity;
     this.networthIncreaseText.text = `+${(this.networthIncrease * this.quantity).toLocaleString()}`;
     this.rateIncreaseText.text = `+${(this.rateIncrease * this.quantity).toLocaleString()} /d`;
 

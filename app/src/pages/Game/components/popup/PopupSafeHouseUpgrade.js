@@ -54,7 +54,7 @@ class PopupSafeHouseUpgrade extends Popup {
     );
     this.add(this.upgradeBtn);
 
-    this.numberOfBuildingsText = scene.add.text(this.popup.x + 390, this.popup.y - 535, '0', {
+    this.numberOfBuildingsText = scene.add.text(this.popup.x + 400, this.popup.y - 535, '0', {
       fontSize: fontSizes.extraLarge,
       color: colors.black,
       fontFamily: fontFamilies.extraBold,
@@ -176,6 +176,7 @@ class PopupSafeHouseUpgrade extends Popup {
         this.networth = networth;
         this.networthIncrease = networthIncrease;
 
+        this.numberOfBuildingsText.text = numberOfBuildings.toLocaleString();
         this.networthText.text = `${networth.toLocaleString()}`;
         this.estimatedMaxPurchase = estimateNumberOfBuildingCanBuy(sold, balance, basePrice, priceStep);
         this.updateValues();
@@ -186,7 +187,6 @@ class PopupSafeHouseUpgrade extends Popup {
   }
 
   updateValues() {
-    this.numberOfBuildingsText.text = this.numberOfBuildings + this.quantity;
     this.networthIncreaseText.text = `+${(this.networthIncrease * this.quantity).toLocaleString()}`;
 
     const estimatedPrice = calculateNextBuildingBuyPriceBatch(
