@@ -55,14 +55,6 @@ class MainScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.scenePlugin({
-      key: 'rexuiplugin',
-      url: '/libs/rexui.min.js',
-      sceneKey: 'rexUI',
-    });
-  }
-
-  create() {
     this.bgMusic = this.sound.add('bg', { loop: true, volume: 0.25 });
 
     this.background = new Background(this, 'bg');
@@ -86,10 +78,6 @@ class MainScene extends Phaser.Scene {
     this.popupWar = new PopupWar(this, 35, 1850);
     this.add.existing(this.popupWar);
 
-    const footer = new Footer(this, 2600);
-    footer.setDepth(1);
-    this.add.existing(footer);
-
     this.popupSettings = new PopupSettings(this);
     this.add.existing(this.popupSettings);
 
@@ -99,29 +87,11 @@ class MainScene extends Phaser.Scene {
     this.popupPortfolio = new PopupPortfolio(this);
     this.add.existing(this.popupPortfolio);
 
-    this.popupLeaderboard = new PopupLeaderboard(this);
-    this.add.existing(this.popupLeaderboard);
-
     this.popupStatistic = new PopupStatistic(this);
     this.add.existing(this.popupStatistic);
 
     this.popupDailyGangWar = new PopupDailyGangWar(this);
     this.add.existing(this.popupDailyGangWar);
-
-    this.popupWarHistory = new PopupWarHistory(this);
-    this.add.existing(this.popupWarHistory);
-
-    this.popupSafeHouseUpgrade = new PopupSafeHouseUpgrade(this);
-    this.add.existing(this.popupSafeHouseUpgrade);
-
-    this.popupBuyGoon = new PopupBuyGoon(this);
-    this.add.existing(this.popupBuyGoon);
-
-    this.popupBuyGangster = new PopupBuyGangster(this);
-    this.add.existing(this.popupBuyGangster);
-
-    const infoButtons = new InfoButtons(this, 550);
-    this.add.existing(infoButtons);
 
     this.game.events.on('music-on', () => {
       this.bgMusic.play();
@@ -142,7 +112,38 @@ class MainScene extends Phaser.Scene {
     } else {
       this.bgMusic.play();
     }
+
+    const pluginLoader = this.load.scenePlugin({
+      key: 'rexuiplugin',
+      url: '/libs/rexui.min.js',
+      sceneKey: 'rexUI',
+    });
+    pluginLoader.once(Phaser.Loader.Events.COMPLETE, () => {
+      this.popupSafeHouseUpgrade = new PopupSafeHouseUpgrade(this);
+      this.add.existing(this.popupSafeHouseUpgrade);
+
+      this.popupBuyGoon = new PopupBuyGoon(this);
+      this.add.existing(this.popupBuyGoon);
+
+      this.popupBuyGangster = new PopupBuyGangster(this);
+      this.add.existing(this.popupBuyGangster);
+
+      this.popupLeaderboard = new PopupLeaderboard(this);
+      this.add.existing(this.popupLeaderboard);
+
+      this.popupWarHistory = new PopupWarHistory(this);
+      this.add.existing(this.popupWarHistory);
+
+      const footer = new Footer(this, 2600);
+      footer.setDepth(1);
+      this.add.existing(footer);
+    });
+
+    const infoButtons = new InfoButtons(this, 550);
+    this.add.existing(infoButtons);
   }
+
+  create() {}
 
   updateAnimationPositions(delta) {
     if (this.animationLayer.gangsterAction === 'back') {
