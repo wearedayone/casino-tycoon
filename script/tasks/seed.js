@@ -58,6 +58,7 @@ const main = async () => {
     nftPrice: '0.0042',
     tokenPrice: '0.00001',
   });
+  await firestore.collection('system').doc('data').set({ nonce: 0 });
   console.log('created system configs');
 
   console.log('create season');
