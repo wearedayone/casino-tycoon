@@ -11,6 +11,10 @@ class LoadingScene extends Phaser.Scene {
   }
 
   preload() {
+    this.game.events.on('user-info-loaded', () => {
+      this.userInfoLoaded = true;
+    });
+
     this.cameras.main.setBackgroundColor('#6123ff');
     const progressBar = this.add.graphics();
     const progressBox = this.add.graphics();
@@ -257,9 +261,6 @@ class LoadingScene extends Phaser.Scene {
     this.load.multiatlas('goon-back', 'goon_back.json');
 
     this.assetLoaded = true;
-    if (this.userInfoLoaded) {
-      this.scene.start('MainScene');
-    }
   }
 
   create() {
@@ -267,16 +268,17 @@ class LoadingScene extends Phaser.Scene {
     this.cameras.main.fadeOut(1000, 30, 195, 255);
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
       this.time.delayedCall(100, () => {
-        this.scene.start('MainScene');
+        if (this.assetLoaded && this.userInfoLoaded) {
+          this.scene.start('MainScene');
+        }
       });
     });
+  }
 
-    this.game.events.on('user-info-loaded', () => {
-      this.userInfoLoaded = true;
-      if (this.assetLoaded) {
-        this.scene.start('MainScene');
-      }
-    });
+  update() {
+    if (this.userInfoLoaded && this.assetLoaded) {
+      this.scene.start('MainScene');
+    }
   }
 }
 
