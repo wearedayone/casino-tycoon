@@ -239,7 +239,6 @@ const increaseGoon = async ({ address, amount }) => {
   const { activeSeasonId } = system.data();
   const user = await firestore.collection('user').where('address', '==', address.toLowerCase()).limit(1).get();
   if (!user.empty) {
-    console.log('get Game play');
     const gamePlay = await firestore
       .collection('gamePlay')
       .where('userId', '==', user.docs[0].id)
@@ -249,7 +248,6 @@ const increaseGoon = async ({ address, amount }) => {
     if (!gamePlay.empty) {
       const now = Date.now();
       const generatedReward = await calculateGeneratedReward(user.docs[0].id);
-      console.log('Update Game play');
       await firestore
         .collection('gamePlay')
         .doc(gamePlay.docs[0].id)
@@ -259,6 +257,13 @@ const increaseGoon = async ({ address, amount }) => {
           pendingReward: admin.firestore.FieldValue.increment(generatedReward),
         });
     }
+
+    await firestore
+      .collection('season')
+      .doc(activeSeasonId)
+      .update({
+        workerSold: admin.firestore.FieldValue.increment(amount),
+      });
   }
 };
 
@@ -288,6 +293,12 @@ const increaseSafeHouse = async ({ address, amount }) => {
           pendingReward: admin.firestore.FieldValue.increment(generatedReward),
         });
     }
+    await firestore
+      .collection('season')
+      .doc(activeSeasonId)
+      .update({
+        machineSold: admin.firestore.FieldValue.increment(amount),
+      });
   }
 };
 
