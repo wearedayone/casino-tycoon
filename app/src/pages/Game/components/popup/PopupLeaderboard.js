@@ -259,7 +259,7 @@ class PopupLeaderboard extends Popup {
   }
 
   updateLeaderboard(leaderboard) {
-    console.log('leaderboard', leaderboard);
+    if (!leaderboard.length) return;
     const displayedLeaderboard = leaderboard.filter(
       ({ reward, networth }) => reward > 0 && networth >= this.minNetworth
     );

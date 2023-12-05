@@ -99,6 +99,8 @@ export const updateWalletPasswordAsked = async (userId) => {
 export const getUserDisplayInfos = async (userId) => {
   const snapshot = await firestore.collection('user').doc(userId).get();
 
+  if (snapshot.empty) return null;
+
   const { avatarURL, username } = snapshot.data();
   return { id: snapshot.id, avatarURL, username };
 };

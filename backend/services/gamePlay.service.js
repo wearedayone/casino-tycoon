@@ -16,7 +16,7 @@ export const getLeaderboard = async (userId) => {
     .get();
 
   const docs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-  const userPromises = docs.map((doc) => getUserDisplayInfos(doc.userId));
+  const userPromises = docs.map((doc) => getUserDisplayInfos(doc.userId)).filter(Boolean);
   const userDatas = await Promise.all(userPromises);
 
   // implement logic calculate reward
