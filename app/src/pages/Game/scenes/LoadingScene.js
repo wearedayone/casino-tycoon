@@ -281,6 +281,8 @@ class LoadingScene extends Phaser.Scene {
   update() {
     if (this.userInfoLoaded && this.assetLoaded) {
       this.scene.start('MainScene');
+    } else if (this.assetLoaded) {
+      this.game.events.emit('check-user-loaded');
     }
   }
 }

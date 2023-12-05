@@ -520,6 +520,10 @@ const Game = () => {
         gameRef.current?.events.emit('update-referral-code', profile.referralCode);
       });
 
+      gameRef.current?.events.on('check-user-loaded', () => {
+        gameRef.current?.events.emit('user-info-loaded');
+      });
+
       gameRef.current?.events.emit('user-info-loaded');
 
       return () => {
