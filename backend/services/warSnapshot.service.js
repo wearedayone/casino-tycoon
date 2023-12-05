@@ -6,7 +6,6 @@ import {
   initTransaction,
   userPendingRewardChangedTypes,
   validateNonWeb3Transaction,
-  validateTxnHash,
 } from './transaction.service.js';
 import { claimToken as claimTokenTask, burnNFT as burnNFTTask } from './worker.service.js';
 
@@ -17,7 +16,12 @@ const PENALTY_CHANCE = 0.1;
 export const takeDailyWarSnapshot = async () => {
   logger.info('\n\n---------taking daily war snapshot--------\n');
   const seasonId = await getActiveSeasonId();
-  const usersGamePlaySnapshot = await firestore.collection('gamePlay').where('seasonId', '==', seasonId).get();
+  const usersGamePlaySnapshot = await firestore
+    .collection('gamePlay')
+    .where('active', '==', true)
+    .where('seasonId', '==', seasonId)
+    .get();
+
   const allUsers = usersGamePlaySnapshot.docs.map((gamePlay) => ({ id: gamePlay.id, ...gamePlay.data() }));
   const usersWithWarEnabled = allUsers.filter(({ war }) => !!war);
   const usersWithWarEnabledCount = usersWithWarEnabled.length;
@@ -202,6 +206,8 @@ export const takeDailyWarSnapshot = async () => {
 
   logger.info('\n---------finish taking daily war snapshot--------\n\n');
 };
+
+takeDailyWarSnapshot();
 
 export const getWarHistory = async (userId) => {
   const seasonId = await getActiveSeasonId();
