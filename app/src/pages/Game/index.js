@@ -304,7 +304,7 @@ const Game = () => {
         gameRef.current.events.emit('update-deposit-code', '683382');
       });
       gameRef.current?.events.on('request-eth-balance', () => {
-        gameRef.current.events.emit('update-eth-balance', ETHBalance);
+        gameRef.current.events.emit('update-eth-balance', { address, ETHBalance });
       });
       gameRef.current?.events.on('refresh-eth-balance', () => {
         reloadBalance();
@@ -537,8 +537,8 @@ const Game = () => {
   }, [appVersion]);
 
   useEffect(() => {
-    gameRef.current?.events.emit('update-eth-balance', ETHBalance);
-  }, [ETHBalance]);
+    gameRef.current?.events.emit('update-eth-balance', { address, ETHBalance });
+  }, [address, ETHBalance]);
 
   useEffect(() => {
     gameRef.current?.events.emit('update-balances', { dailyMoney, ETHBalance, tokenBalance });

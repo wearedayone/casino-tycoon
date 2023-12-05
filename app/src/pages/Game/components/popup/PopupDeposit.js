@@ -79,7 +79,8 @@ class PopupDeposit extends Popup {
       baseContainerY,
       'button-copy',
       'button-copy-pressed',
-      () => navigator.clipboard.writeText(this.address)
+      () => navigator.clipboard.writeText(this.address),
+      { sound: 'button-2' }
     );
 
     const balanceSubtitle = scene.add
@@ -140,8 +141,9 @@ class PopupDeposit extends Popup {
     scene.game.events.on('refresh-eth-balance-completed', () => {
       this.loading = false;
     });
-    scene.game.events.on('update-eth-balance', (balance) => {
-      this.balanceText.text = `${formatter.format(balance)} ETH`;
+    scene.game.events.on('update-eth-balance', ({ address, ETHBalance }) => {
+      this.balanceText.text = `${formatter.format(ETHBalance)} ETH`;
+      this.updateAddress(address);
     });
   }
 
