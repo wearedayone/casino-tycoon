@@ -382,7 +382,7 @@ export const validateTxnHash = async ({ userId, transactionId, txnHash }) => {
   await updateSeasonState(transactionId);
   await updateUserBalance(userId, transactionId);
   await updateUserGamePlay(userId, transactionId);
-  await sendUserBonus(userId, transactionId);
+  // await sendUserBonus(userId, transactionId);
 };
 
 // for non web3 transactions: war-switch
