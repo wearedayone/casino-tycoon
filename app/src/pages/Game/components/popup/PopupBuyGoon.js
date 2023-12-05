@@ -185,6 +185,12 @@ class PopupBuyGoon extends Popup {
     this.coin = scene.add.image(this.priceText.x + this.priceText.width + 40, sliderY, 'coin2').setOrigin(0, 0.5);
     this.add(this.coin);
 
+    scene.game.events.on('buy-goon-completed', () => {
+      if (this.slider) {
+        this.slider.value = 0;
+      }
+    });
+
     scene.game.events.on(
       'update-workers',
       ({ numberOfWorkers, networth, balance, sold, basePrice, priceStep, dailyReward, networthIncrease }) => {

@@ -208,6 +208,12 @@ class PopupBuyGangster extends Popup {
     this.coin = scene.add.image(this.priceText.x + this.priceText.width + 40, sliderY, 'eth-coin').setOrigin(0, 0.5);
     this.add(this.coin);
 
+    scene.game.events.on('buy-gangster-completed', () => {
+      if (this.slider) {
+        this.slider.value = 0;
+      }
+    });
+
     scene.game.events.on(
       'update-machines',
       ({

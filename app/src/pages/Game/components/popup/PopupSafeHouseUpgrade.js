@@ -169,6 +169,12 @@ class PopupSafeHouseUpgrade extends Popup {
     this.coin = scene.add.image(this.priceText.x + this.priceText.width + 40, sliderY, 'coin2').setOrigin(0, 0.5);
     this.add(this.coin);
 
+    scene.game.events.on('upgrade-safehouse-completed', () => {
+      if (this.slider) {
+        this.slider.value = 0;
+      }
+    });
+
     scene.game.events.on(
       'update-buildings',
       ({ numberOfBuildings, networth, balance, sold, basePrice, priceStep, networthIncrease }) => {
