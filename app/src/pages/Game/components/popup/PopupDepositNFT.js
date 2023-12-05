@@ -110,6 +110,7 @@ class PopupDepositNFT extends Popup {
       this.popupProcessing.initLoading(`Staking may take a few minutes.`);
       this.close();
     });
+    scene.game.events.emit('request-wallet-nft-balance');
   }
 
   validate() {
@@ -122,7 +123,7 @@ class PopupDepositNFT extends Popup {
   }
 
   onOpen() {
-    this.scene.game.events.emit('request-wallet-nft-balance');
+    // this.scene.game.events.emit('request-wallet-nft-balance');
   }
 
   cleanup() {
