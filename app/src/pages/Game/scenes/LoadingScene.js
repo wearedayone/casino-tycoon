@@ -5,6 +5,7 @@ import configs from '../configs/configs';
 class LoadingScene extends Phaser.Scene {
   assetLoaded = false;
   userInfoLoaded = false;
+  loadingPercent = 0;
 
   constructor() {
     super('LoadingScene');
@@ -49,7 +50,9 @@ class LoadingScene extends Phaser.Scene {
     percentText.setOrigin(0.5, 0.5);
 
     this.load.on('progress', function (value) {
-      percentText.setText(parseInt(value * 100) + '%');
+      if (value * 100 < this.loadingPercent) return;
+      this.loadingPercent = parseInt(value * 100);
+      percentText.setText(this.loadingPercent + '%');
       progressBar.clear();
       progressBar.fillStyle(0xffffff, 1);
       progressBar.fillRect(100, configs.height / 2 - 100, (configs.width - 200) * value, 200);
