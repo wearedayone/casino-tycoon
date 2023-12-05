@@ -90,10 +90,10 @@ class PopupDailyGangWar extends Popup {
     });
     scene.game.events.emit('request-war-status');
     scene.game.events.emit('request-next-war-time');
+    scene.game.events.emit('request-balances');
   }
 
   onOpen() {
-    this.scene.game.events.emit('request-balances');
     this.scene.game.events.emit('request-next-war-time');
   }
 
