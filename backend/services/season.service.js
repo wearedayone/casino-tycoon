@@ -72,7 +72,7 @@ const takeSeasonLeaderboardSnapshot = async () => {
       const userSnapshot = await firestore.collection('user').doc(player.userId).get();
       const { address } = userSnapshot.data();
       winnerAllocations[i].address = address;
-      winnerAllocations[i].networth = networth;
+      winnerAllocations[i].networth = player.networth;
     } else {
       winnerAllocations[i].address = SYSTEM_ADDRESS;
       winnerAllocations[i].isWorker = true;
