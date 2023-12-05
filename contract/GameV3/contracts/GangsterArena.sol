@@ -113,7 +113,7 @@ contract GangsterArena is Ownable, IGangsterArena {
     require(gangster[msg.sender] >= amount, 'Insufficient balance');
     tokenNFT.safeTransferFrom(address(this), to, tokenId, amount, '');
     gangster[msg.sender] -= amount;
-    emit Withdraw(to, tokenId, amount);
+    emit Withdraw(msg.sender, tokenId, amount);
   }
 
   function burnNFT(address[] memory to, uint256[] memory tokenId, uint256[] memory amount) external onlyOwner {

@@ -297,7 +297,7 @@ const increaseSafeHouse = async ({ address, amount }) => {
       .collection('season')
       .doc(activeSeasonId)
       .update({
-        machineSold: admin.firestore.FieldValue.increment(amount),
+        buildingSold: admin.firestore.FieldValue.increment(amount),
       });
   }
 };
