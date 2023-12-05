@@ -212,6 +212,7 @@ const useSmartContract = () => {
   };
 
   const getNFTBalance = async (address) => {
+    if (!embeddedWallet) return 0;
     const privyProvider = await embeddedWallet.getEthereumProvider();
     const nftContract = new Contract(NFT_ADDRESS, nftAbi.abi, privyProvider.provider);
 
