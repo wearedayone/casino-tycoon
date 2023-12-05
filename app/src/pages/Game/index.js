@@ -623,6 +623,12 @@ const Game = () => {
   }, [gamePlay?.war]);
 
   useEffect(() => {
+    getNFTBalance(address).then((balance) => {
+      gameRef.current?.events.emit('update-wallet-nft-balance', { balance, numberOfMachines });
+    });
+  }, [address, numberOfMachines]);
+
+  useEffect(() => {
     gameRef.current?.events.emit('update-buildings', {
       numberOfBuildings,
       networth,
