@@ -89,7 +89,7 @@ class PopupReferralProgram extends Popup {
         this.close();
       },
       'Continue game',
-      { fontSize: '82px' }
+      { fontSize: '82px', sound: 'close' }
     );
 
     this.add(buttonBack);
