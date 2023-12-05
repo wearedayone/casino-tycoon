@@ -92,7 +92,7 @@ const main = async () => {
       workerSold: 0,
       buildingSold: 0,
       machine: { basePrice: 0.001, dailyReward: 1000, networth: 5 },
-      worker: { basePrice: 250, priceStep: 5, dailyReward: 100, networth: 3 },
+      worker: { basePrice: 250, priceStep: 5, dailyReward: 1000, networth: 3 },
       building: { basePrice: 500, priceStep: 10, dailyReward: 0, networth: 4 },
       status: 'open',
       rankingRewards,
@@ -139,6 +139,12 @@ const main = async () => {
       },
     });
   console.log('created season log');
+  const userSnapshot = await firestore.collection('user').get();
+  for (let user of userSnapshot.docs) {
+    await firestore.collection('user').doc(user.id).update({
+      tokenBalance: 0,
+    });
+  }
 
   console.log('done!');
 };
