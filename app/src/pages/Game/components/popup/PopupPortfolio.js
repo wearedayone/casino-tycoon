@@ -24,7 +24,7 @@ class PopupPortfolio extends Popup {
       'button-blue-pressed',
       this.close,
       'Back',
-      { sound: 'button-1' }
+      { sound: 'close' }
     );
     this.add(this.backBtn);
 
