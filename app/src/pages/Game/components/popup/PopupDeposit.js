@@ -103,7 +103,8 @@ class PopupDeposit extends Popup {
         if (this.loading) return;
         this.loading = true;
         scene.game.events.emit('refresh-eth-balance');
-      }
+      },
+      { sound: 'button-1' }
     );
 
     this.add(subtitle);
