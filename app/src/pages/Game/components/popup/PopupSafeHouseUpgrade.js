@@ -115,6 +115,10 @@ class PopupSafeHouseUpgrade extends Popup {
             if (this.slider) {
               this.slider.value = 0;
               this.slideValue = 0;
+              if (this.sliderThumb) {
+                this.sliderThumb.x = sliderThumbX;
+                this.sliderThumbText.x = sliderThumbX;
+              }
               return;
             }
           }
