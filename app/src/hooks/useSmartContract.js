@@ -2,6 +2,7 @@ import { Contract } from '@ethersproject/contracts';
 import { usePrivy } from '@privy-io/react-auth';
 
 import useUserWallet from './useUserWallet';
+import useSystemStore from '../stores/system.store';
 import gameContractAbi from '../assets/abis/GameContract.json';
 import tokenAbi from '../assets/abis/Token.json';
 import nftAbi from '../assets/abis/NFT.json';
@@ -9,13 +10,18 @@ import { formatter } from '../utils/numbers';
 import environments from '../utils/environments';
 import { parseEther } from '@ethersproject/units';
 
-const { NETWORK_ID, GAME_CONTRACT_ADDRESS, TOKEN_ADDRESS, NFT_ADDRESS, SYSTEM_ADDRESS } = environments;
+const { NETWORK_ID } = environments;
 
 const useSmartContract = () => {
   const { sendTransaction } = usePrivy();
   const embeddedWallet = useUserWallet();
+  const configs = useSystemStore((state) => state.configs);
+
+  const { tokenAddress: TOKEN_ADDRESS, gameAddress: GAME_CONTRACT_ADDRESS, nftAddress: NFT_ADDRESS } = configs || {};
+  const loadedAssets = !!TOKEN_ADDRESS && !!GAME_CONTRACT_ADDRESS && !!NFT_ADDRESS && !!embeddedWallet;
 
   const withdrawToken = async (to, value) => {
+    if (!loadedAssets) return;
     try {
       const privyProvider = await embeddedWallet.getEthereumProvider();
       const tokenContract = new Contract(TOKEN_ADDRESS, tokenAbi.abi, privyProvider.provider);
@@ -44,6 +50,7 @@ const useSmartContract = () => {
   };
 
   const withdrawETH = async (to, value) => {
+    if (!loadedAssets) return;
     try {
       const unsignedTx = {
         to,
@@ -65,6 +72,7 @@ const useSmartContract = () => {
   };
 
   const buyMachine = async (amount, value) => {
+    if (!loadedAssets) return;
     const privyProvider = await embeddedWallet.getEthereumProvider();
     const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
 
@@ -90,6 +98,7 @@ const useSmartContract = () => {
   };
 
   const buyGoon = async ({ amount, value, nonce, signature }) => {
+    if (!loadedAssets) return;
     const privyProvider = await embeddedWallet.getEthereumProvider();
     const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
     const tokenContract = new Contract(TOKEN_ADDRESS, tokenAbi.abi, privyProvider.provider);
@@ -124,6 +133,7 @@ const useSmartContract = () => {
   };
 
   const buySafeHouse = async (amount, value, nonce, signature) => {
+    if (!loadedAssets) return;
     const privyProvider = await embeddedWallet.getEthereumProvider();
     const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
     const tokenContract = new Contract(TOKEN_ADDRESS, tokenAbi.abi, privyProvider.provider);
@@ -158,6 +168,7 @@ const useSmartContract = () => {
   };
 
   const withdrawNFT = async (address, amount) => {
+    if (!loadedAssets) return;
     const privyProvider = await embeddedWallet.getEthereumProvider();
     const nftContract = new Contract(NFT_ADDRESS, nftAbi.abi, privyProvider.provider);
 
@@ -185,6 +196,7 @@ const useSmartContract = () => {
   };
 
   const stakeNFT = async (address, amount) => {
+    if (!loadedAssets) return;
     const privyProvider = await embeddedWallet.getEthereumProvider();
     const nftContract = new Contract(NFT_ADDRESS, nftAbi.abi, privyProvider.provider);
 
@@ -212,7 +224,7 @@ const useSmartContract = () => {
   };
 
   const getNFTBalance = async (address) => {
-    if (!embeddedWallet) return 0;
+    if (!loadedAssets) return 0;
     const privyProvider = await embeddedWallet.getEthereumProvider();
     const nftContract = new Contract(NFT_ADDRESS, nftAbi.abi, privyProvider.provider);
 
@@ -221,6 +233,7 @@ const useSmartContract = () => {
   };
 
   const getStakedNFTBalance = async (address) => {
+    if (!loadedAssets) return 0;
     const privyProvider = await embeddedWallet.getEthereumProvider();
     const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
 
@@ -229,6 +242,7 @@ const useSmartContract = () => {
   };
 
   const isMinted = async (address) => {
+    if (!loadedAssets) return false;
     const privyProvider = await embeddedWallet.getEthereumProvider();
     const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
 

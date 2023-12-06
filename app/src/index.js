@@ -11,6 +11,7 @@ import App from './App';
 import InstallGuideModal from './components/InstallGuideModal';
 import UpdateDetectedModal from './components/UpdateDetectedModal';
 import SetWalletPasswordModal from './components/SetWalletPasswordModal';
+import GameVersion from './components/GameVersion';
 import environments from './utils/environments';
 
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
@@ -65,6 +66,7 @@ root.render(
               <InstallGuideModal />
               <UpdateDetectedModal />
               <SetWalletPasswordModal />
+              <GameVersion />
             </ThemeProvider>
           </SnackbarProvider>
         </BrowserRouter>

@@ -9,10 +9,7 @@ const environments = {
   API_URL: process.env.REACT_APP_API_URL,
   PRIVY_APP_ID: process.env.REACT_APP_PRIVY_APP_ID,
   NETWORK_ID: process.env.REACT_APP_NETWORK_ID,
-  GAME_CONTRACT_ADDRESS: process.env.REACT_APP_GAME_CONTRACT_ADDRESS,
-  TOKEN_ADDRESS: process.env.REACT_APP_TOKEN_ADDRESS,
-  NFT_ADDRESS: process.env.REACT_APP_NFT_ADDRESS,
-  SYSTEM_ADDRESS: process.env.REACT_APP_SYSTEM_ADDRESS,
+  GAME_VERSION: process.env.REACT_APP_GAME_VERSION,
 };
 
 export default environments;
