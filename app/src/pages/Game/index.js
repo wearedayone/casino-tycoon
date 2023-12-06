@@ -227,6 +227,18 @@ const Game = () => {
     gameRef.current?.events.emit('claimable-reward-added');
   };
 
+  const checkGameEndRef = useRef();
+  checkGameEndRef.current = () => {
+    if (!activeSeason) return;
+    const { estimatedEndTime } = activeSeason;
+    const now = Date.now();
+    const endTime = estimatedEndTime.toDate().getTime();
+    const isEnded = now >= endTime;
+    if (isEnded) {
+      gameRef.current?.events.emit('stop-animation');
+    }
+  };
+
   useEffect(() => {
     if (profile && gamePlay && activeSeason && !loaded && !!embeddedWallet) {
       setLoaded(true);
@@ -346,6 +358,7 @@ const Game = () => {
       });
 
       gameRef.current?.events.on('request-claimable-reward', () => calculateClaimableRewardRef.current?.());
+      gameRef.current?.events.on('check-game-ended', () => checkGameEndRef.current?.());
 
       gameRef.current?.events.on('request-claimable-status', () => {
         const nextClaimTime = gamePlay.lastClaimTime.toDate().getTime() + activeSeason.claimGapInSeconds * 1000;

@@ -96,6 +96,19 @@ class Animation extends Phaser.GameObjects.Container {
       .setScale(goonAnimation.back.start.scale)
       .setVisible(false);
 
+    scene.game.events.on('stop-animation', () => {
+      this.gangsterAction = null;
+      this.goonAction = null;
+      this.gangsterFront.anims.stop();
+      this.gangsterFront.setVisible(false);
+      this.gangsterBack.anims.stop();
+      this.gangsterBack.setVisible(false);
+      this.goonFront.anims.stop();
+      this.goonFront.setVisible(false);
+      this.goonBack.anims.stop();
+      this.goonBack.setVisible(false);
+    });
+
     scene.game.events.on('animation-gangster-back', () => {
       this.gangsterAction = 'back';
       this.gangsterFront.anims.stop();
