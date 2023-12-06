@@ -1,26 +1,28 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import '@openzeppelin/contracts/access/Ownable.sol';
-
+import '@openzeppelin/contracts/access/AccessControl.sol';
 import './Gangster.sol';
 import './FIAT.sol';
 import './IGangsterArena.sol';
 
-import 'hardhat/console.sol';
-
-contract GangsterArena is Ownable, IGangsterArena {
+contract GangsterArena is AccessControl, IGangsterArena {
   Gangster public tokenNFT;
   FIAT public tokenFiat;
   address private signerAddress;
+  bytes32 public constant WORKER_ROLE = keccak256('WORKER_ROLE');
+  bytes32 public constant ADMIN_ROLE = keccak256('ADMIN_ROLE');
 
-  uint256 public BASE_PRICE = 0.00069 ether;
-  uint256 public BASE_PRICE_WL = 0.00042 ether;
+  uint256 public BASE_PRICE = 0.001 ether;
+  uint256 public BASE_PRICE_WL = 0.001 ether;
   uint256 public BASE_REFERRAL = 10;
   uint256 public BASE_REFERRAL_DISCOUNT = 90;
   uint256 public MAX_PER_BATCH = 25;
   uint256 public MAX_PER_WL = 20;
+  uint256 public BONUS_FIAT = 10;
+
   bool public gameClosed;
+  bool public lockNFT;
 
   mapping(uint256 => uint256) public tokenMaxSupply;
   mapping(address => bool) public mintedAddess;
@@ -29,14 +31,20 @@ contract GangsterArena is Ownable, IGangsterArena {
   mapping(uint256 => bool) usedNonces;
 
   constructor(
-    address initialOwner,
+    address _defaultAdmin,
+    address _adminAddress,
+    address _workerAddress,
     address _signerAddress,
-    address gangsterAddress,
-    address fiatAddress
-  ) Ownable(initialOwner) {
-    tokenNFT = Gangster(gangsterAddress);
-    tokenFiat = FIAT(fiatAddress);
+    address _gangsterAddress,
+    address _fiatAddress
+  ) {
+    tokenNFT = Gangster(_gangsterAddress);
+    tokenFiat = FIAT(_fiatAddress);
     signerAddress = _signerAddress;
+
+    _grantRole(DEFAULT_ADMIN_ROLE, _defaultAdmin);
+    _grantRole(ADMIN_ROLE, _adminAddress);
+    _grantRole(WORKER_ROLE, _workerAddress);
   }
 
   receive() external payable {}
@@ -53,12 +61,17 @@ contract GangsterArena is Ownable, IGangsterArena {
     return address(this).balance;
   }
 
+  /**
+   * @notice Normal buy gangster
+   */
   function mint(uint256 tokenId, uint256 amount) public payable {
-    // require whitelisted for genesis token
     require(msg.value >= BASE_PRICE * amount, 'Need to send more ether');
     mintNFT(tokenId, amount);
   }
 
+  /**
+   * @notice Buy gangster with referral
+   */
   function mintReferral(
     uint256 tokenId,
     uint256 amount,
@@ -73,9 +86,13 @@ contract GangsterArena is Ownable, IGangsterArena {
     require(msg.value >= (BASE_PRICE * BASE_REFERRAL_DISCOUNT * amount) / 100, 'Need to send more ether');
     mintNFT(tokenId, amount);
     usedNonces[nonce] = true;
+    //TODO: update payout for referree
   }
 
-  function mintWL(uint256 tokenId, uint256 amount, uint256 nonce, bytes memory sig) external payable {
+  /**
+   * @notice Buy gangster with referral
+   */
+  function mintWL(uint256 tokenId, uint256 amount, uint256 nonce, bytes memory sig) public payable {
     // require whitelisted for genesis token
     require(msg.value >= BASE_PRICE_WL * amount, 'Need to send more ether');
     require(mintedAddessWL[msg.sender] + amount <= MAX_PER_WL, 'Max whitelisted perwallet reached');
@@ -87,6 +104,9 @@ contract GangsterArena is Ownable, IGangsterArena {
     mintedAddessWL[msg.sender] += amount;
   }
 
+  /**
+   * @notice Buy Goon
+   */
   function buyGoon(uint256 amount, uint256 value, uint256 nonce, bytes memory sig) public {
     require(!gameClosed, 'Game is closed');
     bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender, amount, value, nonce)));
@@ -95,6 +115,9 @@ contract GangsterArena is Ownable, IGangsterArena {
     emit BuyGoon(msg.sender, amount, nonce);
   }
 
+  /**
+   * @notice Buy Safehouse
+   */
   function buySafeHouse(uint256 amount, uint256 value, uint256 nonce, bytes memory sig) public {
     require(!gameClosed, 'Game is closed');
     bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender, amount, value, nonce)));
@@ -103,42 +126,62 @@ contract GangsterArena is Ownable, IGangsterArena {
     emit BuySafeHouse(msg.sender, amount, nonce);
   }
 
-  function depositNFT(address to, uint256 tokenId, uint256 amount) external {
+  /**
+   * @notice depositNFT
+   */
+  function depositNFT(address to, uint256 tokenId, uint256 amount) public {
     require(!gameClosed, 'Game is closed');
     tokenNFT.safeTransferFrom(msg.sender, address(this), tokenId, amount, '');
     gangster[to] += amount;
     emit Deposit(to, tokenId, amount);
   }
 
-  function withdrawNFT(address to, uint256 tokenId, uint256 amount) external {
+  /**
+   * @notice withdrawNFT
+   */
+  function withdrawNFT(address to, uint256 tokenId, uint256 amount) public {
+    require(!lockNFT, 'NFT is locked');
     require(gangster[msg.sender] >= amount, 'Insufficient balance');
     tokenNFT.safeTransferFrom(address(this), to, tokenId, amount, '');
     gangster[msg.sender] -= amount;
     emit Withdraw(msg.sender, tokenId, amount);
   }
 
-  function burnNFT(address[] memory to, uint256[] memory tokenId, uint256[] memory amount) external onlyOwner {
+  /**
+   * @notice Burn NFT for gangwar
+   */
+  function burnNFT(
+    address[] memory to,
+    uint256[] memory tokenId,
+    uint256[] memory amount
+  ) public onlyRole(WORKER_ROLE) {
     require(!gameClosed, 'Game is closed');
     require(to.length == tokenId.length && tokenId.length == amount.length, 'Input array is not match');
     for (uint256 i = 0; i < to.length; i++) {
       require(gangster[to[i]] >= amount[i], 'Invalid amount to burn');
     }
 
+    uint256 total = reduce(amount);
+    tokenNFT.burn(address(this), tokenId[0], total);
     for (uint256 i = 0; i < to.length; i++) {
-      tokenNFT.burn(address(this), tokenId[i], amount[i]);
       gangster[to[i]] -= amount[i];
     }
     emit Burn(to, tokenId, amount);
   }
 
-  function withdraw() external onlyOwner {
-    require(gameClosed, 'Game is not closed');
-    require(address(this).balance > 0, 'Nothing to withdraw');
-    address payable receiver = payable(msg.sender);
-    receiver.transfer(address(this).balance);
+  /**
+   * @notice Burn goon for gangwar
+   */
+  function burnGoon(address[] memory to, uint256[] memory amount) public onlyRole(WORKER_ROLE) {
+    require(!gameClosed, 'Game is closed');
+    require(to.length == amount.length, 'Input array is not match');
+    emit BurnGoon(to, amount);
   }
 
-  function setWinner(address[] memory to, uint256[] memory points) external onlyOwner {
+  /**
+   * @notice update winners and payout
+   */
+  function setWinner(address[] memory to, uint256[] memory points) public onlyRole(WORKER_ROLE) {
     require(gameClosed, 'Game is not closed');
     require(address(this).balance > 0, 'Nothing to withdraw');
     require(to.length == points.length, 'Invalid input array length');
@@ -153,6 +196,23 @@ contract GangsterArena is Ownable, IGangsterArena {
     }
   }
 
+  /**
+   * @notice set game close status
+   */
+  function setGameClosed(bool value) public onlyRole(WORKER_ROLE) {
+    gameClosed = value;
+  }
+
+  /**
+   * @notice set NFT Lock flag - use to prevent withdraw nft when calculate gangwar result
+   */
+  function setLockNFT(bool value) public onlyRole(WORKER_ROLE) {
+    lockNFT = value;
+  }
+
+  /**
+   * @notice ERC1155 receiver
+   */
   function onERC1155Received(
     address operator,
     address from,
@@ -165,42 +225,71 @@ contract GangsterArena is Ownable, IGangsterArena {
 
   /**
   ***************************
-  Customization for the contract
+  Customization for the contract (ADMIN_ROLE)
   ***************************
    */
 
-  function setGameClosed(bool value) external onlyOwner {
-    gameClosed = value;
-  }
-
-  function setTokenMaxSupply(uint256[] calldata _tokenMaxSupplies) public onlyOwner {
+  /**
+   * @notice set Token Max Supply - default [0,1000]
+   */
+  function setTokenMaxSupply(uint256[] calldata _tokenMaxSupplies) public onlyRole(ADMIN_ROLE) {
     for (uint256 i = 0; i < _tokenMaxSupplies.length; i++) {
       tokenMaxSupply[i] = _tokenMaxSupplies[i];
     }
   }
 
-  function setMaxPerBatch(uint256 _maxPerBatch) public onlyOwner {
+  /**
+   * @notice set Max per batch
+   */
+  function setMaxPerBatch(uint256 _maxPerBatch) public onlyRole(ADMIN_ROLE) {
     MAX_PER_BATCH = _maxPerBatch;
   }
 
-  function setBasePrice(uint256 _basePrice) public onlyOwner {
+  /**
+   * @notice set Base Price Gangster
+   */
+  function setBasePrice(uint256 _basePrice) public onlyRole(ADMIN_ROLE) {
     BASE_PRICE = _basePrice;
   }
 
-  function setBasePriceWL(uint256 _basePrice) public onlyOwner {
+  /**
+   * @notice set Base Price of Gangster for Whitelisted
+   */
+  function setBasePriceWL(uint256 _basePrice) public onlyRole(ADMIN_ROLE) {
     BASE_PRICE_WL = _basePrice;
   }
 
-  function setBaseReferral(uint256 _refferral) public onlyOwner {
+  /**
+   * @notice set Base Referral /10000
+   */
+  function setBaseReferral(uint256 _refferral) public onlyRole(ADMIN_ROLE) {
     BASE_REFERRAL = _refferral;
   }
 
-  function setBaseReferralDiscount(uint256 refferral_discount) public onlyOwner {
+  /**
+   * @notice set Base Referral Discount /10000
+   */
+  function setBaseReferralDiscount(uint256 refferral_discount) public onlyRole(ADMIN_ROLE) {
     BASE_REFERRAL_DISCOUNT = refferral_discount;
   }
 
-  function setMaxPerWL(uint256 _maxPerWL) public onlyOwner {
+  /**
+   * @notice set Max Per Whitelisted Wallet
+   */
+  function setMaxPerWL(uint256 _maxPerWL) public onlyRole(ADMIN_ROLE) {
     MAX_PER_WL = _maxPerWL;
+  }
+
+  /**
+  ***************************
+  DEFAULT_ADMIN_ROLE Function
+  ***************************
+   */
+  function withdraw() public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(gameClosed, 'Game is not closed');
+    require(address(this).balance > 0, 'Nothing to withdraw');
+    address payable receiver = payable(msg.sender);
+    receiver.transfer(address(this).balance);
   }
 
   /**
@@ -279,8 +368,12 @@ contract GangsterArena is Ownable, IGangsterArena {
     }
     if (!mintedAddess[msg.sender]) mintedAddess[msg.sender] = true;
     uint256 fiatReserve = tokenFiat.balanceOf(address(this));
-    uint256 bonus = ((100 ** amount - 99 ** amount) * fiatReserve) / (100 ** amount);
-    tokenFiat.transfer(msg.sender, bonus);
+    uint256 fiatBonus;
+    for (uint256 i = 0; i < amount; i++) {
+      fiatBonus += (fiatReserve * BONUS_FIAT) / 1000;
+      fiatReserve = fiatReserve - (fiatReserve * BONUS_FIAT) / 1000;
+    }
+    tokenFiat.transfer(msg.sender, fiatBonus);
     emit Mint(msg.sender, tokenId, amount);
   }
 }

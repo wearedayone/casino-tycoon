@@ -9,6 +9,7 @@ require('chai').use(require('chai-as-promised')).should();
 // const { getBigNumber } = require('./utils');
 const TOKEN_PER_ACCOUNT = 1000000000n;
 const BASE_18 = 1000000000000000000n;
+const nftPrice = 1000000000000000n;
 
 const MINTER_ROLE = '0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6';
 
@@ -44,12 +45,21 @@ describe('Gangster Arena', function () {
     await GangsterNFTContract.waitForDeployment();
     const GangsterNFTContractAddress = await GangsterNFTContract.getAddress();
 
+    const _defaultAdmin = owner.address;
+    const _adminAddress = owner.address;
+    const _workerAddress = owner.address;
+    const _signerAddress = owner.address;
+    const _gangsterAddress = GangsterNFTContractAddress;
+    const _fiatAddress = FiatContractAddress;
+
     const GangsterArena = await ethers.getContractFactory('GangsterArena');
     const GangsterArenaContract = await GangsterArena.deploy(
-      owner.address,
-      owner.address,
-      GangsterNFTContractAddress,
-      FiatContractAddress
+      _defaultAdmin,
+      _adminAddress,
+      _workerAddress,
+      _signerAddress,
+      _gangsterAddress,
+      _fiatAddress
     );
     await GangsterArenaContract.waitForDeployment();
     const GangsterArenaContractAddress = await GangsterArenaContract.getAddress();
@@ -60,10 +70,10 @@ describe('Gangster Arena', function () {
 
     // update config for gangster arena
     // await GangsterArenaContract.setContractAddress(GangsterNFTContract.getAddress());
-    await GangsterArenaContract.setTokenMaxSupply([0, 1000]);
+    await GangsterArenaContract.setTokenMaxSupply([0, 10000]);
 
     const promises = [];
-    token.mint(GangsterArenaContractAddress, 1n * BASE_18);
+    token.mint(GangsterArenaContractAddress, 1000000n * BASE_18);
     for (const account of accounts) {
       promises.push(token.mint(account.address, TOKEN_PER_ACCOUNT * BASE_18));
     }
@@ -121,7 +131,7 @@ describe('Gangster Arena', function () {
       const { GangsterNFTContract, GangsterArenaContract, token, owner, acc1 } = await loadFixture(
         deployStakingFixture
       );
-      const nftPrice = 69000000000000000n;
+      const nftPrice = 1000000000000000n;
       await GangsterArenaContract.mint(1, 10, { from: owner.address, value: nftPrice * 10n });
 
       const gangsterCount = await GangsterArenaContract.gangster(owner.address);
@@ -140,13 +150,26 @@ describe('Gangster Arena', function () {
 
       const gangsterCount1 = await GangsterArenaContract.gangster(acc1.address);
       expect(gangsterCount1).to.be.equal(1);
+      let data = {
+        address: [],
+        token: [],
+        amount: [],
+      };
 
-      await GangsterArenaContract.burnNFT([acc1.address], [1], [1]);
+      for (let i = 0; i < 1; i++) {
+        await GangsterArenaContract.connect(acc1).mint(1, 25, { from: acc1.address, value: nftPrice * 25n });
+        data.address.push(acc1.address);
+        data.token.push(1);
+        data.amount.push(25);
+      }
+      await GangsterArenaContract.burnNFT(data.address, data.token, data.amount);
+      await GangsterArenaContract.burnGoon(data.address, data.amount);
+
       const balance4 = await GangsterNFTContract.balanceOf(await GangsterArenaContract.getAddress(), 1);
-      expect(balance4).to.be.equal(9);
+      expect(balance4).to.be.equal(10);
 
       const gangsterCount2 = await GangsterArenaContract.gangster(acc1.address);
-      expect(gangsterCount2).to.be.equal(0);
+      expect(gangsterCount2).to.be.equal(1);
     });
   });
   describe('Test WL mint', function () {
@@ -163,7 +186,6 @@ describe('Gangster Arena', function () {
       );
       const signature = await owner.signMessage(ethers.toBeArray(message));
 
-      const nftPrice = 420000000000000n;
       await GangsterArenaContract.connect(acc1).mintWL(1, 2, 1, signature, {
         from: acc1.address,
         value: nftPrice * 2n,

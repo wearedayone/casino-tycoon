@@ -3,12 +3,13 @@ pragma solidity ^0.8.20;
 
 interface IGangsterArena {
   /// Event
-  event Mint(address to, uint256 tokenId, uint256 amount);
-  event BuyGoon(address to, uint256 amount, uint256 nonce);
-  event BuySafeHouse(address to, uint256 amount, uint256 nonce);
-  event Deposit(address to, uint256 tokenId, uint256 amount);
-  event Withdraw(address to, uint256 tokenId, uint256 amount);
+  event Mint(address indexed to, uint256 tokenId, uint256 amount);
+  event BuyGoon(address indexed to, uint256 amount, uint256 nonce);
+  event BuySafeHouse(address indexed to, uint256 amount, uint256 nonce);
+  event Deposit(address indexed to, uint256 tokenId, uint256 amount);
+  event Withdraw(address indexed to, uint256 tokenId, uint256 amount);
   event Burn(address[] to, uint256[] tokenId, uint256[] amount);
+  event BurnGoon(address[] to, uint256[] amount);
 
   /// Function
   function mint(uint256 tokenId, uint256 amount) external payable;

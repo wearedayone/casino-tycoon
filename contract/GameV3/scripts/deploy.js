@@ -10,6 +10,11 @@ const { ethers } = require('hardhat');
 async function main() {
   const FIAT = await ethers.getContractFactory('FIAT');
   const workerAddress = '0x890611302Ee344d5bD94DA9811C18e2De5588077';
+  const _defaultAdmin = '0x890611302Ee344d5bD94DA9811C18e2De5588077';
+  const _adminAddress = '0x890611302Ee344d5bD94DA9811C18e2De5588077';
+  const _workerAddress = '0x890611302Ee344d5bD94DA9811C18e2De5588077';
+  const _signerAddress = '0x890611302Ee344d5bD94DA9811C18e2De5588077';
+
   // const nftAddress = '0x87377767C46D79aEfc9364EBDf0e00334d2269b9';
   const FIATToken = await FIAT.deploy(workerAddress);
   const FIATTokenAddress = await FIATToken.getAddress();
@@ -22,8 +27,10 @@ async function main() {
 
   const GangsterArena = await ethers.getContractFactory('GangsterArena');
   const GangsterArenaContract = await GangsterArena.deploy(
-    workerAddress,
-    workerAddress,
+    _defaultAdmin,
+    _adminAddress,
+    _workerAddress,
+    _signerAddress,
     GangsterNFTAddress,
     FIATTokenAddress
   );
