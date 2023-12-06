@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 
 import { formatter } from '../../../../utils/numbers';
+import { colors, fontFamilies } from '../../../../utils/styles';
 
 class DailyMoney extends Phaser.GameObjects.Container {
   constructor(scene, x, y, value) {
@@ -8,12 +9,10 @@ class DailyMoney extends Phaser.GameObjects.Container {
 
     this.container = scene.add.image(x, y, 'daily-money').setOrigin(0.5, 0.5);
     this.valueText = scene.add
-      .text(x + 20, y - 10, formatter.format(value), {
-        // font: 'bold 60px Arial',
+      .text(x + 20, y - 10, `+${formatter.format(value)}`, {
         fontSize: '50px',
-        // fontWeight: 'bold',
-        fontFamily: 'WixMadeforDisplayExtraBold',
-        color: '#7C2828',
+        fontFamily: fontFamilies.extraBold,
+        color: colors.brown,
       })
       .setOrigin(0.5, 0.5);
 
@@ -22,7 +21,7 @@ class DailyMoney extends Phaser.GameObjects.Container {
   }
 
   updateValue(newValue) {
-    this.valueText.text = formatter.format(newValue);
+    this.valueText.text = `+${formatter.format(newValue)}`;
   }
 }
 
