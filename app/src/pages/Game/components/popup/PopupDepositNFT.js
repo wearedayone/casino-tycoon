@@ -79,7 +79,7 @@ class PopupDepositNFT extends Popup {
         parentModal.open();
       },
       'Back',
-      { fontSize: '82px' }
+      { fontSize: '82px', sound: 'close' }
     );
     this.buttonStake = new Button(
       scene,
