@@ -6,10 +6,14 @@ import alchemy from '../configs/alchemy.config.js';
 import environments from '../utils/environments.js';
 import logger from '../utils/logger.js';
 import { GangsterEvent } from '../utils/constants.js';
+import { getActiveSeason } from '../services/season.service.js';
 
-const { GAME_CONTRACT_ADDRESS, NETWORK_ID } = environments;
+const { NETWORK_ID } = environments;
 
 const gangsterArenaListener = async () => {
+  const activeSeason = await getActiveSeason();
+  const { gameAddress: GAME_CONTRACT_ADDRESS } = activeSeason || {};
+
   const ethersProvider = await alchemy.config.getWebSocketProvider();
   const contract = new Contract(GAME_CONTRACT_ADDRESS, GangsterArenaABI.abi, ethersProvider);
 

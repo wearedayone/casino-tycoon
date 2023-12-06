@@ -5,10 +5,14 @@ import admin, { firestore } from '../configs/firebase.config.js';
 import alchemy from '../configs/alchemy.config.js';
 import environments from '../utils/environments.js';
 import logger from '../utils/logger.js';
+import { getActiveSeason } from '../services/season.service.js';
 
-const { TOKEN_ADDRESS, NETWORK_ID, GAME_CONTRACT_ADDRESS } = environments;
+const { NETWORK_ID } = environments;
 
 const tokenListener = async () => {
+  const activeSeason = await getActiveSeason();
+  const { tokenAddress: TOKEN_ADDRESS } = activeSeason || {};
+
   const ethersProvider = await alchemy.config.getWebSocketProvider();
   const contract = new Contract(TOKEN_ADDRESS, tokenABI.abi, ethersProvider);
 
@@ -19,6 +23,8 @@ const tokenListener = async () => {
 };
 
 export const queryEvent = async (fromBlock) => {
+  const activeSeason = await getActiveSeason();
+  const { tokenAddress: TOKEN_ADDRESS } = activeSeason || {};
   const ethersProvider = await alchemy.config.getWebSocketProvider();
   const contract = new Contract(TOKEN_ADDRESS, tokenABI.abi, ethersProvider);
   const depositEvents = await contract.queryFilter('Transfer', fromBlock);
@@ -31,6 +37,9 @@ export const queryEvent = async (fromBlock) => {
 
 const processTransferEvent = async ({ from, to, value, event, contract }) => {
   try {
+    const activeSeason = await getActiveSeason();
+    const { gameAddress: GAME_CONTRACT_ADDRESS } = activeSeason || {};
+
     logger.info('Token Transfer');
     logger.info({ from, to, value, event });
     const { transactionHash } = event;

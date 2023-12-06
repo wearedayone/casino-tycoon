@@ -9,8 +9,9 @@ import gameContractABI from '../assets/abis/GameContract.json' assert { type: 'j
 import environments from '../utils/environments.js';
 import alchemy from '../configs/alchemy.config.js';
 import logger from '../utils/logger.js';
+import { getActiveSeason } from './season.service.js';
 
-const { WORKER_WALLET_PRIVATE_KEY, TOKEN_ADDRESS, GAME_CONTRACT_ADDRESS } = environments;
+const { WORKER_WALLET_PRIVATE_KEY } = environments;
 
 const getWorkerWallet = async () => {
   const ethersProvider = await alchemy.config.getProvider();
@@ -19,11 +20,15 @@ const getWorkerWallet = async () => {
 };
 
 const getTokenContract = async (signer) => {
+  const activeSeason = await getActiveSeason();
+  const { tokenAddress: TOKEN_ADDRESS } = activeSeason || {};
   const contract = new Contract(TOKEN_ADDRESS, tokenABI.abi, signer);
   return contract;
 };
 
 const getGameContract = async (signer) => {
+  const activeSeason = await getActiveSeason();
+  const { gameAddress: GAME_CONTRACT_ADDRESS } = activeSeason || {};
   const contract = new Contract(GAME_CONTRACT_ADDRESS, gameContractABI.abi, signer);
   return contract;
 };

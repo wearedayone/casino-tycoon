@@ -20,7 +20,7 @@ import {
 import logger from '../utils/logger.js';
 import environments from '../utils/environments.js';
 
-const { TOKEN_ADDRESS, SYSTEM_ADDRESS, GAME_CONTRACT_ADDRESS } = environments;
+const { SYSTEM_ADDRESS } = environments;
 
 export const initTransaction = async ({ userId, type, ...data }) => {
   const activeSeason = await getActiveSeason();
@@ -159,6 +159,9 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
     const bnValue = BigNumber.from(BigInt(Math.round(value * 1e12))).mul(BigNumber.from(1e6));
     console.log({ logdata: logs[0]?.data, value, bnValue, v1: BigNumber.from(BigInt(Math.round(value * 1e12))) });
 
+    const activeSeason = await getActiveSeason();
+    const { tokenAddress: TOKEN_ADDRESS } = activeSeason || {};
+
     if (type === 'withdraw') {
       if (token === 'FIAT' && to.toLowerCase() !== TOKEN_ADDRESS.toLowerCase())
         throw new Error(`Bad request: invalid receiver for ${type}, txn: ${JSON.stringify(receipt)}`);
@@ -179,14 +182,6 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
       if (!bnValue.eq(transactionValue))
         throw new Error(`Bad request: Value doesnt match, ${JSON.stringify({ transactionValue, bnValue })}`);
     }
-
-    // if (type === 'buy-machine') {
-    //   if (to.toLowerCase() !== GAME_CONTRACT_ADDRESS.toLowerCase())
-    //     throw new Error(`Bad request: invalid receiver for ${type}, txn: ${JSON.stringify(receipt)}`);
-
-    //   if (!bnValue.eq(transactionValue))
-    //     throw new Error(`Bad request: Value doesnt match, ${JSON.stringify({ transactionValue, bnValue })}`);
-    // }
 
     return true;
   } catch (err) {
