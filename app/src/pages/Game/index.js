@@ -280,6 +280,7 @@ const Game = () => {
       gameRef.current?.events.on('toggle-game-sound', toggleSound);
 
       gameRef.current?.events.on('request-game-ended-status', () => {
+        console.log({ isEnded });
         if (isEnded) gameRef.current?.events.emit('game-ended');
       });
       gameRef.current?.events.on('request-app-version', () => {
