@@ -174,7 +174,7 @@ const Game = () => {
       const { amount, value, nonce, signature } = res.data;
       const receipt = await buySafeHouse(amount, value, nonce, signature);
 
-      if (receipt.status === 1) {
+      if (receipt.status !== 1) {
         throw new Error('Transaction failed');
       }
     } catch (err) {

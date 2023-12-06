@@ -113,9 +113,9 @@ const main = async () => {
         { networthStart: 2000, networthEnd: 4999, level: 14 },
         { networthStart: 5000, level: 15 },
       ],
-      tokenAddress: '0x5BD9fdf6552fc616A3a7b4EE73e19beb2272fE51',
-      nftAddress: '0x2F9a53B55f6BD7E12cd7fe60f107d14d93553ed2',
-      gameAddress: '0x76EE0cf07461e64C53A3672bb6c3F5a7E9cA182F',
+      tokenAddress: '0x66Bd291b9882Be48fE2eD08B5628aa7A57c22773',
+      nftAddress: '0xeD7A88f3df14bc2416857fd6Bc5440814777D07f',
+      gameAddress: '0xA55f3DfdFe954724d788772F9e940F2C915B49da',
     });
   console.log('created season');
 

@@ -59,7 +59,8 @@ class PopupProcessing extends Popup {
     this.loadingAnimation.play();
 
     scene.game.events.on(completedEvent, (data) => {
-      const { status, message } = data;
+      const status = data?.status;
+      const message = data?.message;
       this.loading = false;
       // icons
       this.loadingAnimation.pause();
@@ -134,6 +135,7 @@ class PopupProcessing extends Popup {
     this.loadingAnimation.resume();
     this.icon.setVisible(true);
     this.iconDone.setVisible(false);
+    this.iconFail.setVisible(false);
     this.setVisible(true);
   }
 }
