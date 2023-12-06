@@ -15,9 +15,14 @@ const { NETWORK_ID } = environments;
 const useSmartContract = () => {
   const { sendTransaction } = usePrivy();
   const embeddedWallet = useUserWallet();
-  const configs = useSystemStore((state) => state.configs);
+  const activeSeason = useSystemStore((state) => state.activeSeason);
 
-  const { tokenAddress: TOKEN_ADDRESS, gameAddress: GAME_CONTRACT_ADDRESS, nftAddress: NFT_ADDRESS } = configs || {};
+  const {
+    tokenAddress: TOKEN_ADDRESS,
+    gameAddress: GAME_CONTRACT_ADDRESS,
+    nftAddress: NFT_ADDRESS,
+  } = activeSeason || {};
+
   const loadedAssets = !!TOKEN_ADDRESS && !!GAME_CONTRACT_ADDRESS && !!NFT_ADDRESS && !!embeddedWallet;
 
   const withdrawToken = async (to, value) => {
