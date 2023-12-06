@@ -554,6 +554,10 @@ const Game = () => {
   }, [appVersion]);
 
   useEffect(() => {
+    if (isEnded) gameRef.current?.events.emit('game-ended');
+  }, [isEnded]);
+
+  useEffect(() => {
     gameRef.current?.events.emit('update-eth-balance', { address, ETHBalance });
   }, [address, ETHBalance]);
 

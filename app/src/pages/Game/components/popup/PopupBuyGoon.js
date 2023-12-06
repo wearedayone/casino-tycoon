@@ -191,6 +191,9 @@ class PopupBuyGoon extends Popup {
       }
     });
 
+    scene.game.events.on('game-ended', () => {
+      this.upgradeBtn.setDisabledState(true);
+    });
     scene.game.events.on(
       'update-workers',
       ({ numberOfWorkers, networth, balance, sold, basePrice, priceStep, dailyReward, networthIncrease }) => {
@@ -231,7 +234,7 @@ class PopupBuyGoon extends Popup {
     this.coin.x = this.priceText.x + this.priceText.width + 20;
 
     this.insufficientBalance.setVisible(this.quantity > this.estimatedMaxPurchase);
-    this.upgradeBtn.setDisabledState(this.quantity > this.estimatedMaxPurchase);
+    this.upgradeBtn.setDisabledState(this.scene.isGameEnded || this.quantity > this.estimatedMaxPurchase);
   }
 }
 
