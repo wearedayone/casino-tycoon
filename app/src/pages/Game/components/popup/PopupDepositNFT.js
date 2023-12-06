@@ -17,6 +17,7 @@ const subtitleStyle = {
 class PopupDepositNFT extends Popup {
   loading = false;
   balance = 0;
+  numberOfMachines = 0;
 
   constructor(scene, parentModal) {
     super(scene, 'popup-small', { title: 'Stake NFT' });
@@ -106,6 +107,13 @@ class PopupDepositNFT extends Popup {
     scene.add.existing(this.popupProcessing);
 
     scene.game.events.on('update-wallet-nft-balance', (data) => this.updateBalance(data));
+    scene.game.events.on('update-wallet-nft-unstaked', ({ balance }) => {
+      this.balance = balance;
+      if (this.balanceText) {
+        const total = balance + this.numberOfMachines;
+        this.balanceText.text = `${balance.toLocaleString()} of ${total.toLocaleString()} Gangsters unstaked`;
+      }
+    });
     scene.game.events.on('deposit-nft-started', () => {
       this.popupProcessing.initLoading(`Staking may take a few minutes.`);
       this.close();
@@ -123,7 +131,7 @@ class PopupDepositNFT extends Popup {
   }
 
   onOpen() {
-    // this.scene.game.events.emit('request-wallet-nft-balance');
+    this.scene.game.events.emit('request-wallet-nft-unstaked');
   }
 
   cleanup() {
@@ -134,6 +142,7 @@ class PopupDepositNFT extends Popup {
   updateBalance({ balance, numberOfMachines }) {
     const total = balance + numberOfMachines;
     this.balance = balance;
+    this.numberOfMachines = numberOfMachines;
     this.balanceText.text = `${balance.toLocaleString()} of ${total.toLocaleString()} Gangsters unstaked`;
   }
 }

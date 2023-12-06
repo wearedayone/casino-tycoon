@@ -327,8 +327,13 @@ const Game = () => {
       });
       gameRef.current?.events.on('request-wallet-nft-balance', () => {
         getNFTBalance(address).then((balance) => {
-          console.log('balance', balance);
           gameRef.current.events.emit('update-wallet-nft-balance', { balance, numberOfMachines });
+        });
+      });
+
+      gameRef.current?.events.on('request-wallet-nft-unstaked', () => {
+        getNFTBalance(address).then((balance) => {
+          gameRef.current.events.emit('update-wallet-nft-unstaked', { balance });
         });
       });
 
