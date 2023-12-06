@@ -88,6 +88,7 @@ contract GangsterArena is Ownable, IGangsterArena {
   }
 
   function buyGoon(uint256 amount, uint256 value, uint256 nonce, bytes memory sig) public {
+    require(!gameClosed, 'Game is closed');
     bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender, amount, value, nonce)));
     require(verifyAddressSigner(message, sig), 'Invalid signature');
     tokenFiat.transferFrom(msg.sender, address(this), value);
@@ -95,6 +96,7 @@ contract GangsterArena is Ownable, IGangsterArena {
   }
 
   function buySafeHouse(uint256 amount, uint256 value, uint256 nonce, bytes memory sig) public {
+    require(!gameClosed, 'Game is closed');
     bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender, amount, value, nonce)));
     require(verifyAddressSigner(message, sig), 'Invalid signature');
     tokenFiat.transferFrom(msg.sender, address(this), value);
@@ -109,7 +111,6 @@ contract GangsterArena is Ownable, IGangsterArena {
   }
 
   function withdrawNFT(address to, uint256 tokenId, uint256 amount) external {
-    require(!gameClosed, 'Game is closed');
     require(gangster[msg.sender] >= amount, 'Insufficient balance');
     tokenNFT.safeTransferFrom(address(this), to, tokenId, amount, '');
     gangster[msg.sender] -= amount;
