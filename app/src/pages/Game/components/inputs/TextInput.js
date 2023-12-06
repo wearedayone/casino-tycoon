@@ -7,6 +7,7 @@ class TextInput extends Phaser.GameObjects.Container {
   maxDisplayedCharacters = 0;
 
   // state
+  isDisabled = false;
   isFocused = false;
   value = '';
 
@@ -15,6 +16,7 @@ class TextInput extends Phaser.GameObjects.Container {
     x,
     y,
     {
+      isDisabled = false,
       color = '#29000b',
       fontSize = '60px',
       placeholder = '',
@@ -26,6 +28,7 @@ class TextInput extends Phaser.GameObjects.Container {
   ) {
     super(scene, 0, 0);
     scene.input.keyboard.createCursorKeys();
+    this.isDisabled = isDisabled;
     this.maxDisplayedCharacters = maxDisplayedCharacters;
 
     this.container = scene.add.image(x, y, 'text-input').setOrigin(0.5, 0.5);
@@ -74,7 +77,7 @@ class TextInput extends Phaser.GameObjects.Container {
 
     // on focus
     this.container.on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
-      if (!this.isFocused) {
+      if (!this.isFocused && !this.isDisabled) {
         // isEnteringName is used to turn on and off the recording of key strokes.
         this.isFocused = true;
         this.updateDisplayedString();

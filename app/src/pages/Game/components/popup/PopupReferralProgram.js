@@ -59,9 +59,8 @@ class PopupReferralProgram extends Popup {
 
     this.inviteCode = new TextInput(scene, width / 2, inviteCodeY, {
       placeholder: 'Enter referral code',
-      valueRegex: addressInputRegex,
-      characterRegex: addressCharacterRegex,
       maxDisplayedCharacters: 18,
+      isDisabled: true,
     });
     const buttonPaste = new Button(
       scene,
