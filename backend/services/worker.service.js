@@ -68,10 +68,10 @@ export const claimToken = async ({ address, amount }) => {
       const message = newError.context.match(regex);
       if (message) {
         const error = new Error(message[0]);
-        log.error(error.message);
+        logger.error(error.message);
       }
     } else {
-      log.error(err.message);
+      logger.error(err.message);
     }
 
     return { txnHash, status: 'Failed' };
@@ -106,10 +106,10 @@ export const claimTokenBonus = async ({ address, amount }) => {
       const message = newError.context.match(regex);
       if (message) {
         const error = new Error(message[0]);
-        log.error(error.message);
+        logger.error(error.message);
       }
     } else {
-      log.error(err.message);
+      logger.error(err.message);
     }
 
     return { txnHash, status: 'Failed' };

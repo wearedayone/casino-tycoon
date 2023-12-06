@@ -135,7 +135,7 @@ class PopupProcessing extends Popup {
     this.loadingAnimation.resume();
     this.icon.setVisible(true);
     this.iconDone.setVisible(false);
-    this.iconFail.setVisible(false);
+    if (this.iconFail) this.iconFail.setVisible(false);
     this.setVisible(true);
   }
 }
