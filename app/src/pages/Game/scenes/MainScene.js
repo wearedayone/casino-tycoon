@@ -144,6 +144,7 @@ class MainScene extends Phaser.Scene {
     const infoButtons = new InfoButtons(this, 550);
     this.add.existing(infoButtons);
 
+    this.game.events.emit('request-game-ended-status');
     this.game.events.on('game-ended', () => {
       this.isGameEnded = true;
     });

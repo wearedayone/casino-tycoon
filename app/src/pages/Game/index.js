@@ -287,6 +287,9 @@ const Game = () => {
       gameRef.current?.events.on('log-out', logout);
       gameRef.current?.events.on('toggle-game-sound', toggleSound);
 
+      gameRef.current?.events.on('request-game-ended-status', () => {
+        if (isEnded) gameRef.current?.events.emit('game-ended');
+      });
       gameRef.current?.events.on('request-app-version', () => {
         gameRef.current.events.emit('update-app-version', appVersion);
       });
