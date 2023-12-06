@@ -57,7 +57,7 @@
       }
     </style>
   </head>
-  <body>
+  <body style="margin: 0;">
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div
       style="
@@ -71,7 +71,16 @@
     <div style="font-family: WixMadeforDisplayBold, sans-serif; position: absolute; left: -1000px; visibility: hidden">
       .
     </div>
-    <div id="root"></div>
+    <div id="root">
+      <div id="flash" style="height: 100vh; background-image: url(/images/bg-login.png);background-size:cover; background-repeat: no-repeat;justify-content: center;-webkit-box-pack:center; background-position:center;">
+        <div style="padding: 16px;">
+          <div style="margin-top: 20vh;">
+            <img src="/images/logo.svg" width="100%">
+          </div>
+        </div>
+        
+      </div>
+    </div>
     <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.
@@ -82,5 +91,6 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
+    
   </body>
 </html>
