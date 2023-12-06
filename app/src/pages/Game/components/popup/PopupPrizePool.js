@@ -119,9 +119,13 @@ class PopupPrizePool extends Popup {
     console.log('rankingRewards', rankingRewards);
     const contentContainerHeight = rankingRewards.length * rowHeight;
     this.contentContainer.setSize(this.popup.width * 0.8, contentContainerHeight);
-    if (this.table) this.remove(this.table);
+    if (this.table) {
+      this.remove(this.table);
+      this.table.destroy(true);
+    }
     if (this.items.length) {
       for (let item of this.items) {
+        item.destroy();
         this.remove(item);
       }
     }
