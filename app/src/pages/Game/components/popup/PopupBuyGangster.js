@@ -39,6 +39,7 @@ class PopupBuyGangster extends Popup {
       sound: 'gangster',
       completedEvent: 'buy-gangster-completed',
       completedIcon: 'icon-gangster-buy-done',
+      failedIcon: 'icon-gangster-buy-fail',
       description: '',
     });
     scene.add.existing(this.popupBuyProcessing);

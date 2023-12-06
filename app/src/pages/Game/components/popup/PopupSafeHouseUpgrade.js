@@ -32,6 +32,7 @@ class PopupSafeHouseUpgrade extends Popup {
       sound: 'house',
       completedEvent: 'upgrade-safehouse-completed',
       completedIcon: 'icon-safehouse-upgrade-done',
+      failedIcon: 'icon-safehouse-upgrade-fail',
       description: `Upgrading Safehouse.\nPlease, wait`,
     });
     scene.add.existing(this.popupBuyProcessing);

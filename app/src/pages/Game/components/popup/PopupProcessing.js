@@ -7,7 +7,7 @@ import { formatter } from '../../../../utils/numbers';
 const { width } = configs;
 
 class PopupProcessing extends Popup {
-  constructor(scene, { sound, completedEvent, completedIcon, description }) {
+  constructor(scene, { sound, completedEvent, completedIcon, description, failedIcon }) {
     super(scene, 'popup-small', { title: 'Almost done', openOnCreate: false });
     const startingY = this.popup.y - this.popup.height / 2;
     const iconY = startingY + 320;
@@ -19,6 +19,12 @@ class PopupProcessing extends Popup {
     this.icon = scene.add.image(width / 2, iconY, 'icon-loading');
     this.iconDone = scene.add.image(width / 2, iconY, completedIcon);
     this.iconDone.setVisible(false);
+    if (failedIcon) {
+      this.iconFail = scene.add.image(width / 2, iconY, failedIcon);
+      this.iconFail.setVisible(false);
+      this.add(this.iconFail);
+    }
+
     this.title = scene.add
       .text(width / 2, titleY, 'Processing...', {
         fontSize: '100px',
@@ -53,56 +59,69 @@ class PopupProcessing extends Popup {
     this.loadingAnimation.play();
 
     scene.game.events.on(completedEvent, (data) => {
+      const { status, message } = data;
       this.loading = false;
-      this.setTitle('Success');
-      this.title.text = 'All done!';
-      this.description.text = 'Your reputation & earnings \n are updated';
-      this.doneSound?.play();
-
       // icons
       this.loadingAnimation.pause();
       this.icon.setVisible(false);
-      this.iconDone.setVisible(true);
 
-      const hasTxnHashEvents = [
-        'buy-gangster-completed',
-        'deposit-nft-completed',
-        'withdraw-token-completed',
-        'withdraw-eth-completed',
-        'withdraw-nft-completed',
-      ];
+      if (status === 'failed') {
+        this.setTitle('Failed');
+        this.title.text = 'Transaction failed!';
+        this.description.text = message;
+        this.doneSound?.play();
 
-      if (!hasTxnHashEvents.includes(completedEvent)) return;
-      const { txnHash, amount } = data;
-      let title = '',
-        desc = '';
+        if (failedIcon) {
+          this.iconFail.setVisible(true);
+        } else {
+          this.icon.setVisible(true);
+        }
+      } else {
+        this.setTitle('Success');
+        this.title.text = 'All done!';
+        this.description.text = 'Your reputation & earnings \n are updated';
+        this.doneSound?.play();
+        this.iconDone.setVisible(true);
+        const hasTxnHashEvents = [
+          'buy-gangster-completed',
+          'deposit-nft-completed',
+          'withdraw-token-completed',
+          'withdraw-eth-completed',
+          'withdraw-nft-completed',
+        ];
 
-      switch (completedEvent) {
-        case 'buy-gangster-completed':
-          title = `${amount.toLocaleString()} Gangster${amount > 1 ? 's' : ''}`;
-          desc = 'Gangsters hired successfully.';
-          break;
-        case 'deposit-nft-completed':
-          title = `${amount.toLocaleString()} NFT${amount > 1 ? 's' : ''}`;
-          desc = 'Staking completed.';
-          break;
-        case 'withdraw-token-completed':
-          title = `${amount.toLocaleString()} $FIAT`;
-          desc = 'Withdraw completed.';
-          break;
-        case 'withdraw-eth-completed':
-          title = `${formatter.format(amount)} ETH`;
-          desc = 'Withdraw completed.';
-          break;
-        case 'withdraw-nft-completed':
-          title = `${amount.toLocaleString()} NFT${amount > 1 ? 's' : ''}`;
-          desc = 'Withdraw completed.';
-          break;
+        if (!hasTxnHashEvents.includes(completedEvent)) return;
+        const { txnHash, amount } = data;
+        let title = '',
+          desc = '';
+
+        switch (completedEvent) {
+          case 'buy-gangster-completed':
+            title = `${amount.toLocaleString()} Gangster${amount > 1 ? 's' : ''}`;
+            desc = 'Gangsters hired successfully.';
+            break;
+          case 'deposit-nft-completed':
+            title = `${amount.toLocaleString()} NFT${amount > 1 ? 's' : ''}`;
+            desc = 'Staking completed.';
+            break;
+          case 'withdraw-token-completed':
+            title = `${amount.toLocaleString()} $FIAT`;
+            desc = 'Withdraw completed.';
+            break;
+          case 'withdraw-eth-completed':
+            title = `${formatter.format(amount)} ETH`;
+            desc = 'Withdraw completed.';
+            break;
+          case 'withdraw-nft-completed':
+            title = `${amount.toLocaleString()} NFT${amount > 1 ? 's' : ''}`;
+            desc = 'Withdraw completed.';
+            break;
+        }
+
+        this.popupTxnCompleted = new PopupTxnCompleted(scene, completedIcon, title, desc, txnHash);
+        scene.add.existing(this.popupTxnCompleted);
+        this.close();
       }
-
-      this.popupTxnCompleted = new PopupTxnCompleted(scene, completedIcon, title, desc, txnHash);
-      scene.add.existing(this.popupTxnCompleted);
-      this.close();
     });
   }
 

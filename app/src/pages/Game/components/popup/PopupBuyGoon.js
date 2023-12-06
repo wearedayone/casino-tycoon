@@ -35,6 +35,7 @@ class PopupBuyGoon extends Popup {
       sound: 'minion',
       completedEvent: 'buy-goon-completed',
       completedIcon: 'icon-goon-buy-done',
+      failedIcon: 'icon-goon-buy-fail',
       description: ``,
     });
     scene.add.existing(this.popupBuyProcessing);

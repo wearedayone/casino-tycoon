@@ -18,7 +18,7 @@ contract GangsterArena is Ownable, IGangsterArena {
   uint256 public BASE_PRICE_WL = 0.00042 ether;
   uint256 public BASE_REFERRAL = 10;
   uint256 public BASE_REFERRAL_DISCOUNT = 90;
-  uint256 public MAX_PER_BATCH = 20;
+  uint256 public MAX_PER_BATCH = 25;
   uint256 public MAX_PER_WL = 20;
   bool public gameClosed;
 
@@ -145,11 +145,11 @@ contract GangsterArena is Ownable, IGangsterArena {
 
     uint256 total = reduce(points);
     require(total > 0, 'Invalid points input');
-
+    uint256 totalBalance = address(this).balance;
     for (uint256 i = 0; i < to.length; i++) {
       address payable receiver = payable(to[i]);
-      uint256 reward = (address(this).balance * points[i]) / total;
-      receiver.transfer(reward);
+      uint256 reward = (totalBalance * points[i]) / total;
+      if (reward > 0) receiver.transfer(reward);
     }
   }
 

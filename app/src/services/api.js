@@ -28,7 +28,7 @@ api.interceptors.response.use(
     return response;
   },
   (err) => {
-    console.log(err?.response?.data);
+    console.log({ err });
     throw new Error((err.response && err.response.data) || err.message);
   }
 );

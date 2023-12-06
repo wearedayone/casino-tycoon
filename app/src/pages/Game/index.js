@@ -175,30 +175,24 @@ const Game = () => {
       const receipt = await buySafeHouse(amount, value, nonce, signature);
 
       if (receipt.status === 1) {
-        enqueueSnackbar(`Upgrade safehouse successfully`, {
-          variant: 'success',
-        });
+        throw new Error('Transaction failed');
       }
     } catch (err) {
-      enqueueSnackbar('Insufficient $FIAT or ETH', { variant: 'error' });
       console.error(err);
+      throw err;
     }
   };
 
   const buyWorker = async (quantity) => {
     try {
       const res = await create({ type: 'buy-worker', amount: quantity });
-      console.log(res);
       const { amount, value, nonce, signature } = res.data;
       const receipt = await buyGoon({ amount, value, nonce, signature });
-      if (receipt.status === 1) {
-        enqueueSnackbar(`Buy goon successfully`, {
-          variant: 'success',
-        });
+      if (receipt.status !== 1) {
+        throw new Error('Transaction failed');
       }
     } catch (err) {
-      enqueueSnackbar('Insufficient $FIAT or ETH', { variant: 'error' });
-      console.error(err);
+      throw err;
     }
   };
 
@@ -211,10 +205,8 @@ const Game = () => {
         await validate({ transactionId: id, txnHash: receipt.transactionHash });
         return receipt.transactionHash;
       }
-      enqueueSnackbar('Buy Gangster successfully', { variant: 'success' });
     } catch (err) {
-      enqueueSnackbar('Insufficient ETH', { variant: 'error' });
-      console.error(err);
+      throw err;
     }
   };
 
@@ -428,6 +420,7 @@ const Game = () => {
           gameRef.current?.events.emit('upgrade-safehouse-completed');
         } catch (err) {
           console.error(err);
+          gameRef.current?.events.emit('upgrade-safehouse-completed', { status: 'failed', message: err.message });
         }
       });
 
@@ -448,7 +441,8 @@ const Game = () => {
           await buyWorker(quantity);
           gameRef.current?.events.emit('buy-goon-completed');
         } catch (err) {
-          console.error(err);
+          console.error(431, { err });
+          gameRef.current?.events.emit('buy-goon-completed', { status: 'failed', message: err.message });
         }
       });
 
@@ -458,6 +452,7 @@ const Game = () => {
           gameRef.current?.events.emit('buy-gangster-completed', { txnHash, amount: quantity });
         } catch (err) {
           console.error(err);
+          gameRef.current?.events.emit('buy-gangster-completed', { status: 'failed', message: err.message });
         }
       });
 

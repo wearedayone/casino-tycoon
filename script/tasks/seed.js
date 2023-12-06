@@ -72,7 +72,7 @@ const main = async () => {
 
   console.log('create season');
   const now = Date.now();
-  const endTimeUnix = Date.now() + 10 * 24 * 60 * 60 * 1000;
+  const endTimeUnix = Date.now() + 2 * 60 * 60 * 1000;
   const startTime = admin.firestore.Timestamp.fromMillis(now);
   const estimatedEndTime = admin.firestore.Timestamp.fromMillis(endTimeUnix);
   await firestore
@@ -87,7 +87,7 @@ const main = async () => {
       prizePool: 0,
       reservePool: 0,
       reservePoolReward: 0.01,
-      timeStepInHours: 0.25,
+      timeStepInHours: 0.0001,
       machineSold: 0,
       workerSold: 0,
       buildingSold: 0,
@@ -113,6 +113,9 @@ const main = async () => {
         { networthStart: 2000, networthEnd: 4999, level: 14 },
         { networthStart: 5000, level: 15 },
       ],
+      tokenAddress: '0x5BD9fdf6552fc616A3a7b4EE73e19beb2272fE51',
+      nftAddress: '0x2F9a53B55f6BD7E12cd7fe60f107d14d93553ed2',
+      gameAddress: '0x76EE0cf07461e64C53A3672bb6c3F5a7E9cA182F',
     });
   console.log('created season');
 
