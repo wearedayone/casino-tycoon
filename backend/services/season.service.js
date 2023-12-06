@@ -22,7 +22,6 @@ export const getActiveSeason = async () => {
 };
 
 const TAKE_SEASON_SNAPSHOT = 'take-season-snapshot';
-const DEV_FEE = 0.1;
 export const updateSeasonSnapshotSchedule = async () => {
   const existingJob = schedule.scheduledJobs[TAKE_SEASON_SNAPSHOT];
   logger.info(`existingJobExists: ${!!existingJob}`);
@@ -54,7 +53,6 @@ const takeSeasonLeaderboardSnapshot = async () => {
 
       for (let j = 0; j < rankRange; j++) {
         // calculate rewards allocation points
-        // assume total share = 1 - DEV_FEE
         winnerAllocations.push({ rank: rankStart + j, prizeShare: share, prizeValue: prizePool * share });
       }
     }
@@ -66,6 +64,7 @@ const takeSeasonLeaderboardSnapshot = async () => {
       .orderBy('networth', 'desc')
       .get();
     const gamePlays = gamePlaysSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    let totalSharePaid = 0;
     for (let i = 0; i < winnerAllocations.length; i++) {
       const player = gamePlays[i];
       // exclude players with 0 networth
@@ -74,27 +73,28 @@ const takeSeasonLeaderboardSnapshot = async () => {
         const { address } = userSnapshot.data();
         winnerAllocations[i].address = address;
         winnerAllocations[i].networth = player.networth;
-      } else {
-        winnerAllocations[i].address = SYSTEM_ADDRESS;
-        winnerAllocations[i].isWorker = true;
-      }
+        totalSharePaid += winnerAllocations[i].prizeShare;
+      } else break;
     }
 
-    // add default dev fee
-    winnerAllocations.push({
-      address: SYSTEM_ADDRESS,
-      isWorker: true,
-      prizeShare: DEV_FEE,
-      prizeValue: prizePool * DEV_FEE,
-    });
+    // dev fee is remaining prize pool
+    const devFee = 1 - totalSharePaid;
+    if (devFee)
+      winnerAllocations.push({
+        address: SYSTEM_ADDRESS,
+        isWorker: true,
+        prizeShare: devFee,
+        prizeValue: prizePool * devFee,
+      });
 
     // save snapshot to firestore
     // TODO: use event listener to update for accurate prizeValue
     await seasonRef.update({ winnerSnapshot: winnerAllocations });
 
     // call on-chain `setWinner` method
-    const winners = winnerAllocations.map(({ address }) => address);
-    const points = winnerAllocations.map(({ prizeShare }) => Math.round(prizeShare * Math.pow(10, 6))); // eliminate decimals
+    const actualWinners = winnerAllocations.filter(({ address }) => !!address);
+    const winners = actualWinners.map(({ address }) => address);
+    const points = actualWinners.map(({ prizeShare }) => Math.round(prizeShare * Math.pow(10, 6))); // eliminate decimals
     await setWinner({ winners, points });
   } catch (ex) {
     logger.error(ex);
