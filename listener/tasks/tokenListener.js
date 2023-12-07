@@ -10,10 +10,9 @@ import { getActiveSeason } from '../services/season.service.js';
 const { NETWORK_ID } = environments;
 
 const tokenListener = async () => {
-  logger.info(`Start listen contract ${TOKEN_ADDRESS} on Network ${NETWORK_ID}`);
   const activeSeason = await getActiveSeason();
   const { tokenAddress: TOKEN_ADDRESS } = activeSeason || {};
-
+  logger.info(`Start listen contract ${TOKEN_ADDRESS} on Network ${NETWORK_ID}`);
   const ethersProvider = await alchemy.config.getWebSocketProvider();
   const contract = new Contract(TOKEN_ADDRESS, tokenABI.abi, ethersProvider);
 
