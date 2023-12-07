@@ -147,7 +147,7 @@ const SettingModalWithdrawToken = ({ open, onBack }) => {
 };
 
 export const BASESCAN_PREFIX = {
-  1: '',
+  8453: '',
   84531: 'goerli.',
 };
 

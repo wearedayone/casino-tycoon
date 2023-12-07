@@ -70,7 +70,7 @@ class PopupTxnCompleted extends Popup {
 }
 
 export const BASESCAN_PREFIX = {
-  1: '',
+  8453: '',
   84531: 'goerli.',
 };
 
