@@ -59,16 +59,19 @@ export const createUserIfNotExist = async (userId) => {
       }
     }
 
-    await firestore.collection('user').doc(userId).set({
-      address: wallet.address.toLocaleLowerCase(),
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      username,
-      avatarURL,
-      tokenBalance: 0,
-      ETHBalance: 0,
-      walletPasswordAsked: false,
-      referralCode,
-    });
+    await firestore
+      .collection('user')
+      .doc(userId)
+      .set({
+        address: wallet?.address?.toLocaleLowerCase() || '',
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        username,
+        avatarURL,
+        tokenBalance: 0,
+        ETHBalance: 0,
+        walletPasswordAsked: false,
+        referralCode,
+      });
   } else {
     const ethersProvider = await alchemy.config.getProvider();
     const value = await ethersProvider.getBalance(user.wallet.address);

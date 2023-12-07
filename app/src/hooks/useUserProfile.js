@@ -20,7 +20,7 @@ const useUserProfile = (ready, user) => {
   useEffect(() => {
     let unsubscribe;
     if (ready) {
-      if (user) {
+      if (user && !!embeddedWallet) {
         getMe()
           .then(() => {
             unsubscribe = onSnapshot(doc(firestore, 'user', user.id), (snapshot) => {
@@ -42,7 +42,7 @@ const useUserProfile = (ready, user) => {
     }
 
     return () => unsubscribe?.();
-  }, [ready, user]);
+  }, [ready, user, embeddedWallet]);
 
   useEffect(() => {
     if (embeddedWallet && profile) {
