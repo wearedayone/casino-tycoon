@@ -8,7 +8,7 @@ import serviceAccountProduction from '../serviceAccounts/casino-tycoon-productio
 const { ENVIRONMENT } = environments;
 const serviceAccount =
   ENVIRONMENT === 'production'
-    ? serviceAccountStaging
+    ? serviceAccountProduction
     : ENVIRONMENT === 'staging'
     ? serviceAccountStaging
     : serviceAccountDev;
