@@ -8,22 +8,28 @@ const fs = require('fs');
 const { ethers } = require('hardhat');
 
 async function main() {
-  const FIAT = await ethers.getContractFactory('FIAT');
-  const workerAddress = '0x890611302Ee344d5bD94DA9811C18e2De5588077';
-  const _defaultAdmin = '0x890611302Ee344d5bD94DA9811C18e2De5588077';
-  const _adminAddress = '0x890611302Ee344d5bD94DA9811C18e2De5588077';
-  const _workerAddress = '0x890611302Ee344d5bD94DA9811C18e2De5588077';
-  const _signerAddress = '0x890611302Ee344d5bD94DA9811C18e2De5588077';
+  const _defaultAdmin = '0xd97612bD2272eDc1F66BbA99666C6a0fAa6046F4';
+  const _adminAddress = '0x9EC95637ff4fA040a54CbDCDD0312e46F7a204CF';
+  const _workerAddress = '0x9EC95637ff4fA040a54CbDCDD0312e46F7a204CF';
+  const _signerAddress = '0x9EC95637ff4fA040a54CbDCDD0312e46F7a204CF';
+  const _nftAddress = '0x873a4f8cD3623032fa4ba8f13128cf02F288Bd51';
+  const _fiatAddress = '0xDfF92e4c9a21Fcd201983D904Db0A6D1713C3636';
 
-  // const nftAddress = '0x87377767C46D79aEfc9364EBDf0e00334d2269b9';
-  const FIATToken = await FIAT.deploy(workerAddress);
-  const FIATTokenAddress = await FIATToken.getAddress();
-  console.log(`FIATToken is deployed to ${FIATTokenAddress}`);
+  // const workerAddress = '0x890611302Ee344d5bD94DA9811C18e2De5588077';
+  // const _defaultAdmin = '0x890611302Ee344d5bD94DA9811C18e2De5588077';
+  // const _adminAddress = '0x890611302Ee344d5bD94DA9811C18e2De5588077';
+  // const _workerAddress = '0x890611302Ee344d5bD94DA9811C18e2De5588077';
+  // const _signerAddress = '0x890611302Ee344d5bD94DA9811C18e2De5588077';
 
-  const Gangster = await ethers.getContractFactory('Gangster');
-  const GangsterNFT = await Gangster.deploy(workerAddress, workerAddress);
-  const GangsterNFTAddress = await GangsterNFT.getAddress();
-  console.log(`NFT contract is deployed to ${GangsterNFTAddress}`);
+  // const FIAT = await ethers.getContractFactory('FIAT');
+  // const FIATToken = await FIAT.deploy(_workerAddress);
+  // const _fiatAddress = await FIATToken.getAddress();
+  // console.log(`FIATToken is deployed to ${_fiatAddress}`);
+
+  // const Gangster = await ethers.getContractFactory('Gangster');
+  // const GangsterNFT = await Gangster.deploy(_workerAddress, _workerAddress);
+  // const GangsterNFTAddress = await GangsterNFT.getAddress();
+  // console.log(`NFT contract is deployed to ${GangsterNFTAddress}`);
 
   const GangsterArena = await ethers.getContractFactory('GangsterArena');
   const GangsterArenaContract = await GangsterArena.deploy(
@@ -31,20 +37,20 @@ async function main() {
     _adminAddress,
     _workerAddress,
     _signerAddress,
-    GangsterNFTAddress,
-    FIATTokenAddress
+    _nftAddress,
+    _fiatAddress
   );
   const GangsterArenaContractAddress = await GangsterArenaContract.getAddress();
   console.log(`Game contract is deployed to ${GangsterArenaContractAddress}`);
 
   // Pre-config
-  await GangsterArenaContract.setTokenMaxSupply([0, 10000]);
-  const minterRole = await GangsterNFT.MINTER_ROLE();
-  await GangsterNFT.grantRole(minterRole, GangsterArenaContractAddress);
+  // await GangsterArenaContract.setTokenMaxSupply([0, 10000]);
+  // const minterRole = await GangsterNFT.MINTER_ROLE();
+  // await GangsterNFT.grantRole(minterRole, GangsterArenaContractAddress);
 
   fs.writeFileSync(
     './contracts.txt',
-    `FIATToken = ${FIATTokenAddress}\nNFT contract = ${GangsterNFTAddress}\nGame contract = ${GangsterArenaContractAddress}`,
+    `FIATToken = ${_fiatAddress}\nNFT contract = ${_nftAddress}\nGame contract = ${GangsterArenaContractAddress}`,
     {
       encoding: 'utf-8',
     }
