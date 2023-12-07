@@ -10,7 +10,9 @@
     "dev": "env-cmd -f .env.dev node tasks/seed.js"
   },
   "dependencies": {
+    "alchemy-sdk": "^3.1.0",
     "dotenv": "^16.3.1",
+    "ethers": "5.7.2",
     "firebase-admin": "^11.11.0",
     "moment": "^2.29.4"
   }
