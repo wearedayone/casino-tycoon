@@ -135,7 +135,9 @@ const Login = () => {
               Close and restart if needed.
               <br />
               <br />
-              <span>Read more</span>
+              <a target="_" href="https://wiki.gangsterarena.com" style={{ color: '#FFF' }}>
+                <span>Read more</span>
+              </a>
             </Typography>
           </Box>
         </Box>

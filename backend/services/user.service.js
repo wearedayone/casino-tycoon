@@ -73,17 +73,21 @@ export const createUserIfNotExist = async (userId) => {
         referralCode,
       });
   } else {
-    const ethersProvider = await alchemy.config.getProvider();
-    const value = await ethersProvider.getBalance(user.wallet.address);
-    console.log(formatEther(value));
-    const { ETHBalance } = snapshot.data();
-    if (ETHBalance !== Number(formatEther(value))) {
-      await firestore
-        .collection('user')
-        .doc(userId)
-        .update({
-          ETHBalance: Number(formatEther(value)),
-        });
+    const { wallet } = user;
+    if (wallet) {
+      const ethersProvider = await alchemy.config.getProvider();
+      const value = await ethersProvider.getBalance(user.wallet.address);
+      console.log(formatEther(value));
+      const { ETHBalance } = snapshot.data();
+      if (ETHBalance !== Number(formatEther(value))) {
+        await firestore
+          .collection('user')
+          .doc(userId)
+          .update({
+            address: wallet?.address?.toLocaleLowerCase() || '',
+            ETHBalance: Number(formatEther(value)),
+          });
+      }
     }
   }
 

@@ -9,6 +9,8 @@ const environments = {
   TOKEN_ADDRESS: process.env.TOKEN_ADDRESS,
   NFT_ADDRESS: process.env.NFT_ADDRESS,
   GAME_CONTRACT_ADDRESS: process.env.GAME_CONTRACT_ADDRESS,
+  PRIVY_APP_ID: process.env.PRIVY_APP_ID,
+  PRIVY_APP_SECRET: process.env.PRIVY_APP_SECRET,
 };
 
 export default environments;
