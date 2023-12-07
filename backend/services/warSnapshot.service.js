@@ -7,7 +7,7 @@ import {
   userPendingRewardChangedTypes,
   validateNonWeb3Transaction,
 } from './transaction.service.js';
-import { claimToken as claimTokenTask, burnNFT as burnNFTTask } from './worker.service.js';
+import { claimToken as claimTokenTask, burnNFT as burnNFTTask, burnGoon as burnGoonTask } from './worker.service.js';
 
 const BONUS_LIMIT = 0.5;
 const BONUS_MULTIPLIER = 1;
@@ -132,6 +132,10 @@ export const takeDailyWarSnapshot = async () => {
     });
 
     // log user war result
+    const gangsterPenalties = [];
+    const goonPenalties = [];
+    const penaltyUsers = [];
+
     for (let gamePlay of allUsers) {
       const bonus = bonusMap[gamePlay.userId] ?? null;
       const penalty = penaltyMap[gamePlay.userId] ?? null;
@@ -181,15 +185,24 @@ export const takeDailyWarSnapshot = async () => {
             const userSnapshot = await firestore.collection('user').doc(gamePlay.userId).get();
             const { address } = userSnapshot.data();
 
-            const { txnHash, status } = await burnNFTTask({ address, amount: penalty.gangster });
-
-            await firestore.collection('transaction').doc(txn.id).update({
-              txnHash,
-              status,
+            gangsterPenalties.push({
+              txnId: txn.id,
+              address,
+              amount: penalty.gangster,
             });
           }
 
-          await validateNonWeb3Transaction({ userId: gamePlay.userId, transactionId: txn.id });
+          if (penalty.goon) {
+            const userSnapshot = await firestore.collection('user').doc(gamePlay.userId).get();
+            const { address } = userSnapshot.data();
+
+            goonPenalties.push({
+              address,
+              amount: penalty.goon,
+            });
+          }
+
+          penaltyUsers.push({ userId: gamePlay.userId, txnId: txn.id });
         }
 
         await firestore
@@ -203,6 +216,47 @@ export const takeDailyWarSnapshot = async () => {
         console.error(error);
         logger.error(`err while writing war result for ${gamePlay.userId}: ${error.message}`);
       }
+    }
+
+    // console.log(`Penalty`, { gangsterPenalties, goonPenalties, penaltyUsers });
+    logger.info(`Penalty: ${JSON.stringify({ gangsterPenalties, goonPenalties, penaltyUsers })}`);
+
+    let gangsterPenaltyTxnStatus = 'Success';
+    if (gangsterPenalties.length) {
+      const addresses = gangsterPenalties.map((item) => item.address);
+      const ids = Array(gangsterPenalties.length).fill(1);
+      const amounts = gangsterPenalties.map((item) => item.amount);
+      const { txnHash, status } = await burnNFTTask({ addresses, ids, amounts });
+      gangsterPenaltyTxnStatus = status;
+      // console.log(`Gangster penalties, ${JSON.stringify({ addresses, ids, amounts, txnHash, status })}`);
+      logger.info(`Gangster penalties, ${JSON.stringify({ addresses, ids, amounts, txnHash, status })}`);
+
+      const updateTxnPromises = gangsterPenalties.map((item) => {
+        return firestore.collection('transaction').doc(item.txnId).update({
+          txnHash,
+          status,
+        });
+      });
+
+      await Promise.all(updateTxnPromises);
+    }
+
+    let goonPenaltyTxnStatus = 'Success';
+    if (goonPenalties.length) {
+      const addresses = goonPenalties.map((item) => item.address);
+      const amounts = goonPenalties.map((item) => item.amount);
+      const { txnHash, status } = await burnGoonTask({ addresses, amounts });
+      goonPenaltyTxnStatus = status;
+      // console.log(`Goon penalties, ${JSON.stringify({ addresses, amounts, txnHash, status })}`);
+      logger.info(`Goon penalties, ${JSON.stringify({ addresses, amounts, txnHash, status })}`);
+    }
+
+    // console.log({ gangsterPenaltyTxnStatus, goonPenaltyTxnStatus, penaltyUsers });
+    if (gangsterPenaltyTxnStatus === 'Success' && goonPenaltyTxnStatus === 'Success' && penaltyUsers.length) {
+      const updateUserGamePlayPromises = penaltyUsers.map((item) =>
+        validateNonWeb3Transaction({ userId: item.userId, transactionId: item.txnId })
+      );
+      await Promise.all(updateUserGamePlayPromises);
     }
 
     logger.info('\n---------finish taking daily war snapshot--------\n\n');

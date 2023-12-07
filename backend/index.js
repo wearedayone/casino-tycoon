@@ -21,6 +21,11 @@ const main = () => {
 
   app.use('/api', routes);
 
+  app.get('/test-daily-war', async (req, res) => {
+    await takeDailyWarSnapshot();
+    return res.sendStatus(200);
+  });
+
   app.listen(PORT, () => console.log(`server is running on port ${PORT}`));
 
   // set a schedule in case server restarted

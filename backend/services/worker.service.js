@@ -116,15 +116,53 @@ export const claimTokenBonus = async ({ address, amount }) => {
   }
 };
 
-export const burnNFT = async ({ address, amount }) => {
+export const burnNFT = async ({ addresses, ids, amounts }) => {
   let txnHash;
   try {
-    logger.info('start claimToken');
-    logger.info({ address, amount });
+    logger.info('start burnNFT');
+    logger.info({ addresses, ids, amounts });
     const workerWallet = await getWorkerWallet();
     const gameContract = await getGameContract(workerWallet);
     logger.info('start Transaction:');
-    const tx = await gameContract.burnNFT([address], [1], [amount]);
+    const tx = await gameContract.burnNFT(addresses, ids, amounts);
+    logger.info('Transaction:' + tx.hash);
+    const receipt = await tx.wait();
+
+    txnHash = receipt.transactionHash;
+
+    if (receipt.status !== 1) {
+      logger.error(`Unsuccessful txn: ${JSON.stringify(receipt)}`);
+      throw new Error(`Unsuccessful txn: ${JSON.stringify(receipt)}`);
+    }
+
+    return { txnHash, status: 'Success' };
+  } catch (err) {
+    console.error(err);
+    const newError = getParsedEthersError(err);
+    const regex = /(execution reverted: )([A-Za-z\s])*/;
+    if (newError.context) {
+      const message = newError.context.match(regex);
+      if (message) {
+        const error = new Error(message[0]);
+        logger.error(error.message);
+      }
+    } else {
+      logger.error(err.message);
+    }
+
+    return { txnHash, status: 'Failed' };
+  }
+};
+
+export const burnGoon = async ({ addresses, amounts }) => {
+  let txnHash;
+  try {
+    logger.info('start burnGoon');
+    logger.info({ addresses, amounts });
+    const workerWallet = await getWorkerWallet();
+    const gameContract = await getGameContract(workerWallet);
+    logger.info('start Transaction:');
+    const tx = await gameContract.burnGoon(addresses, amounts);
     logger.info('Transaction:' + tx.hash);
     const receipt = await tx.wait();
 
