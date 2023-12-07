@@ -425,8 +425,17 @@ const Game = () => {
           await buyBuilding(quantity);
           gameRef.current?.events.emit('upgrade-safehouse-completed');
         } catch (err) {
-          console.error(err);
-          gameRef.current?.events.emit('upgrade-safehouse-completed', { status: 'failed', message: err.message });
+          let message = err.message;
+          switch (err.code) {
+            case 'UNPREDICTABLE_GAS_LIMIT':
+              message = 'INSUFFICIENT GAS';
+              break;
+            case 'INSUFFICIENT_FUNDS':
+              message = 'INSUFFICIENT ETH';
+              break;
+            default:
+          }
+          gameRef.current?.events.emit('upgrade-safehouse-completed', { status: 'failed', message: message });
         }
       });
 
@@ -447,8 +456,17 @@ const Game = () => {
           await buyWorker(quantity);
           gameRef.current?.events.emit('buy-goon-completed');
         } catch (err) {
-          console.error(431, { err });
-          gameRef.current?.events.emit('buy-goon-completed', { status: 'failed', message: err.message });
+          let message = err.message;
+          switch (err.code) {
+            case 'UNPREDICTABLE_GAS_LIMIT':
+              message = 'INSUFFICIENT GAS';
+              break;
+            case 'INSUFFICIENT_FUNDS':
+              message = 'INSUFFICIENT ETH';
+              break;
+            default:
+          }
+          gameRef.current?.events.emit('buy-goon-completed', { status: 'failed', message: message });
         }
       });
 
@@ -457,8 +475,17 @@ const Game = () => {
           const txnHash = await buyGangster(quantity);
           gameRef.current?.events.emit('buy-gangster-completed', { txnHash, amount: quantity });
         } catch (err) {
-          console.error(err);
-          gameRef.current?.events.emit('buy-gangster-completed', { status: 'failed', message: err.message });
+          let message = err.message;
+          switch (err.code) {
+            case 'UNPREDICTABLE_GAS_LIMIT':
+              message = 'INSUFFICIENT GAS';
+              break;
+            case 'INSUFFICIENT_FUNDS':
+              message = 'INSUFFICIENT ETH';
+              break;
+            default:
+          }
+          gameRef.current?.events.emit('buy-gangster-completed', { status: 'failed', message: message });
         }
       });
 
