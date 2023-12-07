@@ -34,7 +34,7 @@ const gangsterArenaListener = async () => {
 
   contract.on(GangsterEvent.Burn, async (from, to, amount, event) => {
     await firestore.collection('web3Listener').doc(NETWORK_ID).update({ lastBlock: event.blockNumber });
-    for (let i = 0; i < from.length(); i++) {
+    for (let i = 0; i < from.length; i++) {
       await processBurnEvent({ from: from[i], to: to[i], amount: amount[i], event, contract });
     }
   });
