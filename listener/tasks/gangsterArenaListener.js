@@ -11,6 +11,7 @@ import { getActiveSeason } from '../services/season.service.js';
 const { NETWORK_ID } = environments;
 
 const gangsterArenaListener = async () => {
+  logger.info(`Start listen contract ${GAME_CONTRACT_ADDRESS} on Network ${NETWORK_ID}`);
   const activeSeason = await getActiveSeason();
   const { gameAddress: GAME_CONTRACT_ADDRESS } = activeSeason || {};
 

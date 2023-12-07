@@ -7,21 +7,33 @@ const { ENVIRONMENT } = environments;
 const rankingRewards =
   ENVIRONMENT === 'production'
     ? [
-        { rankStart: 1, rankEnd: 1, share: 0.2 },
-        { rankStart: 2, rankEnd: 2, share: 0.14 },
-        { rankStart: 3, rankEnd: 3, share: 0.1 },
-        { rankStart: 4, rankEnd: 4, share: 0.07 },
-        { rankStart: 5, rankEnd: 5, share: 0.05 },
-        { rankStart: 6, rankEnd: 6, share: 0.04 },
-        { rankStart: 7, rankEnd: 7, share: 0.03 },
-        { rankStart: 8, rankEnd: 8, share: 0.015 },
-        { rankStart: 9, rankEnd: 9, share: 0.01 },
-        { rankStart: 10, rankEnd: 15, share: 0.0075 },
-        { rankStart: 16, rankEnd: 25, share: 0.005 },
-        { rankStart: 26, rankEnd: 50, share: 0.003 },
-        { rankStart: 51, rankEnd: 100, share: 0.0015 },
+        { rankStart: 1, rankEnd: 1, share: 0.3 },
+        { rankStart: 2, rankEnd: 2, share: 0.19 },
+        { rankStart: 3, rankEnd: 3, share: 0.14 },
+        { rankStart: 4, rankEnd: 4, share: 0.1 },
+        { rankStart: 5, rankEnd: 5, share: 0.07 },
+        { rankStart: 6, rankEnd: 6, share: 0.06 },
+        { rankStart: 7, rankEnd: 7, share: 0.05 },
+        { rankStart: 8, rankEnd: 8, share: 0.04 },
+        { rankStart: 9, rankEnd: 9, share: 0.03 },
+        { rankStart: 10, rankEnd: 10, share: 0.02 },
       ]
-    : ENVIRONMENT === 'staging'
+    : // [
+    //     { rankStart: 1, rankEnd: 1, share: 0.2 },
+    //     { rankStart: 2, rankEnd: 2, share: 0.14 },
+    //     { rankStart: 3, rankEnd: 3, share: 0.1 },
+    //     { rankStart: 4, rankEnd: 4, share: 0.07 },
+    //     { rankStart: 5, rankEnd: 5, share: 0.05 },
+    //     { rankStart: 6, rankEnd: 6, share: 0.04 },
+    //     { rankStart: 7, rankEnd: 7, share: 0.03 },
+    //     { rankStart: 8, rankEnd: 8, share: 0.015 },
+    //     { rankStart: 9, rankEnd: 9, share: 0.01 },
+    //     { rankStart: 10, rankEnd: 15, share: 0.0075 },
+    //     { rankStart: 16, rankEnd: 25, share: 0.005 },
+    //     { rankStart: 26, rankEnd: 50, share: 0.003 },
+    //     { rankStart: 51, rankEnd: 100, share: 0.0015 },
+    //   ]
+    ENVIRONMENT === 'staging'
     ? [
         { rankStart: 1, rankEnd: 1, share: 0.3 },
         { rankStart: 2, rankEnd: 2, share: 0.19 },
@@ -49,7 +61,7 @@ const rankingRewards =
 const main = async () => {
   console.log('init data');
   // web3Listener
-  await firestore.collection('web3Listener').doc('84531').set({ lastBlock: 0 });
+  await firestore.collection('web3Listener').doc('8453').set({ lastBlock: 0 });
   // system config
   console.log('create system configs');
   const activeSeasonId = firestore.collection('season').doc().id;
@@ -72,7 +84,7 @@ const main = async () => {
 
   console.log('create season');
   const now = Date.now();
-  const endTimeUnix = Date.now() + 2 * 60 * 60 * 1000;
+  const endTimeUnix = Date.now() + 5 * 24 * 60 * 60 * 1000;
   const startTime = admin.firestore.Timestamp.fromMillis(now);
   const estimatedEndTime = admin.firestore.Timestamp.fromMillis(endTimeUnix);
   await firestore
@@ -83,11 +95,11 @@ const main = async () => {
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       startTime,
       estimatedEndTime,
-      claimGapInSeconds: 30,
+      claimGapInSeconds: 300,
       prizePool: 0,
       reservePool: 0,
       reservePoolReward: 0.01,
-      timeStepInHours: 0.0001,
+      timeStepInHours: 0.25,
       machineSold: 0,
       workerSold: 0,
       buildingSold: 0,
@@ -113,9 +125,9 @@ const main = async () => {
         { networthStart: 2000, networthEnd: 4999, level: 14 },
         { networthStart: 5000, level: 15 },
       ],
-      tokenAddress: '0xA26a284F8BC036a80a708088F54B4FDfB34B9fE0',
-      nftAddress: '0xF6B54f85F9d7Be4609aE554d98E1CA07219199cB',
-      gameAddress: '0xd0502149c2D4251C200DBf8B362F1ed3249D696D',
+      tokenAddress: '0xDfF92e4c9a21Fcd201983D904Db0A6D1713C3636',
+      nftAddress: '0x873a4f8cD3623032fa4ba8f13128cf02F288Bd51',
+      gameAddress: '0xD3D23920499fA379fFfa27aD11c8819747F5Be72',
     });
   console.log('created season');
 
