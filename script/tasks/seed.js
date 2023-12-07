@@ -3,7 +3,7 @@ import moment from 'moment';
 import admin, { firestore } from '../configs/admin.config.js';
 import environments from '../utils/environments.js';
 
-const { ENVIRONMENT } = environments;
+const { ENVIRONMENT, TOKEN_ADDRESS, NFT_ADDRESS, GAME_CONTRACT_ADDRESS } = environments;
 const rankingRewards =
   ENVIRONMENT === 'production'
     ? [
@@ -125,9 +125,9 @@ const main = async () => {
         { networthStart: 2000, networthEnd: 4999, level: 14 },
         { networthStart: 5000, level: 15 },
       ],
-      tokenAddress: '0xDfF92e4c9a21Fcd201983D904Db0A6D1713C3636',
-      nftAddress: '0x873a4f8cD3623032fa4ba8f13128cf02F288Bd51',
-      gameAddress: '0xD3D23920499fA379fFfa27aD11c8819747F5Be72',
+      tokenAddress: TOKEN_ADDRESS,
+      nftAddress: NFT_ADDRESS,
+      gameAddress: GAME_CONTRACT_ADDRESS,
     });
   console.log('created season');
 

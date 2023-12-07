@@ -459,11 +459,13 @@ export const finishClaimToken = async ({ address, claimedAmount, transactionId }
     address,
     amount: BigInt(claimedAmount * 1e12) * BigInt(1e6),
   });
-
-  await firestore.collection('transaction').doc(transactionId).update({
-    txnHash,
-    status,
-  });
+  console.log({ address, claimedAmount, transactionId, txnHash, status });
+  if (txnHash && status) {
+    await firestore.collection('transaction').doc(transactionId).update({
+      txnHash,
+      status,
+    });
+  }
 };
 
 // utils

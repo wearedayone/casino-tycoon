@@ -5,9 +5,10 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "stg": "env-cmd -f .env.stg node tasks/seed.js",
-    "prd": "env-cmd -f .env.prd node tasks/seed.js",
-    "dev": "env-cmd -f .env.dev node tasks/seed.js"
+    "init-season:stg": "env-cmd -f .env.stg node tasks/seed.js",
+    "init-season:prd": "env-cmd -f .env.prd node tasks/seed.js",
+    "init-season:dev": "env-cmd -f .env.dev node tasks/seed.js",
+    "drop-eth:prd": "env-cmd -f .env.prd node tasks/sendETH.js"
   },
   "dependencies": {
     "alchemy-sdk": "^3.1.0",

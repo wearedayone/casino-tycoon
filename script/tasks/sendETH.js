@@ -8,7 +8,7 @@ const amountInEther = '0.0109';
 
 const main = async () => {
   const provider = await alchemy.config.getProvider();
-  const wallet = new ethers.Wallet(privateKey, provider);
+  // const wallet = new ethers.Wallet(privateKey, provider);
 
   const userSnapshot = await firestore.collection('user').get();
   const users = userSnapshot.docs.filter((item) => !item.data().dropETH);
@@ -31,13 +31,13 @@ const main = async () => {
         value: ethers.utils.parseEther(amountInEther),
       };
       // Send a transaction
-      const receipt = await wallet.sendTransaction(tx);
-      const txn = await receipt.wait();
-      if (txn.status === 1) {
-        console.log(`Sent ${amountInEther} ETH for address ${receiver.username}.\nTxn hash: ${txn.transactionHash}`);
-      } else {
-        throw new Error(`Something wrong ${JSON.stringify(receipt)}`);
-      }
+      // const receipt = await wallet.sendTransaction(tx);
+      // const txn = await receipt.wait();
+      // if (txn.status === 1) {
+      //   console.log(`Sent ${amountInEther} ETH for address ${receiver.username}.\nTxn hash: ${txn.transactionHash}`);
+      // } else {
+      //   throw new Error(`Something wrong ${JSON.stringify(receipt)}`);
+      // }
     } catch (err) {
       console.error(`Error while sending ETH for ${receiver.username}`, err.message);
       continue;
