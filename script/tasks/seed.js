@@ -128,6 +128,10 @@ const main = async () => {
       tokenAddress: TOKEN_ADDRESS,
       nftAddress: NFT_ADDRESS,
       gameAddress: GAME_CONTRACT_ADDRESS,
+      warConfig: {
+        warBonus: 1,
+        dieChance: 0.15,
+      },
     });
   console.log('created season');
 

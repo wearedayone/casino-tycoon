@@ -1,3 +1,5 @@
+import moment from 'moment';
+
 import admin, { firestore } from '../configs/firebase.config.js';
 import logger from '../utils/logger.js';
 import { getActiveSeasonId, getActiveSeason } from './season.service.js';
@@ -5,7 +7,6 @@ import { calculateGeneratedReward, initTransaction, validateNonWeb3Transaction }
 import { claimToken as claimTokenTask, burnNFT as burnNFTTask, burnGoon as burnGoonTask } from './worker.service.js';
 
 const BONUS_LIMIT = 0.5;
-const PENALTY_CHANCE = 0.1;
 
 const getUserDailyIncome = async (userId) => {
   const activeSeason = await getActiveSeason();
@@ -28,7 +29,8 @@ const getUserDailyIncome = async (userId) => {
 export const takeDailyWarSnapshot = async () => {
   try {
     logger.info('\n\n---------taking daily war snapshot--------\n');
-    const seasonId = await getActiveSeasonId();
+    const activeSeason = await getActiveSeason();
+    const { id: seasonId, warConfig } = activeSeason || {};
     const usersGamePlaySnapshot = await firestore
       .collection('gamePlay')
       .where('active', '==', true)
@@ -56,33 +58,25 @@ export const takeDailyWarSnapshot = async () => {
       generatedRewardMap[gamePlay.userId] = await calculateGeneratedReward(gamePlay.userId);
     }
 
-    const lastWarSnapshot = await firestore.collection('warSnapshot').orderBy('createdAt', 'desc').limit(1).get();
-    let lastWarAt;
-    if (lastWarSnapshot.size) {
-      lastWarAt = lastWarSnapshot.docs[0].data().createdAt.toDate();
-    } else {
-      lastWarAt = new Date();
-      lastWarAt.setDate(lastWarAt.getDate() - 1);
-    }
-
     // calculate bonus & penalty
     for (let gamePlay of usersWithWarEnabled) {
       logger.info(`${gamePlay.userId}`);
 
       if (isPenalty) {
-        const gangster = getDeadCount(gamePlay.numberOfMachines);
-        const goon = getDeadCount(gamePlay.numberOfWorkers);
+        const gangster = getDeadCount(gamePlay.numberOfMachines, warConfig?.dieChance);
+        const goon = getDeadCount(gamePlay.numberOfWorkers, warConfig?.dieChance);
         penaltyMap[gamePlay.userId] = { gangster, goon };
 
         logger.info(`   penalty.gangster: ${gangster}`);
         logger.info(`   penalty.goon: ${goon}`);
       } else {
-        bonusMap[gamePlay.userId] = await getUserDailyIncome(gamePlay.userId);
+        const userDailyIncome = await getUserDailyIncome(gamePlay.userId);
+        bonusMap[gamePlay.userId] = userDailyIncome * warConfig?.warBonus;
       }
     }
 
     // log war snapshot
-    const todayDateString = new Date().toISOString().substring(0, 10).split('-').join(''); // YYYYMMDD format
+    const todayDateString = moment().format('YYYYMMDD-HHmmss');
     await firestore.collection('warSnapshot').doc(todayDateString).set({
       seasonId,
       usersCount: usersGamePlaySnapshot.size,
@@ -245,10 +239,10 @@ export const getWarHistory = async (userId) => {
 };
 
 // utils
-const getDeadCount = (originalCount) => {
-  // example: originalCount = 86, PENALTY_CHANCE = 0.1;
+const getDeadCount = (originalCount, dieChance) => {
+  // example: originalCount = 86, dieChance = 0.1;
   // deadCount = 8.6;
-  const deadCount = originalCount * PENALTY_CHANCE;
+  const deadCount = originalCount * dieChance;
   // certainDeathCount = 8 => 8 units certainly will die
   const certainDeathCount = Math.floor(deadCount);
 
