@@ -50,9 +50,8 @@ export const claimToken = async ({ address, amount }) => {
     logger.info('start Transaction:');
     const tx = await tokenContract.mint(address, amount, { gasLimit: 200000 });
     logger.info('Transaction:' + tx.hash);
+    txnHash = tx.hash;
     const receipt = await tx.wait();
-
-    txnHash = receipt.transactionHash;
 
     if (receipt.status !== 1) {
       logger.info(`error: ${JSON.stringify(receipt)}`);
@@ -74,7 +73,7 @@ export const claimToken = async ({ address, amount }) => {
       logger.error(err.message);
     }
 
-    return { txnHash, status: 'Failed' };
+    return { txnHash: txnHash || '', status: 'Failed' };
   }
 };
 
@@ -88,9 +87,8 @@ export const claimTokenBonus = async ({ address, amount }) => {
     logger.info('start Transaction:');
     const tx = await tokenContract.transfer(address, amount, { gasLimit: 200000 });
     logger.info('Transaction:' + tx.hash);
+    txnHash = tx.hash;
     const receipt = await tx.wait();
-
-    txnHash = receipt.transactionHash;
 
     if (receipt.status !== 1) {
       logger.info(`error: ${JSON.stringify(receipt)}`);
@@ -112,7 +110,7 @@ export const claimTokenBonus = async ({ address, amount }) => {
       logger.error(err.message);
     }
 
-    return { txnHash, status: 'Failed' };
+    return { txnHash: txnHash || '', status: 'Failed' };
   }
 };
 
