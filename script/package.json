@@ -11,6 +11,7 @@
     "drop-eth:prd": "env-cmd -f .env.prd node tasks/sendETH.js"
   },
   "dependencies": {
+    "@enzoferey/ethers-error-parser": "^0.2.3",
     "@privy-io/server-auth": "^1.5.3",
     "alchemy-sdk": "^3.1.0",
     "dotenv": "^16.3.1",

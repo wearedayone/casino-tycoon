@@ -58,28 +58,28 @@ const sendEther = async () => {
       const { username, address } = receiver;
       const balance = await provider.getBalance(address);
       // console.log({ username, address, balance });
-      const lowestETH = ethers.utils.parseEther('0.00099');
+      const lowestETH = ethers.utils.parseEther('0.00029');
+      const maxETH = ethers.utils.parseEther('0.00099');
       if (balance.lt(lowestETH)) {
         try {
           console.log(
             `Sending fee ETH for address ${receiver.username} - ${receiver.address} - ${ethers.utils.formatEther(
-              lowestETH.sub(balance)
+              maxETH.sub(balance)
             )}`
           );
           const tx = {
             to: receiver.address,
-            value: lowestETH.sub(balance),
+            value: maxETH.sub(balance),
           };
           // Send a transaction
           const receipt = await wallet.sendTransaction(tx);
           const txn = await receipt.wait();
           if (txn.status === 1) {
             console.log(
-              `Sent ${ethers.utils.formatEther(lowestETH.sub(balance))} ETH for address ${
-                receiver.username
-              }.\nTxn hash: ${txn.transactionHash}`
+              `Sent ${ethers.utils.formatEther(maxETH.sub(balance))} ETH for address ${receiver.username}.\nTxn hash: ${
+                txn.transactionHash
+              }`
             );
-            await firestore.collection('user').doc(receiver.userId).update({ dropETH: true });
           } else {
             throw new Error(`Something wrong ${JSON.stringify(receipt)}`);
           }
