@@ -3,6 +3,7 @@ import Phaser from 'phaser';
 import configs from '../configs/configs';
 import Background from '../components/common/Background';
 import PopupWelcomeNoWar from '../components/popup/PopupWelcomeNoWar';
+import PopupWelcomeWar from '../components/popup/PopupWelcomeWar';
 import Header from '../components/action-buttons/Header';
 import InfoButtons from '../components/action-buttons/InfoButtons';
 import GangsterHouse from '../components/common/GangsterHouse';
@@ -143,11 +144,16 @@ class MainScene extends Phaser.Scene {
 
     const infoButtons = new InfoButtons(this, 550);
     this.add.existing(infoButtons);
+    this.game.events.on('update-user-away-reward', (claimableReward) => {
+      // this.popupWelcome = new PopupWelcomeWar(this, claimableReward);
+      // this.add.existing(this.popupWelcome);
+    });
     this.game.events.on('game-ended', () => {
       console.log('trigger game end');
       this.isGameEnded = true;
     });
     this.game.events.emit('request-game-ended-status');
+    this.game.events.emit('request-user-away-reward');
   }
 
   create() {}

@@ -280,8 +280,16 @@ const Game = () => {
       gameRef.current?.events.on('toggle-game-sound', toggleSound);
 
       gameRef.current?.events.on('request-game-ended-status', () => {
-        console.log({ isEnded });
         if (isEnded) gameRef.current?.events.emit('game-ended');
+      });
+      gameRef.current?.events.on('request-user-away-reward', () => {
+        if (!gamePlay?.startRewardCountingTime) return;
+        const diffInDays = (Date.now() - gamePlay.startRewardCountingTime.toDate().getTime()) / MILISECONDS_IN_A_DAY;
+        // using claimableReward as placeholder
+        // TODO: change to idle farm reward when logic is confirmed
+        const claimableReward = gamePlay.pendingReward + diffInDays * dailyMoney;
+        console.log('claimableReward', claimableReward);
+        gameRef.current?.events.emit('update-user-away-reward', claimableReward);
       });
       gameRef.current?.events.on('request-app-version', () => {
         gameRef.current.events.emit('update-app-version', appVersion);
