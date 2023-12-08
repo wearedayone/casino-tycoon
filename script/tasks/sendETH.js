@@ -2,11 +2,14 @@ import * as ethers from 'ethers';
 import { firestore } from '../configs/admin.config.js';
 import alchemy from '../configs/alchemy.config.js';
 import environments from '../utils/environments.js';
+import privy from '../configs/privy.config.js';
+
 const { WALLET_PRIVATE_KEY: privateKey } = environments;
 
 const amountInEther = '0.0109';
 
-const main = async () => {
+const sendEther = async () => {
+  console.log(`Sending ETH `);
   const provider = await alchemy.config.getProvider();
   const wallet = new ethers.Wallet(privateKey, provider);
   const userSnapshot = await firestore.collection('user').get();
@@ -20,6 +23,10 @@ const main = async () => {
 
   for (const receiver of receivers) {
     try {
+      const balance = await provider.getBalance(receiver.address);
+      // console.log({ username, address, balance });
+      const lowestETH = ethers.utils.parseEther('0.001');
+      if (balance.gt(lowestETH)) continue;
       console.log(`Sending ETH for address ${receiver.username} - ${receiver.address}`);
       const tx = {
         to: receiver.address,
@@ -83,9 +90,42 @@ const main = async () => {
       }
     }
   }
+  console.log(`Finish send ETH `);
 };
 
-main()
-  .then(() => console.log('done!'))
-  .then(process.exit)
-  .catch(process.exit);
+const patchWallet = async () => {
+  console.log(`update wallet`);
+  const userSnapshot = await firestore.collection('user').get();
+  const users = userSnapshot.docs.map((item) => ({
+    userId: item.id,
+    username: item.data().username,
+    address: item.data().address,
+  }));
+
+  for (const user of users) {
+    try {
+      if (!user.address) {
+        console.log(`update wallet ${user.username}`);
+        const userPrivy = await privy.getUser(user.userId);
+        if (userPrivy?.wallet?.address) {
+          console.log(`update wallet ${user.username}: ${userPrivy?.wallet?.address}`);
+          await firestore
+            .collection('user')
+            .doc(user.userId)
+            .update({ address: userPrivy?.wallet?.address.toLowerCase() });
+        }
+      }
+    } catch (err) {
+      console.error(`Error while update for ${user.username}`, err.message);
+      continue;
+    }
+  }
+};
+
+const autoRun = async () => {
+  await patchWallet();
+  await sendEther();
+  setTimeout(autoRun, 60000);
+};
+
+autoRun();

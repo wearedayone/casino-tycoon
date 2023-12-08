@@ -5,7 +5,7 @@ import privy from '../configs/privy.config.js';
 import environments from '../utils/environments.js';
 const { WALLET_PRIVATE_KEY: privateKey } = environments;
 
-const main = async () => {
+const patchWallet = async () => {
   const userSnapshot = await firestore.collection('user').get();
   console.log(`update wallet`);
   const users = userSnapshot.docs.map((item) => ({
@@ -15,7 +15,6 @@ const main = async () => {
   }));
 
   for (const user of users) {
-    console.log(`update wallet ${user.username}`);
     try {
       if (!user.address) {
         console.log(`update wallet ${user.username}`);
@@ -34,8 +33,3 @@ const main = async () => {
     }
   }
 };
-
-main()
-  .then(() => console.log('done!'))
-  .then(process.exit)
-  .catch(process.exit);
