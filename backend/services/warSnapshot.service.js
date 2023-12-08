@@ -1,17 +1,29 @@
 import admin, { firestore } from '../configs/firebase.config.js';
 import logger from '../utils/logger.js';
-import { getActiveSeasonId } from './season.service.js';
-import {
-  calculateGeneratedReward,
-  initTransaction,
-  userPendingRewardChangedTypes,
-  validateNonWeb3Transaction,
-} from './transaction.service.js';
+import { getActiveSeasonId, getActiveSeason } from './season.service.js';
+import { calculateGeneratedReward, initTransaction, validateNonWeb3Transaction } from './transaction.service.js';
 import { claimToken as claimTokenTask, burnNFT as burnNFTTask, burnGoon as burnGoonTask } from './worker.service.js';
 
 const BONUS_LIMIT = 0.5;
-const BONUS_MULTIPLIER = 1;
 const PENALTY_CHANCE = 0.1;
+
+const getUserDailyIncome = async (userId) => {
+  const activeSeason = await getActiveSeason();
+  const { machine, worker } = activeSeason || {};
+  if (!machine || !worker) return 0;
+
+  const userGamePlaySnapshot = await firestore
+    .collection('gamePlay')
+    .where('userId', '==', userId)
+    .where('seasonId', '==', activeSeason.id)
+    .get();
+  if (userGamePlaySnapshot.empty) return 0;
+
+  const userGamePlay = { id: userGamePlaySnapshot.docs[0].id, ...userGamePlaySnapshot.docs[0].data() };
+  const { numberOfMachines, numberOfWorkers } = userGamePlay;
+
+  return machine.dailyReward * numberOfMachines + worker.dailyReward * numberOfWorkers;
+};
 
 export const takeDailyWarSnapshot = async () => {
   try {
@@ -65,57 +77,7 @@ export const takeDailyWarSnapshot = async () => {
         logger.info(`   penalty.gangster: ${gangster}`);
         logger.info(`   penalty.goon: ${goon}`);
       } else {
-        const txnsSinceLastWarSnapshot = await firestore
-          .collection('transaction')
-          .where('type', 'in', userPendingRewardChangedTypes)
-          .where('status', '==', 'Success')
-          .where('createdAt', '>=', lastWarAt)
-          .orderBy('createdAt', 'desc')
-          .get();
-        const hasPendingRewardChangedSinceLastWar = txnsSinceLastWarSnapshot.size > 0;
-
-        if (hasPendingRewardChangedSinceLastWar) {
-          let pendingRewardSinceLastWar = 0,
-            numberOfMachines = gamePlay.numberOfMachines,
-            numberOfWorkers = gamePlay.numberOfWorkers,
-            start,
-            end;
-
-          for (let i = 0; i < txnsSinceLastWarSnapshot.size; i++) {
-            const txn = txnsSinceLastWarSnapshot.docs[i].data();
-            const isLastTxn = i === txnsSinceLastWarSnapshot.size - 1;
-
-            start = isLastTxn
-              ? lastWarAt.getTime()
-              : txnsSinceLastWarSnapshot.docs[i + 1].data().createdAt.toDate().getTime();
-            start = Math.max(gamePlay.createdAt.toDate().getTime(), start); // if user joined after last war
-            end = txn.createdAt.toDate().getTime();
-            if (txn.type === 'buy-machine') numberOfMachines -= txn.amount;
-            if (txn.type === 'buy-worker') numberOfWorkers -= txn.amount;
-            if (txn.type === 'war-penalty') {
-              numberOfMachines += txn.machinesDeadCount;
-              numberOfWorkers += txn.workersDeadCount;
-            }
-            const generatedReward = await calculateGeneratedReward(gamePlay.userId, {
-              start,
-              end,
-              numberOfMachines,
-              numberOfWorkers,
-            });
-
-            pendingRewardSinceLastWar += generatedReward;
-          }
-          const bonusAmount = (pendingRewardSinceLastWar + generatedRewardMap[gamePlay.userId]) * BONUS_MULTIPLIER;
-          bonusMap[gamePlay.userId] = bonusAmount;
-          logger.debug(`   pendingRewardSinceLastWar: ${pendingRewardSinceLastWar}`);
-          logger.debug(`   generatedReward: ${generatedRewardMap[gamePlay.userId]}`);
-          logger.info(`   bonusAmount: ${bonusAmount}\n`);
-        } else {
-          const bonusAmount = generatedRewardMap[gamePlay.userId] * BONUS_MULTIPLIER;
-          bonusMap[gamePlay.userId] = bonusAmount;
-          logger.debug(`   generatedReward: ${generatedRewardMap[gamePlay.userId]}`);
-          logger.info(`   bonusAmount: ${bonusAmount}\n`);
-        }
+        bonusMap[gamePlay.userId] = await getUserDailyIncome(gamePlay.userId);
       }
     }
 
