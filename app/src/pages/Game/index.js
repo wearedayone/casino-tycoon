@@ -42,8 +42,17 @@ const Game = () => {
   const market = useSystemStore((state) => state.market);
   const sound = useSettingStore((state) => state.sound);
   const toggleSound = useSettingStore((state) => state.toggleSound);
-  const { getNFTBalance, withdrawToken, withdrawETH, withdrawNFT, stakeNFT, buySafeHouse, buyMachine, buyGoon } =
-    useSmartContract();
+  const {
+    getNFTBalance,
+    getETHBalance,
+    withdrawToken,
+    withdrawETH,
+    withdrawNFT,
+    stakeNFT,
+    buySafeHouse,
+    buyMachine,
+    buyGoon,
+  } = useSmartContract();
   const { ready, authenticated, user, exportWallet: exportWalletPrivy, logout } = usePrivy();
   const [isLeaderboardModalOpen, setLeaderboardModalOpen] = useState(false);
   const { isEnded, countdownString } = useSeasonCountdown({ open: isLeaderboardModalOpen });
@@ -319,8 +328,13 @@ const Game = () => {
       gameRef.current?.events.on('request-deposit-code', () => {
         gameRef.current.events.emit('update-deposit-code', '683382');
       });
-      gameRef.current?.events.on('request-eth-balance', () => {
-        gameRef.current.events.emit('update-eth-balance', { address, ETHBalance });
+      gameRef.current?.events.on('request-eth-balance', async () => {
+        const newBalance = await getETHBalance(address);
+        console.log({ ETHBalance, newBalance });
+        if (newBalance !== ETHBalance) {
+          reloadBalance();
+        }
+        gameRef.current.events.emit('update-eth-balance', { address, ETHBalance: newBalance });
       });
       gameRef.current?.events.on('refresh-eth-balance', () => {
         reloadBalance();

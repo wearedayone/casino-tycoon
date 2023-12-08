@@ -23,6 +23,7 @@ import environments from '../utils/environments.js';
 const { SYSTEM_ADDRESS } = environments;
 
 export const initTransaction = async ({ userId, type, ...data }) => {
+  logger.info(`init transaction user:${userId} - type:${type}`);
   const activeSeason = await getActiveSeason();
   if (activeSeason.status !== 'open') throw new Error('Season ended');
 
@@ -349,7 +350,7 @@ const sendUserBonus = async (userId, transactionId) => {
 
     const { txnHash, status } = await claimTokenBonus({
       address,
-      amount: BigInt(bonus * 1e18),
+      amount: BigInt(bonus * 1e6) * BigInt(1e12),
     });
 
     console.log('claimed bonus', { txnHash, status });

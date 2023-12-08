@@ -45,18 +45,12 @@ export const takeDailyWarSnapshot = async () => {
     const isPenalty = Math.round(voteRatio * 100) / 100 >= BONUS_LIMIT;
 
     const bonusMap = {};
-    const generatedRewardMap = {}; // update when calc bonus
     const penaltyMap = {};
     const createdAt = admin.firestore.FieldValue.serverTimestamp();
 
     logger.info(
       `${usersWithWarEnabledCount} players voted WAR out of ${usersGamePlaySnapshot.size} players\n voteRatio = ${voteRatio}. isPenalty = ${isPenalty}`
     );
-
-    // reset pending rewards timestamp
-    for (let gamePlay of allUsers) {
-      generatedRewardMap[gamePlay.userId] = await calculateGeneratedReward(gamePlay.userId);
-    }
 
     // calculate bonus & penalty
     for (let gamePlay of usersWithWarEnabled) {
@@ -104,6 +98,8 @@ export const takeDailyWarSnapshot = async () => {
           penalty,
           createdAt,
           userId: gamePlay.userId,
+          numberOfMachines: gamePlay.numberOfMachines,
+          numberOfWorkers: gamePlay.numberOfWorkers,
         });
 
         // send user war bonus
@@ -118,7 +114,7 @@ export const takeDailyWarSnapshot = async () => {
           const { address } = userSnapshot.data();
           const { txnHash, status } = await claimTokenTask({
             address,
-            amount: BigInt(bonus * 1e18),
+            amount: BigInt(bonus * 1e6) * BigInt(1e12),
           });
 
           await firestore.collection('transaction').doc(txn.id).update({
@@ -160,14 +156,6 @@ export const takeDailyWarSnapshot = async () => {
 
           penaltyUsers.push({ userId: gamePlay.userId, txnId: txn.id });
         }
-
-        await firestore
-          .collection('gamePlay')
-          .doc(gamePlay.id)
-          .update({
-            pendingReward: admin.firestore.FieldValue.increment(generatedRewardMap[gamePlay.userId]),
-            startRewardCountingTime: createdAt,
-          });
       } catch (error) {
         console.error(error);
         logger.error(`err while writing war result for ${gamePlay.userId}: ${error.message}`);

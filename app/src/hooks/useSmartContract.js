@@ -8,7 +8,7 @@ import tokenAbi from '../assets/abis/Token.json';
 import nftAbi from '../assets/abis/NFT.json';
 import { formatter } from '../utils/numbers';
 import environments from '../utils/environments';
-import { parseEther } from '@ethersproject/units';
+import { parseEther, formatEther } from '@ethersproject/units';
 
 const { NETWORK_ID } = environments;
 
@@ -254,6 +254,13 @@ const useSmartContract = () => {
     return Number(res.toString());
   };
 
+  const getETHBalance = async (address) => {
+    if (!loadedAssets) return 0;
+    const privyProvider = await embeddedWallet.getEthereumProvider();
+    const res = await privyProvider.provider.getBalance(address);
+    return Number(formatEther(res.toString()));
+  };
+
   const getStakedNFTBalance = async (address) => {
     if (!loadedAssets) return 0;
     const privyProvider = await embeddedWallet.getEthereumProvider();
@@ -281,6 +288,7 @@ const useSmartContract = () => {
     withdrawNFT,
     stakeNFT,
     getNFTBalance,
+    getETHBalance,
     getStakedNFTBalance,
     isMinted,
   };
