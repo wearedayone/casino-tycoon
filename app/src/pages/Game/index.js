@@ -385,6 +385,10 @@ const Game = () => {
         gameRef.current.events.emit('update-war-status', { war: gamePlay.war });
       });
 
+      gameRef.current?.events.on('request-war-die-chance', () => {
+        gameRef.current.events.emit('update-war-die-chance', { dieChance: activeSeason.warConfig.dieChance });
+      });
+
       gameRef.current?.events.on('change-war-status', ({ war }) => {
         gameRef.current.events.emit('update-war-status', { war });
         toggleWarStatus({ war }).catch((err) => {

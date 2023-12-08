@@ -11,6 +11,7 @@ const largeBlackExtraBold = { fontSize: fontSizes.large, color: colors.black, fo
 const largeBlackBold = { fontSize: fontSizes.large, color: colors.black, fontFamily: fontFamilies.bold };
 
 class PopupDailyGangWar extends Popup {
+  dieChance = 0;
   constructor(scene) {
     super(scene, 'popup-daily-gang-war', { ribbon: 'ribbon-daily-gang-war' });
 
@@ -88,6 +89,30 @@ class PopupDailyGangWar extends Popup {
       const timeText = `${hours}h ${mins.toString().padStart(2, '0')}m`;
       this.timeText.text = timeText;
     });
+    scene.game.events.on('update-war-die-chance', ({ dieChance }) => {
+      this.dieChance = dieChance;
+
+      const dieChanceText1Y = this.popup.y - this.popup.height / 2 + this.popup.height * 0.455 - 153;
+      this.dieChanceText1 = scene.add
+        .text(this.warBonusX - 55, dieChanceText1Y, `${dieChance * 100}%`, {
+          fontSize: '50px',
+          color: colors.black,
+          fontFamily: fontFamilies.bold,
+        })
+        .setOrigin(0.5, 0.5);
+      this.add(this.dieChanceText1);
+
+      const dieChanceText2Y = this.popup.y + this.popup.height / 2 - 223;
+      this.dieChanceText2 = scene.add
+        .text(this.popup.x + 180, dieChanceText2Y, `${dieChance * 100}%`, {
+          fontSize: fontSizes.small,
+          color: colors.brown,
+          fontFamily: fontFamilies.bold,
+        })
+        .setOrigin(1, 0.5);
+      this.add(this.dieChanceText2);
+    });
+    scene.game.events.emit('request-war-die-chance');
     scene.game.events.emit('request-war-status');
     scene.game.events.emit('request-next-war-time');
     scene.game.events.emit('request-balances');
