@@ -591,9 +591,9 @@ const Game = () => {
       gameRef.current?.events.on('request-portfolio', () => {
         getRank().then((res) => {
           const { rank, reward: rankReward } = res.data;
-          const tokenValue = tokenBalance * 0.000001; // TODO: update formulas to calculate token value
-          const machineValue = numberOfMachines * 0.041; // TODO: update formulas to calculate machine value
-          const totalBalance = ETHBalance + tokenValue + machineValue + rankReward;
+          const tokenValue = tokenBalance * parseFloat(tokenPrice); // TODO: update formulas to calculate token value
+          const machineValue = numberOfMachines * parseFloat(nftPrice); // TODO: update formulas to calculate machine value
+          const totalBalance = parseFloat(ETHBalance) + tokenValue + machineValue + rankReward;
           gameRef.current?.events.emit('update-portfolio', {
             address,
             totalBalance,

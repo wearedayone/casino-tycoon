@@ -38,7 +38,7 @@ Sentry.init({
   integrations: [
     new Sentry.BrowserTracing({
       // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
-      tracePropagationTargets: ['localhost', 'https://stg.gangsterarena.com', 'https://gangsterarena.com'],
+      tracePropagationTargets: ['localhost', 'https://staging.gangsterarena.com', 'https://gangsterarena.com'],
     }),
     new Sentry.Replay(),
   ],

@@ -22,7 +22,7 @@ const useSeasonCountdown = ({ open }) => {
         const endTime = moment(estimatedEndTime.toDate());
         const diff = moment.duration(endTime.diff(now));
         setEnd({
-          days: diff.days(),
+          days: Math.floor(diff.asDays()),
           hours: diff.hours(),
           minutes: diff.minutes(),
           seconds: diff.seconds(),

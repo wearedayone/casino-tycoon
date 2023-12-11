@@ -159,6 +159,9 @@ const processBuyGoonEvent = async ({ to, amount, nonce, event, contract }) => {
     if (!txn.empty) {
       const txnId = txn.docs[0].id;
       const txnData = txn.docs[0].data();
+      await firestore.collection('transaction').doc(txnId).update({
+        status: 'Success',
+      });
     }
   } catch (err) {
     logger.error(err);
@@ -177,6 +180,9 @@ const processBuySafeHouseEvent = async ({ to, amount, nonce, event, contract }) 
     if (!txn.empty) {
       const txnId = txn.docs[0].id;
       const txnData = txn.docs[0].data();
+      await firestore.collection('transaction').doc(txnId).update({
+        status: 'Success',
+      });
     }
   } catch (err) {
     logger.error(err);

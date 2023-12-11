@@ -57,7 +57,7 @@ class LoadingScene extends Phaser.Scene {
       style: {
         fontSize: '78px',
         fontFamily: "'WixMadeforDisplayBold', sans-serif",
-        fill: '#ffffff',
+        fill: '#000000',
       },
     });
     percentText.setOrigin(0.5, 0.5);
@@ -67,7 +67,7 @@ class LoadingScene extends Phaser.Scene {
       this.loadingPercent = parseInt(value * 100);
       percentText.setText(this.loadingPercent + '%');
       progressBar.clear();
-      progressBar.fillStyle(0x000000);
+      progressBar.fillStyle(0x1026fc, 0.8);
       progressBar.fillRect(100, progressY, (configs.width - 200) * value, 200);
     });
 

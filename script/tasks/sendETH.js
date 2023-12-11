@@ -46,7 +46,7 @@ const sendEther = async () => {
       continue;
     }
   }
-  const givetxnfee = false;
+  const givetxnfee = true;
   if (givetxnfee) {
     const allUsers = userSnapshot.docs.map((item) => ({
       userId: item.id,

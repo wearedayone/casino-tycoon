@@ -1,19 +1,6 @@
 import fs from 'fs';
 import { firestore } from '../configs/admin.config.js';
-
-const getActiveSeasonId = async () => {
-  const snapshot = await firestore.collection('system').doc('default').get();
-  const configs = snapshot.data();
-
-  return configs.activeSeasonId;
-};
-
-const getActiveSeason = async () => {
-  const activeSeasonId = await getActiveSeasonId();
-  const snapshot = await firestore.collection('season').doc(activeSeasonId).get();
-
-  return { id: snapshot.id, ...snapshot.data() };
-};
+import { getActiveSeason } from '../utils/utils.js';
 
 const main = async () => {
   const activeSeason = await getActiveSeason();
