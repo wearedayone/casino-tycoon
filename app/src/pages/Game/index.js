@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Box } from '@mui/material';
 import Phaser from 'phaser';
-import UIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
 import { useQuery } from '@tanstack/react-query';
 import { useSnackbar } from 'notistack';
 import { usePrivy } from '@privy-io/react-auth';
+import * as Sentry from '@sentry/react';
 
 import useUserStore from '../../stores/user.store';
 import useSystemStore from '../../stores/system.store';
@@ -20,7 +20,6 @@ import { create, validate } from '../../services/transaction.service';
 import gameConfigs from './configs/configs';
 import LoadingScene from './scenes/LoadingScene';
 import MainScene from './scenes/MainScene';
-import ExampleScene from './scenes/TestScene';
 import useUserWallet from '../../hooks/useUserWallet';
 import useSeasonCountdown from '../../hooks/useSeasonCountdown';
 
@@ -73,11 +72,19 @@ const Game = () => {
     queryKey: [QueryKeys.Rank, profile?.id],
     enabled: !!profile?.id,
     refetchInterval: 30 * 1000,
+    retry: 3,
+    onError: (err) => {
+      Sentry.captureException(err);
+    },
   });
   const { data: leaderboardData } = useQuery({
     queryKey: [QueryKeys.Leaderboard],
     queryFn: getLeaderboard,
     refetchInterval: 30 * 1000,
+    retry: 3,
+    onError: (err) => {
+      Sentry.captureException(err);
+    },
   });
 
   const { username, address, avatarURL, tokenBalance, ETHBalance } = profile || { tokenBalance: 0, ETHBalance: 0 };
@@ -106,13 +113,18 @@ const Game = () => {
     if (!isAuthenticated || !hasEmbeddedWallet) return;
     try {
       await exportWalletPrivy();
-    } catch (error) {}
+    } catch (err) {
+      console.error(err);
+      Sentry.captureException(err);
+    }
   };
   const reloadBalance = async () => {
     try {
       console.log('refreshing eth balance');
       await updateBalance();
     } catch (err) {
+      console.error(err);
+      Sentry.captureException(err);
     } finally {
       gameRef.current?.events.emit('refresh-eth-balance-completed');
     }
@@ -158,6 +170,7 @@ const Game = () => {
     } catch (err) {
       err.message && enqueueSnackbar(err.message, { variant: 'error' });
       console.error(err);
+      Sentry.captureException(err);
     }
   };
 
@@ -173,6 +186,7 @@ const Game = () => {
     } catch (err) {
       err.message && enqueueSnackbar(err.message, { variant: 'error' });
       console.error(err);
+      Sentry.captureException(err);
     }
   };
 
@@ -188,6 +202,7 @@ const Game = () => {
       }
     } catch (err) {
       console.error(err);
+      Sentry.captureException(err);
       throw err;
     }
   };
@@ -201,6 +216,8 @@ const Game = () => {
         throw new Error('Transaction failed');
       }
     } catch (err) {
+      console.error(err);
+      Sentry.captureException(err);
       throw err;
     }
   };
@@ -215,6 +232,8 @@ const Game = () => {
         return receipt.transactionHash;
       }
     } catch (err) {
+      console.error(err);
+      Sentry.captureException(err);
       throw err;
     }
   };
@@ -362,7 +381,10 @@ const Game = () => {
       gameRef.current?.events.on('request-rank', () => {
         getRank()
           .then((res) => gameRef.current.events.emit('update-rank', { rank: res.data.rank, reward: res.data.reward }))
-          .catch((err) => console.error(err));
+          .catch((err) => {
+            console.error(err);
+            Sentry.captureException(err);
+          });
       });
 
       gameRef.current?.events.on('request-networth', () => {
@@ -392,7 +414,10 @@ const Game = () => {
       gameRef.current?.events.on('request-war-history', () => {
         getWarHistory()
           .then((res) => gameRef.current.events.emit('update-war-history', res.data))
-          .catch((err) => console.error(err));
+          .catch((err) => {
+            console.error(err);
+            Sentry.captureException(err);
+          });
       });
 
       gameRef.current?.events.on('request-war-status', () => {
@@ -407,6 +432,7 @@ const Game = () => {
         gameRef.current.events.emit('update-war-status', { war });
         toggleWarStatus({ war }).catch((err) => {
           console.error(err);
+          Sentry.captureException(err);
           gameRef.current.events.emit('update-war-status', { war: !war });
         });
       });
@@ -416,7 +442,10 @@ const Game = () => {
           .then((res) => {
             gameRef.current.events.emit('update-next-war-time', { time: res.data.time });
           })
-          .catch((err) => console.error(err));
+          .catch((err) => {
+            console.error(err);
+            Sentry.captureException(err);
+          });
       });
 
       gameRef.current?.events.on('withdraw-token', ({ amount, address }) => {
@@ -442,6 +471,7 @@ const Game = () => {
           amount = res.data.claimedAmount;
         } catch (err) {
           console.error(err);
+          Sentry.captureException(err);
         }
         gameRef.current?.events.emit('claim-completed', { amount });
       });

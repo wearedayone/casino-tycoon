@@ -10,6 +10,8 @@ const environments = {
   PRIVY_APP_ID: process.env.REACT_APP_PRIVY_APP_ID,
   NETWORK_ID: process.env.REACT_APP_NETWORK_ID,
   GAME_VERSION: process.env.REACT_APP_GAME_VERSION,
+  ENVIRONMENT: process.env.REACT_APP_ENVIRONMENT,
+  SENTRY_DSN: process.env.REACT_APP_SENTRY_DSN,
 };
 
 export default environments;
