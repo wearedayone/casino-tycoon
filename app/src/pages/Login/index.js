@@ -62,7 +62,8 @@ const Login = () => {
             width={{ xs: '100%', sm: '600px' }}
             display="flex"
             flexDirection="column"
-            justifyContent="flex-end">
+            justifyContent="flex-end"
+            sx={{ maxWidth: '600px', '& img': { width: '100%' } }}>
             <img src="/images/logo.svg" />
           </Box>
           <Box

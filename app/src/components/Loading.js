@@ -24,7 +24,14 @@ const Loading = () => {
         justifyContent="center"
         bgcolor="rgba(0, 0, 0, 0.2)">
         <Box flex={1} display="flex" flexDirection="column" justifyContent="center" gap={10}>
-          <Box flex={1} mx="auto" mt="20vh" width={{ xs: '100%', sm: '600px' }} display="flex" flexDirection="column">
+          <Box
+            flex={1}
+            mx="auto"
+            mt="20vh"
+            width={{ xs: '100%', sm: '600px' }}
+            display="flex"
+            flexDirection="column"
+            sx={{ maxWidth: '600px', '& img': { width: '100%' } }}>
             <img src="/images/logo.svg" />
           </Box>
         </Box>

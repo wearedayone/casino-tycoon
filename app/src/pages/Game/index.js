@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Box } from '@mui/material';
+import { Box, alpha } from '@mui/material';
 import Phaser from 'phaser';
 import { useQuery } from '@tanstack/react-query';
 import { useSnackbar } from 'notistack';
@@ -55,6 +55,8 @@ const Game = () => {
   const { ready, authenticated, user, exportWallet: exportWalletPrivy, logout } = usePrivy();
   const [isLeaderboardModalOpen, setLeaderboardModalOpen] = useState(false);
   const { isEnded, countdownString } = useSeasonCountdown({ open: isLeaderboardModalOpen });
+  const [showBg, setShowBg] = useState(true);
+
   const { appVersion } = configs || {};
   const { tokenPrice, nftPrice } = market || {};
 
@@ -298,6 +300,9 @@ const Game = () => {
 
       const game = new Phaser.Game(config);
       game.sound.setMute(sound !== 'on');
+
+      game.events.on('hide-bg', () => setShowBg(false));
+
       gameRef.current = game;
     }
 
@@ -840,13 +845,54 @@ const Game = () => {
         !userHasInteractive && setUserHasInteracted(true);
       }}>
       <Box
+        position="relative"
         id="game-container"
         width="100vw"
         height={`${localStorage.getItem('windowHeight')}px`}
         display="flex"
         alignItems="center"
         justifyContent="center"
-      />
+        sx={
+          showBg
+            ? {
+                backgroundImage: 'url(/images/bg-login.png)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                '& canvas': { position: 'absolute' },
+              }
+            : {}
+        }>
+        {showBg && (
+          <>
+            <Box position="absolute" top={0} left={0} width="100%" height="100%" bgcolor={alpha('#000', 0.4)}>
+              <Box p={2} width="100%" display="flex" flexDirection="column" alignItems="center" gap={2}>
+                <Box
+                  mx="auto"
+                  mt="20vh"
+                  width={{ xs: '100%', sm: '600px' }}
+                  display="flex"
+                  flexDirection="column"
+                  sx={{ maxWidth: '600px', '& img': { width: '100%' } }}>
+                  <img src="/images/logo.svg" />
+                </Box>
+                <Box
+                  width="100px"
+                  sx={{
+                    '& img': {
+                      width: '100%',
+                      animationName: 'spin',
+                      animationDuration: '5000ms',
+                      animationIterationCount: 'infinite',
+                      animationTimingFunction: 'linear',
+                    },
+                  }}>
+                  <img src="/images/icons/loading.png" />
+                </Box>
+              </Box>
+            </Box>
+          </>
+        )}
+      </Box>
     </Box>
   );
 };

@@ -2,6 +2,16 @@ import Phaser from 'phaser';
 
 import configs from '../configs/configs';
 
+const logoRatio = 10 / 3;
+const loadingIconRatio = 100 / 109;
+const isXS = window.innerWidth < 600;
+const logoWidth = isXS ? window.innerWidth - 32 : Math.min(600, window.innerWidth - 32);
+const logoHeight = logoWidth / logoRatio;
+const loadingIconWidth = 100;
+const loadingIconHeight = loadingIconWidth / loadingIconRatio;
+
+const windowLoadingTextY = 0.2 * window.innerHeight + logoHeight + 16 + loadingIconHeight + 32;
+
 class LoadingScene extends Phaser.Scene {
   assetLoaded = false;
   userInfoLoaded = false;
@@ -12,38 +22,41 @@ class LoadingScene extends Phaser.Scene {
   }
 
   preload() {
+    const loadingTextY = (windowLoadingTextY * configs.height) / window.innerHeight;
+    const progressY = loadingTextY + 150;
     this.game.events.on('user-info-loaded', () => {
       this.userInfoLoaded = true;
     });
 
-    this.cameras.main.setBackgroundColor('#6123ff');
-    const progressBar = this.add.graphics();
+    // this.cameras.main.setBackgroundColor('#6123ff');
     const progressBox = this.add.graphics();
-    progressBox.fillStyle(0x222222, 0.8);
-    progressBox.fillRect(100, configs.height / 2 - 100, configs.width - 200, 200);
+    progressBox.fillStyle(0xffffff, 1);
+    progressBox.fillRect(100, progressY, configs.width - 200, 200);
+    const progressBar = this.add.graphics();
 
     const width = this.cameras.main.width;
-    const height = this.cameras.main.height;
+    // const height = this.cameras.main.height;
     const loadingText = this.make.text({
       x: width / 2,
-      y: height / 2 - 200,
-      text: 'Loading Game...',
+      y: loadingTextY,
+      text: 'Loading game assets & profile...',
       style: {
         // font: 'bold 85px WixMadeforDisplay',
-        fontSize: '85px',
-        fontFamily: "'WixMadeforDisplay', sans-serif",
+        fontSize: '78px',
+        fontFamily: "'WixMadeforDisplayBold', sans-serif",
         fill: '#ffffff',
       },
     });
-    loadingText.setOrigin(0.5, 0.5);
+    loadingText.setOrigin(0.5, 0);
+    loadingText.setStroke('#000000', 6);
 
     const percentText = this.make.text({
       x: width / 2,
-      y: height / 2,
+      y: progressY + 100,
       text: '0%',
       style: {
-        fontSize: '85px',
-        fontFamily: "'WixMadeforDisplay', sans-serif",
+        fontSize: '78px',
+        fontFamily: "'WixMadeforDisplayBold', sans-serif",
         fill: '#ffffff',
       },
     });
@@ -54,16 +67,11 @@ class LoadingScene extends Phaser.Scene {
       this.loadingPercent = parseInt(value * 100);
       percentText.setText(this.loadingPercent + '%');
       progressBar.clear();
-      progressBar.fillStyle(0xffffff, 1);
-      progressBar.fillRect(100, configs.height / 2 - 100, (configs.width - 200) * value, 200);
+      progressBar.fillStyle(0x000000);
+      progressBar.fillRect(100, progressY, (configs.width - 200) * value, 200);
     });
 
-    this.load.on('complete', function () {
-      progressBar.destroy();
-      progressBox.destroy();
-      loadingText.destroy();
-      percentText.destroy();
-    });
+    this.load.on('complete', function () {});
 
     this.load.scenePlugin(
       'rexuiplugin',
@@ -272,23 +280,21 @@ class LoadingScene extends Phaser.Scene {
     this.assetLoaded = true;
   }
 
-  create() {
-    this.cameras.main.setBackgroundColor('#6123ff');
-    this.cameras.main.fadeOut(1000, 30, 195, 255);
-    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, (cam, effect) => {
-      this.time.delayedCall(100, () => {
-        if (this.assetLoaded && this.userInfoLoaded) {
-          this.scene.start('MainScene');
-        }
-      });
-    });
-  }
+  create() {}
 
   update() {
     if (this.userInfoLoaded && this.assetLoaded) {
+      this.game.events.emit('hide-bg');
       this.scene.start('MainScene');
     } else if (this.assetLoaded) {
       this.game.events.emit('check-user-loaded');
+      if (this.loadingText) {
+        this.loadingText.text = 'Loading profile...';
+      }
+    } else if (this.userInfoLoaded) {
+      if (this.loadingText) {
+        this.loadingText.text = 'Loading game assets...';
+      }
     }
   }
 }
