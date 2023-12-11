@@ -5,8 +5,8 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "updateFIATPrice:stg": "env-cmd -f .env.stg node tasks/updateFIATPrice.js",
-    "updateFIATPrice:prd": "env-cmd -f .env.prd node tasks/updateFIATPrice.js"
+    "cron:stg": "env-cmd -f .env.stg node index.js",
+    "cron:prd": "env-cmd -f .env.prd node index.js"
   },
   "dependencies": {
     "@uniswap/v3-periphery": "^1.4.0",
@@ -15,6 +15,7 @@
     "dotenv": "^16.0.3",
     "ethers": "^6.9.0",
     "firebase-admin": "^12.0.0",
-    "jsbi": "^3.2.5"
+    "jsbi": "^3.2.5",
+    "node-cron": "^3.0.3"
   }
 }

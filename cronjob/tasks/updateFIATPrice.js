@@ -26,7 +26,7 @@ async function getPrice({ currentTick, inputAmount, baseTokenDecimals, quoteToke
   }
 }
 
-const updateFIATPrice = async () => {
+export const updateFIATPrice = async () => {
   try {
     const provider = await alchemy.config.getProvider();
     const contract = new Contract(UNISWAP_CONTRACT_ADDRESS, UniswapABI.abi, provider);
@@ -59,5 +59,3 @@ const updateFIATPrice = async () => {
     console.log({ err });
   }
 };
-
-updateFIATPrice();
