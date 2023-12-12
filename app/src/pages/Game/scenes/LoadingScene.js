@@ -62,7 +62,7 @@ class LoadingScene extends Phaser.Scene {
     });
     percentText.setOrigin(0.5, 0.5);
 
-    this.load.on('progress', function (value) {
+    this.load.on('progress', (value) => {
       if (value * 100 < this.loadingPercent) return;
       this.loadingPercent = parseInt(value * 100);
       percentText.setText(this.loadingPercent + '%');
@@ -71,7 +71,9 @@ class LoadingScene extends Phaser.Scene {
       progressBar.fillRect(100, progressY, (configs.width - 200) * value, 200);
     });
 
-    this.load.on('complete', function () {});
+    this.load.on('complete', () => {
+      this.assetLoaded = true;
+    });
 
     this.load.scenePlugin(
       'rexuiplugin',
@@ -276,8 +278,6 @@ class LoadingScene extends Phaser.Scene {
     this.load.multiatlas('gangster-back', 'gangster_back.json');
     this.load.multiatlas('goon-front', 'goon_front.json');
     this.load.multiatlas('goon-back', 'goon_back.json');
-
-    this.assetLoaded = true;
   }
 
   create() {}
