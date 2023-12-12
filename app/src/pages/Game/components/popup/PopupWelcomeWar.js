@@ -8,6 +8,7 @@ const { width, height } = configs;
 
 class PopupWelcomeWar extends Popup {
   latestWar = {};
+  loading = false;
 
   constructor(scene, value) {
     super(scene, 'popup-welcome-war', {
@@ -15,6 +16,7 @@ class PopupWelcomeWar extends Popup {
       destroyWhenClosed: true,
       ribbon: 'ribbon-welcome',
       hasGlow: true,
+      onClose: () => scene.game.events.emit('update-last-time-seen-war-result'),
     });
 
     const leftMargin = this.popup.x - this.popup.width / 2;
@@ -27,7 +29,11 @@ class PopupWelcomeWar extends Popup {
       height / 2 + this.popup.height / 2 - 20,
       'button-claim',
       'button-claim-pressed',
-      () => console.log('claim btn clicked'),
+      () => {
+        if (this.loading) return;
+        scene.game.events.emit('claim');
+        this.close();
+      },
       { sound: 'button-1' }
     );
     this.add(this.buttonClaim);

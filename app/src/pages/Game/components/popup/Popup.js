@@ -11,10 +11,20 @@ class Popup extends Phaser.GameObjects.Container {
   constructor(
     scene,
     img = 'popup',
-    { ribbon, title, titleIcon, openOnCreate = false, destroyWhenClosed = false, noCloseBtn = false, hasGlow } = {}
+    {
+      ribbon,
+      title,
+      titleIcon,
+      openOnCreate = false,
+      destroyWhenClosed = false,
+      noCloseBtn = false,
+      hasGlow,
+      onClose,
+    } = {}
   ) {
     super(scene, 0, 0);
     this.destroyWhenClosed = destroyWhenClosed;
+    this.onClose = onClose;
 
     this.background = scene.add.rectangle(0, 0, configs.width, configs.height, 0x000000, 0.4).setOrigin(0, 0);
     this.add(this.background);
@@ -112,6 +122,8 @@ class Popup extends Phaser.GameObjects.Container {
     this.cleanup();
     if (this.destroyWhenClosed) this.destroy(true);
     else this.setVisible(false);
+
+    this.onClose?.();
   };
 
   setTitle(string) {

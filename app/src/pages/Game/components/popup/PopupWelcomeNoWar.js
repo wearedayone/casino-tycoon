@@ -15,7 +15,10 @@ class PopupWelcomeNoWar extends Popup {
       height / 2 + this.popup.height / 2 - 20,
       'button-claim',
       'button-claim-pressed',
-      () => console.log('claim btn clicked'),
+      () => {
+        scene.game.events.emit('claim');
+        this.close();
+      },
       { sound: 'button-1' }
     );
     this.add(this.buttonClaim);

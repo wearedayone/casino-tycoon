@@ -11,7 +11,12 @@ import useSystemStore from '../../stores/system.store';
 import useSettingStore from '../../stores/setting.store';
 import { getRank, getWarHistory, toggleWarStatus, updateBalance } from '../../services/user.service';
 import { claimToken } from '../../services/transaction.service';
-import { getLeaderboard, getNextWarSnapshotUnixTime } from '../../services/gamePlay.service';
+import {
+  getLeaderboard,
+  getNextWarSnapshotUnixTime,
+  updateLastTimeSeenGangWarResult,
+} from '../../services/gamePlay.service';
+import { getLatestWar } from '../../services/war.service';
 import QueryKeys from '../../utils/queryKeys';
 import { calculateHouseLevel } from '../../utils/formulas';
 import useSmartContract from '../../hooks/useSmartContract';
@@ -315,14 +320,28 @@ const Game = () => {
       gameRef.current?.events.on('request-game-ended-status', () => {
         if (isEnded) gameRef.current?.events.emit('game-ended');
       });
-      gameRef.current?.events.on('request-user-away-reward', () => {
-        if (!gamePlay?.startRewardCountingTime) return;
-        const diffInDays = (Date.now() - gamePlay.startRewardCountingTime.toDate().getTime()) / MILISECONDS_IN_A_DAY;
-        // using claimableReward as placeholder
-        // TODO: change to idle farm reward when logic is confirmed
-        const claimableReward = gamePlay.pendingReward + diffInDays * dailyMoney;
-        console.log('claimableReward', claimableReward);
-        gameRef.current?.events.emit('update-user-away-reward', claimableReward);
+      gameRef.current?.events.on('request-user-away-reward', async () => {
+        try {
+          if (!gamePlay?.startRewardCountingTime) return;
+          const lastUnixTimeSeenWarResult = gamePlay?.lastTimeSeenWarResult
+            ? gamePlay?.lastTimeSeenWarResult.toDate().getTime()
+            : 0;
+          const {
+            data: { latestWar, war },
+          } = await getLatestWar();
+          const latestWarUnixTime = latestWar.createdAt;
+          const showWarPopup = war && lastUnixTimeSeenWarResult < latestWarUnixTime;
+
+          const diffInDays = (Date.now() - gamePlay.startRewardCountingTime.toDate().getTime()) / MILISECONDS_IN_A_DAY;
+          // using claimableReward as placeholder
+          // TODO: change to idle farm reward when logic is confirmed
+          const claimableReward = gamePlay.pendingReward + diffInDays * dailyMoney;
+          console.log('claimableReward', claimableReward);
+          gameRef.current?.events.emit('update-user-away-reward', { showWarPopup, claimableReward });
+        } catch (err) {
+          console.error(err);
+          Sentry.captureException(err);
+        }
       });
       gameRef.current?.events.on('request-app-version', () => {
         gameRef.current.events.emit('update-app-version', appVersion);
@@ -627,6 +646,13 @@ const Game = () => {
 
       gameRef.current?.events.on('check-user-loaded', () => {
         gameRef.current?.events.emit('user-info-loaded');
+      });
+
+      gameRef.current?.events.on('update-last-time-seen-war-result', () => {
+        updateLastTimeSeenGangWarResult().catch((err) => {
+          console.error(err);
+          Sentry.captureException(err);
+        });
       });
 
       gameRef.current?.events.emit('user-info-loaded');

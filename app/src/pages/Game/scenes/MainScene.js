@@ -144,9 +144,11 @@ class MainScene extends Phaser.Scene {
 
     const infoButtons = new InfoButtons(this, 550);
     this.add.existing(infoButtons);
-    this.game.events.on('update-user-away-reward', (claimableReward) => {
-      // this.popupWelcome = new PopupWelcomeWar(this, claimableReward);
-      // this.add.existing(this.popupWelcome);
+    this.game.events.on('update-user-away-reward', ({ showWarPopup, claimableReward }) => {
+      this.popupWelcome = showWarPopup
+        ? new PopupWelcomeWar(this, claimableReward)
+        : new PopupWelcomeNoWar(this, claimableReward);
+      this.add.existing(this.popupWelcome);
     });
     this.game.events.on('game-ended', () => {
       console.log('trigger game end');
