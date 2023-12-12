@@ -5,6 +5,7 @@ import {
   getGamePlayLeaderboard,
   getNextWarSnapshot,
   updateLastTimeSeenGangWarResult,
+  getTotalVoters,
 } from '../controllers/gamePlay.controller.js';
 
 const router = Router();
@@ -12,5 +13,6 @@ const router = Router();
 router.get('/', auth, getGamePlayLeaderboard);
 router.get('/next-war-time', getNextWarSnapshot);
 router.put('/last-time-seen-war-result', auth, updateLastTimeSeenGangWarResult);
+router.get('/voters', getTotalVoters);
 
 export default router;

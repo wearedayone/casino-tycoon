@@ -31,14 +31,14 @@ class PopupDailyGangWar extends Popup {
     this.warSound = scene.sound.add('war', { loop: false });
 
     this.warBonusX = this.popup.x + this.popup.width * 0.25;
-    const warBonusY = this.popup.y - this.popup.height / 2 + this.popup.height * 0.455;
+    const warBonusY = this.popup.y - 145;
 
     this.warBonus = scene.add.text(this.warBonusX - 60, warBonusY, '0', largeBlackExtraBold).setOrigin(0.5, 0.5);
     this.warBonusCoin = scene.add.image(this.warBonusX + this.warBonus.width / 2, warBonusY, 'coin2');
     this.add(this.warBonus);
     this.add(this.warBonusCoin);
 
-    const contentY = this.popup.y + 50;
+    const contentY = this.popup.y - 20;
     const peaceX = this.popup.x - 380;
     const warX = this.popup.x + 220;
     const changeWarStatus = (war) => {
@@ -66,20 +66,30 @@ class PopupDailyGangWar extends Popup {
     this.add(peaceText);
     this.add(warText);
 
-    this.timeText = scene.add.text(this.popup.x + 120, this.popup.y + 185, '0h 00m', {
+    this.timeText = scene.add.text(this.popup.x + 120, this.popup.y + this.popup.height / 2 - 233, '0h 00m', {
       fontSize: '50px',
       color: colors.black,
       fontFamily: fontFamilies.extraBold,
     });
     this.add(this.timeText);
 
+    this.totalVoterText = scene.add.text(this.popup.x, this.popup.y + 140, 'Total Voters: 0', {
+      fontSize: '50px',
+      color: colors.brown,
+      fontFamily: fontFamilies.bold,
+    });
+    this.totalVoterText.setOrigin(0.5, 0.5);
+    this.add(this.totalVoterText);
+
     scene.game.events.on('update-balances', (data) => this.updateBonusRate(data));
+
     scene.game.events.on('update-war-status', ({ war }) => {
       this.checkedIconPeace.setVisible(!war);
       this.uncheckedIconPeace.setVisible(war);
       this.checkedIconWar.setVisible(war);
       this.uncheckedIconWar.setVisible(!war);
     });
+
     scene.game.events.on('update-next-war-time', ({ time }) => {
       const now = Date.now();
       const diffInMins = (time - now) / (60 * 1000);
@@ -89,10 +99,11 @@ class PopupDailyGangWar extends Popup {
       const timeText = `${hours}h ${mins.toString().padStart(2, '0')}m`;
       this.timeText.text = timeText;
     });
+
     scene.game.events.on('update-war-die-chance', ({ dieChance }) => {
       this.dieChance = dieChance;
 
-      const dieChanceText1Y = this.popup.y - this.popup.height / 2 + this.popup.height * 0.455 - 153;
+      const dieChanceText1Y = this.popup.y - 308;
       this.dieChanceText1 = scene.add
         .text(this.warBonusX - 55, dieChanceText1Y, `${dieChance * 100}%`, {
           fontSize: '50px',
@@ -102,7 +113,7 @@ class PopupDailyGangWar extends Popup {
         .setOrigin(0.5, 0.5);
       this.add(this.dieChanceText1);
 
-      const dieChanceText2Y = this.popup.y + this.popup.height / 2 - 223;
+      const dieChanceText2Y = this.popup.y + this.popup.height / 2 - 368;
       this.dieChanceText2 = scene.add
         .text(this.popup.x + 180, dieChanceText2Y, `${dieChance * 100}%`, {
           fontSize: fontSizes.small,
@@ -112,14 +123,21 @@ class PopupDailyGangWar extends Popup {
         .setOrigin(1, 0.5);
       this.add(this.dieChanceText2);
     });
+
+    scene.game.events.on('update-total-voters', ({ count }) => {
+      this.totalVoterText.text = `Total Voters: ${count}`;
+    });
+
     scene.game.events.emit('request-war-die-chance');
     scene.game.events.emit('request-war-status');
     scene.game.events.emit('request-next-war-time');
     scene.game.events.emit('request-balances');
+    scene.game.events.emit('request-total-voters');
   }
 
   onOpen() {
     this.scene.game.events.emit('request-next-war-time');
+    this.scene.game.events.emit('request-total-voters');
   }
 
   updateBonusRate({ dailyMoney }) {

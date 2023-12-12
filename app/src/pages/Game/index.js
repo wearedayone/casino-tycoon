@@ -14,6 +14,7 @@ import { claimToken } from '../../services/transaction.service';
 import {
   getLeaderboard,
   getNextWarSnapshotUnixTime,
+  getTotalVoters,
   updateLastTimeSeenGangWarResult,
 } from '../../services/gamePlay.service';
 import { getLatestWar } from '../../services/war.service';
@@ -655,6 +656,17 @@ const Game = () => {
           console.error(err);
           Sentry.captureException(err);
         });
+      });
+
+      gameRef.current?.events.on('request-total-voters', () => {
+        getTotalVoters()
+          .then((res) => {
+            gameRef.current?.events.emit('update-total-voters', { count: res.data.count });
+          })
+          .catch((err) => {
+            console.error(err);
+            Sentry.captureException(err);
+          });
       });
 
       gameRef.current?.events.emit('user-info-loaded');

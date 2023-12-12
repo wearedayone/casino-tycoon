@@ -56,3 +56,14 @@ export const updateLastTimeSeenWarResult = async (userId) => {
     lastTimeSeenWarResult: admin.firestore.FieldValue.serverTimestamp(),
   });
 };
+
+export const getAllActiveGamePlay = async () => {
+  const activeSeasonId = await getActiveSeasonId();
+  const snapshot = await firestore
+    .collection('gamePlay')
+    .where('seasonId', '==', activeSeasonId)
+    .where('active', '==', true)
+    .get();
+
+  return snapshot.size;
+};
