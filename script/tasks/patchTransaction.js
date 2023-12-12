@@ -10,9 +10,9 @@ const { GAME_CONTRACT_ADDRESS } = environments;
 const main = async () => {
   try {
     console.log('Start patching transaction');
-    await patchTransaction({ type: 'buy-worker', eventName: 'BuyGoon' });
-    await patchTransaction({ type: 'buy-building', eventName: 'BuySafeHouse' });
-    await patchMintEvent({ type: 'buy-machine', eventName: 'BuySafeHouse' });
+    // await patchTransaction({ type: 'buy-worker', eventName: 'BuyGoon' });
+    // await patchTransaction({ type: 'buy-building', eventName: 'BuySafeHouse' });
+    await patchMintEvent({ type: 'buy-machine', eventName: 'Mint' });
 
     console.log(`Query pending transaction`);
     const snapshotTxn = await firestore.collection('transaction').where('status', '==', 'Pending').get();
@@ -79,23 +79,34 @@ const patchMintEvent = async ({ type, eventName }) => {
       .where('seasonId', '==', activeSeasonId)
       .where('type', '==', type)
       .where('amount', '==', amount.toNumber())
-      .where('nonce', '==', nonce.toNumber())
+      .where('txnHash', '==', event.transactionHash)
       .limit(1)
       .get();
     if (!snapshot.empty) {
       const { status } = snapshot.docs[0].data();
       if (status !== 'Success') {
         console.log('Update status');
-        await firestore
-          .collection('transaction')
-          .doc(snapshot.docs[0].id)
-          .update({ status: 'Success', txnHash: event.transactionHash });
-      } else {
-        console.log('Update hash');
-        await firestore.collection('transaction').doc(snapshot.docs[0].id).update({ txnHash: event.transactionHash });
+        // await firestore
+        //   .collection('transaction')
+        //   .doc(snapshot.docs[0].id)
+        //   .update({ status: 'Success', txnHash: event.transactionHash });
       }
     } else {
       console.log('No transaction');
+      console.log({ activeSeasonId, type, amount: amount.toNumber(), txnHash: event.transactionHash, to });
+      const userSnapshot = await firestore.collection('user').where('address', '==', to.toLowerCase()).limit(1).get();
+      if (userSnapshot.empty) {
+        continue;
+      }
+      const userId = userSnapshot.docs[0].id;
+      const txnSnapshot = await firestore
+        .collection('transaction')
+        .where('seasonId', '==', activeSeasonId)
+        .where('type', '==', type)
+        .where('amount', '==', amount.toNumber())
+        .where('userId', '==', userId)
+        .get();
+      console.log(txnSnapshot.docs.length);
     }
   }
 };
