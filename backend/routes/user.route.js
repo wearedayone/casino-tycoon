@@ -8,6 +8,7 @@ import {
   completeAskingWalletPassword,
   updateBalance,
   getRank,
+  setLastOnlineTime,
 } from '../controllers/user.controller.js';
 
 const router = Router();
@@ -18,5 +19,6 @@ router.get('/me/war-history', auth, getUserWarHistory);
 router.put('/me/wallet-password-ask', auth, completeAskingWalletPassword);
 router.put('/me/balances', auth, updateBalance);
 router.get('/me/rank', auth, getRank);
+router.put('/me/last-online-time', auth, setLastOnlineTime);
 
 export default router;

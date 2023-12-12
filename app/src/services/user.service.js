@@ -11,3 +11,5 @@ export const completeAskingWalletPassword = () => api.put('/api/v1/users/me/wall
 export const updateBalance = () => api.put('/api/v1/users/me/balances');
 
 export const getRank = () => api.get('/api/v1/users/me/rank');
+
+export const setLastOnlineTime = () => api.put('/api/v1/users/me/last-online-time');

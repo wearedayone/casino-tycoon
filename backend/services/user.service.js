@@ -148,3 +148,10 @@ export const getUserRankAndReward = async (userId) => {
 
   return null;
 };
+
+export const updateLastOnlineTime = async (userId) => {
+  await firestore
+    .collection('user')
+    .doc(userId)
+    .update({ lastOnlineTime: admin.firestore.FieldValue.serverTimestamp() });
+};

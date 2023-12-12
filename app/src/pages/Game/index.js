@@ -322,7 +322,7 @@ const Game = () => {
       });
       gameRef.current?.events.on('request-user-away-reward', async () => {
         try {
-          if (!gamePlay?.startRewardCountingTime) return;
+          if (!profile || !gamePlay?.startRewardCountingTime) return;
           const lastUnixTimeSeenWarResult = gamePlay?.lastTimeSeenWarResult
             ? gamePlay?.lastTimeSeenWarResult.toDate().getTime()
             : 0;
@@ -332,11 +332,13 @@ const Game = () => {
           const latestWarUnixTime = latestWar.createdAt;
           const showWarPopup = war && lastUnixTimeSeenWarResult < latestWarUnixTime;
 
-          const diffInDays = (Date.now() - gamePlay.startRewardCountingTime.toDate().getTime()) / MILISECONDS_IN_A_DAY;
-          // using claimableReward as placeholder
-          // TODO: change to idle farm reward when logic is confirmed
-          const claimableReward = gamePlay.pendingReward + diffInDays * dailyMoney;
-          console.log('claimableReward', claimableReward);
+          let startTime = gamePlay.startRewardCountingTime.toDate().getTime();
+          if (profile.lastOnlineTime) {
+            startTime = profile.lastOnlineTime.toDate().getTime();
+          }
+
+          const diffInDays = (Date.now() - startTime) / MILISECONDS_IN_A_DAY;
+          const claimableReward = diffInDays * dailyMoney;
           gameRef.current?.events.emit('update-user-away-reward', { showWarPopup, claimableReward });
         } catch (err) {
           console.error(err);
