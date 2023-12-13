@@ -9,9 +9,9 @@ class TextButton extends Button {
     pressedImage,
     onClick,
     text,
-    { color = '#fff', fontSize = '60px', icon, iconPosition = 'start', sound, disabledImage } = {}
+    { color = '#fff', fontSize = '60px', icon, iconPosition = 'start', sound, disabledImage, onHold, onRelease } = {}
   ) {
-    super(scene, x, y, defaultImage, pressedImage, onClick, { sound, disabledImage });
+    super(scene, x, y, defaultImage, pressedImage, onClick, { sound, disabledImage, onHold, onRelease });
 
     const textOffset = iconPosition === 'start' ? 80 : -80;
     const textX = icon ? textOffset : 0;

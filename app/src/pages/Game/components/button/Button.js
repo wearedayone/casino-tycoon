@@ -5,7 +5,7 @@ class Button extends Phaser.GameObjects.Container {
   y = 0;
   disabled = false;
 
-  constructor(scene, x, y, defaultImage, pressedImage, onClick, { sound, disabledImage } = {}) {
+  constructor(scene, x, y, defaultImage, pressedImage, onClick, { sound, disabledImage, onHold, onRelease } = {}) {
     super(scene, x, y);
     this.x = x;
     this.y = y;
@@ -38,6 +38,12 @@ class Button extends Phaser.GameObjects.Container {
         if (this.btnSound) {
           this.btnSound.play();
         }
+        onHold?.();
+      })
+      .on(Phaser.Input.Events.GAMEOBJECT_POINTER_OUT, () => {
+        this.defaultImage.setVisible(true);
+        this.pressedImage.setVisible(false);
+        onRelease?.();
       })
       .on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
         if (this.disabled) return;
@@ -45,6 +51,7 @@ class Button extends Phaser.GameObjects.Container {
         this.defaultImage.setVisible(true);
         this.pressedImage.setVisible(false);
         onClick?.();
+        onRelease?.();
       });
   }
 
