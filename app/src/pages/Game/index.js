@@ -360,7 +360,6 @@ const Game = () => {
           timeStepInHours,
           prizePool,
           isEnded,
-          minNetworth: machine.networth,
         });
       });
       gameRef.current?.events.on('close-leaderboard-modal', () => {
@@ -717,7 +716,6 @@ const Game = () => {
         timeStepInHours,
         prizePool,
         isEnded,
-        minNetworth: machine.networth,
       });
     }
   }, [
