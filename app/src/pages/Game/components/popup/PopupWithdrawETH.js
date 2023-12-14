@@ -28,6 +28,8 @@ class PopupWithdrawETH extends Popup {
     const amountInputY = subtitleY + 300;
     const balanceY = amountInputY + 130;
     const addressInputY = balanceY + 240;
+    this.isWithdrawMax = false;
+    this.defaultFee = 0.00005;
 
     const subtitle = scene.add.text(width / 2, subtitleY, 'Enter the amount of ETH \nto withdraw', {
       fontSize: '60px',
@@ -51,7 +53,14 @@ class PopupWithdrawETH extends Popup {
       amountInputY,
       'button-max',
       'button-max-pressed',
-      () => this.amountInput.updateValue(formatter.format(this.balance))
+      () => {
+        if (this.balance > this.defaultFee) {
+          this.amountInput.updateValue(formatter.format(this.balance - this.defaultFee));
+          this.isWithdrawMax = true;
+        } else {
+          this.amountInput.updateValue(0);
+        }
+      }
     );
     this.add(this.amountInput);
     this.add(buttonMax);
@@ -79,11 +88,26 @@ class PopupWithdrawETH extends Popup {
       'button-paste-pressed',
       async () => {
         const text = await navigator.clipboard.readText();
-        this.addressInput.updateValue(text.trim());
+        if (text) {
+          this.addressInput.updateValue(text.trim());
+        } else {
+          this.errMSG.text = 'Clipboard is empty';
+          this.errMSG.setVisible(true);
+        }
       }
     );
     this.add(this.addressInput);
     this.add(buttonPaste);
+
+    this.errMSG = scene.add.text(width / 2, balanceY + 350, ``, {
+      fontSize: '50px',
+      color: '#E93D45',
+      fontFamily: 'WixMadeforDisplayBold',
+      align: 'center',
+    });
+    this.errMSG.setOrigin(0.5, 0);
+    this.errMSG.setVisible(false);
+    this.add(this.errMSG);
 
     const buttonBack = new TextButton(
       scene,
@@ -106,11 +130,21 @@ class PopupWithdrawETH extends Popup {
       'button-confirm-pressed',
       () => {
         // TODO: show validation to user
+        if (Number(this.amountInput.value) !== Number(formatter.format(this.balance - this.defaultFee))) {
+          console.log('changed', {
+            balance: formatter.format(this.balance - this.defaultFee),
+            input: this.amountInput.value,
+          });
+          this.isWithdrawMax = false;
+        }
         const isValid = this.validate();
-        if (!isValid) return;
+        if (!isValid) {
+          this.errMSG.setVisible(true);
+          return;
+        }
 
         scene.game.events.emit('withdraw-eth', {
-          amount: Number(this.amountInput.value),
+          amount: this.isWithdrawMax ? this.balance - this.defaultFee : Number(this.amountInput.value),
           address: this.addressInput.value,
         });
       },
@@ -135,13 +169,25 @@ class PopupWithdrawETH extends Popup {
     let isValid = true;
     const amount = Number(this.amountInput.value);
     const address = this.addressInput.value.trim();
-
-    if (!amount || amount > this.balance) isValid = false;
-    if (!address || !isAddress(address)) isValid = false;
+    if (!this.isWithdrawMax && (!amount || amount > this.balance)) {
+      this.errMSG.text = 'Insufficient ETH';
+      isValid = false;
+    }
+    if (!address || !isAddress(address)) {
+      this.errMSG.text = 'Invalid address';
+      isValid = false;
+    }
 
     return isValid;
   }
 
+  /* effects */
+  // override to run effects after opening popup
+  onOpen() {
+    this.errMSG.setVisible(false);
+    this.isWithdrawMax = false;
+  }
+  // override to run effects before closing popup
   cleanup() {
     // reset form
     this.amountInput.updateValue('');

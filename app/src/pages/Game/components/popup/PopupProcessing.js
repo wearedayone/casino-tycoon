@@ -61,13 +61,19 @@ class PopupProcessing extends Popup {
     scene.game.events.on(completedEvent, (data) => {
       const status = data?.status;
       const message = data?.message;
+      const title = data?.title;
       this.loading = false;
       // icons
       this.loadingAnimation.pause();
       this.icon.setVisible(false);
 
       if (status === 'failed') {
-        this.setTitle('Failed');
+        if (title) {
+          this.setTitle(title);
+        } else {
+          this.setTitle('Failed');
+        }
+
         this.title.text = 'Transaction failed!';
         this.description.text = message;
         this.doneSound?.play();

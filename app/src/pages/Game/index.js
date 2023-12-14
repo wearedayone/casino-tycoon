@@ -168,17 +168,26 @@ const Game = () => {
         txnId = res.data.id;
       }
       const receipt = await web3Withdraw(address, value);
-      // for test only
-      // const receipt = { status: 1, transactionHash: 'test-txn-hash' };
-      gameRef.current?.events.emit(txnCompletedEvent, { amount, txnHash: receipt.transactionHash });
-      if (receipt.status === 1) {
-        if (txnId) await validate({ transactionId: txnId, txnHash: receipt.transactionHash });
-        enqueueSnackbar(`Transferred ${tokenType} successfully`, { variant: 'success' });
+      if (receipt) {
+        console.log({ receipt });
+        gameRef.current?.events.emit(txnCompletedEvent, { amount, txnHash: receipt.transactionHash });
+        if (receipt.status === 1) {
+          if (txnId) await validate({ transactionId: txnId, txnHash: receipt.transactionHash });
+        }
       }
     } catch (err) {
-      err.message && enqueueSnackbar(err.message, { variant: 'error' });
-      console.error(err);
-      Sentry.captureException(err);
+      if (err.message === 'The user rejected the request') {
+        gameRef.current?.events.emit(txnCompletedEvent, {
+          amount,
+          txnHash: '',
+          status: 'failed',
+          title: 'Cancelled',
+          message: 'Request cancelled',
+        });
+      } else {
+        console.error(err);
+        Sentry.captureException(err);
+      }
     }
   };
 

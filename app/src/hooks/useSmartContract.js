@@ -51,6 +51,7 @@ const useSmartContract = () => {
       return receipt;
     } catch (err) {
       console.error(err.message);
+      throw err;
     }
   };
 
@@ -73,6 +74,7 @@ const useSmartContract = () => {
       return txReceipt;
     } catch (err) {
       console.error(err.message);
+      throw err;
     }
   };
 
