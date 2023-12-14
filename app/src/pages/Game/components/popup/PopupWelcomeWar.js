@@ -1,5 +1,6 @@
 import Popup from './Popup';
 import Button from '../button/Button';
+import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
 import { formatter } from '../../../../utils/numbers';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
@@ -22,21 +23,6 @@ class PopupWelcomeWar extends Popup {
     const leftMargin = this.popup.x - this.popup.width / 2;
     const topMargin = this.popup.y - this.popup.height / 2;
     const outcomeTextY = topMargin + this.popup.height - 280;
-
-    this.buttonClaim = new Button(
-      scene,
-      width / 2,
-      height / 2 + this.popup.height / 2 - 20,
-      'button-claim',
-      'button-claim-pressed',
-      () => {
-        if (this.loading) return;
-        scene.game.events.emit('claim');
-        this.close();
-      },
-      { sound: 'button-1' }
-    );
-    this.add(this.buttonClaim);
 
     this.valueText = scene.add
       .text(leftMargin + this.popup.width * 0.25, topMargin + this.popup.height * 0.3, `+${formatter.format(value)}`, {
@@ -110,7 +96,44 @@ class PopupWelcomeWar extends Popup {
       this.outcomeIconGangster.setVisible(!bonus && !hasNoPenalties);
       this.outcomeIconGoon.setVisible(!bonus && !hasNoPenalties);
     });
+
+    scene.game.events.on('update-claimable-status', ({ claimable, active }) => {
+      if (this.buttonClaim) {
+        this.remove(this.buttonClaim);
+        this.buttonClaim.destroy(true);
+      }
+      if (claimable && active) {
+        this.buttonClaim = new Button(
+          scene,
+          width / 2,
+          height / 2 + this.popup.height / 2 - 20,
+          'button-claim',
+          'button-claim-pressed',
+          () => {
+            if (this.loading) return;
+            scene.game.events.emit('claim');
+            this.close();
+          },
+          { sound: 'button-1' }
+        );
+        this.add(this.buttonClaim);
+      } else {
+        this.buttonClaim = new TextButton(
+          scene,
+          width / 2,
+          height / 2 + this.popup.height / 2 - 20,
+          'button-blue',
+          'button-blue-pressed',
+          () => this.close(),
+          'Back',
+          { sound: 'close' }
+        );
+        this.add(this.buttonClaim);
+      }
+    });
+
     scene.game.events.emit('request-war-history');
+    scene.game.events.emit('request-claimable-status');
   }
 }
 

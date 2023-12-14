@@ -432,8 +432,10 @@ const Game = () => {
       gameRef.current?.events.on('check-game-ended', () => checkGameEndRef.current?.());
 
       gameRef.current?.events.on('request-claimable-status', () => {
+        const now = Date.now();
+        const endUnixTime = activeSeason.estimatedEndTime.toDate().getTime();
         const nextClaimTime = gamePlay.lastClaimTime.toDate().getTime() + activeSeason.claimGapInSeconds * 1000;
-        const claimable = Date.now() > nextClaimTime;
+        const claimable = now > nextClaimTime && now < endUnixTime;
         gameRef.current.events.emit('update-claimable-status', { claimable, active: gamePlay.active });
       });
 
@@ -745,19 +747,20 @@ const Game = () => {
   }, [sound]);
 
   useEffect(() => {
-    if (activeSeason?.claimGapInSeconds && gamePlay?.lastClaimTime) {
+    if (activeSeason?.estimatedEndTime && activeSeason?.claimGapInSeconds && gamePlay?.lastClaimTime) {
       gameRef.current?.events.emit('update-claim-time', {
         claimGapInSeconds: activeSeason?.claimGapInSeconds,
         lastClaimTime: gamePlay?.lastClaimTime?.toDate().getTime(),
         active: gamePlay.active,
       });
 
+      const endUnixTime = activeSeason.estimatedEndTime.toDate().getTime();
       const nextClaimTime = gamePlay?.lastClaimTime.toDate().getTime() + activeSeason.claimGapInSeconds * 1000;
       const now = Date.now();
-      const claimable = now > nextClaimTime;
+      const claimable = now > nextClaimTime && now < endUnixTime;
       gameRef.current?.events.emit('update-claimable-status', { claimable, active: gamePlay.active });
     }
-  }, [activeSeason?.claimGapInSeconds, gamePlay?.lastClaimTime]);
+  }, [activeSeason?.estimatedEndTime, activeSeason?.claimGapInSeconds, gamePlay?.lastClaimTime]);
 
   useEffect(() => {
     if (gamePlay?.startRewardCountingTime && gamePlay?.pendingReward) {
