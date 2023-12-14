@@ -90,10 +90,10 @@ class PopupBuyGoon extends Popup {
     this.add(this.roiText);
 
     const counterY = this.popup.y + this.popup.height / 2 - 280;
-    const minusBtnX = 350;
+    const minusBtnX = this.popup.x - this.popup.width / 2 + 310;
     this.minusBtn = new TextButton(
       scene,
-      350,
+      minusBtnX,
       counterY,
       'button-square',
       'button-square-pressed',
@@ -163,7 +163,7 @@ class PopupBuyGoon extends Popup {
     );
     this.add(this.plusBtn);
 
-    this.quantityText = scene.add.text(minusBtnX + 180, counterY, this.quantity, {
+    this.quantityText = scene.add.text(minusBtnX + 170, counterY, this.quantity, {
       fontSize: '60px',
       fontFamily: fontFamilies.extraBold,
       color: '#7C2828',
