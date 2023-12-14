@@ -274,6 +274,10 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-war', '/images/icon-war.png');
     this.load.image('icon-checked', '/images/icon-checked.png');
     this.load.image('icon-unchecked', '/images/icon-unchecked.png');
+    this.load.image('icon-error-network', '/images/icons/error-network.png');
+    this.load.image('icon-error-unknown', '/images/icons/error-unknown.png');
+    this.load.image('icon-error-insufficient', '/images/icons/error-insufficient.png');
+    this.load.image('deposit-more-eth', '/images/deposit-more-eth.png');
 
     this.load.path = '/images/animation/';
     this.load.multiatlas('gangster-front', 'gangster_front.json');

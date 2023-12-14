@@ -79,6 +79,7 @@ const useSmartContract = () => {
   };
 
   const buyMachine = async (amount, value) => {
+    console.log('Start buyMachine');
     if (!loadedAssets) return;
     const privyProvider = await embeddedWallet.getEthereumProvider();
     const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
@@ -94,13 +95,13 @@ const useSmartContract = () => {
     };
 
     const uiConfig = {
-      header: `Buy ${amount} gangsters with ${formatter.format(value)} ETH`,
+      header: `Buy ${amount} gangster${amount > 1 ? 's' : ''} with ${formatter.format(value)} ETH`,
       description: '',
       buttonText: 'Send transaction',
     };
-
+    console.log('Start sendTransaction');
     const receipt = await sendTransaction(unsignedTx, uiConfig);
-
+    console.log('Finish buyMachine', receipt);
     return receipt;
   };
 
@@ -138,7 +139,7 @@ const useSmartContract = () => {
     };
 
     const uiConfig = {
-      header: `Buy ${amount} gangsters with ${formatter.format(value)} ETH`,
+      header: `Buy ${amount} Goon${amount > 1 ? 's' : ''} with ${formatter.format(value)} FIAT`,
       description: '',
       buttonText: 'Send transaction',
     };

@@ -519,6 +519,10 @@ const Game = () => {
           gameRef.current?.events.emit('upgrade-safehouse-completed');
         } catch (err) {
           let message = err.message;
+          let errorCode = err.code?.toString();
+          if (!errorCode && message === 'Network Error') {
+            errorCode = '12002';
+          }
           switch (err.code) {
             case 'UNPREDICTABLE_GAS_LIMIT':
               message = 'INSUFFICIENT GAS';
@@ -528,7 +532,11 @@ const Game = () => {
               break;
             default:
           }
-          gameRef.current?.events.emit('upgrade-safehouse-completed', { status: 'failed', message: message });
+          gameRef.current?.events.emit('upgrade-safehouse-completed', {
+            status: 'failed',
+            message: message,
+            code: errorCode,
+          });
         }
       });
 
@@ -550,6 +558,10 @@ const Game = () => {
           gameRef.current?.events.emit('buy-goon-completed');
         } catch (err) {
           let message = err.message;
+          let errorCode = err.code?.toString();
+          if (!errorCode && message === 'Network Error') {
+            errorCode = '12002';
+          }
           switch (err.code) {
             case 'UNPREDICTABLE_GAS_LIMIT':
               message = 'INSUFFICIENT GAS';
@@ -559,7 +571,7 @@ const Game = () => {
               break;
             default:
           }
-          gameRef.current?.events.emit('buy-goon-completed', { status: 'failed', message: message });
+          gameRef.current?.events.emit('buy-goon-completed', { status: 'failed', message: message, code: errorCode });
         }
       });
 
@@ -568,9 +580,15 @@ const Game = () => {
           const txnHash = await buyGangster(quantity);
           gameRef.current?.events.emit('buy-gangster-completed', { txnHash, amount: quantity });
         } catch (err) {
+          console.log({ err });
           let message = err.message;
-          switch (err.code) {
+          let errorCode = err.code?.toString();
+          if (!errorCode && message === 'Network Error') {
+            errorCode = '12002';
+          }
+          switch (errorCode) {
             case 'UNPREDICTABLE_GAS_LIMIT':
+            case '-32603':
               message = 'INSUFFICIENT GAS';
               break;
             case 'INSUFFICIENT_FUNDS':
@@ -578,7 +596,11 @@ const Game = () => {
               break;
             default:
           }
-          gameRef.current?.events.emit('buy-gangster-completed', { status: 'failed', message: message });
+          gameRef.current?.events.emit('buy-gangster-completed', {
+            status: 'failed',
+            message: message,
+            code: errorCode,
+          });
         }
       });
 
