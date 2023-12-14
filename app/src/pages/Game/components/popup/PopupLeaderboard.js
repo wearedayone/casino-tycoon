@@ -218,15 +218,20 @@ class PopupLeaderboard extends Popup {
   }
 
   onOpen() {
+    if (this.table) {
+      this.table.setMouseWheelScrollerEnable(true);
+    }
     this.scene.game.events.emit('open-leaderboard-modal');
   }
 
   cleanup() {
+    if (this.table) {
+      this.table.setMouseWheelScrollerEnable(false);
+    }
     this.scene.game.events.emit('close-leaderboard-modal');
   }
 
   updateValues(season) {
-    console.log('season', season);
     const { name, timeStepInHours, prizePool, isEnded } = season;
     this.updateEndedState(isEnded);
 
@@ -258,7 +263,6 @@ class PopupLeaderboard extends Popup {
 
   updateLeaderboard(leaderboard) {
     if (!leaderboard.length) return;
-
     this.crownGold.setVisible(leaderboard.length >= 1);
     this.crownSilver.setVisible(leaderboard.length >= 2);
     this.crownCopper.setVisible(leaderboard.length >= 3);
@@ -279,7 +283,11 @@ class PopupLeaderboard extends Popup {
 
     // redraw table if numberOfRows changed
     this.contentContainer.setSize(200, this.rankNumbers.height);
-    if (this.table) this.remove(this.table);
+    if (this.table) {
+      this.remove(this.table);
+      this.table.destroy(true);
+      this.table = null;
+    }
     if (this.stars.length) {
       for (let star of this.stars) {
         star.destroy();
@@ -297,7 +305,6 @@ class PopupLeaderboard extends Popup {
 
     const tableHeight = this.leaderboardContainer.height - this.playerRankContainer.height;
     const visibleRatio = tableHeight / this.contentContainer.height;
-    console.log({ tableHeight, contentContainerHeight: this.contentContainer.height, visibleRatio });
     this.leaderboardThumb = this.scene.rexUI.add
       .roundRectangle({
         height: visibleRatio < 1 ? tableHeight * visibleRatio : 0,
@@ -315,7 +322,7 @@ class PopupLeaderboard extends Popup {
       background: this.scene.rexUI.add.roundRectangle({ radius: 10 }),
       panel: { child: this.contentContainer, mask: { padding: 1 } },
       slider: { thumb: this.leaderboardThumb },
-      mouseWheelScroller: { focus: false, speed: 0.3 },
+      mouseWheelScroller: { focus: true, speed: 0.3 },
       space: { left: 50, right: 40, top: 40, bottom: 40, panel: 20, header: 10, footer: 10 },
     }).layout();
     if (leaderboard.length <= 10) {
