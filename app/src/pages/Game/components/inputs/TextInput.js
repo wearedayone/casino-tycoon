@@ -106,6 +106,7 @@ class TextInput extends Phaser.GameObjects.Container {
     if (isMobileDevice()) {
       this.hiddenDomInput = document.createElement('input');
       this.hiddenDomInput.style.position = 'absolute';
+      this.hiddenDomInput.style.top = '50%';
       this.hiddenDomInput.style.opacity = '0';
       this.hiddenDomInput.style.zIndex = '-1';
       document.body.appendChild(this.hiddenDomInput);
