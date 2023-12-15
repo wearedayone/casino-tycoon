@@ -45,10 +45,10 @@ class PopupLeaderboard extends Popup {
     const popupPrizePool = new PopupPrizePool(scene, this);
     scene.add.existing(popupPrizePool);
 
-    this.gameEndsIn = scene.add.text(width / 2, gameEndsY, 'GAME ENDS IN: ', largeBlackExtraBold).setOrigin(1, 0);
-    this.clockIcon = scene.add.image(width / 2, gameEndsY, 'icon-clock').setOrigin(0, 0);
+    this.gameEndsIn = scene.add.text(width / 2 - 30, gameEndsY, 'GAME ENDS IN: ', largeBlackExtraBold).setOrigin(1, 0);
+    this.clockIcon = scene.add.image(width / 2 - 30, gameEndsY, 'icon-clock').setOrigin(0, 0);
     this.gameEndTime = scene.add.text(
-      width / 2 + this.popup.width * 0.07,
+      width / 2 + this.popup.width * 0.04,
       gameEndsY,
       '--d --h --m --s',
       largeBlackExtraBold
