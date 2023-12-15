@@ -28,7 +28,7 @@ class PopupPrizePool extends Popup {
     const paddedX = leftMargin + this.popup.width * 0.1;
     const startingY = this.popup.y - this.popup.height / 2;
     const prizePoolContainerY = startingY + 220;
-    const tableHeaderY = prizePoolContainerY + 190;
+    const tableHeaderY = prizePoolContainerY + 210;
     this.tableY = tableHeaderY + 50;
 
     const prizePoolContainer = scene.add
@@ -45,11 +45,12 @@ class PopupPrizePool extends Popup {
     this.add(currentPrizePool);
     this.add(this.prizePoolText);
     this.add(ethIcon);
-
-    this.totalShareText = scene.add.text(this.popup.x, startingY + 350, '', {
+    // ?leftMargin + this.popup.width * 0.5,
+    this.totalShareText = scene.add.text(this.popup.x, startingY + 370, '', {
       fontSize: '42px',
       color: '#000',
       fontFamily: fontFamilies.bold,
+      align: 'center',
     });
     this.totalShareText.setOrigin(0.5, 0.5);
     this.add(this.totalShareText);
@@ -150,7 +151,7 @@ class PopupPrizePool extends Popup {
       }
     }
     const totalShare = rankingRewards.reduce((total, item) => total + item.share, 0);
-    this.totalShareText.text = `${Math.round(totalShare * 100)}% ETH spent on Gangster NFTs goes to prize pool`;
+    this.totalShareText.text = `${Math.round(totalShare * 100)}% ETH spent on Gangster NFTs goes to\nprize pool`;
 
     this.items = [];
     for (let i = 0; i < rankingRewards.length; i++) {
