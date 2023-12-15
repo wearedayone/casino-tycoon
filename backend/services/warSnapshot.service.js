@@ -20,16 +20,16 @@ export const getLatestWar = async (userId) => {
 
   const result = { latestWar };
 
-  const activeSeasonId = await getActiveSeasonId();
-  const gamePlaySnapshot = await firestore
-    .collection('gamePlay')
-    .where('seasonId', '==', activeSeasonId)
+  const warResultSnapshot = await firestore
+    .collection('warSnapshot')
+    .doc(latestWar.id)
+    .collection('warResult')
     .where('userId', '==', userId)
     .limit(1)
     .get();
-  if (!gamePlaySnapshot.empty) {
-    const { war } = gamePlaySnapshot.docs[0].data();
-    result.war = war;
+  if (!warResultSnapshot.empty) {
+    const { isWarEnabled } = warResultSnapshot.docs[0].data();
+    result.war = isWarEnabled;
   }
 
   return result;
