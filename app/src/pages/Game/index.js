@@ -178,15 +178,26 @@ const Game = () => {
     } catch (err) {
       if (err.message === 'The user rejected the request') {
         gameRef.current?.events.emit(txnCompletedEvent, {
+          code: '4001',
           amount,
           txnHash: '',
           status: 'failed',
-          title: 'Cancelled',
-          message: 'Request cancelled',
+          message: 'The user rejected\nthe request',
         });
       } else {
         console.error(err);
         Sentry.captureException(err);
+
+        let message = err.message;
+        let errorCode = err.code?.toString();
+        if (!errorCode && message === 'Network Error') {
+          errorCode = '12002';
+        }
+        gameRef.current?.events.emit(txnCompletedEvent, {
+          status: 'failed',
+          message: message,
+          code: errorCode,
+        });
       }
     }
   };
