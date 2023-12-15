@@ -132,6 +132,10 @@ const main = async () => {
         warBonus: 1,
         dieChance: 0.15,
       },
+      referralConfig: {
+        referralBonus: 0.1,
+        referralDiscount: 0.1,
+      },
     });
   console.log('created season');
 

@@ -9,7 +9,7 @@ import * as Sentry from '@sentry/react';
 import useUserStore from '../../stores/user.store';
 import useSystemStore from '../../stores/system.store';
 import useSettingStore from '../../stores/setting.store';
-import { getRank, getWarHistory, toggleWarStatus, updateBalance } from '../../services/user.service';
+import { applyInviteCode, getRank, getWarHistory, toggleWarStatus, updateBalance } from '../../services/user.service';
 import { claimToken } from '../../services/transaction.service';
 import {
   getLeaderboard,
@@ -95,7 +95,10 @@ const Game = () => {
     },
   });
 
-  const { username, address, avatarURL, tokenBalance, ETHBalance } = profile || { tokenBalance: 0, ETHBalance: 0 };
+  const { username, address, avatarURL, tokenBalance, ETHBalance, inviteCode, referralCode } = profile || {
+    tokenBalance: 0,
+    ETHBalance: 0,
+  };
   const { numberOfMachines, numberOfWorkers, numberOfBuildings, networth } = gamePlay || {
     numberOfMachines: 0,
     numberOfWorkers: 0,
@@ -476,6 +479,25 @@ const Game = () => {
         gameRef.current.events.emit('update-war-die-chance', { dieChance: activeSeason.warConfig.dieChance });
       });
 
+      gameRef.current?.events.on('request-referral-config', () => {
+        gameRef.current.events.emit('update-referral-config', activeSeason.referralConfig);
+      });
+
+      gameRef.current?.events.on('request-invite-code', () => {
+        if (inviteCode) gameRef.current.events.emit('update-invite-code', { code: inviteCode });
+      });
+
+      gameRef.current?.events.on('apply-invite-code', ({ code }) => {
+        applyInviteCode({ code })
+          .then(() =>
+            gameRef.current.events.emit('complete-apply-invite-code', { status: 'Success', message: 'Success' })
+          )
+          .catch((err) => {
+            console.log('err', err);
+            gameRef.current.events.emit('complete-apply-invite-code', { status: 'Error', message: err.message });
+          });
+      });
+
       gameRef.current?.events.on('change-war-status', ({ war }) => {
         gameRef.current.events.emit('update-war-status', { war });
         toggleWarStatus({ war }).catch((err) => {
@@ -687,7 +709,7 @@ const Game = () => {
       });
 
       gameRef.current?.events.on('request-referral-code', () => {
-        gameRef.current?.events.emit('update-referral-code', profile.referralCode);
+        gameRef.current?.events.emit('update-referral-code', referralCode);
       });
 
       gameRef.current?.events.on('check-user-loaded', () => {

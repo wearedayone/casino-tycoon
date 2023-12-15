@@ -20,6 +20,8 @@ class TextInput extends Phaser.GameObjects.Container {
       color = '#29000b',
       fontSize = '60px',
       placeholder = '',
+      textTransform = 'none',
+      onChange,
       icon,
       valueRegex = /.*/,
       characterRegex = /./,
@@ -30,6 +32,8 @@ class TextInput extends Phaser.GameObjects.Container {
     scene.input.keyboard.createCursorKeys();
     this.isDisabled = isDisabled;
     this.maxDisplayedCharacters = maxDisplayedCharacters;
+    this.onChange = onChange;
+    this.textTransform = textTransform;
 
     this.container = scene.add.image(x, y, 'text-input').setOrigin(0.5, 0.5);
     this.container.setInteractive();
@@ -186,15 +190,22 @@ class TextInput extends Phaser.GameObjects.Container {
   }
 
   updateValue(newValue, isCalledFromOutside = true) {
-    this.value = newValue;
-    if (isCalledFromOutside) this.hiddenDomInput.value = newValue;
+    let value = newValue;
+    if (this.textTransform === 'uppercase') value = newValue.toUpperCase();
+    if (!this.isDisabled) this.onChange(value);
+    this.value = value;
+    if (isCalledFromOutside) this.hiddenDomInput.value = value;
     this.updateDisplayedString();
 
     // placeholder style
     if (this.placeholder) {
-      if (newValue.length) this.placeholder.setVisible(false);
+      if (value.length) this.placeholder.setVisible(false);
       else this.placeholder.setVisible(true);
     }
+  }
+
+  setDisabled(state) {
+    this.isDisabled = state;
   }
 }
 
