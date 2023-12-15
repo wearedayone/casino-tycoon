@@ -105,6 +105,9 @@ class PopupPrizePool extends Popup {
       'button-blue',
       'button-blue-pressed',
       () => {
+        if (this.table) {
+          this.table.setMouseWheelScrollerEnable(false);
+        }
         this.close();
         parentModal.open();
       },
