@@ -4,7 +4,8 @@ import { parseEther, parseUnits, formatEther } from '@ethersproject/units';
 import IUniswapV3PoolABI from '@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Pool.sol/IUniswapV3Pool.json';
 import SwapRouterABI from '@uniswap/v3-periphery/artifacts/contracts/interfaces/ISwapRouter.sol/ISwapRouter.json';
 import UniswapV3Factory from '@uniswap/v3-core/artifacts/contracts/UniswapV3Factory.sol/UniswapV3Factory.json';
-import QuoterABI from '@uniswap/v3-periphery/artifacts/contracts/interfaces/IQuoter.sol/IQuoter.json';
+// import QuoterABI from '@uniswap/v3-periphery/artifacts/contracts/interfaces/IQuoter.sol/IQuoter.json';
+import QuoterV2ABI from '@uniswap/v3-periphery/artifacts/contracts/interfaces/IQuoterV2.sol/IQuoterV2.json';
 
 import useUserWallet from './useUserWallet';
 import useSystemStore from '../stores/system.store';
@@ -19,7 +20,7 @@ import RAKKU from '../assets/abis/RAKKU.json';
 
 const {
   NETWORK_ID,
-  UNISWAP_QUOTER_ADDRESS,
+  UNISWAP_QUOTER_V2_ADDRESS,
   UNISWAP_SWAP_ROUTER_ADDRESS,
   UNISWAP_FACTORY_ADDRESS,
   UNISWAP_POOL_FEE,
@@ -28,7 +29,7 @@ const {
 
 console.log({
   NETWORK_ID,
-  UNISWAP_QUOTER_ADDRESS,
+  UNISWAP_QUOTER_V2_ADDRESS,
   UNISWAP_SWAP_ROUTER_ADDRESS,
   UNISWAP_FACTORY_ADDRESS,
   UNISWAP_POOL_FEE,
@@ -358,7 +359,7 @@ const useSmartContract = () => {
   };
 
   const getSwapContractInfo = async () => {
-    const quoterAddress = UNISWAP_QUOTER_ADDRESS;
+    const quoterAddress = UNISWAP_QUOTER_V2_ADDRESS;
     const swapRouterAddress = UNISWAP_SWAP_ROUTER_ADDRESS;
     const factoryAddress = UNISWAP_FACTORY_ADDRESS;
     const fee = Number(UNISWAP_POOL_FEE);
@@ -377,7 +378,7 @@ const useSmartContract = () => {
 
     const poolContract = new Contract(poolAddress, IUniswapV3PoolABI.abi, privyProvider.provider);
     const swapRouterContract = new Contract(swapRouterAddress, SwapRouterABI.abi, privyProvider.provider);
-    const quoterContract = new Contract(quoterAddress, QuoterABI.abi, privyProvider.provider);
+    const quoterContract = new Contract(quoterAddress, QuoterV2ABI.abi, privyProvider.provider);
 
     return {
       quoterAddress,
@@ -398,38 +399,68 @@ const useSmartContract = () => {
 
   const convertEthInputToToken = async (ethAmount) => {
     if (!loadedAssets) return 0;
-    const { fee, ethAddress, ethDecimals, tokenAddress, tokenDecimals, quoterContract } = await getSwapContractInfo();
+    const { fee, ethAddress, ethDecimals, tokenAddress, tokenDecimals, quoterContract, poolContract } =
+      await getSwapContractInfo();
+
+    const { sqrtPriceX96 } = await getPoolState(poolContract);
 
     const amountIn = parseUnits(ethAmount.toString(), ethDecimals);
-    const res = await quoterContract.callStatic.quoteExactInputSingle(ethAddress, tokenAddress, fee, amountIn, '0');
-    return (Number(res.toString()) / Math.pow(10, tokenDecimals)).toLocaleString();
+    const res = await quoterContract.callStatic.quoteExactInputSingle([ethAddress, tokenAddress, amountIn, fee, '0']);
+    const resultAmount = res[0];
+    const sqrtPriceX96After = res[1];
+    const diff = Math.abs(Number(sqrtPriceX96After.toString()) - Number(sqrtPriceX96.toString()));
+    const priceImpact = diff / Number(sqrtPriceX96After.toString());
+    return { amount: (Number(resultAmount.toString()) / Math.pow(10, tokenDecimals)).toLocaleString(), priceImpact };
   };
 
   const convertEthOutputToToken = async (ethAmount) => {
     if (!loadedAssets) return 0;
-    const { fee, ethAddress, ethDecimals, tokenAddress, tokenDecimals, quoterContract } = await getSwapContractInfo();
+    const { fee, ethAddress, ethDecimals, tokenAddress, tokenDecimals, quoterContract, poolContract } =
+      await getSwapContractInfo();
+
+    const { sqrtPriceX96 } = await getPoolState(poolContract);
 
     const amountOut = parseUnits(ethAmount.toString(), ethDecimals);
-    const res = await quoterContract.callStatic.quoteExactOutputSingle(tokenAddress, ethAddress, fee, amountOut, '0');
-    return (Number(res.toString()) / Math.pow(10, tokenDecimals)).toLocaleString();
+    const res = await quoterContract.callStatic.quoteExactOutputSingle([tokenAddress, ethAddress, amountOut, fee, '0']);
+    const resultAmount = res[0];
+    const sqrtPriceX96After = res[1];
+    const diff = Math.abs(Number(sqrtPriceX96After.toString()) - Number(sqrtPriceX96.toString()));
+    const priceImpact = diff / Number(sqrtPriceX96After.toString());
+    return { amount: (Number(resultAmount.toString()) / Math.pow(10, tokenDecimals)).toLocaleString(), priceImpact };
   };
 
   const convertTokenInputToEth = async (tokenAmount) => {
     if (!loadedAssets) return 0;
-    const { fee, ethAddress, ethDecimals, tokenAddress, tokenDecimals, quoterContract } = await getSwapContractInfo();
+    const { fee, ethAddress, ethDecimals, tokenAddress, tokenDecimals, quoterContract, poolContract } =
+      await getSwapContractInfo();
+
+    const { sqrtPriceX96 } = await getPoolState(poolContract);
 
     const amountIn = parseUnits(tokenAmount.toString(), tokenDecimals);
-    const res = await quoterContract.callStatic.quoteExactInputSingle(tokenAddress, ethAddress, fee, amountIn, '0');
-    return (Number(res.toString()) / Math.pow(10, ethDecimals)).toLocaleString();
+    const res = await quoterContract.callStatic.quoteExactInputSingle([tokenAddress, ethAddress, amountIn, fee, '0']);
+
+    const resultAmount = res[0];
+    const sqrtPriceX96After = res[1];
+    const diff = Math.abs(Number(sqrtPriceX96After.toString()) - Number(sqrtPriceX96.toString()));
+    const priceImpact = diff / Number(sqrtPriceX96After.toString());
+    return { amount: (Number(resultAmount.toString()) / Math.pow(10, ethDecimals)).toLocaleString(), priceImpact };
   };
 
   const convertTokenOutputToEth = async (tokenAmount) => {
     if (!loadedAssets) return 0;
-    const { fee, ethAddress, ethDecimals, tokenAddress, tokenDecimals, quoterContract } = await getSwapContractInfo();
+    const { fee, ethAddress, ethDecimals, tokenAddress, tokenDecimals, quoterContract, poolContract } =
+      await getSwapContractInfo();
+
+    const { sqrtPriceX96 } = await getPoolState(poolContract);
 
     const amountOut = parseUnits(tokenAmount.toString(), tokenDecimals);
-    const res = await quoterContract.callStatic.quoteExactOutputSingle(ethAddress, tokenAddress, fee, amountOut, '0');
-    return (Number(res.toString()) / Math.pow(10, ethDecimals)).toLocaleString();
+    const res = await quoterContract.callStatic.quoteExactOutputSingle([ethAddress, tokenAddress, amountOut, fee, '0']);
+    console.log(res);
+    const resultAmount = res[0];
+    const sqrtPriceX96After = res[1];
+    const diff = Math.abs(Number(sqrtPriceX96After.toString()) - Number(sqrtPriceX96.toString()));
+    const priceImpact = diff / Number(sqrtPriceX96After.toString());
+    return { amount: (Number(resultAmount.toString()) / Math.pow(10, ethDecimals)).toLocaleString(), priceImpact };
   };
 
   const swapEthToToken = async (amount) => {
@@ -440,7 +471,7 @@ const useSmartContract = () => {
     const privyProvider = await embeddedWallet.getEthereumProvider();
     const amountIn = parseUnits(amount.toString(), ethDecimals);
 
-    const tokenAmount = await convertEthInputToToken(amount);
+    const { amount: tokenAmount } = await convertEthInputToToken(amount);
 
     const swapRouterContract = new Contract(swapRouterAddress, SwapRouterABI.abi, privyProvider.provider);
 
@@ -475,7 +506,7 @@ const useSmartContract = () => {
     const privyProvider = await embeddedWallet.getEthereumProvider();
     const amountIn = parseUnits(amount.toString(), tokenDecimals);
 
-    const ethAmount = await convertTokenInputToEth(amount);
+    const { amount: ethAmount } = await convertTokenInputToEth(amount);
 
     const tokenContract = new Contract(tokenAddress, RAKKU.abi, privyProvider.provider);
 

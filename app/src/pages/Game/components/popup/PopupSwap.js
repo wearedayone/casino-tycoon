@@ -69,8 +69,9 @@ class PopupSwap extends Popup {
         if (!value || !Number(value)) {
           scene.game.events.emit(
             this.tokenSwap === 'eth' ? 'convert-eth-input-to-token-result' : 'convert-token-input-to-eth-result',
-            { amount: '0.00' }
+            { amount: '0.00', priceImpact: 0 }
           );
+          this.priceImpact.text = '0.0%';
           return;
         }
 
@@ -122,8 +123,9 @@ class PopupSwap extends Popup {
         if (!value || !Number(value)) {
           scene.game.events.emit(
             this.tokenSwap === 'eth' ? 'convert-token-output-to-eth-result' : 'convert-eth-output-to-token-result',
-            { amount: '0.00' }
+            { amount: '0.00', priceImpact: 0 }
           );
+          this.priceImpact.text = '0.0%';
           return;
         }
 
@@ -155,7 +157,7 @@ class PopupSwap extends Popup {
     this.add(this.switchBtn);
 
     const priceImpact = scene.add.text(textX, priceImpactY, 'Price Impact:', mediumBrownBold);
-    this.priceImpact = scene.add.text(width - textX, priceImpactY, '0.312%', mediumBrownBold).setOrigin(1, 0);
+    this.priceImpact = scene.add.text(width - textX, priceImpactY, '0.0%', mediumBrownBold).setOrigin(1, 0);
     const maxSlippage = scene.add.text(textX, maxSlippageY, 'Max. Slippage:', mediumBrownBold);
     this.maxSlippage = scene.add.text(width - textX, maxSlippageY, '(Auto) 0.5%', mediumBrownBold).setOrigin(1, 0);
     this.add(priceImpact);
@@ -188,7 +190,6 @@ class PopupSwap extends Popup {
 
         // TODO: show validation to user
         const isValid = this.validate();
-        console.log({ isValid });
         if (!isValid) return;
 
         this.setLoading(true);
@@ -212,20 +213,28 @@ class PopupSwap extends Popup {
       this.popupProcessing.initLoading(`Swapping may take a few minutes.`);
       this.close();
     });
-    scene.game.events.on('convert-eth-input-to-token-result', ({ amount }) => {
+    scene.game.events.on('convert-eth-input-to-token-result', ({ amount, priceImpact }) => {
+      // console.log('convert-eth-input-to-token-result', { amount, priceImpact });
       this.token2AmountInput.updateValue(`${amount}`, true, true);
+      this.priceImpact.text = `~${(priceImpact * 100).toFixed(2)}%`;
       this.setLoading(false);
     });
-    scene.game.events.on('convert-eth-output-to-token-result', ({ amount }) => {
+    scene.game.events.on('convert-eth-output-to-token-result', ({ amount, priceImpact }) => {
+      // console.log('convert-eth-output-to-token-result', { amount, priceImpact });
       this.token1AmountInput.updateValue(`${amount}`, true, true);
+      this.priceImpact.text = `~${(priceImpact * 100).toFixed(2)}%`;
       this.setLoading(false);
     });
-    scene.game.events.on('convert-token-input-to-eth-result', ({ amount }) => {
+    scene.game.events.on('convert-token-input-to-eth-result', ({ amount, priceImpact }) => {
+      // console.log('convert-token-input-to-eth-result', { amount, priceImpact });
       this.token2AmountInput.updateValue(`${amount}`, true, true);
+      this.priceImpact.text = `~${(priceImpact * 100).toFixed(2)}%`;
       this.setLoading(false);
     });
-    scene.game.events.on('convert-token-output-to-eth-result', ({ amount }) => {
+    scene.game.events.on('convert-token-output-to-eth-result', ({ amount, priceImpact }) => {
+      // console.log('convert-token-output-to-eth-result', { amount, priceImpact });
       this.token1AmountInput.updateValue(`${amount}`, true, true);
+      this.priceImpact.text = `~${(priceImpact * 100).toFixed(2)}%`;
       this.setLoading(false);
     });
   }
