@@ -21,7 +21,7 @@ class PopupPrizePool extends Popup {
   prizePool = 0;
   items = [];
 
-  constructor(scene, parentModal) {
+  constructor(scene) {
     super(scene, 'popup-extra-large', { title: 'Total Prize Pool', titleIcon: 'icon-info', noCloseBtn: true });
 
     const leftMargin = this.popup.x - this.popup.width / 2;
@@ -109,7 +109,7 @@ class PopupPrizePool extends Popup {
           this.table.setMouseWheelScrollerEnable(false);
         }
         this.close();
-        parentModal.open();
+        scene.popupLeaderboard.open();
       },
       'Back',
       { fontSize: '82px', sound: 'close' }
