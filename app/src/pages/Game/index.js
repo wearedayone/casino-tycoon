@@ -78,6 +78,8 @@ const Game = () => {
     buyGoon,
     retire,
     swap,
+    swapEthToToken,
+    swapTokenToEth,
     convertEthInputToToken,
     convertEthOutputToToken,
     convertTokenInputToEth,
@@ -92,11 +94,9 @@ const Game = () => {
   // useEffect(() => {
   //   if (!!embeddedWallet) {
   //     console.log('swap', embeddedWallet);
-  //     swap()
+  //     swapTokenToEth(10)
   //       .then(console.log)
   //       .catch((err) => console.log('error swap', err));
-
-  //     getETHBalance(embeddedWallet.address).catch((err) => console.log('error get eth balance', err));
   //   }
   // }, [embeddedWallet]);
 
@@ -656,7 +656,8 @@ const Game = () => {
       gameRef.current?.events.on('deposit-nft', ({ amount }) => {
         stake(amount);
       });
-      gameRef.current?.events.on('swap', ({ amount }) => {
+      gameRef.current?.events.on('swap', ({ tokenSwap, amount }) => {
+        console.log({ tokenSwap, amount });
         gameRef.current.events.emit('swap-started', { amount, txnHash: '' });
       });
 
