@@ -16,9 +16,24 @@ import environments from '../utils/environments';
 
 // test
 import RAKKU from '../assets/abis/RAKKU.json';
-import DAY1 from '../assets/abis/DAY1.json';
 
-const { NETWORK_ID } = environments;
+const {
+  NETWORK_ID,
+  UNISWAP_QUOTER_ADDRESS,
+  UNISWAP_SWAP_ROUTER_ADDRESS,
+  UNISWAP_FACTORY_ADDRESS,
+  UNISWAP_POOL_FEE,
+  UNISWAP_WETH_ADDRESS,
+} = environments;
+
+console.log({
+  NETWORK_ID,
+  UNISWAP_QUOTER_ADDRESS,
+  UNISWAP_SWAP_ROUTER_ADDRESS,
+  UNISWAP_FACTORY_ADDRESS,
+  UNISWAP_POOL_FEE,
+  UNISWAP_WETH_ADDRESS,
+});
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -343,25 +358,19 @@ const useSmartContract = () => {
   };
 
   const getSwapContractInfo = async () => {
-    const quoterAddress = '0xb27308f9F90D607463bb33eA1BeBb41C27CE5AB6'; // put it in env
-    const swapRouterAddress = '0xE592427A0AEce92De3Edee1F18E0157C05861564'; // put it in env
-    const factoryAddress = '0x1F98431c8aD98523631AE4a59f267346ea31F984'; // put it in env
-    const fee = 500;
+    const quoterAddress = UNISWAP_QUOTER_ADDRESS;
+    const swapRouterAddress = UNISWAP_SWAP_ROUTER_ADDRESS;
+    const factoryAddress = UNISWAP_FACTORY_ADDRESS;
+    const fee = Number(UNISWAP_POOL_FEE);
 
     const privyProvider = await embeddedWallet.getEthereumProvider();
 
-    const name0 = 'Polygon MATIC';
-    const symbol0 = 'MATIC';
     const ethDecimals = 18;
-    const ethAddress = '0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889';
+    const ethAddress = UNISWAP_WETH_ADDRESS;
 
-    // usdc
-    // const address0 = '0x07865c6e87b9f70255377e024ace6630c1eaa37f';
-
-    const name1 = 'Rakku Coin';
-    const symbol1 = 'RAKKU';
     const tokenDecimals = 18;
-    const tokenAddress = '0x8C2226F10D1abc6cFF3DD170f5b07101dd5D6E37';
+    const tokenAddress = '0x8C2226F10D1abc6cFF3DD170f5b07101dd5D6E37'; // for test
+    // const tokenAddress = TOKEN_ADDRESS //  for release
 
     const factoryContract = new Contract(factoryAddress, UniswapV3Factory.abi, privyProvider.provider);
     const poolAddress = await factoryContract.getPool(ethAddress, tokenAddress, fee);
