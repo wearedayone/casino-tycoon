@@ -25,6 +25,8 @@ const useSmartContract = () => {
     nftAddress: NFT_ADDRESS,
   } = activeSeason || {};
 
+  console.log({ TOKEN_ADDRESS, GAME_CONTRACT_ADDRESS, NFT_ADDRESS });
+
   const loadedAssets = !!TOKEN_ADDRESS && !!GAME_CONTRACT_ADDRESS && !!NFT_ADDRESS && !!embeddedWallet;
 
   const withdrawToken = async (to, value) => {
@@ -199,38 +201,16 @@ const useSmartContract = () => {
   const withdrawNFT = async (address, amount) => {
     if (!loadedAssets) return;
     const privyProvider = await embeddedWallet.getEthereumProvider();
-    const nftContract = new Contract(NFT_ADDRESS, nftAbi.abi, privyProvider.provider);
 
-    let approveReceipt;
-    const isApprovedAll = await nftContract.isApprovedForAll(embeddedWallet.address, GAME_CONTRACT_ADDRESS);
-    if (!isApprovedAll) {
-      const approveData = nftContract.interface.encodeFunctionData('setApprovalForAll', [GAME_CONTRACT_ADDRESS, true]);
-
-      const approveUnsignedTx = {
-        to: NFT_ADDRESS,
-        chainId: Number(NETWORK_ID),
-        data: approveData,
-      };
-
-      // console.log({ NFT_ADDRESS, GAME_CONTRACT_ADDRESS, approveData });
-      approveReceipt = await sendTransaction(approveUnsignedTx);
-    }
-
-    if (approveReceipt?.status === 1) {
-      await delay(1000);
-    }
-
-    if (!approveReceipt || approveReceipt?.status === 1) {
-      const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
-      const data = gameContract.interface.encodeFunctionData('withdrawNFT', [address, 1, amount]);
-      const unsignedTx = {
-        to: GAME_CONTRACT_ADDRESS,
-        chainId: Number(NETWORK_ID),
-        data,
-      };
-      const receipt = await sendTransaction(unsignedTx);
-      return receipt;
-    }
+    const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
+    const data = gameContract.interface.encodeFunctionData('withdrawNFT', [address, 1, amount]);
+    const unsignedTx = {
+      to: GAME_CONTRACT_ADDRESS,
+      chainId: Number(NETWORK_ID),
+      data,
+    };
+    const receipt = await sendTransaction(unsignedTx);
+    return receipt;
   };
 
   const stakeNFT = async (address, amount) => {
