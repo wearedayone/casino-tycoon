@@ -171,6 +171,7 @@ class PopupReferralProgram extends Popup {
 
     this.codeCheckIcon.setVisible(true);
     this.inviteCode.setDisabled(true);
+    this.inviteCode.setTextStyle({ fontFamily: fontFamilies.extraBold, align: 'center' });
   }
 
   cleanup() {
