@@ -978,7 +978,12 @@ const Game = () => {
 
       gameRef.current?.events.on('convert-eth-input-to-token', ({ amount }) => {
         convertEthInputToToken(amount)
-          .then((result) => gameRef.current?.events.emit('convert-eth-input-to-token-result', { amount: result }))
+          .then((result) =>
+            gameRef.current?.events.emit('convert-eth-input-to-token-result', {
+              amount: result.amount,
+              priceImpact: result.priceImpact,
+            })
+          )
           .catch((err) => {
             console.error(err);
             Sentry.captureException(err);
@@ -1001,7 +1006,12 @@ const Game = () => {
 
       gameRef.current?.events.on('convert-eth-output-to-token', ({ amount }) => {
         convertEthOutputToToken(amount)
-          .then((result) => gameRef.current?.events.emit('convert-eth-output-to-token-result', { amount: result }))
+          .then((result) =>
+            gameRef.current?.events.emit('convert-eth-output-to-token-result', {
+              amount: result.amount,
+              priceImpact: result.priceImpact,
+            })
+          )
           .catch((err) => {
             console.error(err);
             Sentry.captureException(err);
@@ -1032,7 +1042,12 @@ const Game = () => {
 
       gameRef.current?.events.on('convert-token-input-to-eth', ({ amount }) => {
         convertTokenInputToEth(amount)
-          .then((result) => gameRef.current?.events.emit('convert-token-input-to-eth-result', { amount: result }))
+          .then((result) =>
+            gameRef.current?.events.emit('convert-token-input-to-eth-result', {
+              amount: result.amount,
+              priceImpact: result.priceImpact,
+            })
+          )
           .catch((err) => {
             console.error(err);
             Sentry.captureException(err);
@@ -1052,7 +1067,12 @@ const Game = () => {
       });
       gameRef.current?.events.on('convert-token-output-to-eth', ({ amount }) => {
         convertTokenOutputToEth(amount)
-          .then((result) => gameRef.current?.events.emit('convert-token-output-to-eth-result', { amount: result }))
+          .then((result) =>
+            gameRef.current?.events.emit('convert-token-output-to-eth-result', {
+              amount: result.amount,
+              priceImpact: result.priceImpact,
+            })
+          )
           .catch((err) => {
             console.error(err);
             Sentry.captureException(err);
