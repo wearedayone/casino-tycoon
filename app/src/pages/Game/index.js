@@ -77,12 +77,28 @@ const Game = () => {
     buyMachine,
     buyGoon,
     retire,
+    swap,
+    convertEthInputToToken,
+    convertEthOutputToToken,
+    convertTokenInputToEth,
+    convertTokenOutputToEth,
   } = useSmartContract();
   const { ready, authenticated, user, exportWallet: exportWalletPrivy, logout } = usePrivy();
   const [isLeaderboardModalOpen, setLeaderboardModalOpen] = useState(false);
   const { isEnded, countdownString } = useSeasonCountdown({ open: isLeaderboardModalOpen });
   const [showBg, setShowBg] = useState(true);
   const { workerSoldLast24h, buildingSoldLast24h, updateNow } = useSalesLast24h();
+
+  // useEffect(() => {
+  //   if (!!embeddedWallet) {
+  //     console.log('swap', embeddedWallet);
+  //     swap()
+  //       .then(console.log)
+  //       .catch((err) => console.log('error swap', err));
+
+  //     getETHBalance(embeddedWallet.address).catch((err) => console.log('error get eth balance', err));
+  //   }
+  // }, [embeddedWallet]);
 
   const { appVersion } = configs || {};
   const { tokenPrice, nftPrice } = market || {};
@@ -500,12 +516,17 @@ const Game = () => {
         gameRef.current.events.emit('update-deposit-code', profile.code);
       });
       gameRef.current?.events.on('request-eth-balance', async () => {
-        const newBalance = await getETHBalance(address);
-        console.log({ ETHBalance, newBalance });
-        if (newBalance !== ETHBalance) {
-          reloadBalance();
+        try {
+          const newBalance = await getETHBalance(address);
+          console.log({ ETHBalance, newBalance });
+          if (newBalance !== ETHBalance) {
+            reloadBalance();
+          }
+          gameRef.current.events.emit('update-eth-balance', { address, ETHBalance: newBalance });
+        } catch (err) {
+          console.error(err);
+          Sentry.captureException(err);
         }
-        gameRef.current.events.emit('update-eth-balance', { address, ETHBalance: newBalance });
       });
       gameRef.current?.events.on('refresh-eth-balance', () => {
         reloadBalance();
@@ -519,15 +540,25 @@ const Game = () => {
         });
       });
       gameRef.current?.events.on('request-wallet-nft-balance', () => {
-        getNFTBalance(address).then((balance) => {
-          gameRef.current.events.emit('update-wallet-nft-balance', { balance, numberOfMachines });
-        });
+        getNFTBalance(address)
+          .then((balance) => {
+            gameRef.current.events.emit('update-wallet-nft-balance', { balance, numberOfMachines });
+          })
+          .catch((err) => {
+            console.error(err);
+            Sentry.captureException(err);
+          });
       });
 
       gameRef.current?.events.on('request-wallet-nft-unstaked', () => {
-        getNFTBalance(address).then((balance) => {
-          gameRef.current.events.emit('update-wallet-nft-unstaked', { balance });
-        });
+        getNFTBalance(address)
+          .then((balance) => {
+            gameRef.current.events.emit('update-wallet-nft-unstaked', { balance });
+          })
+          .catch((err) => {
+            console.error(err);
+            Sentry.captureException(err);
+          });
       });
 
       gameRef.current?.events.on('request-rank', () => {
@@ -910,6 +941,15 @@ const Game = () => {
           });
       });
 
+      gameRef.current?.events.on('convert-eth-input-to-token', ({ amount }) => {
+        convertEthInputToToken(amount)
+          .then((result) => gameRef.current?.events.emit('convert-eth-input-to-token-result', { amount: result }))
+          .catch((err) => {
+            console.error(err);
+            Sentry.captureException(err);
+          });
+      });
+
       gameRef.current?.events.on('update-war-attack', (data) => {
         const { attackUserId } = data;
 
@@ -918,6 +958,15 @@ const Game = () => {
             gameRef.current?.events.emit('update-war-attack-completed');
             enqueueSnackbar('War deployment saved', { variant: 'success' });
           })
+          .catch((err) => {
+            console.error(err);
+            Sentry.captureException(err);
+          });
+      });
+
+      gameRef.current?.events.on('convert-eth-output-to-token', ({ amount }) => {
+        convertEthOutputToToken(amount)
+          .then((result) => gameRef.current?.events.emit('convert-eth-output-to-token-result', { amount: result }))
           .catch((err) => {
             console.error(err);
             Sentry.captureException(err);
@@ -946,12 +995,29 @@ const Game = () => {
           });
       });
 
+      gameRef.current?.events.on('convert-token-input-to-eth', ({ amount }) => {
+        convertTokenInputToEth(amount)
+          .then((result) => gameRef.current?.events.emit('convert-token-input-to-eth-result', { amount: result }))
+          .catch((err) => {
+            console.error(err);
+            Sentry.captureException(err);
+          });
+      });
+
       gameRef.current?.events.on('request-user-to-attack-detail', ({ userId }) => {
         getUserDetailToAttack(userId)
           .then((res) => {
             const { user, gamePlay, warResults } = res.data;
             gameRef.current?.events.emit('update-user-to-attack-detail', { user, gamePlay, warResults });
           })
+          .catch((err) => {
+            console.error(err);
+            Sentry.captureException(err);
+          });
+      });
+      gameRef.current?.events.on('convert-token-output-to-eth', ({ amount }) => {
+        convertTokenOutputToEth(amount)
+          .then((result) => gameRef.current?.events.emit('convert-token-output-to-eth-result', { amount: result }))
           .catch((err) => {
             console.error(err);
             Sentry.captureException(err);
@@ -1129,9 +1195,20 @@ const Game = () => {
   }, [gamePlay?.startRewardCountingTime, gamePlay?.pendingreward, dailyMoney]);
 
   useEffect(() => {
-    getNFTBalance(address).then((balance) => {
-      gameRef.current?.events.emit('update-wallet-nft-balance', { balance, numberOfMachines });
-    });
+    if (gamePlay) {
+      gameRef.current?.events.emit('update-war-status', { war: gamePlay.war });
+    }
+  }, [gamePlay?.war]);
+
+  useEffect(() => {
+    getNFTBalance(address)
+      .then((balance) => {
+        gameRef.current?.events.emit('update-wallet-nft-balance', { balance, numberOfMachines });
+      })
+      .catch((err) => {
+        console.error(err);
+        Sentry.captureException(err);
+      });
   }, [address, numberOfMachines]);
 
   useEffect(() => {

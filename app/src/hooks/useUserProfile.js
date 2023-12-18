@@ -59,7 +59,12 @@ const useUserProfile = (ready, user) => {
 
   useEffect(() => {
     if (embeddedWallet && profile) {
-      isMinted(profile.address).then((minted) => setClaimable(minted));
+      isMinted(profile.address)
+        .then((minted) => setClaimable(minted))
+        .catch((err) => {
+          console.error(err);
+          Sentry.captureException(err);
+        });
 
       if (!profile.walletPasswordAsked) {
         setOpenSetWalletPassword(true);

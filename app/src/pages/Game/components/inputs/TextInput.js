@@ -6,6 +6,8 @@ class TextInput extends Phaser.GameObjects.Container {
   textBeginningX = 0;
   maxDisplayedCharacters = 0;
   defaultTextStyle = {};
+  valueRegex = /.*/;
+  characterRegex = /./;
 
   // state
   isDisabled = false;
@@ -39,6 +41,8 @@ class TextInput extends Phaser.GameObjects.Container {
     this.onChange = onChange;
     this.textTransform = textTransform;
     this.onBlur = onBlur;
+    this.valueRegex = valueRegex;
+    this.characterRegex = characterRegex;
 
     this.container = scene.add.image(x, y, inputImg).setOrigin(0.5, 0.5);
     this.container.setInteractive();
@@ -52,7 +56,7 @@ class TextInput extends Phaser.GameObjects.Container {
     if (icon) {
       const iconXPadding = this.container.width * 0.05;
       const iconMarginRight = this.container.width * 0.1;
-      this.icon = scene.add.image(inputStartX + iconXPadding, y, icon);
+      this.icon = scene.add.sprite(inputStartX + iconXPadding, y, icon);
       this.add(this.icon);
       this.textBeginningX = inputStartX + iconXPadding + iconMarginRight;
     }
@@ -118,7 +122,7 @@ class TextInput extends Phaser.GameObjects.Container {
 
       this.hiddenDomInput.addEventListener('input', (event) => {
         console.log('event.target.value', event.target.value);
-        if (event.target.value && !event.target.value.match(valueRegex)) {
+        if (event.target.value && !event.target.value.match(this.valueRegex)) {
           // prevents adding value
           this.hiddenDomInput.value = this.value;
           return;
@@ -139,8 +143,8 @@ class TextInput extends Phaser.GameObjects.Container {
           this.updateValue(this.value.slice(0, -1), false);
         } else if (
           event.key.length === 1 &&
-          event.key.match(characterRegex) &&
-          (this.value + event.key).match(valueRegex)
+          event.key.match(this.characterRegex) &&
+          (this.value + event.key).match(this.valueRegex)
         ) {
           this.updateValue(this.value + event.key, false);
         }
@@ -150,6 +154,23 @@ class TextInput extends Phaser.GameObjects.Container {
         // }
       }
     });
+  }
+
+  changeIcon(newIcon) {
+    if (this.icon) {
+      this.icon.setTexture(newIcon);
+    }
+  }
+
+  changeRegex(valueRegex, characterRegex) {
+    this.valueRegex = valueRegex;
+    this.characterRegex = characterRegex;
+  }
+
+  changePlaceholder(placeholder) {
+    if (this.placeholder) {
+      this.placeholder.text = placeholder;
+    }
   }
 
   blur() {
@@ -197,10 +218,10 @@ class TextInput extends Phaser.GameObjects.Container {
     if (this.isFocused) this.formCursor.x = this.textBeginningX + this.displayedString.width;
   }
 
-  updateValue(newValue, isCalledFromOutside = true) {
+  updateValue(newValue, isCalledFromOutside = true, onChangeBlocked = false) {
     let value = newValue;
     if (this.textTransform === 'uppercase') value = newValue.toUpperCase();
-    if (!this.isDisabled) this.onChange?.(value);
+    if (!this.isDisabled && !onChangeBlocked) this.onChange?.(value);
     this.value = value;
     if (isCalledFromOutside) this.hiddenDomInput.value = value;
     this.updateDisplayedString();
