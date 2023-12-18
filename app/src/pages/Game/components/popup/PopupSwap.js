@@ -247,7 +247,7 @@ class PopupSwap extends Popup {
 
   validate() {
     let isValid = true;
-    if (!this.token1AmountInput.value) return false;
+    if (!this.token1AmountInput.value || !this.token2AmountInput.value) return false;
 
     const inputAmount = Number(this.token1AmountInput.value);
     const userAmount = this.tokenSwap === 'eth' ? this.ethBalance : this.tokenBalance;
