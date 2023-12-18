@@ -161,10 +161,10 @@ class PopupSettings extends Popup {
         this.close();
         popupSwap.open();
       },
-      'Swap (coming soon)',
+      'Swap',
       { disabledImage: 'button-long-disabled', sound: 'open' }
     );
-    this.buttonSwap.setDisabledState(true);
+    // this.buttonSwap.setDisabledState(true);
     this.add(this.balanceBtnsContainer);
     this.add(this.buttonWithdraw);
     this.add(this.buttonDeposit);

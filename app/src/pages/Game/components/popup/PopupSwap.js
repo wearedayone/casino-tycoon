@@ -3,6 +3,7 @@ import PopupTxnProcessingSwap from './PopupTxnProcessingSwap';
 import Button from '../button/Button';
 import TextInput from '../inputs/TextInput';
 import TextButton from '../button/TextButton';
+import ImageButton from '../button/ImageButton';
 import configs from '../../configs/configs';
 import {
   integerCharacterRegex,
@@ -22,7 +23,11 @@ const mediumBrownBold = {
 
 class PopupSwap extends Popup {
   loading = false;
-  balance = 0;
+  ethBalance = 0;
+  tokenBalance = 0;
+  tokenSwap = 'eth';
+  timeout = null;
+  loading = false;
 
   constructor(scene, parentModal) {
     super(scene, 'popup-small', { title: 'Swap' });
@@ -31,10 +36,10 @@ class PopupSwap extends Popup {
     const textX = leftMargin + this.popup.width * 0.1;
     const startingY = this.popup.y - this.popup.height / 2;
     const youPayY = startingY + 170;
-    const ethAmountInputY = youPayY + 200;
-    const youReceiveY = ethAmountInputY + 120;
-    const tokenAmountInputY = youReceiveY + 200;
-    const priceImpactY = tokenAmountInputY + 140;
+    const token1AmountInputY = youPayY + 200;
+    const youReceiveY = token1AmountInputY + 170;
+    const token2AmountInputY = youReceiveY + 170;
+    const priceImpactY = token2AmountInputY + 140;
     const maxSlippageY = priceImpactY + 90;
 
     const youPay = scene.add.text(textX, youPayY, 'You pay:', {
@@ -42,40 +47,100 @@ class PopupSwap extends Popup {
       color: colors.black,
       fontFamily: fontFamilies.bold,
     });
-    this.ethAmountInput = new TextInput(scene, width / 2, ethAmountInputY, {
+    this.token1AmountInput = new TextInput(scene, width / 2, token1AmountInputY, {
       icon: 'icon-eth',
       placeholder: '0.00',
       valueRegex: numberInputRegex,
       characterRegex: numberCharacterRegex,
       maxDisplayedCharacters: 13,
+      onChange: (value) => {
+        if (this.timeout) {
+          clearTimeout(this.timeout);
+        }
+
+        if (!value || !Number(value)) {
+          scene.game.events.emit(
+            this.tokenSwap === 'eth' ? 'convert-eth-input-to-token-result' : 'convert-token-input-to-eth-result',
+            { amount: '0.00' }
+          );
+          return;
+        }
+
+        this.timeout = setTimeout(
+          () =>
+            scene.game.events.emit(
+              this.tokenSwap === 'eth' ? 'convert-eth-input-to-token' : 'convert-token-input-to-eth',
+              {
+                amount: Number(value),
+              }
+            ),
+          500
+        );
+      },
     });
     this.balanceText = scene.add
-      .text(width - textX, ethAmountInputY, '0.00', {
+      .text(width - textX, token1AmountInputY, '0.00', {
         fontSize: fontSizes.medium,
         color: colors.black,
         fontFamily: fontFamilies.bold,
       })
       .setOrigin(1, 1);
-    const available = scene.add.text(width - textX, ethAmountInputY, 'Available', mediumBrownBold).setOrigin(1, 0);
+    const available = scene.add.text(width - textX, token1AmountInputY, 'Available', mediumBrownBold).setOrigin(1, 0);
     this.add(youPay);
-    this.add(this.ethAmountInput);
+    this.add(this.token1AmountInput);
     this.add(this.balanceText);
     this.add(available);
 
-    const youReceive = scene.add.text(textX, youReceiveY, 'You receive:', {
-      fontSize: fontSizes.large,
-      color: colors.black,
-      fontFamily: fontFamilies.bold,
-    });
-    this.tokenAmountInput = new TextInput(scene, width / 2, tokenAmountInputY, {
+    const youReceive = scene.add
+      .text(textX, youReceiveY, 'You receive:', {
+        fontSize: fontSizes.large,
+        color: colors.black,
+        fontFamily: fontFamilies.bold,
+      })
+      .setOrigin(0, 0.5);
+    this.token2AmountInput = new TextInput(scene, width / 2, token2AmountInputY, {
       icon: 'icon-coin',
-      placeholder: '0',
-      valueRegex: integerInputRegex,
-      characterRegex: integerCharacterRegex,
+      placeholder: '0.00',
+      valueRegex: numberInputRegex,
+      characterRegex: numberCharacterRegex,
       maxDisplayedCharacters: 18,
+      onChange: (value) => {
+        if (this.timeout) {
+          clearTimeout(this.timeout);
+        }
+
+        if (!value || !Number(value)) {
+          scene.game.events.emit(
+            this.tokenSwap === 'eth' ? 'convert-token-output-to-eth-result' : 'convert-eth-output-to-token-result',
+            { amount: '0.00' }
+          );
+          return;
+        }
+
+        this.timeout = setTimeout(
+          () =>
+            scene.game.events.emit(
+              this.tokenSwap === 'eth' ? 'convert-token-output-to-eth' : 'convert-eth-output-to-token',
+              { amount: Number(value || '0') }
+            ),
+          500
+        );
+      },
     });
     this.add(youReceive);
-    this.add(this.tokenAmountInput);
+    this.add(this.token2AmountInput);
+
+    this.switchBtn = new ImageButton(
+      scene,
+      this.popup.x + this.popup.width / 2 - 130,
+      youReceiveY,
+      'button-square-small',
+      'button-square-small-pressed',
+      () => this.switch(),
+      'swap-arrow',
+      'button-1'
+    );
+    this.add(this.switchBtn);
 
     const priceImpact = scene.add.text(textX, priceImpactY, 'Price Impact:', mediumBrownBold);
     this.priceImpact = scene.add.text(width - textX, priceImpactY, '0.312%', mediumBrownBold).setOrigin(1, 0);
@@ -111,6 +176,7 @@ class PopupSwap extends Popup {
 
         // TODO: show validation to user
         const isValid = this.validate();
+        console.log({ isValid });
         if (!isValid) return;
 
         this.setLoading(true);
@@ -122,7 +188,9 @@ class PopupSwap extends Popup {
     this.add(buttonBack);
     this.add(this.buttonApprove);
 
-    scene.game.events.on('update-eth-balance', ({ ETHBalance }) => this.updateBalance(ETHBalance));
+    scene.game.events.on('update-balances', ({ ETHBalance, tokenBalance }) =>
+      this.updateBalance({ ETHBalance, tokenBalance })
+    );
     scene.game.events.on('swap-completed', () => this.setLoading(false));
     scene.game.events.on('swap-started', ({ txnHash }) => {
       this.setLoading(false);
@@ -130,17 +198,61 @@ class PopupSwap extends Popup {
       scene.add.existing(this.popupTxnProcessing);
       this.close();
     });
+    scene.game.events.on('convert-eth-input-to-token-result', ({ amount }) => {
+      this.token2AmountInput.updateValue(`${amount}`, true, true);
+      console.log('convert-eth-input-to-token-result', amount);
+    });
+    scene.game.events.on('convert-eth-output-to-token-result', ({ amount }) => {
+      this.token1AmountInput.updateValue(`${amount}`, true, true);
+      console.log('convert-eth-output-to-token-result', amount);
+    });
+    scene.game.events.on('convert-token-input-to-eth-result', ({ amount }) => {
+      this.token2AmountInput.updateValue(`${amount}`, true, true);
+      console.log('convert-token-input-to-eth-result', amount);
+    });
+    scene.game.events.on('convert-token-output-to-eth-result', ({ amount }) => {
+      this.token1AmountInput.updateValue(`${amount}`, true, true);
+      console.log('convert-token-output-to-eth-result', amount);
+    });
+  }
+
+  switch() {
+    this.token1AmountInput.updateValue('0.00', true, true);
+    this.token2AmountInput.updateValue('0.00', true, true);
+
+    if (this.tokenSwap === 'eth') {
+      this.tokenSwap = 'token';
+      this.token1AmountInput.changeIcon('icon-coin');
+      // this.token1AmountInput.changeRegex(integerInputRegex, integerCharacterRegex);
+      // this.token1AmountInput.changePlaceholder('0');
+      this.token2AmountInput.changeIcon('icon-eth');
+      // this.token2AmountInput.changeRegex(numberInputRegex, numberCharacterRegex);
+      // this.token2AmountInput.changePlaceholder('0.00');
+      this.balanceText.text = `${formatter.format(this.tokenBalance)}`;
+    } else {
+      this.tokenSwap = 'eth';
+      this.token1AmountInput.changeIcon('icon-eth');
+      // this.token1AmountInput.changeRegex(numberInputRegex, numberCharacterRegex);
+      // this.token1AmountInput.changePlaceholder('0.00');
+      this.token2AmountInput.changeIcon('icon-coin');
+      // this.token2AmountInput.changeRegex(integerInputRegex, integerCharacterRegex);
+      // this.token2AmountInput.changePlaceholder('0');
+      this.balanceText.text = `${formatter.format(this.ethBalance)}`;
+    }
   }
 
   onOpen() {
-    this.scene.game.events.emit('request-eth-balance');
+    this.scene.game.events.emit('request-balances');
   }
 
   validate() {
     let isValid = true;
-    const amount = Number(this.ethAmountInput.value);
+    if (!this.token1AmountInput.value) return false;
 
-    if (!amount || amount > this.balance) isValid = false;
+    const inputAmount = Number(this.token1AmountInput.value);
+    const userAmount = this.tokenSwap === 'eth' ? this.ethBalance : this.tokenBalance;
+
+    if (!inputAmount || inputAmount > userAmount) isValid = false;
 
     return isValid;
   }
@@ -153,13 +265,15 @@ class PopupSwap extends Popup {
 
   cleanup() {
     // reset form
-    this.ethAmountInput.updateValue('');
-    this.tokenAmountInput.updateValue('');
+    this.token1AmountInput.updateValue('');
+    this.token2AmountInput.updateValue('');
   }
 
-  updateBalance(balance) {
-    this.balance = balance;
-    this.balanceText.text = `${formatter.format(balance)}`;
+  updateBalance({ ETHBalance, tokenBalance }) {
+    console.log({ ETHBalance, tokenBalance });
+    this.ethBalance = ETHBalance;
+    this.tokenBalance = tokenBalance;
+    this.balanceText.text = `${formatter.format(this.tokenSwap === 'eth' ? ETHBalance : tokenBalance)}`;
   }
 }
 

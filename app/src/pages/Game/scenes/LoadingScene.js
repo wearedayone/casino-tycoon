@@ -173,11 +173,11 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('gun', '/images/gun.png');
     this.load.image('man', '/images/man.png');
     this.load.image('eth-coin', '/images/eth-coin.png');
-    this.load.image('slider-thumb', '/images/slider-thumb.png');
     this.load.image('counter', '/images/counter.png');
     this.load.image('row-container', '/images/row-container.png');
     this.load.image('goon-mini', '/images/goon-mini.png');
     this.load.image('safehouse-mini', '/images/safehouse-mini.png');
+    this.load.image('swap-arrow', '/images/swap-arrow.png');
 
     this.load.image('button-approve', '/images/button-approve.png');
     this.load.image('button-approve-pressed', '/images/button-approve-pressed.png');
@@ -249,6 +249,8 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-green', '/images/button-green.png');
     this.load.image('button-green-pressed', '/images/button-green-pressed.png');
     this.load.image('button-blue-small', '/images/button-blue-small.png');
+    this.load.image('button-square-small', '/images/button-square-small.png');
+    this.load.image('button-square-small-pressed', '/images/button-square-small-pressed.png');
 
     this.load.image('button-buy-safehouse', '/images/button-buy-safehouse.png');
     this.load.image('button-buy-safehouse-pressed', '/images/button-buy-safehouse-pressed.png');
