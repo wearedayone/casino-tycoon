@@ -193,7 +193,7 @@ class TextInput extends Phaser.GameObjects.Container {
   updateValue(newValue, isCalledFromOutside = true) {
     let value = newValue;
     if (this.textTransform === 'uppercase') value = newValue.toUpperCase();
-    if (!this.isDisabled) this.onChange(value);
+    if (!this.isDisabled) this.onChange?.(value);
     this.value = value;
     if (isCalledFromOutside) this.hiddenDomInput.value = value;
     this.updateDisplayedString();
