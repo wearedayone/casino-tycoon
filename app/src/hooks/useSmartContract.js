@@ -431,17 +431,7 @@ const useSmartContract = () => {
     const privyProvider = await embeddedWallet.getEthereumProvider();
     const amountIn = parseUnits(amount.toString(), ethDecimals);
 
-    // const tokenContract = new Contract(address0, RAKKU.abi, privyProvider.provider);
-
-    // const approveData = tokenContract.interface.encodeFunctionData('approve', [swapRouterAddress, amountIn.toString()]);
-    // const approveUnsignedTx = {
-    //   to: address0,
-    //   chainId: Number(NETWORK_ID),
-    //   data: approveData,
-    // };
-    // const signTxn = await sendTransaction(approveUnsignedTx);
-    // console.log({signTxn})
-    // await delay(1000);
+    const tokenAmount = await convertEthInputToToken(amount);
 
     const swapRouterContract = new Contract(swapRouterAddress, SwapRouterABI.abi, privyProvider.provider);
 
@@ -457,15 +447,15 @@ const useSmartContract = () => {
     };
 
     const swapData = swapRouterContract.interface.encodeFunctionData('exactInputSingle', [params]);
-    const swapUnsignedData = {
+    const swapUnsignedTxn = {
       to: swapRouterAddress,
       chainId: Number(NETWORK_ID),
       data: swapData,
       // eslint-disable-next-line
       value: BigInt(amount * Math.pow(10, ethDecimals)),
     };
-    const txn = await sendTransaction(swapUnsignedData);
-    console.log({ txn });
+    const receipt = await sendTransaction(swapUnsignedTxn);
+    return { receipt, receiveAmount: tokenAmount };
   };
 
   const swapTokenToEth = async (amount) => {
@@ -475,6 +465,8 @@ const useSmartContract = () => {
 
     const privyProvider = await embeddedWallet.getEthereumProvider();
     const amountIn = parseUnits(amount.toString(), tokenDecimals);
+
+    const ethAmount = await convertTokenInputToEth(amount);
 
     const tokenContract = new Contract(tokenAddress, RAKKU.abi, privyProvider.provider);
 
@@ -502,13 +494,13 @@ const useSmartContract = () => {
     };
 
     const swapData = swapRouterContract.interface.encodeFunctionData('exactInputSingle', [params]);
-    const swapUnsignedData = {
+    const swapUnsignedTxn = {
       to: swapRouterAddress,
       chainId: Number(NETWORK_ID),
       data: swapData,
     };
-    const txn = await sendTransaction(swapUnsignedData);
-    console.log({ txn });
+    const receipt = await sendTransaction(swapUnsignedTxn);
+    return { receipt, receiveAmount: ethAmount };
   };
 
   return {
