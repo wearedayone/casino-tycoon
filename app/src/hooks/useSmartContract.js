@@ -1,6 +1,10 @@
 import { Contract } from '@ethersproject/contracts';
 import { usePrivy } from '@privy-io/react-auth';
-import { parseEther, formatEther } from '@ethersproject/units';
+import { parseEther, parseUnits, formatEther } from '@ethersproject/units';
+import IUniswapV3PoolABI from '@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Pool.sol/IUniswapV3Pool.json';
+import SwapRouterABI from '@uniswap/v3-periphery/artifacts/contracts/interfaces/ISwapRouter.sol/ISwapRouter.json';
+import UniswapV3Factory from '@uniswap/v3-core/artifacts/contracts/UniswapV3Factory.sol/UniswapV3Factory.json';
+import QuoterABI from '@uniswap/v3-periphery/artifacts/contracts/interfaces/IQuoter.sol/IQuoter.json';
 
 import useUserWallet from './useUserWallet';
 import useSystemStore from '../stores/system.store';
@@ -9,6 +13,10 @@ import tokenAbi from '../assets/abis/Token.json';
 import nftAbi from '../assets/abis/NFT.json';
 import { formatter } from '../utils/numbers';
 import environments from '../utils/environments';
+
+// test
+import RAKKU from '../assets/abis/RAKKU.json';
+import DAY1 from '../assets/abis/DAY1.json';
 
 const { NETWORK_ID } = environments;
 
@@ -312,6 +320,197 @@ const useSmartContract = () => {
     return minted;
   };
 
+  // test swap
+  const getPoolImmutables = async (poolContract) => {
+    const [token0, token1, fee] = await Promise.all([poolContract.token0(), poolContract.token1(), poolContract.fee()]);
+
+    const immutables = {
+      token0: token0,
+      token1: token1,
+      fee: fee,
+    };
+    return immutables;
+  };
+
+  const getPoolState = async (poolContract) => {
+    const slot = await poolContract.slot0();
+
+    const state = {
+      sqrtPriceX96: slot[0],
+    };
+
+    return state;
+  };
+
+  const getSwapContractInfo = async () => {
+    const quoterAddress = '0xb27308f9F90D607463bb33eA1BeBb41C27CE5AB6'; // put it in env
+    const swapRouterAddress = '0xE592427A0AEce92De3Edee1F18E0157C05861564'; // put it in env
+    const factoryAddress = '0x1F98431c8aD98523631AE4a59f267346ea31F984'; // put it in env
+    const fee = 500;
+
+    const privyProvider = await embeddedWallet.getEthereumProvider();
+
+    const name0 = 'Polygon MATIC';
+    const symbol0 = 'MATIC';
+    const ethDecimals = 18;
+    const ethAddress = '0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889';
+
+    // usdc
+    // const address0 = '0x07865c6e87b9f70255377e024ace6630c1eaa37f';
+
+    const name1 = 'Rakku Coin';
+    const symbol1 = 'RAKKU';
+    const tokenDecimals = 18;
+    const tokenAddress = '0x8C2226F10D1abc6cFF3DD170f5b07101dd5D6E37';
+
+    const factoryContract = new Contract(factoryAddress, UniswapV3Factory.abi, privyProvider.provider);
+    const poolAddress = await factoryContract.getPool(ethAddress, tokenAddress, fee);
+
+    const poolContract = new Contract(poolAddress, IUniswapV3PoolABI.abi, privyProvider.provider);
+    const swapRouterContract = new Contract(swapRouterAddress, SwapRouterABI.abi, privyProvider.provider);
+    const quoterContract = new Contract(quoterAddress, QuoterABI.abi, privyProvider.provider);
+
+    return {
+      quoterAddress,
+      swapRouterAddress,
+      factoryAddress,
+      poolAddress,
+      ethAddress,
+      factoryContract,
+      poolContract,
+      swapRouterContract,
+      quoterContract,
+      ethDecimals,
+      tokenAddress,
+      tokenDecimals,
+      fee,
+    };
+  };
+
+  const convertEthInputToToken = async (ethAmount) => {
+    if (!loadedAssets) return 0;
+    const { fee, ethAddress, ethDecimals, tokenAddress, tokenDecimals, quoterContract } = await getSwapContractInfo();
+
+    const amountIn = parseUnits(ethAmount.toString(), ethDecimals);
+    const res = await quoterContract.callStatic.quoteExactInputSingle(ethAddress, tokenAddress, fee, amountIn, '0');
+    return (Number(res.toString()) / Math.pow(10, tokenDecimals)).toLocaleString();
+  };
+
+  const convertEthOutputToToken = async (ethAmount) => {
+    if (!loadedAssets) return 0;
+    const { fee, ethAddress, ethDecimals, tokenAddress, tokenDecimals, quoterContract } = await getSwapContractInfo();
+
+    const amountOut = parseUnits(ethAmount.toString(), ethDecimals);
+    const res = await quoterContract.callStatic.quoteExactOutputSingle(tokenAddress, ethAddress, fee, amountOut, '0');
+    return (Number(res.toString()) / Math.pow(10, tokenDecimals)).toLocaleString();
+  };
+
+  const convertTokenInputToEth = async (tokenAmount) => {
+    if (!loadedAssets) return 0;
+    const { fee, ethAddress, ethDecimals, tokenAddress, tokenDecimals, quoterContract } = await getSwapContractInfo();
+
+    const amountIn = parseUnits(tokenAmount.toString(), tokenDecimals);
+    const res = await quoterContract.callStatic.quoteExactInputSingle(tokenAddress, ethAddress, fee, amountIn, '0');
+    return (Number(res.toString()) / Math.pow(10, ethDecimals)).toLocaleString();
+  };
+
+  const convertTokenOutputToEth = async (tokenAmount) => {
+    if (!loadedAssets) return 0;
+    const { fee, ethAddress, ethDecimals, tokenAddress, tokenDecimals, quoterContract } = await getSwapContractInfo();
+
+    const amountOut = parseUnits(tokenAmount.toString(), tokenDecimals);
+    const res = await quoterContract.callStatic.quoteExactOutputSingle(ethAddress, tokenAddress, fee, amountOut, '0');
+    return (Number(res.toString()) / Math.pow(10, ethDecimals)).toLocaleString();
+  };
+
+  const swapEthToToken = async (amount) => {
+    if (!loadedAssets) return false;
+
+    const { ethAddress, ethDecimals, tokenAddress, swapRouterAddress, fee } = await getSwapContractInfo();
+
+    const privyProvider = await embeddedWallet.getEthereumProvider();
+    const amountIn = parseUnits(amount.toString(), ethDecimals);
+
+    // const tokenContract = new Contract(address0, RAKKU.abi, privyProvider.provider);
+
+    // const approveData = tokenContract.interface.encodeFunctionData('approve', [swapRouterAddress, amountIn.toString()]);
+    // const approveUnsignedTx = {
+    //   to: address0,
+    //   chainId: Number(NETWORK_ID),
+    //   data: approveData,
+    // };
+    // const signTxn = await sendTransaction(approveUnsignedTx);
+    // console.log({signTxn})
+    // await delay(1000);
+
+    const swapRouterContract = new Contract(swapRouterAddress, SwapRouterABI.abi, privyProvider.provider);
+
+    const params = {
+      tokenIn: ethAddress,
+      tokenOut: tokenAddress,
+      fee: fee,
+      recipient: embeddedWallet.address,
+      deadline: Math.floor(Date.now() / 1000) + 60 * 10,
+      amountIn,
+      amountOutMinimum: 0,
+      sqrtPriceLimitX96: 0,
+    };
+
+    const swapData = swapRouterContract.interface.encodeFunctionData('exactInputSingle', [params]);
+    const swapUnsignedData = {
+      to: swapRouterAddress,
+      chainId: Number(NETWORK_ID),
+      data: swapData,
+      // eslint-disable-next-line
+      value: BigInt(amount * Math.pow(10, ethDecimals)),
+    };
+    const txn = await sendTransaction(swapUnsignedData);
+    console.log({ txn });
+  };
+
+  const swapTokenToEth = async (amount) => {
+    if (!loadedAssets) return false;
+
+    const { ethAddress, tokenAddress, tokenDecimals, swapRouterAddress, fee } = await getSwapContractInfo();
+
+    const privyProvider = await embeddedWallet.getEthereumProvider();
+    const amountIn = parseUnits(amount.toString(), tokenDecimals);
+
+    const tokenContract = new Contract(tokenAddress, RAKKU.abi, privyProvider.provider);
+
+    const approveData = tokenContract.interface.encodeFunctionData('approve', [swapRouterAddress, amountIn.toString()]);
+    const approveUnsignedTx = {
+      to: tokenAddress,
+      chainId: Number(NETWORK_ID),
+      data: approveData,
+    };
+    const signTxn = await sendTransaction(approveUnsignedTx);
+    console.log({ signTxn });
+    await delay(1000);
+
+    const swapRouterContract = new Contract(swapRouterAddress, SwapRouterABI.abi, privyProvider.provider);
+
+    const params = {
+      tokenIn: tokenAddress,
+      tokenOut: ethAddress,
+      fee: fee,
+      recipient: embeddedWallet.address,
+      deadline: Math.floor(Date.now() / 1000) + 60 * 10,
+      amountIn,
+      amountOutMinimum: 0,
+      sqrtPriceLimitX96: 0,
+    };
+
+    const swapData = swapRouterContract.interface.encodeFunctionData('exactInputSingle', [params]);
+    const swapUnsignedData = {
+      to: swapRouterAddress,
+      chainId: Number(NETWORK_ID),
+      data: swapData,
+    };
+    const txn = await sendTransaction(swapUnsignedData);
+    console.log({ txn });
+  };
+
   return {
     buyMachine,
     buyGoon,
@@ -325,6 +524,12 @@ const useSmartContract = () => {
     getETHBalance,
     getStakedNFTBalance,
     isMinted,
+    swapEthToToken,
+    swapTokenToEth,
+    convertEthInputToToken,
+    convertEthOutputToToken,
+    convertTokenInputToEth,
+    convertTokenOutputToEth,
   };
 };
 

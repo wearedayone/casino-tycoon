@@ -66,6 +66,8 @@ class PopupSwap extends Popup {
           return;
         }
 
+        this.setLoading(true);
+
         this.timeout = setTimeout(
           () =>
             scene.game.events.emit(
@@ -116,6 +118,8 @@ class PopupSwap extends Popup {
           );
           return;
         }
+
+        this.setLoading(true);
 
         this.timeout = setTimeout(
           () =>
@@ -180,7 +184,10 @@ class PopupSwap extends Popup {
         if (!isValid) return;
 
         this.setLoading(true);
-        const data = {};
+        const data = {
+          tokenSwap: this.tokenSwap,
+          amount: Number(this.token1AmountInput.value),
+        };
         scene.game.events.emit('swap', data);
       },
       { disabledImage: 'button-approve-disabled' }
@@ -200,19 +207,19 @@ class PopupSwap extends Popup {
     });
     scene.game.events.on('convert-eth-input-to-token-result', ({ amount }) => {
       this.token2AmountInput.updateValue(`${amount}`, true, true);
-      console.log('convert-eth-input-to-token-result', amount);
+      this.setLoading(false);
     });
     scene.game.events.on('convert-eth-output-to-token-result', ({ amount }) => {
       this.token1AmountInput.updateValue(`${amount}`, true, true);
-      console.log('convert-eth-output-to-token-result', amount);
+      this.setLoading(false);
     });
     scene.game.events.on('convert-token-input-to-eth-result', ({ amount }) => {
       this.token2AmountInput.updateValue(`${amount}`, true, true);
-      console.log('convert-token-input-to-eth-result', amount);
+      this.setLoading(false);
     });
     scene.game.events.on('convert-token-output-to-eth-result', ({ amount }) => {
       this.token1AmountInput.updateValue(`${amount}`, true, true);
-      console.log('convert-token-output-to-eth-result', amount);
+      this.setLoading(false);
     });
   }
 
