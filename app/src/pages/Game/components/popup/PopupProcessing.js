@@ -14,14 +14,15 @@ class PopupProcessing extends Popup {
     this.onCompleted = onCompleted;
 
     const startingY = this.popup.y - this.popup.height / 2;
-    const iconY = startingY + 320;
+    const iconY = startingY + 350;
     const titleY = iconY + 160;
     const descriptionY = titleY + 320;
 
     this.loading = true;
+    this.completedIcon = completedIcon;
     if (sound) this.doneSound = scene.sound.add(sound, { loop: false });
     this.icon = scene.add.image(width / 2, iconY, 'icon-loading');
-    this.iconDone = scene.add.image(width / 2, iconY, completedIcon);
+    this.iconDone = scene.add.sprite(width / 2, iconY, completedIcon);
     this.iconDone.setVisible(false);
     if (failedIcon) {
       this.iconFail = scene.add.image(width / 2, iconY, failedIcon);
@@ -31,9 +32,9 @@ class PopupProcessing extends Popup {
 
     this.title = scene.add
       .text(width / 2, titleY, 'Processing...', {
-        fontSize: '100px',
+        fontSize: '52px',
         color: colors.brown,
-        fontFamily: fontFamilies.extraBold,
+        fontFamily: fontFamilies.bold,
         align: 'center',
       })
       .setOrigin(0.5, 0);
@@ -101,10 +102,11 @@ class PopupProcessing extends Popup {
           'withdraw-eth-completed',
           'withdraw-nft-completed',
           'retire-completed',
+          'swap-completed',
         ];
 
         if (!hasTxnHashEvents.includes(completedEvent)) return;
-        const { txnHash, amount } = data;
+        const { txnHash, amount, description, token } = data;
         let title = '',
           desc = '';
 
@@ -129,6 +131,9 @@ class PopupProcessing extends Popup {
           case 'withdraw-nft-completed':
             title = `${amount.toLocaleString()} NFT${amount > 1 ? 's' : ''}`;
             desc = 'Withdraw completed.';
+          case 'swap-completed':
+            title = `${amount.toLocaleString()} ${token}`;
+            desc = description;
             break;
           case 'retire-completed':
             title = '';
@@ -136,7 +141,7 @@ class PopupProcessing extends Popup {
             break;
         }
 
-        this.popupTxnCompleted = new PopupTxnCompleted(scene, completedIcon, title, desc, txnHash, onCompleted);
+        this.popupTxnCompleted = new PopupTxnCompleted(scene, this.completedIcon, title, desc, txnHash, onCompleted);
         scene.add.existing(this.popupTxnCompleted);
         this.onCompleted = null;
         this.close();
@@ -152,13 +157,17 @@ class PopupProcessing extends Popup {
     console.log('init loading');
     this.loading = true;
     this.description.text = description;
-    this.setTitle(`Processing`);
+    this.setTitle(`Almost done`);
     this.title.text = 'Processing...';
     this.loadingAnimation.resume();
     this.icon.setVisible(true);
     this.iconDone.setVisible(false);
     if (this.iconFail) this.iconFail.setVisible(false);
     this.setVisible(true);
+  }
+
+  updateCompletedIcon(newCompletedIcon) {
+    this.completedIcon = newCompletedIcon;
   }
 }
 

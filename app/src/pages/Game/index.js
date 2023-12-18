@@ -91,6 +91,8 @@ const Game = () => {
   const [showBg, setShowBg] = useState(true);
   const { workerSoldLast24h, buildingSoldLast24h, updateNow } = useSalesLast24h();
 
+  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
   // useEffect(() => {
   //   if (!!embeddedWallet) {
   //     console.log('swap', embeddedWallet);
@@ -656,9 +658,41 @@ const Game = () => {
       gameRef.current?.events.on('deposit-nft', ({ amount }) => {
         stake(amount);
       });
-      gameRef.current?.events.on('swap', ({ tokenSwap, amount }) => {
-        console.log({ tokenSwap, amount });
-        gameRef.current.events.emit('swap-started', { amount, txnHash: '' });
+      gameRef.current?.events.on('swap', async ({ tokenSwap, amount }) => {
+        try {
+          console.log({ tokenSwap, amount });
+          gameRef.current.events.emit('swap-started', { amount, txnHash: '' });
+          const func = tokenSwap === 'eth' ? swapEthToToken : swapTokenToEth;
+          const { receipt, receiveAmount } = await func(amount);
+          if (receipt.status === 1) {
+            gameRef.current.events.emit('swap-completed', {
+              txnHash: receipt.transactionHash,
+              amount: receiveAmount,
+              token: tokenSwap === 'eth' ? '$FIAT' : 'ETH',
+              description: tokenSwap === 'eth' ? 'Swap ETH to $FIAT completed' : 'Swap $FIAT to ETH completed',
+            });
+          }
+        } catch (err) {
+          let message = err.message;
+          let errorCode = err.code?.toString();
+          if (!errorCode && message === 'Network Error') {
+            errorCode = '12002';
+          }
+          switch (err.code) {
+            case 'UNPREDICTABLE_GAS_LIMIT':
+              message = 'INSUFFICIENT GAS';
+              break;
+            case 'INSUFFICIENT_FUNDS':
+              message = 'INSUFFICIENT ETH';
+              break;
+            default:
+          }
+          gameRef.current?.events.emit('swap-completed', {
+            status: 'failed',
+            message: message,
+            code: errorCode || '4001',
+          });
+        }
       });
 
       gameRef.current?.events.on('claim', async () => {

@@ -20,7 +20,7 @@ class PopupTxnCompleted extends Popup {
     const descriptionY = titleY + 260;
     const viewTxnHashY = descriptionY + 200;
 
-    this.icon = scene.add.image(width / 2, iconY, icon);
+    this.icon = scene.add.sprite(width / 2, iconY, icon);
     this.title = scene.add
       .text(width / 2, titleY, title, {
         fontSize: '100px',
@@ -72,6 +72,10 @@ class PopupTxnCompleted extends Popup {
 
   cleanup() {
     this.onCompleted?.();
+  }
+
+  updateIcon(newIcon) {
+    this.icon.setTexture(newIcon);
   }
 }
 
