@@ -117,7 +117,7 @@ class PopupTxnError extends Popup {
       'button-blue-pressed',
       this.close,
       'Great',
-      { fontSize: '82px' }
+      { fontSize: '82px', sound: 'close' }
     );
     this.add(buttonGreat);
 
