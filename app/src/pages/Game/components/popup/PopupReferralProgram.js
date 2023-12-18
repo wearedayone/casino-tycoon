@@ -26,7 +26,7 @@ class PopupReferralProgram extends Popup {
   code = '';
 
   constructor(scene, data) {
-    super(scene, 'popup_referral', { title: 'Referral Program' });
+    super(scene, 'popup-referral', { title: 'Referral Program' });
     const leftMargin = this.popup.x - this.popup.width / 2;
     const startingY = this.popup.y - this.popup.height / 2;
     const walletContainerY = startingY + 1300;

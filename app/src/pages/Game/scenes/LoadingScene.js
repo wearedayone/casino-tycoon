@@ -138,7 +138,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('popup-buy-gangster', '/images/popup-buy-gangster.png');
     this.load.image('popup-portfolio', '/images/popup-portfolio.png');
     this.load.image('popup-statistic', '/images/popup-statistic.png');
-    this.load.image('popup_referral', '/images/popup_referral.png');
+    this.load.image('popup-referral', '/images/popup-referral.png');
 
     this.load.image('ribbon-welcome', '/images/ribbon-welcome.png');
     this.load.image('ribbon-daily-gang-war', '/images/ribbon-daily-gang-war.png');
