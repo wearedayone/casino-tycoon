@@ -21,14 +21,14 @@ class PopupPrizePool extends Popup {
   prizePool = 0;
   items = [];
 
-  constructor(scene, parentModal) {
+  constructor(scene) {
     super(scene, 'popup-extra-large', { title: 'Total Prize Pool', titleIcon: 'icon-info', noCloseBtn: true });
 
     const leftMargin = this.popup.x - this.popup.width / 2;
     const paddedX = leftMargin + this.popup.width * 0.1;
     const startingY = this.popup.y - this.popup.height / 2;
     const prizePoolContainerY = startingY + 220;
-    const tableHeaderY = prizePoolContainerY + 180;
+    const tableHeaderY = prizePoolContainerY + 210;
     this.tableY = tableHeaderY + 50;
 
     const prizePoolContainer = scene.add
@@ -45,6 +45,15 @@ class PopupPrizePool extends Popup {
     this.add(currentPrizePool);
     this.add(this.prizePoolText);
     this.add(ethIcon);
+    // ?leftMargin + this.popup.width * 0.5,
+    this.totalShareText = scene.add.text(this.popup.x, startingY + 370, '', {
+      fontSize: '42px',
+      color: '#000',
+      fontFamily: fontFamilies.bold,
+      align: 'center',
+    });
+    this.totalShareText.setOrigin(0.5, 0.5);
+    this.add(this.totalShareText);
 
     const rank = scene.add.text(leftMargin + this.popup.width * 0.17, tableHeaderY, 'Rank', smallBrownBold);
     const allocation = scene.add.text(
@@ -96,8 +105,11 @@ class PopupPrizePool extends Popup {
       'button-blue',
       'button-blue-pressed',
       () => {
+        if (this.table) {
+          this.table.setMouseWheelScrollerEnable(false);
+        }
         this.close();
-        parentModal.open();
+        scene.popupLeaderboard.open();
       },
       'Back',
       { fontSize: '82px', sound: 'close' }
@@ -106,6 +118,18 @@ class PopupPrizePool extends Popup {
 
     scene.game.events.on('update-season', (data) => this.updateValues(data));
     scene.game.events.on('update-ranking-rewards', (data) => this.updateRewardAllocation(data));
+  }
+
+  onOpen() {
+    if (this.table) {
+      this.table.setMouseWheelScrollerEnable(true);
+    }
+  }
+
+  cleanup() {
+    if (this.table) {
+      this.table.setMouseWheelScrollerEnable(false);
+    }
   }
 
   updateValues(season) {
@@ -129,7 +153,9 @@ class PopupPrizePool extends Popup {
         this.remove(item);
       }
     }
-    console.log('this.contentContainer', this.contentContainer);
+    const totalShare = rankingRewards.reduce((total, item) => total + item.share, 0);
+    this.totalShareText.text = `${Math.round(totalShare * 100)}% ETH spent on Gangster NFTs goes to\nprize pool`;
+
     this.items = [];
     for (let i = 0; i < rankingRewards.length; i++) {
       const y = i * rowHeight;
@@ -172,10 +198,11 @@ class PopupPrizePool extends Popup {
       background: this.scene.rexUI.add.roundRectangle({ radius: 10 }),
       panel: { child: this.contentContainer, mask: { padding: 1 } },
       slider: { thumb: this.leaderboardThumb },
-      mouseWheelScroller: { focus: false, speed: 0.3 },
+      mouseWheelScroller: { focus: true, speed: 0.3 },
       space: { left: 50, right: 40, top: 40, bottom: 40, panel: 20, header: 10, footer: 10 },
     }).layout();
     this.add(this.table);
+    this.table.setMouseWheelScrollerEnable(false);
 
     this.table.on('scroll', () => {
       if (this.leaderboardThumb.visible) return;

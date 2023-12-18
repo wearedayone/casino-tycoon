@@ -8,15 +8,19 @@ import {
   completeAskingWalletPassword,
   updateBalance,
   getRank,
+  setLastOnlineTime,
+  applyReferralCode,
 } from '../controllers/user.controller.js';
 
 const router = Router();
 
 router.get('/me', auth, getMe);
 router.put('/me/war', auth, toggleWar);
+router.put('/me/invite-code', auth, applyReferralCode);
 router.get('/me/war-history', auth, getUserWarHistory);
 router.put('/me/wallet-password-ask', auth, completeAskingWalletPassword);
 router.put('/me/balances', auth, updateBalance);
 router.get('/me/rank', auth, getRank);
+router.put('/me/last-online-time', auth, setLastOnlineTime);
 
 export default router;

@@ -1,7 +1,7 @@
 import moment from 'moment';
 
-import { firestore } from '../configs/firebase.config.js';
-import { getActiveSeason } from './season.service.js';
+import admin, { firestore } from '../configs/firebase.config.js';
+import { getActiveSeason, getActiveSeasonId } from './season.service.js';
 import { getUserDisplayInfos } from './user.service.js';
 import { calculateReward } from '../utils/formulas.js';
 
@@ -40,4 +40,30 @@ export const getNextWarSnapshotUnixTime = async () => {
 
   const nextWarSnapshot = warSnapshotToday.add(1, 'day');
   return nextWarSnapshot.toDate().getTime();
+};
+
+export const updateLastTimeSeenWarResult = async (userId) => {
+  const activeSeasonId = await getActiveSeasonId();
+  const gamePlaySnapshot = await firestore
+    .collection('gamePlay')
+    .where('userId', '==', userId)
+    .where('seasonId', '==', activeSeasonId)
+    .limit(1)
+    .get();
+  if (gamePlaySnapshot.empty) throw new Error("Cannot find user's game play");
+
+  await gamePlaySnapshot.docs[0].ref.update({
+    lastTimeSeenWarResult: admin.firestore.FieldValue.serverTimestamp(),
+  });
+};
+
+export const getAllActiveGamePlay = async () => {
+  const activeSeasonId = await getActiveSeasonId();
+  const snapshot = await firestore
+    .collection('gamePlay')
+    .where('seasonId', '==', activeSeasonId)
+    .where('active', '==', true)
+    .get();
+
+  return snapshot.size;
 };

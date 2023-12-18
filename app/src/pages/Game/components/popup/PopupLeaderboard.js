@@ -1,7 +1,6 @@
 import { ScrollablePanel } from 'phaser3-rex-plugins/templates/ui/ui-components.js';
 
 import Popup from './Popup';
-import PopupPrizePool from './PopupPrizePool';
 import Button from '../button/Button';
 import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
@@ -25,7 +24,6 @@ const smallBlackBold = { fontSize: fontSizes.small, color: colors.black, fontFam
 
 class PopupLeaderboard extends Popup {
   isEnded = false;
-  minNetworth = 0; // players' networth must be more than this to be displayed
   numberOfRows = 0;
   stars = [];
 
@@ -42,14 +40,10 @@ class PopupLeaderboard extends Popup {
     const leaderboardHeaderY = reputationY + 140;
     this.leaderboardY = leaderboardHeaderY + 80;
 
-    // child modals
-    const popupPrizePool = new PopupPrizePool(scene, this);
-    scene.add.existing(popupPrizePool);
-
-    this.gameEndsIn = scene.add.text(width / 2, gameEndsY, 'GAME ENDS IN: ', largeBlackExtraBold).setOrigin(1, 0);
-    this.clockIcon = scene.add.image(width / 2, gameEndsY, 'icon-clock').setOrigin(0, 0);
+    this.gameEndsIn = scene.add.text(width / 2 - 40, gameEndsY, 'GAME ENDS IN: ', largeBlackExtraBold).setOrigin(1, 0);
+    this.clockIcon = scene.add.image(width / 2 - 40, gameEndsY, 'icon-clock').setOrigin(0, 0);
     this.gameEndTime = scene.add.text(
-      width / 2 + this.popup.width * 0.07,
+      width / 2 + this.popup.width * 0.03,
       gameEndsY,
       '--d --h --m --s',
       largeBlackExtraBold
@@ -96,7 +90,7 @@ class PopupLeaderboard extends Popup {
       'button-info-pressed',
       () => {
         this.close();
-        popupPrizePool.open();
+        scene.popupPrizePool.open();
       },
       { sound: 'open' }
     );
@@ -219,21 +213,25 @@ class PopupLeaderboard extends Popup {
   }
 
   onOpen() {
+    if (this.table) {
+      this.table.setMouseWheelScrollerEnable(true);
+    }
     this.scene.game.events.emit('open-leaderboard-modal');
   }
 
   cleanup() {
+    if (this.table) {
+      this.table.setMouseWheelScrollerEnable(false);
+    }
     this.scene.game.events.emit('close-leaderboard-modal');
   }
 
   updateValues(season) {
-    console.log('season', season);
-    const { name, timeStepInHours, prizePool, isEnded, minNetworth } = season;
+    const { name, timeStepInHours, prizePool, isEnded } = season;
     this.updateEndedState(isEnded);
 
     const title = this.isEnded ? `${name} Ended` : `${name} Leaderboard`;
     this.setTitle(title);
-    this.minNetworth = minNetworth;
     this.endTimeExtension.text = `Every Gangster purchased increases time by ${timeStepInHours} hour`;
     this.prizePool.text = formatter.format(prizePool);
   }
@@ -260,17 +258,13 @@ class PopupLeaderboard extends Popup {
 
   updateLeaderboard(leaderboard) {
     if (!leaderboard.length) return;
-    const displayedLeaderboard = leaderboard.filter(
-      ({ reward, networth }) => reward > 0 && networth >= this.minNetworth
-    );
-
-    this.crownGold.setVisible(displayedLeaderboard.length >= 1);
-    this.crownSilver.setVisible(displayedLeaderboard.length >= 2);
-    this.crownCopper.setVisible(displayedLeaderboard.length >= 3);
-    this.rankNumbers.text = displayedLeaderboard.map(({ rank }) => rank).join('\n\n');
-    this.usernames.text = displayedLeaderboard.map(formatUsername).join('\n\n');
-    this.networths.text = displayedLeaderboard.map(({ networth }) => networth).join('\n\n');
-    this.ethRewards.text = displayedLeaderboard.map(({ reward }) => `~${formatter.format(reward)}`).join('\n\n');
+    this.crownGold.setVisible(leaderboard.length >= 1);
+    this.crownSilver.setVisible(leaderboard.length >= 2);
+    this.crownCopper.setVisible(leaderboard.length >= 3);
+    this.rankNumbers.text = leaderboard.map(({ rank }) => rank).join('\n\n');
+    this.usernames.text = leaderboard.map(formatUsername).join('\n\n');
+    this.networths.text = leaderboard.map(({ networth }) => networth).join('\n\n');
+    this.ethRewards.text = leaderboard.map(({ reward }) => `~${formatter.format(reward)}`).join('\n\n');
 
     const userRecord = leaderboard.find(({ isUser }) => isUser);
     this.playerRank.text = userRecord.rank.toLocaleString();
@@ -279,20 +273,25 @@ class PopupLeaderboard extends Popup {
     this.finishedAt.text = `${userRecord.rank.toLocaleString()}${getOrdinalSuffix(userRecord.rank)} place`;
     this.finishedReward.text = formatter.format(userRecord.reward);
 
-    if (this.numberOfRows === displayedLeaderboard.length) return;
-    this.numberOfRows = displayedLeaderboard.length;
+    if (this.numberOfRows === leaderboard.length) return;
+    this.numberOfRows = leaderboard.length;
 
     // redraw table if numberOfRows changed
     this.contentContainer.setSize(200, this.rankNumbers.height);
-    if (this.table) this.remove(this.table);
+    if (this.table) {
+      this.remove(this.table);
+      this.table.destroy(true);
+      this.table = null;
+    }
     if (this.stars.length) {
       for (let star of this.stars) {
+        star.destroy();
         this.remove(star);
       }
     }
 
     this.stars = [];
-    for (let i = 0; i < displayedLeaderboard.length; i++) {
+    for (let i = 0; i < leaderboard.length; i++) {
       const y = i * rowHeight;
       const star = this.scene.add.image(this.popup.width * 0.52, y, 'icon-star').setOrigin(0, 0);
       this.stars.push(star);
@@ -301,7 +300,6 @@ class PopupLeaderboard extends Popup {
 
     const tableHeight = this.leaderboardContainer.height - this.playerRankContainer.height;
     const visibleRatio = tableHeight / this.contentContainer.height;
-    console.log({ tableHeight, contentContainerHeight: this.contentContainer.height, visibleRatio });
     this.leaderboardThumb = this.scene.rexUI.add
       .roundRectangle({
         height: visibleRatio < 1 ? tableHeight * visibleRatio : 0,
@@ -319,12 +317,18 @@ class PopupLeaderboard extends Popup {
       background: this.scene.rexUI.add.roundRectangle({ radius: 10 }),
       panel: { child: this.contentContainer, mask: { padding: 1 } },
       slider: { thumb: this.leaderboardThumb },
-      mouseWheelScroller: { focus: false, speed: 0.3 },
+      mouseWheelScroller: { focus: true, speed: 0.3 },
       space: { left: 50, right: 40, top: 40, bottom: 40, panel: 20, header: 10, footer: 10 },
     }).layout();
+    if (leaderboard.length <= 10) {
+      this.table.setScrollerEnable(false);
+    } else {
+      this.table.setScrollerEnable(true);
+    }
     this.add(this.table);
 
-    this.table.on('scroll', () => {
+    this.table.on('scroll', (e) => {
+      // console.log('scroll', e.t); // e.t === scrolled percentage
       if (this.leaderboardThumb.visible) return;
       this.leaderboardThumb.setVisible(true);
     });

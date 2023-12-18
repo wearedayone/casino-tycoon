@@ -1,4 +1,9 @@
-import { getLeaderboard, getNextWarSnapshotUnixTime } from '../services/gamePlay.service.js';
+import {
+  getLeaderboard,
+  getNextWarSnapshotUnixTime,
+  updateLastTimeSeenWarResult,
+  getAllActiveGamePlay,
+} from '../services/gamePlay.service.js';
 
 export const getGamePlayLeaderboard = async (req, res) => {
   try {
@@ -13,6 +18,24 @@ export const getNextWarSnapshot = async (req, res) => {
   try {
     const data = await getNextWarSnapshotUnixTime();
     return res.status(200).send({ time: data });
+  } catch (err) {
+    return res.status(400).send(err.message);
+  }
+};
+
+export const updateLastTimeSeenGangWarResult = async (req, res) => {
+  try {
+    await updateLastTimeSeenWarResult(req.userId);
+    return res.sendStatus(200);
+  } catch (err) {
+    return res.status(400).send(err.message);
+  }
+};
+
+export const getTotalVoters = async (req, res) => {
+  try {
+    const data = await getAllActiveGamePlay();
+    return res.status(200).send({ count: data });
   } catch (err) {
     return res.status(400).send(err.message);
   }

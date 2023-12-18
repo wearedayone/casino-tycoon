@@ -22,6 +22,7 @@ import PopupStatistic from '../components/popup/PopupStatistic';
 import PopupLeaderboard from '../components/popup/PopupLeaderboard';
 import PopupDeposit from '../components/popup/PopupDeposit';
 import PopupReferralProgram from '../components/popup/PopupReferralProgram';
+import PopupPrizePool from '../components/popup/PopupPrizePool';
 
 const { goonAnimation, gangsterAnimation, width } = configs;
 
@@ -134,6 +135,9 @@ class MainScene extends Phaser.Scene {
       this.popupLeaderboard = new PopupLeaderboard(this);
       this.add.existing(this.popupLeaderboard);
 
+      this.popupPrizePool = new PopupPrizePool(this);
+      this.add.existing(this.popupPrizePool);
+
       this.popupWarHistory = new PopupWarHistory(this);
       this.add.existing(this.popupWarHistory);
 
@@ -144,9 +148,11 @@ class MainScene extends Phaser.Scene {
 
     const infoButtons = new InfoButtons(this, 550);
     this.add.existing(infoButtons);
-    this.game.events.on('update-user-away-reward', (claimableReward) => {
-      // this.popupWelcome = new PopupWelcomeWar(this, claimableReward);
-      // this.add.existing(this.popupWelcome);
+    this.game.events.on('update-user-away-reward', ({ showWarPopup, claimableReward }) => {
+      this.popupWelcome = showWarPopup
+        ? new PopupWelcomeWar(this, claimableReward)
+        : new PopupWelcomeNoWar(this, claimableReward);
+      this.add.existing(this.popupWelcome);
     });
     this.game.events.on('game-ended', () => {
       console.log('trigger game end');

@@ -9,9 +9,15 @@ import * as Sentry from '@sentry/react';
 import useUserStore from '../../stores/user.store';
 import useSystemStore from '../../stores/system.store';
 import useSettingStore from '../../stores/setting.store';
-import { getRank, getWarHistory, toggleWarStatus, updateBalance } from '../../services/user.service';
+import { applyInviteCode, getRank, getWarHistory, toggleWarStatus, updateBalance } from '../../services/user.service';
 import { claimToken } from '../../services/transaction.service';
-import { getLeaderboard, getNextWarSnapshotUnixTime } from '../../services/gamePlay.service';
+import {
+  getLeaderboard,
+  getNextWarSnapshotUnixTime,
+  getTotalVoters,
+  updateLastTimeSeenGangWarResult,
+} from '../../services/gamePlay.service';
+import { getLatestWar } from '../../services/war.service';
 import QueryKeys from '../../utils/queryKeys';
 import { calculateHouseLevel } from '../../utils/formulas';
 import useSmartContract from '../../hooks/useSmartContract';
@@ -89,7 +95,10 @@ const Game = () => {
     },
   });
 
-  const { username, address, avatarURL, tokenBalance, ETHBalance } = profile || { tokenBalance: 0, ETHBalance: 0 };
+  const { username, address, avatarURL, tokenBalance, ETHBalance, inviteCode, referralCode } = profile || {
+    tokenBalance: 0,
+    ETHBalance: 0,
+  };
   const { numberOfMachines, numberOfWorkers, numberOfBuildings, networth } = gamePlay || {
     numberOfMachines: 0,
     numberOfWorkers: 0,
@@ -162,17 +171,37 @@ const Game = () => {
         txnId = res.data.id;
       }
       const receipt = await web3Withdraw(address, value);
-      // for test only
-      // const receipt = { status: 1, transactionHash: 'test-txn-hash' };
-      gameRef.current?.events.emit(txnCompletedEvent, { amount, txnHash: receipt.transactionHash });
-      if (receipt.status === 1) {
-        if (txnId) await validate({ transactionId: txnId, txnHash: receipt.transactionHash });
-        enqueueSnackbar(`Transferred ${tokenType} successfully`, { variant: 'success' });
+      if (receipt) {
+        console.log({ receipt });
+        gameRef.current?.events.emit(txnCompletedEvent, { amount, txnHash: receipt.transactionHash });
+        if (receipt.status === 1) {
+          if (txnId) await validate({ transactionId: txnId, txnHash: receipt.transactionHash });
+        }
       }
     } catch (err) {
-      err.message && enqueueSnackbar(err.message, { variant: 'error' });
-      console.error(err);
-      Sentry.captureException(err);
+      if (err.message === 'The user rejected the request') {
+        gameRef.current?.events.emit(txnCompletedEvent, {
+          code: '4001',
+          amount,
+          txnHash: '',
+          status: 'failed',
+          message: 'The user rejected\nthe request',
+        });
+      } else {
+        console.error(err);
+        Sentry.captureException(err);
+
+        let message = err.message;
+        let errorCode = err.code?.toString();
+        if (!errorCode && message === 'Network Error') {
+          errorCode = '12002';
+        }
+        gameRef.current?.events.emit(txnCompletedEvent, {
+          status: 'failed',
+          message: message,
+          code: errorCode,
+        });
+      }
     }
   };
 
@@ -315,14 +344,30 @@ const Game = () => {
       gameRef.current?.events.on('request-game-ended-status', () => {
         if (isEnded) gameRef.current?.events.emit('game-ended');
       });
-      gameRef.current?.events.on('request-user-away-reward', () => {
-        if (!gamePlay?.startRewardCountingTime) return;
-        const diffInDays = (Date.now() - gamePlay.startRewardCountingTime.toDate().getTime()) / MILISECONDS_IN_A_DAY;
-        // using claimableReward as placeholder
-        // TODO: change to idle farm reward when logic is confirmed
-        const claimableReward = gamePlay.pendingReward + diffInDays * dailyMoney;
-        console.log('claimableReward', claimableReward);
-        gameRef.current?.events.emit('update-user-away-reward', claimableReward);
+      gameRef.current?.events.on('request-user-away-reward', async () => {
+        try {
+          if (!profile || !gamePlay?.startRewardCountingTime) return;
+          const lastUnixTimeSeenWarResult = gamePlay?.lastTimeSeenWarResult
+            ? gamePlay?.lastTimeSeenWarResult.toDate().getTime()
+            : 0;
+          const {
+            data: { latestWar, war },
+          } = await getLatestWar();
+          const latestWarUnixTime = latestWar.createdAt;
+          const showWarPopup = war && lastUnixTimeSeenWarResult < latestWarUnixTime;
+
+          let startTime = gamePlay.startRewardCountingTime.toDate().getTime();
+          if (profile.lastOnlineTime) {
+            startTime = profile.lastOnlineTime.toDate().getTime();
+          }
+
+          const diffInDays = (Date.now() - startTime) / MILISECONDS_IN_A_DAY;
+          const claimableReward = diffInDays * dailyMoney;
+          gameRef.current?.events.emit('update-user-away-reward', { showWarPopup, claimableReward });
+        } catch (err) {
+          console.error(err);
+          Sentry.captureException(err);
+        }
       });
       gameRef.current?.events.on('request-app-version', () => {
         gameRef.current.events.emit('update-app-version', appVersion);
@@ -338,7 +383,6 @@ const Game = () => {
           timeStepInHours,
           prizePool,
           isEnded,
-          minNetworth: machine.networth,
         });
       });
       gameRef.current?.events.on('close-leaderboard-modal', () => {
@@ -411,8 +455,10 @@ const Game = () => {
       gameRef.current?.events.on('check-game-ended', () => checkGameEndRef.current?.());
 
       gameRef.current?.events.on('request-claimable-status', () => {
+        const now = Date.now();
+        const endUnixTime = activeSeason.estimatedEndTime.toDate().getTime();
         const nextClaimTime = gamePlay.lastClaimTime.toDate().getTime() + activeSeason.claimGapInSeconds * 1000;
-        const claimable = Date.now() > nextClaimTime;
+        const claimable = now > nextClaimTime && now < endUnixTime;
         gameRef.current.events.emit('update-claimable-status', { claimable, active: gamePlay.active });
       });
 
@@ -431,6 +477,25 @@ const Game = () => {
 
       gameRef.current?.events.on('request-war-die-chance', () => {
         gameRef.current.events.emit('update-war-die-chance', { dieChance: activeSeason.warConfig.dieChance });
+      });
+
+      gameRef.current?.events.on('request-referral-config', () => {
+        gameRef.current.events.emit('update-referral-config', activeSeason.referralConfig);
+      });
+
+      gameRef.current?.events.on('request-invite-code', () => {
+        if (inviteCode) gameRef.current.events.emit('update-invite-code', { code: inviteCode });
+      });
+
+      gameRef.current?.events.on('apply-invite-code', ({ code }) => {
+        applyInviteCode({ code })
+          .then(() =>
+            gameRef.current.events.emit('complete-apply-invite-code', { status: 'Success', message: 'Success' })
+          )
+          .catch((err) => {
+            console.log('err', err);
+            gameRef.current.events.emit('complete-apply-invite-code', { status: 'Error', message: err.message });
+          });
       });
 
       gameRef.current?.events.on('change-war-status', ({ war }) => {
@@ -487,6 +552,10 @@ const Game = () => {
           gameRef.current?.events.emit('upgrade-safehouse-completed');
         } catch (err) {
           let message = err.message;
+          let errorCode = err.code?.toString();
+          if (!errorCode && message === 'Network Error') {
+            errorCode = '12002';
+          }
           switch (err.code) {
             case 'UNPREDICTABLE_GAS_LIMIT':
               message = 'INSUFFICIENT GAS';
@@ -496,7 +565,11 @@ const Game = () => {
               break;
             default:
           }
-          gameRef.current?.events.emit('upgrade-safehouse-completed', { status: 'failed', message: message });
+          gameRef.current?.events.emit('upgrade-safehouse-completed', {
+            status: 'failed',
+            message: message,
+            code: errorCode,
+          });
         }
       });
 
@@ -518,6 +591,10 @@ const Game = () => {
           gameRef.current?.events.emit('buy-goon-completed');
         } catch (err) {
           let message = err.message;
+          let errorCode = err.code?.toString();
+          if (!errorCode && message === 'Network Error') {
+            errorCode = '12002';
+          }
           switch (err.code) {
             case 'UNPREDICTABLE_GAS_LIMIT':
               message = 'INSUFFICIENT GAS';
@@ -527,7 +604,7 @@ const Game = () => {
               break;
             default:
           }
-          gameRef.current?.events.emit('buy-goon-completed', { status: 'failed', message: message });
+          gameRef.current?.events.emit('buy-goon-completed', { status: 'failed', message: message, code: errorCode });
         }
       });
 
@@ -536,9 +613,15 @@ const Game = () => {
           const txnHash = await buyGangster(quantity);
           gameRef.current?.events.emit('buy-gangster-completed', { txnHash, amount: quantity });
         } catch (err) {
+          console.log({ err });
           let message = err.message;
-          switch (err.code) {
+          let errorCode = err.code?.toString();
+          if (!errorCode && message === 'Network Error') {
+            errorCode = '12002';
+          }
+          switch (errorCode) {
             case 'UNPREDICTABLE_GAS_LIMIT':
+            case '-32603':
               message = 'INSUFFICIENT GAS';
               break;
             case 'INSUFFICIENT_FUNDS':
@@ -546,7 +629,11 @@ const Game = () => {
               break;
             default:
           }
-          gameRef.current?.events.emit('buy-gangster-completed', { status: 'failed', message: message });
+          gameRef.current?.events.emit('buy-gangster-completed', {
+            status: 'failed',
+            message: message,
+            code: errorCode,
+          });
         }
       });
 
@@ -622,11 +709,29 @@ const Game = () => {
       });
 
       gameRef.current?.events.on('request-referral-code', () => {
-        gameRef.current?.events.emit('update-referral-code', profile.referralCode);
+        gameRef.current?.events.emit('update-referral-code', referralCode);
       });
 
       gameRef.current?.events.on('check-user-loaded', () => {
         gameRef.current?.events.emit('user-info-loaded');
+      });
+
+      gameRef.current?.events.on('update-last-time-seen-war-result', () => {
+        updateLastTimeSeenGangWarResult().catch((err) => {
+          console.error(err);
+          Sentry.captureException(err);
+        });
+      });
+
+      gameRef.current?.events.on('request-total-voters', () => {
+        getTotalVoters()
+          .then((res) => {
+            gameRef.current?.events.emit('update-total-voters', { count: res.data.count });
+          })
+          .catch((err) => {
+            console.error(err);
+            Sentry.captureException(err);
+          });
       });
 
       gameRef.current?.events.emit('user-info-loaded');
@@ -677,7 +782,6 @@ const Game = () => {
         timeStepInHours,
         prizePool,
         isEnded,
-        minNetworth: machine.networth,
       });
     }
   }, [
@@ -707,19 +811,20 @@ const Game = () => {
   }, [sound]);
 
   useEffect(() => {
-    if (activeSeason?.claimGapInSeconds && gamePlay?.lastClaimTime) {
+    if (activeSeason?.estimatedEndTime && activeSeason?.claimGapInSeconds && gamePlay?.lastClaimTime) {
       gameRef.current?.events.emit('update-claim-time', {
         claimGapInSeconds: activeSeason?.claimGapInSeconds,
         lastClaimTime: gamePlay?.lastClaimTime?.toDate().getTime(),
         active: gamePlay.active,
       });
 
+      const endUnixTime = activeSeason.estimatedEndTime.toDate().getTime();
       const nextClaimTime = gamePlay?.lastClaimTime.toDate().getTime() + activeSeason.claimGapInSeconds * 1000;
       const now = Date.now();
-      const claimable = now > nextClaimTime;
+      const claimable = now > nextClaimTime && now < endUnixTime;
       gameRef.current?.events.emit('update-claimable-status', { claimable, active: gamePlay.active });
     }
-  }, [activeSeason?.claimGapInSeconds, gamePlay?.lastClaimTime]);
+  }, [activeSeason?.estimatedEndTime, activeSeason?.claimGapInSeconds, gamePlay?.lastClaimTime]);
 
   useEffect(() => {
     if (gamePlay?.startRewardCountingTime && gamePlay?.pendingReward) {

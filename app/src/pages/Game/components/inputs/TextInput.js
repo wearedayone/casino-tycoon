@@ -5,6 +5,7 @@ class TextInput extends Phaser.GameObjects.Container {
   fontSize = '60px';
   textBeginningX = 0;
   maxDisplayedCharacters = 0;
+  defaultTextStyle = {};
 
   // state
   isDisabled = false;
@@ -20,6 +21,8 @@ class TextInput extends Phaser.GameObjects.Container {
       color = '#29000b',
       fontSize = '60px',
       placeholder = '',
+      textTransform = 'none',
+      onChange,
       icon,
       valueRegex = /.*/,
       characterRegex = /./,
@@ -30,12 +33,14 @@ class TextInput extends Phaser.GameObjects.Container {
     scene.input.keyboard.createCursorKeys();
     this.isDisabled = isDisabled;
     this.maxDisplayedCharacters = maxDisplayedCharacters;
+    this.onChange = onChange;
+    this.textTransform = textTransform;
 
     this.container = scene.add.image(x, y, 'text-input').setOrigin(0.5, 0.5);
     this.container.setInteractive();
     this.add(this.container);
 
-    const textStyle = { fontSize, color, fontFamily: 'WixMadeforDisplayBold' };
+    this.defaultTextStyle = { fontSize, color, fontFamily: 'WixMadeforDisplayBold' };
     const inputStartX = this.container.x - this.container.width / 2 + this.container.width * 0.05;
     this.textBeginningX = inputStartX;
 
@@ -51,16 +56,16 @@ class TextInput extends Phaser.GameObjects.Container {
     // placeholder
     if (placeholder.length) {
       this.placeholder = scene.add
-        .text(this.textBeginningX, y, placeholder, { ...textStyle, color: '#c7c7c7' })
+        .text(this.textBeginningX, y, placeholder, { ...this.defaultTextStyle, color: '#c7c7c7' })
         .setOrigin(0, 0.5);
       this.add(this.placeholder);
     }
-    this.displayedString = scene.add.text(this.textBeginningX, y, '', textStyle).setOrigin(0, 0.5);
+    this.displayedString = scene.add.text(this.textBeginningX, y, '', this.defaultTextStyle).setOrigin(0, 0.5);
     this.add(this.displayedString);
 
     // blinking cursor
     this.formCursor = scene.add
-      .text(this.textBeginningX + this.displayedString.width, y, '|', textStyle)
+      .text(this.textBeginningX + this.displayedString.width, y, '|', this.defaultTextStyle)
       .setOrigin(0, 0.5);
     this.formCursor.setAlpha(0);
 
@@ -102,6 +107,7 @@ class TextInput extends Phaser.GameObjects.Container {
     if (isMobileDevice()) {
       this.hiddenDomInput = document.createElement('input');
       this.hiddenDomInput.style.position = 'absolute';
+      this.hiddenDomInput.style.top = '50%';
       this.hiddenDomInput.style.opacity = '0';
       this.hiddenDomInput.style.zIndex = '-1';
       document.body.appendChild(this.hiddenDomInput);
@@ -186,14 +192,29 @@ class TextInput extends Phaser.GameObjects.Container {
   }
 
   updateValue(newValue, isCalledFromOutside = true) {
-    this.value = newValue;
-    if (isCalledFromOutside) this.hiddenDomInput.value = newValue;
+    let value = newValue;
+    if (this.textTransform === 'uppercase') value = newValue.toUpperCase();
+    if (!this.isDisabled) this.onChange?.(value);
+    this.value = value;
+    if (isCalledFromOutside) this.hiddenDomInput.value = value;
     this.updateDisplayedString();
 
     // placeholder style
     if (this.placeholder) {
-      if (newValue.length) this.placeholder.setVisible(false);
+      if (value.length) this.placeholder.setVisible(false);
       else this.placeholder.setVisible(true);
+    }
+  }
+
+  setDisabled(state) {
+    this.isDisabled = state;
+  }
+
+  setTextStyle(style) {
+    this.displayedString.setStyle({ ...this.defaultTextStyle, ...style });
+    if (style.align === 'center') {
+      this.displayedString.setX(this.container.x);
+      this.displayedString.setOrigin(0.5, 0.5);
     }
   }
 }

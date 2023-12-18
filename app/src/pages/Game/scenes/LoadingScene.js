@@ -62,7 +62,7 @@ class LoadingScene extends Phaser.Scene {
     });
     percentText.setOrigin(0.5, 0.5);
 
-    this.load.on('progress', function (value) {
+    this.load.on('progress', (value) => {
       if (value * 100 < this.loadingPercent) return;
       this.loadingPercent = parseInt(value * 100);
       percentText.setText(this.loadingPercent + '%');
@@ -71,7 +71,9 @@ class LoadingScene extends Phaser.Scene {
       progressBar.fillRect(100, progressY, (configs.width - 200) * value, 200);
     });
 
-    this.load.on('complete', function () {});
+    this.load.on('complete', () => {
+      this.assetLoaded = true;
+    });
 
     this.load.scenePlugin(
       'rexuiplugin',
@@ -136,7 +138,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('popup-buy-gangster', '/images/popup-buy-gangster.png');
     this.load.image('popup-portfolio', '/images/popup-portfolio.png');
     this.load.image('popup-statistic', '/images/popup-statistic.png');
-    this.load.image('popup_referral', '/images/popup_referral.png');
+    this.load.image('popup-referral', '/images/popup-referral.png');
 
     this.load.image('ribbon-welcome', '/images/ribbon-welcome.png');
     this.load.image('ribbon-daily-gang-war', '/images/ribbon-daily-gang-war.png');
@@ -166,10 +168,13 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-red-med-pressed', '/images/button-red-med-pressed.png');
     this.load.image('button-blue-long', '/images/button-blue-long.png');
     this.load.image('button-blue-long-pressed', '/images/button-blue-long-pressed.png');
+    this.load.image('button-blue-long-thick', '/images/button-blue-long-thick.png');
+    this.load.image('button-blue-long-thick-pressed', '/images/button-blue-long-thick-pressed.png');
     this.load.image('button-green-long', '/images/button-green-long.png');
     this.load.image('button-green-long-pressed', '/images/button-green-long-pressed.png');
     this.load.image('button-long-disabled', '/images/button-long-disabled.png');
-    this.load.image('button-apply-disabled', '/images/button-apply-disabled.png');
+    this.load.image('button-check', '/images/button-check.png');
+    this.load.image('button-check-pressed', '/images/button-check-pressed.png');
     this.load.image('button-close', '/images/button-close.png');
     this.load.image('button-close-pressed', '/images/button-close-pressed.png');
     this.load.image('button-confirm', '/images/button-confirm.png');
@@ -190,6 +195,8 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-max-pressed', '/images/button-max-pressed.png');
     this.load.image('button-paste', '/images/button-paste.png');
     this.load.image('button-paste-pressed', '/images/button-paste-pressed.png');
+    this.load.image('button-paste-small', '/images/button-paste-small.png');
+    this.load.image('button-paste-small-pressed', '/images/button-paste-small-pressed.png');
     this.load.image('button-portfolio', '/images/button-portfolio.png');
     this.load.image('button-portfolio-pressed', '/images/button-portfolio-pressed.png');
     this.load.image('button-rank', '/images/button-rank.png');
@@ -209,6 +216,8 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-claim-pressed', '/images/button-claim-pressed.png');
     this.load.image('button-back-portfolio', '/images/button-back-portfolio.png');
     this.load.image('button-back-portfolio-pressed', '/images/button-back-portfolio-pressed.png');
+    this.load.image('button-square', '/images/button-square.png');
+    this.load.image('button-square-pressed', '/images/button-square-pressed.png');
 
     this.load.image('button-buy-safehouse', '/images/button-buy-safehouse.png');
     this.load.image('button-buy-safehouse-pressed', '/images/button-buy-safehouse-pressed.png');
@@ -235,6 +244,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('swap', '/images/swap.png');
 
     this.load.image('icon-chevron-right', '/images/icons/chevron-right.png');
+    this.load.image('icon-check', '/images/icons/check.png');
     this.load.image('icon-clock', '/images/icons/clock.png');
     this.load.image('icon-coin', '/images/icons/coin.png');
     this.load.image('icon-coin-mini', '/images/icons/coin-mini.png');
@@ -270,14 +280,16 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-war', '/images/icon-war.png');
     this.load.image('icon-checked', '/images/icon-checked.png');
     this.load.image('icon-unchecked', '/images/icon-unchecked.png');
+    this.load.image('icon-error-network', '/images/icons/error-network.png');
+    this.load.image('icon-error-unknown', '/images/icons/error-unknown.png');
+    this.load.image('icon-error-insufficient', '/images/icons/error-insufficient.png');
+    this.load.image('deposit-more-eth', '/images/deposit-more-eth.png');
 
     this.load.path = '/images/animation/';
     this.load.multiatlas('gangster-front', 'gangster_front.json');
     this.load.multiatlas('gangster-back', 'gangster_back.json');
     this.load.multiatlas('goon-front', 'goon_front.json');
     this.load.multiatlas('goon-back', 'goon_back.json');
-
-    this.assetLoaded = true;
   }
 
   create() {}

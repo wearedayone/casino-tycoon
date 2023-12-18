@@ -86,6 +86,16 @@ class PopupWithdrawNFT extends Popup {
     this.add(this.addressInput);
     this.add(buttonPaste);
 
+    this.errMSG = scene.add.text(width / 2, balanceY + 350, ``, {
+      fontSize: '50px',
+      color: '#E93D45',
+      fontFamily: 'WixMadeforDisplayBold',
+      align: 'center',
+    });
+    this.errMSG.setOrigin(0.5, 0);
+    this.errMSG.setVisible(false);
+    this.add(this.errMSG);
+
     const buttonBack = new TextButton(
       scene,
       width / 2 - this.popup.width * 0.23,
@@ -108,7 +118,10 @@ class PopupWithdrawNFT extends Popup {
       () => {
         // TODO: show validation to user
         const isValid = this.validate();
-        if (!isValid) return;
+        if (!isValid) {
+          this.errMSG.setVisible(true);
+          return;
+        }
 
         scene.game.events.emit('withdraw-nft', {
           amount: Number(this.amountInput.value),
@@ -137,10 +150,20 @@ class PopupWithdrawNFT extends Popup {
     const amount = Number(this.amountInput.value);
     const address = this.addressInput.value.trim();
 
-    if (!amount || amount > this.balance) isValid = false;
-    if (!address || !isAddress(address)) isValid = false;
+    if (!amount || amount > this.balance) {
+      this.errMSG.text = 'Insufficient NFT';
+      isValid = false;
+    }
+    if (!address || !isAddress(address)) {
+      this.errMSG.text = 'Invalid address';
+      isValid = false;
+    }
 
     return isValid;
+  }
+
+  onOpen() {
+    this.errMSG.setVisible(false);
   }
 
   cleanup() {

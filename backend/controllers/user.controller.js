@@ -4,6 +4,8 @@ import {
   updateWalletPasswordAsked,
   updateBalance as updateBalanceService,
   getUserRankAndReward,
+  updateLastOnlineTime,
+  applyInviteCode,
 } from '../services/user.service.js';
 import { getWarHistory } from '../services/warSnapshot.service.js';
 
@@ -24,6 +26,16 @@ export const toggleWar = async (req, res) => {
   } catch (err) {
     console.log({ err });
     return res.status(400).send(err);
+  }
+};
+
+export const applyReferralCode = async (req, res) => {
+  try {
+    await applyInviteCode(req.userId, req.body.code);
+    return res.sendStatus(200);
+  } catch (err) {
+    console.log({ err });
+    return res.status(400).send(err.message);
   }
 };
 
@@ -61,6 +73,16 @@ export const getRank = async (req, res) => {
   try {
     const data = await getUserRankAndReward(req.userId);
     return res.status(200).send(data);
+  } catch (err) {
+    console.log({ err });
+    return res.status(400).send(err);
+  }
+};
+
+export const setLastOnlineTime = async (req, res) => {
+  try {
+    await updateLastOnlineTime(req.userId);
+    return res.sendStatus(200);
   } catch (err) {
     console.log({ err });
     return res.status(400).send(err);

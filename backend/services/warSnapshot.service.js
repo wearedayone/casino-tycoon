@@ -8,22 +8,31 @@ import { claimToken as claimTokenTask, burnNFT as burnNFTTask, burnGoon as burnG
 
 const BONUS_LIMIT = 0.5;
 
-const getUserDailyIncome = async (userId) => {
-  const activeSeason = await getActiveSeason();
-  const { machine, worker } = activeSeason || {};
-  if (!machine || !worker) return 0;
+export const getLatestWar = async (userId) => {
+  const snapshot = await firestore.collection('warSnapshot').orderBy('createdAt', 'desc').limit(1).get();
+  if (snapshot.empty) return null;
 
-  const userGamePlaySnapshot = await firestore
-    .collection('gamePlay')
+  const latestWar = {
+    id: snapshot.docs[0].id,
+    ...snapshot.docs[0].data(),
+    createdAt: snapshot.docs[0].data().createdAt.toDate().getTime(),
+  };
+
+  const result = { latestWar };
+
+  const warResultSnapshot = await firestore
+    .collection('warSnapshot')
+    .doc(latestWar.id)
+    .collection('warResult')
     .where('userId', '==', userId)
-    .where('seasonId', '==', activeSeason.id)
+    .limit(1)
     .get();
-  if (userGamePlaySnapshot.empty) return 0;
+  if (!warResultSnapshot.empty) {
+    const { isWarEnabled } = warResultSnapshot.docs[0].data();
+    result.war = isWarEnabled;
+  }
 
-  const userGamePlay = { id: userGamePlaySnapshot.docs[0].id, ...userGamePlaySnapshot.docs[0].data() };
-  const { numberOfMachines, numberOfWorkers } = userGamePlay;
-
-  return machine.dailyReward * numberOfMachines + worker.dailyReward * numberOfWorkers;
+  return result;
 };
 
 export const takeDailyWarSnapshot = async () => {
@@ -241,4 +250,22 @@ const getDeadCount = (originalCount, dieChance) => {
   logger.info(`deadCount: ${certainDeathCount + extraDeath}`);
 
   return certainDeathCount + extraDeath;
+};
+
+const getUserDailyIncome = async (userId) => {
+  const activeSeason = await getActiveSeason();
+  const { machine, worker } = activeSeason || {};
+  if (!machine || !worker) return 0;
+
+  const userGamePlaySnapshot = await firestore
+    .collection('gamePlay')
+    .where('userId', '==', userId)
+    .where('seasonId', '==', activeSeason.id)
+    .get();
+  if (userGamePlaySnapshot.empty) return 0;
+
+  const userGamePlay = { id: userGamePlaySnapshot.docs[0].id, ...userGamePlaySnapshot.docs[0].data() };
+  const { numberOfMachines, numberOfWorkers } = userGamePlay;
+
+  return machine.dailyReward * numberOfMachines + worker.dailyReward * numberOfWorkers;
 };

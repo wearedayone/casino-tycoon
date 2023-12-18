@@ -1,5 +1,6 @@
 import { Contract } from '@ethersproject/contracts';
 import { usePrivy } from '@privy-io/react-auth';
+import { parseEther, formatEther } from '@ethersproject/units';
 
 import useUserWallet from './useUserWallet';
 import useSystemStore from '../stores/system.store';
@@ -8,9 +9,10 @@ import tokenAbi from '../assets/abis/Token.json';
 import nftAbi from '../assets/abis/NFT.json';
 import { formatter } from '../utils/numbers';
 import environments from '../utils/environments';
-import { parseEther, formatEther } from '@ethersproject/units';
 
 const { NETWORK_ID } = environments;
+
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const useSmartContract = () => {
   const { sendTransaction } = usePrivy();
@@ -51,6 +53,7 @@ const useSmartContract = () => {
       return receipt;
     } catch (err) {
       console.error(err.message);
+      throw err;
     }
   };
 
@@ -73,10 +76,12 @@ const useSmartContract = () => {
       return txReceipt;
     } catch (err) {
       console.error(err.message);
+      throw err;
     }
   };
 
   const buyMachine = async (amount, value) => {
+    console.log('Start buyMachine');
     if (!loadedAssets) return;
     const privyProvider = await embeddedWallet.getEthereumProvider();
     const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
@@ -92,13 +97,13 @@ const useSmartContract = () => {
     };
 
     const uiConfig = {
-      header: `Buy ${amount} gangsters with ${formatter.format(value)} ETH`,
+      header: `Buy ${amount} gangster${amount > 1 ? 's' : ''} with ${formatter.format(value)} ETH`,
       description: '',
       buttonText: 'Send transaction',
     };
-
+    console.log('Start sendTransaction');
     const receipt = await sendTransaction(unsignedTx, uiConfig);
-
+    console.log('Finish buyMachine', receipt);
     return receipt;
   };
 
@@ -123,6 +128,7 @@ const useSmartContract = () => {
         data,
       };
       await sendTransaction(unsignedTx);
+      await delay(1000);
     }
 
     // eslint-disable-next-line no-undef
@@ -136,7 +142,7 @@ const useSmartContract = () => {
     };
 
     const uiConfig = {
-      header: `Buy ${amount} gangsters with ${formatter.format(value)} ETH`,
+      header: `Buy ${amount} Goon${amount > 1 ? 's' : ''} with ${formatter.format(value)} FIAT`,
       description: '',
       buttonText: 'Send transaction',
     };
@@ -167,6 +173,7 @@ const useSmartContract = () => {
         data,
       };
       await sendTransaction(unsignedTx);
+      await delay(1000);
     }
 
     // eslint-disable-next-line no-undef
@@ -192,29 +199,16 @@ const useSmartContract = () => {
   const withdrawNFT = async (address, amount) => {
     if (!loadedAssets) return;
     const privyProvider = await embeddedWallet.getEthereumProvider();
-    const nftContract = new Contract(NFT_ADDRESS, nftAbi.abi, privyProvider.provider);
 
-    const approveData = nftContract.interface.encodeFunctionData('setApprovalForAll', [GAME_CONTRACT_ADDRESS, true]);
-
-    const approveUnsignedTx = {
-      to: NFT_ADDRESS,
+    const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
+    const data = gameContract.interface.encodeFunctionData('withdrawNFT', [address, 1, amount]);
+    const unsignedTx = {
+      to: GAME_CONTRACT_ADDRESS,
       chainId: Number(NETWORK_ID),
-      data: approveData,
+      data,
     };
-
-    // console.log({ NFT_ADDRESS, GAME_CONTRACT_ADDRESS, approveData });
-    const approveReceipt = await sendTransaction(approveUnsignedTx);
-    if (approveReceipt.status === 1) {
-      const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
-      const data = gameContract.interface.encodeFunctionData('withdrawNFT', [address, 1, amount]);
-      const unsignedTx = {
-        to: GAME_CONTRACT_ADDRESS,
-        chainId: Number(NETWORK_ID),
-        data,
-      };
-      const receipt = await sendTransaction(unsignedTx);
-      return receipt;
-    }
+    const receipt = await sendTransaction(unsignedTx);
+    return receipt;
   };
 
   const stakeNFT = async (address, amount) => {
@@ -222,17 +216,23 @@ const useSmartContract = () => {
     const privyProvider = await embeddedWallet.getEthereumProvider();
     const nftContract = new Contract(NFT_ADDRESS, nftAbi.abi, privyProvider.provider);
 
-    const approveData = nftContract.interface.encodeFunctionData('setApprovalForAll', [GAME_CONTRACT_ADDRESS, true]);
+    const isApprovedForAll = await nftContract.isApprovedForAll(embeddedWallet.address, GAME_CONTRACT_ADDRESS);
 
-    const approveUnsignedTx = {
-      to: NFT_ADDRESS,
-      chainId: Number(NETWORK_ID),
-      data: approveData,
-    };
+    let approveReceipt;
+    if (!isApprovedForAll) {
+      const approveData = nftContract.interface.encodeFunctionData('setApprovalForAll', [GAME_CONTRACT_ADDRESS, true]);
 
-    // console.log({ NFT_ADDRESS, GAME_CONTRACT_ADDRESS, approveData });
-    const approveReceipt = await sendTransaction(approveUnsignedTx);
-    if (approveReceipt.status === 1) {
+      const approveUnsignedTx = {
+        to: NFT_ADDRESS,
+        chainId: Number(NETWORK_ID),
+        data: approveData,
+      };
+
+      approveReceipt = await sendTransaction(approveUnsignedTx);
+      await delay(1000);
+    }
+
+    if (!approveReceipt || approveReceipt.status === 1) {
       const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
       const data = gameContract.interface.encodeFunctionData('depositNFT', [address, 1, amount]);
       const unsignedTx = {

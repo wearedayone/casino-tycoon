@@ -3,6 +3,7 @@ import PopupTxnCompleted from './PopupTxnCompleted';
 import configs from '../../configs/configs';
 import { colors, fontFamilies } from '../../../../utils/styles';
 import { formatter } from '../../../../utils/numbers';
+import PopupTxnError from './PopupTxnError';
 
 const { width } = configs;
 
@@ -61,22 +62,28 @@ class PopupProcessing extends Popup {
     scene.game.events.on(completedEvent, (data) => {
       const status = data?.status;
       const message = data?.message;
+      const title = data?.title;
+      const txnHash = data?.txnHash;
+      const action = data?.action;
+      const iconError = data?.iconError;
+      const code = data?.code;
       this.loading = false;
       // icons
       this.loadingAnimation.pause();
       this.icon.setVisible(false);
 
       if (status === 'failed') {
-        this.setTitle('Failed');
-        this.title.text = 'Transaction failed!';
-        this.description.text = message;
-        this.doneSound?.play();
-
-        if (failedIcon) {
-          this.iconFail.setVisible(true);
-        } else {
-          this.icon.setVisible(true);
-        }
+        this.popupTxnCompleted = new PopupTxnError({
+          scene,
+          code,
+          icon: iconError,
+          title,
+          description: message,
+          action: action,
+          txnHash: txnHash,
+        });
+        scene.add.existing(this.popupTxnCompleted);
+        this.close();
       } else {
         this.setTitle('Success');
         this.title.text = 'All done!';

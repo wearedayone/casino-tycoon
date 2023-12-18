@@ -62,6 +62,12 @@ class PopupWarHistory extends Popup {
     this.scene.game.events.emit('request-war-history');
   }
 
+  cleanup() {
+    if (this.table) {
+      this.table.setMouseWheelScrollerEnable(false);
+    }
+  }
+
   updateTable(data) {
     console.log('data', data);
     const contentContainerHeight = data.length * rowHeight;
@@ -184,10 +190,11 @@ class PopupWarHistory extends Popup {
       background: this.scene.rexUI.add.roundRectangle({ radius: 10 }),
       panel: { child: this.contentContainer, mask: { padding: 1 } },
       slider: { thumb: this.tableScrollerThumb },
-      mouseWheelScroller: { focus: false, speed: 0.3 },
+      mouseWheelScroller: { focus: true, speed: 0.3 },
       space: { left: 30, right: 30, top: 30, bottom: 30, panel: 20, header: 10, footer: 10 },
     }).layout();
     this.add(this.table);
+    // this.table.setMouseWheelScrollerEnable(false);
 
     this.table.on('scroll', () => {
       if (this.tableScrollerThumb.visible) return;

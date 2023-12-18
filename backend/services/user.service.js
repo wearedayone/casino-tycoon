@@ -148,3 +148,24 @@ export const getUserRankAndReward = async (userId) => {
 
   return null;
 };
+
+export const updateLastOnlineTime = async (userId) => {
+  await firestore
+    .collection('user')
+    .doc(userId)
+    .update({ lastOnlineTime: admin.firestore.FieldValue.serverTimestamp() });
+};
+
+export const applyInviteCode = async (userId, code) => {
+  const appliedCode = code.trim().toLowerCase();
+  const referrerSnapshot = await firestore.collection('user').where('referralCode', '==', appliedCode).get();
+  if (!referrerSnapshot.size) throw new Error('Invalid invite code');
+
+  const userRef = firestore.collection('user').doc(userId);
+  const user = await userRef.get();
+  const { referralCode, inviteCode } = user.data();
+  if (referralCode === appliedCode) throw new Error('Cannot apply your own invite code');
+  if (inviteCode) throw new Error('Cannot apply more than one invite code');
+
+  await userRef.update({ inviteCode: appliedCode });
+};
