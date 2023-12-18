@@ -25,8 +25,6 @@ const useSmartContract = () => {
     nftAddress: NFT_ADDRESS,
   } = activeSeason || {};
 
-  console.log({ TOKEN_ADDRESS, GAME_CONTRACT_ADDRESS, NFT_ADDRESS });
-
   const loadedAssets = !!TOKEN_ADDRESS && !!GAME_CONTRACT_ADDRESS && !!NFT_ADDRESS && !!embeddedWallet;
 
   const withdrawToken = async (to, value) => {
@@ -218,17 +216,23 @@ const useSmartContract = () => {
     const privyProvider = await embeddedWallet.getEthereumProvider();
     const nftContract = new Contract(NFT_ADDRESS, nftAbi.abi, privyProvider.provider);
 
-    const approveData = nftContract.interface.encodeFunctionData('setApprovalForAll', [GAME_CONTRACT_ADDRESS, true]);
+    const isApprovedForAll = await nftContract.isApprovedForAll(embeddedWallet.address, GAME_CONTRACT_ADDRESS);
 
-    const approveUnsignedTx = {
-      to: NFT_ADDRESS,
-      chainId: Number(NETWORK_ID),
-      data: approveData,
-    };
+    let approveReceipt;
+    if (!isApprovedForAll) {
+      const approveData = nftContract.interface.encodeFunctionData('setApprovalForAll', [GAME_CONTRACT_ADDRESS, true]);
 
-    // console.log({ NFT_ADDRESS, GAME_CONTRACT_ADDRESS, approveData });
-    const approveReceipt = await sendTransaction(approveUnsignedTx);
-    if (approveReceipt.status === 1) {
+      const approveUnsignedTx = {
+        to: NFT_ADDRESS,
+        chainId: Number(NETWORK_ID),
+        data: approveData,
+      };
+
+      approveReceipt = await sendTransaction(approveUnsignedTx);
+      await delay(1000);
+    }
+
+    if (!approveReceipt || approveReceipt.status === 1) {
       const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
       const data = gameContract.interface.encodeFunctionData('depositNFT', [address, 1, amount]);
       const unsignedTx = {
