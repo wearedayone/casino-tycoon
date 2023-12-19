@@ -25,6 +25,8 @@ const {
   UNISWAP_FACTORY_ADDRESS,
   UNISWAP_POOL_FEE,
   UNISWAP_WETH_ADDRESS,
+  ETH_DECIMALS,
+  TOKEN_DECIMALS,
 } = environments;
 
 console.log({
@@ -34,6 +36,8 @@ console.log({
   UNISWAP_FACTORY_ADDRESS,
   UNISWAP_POOL_FEE,
   UNISWAP_WETH_ADDRESS,
+  ETH_DECIMALS,
+  TOKEN_DECIMALS,
 });
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -336,18 +340,6 @@ const useSmartContract = () => {
     return minted;
   };
 
-  // test swap
-  const getPoolImmutables = async (poolContract) => {
-    const [token0, token1, fee] = await Promise.all([poolContract.token0(), poolContract.token1(), poolContract.fee()]);
-
-    const immutables = {
-      token0: token0,
-      token1: token1,
-      fee: fee,
-    };
-    return immutables;
-  };
-
   const getPoolState = async (poolContract) => {
     const slot = await poolContract.slot0();
 
@@ -366,10 +358,10 @@ const useSmartContract = () => {
 
     const privyProvider = await embeddedWallet.getEthereumProvider();
 
-    const ethDecimals = 18;
+    const ethDecimals = Number(ETH_DECIMALS);
     const ethAddress = UNISWAP_WETH_ADDRESS;
 
-    const tokenDecimals = 18;
+    const tokenDecimals = Number(TOKEN_DECIMALS);
     const tokenAddress = '0x8C2226F10D1abc6cFF3DD170f5b07101dd5D6E37'; // for test
     // const tokenAddress = TOKEN_ADDRESS //  for release
 
