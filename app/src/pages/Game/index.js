@@ -39,6 +39,7 @@ import { create, validate } from '../../services/transaction.service';
 import gameConfigs from './configs/configs';
 import LoadingScene from './scenes/LoadingScene';
 import MainScene from './scenes/MainScene';
+import TutorialScene from './scenes/TutorialScene';
 import useUserWallet from '../../hooks/useUserWallet';
 import useSeasonCountdown from '../../hooks/useSeasonCountdown';
 
@@ -380,7 +381,7 @@ const Game = () => {
         scale: {
           mode: Phaser.Scale.FIT,
         },
-        scene: [LoadingScene, MainScene],
+        scene: [LoadingScene, TutorialScene, MainScene],
         debug: false,
         audio: {
           mute: sound !== 'on',

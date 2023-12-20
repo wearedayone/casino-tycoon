@@ -5,6 +5,11 @@ import Button from '../button/Button';
 const verticalGap = 280;
 
 class PopupBuy extends Phaser.GameObjects.Container {
+  goonDisabled = false;
+  gangsterDisabled = false;
+  houseDisabled = false;
+  onClick = () => {};
+
   constructor(scene, x, y) {
     super(scene, x, y);
 
@@ -15,7 +20,11 @@ class PopupBuy extends Phaser.GameObjects.Container {
       140,
       'button-buy-safehouse',
       'button-buy-safehouse-pressed',
-      () => scene.popupSafeHouseUpgrade.setVisible(true),
+      () => {
+        if (this.houseDisabled) return;
+        scene.popupSafeHouseUpgrade.setVisible(true);
+        this.onClick?.();
+      },
       { sound: 'open' }
     );
     this.addGangsterBtn = new Button(
@@ -24,7 +33,11 @@ class PopupBuy extends Phaser.GameObjects.Container {
       this.addSafeHouseBtn.y + verticalGap,
       'button-buy-gangster',
       'button-buy-gangster-pressed',
-      () => scene.popupBuyGangster.setVisible(true),
+      () => {
+        if (this.gangsterDisabled) return;
+        scene.popupBuyGangster.setVisible(true);
+        this.onClick?.();
+      },
       { sound: 'open' }
     );
     this.addGoonBtn = new Button(
@@ -33,7 +46,11 @@ class PopupBuy extends Phaser.GameObjects.Container {
       this.addGangsterBtn.y + verticalGap,
       'button-buy-goon',
       'button-buy-goon-pressed',
-      () => scene.popupBuyGoon.setVisible(true),
+      () => {
+        if (this.goonDisabled) return;
+        scene.popupBuyGoon.setVisible(true);
+        this.onClick?.();
+      },
       { sound: 'open' }
     );
 
@@ -42,6 +59,28 @@ class PopupBuy extends Phaser.GameObjects.Container {
     this.add(this.addGangsterBtn);
     this.add(this.addGoonBtn);
     this.setVisible(false);
+  }
+
+  updateDisabled({ goonDisabled, gangsterDisabled, houseDisabled }) {
+    this.goonDisabled = goonDisabled;
+    this.gangsterDisabled = gangsterDisabled;
+    this.houseDisabled = houseDisabled;
+
+    if (houseDisabled) {
+      this.addSafeHouseBtn.setAlpha(0.5);
+    }
+
+    if (gangsterDisabled) {
+      this.addGangsterBtn.setAlpha(0.5);
+    }
+
+    if (goonDisabled) {
+      this.addGoonBtn.setAlpha(0.5);
+    }
+  }
+
+  updateCallback(callback) {
+    this.onClick = callback;
   }
 }
 
