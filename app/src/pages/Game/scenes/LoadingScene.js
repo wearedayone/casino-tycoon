@@ -36,7 +36,7 @@ class LoadingScene extends Phaser.Scene {
 
     const width = this.cameras.main.width;
     // const height = this.cameras.main.height;
-    const loadingText = this.make.text({
+    this.loadingText = this.make.text({
       x: width / 2,
       y: loadingTextY,
       text: 'Loading game assets & profile...',
@@ -47,8 +47,8 @@ class LoadingScene extends Phaser.Scene {
         fill: '#ffffff',
       },
     });
-    loadingText.setOrigin(0.5, 0);
-    loadingText.setStroke('#000000', 6);
+    this.loadingText.setOrigin(0.5, 0);
+    this.loadingText.setStroke('#000000', 6);
 
     const percentText = this.make.text({
       x: width / 2,
@@ -325,6 +325,32 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-error-insufficient', '/images/icons/error-insufficient.png');
     this.load.image('deposit-more-eth', '/images/deposit-more-eth.png');
 
+    this.load.image('tutorial-overlay', '/images/tutorial-overlay.png');
+    this.load.image('tutorial-next', '/images/tutorial-next.png');
+    this.load.image('tutorial-arrow-up', '/images/tutorial-arrow-up.png');
+    this.load.image('tutorial-arrow-down', '/images/tutorial-arrow-down.png');
+    this.load.image('tutorial-arrow-left', '/images/tutorial-arrow-left.png');
+    this.load.image('tutorial-arrow-right', '/images/tutorial-arrow-right.png');
+    this.load.image('tutorial-claim-inactive-btn', '/images/tutorial-claim-inactive-btn.png');
+    this.load.image('tutorial-1', '/images/tutorial-1.png');
+    this.load.image('tutorial-2', '/images/tutorial-2.png');
+    this.load.image('tutorial-4', '/images/tutorial-4.png');
+    this.load.image('tutorial-4-gangster', '/images/tutorial-4-gangster.png');
+    this.load.image('tutorial-5', '/images/tutorial-5.png');
+    this.load.image('tutorial-5-gangster', '/images/tutorial-5-gangster.png');
+    this.load.image('tutorial-6', '/images/tutorial-6.png');
+    this.load.image('tutorial-6-claim-btn', '/images/tutorial-6-claim-btn.png');
+    this.load.image('tutorial-6-claim-btn-light', '/images/tutorial-6-claim-btn-light.png');
+    this.load.image('tutorial-7', '/images/tutorial-7.png');
+    this.load.image('tutorial-9', '/images/tutorial-9.png');
+    this.load.image('tutorial-11', '/images/tutorial-11.png');
+    this.load.image('tutorial-12', '/images/tutorial-12.png');
+    this.load.image('tutorial-14', '/images/tutorial-14.png');
+    this.load.image('tutorial-15', '/images/tutorial-15.png');
+    this.load.image('tutorial-16', '/images/tutorial-16.png');
+    this.load.image('tutorial-17', '/images/tutorial-17.png');
+    this.load.image('tutorial-17-goon', '/images/tutorial-17-goon.png');
+
     this.load.path = '/images/animation/';
     this.load.multiatlas('gangster-front', 'gangster_front.json');
     this.load.multiatlas('gangster-back', 'gangster_back.json');
@@ -337,7 +363,7 @@ class LoadingScene extends Phaser.Scene {
   update() {
     if (this.userInfoLoaded && this.assetLoaded) {
       this.game.events.emit('hide-bg');
-      this.scene.start('MainScene');
+      this.scene.start('TutorialScene');
     } else if (this.assetLoaded) {
       this.game.events.emit('check-user-loaded');
       if (this.loadingText) {
