@@ -27,7 +27,13 @@ class PopupBuyGangster extends Popup {
   reservePoolReward = 0;
   balance = 0;
   basePrice = 0;
+  whitelistPrice = 0;
   quantity = DEFAULT_QUANTITY;
+  maxQuantity = MAX_QUANTITY;
+  isWhitelisted = false;
+  whitelistAmountLeft = 0;
+  referralDiscount = 0;
+  mintFunction = 'mint';
 
   constructor(scene) {
     super(scene, 'popup-buy-gangster', { ribbon: 'ribbon-buy-gangster' });
@@ -57,7 +63,7 @@ class PopupBuyGangster extends Popup {
         );
         this.close();
 
-        scene.game.events.emit('buy-gangster', { quantity: this.quantity });
+        scene.game.events.emit('buy-gangster', { quantity: this.quantity, mintFunction: this.mintFunction });
       },
       'Buy',
       { sound: 'buy', disabledImage: 'button-disabled' }
@@ -164,7 +170,7 @@ class PopupBuyGangster extends Popup {
       'button-square',
       'button-square-pressed',
       () => {
-        if (this.quantity < MAX_QUANTITY) {
+        if (this.quantity < this.maxQuantity) {
           this.quantity++;
           this.updateValues();
         }
@@ -178,7 +184,7 @@ class PopupBuyGangster extends Popup {
             clearInterval(this.interval);
           }
           this.interval = setInterval(() => {
-            if (this.quantity < MAX_QUANTITY) {
+            if (this.quantity < this.maxQuantity) {
               this.quantity++;
               this.updateValues();
             }
@@ -232,14 +238,20 @@ class PopupBuyGangster extends Popup {
         networth,
         balance,
         basePrice,
+        whitelistPrice,
         dailyReward,
         reservePool,
         reservePoolReward,
         networthIncrease,
         tokenPrice,
+        isWhitelisted,
+        whitelistAmountLeft,
+        hasInviteCode,
+        referralDiscount,
       }) => {
         this.balance = balance;
         this.basePrice = basePrice;
+        this.whitelistPrice = whitelistPrice;
         this.numberOfMachines = numberOfMachines;
         this.networth = networth;
         this.networthIncrease = networthIncrease;
@@ -247,11 +259,17 @@ class PopupBuyGangster extends Popup {
         this.tokenPrice = tokenPrice;
         this.reservePool = reservePool;
         this.reservePoolReward = reservePoolReward;
+        this.isWhitelisted = isWhitelisted;
+        this.whitelistAmountLeft = whitelistAmountLeft;
+        this.referralDiscount = referralDiscount;
+        this.mintFunction = isWhitelisted && whitelistAmountLeft ? 'mintWL' : hasInviteCode ? 'mintReferral' : 'mint';
 
         this.numberOfMachinesText.text = numberOfMachines.toLocaleString();
         this.networthText.text = `${networth.toLocaleString()}`;
         this.rateText.text = `${formatter.format(numberOfMachines * dailyReward)}`;
         this.estimatedMaxPurchase = balance && basePrice ? Math.floor(balance / basePrice) : 0;
+        this.maxQuantity =
+          isWhitelisted && whitelistAmountLeft ? Math.min(whitelistAmountLeft, MAX_QUANTITY) : MAX_QUANTITY;
         this.updateValues();
       }
     );
@@ -263,7 +281,9 @@ class PopupBuyGangster extends Popup {
     this.networthIncreaseText.text = `+${(this.networthIncrease * this.quantity).toLocaleString()}`;
     this.rateIncreaseText.text = `+${(this.rateIncrease * this.quantity).toLocaleString()} /d`;
 
-    const estimatedPrice = this.quantity * this.basePrice;
+    const unitPrice =
+      this.mintFunction === 'mintWL' ? this.whitelistPrice : this.basePrice * (1 - this.referralDiscount);
+    const estimatedPrice = this.quantity * unitPrice;
     const roi = estimatedPrice
       ? (((this.rateIncrease * this.quantity * this.tokenPrice) / estimatedPrice) * 100).toFixed(1)
       : 0;
