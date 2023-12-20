@@ -58,6 +58,11 @@ const rankingRewards =
         { rankStart: 9, rankEnd: 9, share: 0.03 },
         { rankStart: 10, rankEnd: 10, share: 0.02 },
       ];
+const assetsConfig = {
+  machine: { basePrice: 0.001, whitelistPrice: 0.0006, dailyReward: 1000, networth: 5 },
+  worker: { basePrice: 250, priceStep: 5, dailyReward: 1000, networth: 3 },
+  building: { basePrice: 500, priceStep: 10, dailyReward: 0, networth: 4 },
+};
 const main = async () => {
   console.log('init data');
   // web3Listener
@@ -103,9 +108,7 @@ const main = async () => {
       machineSold: 0,
       workerSold: 0,
       buildingSold: 0,
-      machine: { basePrice: 0.001, dailyReward: 1000, networth: 5 },
-      worker: { basePrice: 250, priceStep: 5, dailyReward: 1000, networth: 3 },
-      building: { basePrice: 500, priceStep: 10, dailyReward: 0, networth: 4 },
+      ...assetsConfig,
       status: 'open',
       rankingRewards,
       houseLevels: [
@@ -156,9 +159,7 @@ const main = async () => {
         machineSold: 0,
         workerSold: 0,
         buildingSold: 0,
-        machine: { basePrice: 0.001, dailyReward: 1000, networth: 5 },
-        worker: { basePrice: 250, priceStep: 5, dailyReward: 100, networth: 3 },
-        building: { basePrice: 500, priceStep: 10, dailyReward: 0, networth: 4 },
+        ...assetsConfig,
       },
     });
   console.log('created season log');

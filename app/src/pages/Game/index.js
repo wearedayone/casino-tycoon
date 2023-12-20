@@ -99,15 +99,16 @@ const Game = () => {
     tokenBalance: 0,
     ETHBalance: 0,
   };
-  const { numberOfMachines, numberOfWorkers, numberOfBuildings, networth } = gamePlay || {
-    numberOfMachines: 0,
-    numberOfWorkers: 0,
-    numberOfBuildings: 0,
-    networth: 0,
-  };
+  const { numberOfMachines, numberOfWorkers, numberOfBuildings, networth, isWhitelisted, whitelistAmountLeft } =
+    gamePlay || {
+      numberOfMachines: 0,
+      numberOfWorkers: 0,
+      numberOfBuildings: 0,
+      networth: 0,
+    };
   const { machine, worker, building, workerSold, buildingSold, reservePool, reservePoolReward, houseLevels } =
     activeSeason || {
-      machine: { dailyReward: 0, basePrice: 0, networth: 0 },
+      machine: { dailyReward: 0, basePrice: 0, whitelistPrice: 0, networth: 0 },
       worker: { dailyReward: 0, basePrice: 0, networth: 0, priceStep: 0 },
       building: { basePrice: 0, priceStep: 0, networth: 0 },
       buildingSold: 0,
@@ -253,11 +254,11 @@ const Game = () => {
     }
   };
 
-  const buyGangster = async (quantity) => {
+  const buyGangster = async (quantity, mintFunction) => {
     try {
       const res = await create({ type: 'buy-machine', amount: quantity });
-      const { id, amount, value } = res.data;
-      const receipt = await buyMachine(amount, value);
+      const { id, amount, value, nonce, signature, referrerAddress } = res.data;
+      const receipt = await buyMachine({ amount, value, nonce, signature, referrerAddress, mintFunction });
       if (receipt.status === 1) {
         await validate({ transactionId: id, txnHash: receipt.transactionHash });
         return receipt.transactionHash;
@@ -480,7 +481,7 @@ const Game = () => {
       });
 
       gameRef.current?.events.on('request-referral-config', () => {
-        gameRef.current.events.emit('update-referral-config', activeSeason.referralConfig);
+        gameRef.current.events.emit('update-referral-config', activeSeason?.referralConfig);
       });
 
       gameRef.current?.events.on('request-invite-code', () => {
@@ -608,9 +609,9 @@ const Game = () => {
         }
       });
 
-      gameRef.current?.events.on('buy-gangster', async ({ quantity }) => {
+      gameRef.current?.events.on('buy-gangster', async ({ quantity, mintFunction }) => {
         try {
-          const txnHash = await buyGangster(quantity);
+          const txnHash = await buyGangster(quantity, mintFunction);
           gameRef.current?.events.emit('buy-gangster-completed', { txnHash, amount: quantity });
         } catch (err) {
           console.log({ err });
@@ -660,11 +661,16 @@ const Game = () => {
           networth,
           balance: ETHBalance,
           basePrice: machine.basePrice,
+          whitelistPrice: machine.whitelistPrice,
           dailyReward: machine.dailyReward,
           reservePool,
           reservePoolReward,
           networthIncrease: machine.networth,
           tokenPrice,
+          isWhitelisted,
+          whitelistAmountLeft,
+          hasInviteCode: Boolean(inviteCode),
+          referralDiscount: inviteCode ? Number(activeSeason?.referralConfig?.referralDiscount) : 0,
         });
       });
 
@@ -881,13 +887,30 @@ const Game = () => {
       networth,
       balance: ETHBalance,
       basePrice: machine.basePrice,
+      whitelistPrice: machine.whitelistPrice,
       dailyReward: machine.dailyReward,
       reservePool,
       reservePoolReward,
       networthIncrease: machine.networth,
       tokenPrice,
+      isWhitelisted: Boolean(isWhitelisted),
+      whitelistAmountLeft: Number(whitelistAmountLeft),
+      hasInviteCode: Boolean(inviteCode),
+      referralDiscount: inviteCode ? Number(activeSeason?.referralConfig?.referralDiscount) : 0,
     });
-  }, [numberOfMachines, networth, ETHBalance, machine, reservePool, reservePoolReward, tokenPrice]);
+  }, [
+    numberOfMachines,
+    networth,
+    ETHBalance,
+    machine,
+    reservePool,
+    reservePoolReward,
+    tokenPrice,
+    isWhitelisted,
+    whitelistAmountLeft,
+    inviteCode,
+    activeSeason?.referralConfig?.referralDiscount,
+  ]);
 
   useEffect(() => {
     gameRef.current?.events.emit('update-networth', {

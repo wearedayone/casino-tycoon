@@ -16,6 +16,7 @@ import {
   decodeTokenTxnLogs,
   isMinted,
   signMessageBuyGoon,
+  signMessageBuyGangster,
 } from './worker.service.js';
 import logger from '../utils/logger.js';
 import environments from '../utils/environments.js';
@@ -27,7 +28,7 @@ export const initTransaction = async ({ userId, type, ...data }) => {
   const activeSeason = await getActiveSeason();
   if (activeSeason.status !== 'open') throw new Error('Season ended');
 
-  const { machine, machineSold, workerSold, buildingSold, worker, building } = activeSeason;
+  const { machine, machineSold, workerSold, buildingSold, worker, building, referralConfig } = activeSeason;
   const txnData = {};
   switch (type) {
     case 'withdraw':
@@ -36,11 +37,33 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       txnData.token = data.token;
       break;
     case 'buy-machine':
-      txnData.amount = data.amount;
       txnData.token = 'ETH';
       txnData.currentSold = machineSold;
-      txnData.value = Math.ceil(machine.basePrice * data.amount * 1000000) / 1000000;
-      txnData.prices = Array.from({ length: data.amount }, () => machine.basePrice);
+
+      const gamePlaySnapshot = await firestore
+        .collection('gamePlay')
+        .where('userId', '==', userId)
+        .where('seasonId', '==', activeSeason.id)
+        .get();
+      const userSnapshot = await firestore.collection('user').doc(userId).get();
+      const { isWhitelisted, whitelistAmountLeft } = gamePlaySnapshot.docs[0].data();
+      const { inviteCode } = userSnapshot.data();
+      let userReferralDiscount = 0;
+      const isMintWhitelist = Boolean(isWhitelisted && whitelistAmountLeft);
+      txnData.isMintWhitelist = isMintWhitelist;
+      txnData.amount = isMintWhitelist ? Math.min(data.amount, whitelistAmountLeft) : data.amount; // cannot exceed whitelistAmountLeft
+
+      if (inviteCode && !isMintWhitelist) {
+        const referrerSnapshot = await firestore.collection('user').where('referralCode', '==', inviteCode).get();
+        if (!referrerSnapshot.size) break;
+
+        userReferralDiscount = referralConfig.referralDiscount;
+        txnData.referrerAddress = referrerSnapshot.docs[0].data().address;
+      }
+      const unitPrice = isMintWhitelist ? machine.whitelistPrice : machine.basePrice * (1 - userReferralDiscount);
+      const estimatedPrice = data.amount * unitPrice;
+      txnData.value = Math.ceil(estimatedPrice * 1000000) / 1000000;
+      txnData.prices = Array.from({ length: data.amount }, () => unitPrice);
       break;
     case 'buy-worker':
       txnData.amount = data.amount;
@@ -119,6 +142,21 @@ export const initTransaction = async ({ userId, type, ...data }) => {
         value: parseEther(txnData.value + ''),
         nonce: nonce,
       });
+      return { id: newTransaction.id, ...transaction, signature };
+    }
+  }
+
+  if (type === 'buy-machine' && (txnData.isMintWhitelist || txnData.referrerAddress)) {
+    const userData = await firestore.collection('user').doc(userId).get();
+    if (userData.exists) {
+      const { address } = userData.data();
+      const signedData = {
+        address,
+        amount: txnData.amount,
+        nonce,
+      };
+      if (txnData.referrerAddress) signedData.referral = txnData.referrerAddress;
+      const signature = await signMessageBuyGangster(signedData);
       return { id: newTransaction.id, ...transaction, signature };
     }
   }
@@ -263,7 +301,7 @@ const updateUserBalance = async (userId, transactionId) => {
 
 const updateUserGamePlay = async (userId, transactionId) => {
   const snapshot = await firestore.collection('transaction').doc(transactionId).get();
-  const { type, amount } = snapshot.data();
+  const { type, amount, isMintWhitelist } = snapshot.data();
 
   const activeSeason = await getActiveSeason();
   const { machine, worker, building } = activeSeason;
@@ -286,6 +324,8 @@ const updateUserGamePlay = async (userId, transactionId) => {
   let gamePlayData = {};
   switch (type) {
     case 'buy-machine':
+      // TODO: move this to listener later
+      if (isMintWhitelist) gamePlayData = { whitelistAmountLeft: admin.firestore.FieldValue.increment(-amount) };
       // gamePlayData = { numberOfMachines: admin.firestore.FieldValue.increment(amount) };
       assets.numberOfMachines += amount;
       break;

@@ -293,3 +293,23 @@ export const signMessageBuyGoon = async ({ address, amount, value, nonce }) => {
   const signature = await workerWallet.signMessage(ethers.toBeArray(message));
   return signature;
 };
+
+export const signMessageBuyGangster = async ({ address, amount, nonce, referral }) => {
+  const workerWallet = await getWorkerWallet();
+  console.log({ address, amount, nonce, referral });
+
+  // Array of types: declares the data types in the message.
+  const types = ['address', 'uint256', 'uint256', 'uint256'];
+  // Array of values: actual values of the parameters to be hashed.
+  const values = [address, 1, amount, nonce];
+
+  if (referral) {
+    types.push('address');
+    values.push(referral);
+  }
+
+  let message = ethers.solidityPackedKeccak256(types, values);
+
+  const signature = await workerWallet.signMessage(ethers.toBeArray(message));
+  return signature;
+};
