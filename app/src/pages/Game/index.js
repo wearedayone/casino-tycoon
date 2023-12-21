@@ -404,6 +404,11 @@ const Game = () => {
 
       setupSimulatorGameListener(gameRef.current);
 
+      gameRef.current?.events.on('check-user-completed-tutorial', () => {
+        const completed = profile.completedTutorial;
+        gameRef.current?.events.emit('update-user-completed-tutorial', { completed });
+      });
+
       gameRef.current?.events.on('export-wallet', exportWallet);
       gameRef.current?.events.on('log-out', logout);
       gameRef.current?.events.on('toggle-game-sound', toggleSound);

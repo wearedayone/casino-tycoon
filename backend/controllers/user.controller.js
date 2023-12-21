@@ -5,6 +5,7 @@ import {
   getUserRankAndReward,
   updateLastOnlineTime,
   applyInviteCode,
+  updateViewedTutorial,
 } from '../services/user.service.js';
 import { getWarHistory, getWarHistoryDetail } from '../services/warSnapshot.service.js';
 
@@ -85,6 +86,16 @@ export const setLastOnlineTime = async (req, res) => {
     return res.sendStatus(200);
   } catch (err) {
     console.log({ err });
+    return res.status(400).send(err);
+  }
+};
+
+export const completeTutorial = async (req, res) => {
+  try {
+    await updateViewedTutorial(req.userId);
+    return res.sendStatus(200);
+  } catch (err) {
+    console.error(err);
     return res.status(400).send(err);
   }
 };

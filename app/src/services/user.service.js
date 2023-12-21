@@ -16,3 +16,5 @@ export const updateBalance = () => api.put('/api/v1/users/me/balances');
 export const getRank = () => api.get('/api/v1/users/me/rank');
 
 export const setLastOnlineTime = () => api.put('/api/v1/users/me/last-online-time');
+
+export const completeTutorial = () => api.put('/api/v1/users/me/tutorial');
