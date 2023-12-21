@@ -26,10 +26,10 @@ class Step6 extends Phaser.GameObjects.Container {
 
     this.claimButton = new Button(scene, width / 2, y, 'tutorial-6-claim-btn', 'tutorial-6-claim-btn', () => {
       this.startCoinAnimation();
-      scene.game.events.emit('simulator-claim-completed', { amount: 15000 });
       scene.tutorial.setVisible(false);
       setTimeout(() => {
         scene.tutorial.setVisible(true);
+        scene.game.events.emit('simulator-claim-completed', { amount: 15000 });
         onNext();
       }, 3000);
     });
