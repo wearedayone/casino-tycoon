@@ -14,20 +14,20 @@ const { NETWORK_ID } = environments;
 const CODE_LENGTH = 10;
 
 const createGamePlayIfNotExist = async (userId) => {
-  const seasonId = await getActiveSeasonId();
+  const season = await getActiveSeason();
   const snapshot = await firestore
     .collection('gamePlay')
     .where('userId', '==', userId)
-    .where('seasonId', '==', seasonId)
+    .where('seasonId', '==', season.id)
     .get();
   if (snapshot.empty) {
     await firestore.collection('gamePlay').add({
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       userId,
-      seasonId,
-      networth: 0,
+      seasonId: season.id,
+      networth: season.worker.networth,
       numberOfMachines: 0,
-      numberOfWorkers: 0,
+      numberOfWorkers: 1,
       numberOfBuildings: 0,
       lastClaimTime: admin.firestore.FieldValue.serverTimestamp(),
       point: 0,
@@ -181,4 +181,8 @@ export const getUserUsernames = async (userIds) => {
   snapshots.map((snapshot) => snapshot.docs.map((doc) => (usernames[doc.id] = doc.data().username)));
 
   return usernames;
+};
+
+export const updateViewedTutorial = async (userId) => {
+  await firestore.collection('user').doc(userId).update({ completedTutorial: true });
 };

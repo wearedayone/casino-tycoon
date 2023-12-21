@@ -22,6 +22,11 @@ class LoadingScene extends Phaser.Scene {
   }
 
   preload() {
+    this.game.events.on('update-user-completed-tutorial', ({ completed }) => {
+      this.game.events.emit('hide-bg');
+      this.scene.start(completed ? 'MainScene' : 'TutorialScene');
+    });
+
     const loadingTextY = (windowLoadingTextY * configs.height) / window.innerHeight;
     const progressY = loadingTextY + 150;
     this.game.events.on('user-info-loaded', () => {
@@ -362,8 +367,7 @@ class LoadingScene extends Phaser.Scene {
 
   update() {
     if (this.userInfoLoaded && this.assetLoaded) {
-      this.game.events.emit('hide-bg');
-      this.scene.start('TutorialScene');
+      this.game.events.emit('check-user-completed-tutorial');
     } else if (this.assetLoaded) {
       this.game.events.emit('check-user-loaded');
       if (this.loadingText) {

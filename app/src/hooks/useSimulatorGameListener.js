@@ -1,10 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import { faker } from '@faker-js/faker';
+import * as Sentry from '@sentry/react';
 
 import useSystemStore from '../stores/system.store';
 import useUserStore from '../stores/user.store';
 import useSeasonCountdown from './useSeasonCountdown';
 import { calculateHouseLevel } from '../utils/formulas';
+import { completeTutorial } from '../services/user.service';
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -41,8 +43,8 @@ const useSimulatorGameListener = () => {
   const [gameRef, setGameRef] = useState(null);
   const [balances, setBalances] = useState({ dailyMoney: 10000, ETHBalance: 100000, tokenBalance: 100000 });
   const [assets, setAssets] = useState({
-    numberOfMachines: 1,
-    numberOfWorkers: 1,
+    numberOfMachines: 0,
+    numberOfWorkers: 0,
     numberOfBuildings: 0,
     networth: 0,
   });
@@ -80,6 +82,12 @@ const useSimulatorGameListener = () => {
 
     game.events.on('simulator-end', () => {
       console.log('simulator-end');
+      completeTutorial()
+        .then(() => console.log('completed tutorial'))
+        .catch((err) => {
+          console.error(err);
+          Sentry.captureException(err);
+        });
       setGameRef(null);
     });
 
