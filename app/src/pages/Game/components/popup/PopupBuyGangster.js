@@ -36,18 +36,27 @@ class PopupBuyGangster extends Popup {
   referralDiscount = 0;
   mintFunction = 'mint';
 
-  constructor(scene) {
+  constructor(scene, { isSimulator, onCompleted } = {}) {
     super(scene, 'popup-buy-gangster', { ribbon: 'ribbon-buy-gangster' });
+
+    const events = {
+      completed: isSimulator ? 'simulator-buy-gangster-completed' : 'buy-gangster-completed',
+      buyGangster: isSimulator ? 'simulator-buy-gangster' : 'buy-gangster',
+      gameEnded: isSimulator ? 'simulator-game-ended' : 'game-ended',
+      updateMachines: isSimulator ? 'simulator-update-machines' : 'update-machines',
+      requestMachines: isSimulator ? 'simulator-request-machines' : 'request-machines',
+    };
 
     // child modals
     const popupBuyBonusInfo = new PopupBuyBonusInfo(scene, this);
     scene.add.existing(popupBuyBonusInfo);
     this.popupBuyProcessing = new PopupProcessing(scene, {
       sound: 'gangster',
-      completedEvent: 'buy-gangster-completed',
+      completedEvent: events.completed,
       completedIcon: 'icon-gangster-buy-done',
       failedIcon: 'icon-gangster-buy-fail',
       description: '',
+      onCompleted,
     });
     scene.add.existing(this.popupBuyProcessing);
 
@@ -64,7 +73,7 @@ class PopupBuyGangster extends Popup {
         );
         this.close();
 
-        scene.game.events.emit('buy-gangster', { quantity: this.quantity, mintFunction: this.mintFunction });
+        scene.game.events.emit(events.buyGangster, { quantity: this.quantity, mintFunction: this.mintFunction });
       },
       'Buy',
       { sound: 'buy', disabledImage: 'button-disabled' }
@@ -241,7 +250,7 @@ class PopupBuyGangster extends Popup {
     this.coin = scene.add.image(this.priceText.x + this.priceText.width + 40, counterY, 'eth-coin').setOrigin(0, 0.5);
     this.add(this.coin);
 
-    scene.game.events.on('buy-gangster-completed', () => {
+    scene.game.events.on(events.completed, () => {
       this.quantity = DEFAULT_QUANTITY;
       this.updateValues();
     });
@@ -255,11 +264,11 @@ class PopupBuyGangster extends Popup {
       this.updateValues();
     });
 
-    scene.game.events.on('game-ended', () => {
+    scene.game.events.on(events.gameEnded, () => {
       this.upgradeBtn.setDisabledState(true);
     });
     scene.game.events.on(
-      'update-machines',
+      events.updateMachines,
       ({
         numberOfMachines,
         networth,
@@ -301,7 +310,7 @@ class PopupBuyGangster extends Popup {
       }
     );
 
-    scene.game.events.emit('request-machines');
+    scene.game.events.emit(events.requestMachines);
     scene.game.events.emit('request-gas-mint');
   }
 

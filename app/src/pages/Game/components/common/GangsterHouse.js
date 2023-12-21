@@ -6,8 +6,13 @@ import configs from '../../configs/configs';
 const { width } = configs;
 
 class GangsterHouse extends Phaser.GameObjects.Container {
-  constructor(scene, y) {
+  constructor(scene, y, { isSimulator } = {}) {
     super(scene, 0, 0);
+
+    const events = {
+      updateNetworth: isSimulator ? 'simulator-update-networth' : 'update-networth',
+      requestNetworth: isSimulator ? 'simulator-request-networth' : 'request-networth',
+    };
 
     this.house = scene.add.sprite(width / 2, y, '').setOrigin(0.5, 0.5);
 
@@ -22,13 +27,13 @@ class GangsterHouse extends Phaser.GameObjects.Container {
     this.add(this.sign);
     this.add(this.valueText);
 
-    scene.game.events.on('update-networth', ({ networth, level }) => {
+    scene.game.events.on(events.updateNetworth, ({ networth, level }) => {
       this.valueText.text = `${formatter.format(networth)}`;
       if (level) {
         this.house.setTexture(`gangster-house-${level}`);
       }
     });
-    scene.game.events.emit('request-networth');
+    scene.game.events.emit(events.requestNetworth);
   }
 }
 

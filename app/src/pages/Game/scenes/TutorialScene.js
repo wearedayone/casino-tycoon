@@ -65,10 +65,10 @@ class TutorialScene extends Phaser.Scene {
     this.background = new Background(this, 'bg');
     this.add.existing(this.background);
 
-    this.animationLayer = new Animation(this);
+    this.animationLayer = new Animation(this, { isSimulator: true });
     this.add.existing(this.animationLayer);
 
-    const gangsterHouse = new GangsterHouse(this, 2200);
+    const gangsterHouse = new GangsterHouse(this, 2200, { isSimulator: true });
     this.add.existing(gangsterHouse);
 
     this.popupDeposit = new PopupDeposit(this);
@@ -77,7 +77,7 @@ class TutorialScene extends Phaser.Scene {
     this.popupBuy = new PopupBuy(this, width - 335, 1600);
     this.add.existing(this.popupBuy);
 
-    const header = new Header(this, 250);
+    const header = new Header(this, 250, { isSimulator: true });
     this.add.existing(header);
 
     this.popupWar = new PopupWar(this, 35, 1850);
@@ -106,12 +106,12 @@ class TutorialScene extends Phaser.Scene {
       this.bgMusic.stop();
     });
 
-    this.game.events.on('update-workers-machines', ({ numberOfWorkers, numberOfMachines }) => {
-      this.game.events.emit('update-gangster-animation', { numberOfMachines });
-      this.game.events.emit('update-goon-animation', { numberOfWorkers });
+    this.game.events.on('simulator-update-workers-machines', ({ numberOfWorkers, numberOfMachines }) => {
+      this.game.events.emit('simulator-update-gangster-animation', { numberOfMachines });
+      this.game.events.emit('simulator-update-goon-animation', { numberOfWorkers });
     });
 
-    this.game.events.emit('request-workers-machines');
+    this.game.events.emit('simulator-request-workers-machines');
     if (this.game.sound.mute) {
       this.bgMusic.stop();
     } else {
@@ -124,16 +124,52 @@ class TutorialScene extends Phaser.Scene {
       sceneKey: 'rexUI',
     });
     pluginLoader.once(Phaser.Loader.Events.COMPLETE, () => {
-      this.popupSafeHouseUpgrade = new PopupSafeHouseUpgrade(this);
+      this.popupSafeHouseUpgrade = new PopupSafeHouseUpgrade(this, {
+        isSimulator: true,
+        onCompleted: () => {
+          this.tutorial.step10.setVisible(false);
+          this.tutorial.setVisible(false);
+          setTimeout(() => {
+            this.tutorial.setVisible(true);
+            this.tutorial.step11.setVisible(true);
+          }, 2000);
+        },
+      });
       this.add.existing(this.popupSafeHouseUpgrade);
 
-      this.popupBuyGoon = new PopupBuyGoon(this);
+      this.popupBuyGoon = new PopupBuyGoon(this, {
+        isSimulator: true,
+        onCompleted: () => {
+          this.tutorial.step8.setVisible(false);
+          this.tutorial.setVisible(false);
+          setTimeout(() => {
+            this.tutorial.setVisible(true);
+            this.tutorial.step9.setVisible(true);
+          }, 2000);
+        },
+      });
       this.add.existing(this.popupBuyGoon);
 
-      this.popupBuyGangster = new PopupBuyGangster(this);
+      this.popupBuyGangster = new PopupBuyGangster(this, {
+        isSimulator: true,
+        onCompleted: () => {
+          this.tutorial.step3.setVisible(false);
+          this.tutorial.setVisible(false);
+          setTimeout(() => {
+            this.tutorial.setVisible(true);
+            this.tutorial.step4.setVisible(true);
+          }, 2000);
+        },
+      });
       this.add.existing(this.popupBuyGangster);
 
-      this.popupLeaderboard = new PopupLeaderboard(this);
+      this.popupLeaderboard = new PopupLeaderboard(this, {
+        isSimulator: true,
+        onClosePopup: () => {
+          this.tutorial.step13.setVisible(false);
+          this.tutorial.step14.setVisible(true);
+        },
+      });
       this.add.existing(this.popupLeaderboard);
 
       this.popupPrizePool = new PopupPrizePool(this);
@@ -160,10 +196,10 @@ class TutorialScene extends Phaser.Scene {
     //     : new PopupWelcomeNoWar(this, claimableReward);
     //   this.add.existing(this.popupWelcome);
     // });
-    this.game.events.on('game-ended', () => {
-      console.log('trigger game end');
-      this.isGameEnded = true;
-    });
+    // this.game.events.on('game-ended', () => {
+    //   console.log('trigger game end');
+    //   this.isGameEnded = true;
+    // });
     // this.game.events.emit('request-game-ended-status');
     // this.game.events.emit('request-user-away-reward');
   }
@@ -174,7 +210,7 @@ class TutorialScene extends Phaser.Scene {
     if (this.animationLayer.gangsterAction === 'back') {
       const { x, y } = this.animationLayer.gangsterBack;
       if (x >= gangsterAnimation.back.end.x || y <= gangsterAnimation.back.end.y) {
-        this.game.events.emit('animation-gangster-front');
+        this.game.events.emit('simulator-animation-gangster-front');
       } else {
         const newX = Math.min(
           this.animationLayer.gangsterBack.x + gangsterBackAnimationSpeed.x * delta,
@@ -198,9 +234,9 @@ class TutorialScene extends Phaser.Scene {
     if (this.animationLayer.gangsterAction === 'front') {
       const { y } = this.animationLayer.gangsterFront;
       if (y >= gangsterAnimation.front.end.y) {
-        this.game.events.emit('animation-gangster-back');
+        this.game.events.emit('simulator-animation-gangster-back');
         this.game.events.emit('request-claimable-reward');
-        this.game.events.emit('check-game-ended');
+        // this.game.events.emit('check-game-ended');
       } else {
         const newY = Math.min(
           this.animationLayer.gangsterFront.y + gangsterFrontAnimationSpeed.y * delta,
@@ -220,7 +256,7 @@ class TutorialScene extends Phaser.Scene {
       const { x, y } = this.animationLayer.goonBack;
 
       if (x <= goonAnimation.back.end.x || y <= goonAnimation.back.end.y) {
-        this.game.events.emit('animation-goon-front');
+        this.game.events.emit('simulator-animation-goon-front');
       } else {
         const newX = Math.max(
           this.animationLayer.goonBack.x - goonBackAnimationSpeed.x * delta,
@@ -245,8 +281,8 @@ class TutorialScene extends Phaser.Scene {
       const { y } = this.animationLayer.goonFront;
 
       if (y >= goonAnimation.front.end.y) {
-        this.game.events.emit('animation-goon-back');
-        this.game.events.emit('check-game-ended');
+        this.game.events.emit('simulator-animation-goon-back');
+        // this.game.events.emit('check-game-ended');
         // only update claimable when gangsters return to safehouse
         // -> uncomment if gangster & goon's running are no longer synchronized
         // this.game.events.emit('request-claimable-reward');

@@ -27,14 +27,24 @@ class PopupSafeHouseUpgrade extends Popup {
   priceStep = 0;
   quantity = DEFAULT_QUANTITY;
 
-  constructor(scene) {
+  constructor(scene, { isSimulator, onCompleted } = {}) {
     super(scene, 'popup-safehouse-upgrade', { ribbon: 'ribbon-safehouse-upgrade' });
+
+    const events = {
+      completed: isSimulator ? 'simulator-upgrade-safehouse-completed' : 'upgrade-safehouse-completed',
+      upgradeHouse: isSimulator ? 'simulator-upgrade-safehouse' : 'upgrade-safehouse',
+      gameEnded: isSimulator ? 'simulator-game-ended' : 'game-ended',
+      updateBuildings: isSimulator ? 'simulator-update-buildings' : 'update-buildings',
+      requestBuildings: isSimulator ? 'simulator-request-buildings' : 'request-buildings',
+    };
+
     this.popupBuyProcessing = new PopupProcessing(scene, {
       sound: 'house',
-      completedEvent: 'upgrade-safehouse-completed',
+      completedEvent: events.completed,
       completedIcon: 'icon-safehouse-upgrade-done',
       failedIcon: 'icon-safehouse-upgrade-fail',
       description: `Upgrading Safehouse.\nPlease, wait`,
+      onCompleted,
     });
     scene.add.existing(this.popupBuyProcessing);
 
@@ -49,7 +59,7 @@ class PopupSafeHouseUpgrade extends Popup {
         this.popupBuyProcessing.initLoading(`Upgrading Safehouse.\nPlease, wait`);
         this.close();
 
-        scene.game.events.emit('upgrade-safehouse', { quantity: this.quantity });
+        scene.game.events.emit(events.upgradeHouse, { quantity: this.quantity });
       },
       'Upgrade',
       { sound: 'buy', disabledImage: 'button-disabled' }
@@ -180,12 +190,12 @@ class PopupSafeHouseUpgrade extends Popup {
     this.coin = scene.add.image(this.priceText.x + this.priceText.width + 40, counterY, 'coin2').setOrigin(0, 0.5);
     this.add(this.coin);
 
-    scene.game.events.on('upgrade-safehouse-completed', () => {
+    scene.game.events.on(events.completed, () => {
       this.quantity = DEFAULT_QUANTITY;
       this.updateValues();
     });
 
-    scene.game.events.on('game-ended', () => {
+    scene.game.events.on(events.gameEnded, () => {
       this.upgradeBtn.setDisabledState(true);
     });
     scene.game.events.on('update-gas-upgrade-safehouse', ({ gas }) => {
@@ -202,7 +212,7 @@ class PopupSafeHouseUpgrade extends Popup {
     });
 
     scene.game.events.on(
-      'update-buildings',
+      events.updateBuildings,
       ({ numberOfBuildings, networth, balance, sold, basePrice, priceStep, networthIncrease }) => {
         this.balance = balance;
         this.sold = sold;
@@ -219,7 +229,7 @@ class PopupSafeHouseUpgrade extends Popup {
       }
     );
 
-    scene.game.events.emit('request-buildings');
+    scene.game.events.emit(events.requestBuildings);
     scene.game.events.emit('request-gas-upgrade-safehouse');
   }
 

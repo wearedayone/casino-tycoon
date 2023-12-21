@@ -11,8 +11,6 @@ class Step15 extends Phaser.GameObjects.Container {
 
     this.setVisible(false);
 
-    console.log(scene.popupDailyGangWar, scene.popupDailyGangWar.children);
-
     scene.popupDailyGangWar.list.map((item) => (item.y -= 270));
 
     this.image = scene.add.image(width / 2, height - 300, 'tutorial-15').setOrigin(0.5, 0.5);

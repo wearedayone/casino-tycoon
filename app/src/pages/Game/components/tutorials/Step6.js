@@ -20,7 +20,10 @@ class Step6 extends Phaser.GameObjects.Container {
     this.claimButtonLight = scene.add.image(width / 2, y, 'tutorial-6-claim-btn-light').setOrigin(0.5, 0.5);
     this.add(this.claimButtonLight);
 
-    this.claimButton = new Button(scene, width / 2, y, 'tutorial-6-claim-btn', 'tutorial-6-claim-btn', onNext);
+    this.claimButton = new Button(scene, width / 2, y, 'tutorial-6-claim-btn', 'tutorial-6-claim-btn', () => {
+      onNext();
+      scene.game.events.emit('simulator-claim-completed', { amount: 15000 });
+    });
     this.add(this.claimButton);
 
     this.arrow = scene.add.image(width / 2, 2500, 'tutorial-arrow-down').setOrigin(0.5, 1);
