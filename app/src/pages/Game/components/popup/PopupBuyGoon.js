@@ -63,6 +63,7 @@ class PopupBuyGoon extends Popup {
         this.popupBuyProcessing.initLoading(
           `Hiring ${this.quantity} Goon${this.quantity > 1 ? 's' : ''}.\nPlease, wait`
         );
+        this.onCompleted = null;
         this.close();
 
         scene.game.events.emit(events.buyGoon, { quantity: this.quantity });

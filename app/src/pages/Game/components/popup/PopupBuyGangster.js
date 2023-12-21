@@ -73,6 +73,7 @@ class PopupBuyGangster extends Popup {
         this.popupBuyProcessing.initLoading(
           `Hiring ${this.quantity} Gangster${this.quantity > 1 ? 's' : ''}.\nPlease, wait`
         );
+        this.onCompleted = null;
         this.close();
 
         scene.game.events.emit(events.buyGangster, { quantity: this.quantity, mintFunction: this.mintFunction });

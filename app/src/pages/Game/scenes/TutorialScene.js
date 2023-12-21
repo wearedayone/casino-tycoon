@@ -83,17 +83,17 @@ class TutorialScene extends Phaser.Scene {
     this.popupWar = new PopupWar(this, 35, 1850);
     this.add.existing(this.popupWar);
 
-    this.popupSettings = new PopupSettings(this);
-    this.add.existing(this.popupSettings);
+    // this.popupSettings = new PopupSettings(this);
+    // this.add.existing(this.popupSettings);
 
-    this.popupReferralProgram = new PopupReferralProgram(this);
-    this.add.existing(this.popupReferralProgram);
+    // this.popupReferralProgram = new PopupReferralProgram(this);
+    // this.add.existing(this.popupReferralProgram);
 
-    this.popupPortfolio = new PopupPortfolio(this);
-    this.add.existing(this.popupPortfolio);
+    // this.popupPortfolio = new PopupPortfolio(this);
+    // this.add.existing(this.popupPortfolio);
 
-    this.popupStatistic = new PopupStatistic(this);
-    this.add.existing(this.popupStatistic);
+    // this.popupStatistic = new PopupStatistic(this);
+    // this.add.existing(this.popupStatistic);
 
     this.popupDailyGangWar = new PopupDailyGangWar(this, {
       isSimulator: true,
@@ -181,8 +181,8 @@ class TutorialScene extends Phaser.Scene {
       this.popupPrizePool = new PopupPrizePool(this, { isSimulator: true });
       this.add.existing(this.popupPrizePool);
 
-      this.popupWarHistory = new PopupWarHistory(this);
-      this.add.existing(this.popupWarHistory);
+      // this.popupWarHistory = new PopupWarHistory(this);
+      // this.add.existing(this.popupWarHistory);
 
       const footer = new Footer(this, 2600, { isSimulator: true });
       footer.setDepth(1);

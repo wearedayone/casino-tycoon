@@ -59,6 +59,7 @@ class PopupSafeHouseUpgrade extends Popup {
       () => {
         if (!this.quantity) return;
         this.popupBuyProcessing.initLoading(`Upgrading Safehouse.\nPlease, wait`);
+        this.onCompleted = null;
         this.close();
 
         scene.game.events.emit(events.upgradeHouse, { quantity: this.quantity });

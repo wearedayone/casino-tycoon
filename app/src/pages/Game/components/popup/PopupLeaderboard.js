@@ -220,7 +220,7 @@ class PopupLeaderboard extends Popup {
       'button-blue-pressed',
       () => {
         this.close();
-        onClickBackButton();
+        onClickBackButton?.();
       },
       'Back',
       { fontSize: '82px', sound: 'close' }
