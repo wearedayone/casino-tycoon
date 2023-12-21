@@ -11,6 +11,11 @@ class Step15 extends Phaser.GameObjects.Container {
 
     this.setVisible(false);
 
+    const next = () => {
+      scene.popupDailyGangWar.setVisible(false);
+      onNext();
+    };
+
     scene.popupDailyGangWar.list.map((item) => (item.y -= 270));
 
     this.image = scene.add.image(width / 2, height - 300, 'tutorial-15').setOrigin(0.5, 0.5);
@@ -21,7 +26,7 @@ class Step15 extends Phaser.GameObjects.Container {
       .setOrigin(0.5, 0.5);
     this.add(this.nextButton);
     this.nextButton.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
-      onNext();
+      next();
     });
   }
 }

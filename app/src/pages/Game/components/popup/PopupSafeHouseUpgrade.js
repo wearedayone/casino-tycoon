@@ -26,6 +26,7 @@ class PopupSafeHouseUpgrade extends Popup {
   basePrice = 0;
   priceStep = 0;
   quantity = DEFAULT_QUANTITY;
+  onCompleted;
 
   constructor(scene, { isSimulator, onCompleted } = {}) {
     super(scene, 'popup-safehouse-upgrade', { ribbon: 'ribbon-safehouse-upgrade' });
@@ -37,6 +38,7 @@ class PopupSafeHouseUpgrade extends Popup {
       updateBuildings: isSimulator ? 'simulator-update-buildings' : 'update-buildings',
       requestBuildings: isSimulator ? 'simulator-request-buildings' : 'request-buildings',
     };
+    this.onCompleted = onCompleted;
 
     this.popupBuyProcessing = new PopupProcessing(scene, {
       sound: 'house',
@@ -231,6 +233,10 @@ class PopupSafeHouseUpgrade extends Popup {
 
     scene.game.events.emit(events.requestBuildings);
     scene.game.events.emit('request-gas-upgrade-safehouse');
+  }
+
+  cleanup() {
+    this.onCompleted?.();
   }
 
   updateValues() {

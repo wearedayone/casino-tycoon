@@ -29,6 +29,7 @@ class PopupBuyGoon extends Popup {
   priceStep = 0;
   quantity = DEFAULT_QUANTITY;
   estimatedMaxPurchase = 0;
+  onCompleted;
 
   constructor(scene, { isSimulator, onCompleted } = {}) {
     super(scene, 'popup-buy-goon', { ribbon: 'ribbon-buy-goon' });
@@ -40,6 +41,7 @@ class PopupBuyGoon extends Popup {
       updateWorkers: isSimulator ? 'simulator-update-workers' : 'update-workers',
       requestWorkers: isSimulator ? 'simulator-request-workers' : 'request-workers',
     };
+    this.onCompleted = onCompleted;
 
     this.popupBuyProcessing = new PopupProcessing(scene, {
       sound: 'minion',
@@ -248,6 +250,10 @@ class PopupBuyGoon extends Popup {
 
     scene.game.events.emit(events.requestWorkers);
     scene.game.events.emit('request-gas-buy-goon');
+  }
+
+  cleanup() {
+    this.onCompleted?.();
   }
 
   updateValues() {

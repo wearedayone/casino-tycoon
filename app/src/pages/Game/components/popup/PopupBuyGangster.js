@@ -35,6 +35,7 @@ class PopupBuyGangster extends Popup {
   whitelistAmountLeft = 0;
   referralDiscount = 0;
   mintFunction = 'mint';
+  onCompleted;
 
   constructor(scene, { isSimulator, onCompleted } = {}) {
     super(scene, 'popup-buy-gangster', { ribbon: 'ribbon-buy-gangster' });
@@ -46,6 +47,7 @@ class PopupBuyGangster extends Popup {
       updateMachines: isSimulator ? 'simulator-update-machines' : 'update-machines',
       requestMachines: isSimulator ? 'simulator-request-machines' : 'request-machines',
     };
+    this.onCompleted = onCompleted;
 
     // child modals
     const popupBuyBonusInfo = new PopupBuyBonusInfo(scene, this);
@@ -312,6 +314,10 @@ class PopupBuyGangster extends Popup {
 
     scene.game.events.emit(events.requestMachines);
     scene.game.events.emit('request-gas-mint');
+  }
+
+  cleanup() {
+    this.onCompleted?.();
   }
 
   updateValues() {
