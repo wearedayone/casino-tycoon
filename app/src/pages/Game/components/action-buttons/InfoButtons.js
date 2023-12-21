@@ -49,7 +49,7 @@ class InfoButtons extends Phaser.GameObjects.Container {
         if (isSimulator) return;
         scene.popupLeaderboard.open();
       },
-      { sound: 'button-1' }
+      { sound: 'button-1', isSimulator }
     );
     this.portfolioButton = new Button(
       scene,
