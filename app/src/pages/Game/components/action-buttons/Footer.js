@@ -12,7 +12,7 @@ const px = 40;
 const buttonWidth = 288;
 
 class Footer extends Phaser.GameObjects.Container {
-  constructor(scene, y, { isSimulator }) {
+  constructor(scene, y, { isSimulator } = {}) {
     super(scene, 0, 0);
 
     this.buttonWar = new Button(
