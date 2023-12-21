@@ -73,6 +73,8 @@ export const createUserIfNotExist = async (userId) => {
         ETHBalance: 0,
         walletPasswordAsked: false,
         referralCode,
+        referralTotalReward: 0,
+        referralTotalDiscount: 0,
       });
   } else {
     const { wallet } = user;

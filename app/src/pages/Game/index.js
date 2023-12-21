@@ -95,7 +95,17 @@ const Game = () => {
     },
   });
 
-  const { username, address, avatarURL, tokenBalance, ETHBalance, inviteCode, referralCode } = profile || {
+  const {
+    username,
+    address,
+    avatarURL,
+    tokenBalance,
+    ETHBalance,
+    inviteCode,
+    referralCode,
+    referralTotalReward = 0,
+    referralTotalDiscount = 0,
+  } = profile || {
     tokenBalance: 0,
     ETHBalance: 0,
   };
@@ -486,6 +496,10 @@ const Game = () => {
 
       gameRef.current?.events.on('request-invite-code', () => {
         if (inviteCode) gameRef.current.events.emit('update-invite-code', { code: inviteCode });
+      });
+
+      gameRef.current?.events.on('request-referral-data', () => {
+        gameRef.current.events.emit('update-referral-data', { referralTotalReward, referralTotalDiscount });
       });
 
       gameRef.current?.events.on('apply-invite-code', ({ code }) => {
@@ -918,6 +932,10 @@ const Game = () => {
       level: calculateHouseLevel(houseLevels, networth),
     });
   }, [networth, houseLevels]);
+
+  useEffect(() => {
+    gameRef.current?.events.emit('update-referral-data', { referralTotalReward, referralTotalDiscount });
+  }, [referralTotalReward, referralTotalDiscount]);
 
   useEffect(() => {
     gameRef.current?.events.emit('update-workers-machines', { numberOfWorkers, numberOfMachines });

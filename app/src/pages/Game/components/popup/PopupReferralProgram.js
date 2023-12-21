@@ -4,6 +4,7 @@ import TextInput from '../inputs/TextInput';
 import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
+import { customFormat } from '../../../../utils/numbers';
 
 const { width, height } = configs;
 const largeBlackExtraBold = { fontSize: fontSizes.large, color: colors.black, fontFamily: fontFamilies.extraBold };
@@ -157,8 +158,13 @@ class PopupReferralProgram extends Popup {
       this.referralCode = referralCode;
       this.referralText.text = referralCode?.toUpperCase();
     });
+    scene.game.events.on('update-referral-data', ({ referralTotalReward, referralTotalDiscount }) => {
+      this.earnedText.text = `ETH earned: ${customFormat(referralTotalReward, 4)} ETH`;
+      this.savedText.text = `ETH saved: ${customFormat(referralTotalDiscount, 4)} ETH`;
+    });
     scene.game.events.emit('request-referral-config');
     scene.game.events.emit('request-invite-code');
+    scene.game.events.emit('request-referral-data');
   }
 
   onOpen() {
