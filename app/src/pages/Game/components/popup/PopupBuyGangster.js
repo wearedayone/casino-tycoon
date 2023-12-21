@@ -125,7 +125,7 @@ class PopupBuyGangster extends Popup {
       .setOrigin(0, 0.5);
     this.add(this.bonusCoin);
 
-    const counterY = this.popup.y + this.popup.height / 2 - 280;
+    const counterY = this.popup.y + this.popup.height / 2 - 260;
     const minusBtnX = this.popup.x - this.popup.width / 2 + 310;
     this.minusBtn = new TextButton(
       scene,
@@ -207,11 +207,30 @@ class PopupBuyGangster extends Popup {
     this.quantityText.setOrigin(0.5, 0.5);
     this.add(this.quantityText);
 
-    const priceTextX = this.popup.x + 160;
-    this.priceText = scene.add.text(priceTextX, counterY, '0', largeBlackExtraBold).setOrigin(0, 0.5);
+    this.priceTextX = this.popup.x + 160;
+    this.priceText = scene.add.text(this.priceTextX, counterY, '0', largeBlackExtraBold).setOrigin(0, 0.5);
     this.add(this.priceText);
+
+    // WL & referral mint
+    this.alternativePrice = scene.add.text(this.priceTextX, counterY - 110, '0', largeBlackExtraBold).setVisible(false);
+    this.priceStrikethrough = scene.add
+      .rectangle(this.priceTextX + 20, counterY, this.priceText.width, 5, 0x29000b)
+      .setVisible(false);
+    this.add(this.alternativePrice);
+    this.add(this.priceStrikethrough);
+    this.whitelistNote = scene.add
+      .text(this.priceTextX, counterY, '(WL)', {
+        fontSize: fontSizes.small,
+        color: colors.black,
+        fontFamily: fontFamilies.bold,
+        align: 'center',
+      })
+      .setOrigin(0.5, -1)
+      .setVisible(false);
+    this.add(this.whitelistNote);
+
     this.insufficientBalance = scene.add
-      .text(priceTextX, counterY, 'Insufficient ETH', {
+      .text(this.priceTextX, counterY, 'Insufficient ETH', {
         fontSize: fontSizes.small,
         color: colors.black,
         fontFamily: fontFamilies.bold,
@@ -294,9 +313,17 @@ class PopupBuyGangster extends Popup {
     this.roiText.text = `${roi}%`;
     this.bonusText.text = `${formatter.format(bonus)}`;
     this.bonusCoin.x = this.bonusText.x + this.bonusText.width + 20;
-    this.priceText.text = `${formatter.format(estimatedPrice)}`;
+    this.priceText.text = `${formatter.format(this.quantity * this.basePrice)}`;
+    const referralDiscount = this.mintFunction === 'mintReferral' ? ` (-${this.referralDiscount * 100}%)` : '';
+    this.alternativePrice.text = `${formatter.format(estimatedPrice)}${referralDiscount}`;
+    this.priceStrikethrough.width = this.priceText.width;
     this.coin.x = this.priceText.x + this.priceText.width + 20;
+    this.whitelistNote.x = this.priceTextX + this.priceText.width / 2;
 
+    const hasDifferentPrice = this.mintFunction !== 'mint';
+    this.whitelistNote.setVisible(this.mintFunction === 'mintWL');
+    this.alternativePrice.setVisible(hasDifferentPrice);
+    this.priceStrikethrough.setVisible(hasDifferentPrice);
     this.insufficientBalance.setVisible(this.quantity > this.estimatedMaxPurchase);
     this.upgradeBtn.setDisabledState(this.scene.isGameEnded || this.quantity > this.estimatedMaxPurchase);
   }
