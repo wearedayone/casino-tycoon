@@ -78,6 +78,18 @@ const useSimulatorGameListener = () => {
   const setupSimulatorGameListener = (game) => {
     setGameRef(game);
 
+    game.events.on('simulator-end', () => {
+      console.log('simulator-end');
+      setGameRef(null);
+    });
+
+    game.events.on('simulator-request-reserve-pool', () => {
+      game.events.emit('simulator-update-reserve-pool', {
+        reservePool: activeSeason?.reservePool || 0,
+        reservePoolReward: activeSeason?.reservePoolReward || 0,
+      });
+    });
+
     game.events.on('simulator-request-balances', () => {
       game.events.emit('simulator-update-balances', balances);
     });
@@ -187,7 +199,37 @@ const useSimulatorGameListener = () => {
         game.events.emit('simulator-update-rank', { rank: index + 1, reward: thisUser.reward });
       }
     });
+
+    game.events.on('simulator-request-next-war-time', () => {
+      game.events.emit('simulator-update-next-war-time', { time: Date.now() + 24 * 60 * 60 * 1000 });
+    });
+
+    game.events.on('simulator-request-war-die-chance', () => {
+      game.events.emit('simulator-update-war-die-chance', { dieChance: activeSeason?.warConfig?.dieChance });
+    });
+
+    game.events.on('simulator-request-total-voters', () => {
+      game.events.emit('simulator-update-total-voters', { count: leaderboardData.length });
+    });
+
+    game.events.on('simulator-request-war-status', () => {
+      game.events.emit('simulator-update-war-status', { war: false });
+    });
+
+    game.events.on('simulator-refresh-eth-balance', () => {
+      game.events.emit('simulator-refresh-eth-balance-completed');
+    });
+
+    game.events.on('simulator-request-eth-balance', async () => {
+      game.events.emit('simulator-update-eth-balance', { address: user.address, ETHBalance: balances.ETHBalance });
+    });
   };
+
+  useEffect(() => {
+    if (gameRef) {
+      gameRef.events.emit('simulator-update-eth-balance', { address: user.address, ETHBalance: balances.ETHBalance });
+    }
+  }, [balances.ETHBalance]);
 
   useEffect(() => {
     if (gameRef) {
@@ -206,6 +248,7 @@ const useSimulatorGameListener = () => {
   }, [balances]);
 
   useEffect(() => {
+    console.log('Change ', { activeSeason, gameRef });
     if (gameRef) {
       gameRef.events.emit('simulator-update-networth', {
         networth: assets.networth,
@@ -304,6 +347,15 @@ const useSimulatorGameListener = () => {
     if (isLeaderboardModalOpen && gameRef)
       gameRef.events.emit('simulator-update-ranking-rewards', activeSeason?.rankingRewards || []);
   }, [isLeaderboardModalOpen, activeSeason?.rankingRewards]);
+
+  useEffect(() => {
+    if (gameRef) {
+      gameRef.events.emit('simulator-update-reserve-pool', {
+        reservePool: activeSeason?.reservePool || 0,
+        reservePoolReward: activeSeason?.reservePoolReward || 0,
+      });
+    }
+  }, [activeSeason?.reservePool, activeSeason?.reservePoolReward]);
 
   return { setupSimulatorGameListener };
 };

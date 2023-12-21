@@ -62,25 +62,25 @@ class TutorialScene extends Phaser.Scene {
   preload() {
     this.bgMusic = this.sound.add('bg', { loop: true, volume: 0.15 });
 
-    this.background = new Background(this, 'bg');
+    this.background = new Background(this, 'bg'); // done
     this.add.existing(this.background);
 
-    this.animationLayer = new Animation(this, { isSimulator: true });
+    this.animationLayer = new Animation(this, { isSimulator: true }); // done
     this.add.existing(this.animationLayer);
 
-    const gangsterHouse = new GangsterHouse(this, 2200, { isSimulator: true });
+    const gangsterHouse = new GangsterHouse(this, 2200, { isSimulator: true }); // done
     this.add.existing(gangsterHouse);
 
-    this.popupDeposit = new PopupDeposit(this);
+    this.popupDeposit = new PopupDeposit(this, null, { isSimulator: true }); // done
     this.add.existing(this.popupDeposit);
 
-    this.popupBuy = new PopupBuy(this, width - 335, 1600);
+    this.popupBuy = new PopupBuy(this, width - 335, 1600); // done
     this.add.existing(this.popupBuy);
 
-    const header = new Header(this, 250, { isSimulator: true });
+    const header = new Header(this, 250, { isSimulator: true }); // done
     this.add.existing(header);
 
-    this.popupWar = new PopupWar(this, 35, 1850);
+    this.popupWar = new PopupWar(this, 35, 1850); // done
     this.add.existing(this.popupWar);
 
     // this.popupSettings = new PopupSettings(this);
@@ -101,7 +101,7 @@ class TutorialScene extends Phaser.Scene {
         this.tutorial.step15.setVisible(false);
         this.tutorial.step16.setVisible(true);
       },
-    });
+    }); // done
     this.add.existing(this.popupDailyGangWar);
 
     this.game.events.on('music-on', () => {
@@ -140,7 +140,7 @@ class TutorialScene extends Phaser.Scene {
             this.tutorial.step11.setVisible(true);
           }, 2000);
         },
-      });
+      }); // done
       this.add.existing(this.popupSafeHouseUpgrade);
 
       this.popupBuyGoon = new PopupBuyGoon(this, {
@@ -153,7 +153,7 @@ class TutorialScene extends Phaser.Scene {
             this.tutorial.step9.setVisible(true);
           }, 2000);
         },
-      });
+      }); // done
       this.add.existing(this.popupBuyGoon);
 
       this.popupBuyGangster = new PopupBuyGangster(this, {
@@ -166,7 +166,7 @@ class TutorialScene extends Phaser.Scene {
             this.tutorial.step4.setVisible(true);
           }, 2000);
         },
-      });
+      }); // done
       this.add.existing(this.popupBuyGangster);
 
       this.popupLeaderboard = new PopupLeaderboard(this, {
@@ -175,21 +175,21 @@ class TutorialScene extends Phaser.Scene {
           this.tutorial.step13.setVisible(false);
           this.tutorial.step14.setVisible(true);
         },
-      });
+      }); // done
       this.add.existing(this.popupLeaderboard);
 
-      this.popupPrizePool = new PopupPrizePool(this, { isSimulator: true });
+      this.popupPrizePool = new PopupPrizePool(this, { isSimulator: true }); // done
       this.add.existing(this.popupPrizePool);
 
       // this.popupWarHistory = new PopupWarHistory(this);
       // this.add.existing(this.popupWarHistory);
 
-      const footer = new Footer(this, 2600, { isSimulator: true });
+      const footer = new Footer(this, 2600, { isSimulator: true }); // done
       footer.setDepth(1);
       this.add.existing(footer);
     });
 
-    const infoButtons = new InfoButtons(this, 550, { isSimulator: true });
+    const infoButtons = new InfoButtons(this, 550, { isSimulator: true }); // done
     this.add.existing(infoButtons);
 
     this.tutorial = new Tutorial(this);
