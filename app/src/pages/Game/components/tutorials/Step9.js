@@ -16,7 +16,15 @@ class Step9 extends Phaser.GameObjects.Container {
 
     this.setVisible(false);
 
-    this.character = new TutorialCharacter(scene, width / 2, height / 2 - 200, 'tutorial-9', onNext);
+    const next = () => {
+      scene.popupBuy.setVisible(false);
+      scene.popupSafeHouseUpgrade.setDepth(5);
+      scene.popupSafeHouseUpgrade.background?.destroy();
+      scene.popupSafeHouseUpgrade.setVisible(true);
+      onNext();
+    };
+
+    this.character = new TutorialCharacter(scene, width / 2, height / 2 - 200, 'tutorial-9', next);
     this.add(this.character);
 
     this.activeButton = new Button(
@@ -33,12 +41,7 @@ class Step9 extends Phaser.GameObjects.Container {
         scene.popupWar.setVisible(false);
         scene.popupBuy.setDepth(5);
         scene.popupBuy.updateDisabled({ goonDisabled: true, gangsterDisabled: true, houseDisabled: false });
-        scene.popupBuy.updateCallback(() => {
-          scene.popupSafeHouseUpgrade.setDepth(5);
-          scene.popupSafeHouseUpgrade.background?.destroy();
-          scene.popupBuy.setVisible(false);
-          onNext();
-        });
+        scene.popupBuy.updateCallback(() => next());
         scene.popupBuy.setVisible(!scene.popupBuy.visible);
       },
       { sound: 'button-1' }

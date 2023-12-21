@@ -17,7 +17,14 @@ class Step12 extends Phaser.GameObjects.Container {
 
     this.setVisible(false);
 
-    this.character = new TutorialCharacter(scene, width / 2, height / 2 + 400, 'tutorial-12', onNext);
+    const next = () => {
+      scene.popupLeaderboard.setDepth(5);
+      scene.popupLeaderboard.background?.destroy();
+      scene.popupLeaderboard.open();
+      onNext();
+    };
+
+    this.character = new TutorialCharacter(scene, width / 2, height / 2 + 400, 'tutorial-12', next);
     this.add(this.character);
 
     this.rankButton = new RankButton(
@@ -26,12 +33,7 @@ class Step12 extends Phaser.GameObjects.Container {
       y,
       'button-rank',
       'button-rank-pressed',
-      () => {
-        scene.popupLeaderboard.setDepth(5);
-        scene.popupLeaderboard.background?.destroy();
-        scene.popupLeaderboard.open();
-        onNext();
-      },
+      () => next(),
       { sound: 'button-1' }
     );
     this.add(this.rankButton);

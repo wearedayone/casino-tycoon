@@ -95,7 +95,13 @@ class TutorialScene extends Phaser.Scene {
     this.popupStatistic = new PopupStatistic(this);
     this.add.existing(this.popupStatistic);
 
-    this.popupDailyGangWar = new PopupDailyGangWar(this);
+    this.popupDailyGangWar = new PopupDailyGangWar(this, {
+      isSimulator: true,
+      onCompleted: () => {
+        this.tutorial.step15.setVisible(false);
+        this.tutorial.step16.setVisible(true);
+      },
+    });
     this.add.existing(this.popupDailyGangWar);
 
     this.game.events.on('music-on', () => {
