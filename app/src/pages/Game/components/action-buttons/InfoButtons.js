@@ -22,7 +22,7 @@ class InfoButtons extends Phaser.GameObjects.Container {
       'button-setting-pressed',
       () => {
         if (isSimulator) return;
-        scene.popupSettings.open();
+        scene.popupSettings?.open();
       },
       { sound: 'button-1' }
     );
@@ -35,7 +35,7 @@ class InfoButtons extends Phaser.GameObjects.Container {
       'button-referral-pressed',
       () => {
         if (isSimulator) return;
-        scene.popupReferralProgram.open();
+        scene.popupReferralProgram?.open();
       },
       { sound: 'button-1' }
     );
@@ -47,7 +47,7 @@ class InfoButtons extends Phaser.GameObjects.Container {
       'button-rank-pressed',
       () => {
         if (isSimulator) return;
-        scene.popupLeaderboard.open();
+        scene.popupLeaderboard?.open();
       },
       { sound: 'button-1', isSimulator }
     );
@@ -59,7 +59,7 @@ class InfoButtons extends Phaser.GameObjects.Container {
       'button-portfolio-pressed',
       () => {
         if (isSimulator) return;
-        scene.popupPortfolio.open();
+        scene.popupPortfolio?.open();
       },
       { sound: 'button-1' }
     );

@@ -123,6 +123,7 @@ class Tutorial extends Phaser.GameObjects.Container {
 
     this.step17 = new Step17(scene, () => {
       this.step17.setVisible(false);
+      scene.scene.stop();
       scene.scene.start('MainScene');
     });
     this.add(this.step17);
