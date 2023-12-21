@@ -171,14 +171,14 @@ class TutorialScene extends Phaser.Scene {
 
       this.popupLeaderboard = new PopupLeaderboard(this, {
         isSimulator: true,
-        onClosePopup: () => {
+        onClickBackButton: () => {
           this.tutorial.step13.setVisible(false);
           this.tutorial.step14.setVisible(true);
         },
       });
       this.add.existing(this.popupLeaderboard);
 
-      this.popupPrizePool = new PopupPrizePool(this);
+      this.popupPrizePool = new PopupPrizePool(this, { isSimulator: true });
       this.add.existing(this.popupPrizePool);
 
       this.popupWarHistory = new PopupWarHistory(this);
