@@ -1,12 +1,37 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { faker } from '@faker-js/faker';
 
 import useSystemStore from '../stores/system.store';
+import useUserStore from '../stores/user.store';
 import useSeasonCountdown from './useSeasonCountdown';
 import { calculateHouseLevel } from '../utils/formulas';
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const useSimulatorGameListener = ({ leaderboardData }) => {
+const calculateReward = (prizePool, rankingRewards, rankIndex) => {
+  const totalPercentages = rankingRewards.reduce(
+    (total, rankingReward) => total + rankingReward.share * (rankingReward.rankEnd - rankingReward.rankStart + 1),
+    0
+  );
+  if (totalPercentages >= 100) throw new Error('Invalid ranking reward');
+
+  const rank = rankIndex + 1;
+  const rankingReward = rankingRewards.find((item) => item.rankStart <= rank && rank <= item.rankEnd);
+  if (!rankingReward) return 0;
+
+  return prizePool * rankingReward.share;
+};
+
+const mockUsers = Array.from({ length: 20 }, () => ({
+  avatarURL: faker.internet.avatar(),
+  id: faker.string.uuid(),
+  networth: faker.number.int({ min: 0, max: 1000 }),
+  userId: faker.string.uuid(),
+  username: faker.internet.userName(),
+}));
+
+const useSimulatorGameListener = () => {
+  const user = useUserStore((state) => state.profile);
   const activeSeason = useSystemStore((state) => state.activeSeason);
   // console.log(activeSeason);
   // const [activeSeason, setActiveSeason] = useState({
@@ -23,6 +48,32 @@ const useSimulatorGameListener = ({ leaderboardData }) => {
   });
   const [isLeaderboardModalOpen, setLeaderboardModalOpen] = useState(false);
   const { isEnded, countdownString } = useSeasonCountdown({ open: isLeaderboardModalOpen });
+
+  const leaderboardData = useMemo(() => {
+    if (!user || !activeSeason?.rankingRewards) return [];
+
+    const allUsers = [
+      ...mockUsers,
+      {
+        avatarURL: user.avatarURL,
+        id: faker.string.uuid(),
+        networth: assets.networth,
+        userId: user.id,
+        username: user.username,
+        isUser: true,
+      },
+    ]
+      .sort((user1, user2) => user2.networth - user1.networth)
+      .map((user, index) => {
+        return {
+          ...user,
+          rank: index + 1,
+          reward: calculateReward(activeSeason.prizePool, activeSeason?.rankingRewards, index),
+        };
+      });
+
+    return allUsers;
+  }, [user, activeSeason?.prizePool, assets?.networth, activeSeason?.rankingRewards]);
 
   const setupSimulatorGameListener = (game) => {
     setGameRef(game);
@@ -128,9 +179,25 @@ const useSimulatorGameListener = ({ leaderboardData }) => {
     game.events.on('simulator-close-leaderboard-modal', () => {
       setLeaderboardModalOpen(false);
     });
+
+    game.events.on('simulator-request-rank', () => {
+      const index = leaderboardData.findIndex((item) => item.isUser);
+      if (index > -1) {
+        const thisUser = leaderboardData[index];
+        game.events.emit('simulator-update-rank', { rank: index + 1, reward: thisUser.reward });
+      }
+    });
   };
 
-  console.log(assets);
+  useEffect(() => {
+    if (gameRef) {
+      const index = leaderboardData.findIndex((item) => item.isUser);
+      if (index > -1) {
+        const thisUser = leaderboardData[index];
+        gameRef.events.emit('simulator-update-rank', { rank: index + 1, reward: thisUser.reward });
+      }
+    }
+  }, [leaderboardData]);
 
   useEffect(() => {
     if (gameRef) {
@@ -228,11 +295,10 @@ const useSimulatorGameListener = ({ leaderboardData }) => {
   }, [countdownString]);
 
   useEffect(() => {
-    console.log({ isLeaderboardModalOpen, gameRef, leaderboardData });
     if (isLeaderboardModalOpen && gameRef) {
-      gameRef.events.emit('simulator-update-leaderboard', leaderboardData?.data || []);
+      gameRef.events.emit('simulator-update-leaderboard', leaderboardData || []);
     }
-  }, [isLeaderboardModalOpen, leaderboardData?.data]);
+  }, [isLeaderboardModalOpen, leaderboardData]);
 
   useEffect(() => {
     if (isLeaderboardModalOpen && gameRef)

@@ -34,7 +34,7 @@ class Step12 extends Phaser.GameObjects.Container {
       'button-rank',
       'button-rank-pressed',
       () => next(),
-      { sound: 'button-1' }
+      { sound: 'button-1', isSimulator: true }
     );
     this.add(this.rankButton);
 

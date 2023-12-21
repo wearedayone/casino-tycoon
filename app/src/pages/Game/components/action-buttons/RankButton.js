@@ -3,8 +3,13 @@ import Button from '../button/Button';
 const buttonSize = 186;
 
 class RankButton extends Button {
-  constructor(scene, x, y, defaultImage, pressedImage, onClick, sound) {
-    super(scene, x, y, defaultImage, pressedImage, onClick, sound);
+  constructor(scene, x, y, defaultImage, pressedImage, onClick, { sound, isSimulator } = {}) {
+    super(scene, x, y, defaultImage, pressedImage, onClick, { sound });
+
+    const events = {
+      updateRank: isSimulator ? 'simulator-update-rank' : 'update-rank',
+      requestRank: isSimulator ? 'simulator-request-rank' : 'request-rank',
+    };
 
     this.valueText = scene.add
       .text(0, buttonSize / 4 + 10, ``, {
@@ -19,11 +24,11 @@ class RankButton extends Button {
 
     this.add(this.valueText);
 
-    scene.game.events.on('update-rank', ({ rank }) => {
+    scene.game.events.on(events.updateRank, ({ rank }) => {
       if (rank) this.valueText.text = `#${rank}`;
     });
 
-    scene.game.events.emit('request-rank');
+    scene.game.events.emit(events.requestRank);
   }
 }
 
