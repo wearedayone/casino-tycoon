@@ -1,15 +1,9 @@
 import { BigNumber } from 'alchemy-sdk';
+import { formatEther, parseEther } from '@ethersproject/units';
 
 import admin, { firestore } from '../configs/firebase.config.js';
-import { getActiveSeason, updateSeasonSnapshotSchedule } from './season.service.js';
-import {
-  calculateNextBuildingBuyPriceBatch,
-  calculateNextWorkerBuyPriceBatch,
-  calculateNewEstimatedEndTimeUnix,
-  calculateReservePoolBonus,
-} from '../utils/formulas.js';
 import alchemy from '../configs/alchemy.config.js';
-import { formatEther, parseEther } from '@ethersproject/units';
+import { getActiveSeason, updateSeasonSnapshotSchedule } from './season.service.js';
 import {
   claimToken as claimTokenTask,
   claimTokenBonus,
@@ -18,6 +12,13 @@ import {
   signMessageBuyGoon,
   signMessageBuyGangster,
 } from './worker.service.js';
+import {
+  calculateNextBuildingBuyPriceBatch,
+  calculateNextWorkerBuyPriceBatch,
+  calculateNewEstimatedEndTimeUnix,
+  calculateReservePoolBonus,
+} from '../utils/formulas.js';
+import { getAccurate } from '../utils/math.js';
 import logger from '../utils/logger.js';
 import environments from '../utils/environments.js';
 
@@ -44,6 +45,7 @@ export const initTransaction = async ({ userId, type, ...data }) => {
         .collection('gamePlay')
         .where('userId', '==', userId)
         .where('seasonId', '==', activeSeason.id)
+        .limit(1)
         .get();
       const userSnapshot = await firestore.collection('user').doc(userId).get();
       const { isWhitelisted, whitelistAmountLeft } = gamePlaySnapshot.docs[0].data();
@@ -54,15 +56,22 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       txnData.amount = isMintWhitelist ? Math.min(data.amount, whitelistAmountLeft) : data.amount; // cannot exceed whitelistAmountLeft
 
       if (inviteCode && !isMintWhitelist) {
-        const referrerSnapshot = await firestore.collection('user').where('referralCode', '==', inviteCode).get();
+        const referrerSnapshot = await firestore
+          .collection('user')
+          .where('referralCode', '==', inviteCode)
+          .limit(1)
+          .get();
         if (!referrerSnapshot.size) break;
 
         userReferralDiscount = referralConfig.referralDiscount;
         txnData.referrerAddress = referrerSnapshot.docs[0].data().address;
+        txnData.referralDiscount = getAccurate(data.amount * machine.basePrice * userReferralDiscount);
       }
-      const unitPrice = isMintWhitelist ? machine.whitelistPrice : machine.basePrice * (1 - userReferralDiscount);
+      const unitPrice = isMintWhitelist
+        ? machine.whitelistPrice
+        : getAccurate(machine.basePrice * (1 - userReferralDiscount));
       const estimatedPrice = data.amount * unitPrice;
-      txnData.value = Math.ceil(estimatedPrice * 1000000) / 1000000;
+      txnData.value = getAccurate(estimatedPrice);
       txnData.prices = Array.from({ length: data.amount }, () => unitPrice);
       break;
     case 'buy-worker':
@@ -301,16 +310,17 @@ const updateUserBalance = async (userId, transactionId) => {
 
 const updateUserGamePlay = async (userId, transactionId) => {
   const snapshot = await firestore.collection('transaction').doc(transactionId).get();
-  const { type, amount, isMintWhitelist } = snapshot.data();
+  const { type, amount, value, isMintWhitelist, referrerAddress, referralDiscount } = snapshot.data();
 
   const activeSeason = await getActiveSeason();
-  const { machine, worker, building } = activeSeason;
+  const { referralConfig } = activeSeason;
 
   // update user number of assets && pendingReward && startRewardCountingTime
   const gamePlaySnapshot = await firestore
     .collection('gamePlay')
     .where('userId', '==', userId)
     .where('seasonId', '==', activeSeason.id)
+    .limit(1)
     .get();
   const userGamePlay = gamePlaySnapshot.docs[0];
   logger.debug(`userGamePlay before update: ${JSON.stringify(userGamePlay.data())}`);
@@ -324,10 +334,34 @@ const updateUserGamePlay = async (userId, transactionId) => {
   let gamePlayData = {};
   switch (type) {
     case 'buy-machine':
-      // TODO: move this to listener later
-      if (isMintWhitelist) gamePlayData = { whitelistAmountLeft: admin.firestore.FieldValue.increment(-amount) };
       // gamePlayData = { numberOfMachines: admin.firestore.FieldValue.increment(amount) };
       assets.numberOfMachines += amount;
+      // TODO: move this to listener later
+      if (isMintWhitelist) gamePlayData = { whitelistAmountLeft: admin.firestore.FieldValue.increment(-amount) };
+      if (referrerAddress) {
+        // update discount
+        const user = await firestore.collection('user').doc(userId).get();
+        const currentDiscount = user.data().referralTotalDiscount;
+        const referralTotalDiscount = currentDiscount
+          ? admin.firestore.FieldValue.increment(referralDiscount)
+          : referralDiscount;
+
+        await user.ref.update({ referralTotalDiscount });
+
+        // update reward
+        const referrerSnapshot = await firestore
+          .collection('user')
+          .where('address', '==', referrerAddress)
+          .limit(1)
+          .get();
+
+        if (!referrerSnapshot.size) break;
+        const reward = getAccurate(value * referralConfig.referralBonus, 7);
+        const userCurrentReward = referrerSnapshot.docs[0].data().referralTotalReward;
+        const referralTotalReward = userCurrentReward ? admin.firestore.FieldValue.increment(reward) : reward;
+
+        await referrerSnapshot.docs[0].ref.update({ referralTotalReward });
+      }
       break;
     case 'buy-worker':
       gamePlayData = { numberOfWorkers: admin.firestore.FieldValue.increment(amount) };
@@ -540,7 +574,7 @@ export const calculateGeneratedReward = async (userId, { start, end, numberOfMac
   const diffInDays = (now - start) / (24 * 60 * 60 * 1000);
 
   const generatedReward = diffInDays * (numberOfMachines * machine.dailyReward + numberOfWorkers * worker.dailyReward);
-  return Math.round(generatedReward * 1000) / 1000;
+  return getAccurate(generatedReward, 3);
 };
 
 /* all txn types that change user's token generation rate */
