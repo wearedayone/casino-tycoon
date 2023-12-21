@@ -9,8 +9,13 @@ class PopupPrizePool extends Popup {
   prizePool = 0;
   items = [];
 
-  constructor(scene) {
+  constructor(scene, { isSimulator } = {}) {
     super(scene, 'popup-small', { title: 'Rank Prize Pool', titleIcon: 'icon-info', noCloseBtn: true });
+
+    const events = {
+      updateSeason: isSimulator ? 'simulator-update-season' : 'update-season',
+      updateRankingRewards: isSimulator ? 'simulator-update-ranking-rewards' : 'update-ranking-rewards',
+    };
 
     const leftMargin = this.popup.x - this.popup.width / 2;
     const paddedX = leftMargin + this.popup.width * 0.1;

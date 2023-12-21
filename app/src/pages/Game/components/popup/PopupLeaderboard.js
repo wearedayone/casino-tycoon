@@ -27,9 +27,8 @@ class PopupLeaderboard extends Popup {
   isEnded = false;
   numberOfRows = 0;
   stars = [];
-  onClosePopup;
 
-  constructor(scene, { isSimulator, onClosePopup } = {}) {
+  constructor(scene, { isSimulator, onClickBackButton } = {}) {
     super(scene, 'popup-extra-large', { title: 'Season Leaderboard', noCloseBtn: true });
 
     const events = {
@@ -40,7 +39,6 @@ class PopupLeaderboard extends Popup {
       closeLeaderboardModal: isSimulator ? 'simulator-close-leaderboard-modal' : 'close-leaderboard-modal',
     };
     this.events = events;
-    this.onClosePopup = onClosePopup;
 
     const leftMargin = this.popup.x - this.popup.width / 2;
     const paddedX = leftMargin + this.popup.width * 0.1;
@@ -220,7 +218,10 @@ class PopupLeaderboard extends Popup {
       height / 2 + this.popup.height / 2 - 20,
       'button-blue',
       'button-blue-pressed',
-      () => this.close(),
+      () => {
+        this.close();
+        onClickBackButton();
+      },
       'Back',
       { fontSize: '82px', sound: 'close' }
     );
@@ -266,7 +267,6 @@ class PopupLeaderboard extends Popup {
       this.table.setMouseWheelScrollerEnable(false);
     }
     this.scene.game.events.emit(this.events?.closeLeaderboardModal || '');
-    this.onClosePopup?.();
   }
 
   updateValues(season) {

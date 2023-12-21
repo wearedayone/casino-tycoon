@@ -234,6 +234,11 @@ const useSimulatorGameListener = ({ leaderboardData }) => {
     }
   }, [isLeaderboardModalOpen, leaderboardData?.data]);
 
+  useEffect(() => {
+    if (isLeaderboardModalOpen && gameRef)
+      gameRef.events.emit('simulator-update-ranking-rewards', activeSeason?.rankingRewards || []);
+  }, [isLeaderboardModalOpen, activeSeason?.rankingRewards]);
+
   return { setupSimulatorGameListener };
 };
 
