@@ -184,7 +184,7 @@ class TutorialScene extends Phaser.Scene {
       this.popupWarHistory = new PopupWarHistory(this);
       this.add.existing(this.popupWarHistory);
 
-      const footer = new Footer(this, 2600);
+      const footer = new Footer(this, 2600, { isSimulator: true });
       footer.setDepth(1);
       this.add.existing(footer);
     });

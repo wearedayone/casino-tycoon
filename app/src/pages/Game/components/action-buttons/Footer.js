@@ -12,7 +12,7 @@ const px = 40;
 const buttonWidth = 288;
 
 class Footer extends Phaser.GameObjects.Container {
-  constructor(scene, y) {
+  constructor(scene, y, { isSimulator }) {
     super(scene, 0, 0);
 
     this.buttonWar = new Button(
@@ -41,7 +41,9 @@ class Footer extends Phaser.GameObjects.Container {
       { sound: 'button-1' }
     );
 
-    this.buttonClaim = new ClaimButton(scene, width / 2, y);
+    this.buttonClaim = isSimulator
+      ? new Button(scene, width / 2, y, 'tutorial-claim-inactive-btn', 'tutorial-claim-inactive-btn', () => {})
+      : new ClaimButton(scene, width / 2, y);
 
     this.add(this.buttonWar);
     this.add(this.buttonBuy);
