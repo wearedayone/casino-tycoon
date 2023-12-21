@@ -27,7 +27,7 @@ class Step16 extends Phaser.GameObjects.Container {
         scene.popupDeposit.open();
       },
       'eth-balance',
-      0
+      '100k'
     );
     this.add(this.ethBalance);
 

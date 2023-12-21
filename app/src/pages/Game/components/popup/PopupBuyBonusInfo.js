@@ -8,8 +8,13 @@ const { width, height } = configs;
 const largeBlackBold = { fontSize: fontSizes.large, color: colors.black, fontFamily: fontFamilies.bold };
 
 class PopupBuyBonusInfo extends Popup {
-  constructor(scene, parentModal) {
+  constructor(scene, parentModal, { isSimulator } = {}) {
     super(scene, 'popup-small', { title: 'Buy Bonus', titleIcon: 'icon-info' });
+
+    const events = {
+      updateReservePool: isSimulator ? 'simulator-update-reserve-pool' : 'update-reserve-pool',
+      requestReservePool: isSimulator ? 'simulator-request-reserve-pool' : 'request-reserve-pool',
+    };
 
     const leftMargin = this.popup.x - this.popup.width / 2;
     this.paddedX = leftMargin + this.popup.width * 0.1;
@@ -52,8 +57,8 @@ class PopupBuyBonusInfo extends Popup {
     );
     this.add(this.buttonBack);
 
-    scene.game.events.on('update-reserve-pool', (data) => this.updateData(data));
-    scene.game.events.emit('request-reserve-pool');
+    scene.game.events.on(events.updateReservePool, (data) => this.updateData(data));
+    scene.game.events.emit(events.requestReservePool);
   }
 
   updateData({ reservePool, reservePoolReward }) {

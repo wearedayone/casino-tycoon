@@ -50,7 +50,7 @@ class PopupBuyGangster extends Popup {
     this.onCompleted = onCompleted;
 
     // child modals
-    const popupBuyBonusInfo = new PopupBuyBonusInfo(scene, this);
+    const popupBuyBonusInfo = new PopupBuyBonusInfo(scene, this, { isSimulator });
     scene.add.existing(popupBuyBonusInfo);
     this.popupBuyProcessing = new PopupProcessing(scene, {
       sound: 'gangster',

@@ -11,9 +11,21 @@ const { width, height } = configs;
 class PopupDeposit extends Popup {
   loading = false;
   address = '';
+  isSimulator;
 
-  constructor(scene, parentModal) {
+  constructor(scene, parentModal, { isSimulator } = {}) {
     super(scene, 'popup-small', { title: 'Deposit' });
+    this.isSimulator = isSimulator;
+
+    const events = {
+      refreshEthBalance: isSimulator ? 'simulator-refresh-eth-balance' : 'refresh-eth-balance',
+      refreshEthBalanceCompleted: isSimulator
+        ? 'simulator-refresh-eth-balance-completed'
+        : 'refresh-eth-balance-completed',
+      updateEthBalance: isSimulator ? 'simulator-update-eth-balance' : 'update-eth-balance',
+      requestEthBalance: isSimulator ? 'simulator-request-eth-balance' : 'request-eth-balance',
+    };
+    this.events = events;
 
     // child modals
     this.popupDepositETH = new PopupDepositETH(scene, this);
@@ -102,7 +114,7 @@ class PopupDeposit extends Popup {
       () => {
         if (this.loading) return;
         this.loading = true;
-        scene.game.events.emit('refresh-eth-balance');
+        scene.game.events.emit(events.refreshEthBalance);
       },
       { sound: 'button-1' }
     );
@@ -139,17 +151,17 @@ class PopupDeposit extends Popup {
     );
     this.add(buttonBack);
 
-    scene.game.events.on('refresh-eth-balance-completed', () => {
+    scene.game.events.on(events.refreshEthBalanceCompleted, () => {
       this.loading = false;
     });
-    scene.game.events.on('update-eth-balance', ({ address, ETHBalance }) => {
+    scene.game.events.on(events.updateEthBalance, ({ address, ETHBalance }) => {
       this.balanceText.text = `${formatter.format(ETHBalance)} ETH`;
       this.updateAddress(address);
     });
   }
 
   onOpen() {
-    this.scene.game.events.emit('request-eth-balance');
+    this.scene.game.events.emit(this.events?.requestEthBalance || '');
   }
 
   updateAddress(address) {
