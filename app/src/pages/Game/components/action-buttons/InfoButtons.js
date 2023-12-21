@@ -11,9 +11,7 @@ const buttonSize = 186;
 const verticalGap = buttonSize + 50;
 
 class InfoButtons extends Phaser.GameObjects.Container {
-  onClick = () => {};
-
-  constructor(scene, y) {
+  constructor(scene, y, { isSimulator } = {}) {
     super(scene, 0, 0);
 
     this.settingButton = new Button(
@@ -23,8 +21,8 @@ class InfoButtons extends Phaser.GameObjects.Container {
       'button-setting',
       'button-setting-pressed',
       () => {
+        if (isSimulator) return;
         scene.popupSettings.open();
-        this.onClick?.();
       },
       { sound: 'button-1' }
     );
@@ -36,8 +34,8 @@ class InfoButtons extends Phaser.GameObjects.Container {
       'button-referral',
       'button-referral-pressed',
       () => {
+        if (isSimulator) return;
         scene.popupReferralProgram.open();
-        this.onClick?.();
       },
       { sound: 'button-1' }
     );
@@ -48,8 +46,8 @@ class InfoButtons extends Phaser.GameObjects.Container {
       'button-rank',
       'button-rank-pressed',
       () => {
+        if (isSimulator) return;
         scene.popupLeaderboard.open();
-        this.onClick?.();
       },
       { sound: 'button-1' }
     );
@@ -60,8 +58,8 @@ class InfoButtons extends Phaser.GameObjects.Container {
       'button-portfolio',
       'button-portfolio-pressed',
       () => {
+        if (isSimulator) return;
         scene.popupPortfolio.open();
-        this.onClick?.();
       },
       { sound: 'button-1' }
     );
@@ -70,10 +68,6 @@ class InfoButtons extends Phaser.GameObjects.Container {
     this.add(this.referralButton);
     this.add(this.rankButton);
     this.add(this.portfolioButton);
-  }
-
-  updateCallback(callback) {
-    this.onClick = callback;
   }
 }
 
