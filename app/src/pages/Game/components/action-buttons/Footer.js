@@ -22,6 +22,7 @@ class Footer extends Phaser.GameObjects.Container {
       'button-war',
       'button-war-pressed',
       () => {
+        if (isSimulator) return;
         scene.popupBuy.setVisible(false);
         scene.popupWar.setVisible(!scene.popupWar.visible);
       },
@@ -35,6 +36,7 @@ class Footer extends Phaser.GameObjects.Container {
       'button-buy',
       'button-buy-pressed',
       () => {
+        if (isSimulator) return;
         scene.popupWar.setVisible(false);
         scene.popupBuy.setVisible(!scene.popupBuy.visible);
       },

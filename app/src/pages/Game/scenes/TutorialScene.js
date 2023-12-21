@@ -189,7 +189,7 @@ class TutorialScene extends Phaser.Scene {
       this.add.existing(footer);
     });
 
-    const infoButtons = new InfoButtons(this, 550);
+    const infoButtons = new InfoButtons(this, 550, { isSimulator: true });
     this.add.existing(infoButtons);
 
     this.tutorial = new Tutorial(this);
