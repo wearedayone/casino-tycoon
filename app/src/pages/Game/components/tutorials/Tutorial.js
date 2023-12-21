@@ -25,13 +25,8 @@ class Tutorial extends Phaser.GameObjects.Container {
   constructor(scene) {
     super(scene, 0, 0);
 
-    this.background = scene.add.image((width - 1700) / 2, 0, 'tutorial-overlay').setOrigin(0, 0);
-    const scaleX = width / this.background.width;
-    const scaleY = height / this.background.height;
-    const scale = Math.max(scaleX, scaleY);
-    this.background.setScale(scale).setScrollFactor(0);
+    this.background = scene.add.rectangle(0, 0, configs.width, configs.height, 0x260343, 0.8).setOrigin(0, 0);
     this.background.depth = 5;
-
     this.add(this.background);
 
     this.step1 = new Step1(scene, () => {
@@ -128,11 +123,11 @@ class Tutorial extends Phaser.GameObjects.Container {
 
     this.step17 = new Step17(scene, () => {
       this.step17.setVisible(false);
-      scene.start('MainScene');
+      scene.scene.start('MainScene');
     });
     this.add(this.step17);
 
-    this.step17.setVisible(true);
+    this.step1.setVisible(true);
   }
 }
 

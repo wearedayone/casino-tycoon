@@ -31,6 +31,8 @@ class Step14 extends Phaser.GameObjects.Container {
         this.clicked = true;
 
         this.character.y -= 400;
+        this.arrow1.setVisible(false);
+        this.arrow.setVisible(true);
         scene.popupBuy.setVisible(false);
         scene.popupWar.setDepth(5);
         scene.popupWar.updateDisabled({ historyDisabled: true, warDisabled: false });
@@ -46,10 +48,14 @@ class Step14 extends Phaser.GameObjects.Container {
     );
     this.add(this.activeButton);
 
-    this.arrow = scene.add
+    this.arrow = scene.add.image(buttonWidth + px, 2380, 'tutorial-arrow-left').setOrigin(0, 0.5);
+    this.arrow.setVisible(false);
+    this.add(this.arrow);
+
+    this.arrow1 = scene.add
       .image(this.activeButton.x, this.activeButton.y - this.activeButton.height / 2 - 20, 'tutorial-arrow-down')
       .setOrigin(0.5, 1);
-    this.add(this.arrow);
+    this.add(this.arrow1);
   }
 }
 

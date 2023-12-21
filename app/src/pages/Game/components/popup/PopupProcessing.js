@@ -8,8 +8,11 @@ import PopupTxnError from './PopupTxnError';
 const { width } = configs;
 
 class PopupProcessing extends Popup {
-  constructor(scene, { sound, completedEvent, completedIcon, description, failedIcon }) {
+  onCompleted;
+  constructor(scene, { sound, completedEvent, completedIcon, description, failedIcon, onCompleted }) {
     super(scene, 'popup-small', { title: 'Almost done', openOnCreate: false });
+    this.onCompleted = onCompleted;
+
     const startingY = this.popup.y - this.popup.height / 2;
     const iconY = startingY + 320;
     const titleY = iconY + 160;
@@ -92,6 +95,7 @@ class PopupProcessing extends Popup {
         this.iconDone.setVisible(true);
         const hasTxnHashEvents = [
           'buy-gangster-completed',
+          'simulator-buy-gangster-completed',
           'deposit-nft-completed',
           'withdraw-token-completed',
           'withdraw-eth-completed',
@@ -106,6 +110,7 @@ class PopupProcessing extends Popup {
 
         switch (completedEvent) {
           case 'buy-gangster-completed':
+          case 'simulator-buy-gangster-completed':
             title = `${amount.toLocaleString()} Gangster${amount > 1 ? 's' : ''}`;
             desc = 'Gangsters hired successfully.';
             break;
@@ -131,11 +136,16 @@ class PopupProcessing extends Popup {
             break;
         }
 
-        this.popupTxnCompleted = new PopupTxnCompleted(scene, completedIcon, title, desc, txnHash);
+        this.popupTxnCompleted = new PopupTxnCompleted(scene, completedIcon, title, desc, txnHash, onCompleted);
         scene.add.existing(this.popupTxnCompleted);
+        this.onCompleted = null;
         this.close();
       }
     });
+  }
+
+  cleanup() {
+    this.onCompleted?.();
   }
 
   initLoading(description) {

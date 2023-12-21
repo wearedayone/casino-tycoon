@@ -68,14 +68,20 @@ class PopupBuy extends Phaser.GameObjects.Container {
 
     if (houseDisabled) {
       this.addSafeHouseBtn.setAlpha(0.5);
+    } else {
+      this.addSafeHouseBtn.setAlpha(1);
     }
 
     if (gangsterDisabled) {
       this.addGangsterBtn.setAlpha(0.5);
+    } else {
+      this.addGangsterBtn.setAlpha(1);
     }
 
     if (goonDisabled) {
       this.addGoonBtn.setAlpha(0.5);
+    } else {
+      this.addGoonBtn.setAlpha(1);
     }
   }
 

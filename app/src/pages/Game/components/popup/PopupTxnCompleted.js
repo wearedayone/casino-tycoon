@@ -9,9 +9,11 @@ const { width, height } = configs;
 const { NETWORK_ID } = environments;
 
 class PopupTxnCompleted extends Popup {
-  constructor(scene, icon, title, description, txnHash) {
+  onCompleted;
+  constructor(scene, icon, title, description, txnHash, onCompleted) {
     super(scene, 'popup-small', { title: 'Completed', openOnCreate: true });
 
+    this.onCompleted = onCompleted;
     const startingY = this.popup.y - this.popup.height / 2;
     const iconY = startingY + (title ? 300 : 400);
     const titleY = iconY + 180;
@@ -66,6 +68,10 @@ class PopupTxnCompleted extends Popup {
         this.viewTxnHash.setAlpha(1);
         window.open(`https://${BASESCAN_PREFIX[NETWORK_ID]}basescan.org/tx/${txnHash}`);
       });
+  }
+
+  cleanup() {
+    this.onCompleted?.();
   }
 }
 

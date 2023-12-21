@@ -27,9 +27,20 @@ class PopupLeaderboard extends Popup {
   isEnded = false;
   numberOfRows = 0;
   stars = [];
+  onClosePopup;
 
-  constructor(scene) {
+  constructor(scene, { isSimulator, onClosePopup } = {}) {
     super(scene, 'popup-extra-large', { title: 'Season Leaderboard', noCloseBtn: true });
+
+    const events = {
+      updateSeason: isSimulator ? 'simulator-update-season' : 'update-season',
+      updateLeaderboard: isSimulator ? 'simulator-update-leaderboard' : 'update-leaderboard',
+      updateSeasonCountdown: isSimulator ? 'simulator-update-season-countdown' : 'update-season-countdown',
+      openLeaderboardModal: isSimulator ? 'simulator-open-leaderboard-modal' : 'open-leaderboard-modal',
+      closeLeaderboardModal: isSimulator ? 'simulator-close-leaderboard-modal' : 'close-leaderboard-modal',
+    };
+    this.events = events;
+    this.onClosePopup = onClosePopup;
 
     const leftMargin = this.popup.x - this.popup.width / 2;
     const paddedX = leftMargin + this.popup.width * 0.1;
@@ -238,23 +249,24 @@ class PopupLeaderboard extends Popup {
       .setVisible(false);
     this.add(this.nextSeason);
 
-    scene.game.events.on('update-season', (data) => this.updateValues(data));
-    scene.game.events.on('update-leaderboard', (data) => this.updateLeaderboard(data));
-    scene.game.events.on('update-season-countdown', (string) => (this.gameEndTime.text = string));
+    scene.game.events.on(events.updateSeason, (data) => this.updateValues(data));
+    scene.game.events.on(events.updateLeaderboard, (data) => this.updateLeaderboard(data));
+    scene.game.events.on(events.updateSeasonCountdown, (string) => (this.gameEndTime.text = string));
   }
 
   onOpen() {
     if (this.table) {
       this.table.setMouseWheelScrollerEnable(true);
     }
-    this.scene.game.events.emit('open-leaderboard-modal');
+    this.scene.game.events.emit(this.events?.openLeaderboardModal || '');
   }
 
   cleanup() {
     if (this.table) {
       this.table.setMouseWheelScrollerEnable(false);
     }
-    this.scene.game.events.emit('close-leaderboard-modal');
+    this.scene.game.events.emit(this.events?.closeLeaderboardModal || '');
+    this.onClosePopup?.();
   }
 
   updateValues(season) {

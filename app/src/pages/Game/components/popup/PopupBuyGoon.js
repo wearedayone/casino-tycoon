@@ -30,14 +30,24 @@ class PopupBuyGoon extends Popup {
   quantity = DEFAULT_QUANTITY;
   estimatedMaxPurchase = 0;
 
-  constructor(scene) {
+  constructor(scene, { isSimulator, onCompleted } = {}) {
     super(scene, 'popup-buy-goon', { ribbon: 'ribbon-buy-goon' });
+
+    const events = {
+      completed: isSimulator ? 'simulator-buy-goon-completed' : 'buy-goon-completed',
+      buyGoon: isSimulator ? 'simulator-buy-goon' : 'buy-goon',
+      gameEnded: isSimulator ? 'simulator-game-ended' : 'game-ended',
+      updateWorkers: isSimulator ? 'simulator-update-workers' : 'update-workers',
+      requestWorkers: isSimulator ? 'simulator-request-workers' : 'request-workers',
+    };
+
     this.popupBuyProcessing = new PopupProcessing(scene, {
       sound: 'minion',
-      completedEvent: 'buy-goon-completed',
+      completedEvent: events.completed,
       completedIcon: 'icon-goon-buy-done',
       failedIcon: 'icon-goon-buy-fail',
       description: ``,
+      onCompleted,
     });
     scene.add.existing(this.popupBuyProcessing);
     this.upgradeBtn = new TextButton(
@@ -53,7 +63,7 @@ class PopupBuyGoon extends Popup {
         );
         this.close();
 
-        scene.game.events.emit('buy-goon', { quantity: this.quantity });
+        scene.game.events.emit(events.buyGoon, { quantity: this.quantity });
       },
       'Buy',
       { sound: 'buy', disabledImage: 'button-disabled' }
@@ -208,16 +218,16 @@ class PopupBuyGoon extends Popup {
       );
       this.updateValues();
     });
-    scene.game.events.on('buy-goon-completed', () => {
+    scene.game.events.on(events.completed, () => {
       this.quantity = DEFAULT_QUANTITY;
       this.updateValues();
     });
 
-    scene.game.events.on('game-ended', () => {
+    scene.game.events.on(events.gameEnded, () => {
       this.upgradeBtn.setDisabledState(true);
     });
     scene.game.events.on(
-      'update-workers',
+      events.updateWorkers,
       ({ numberOfWorkers, networth, balance, sold, basePrice, priceStep, dailyReward, networthIncrease }) => {
         this.balance = balance;
         this.sold = sold;
@@ -236,7 +246,7 @@ class PopupBuyGoon extends Popup {
       }
     );
 
-    scene.game.events.emit('request-workers');
+    scene.game.events.emit(events.requestWorkers);
     scene.game.events.emit('request-gas-buy-goon');
   }
 

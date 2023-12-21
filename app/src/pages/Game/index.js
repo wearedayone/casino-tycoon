@@ -42,6 +42,7 @@ import MainScene from './scenes/MainScene';
 import TutorialScene from './scenes/TutorialScene';
 import useUserWallet from '../../hooks/useUserWallet';
 import useSeasonCountdown from '../../hooks/useSeasonCountdown';
+import useSimulatorGameListener from '../../hooks/useSimulatorGameListener';
 
 const { width, height } = gameConfigs;
 const MILISECONDS_IN_A_DAY = 86400 * 1000;
@@ -124,6 +125,8 @@ const Game = () => {
     tokenBalance: 0,
     ETHBalance: 0,
   };
+
+  const { setupSimulatorGameListener } = useSimulatorGameListener({ leaderboardData });
   const {
     numberOfMachines,
     numberOfWorkers,
@@ -398,6 +401,9 @@ const Game = () => {
 
     if (loaded && !gameEventListened.current) {
       gameEventListened.current = true;
+
+      setupSimulatorGameListener(gameRef.current);
+
       gameRef.current?.events.on('export-wallet', exportWallet);
       gameRef.current?.events.on('log-out', logout);
       gameRef.current?.events.on('toggle-game-sound', toggleSound);

@@ -14,8 +14,14 @@ const gap = buttonWidth + 20;
 class Header extends Phaser.GameObjects.Container {
   timeout;
 
-  constructor(scene, y) {
+  constructor(scene, y, { isSimulator } = {}) {
     super(scene, 0, 0);
+
+    const events = {
+      updateBalanes: isSimulator ? 'simulator-update-balances' : 'update-balances',
+      claimCompleted: isSimulator ? 'simulator-claim-completed' : 'claim-completed',
+      requestBalances: isSimulator ? 'simulator-request-balances' : 'request-balances',
+    };
 
     this.addedAmount = scene.add
       .text(width / 2 + 100, y, '', {
@@ -34,9 +40,8 @@ class Header extends Phaser.GameObjects.Container {
     this.add(this.fiatBalance);
     this.add(this.ethBalance);
 
-    scene.game.events.on('update-balances', (data) => this.updateValues(data));
-    scene.game.events.on('claim-completed', ({ amount }) => {
-      console.log('amount', amount);
+    scene.game.events.on(events.updateBalanes, (data) => this.updateValues(data));
+    scene.game.events.on(events.claimCompleted, ({ amount }) => {
       this.addedAmount.text = `+${formatter.format(amount)}`;
 
       scene.tweens.add({
@@ -49,7 +54,7 @@ class Header extends Phaser.GameObjects.Container {
       });
     });
 
-    scene.game.events.emit('request-balances');
+    scene.game.events.emit(events.requestBalances);
   }
 
   updateValues({ dailyMoney, ETHBalance, tokenBalance }) {

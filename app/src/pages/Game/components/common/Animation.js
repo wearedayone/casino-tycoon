@@ -8,8 +8,25 @@ class Animation extends Phaser.GameObjects.Container {
   goonAction = null;
   gangsterAction = null;
 
-  constructor(scene) {
+  constructor(scene, { isSimulator } = {}) {
     super(scene, 0, 0);
+
+    const events = {
+      stopAnimation: isSimulator ? 'simulator-stop-animation' : 'stop-animation',
+      animationGangsterBack: isSimulator ? 'simulator-animation-gangster-back' : 'animation-gangster-back',
+      animationGangsterFront: isSimulator ? 'simulator-animation-gangster-front' : 'animation-gangster-front',
+      animationGoonBack: isSimulator ? 'simulator-animation-goon-back' : 'animation-goon-back',
+      animationGoonFront: isSimulator ? 'simulator-animation-goon-front' : 'animation-goon-front',
+      updateGangsterAnimation: isSimulator ? 'simulator-update-gangster-animation' : 'update-gangster-animation',
+      updateGoonAnimation: isSimulator ? 'simulator-update-goon-animation' : 'update-goon-animation',
+    };
+
+    const animations = {
+      gangsterFrontRun: isSimulator ? 'simulator-gangster-front-run' : 'gangster-front-run',
+      gangsterBackRun: isSimulator ? 'simulator-gangster-back-run' : 'gangster-back-run',
+      goonFrontRun: isSimulator ? 'simulator-goon-front-run' : 'goon-front-run',
+      goonBackRun: isSimulator ? 'simulator-goon-back-run' : 'goon-back-run',
+    };
 
     this.coinbagPickupSound = scene.sound.add('coinbag-pickup', { loop: false });
 
@@ -71,10 +88,10 @@ class Animation extends Phaser.GameObjects.Container {
       suffix: '.png',
     });
 
-    scene.anims.create({ key: 'gangster-front-run', frames: gangsterFrontFrames, frameRate: 24, repeat: -1 });
-    scene.anims.create({ key: 'gangster-back-run', frames: gangsterBackFrames, frameRate: 24, repeat: -1 });
-    scene.anims.create({ key: 'goon-front-run', frames: goonFrontFrames, frameRate: 24, repeat: -1 });
-    scene.anims.create({ key: 'goon-back-run', frames: goonBackFrames, frameRate: 24, repeat: -1 });
+    scene.anims.create({ key: animations.gangsterFrontRun, frames: gangsterFrontFrames, frameRate: 24, repeat: -1 });
+    scene.anims.create({ key: animations.gangsterBackRun, frames: gangsterBackFrames, frameRate: 24, repeat: -1 });
+    scene.anims.create({ key: animations.goonFrontRun, frames: goonFrontFrames, frameRate: 24, repeat: -1 });
+    scene.anims.create({ key: animations.goonBackRun, frames: goonBackFrames, frameRate: 24, repeat: -1 });
 
     this.gangsterFront = scene.add
       .sprite(gangsterAnimation.front.start.x, gangsterAnimation.front.start.y)
@@ -96,7 +113,7 @@ class Animation extends Phaser.GameObjects.Container {
       .setScale(goonAnimation.back.start.scale)
       .setVisible(false);
 
-    scene.game.events.on('stop-animation', () => {
+    scene.game.events.on(events.stopAnimation, () => {
       this.gangsterAction = null;
       this.goonAction = null;
       this.gangsterFront.anims.stop();
@@ -109,7 +126,7 @@ class Animation extends Phaser.GameObjects.Container {
       this.goonBack.setVisible(false);
     });
 
-    scene.game.events.on('animation-gangster-back', () => {
+    scene.game.events.on(events.animationGangsterBack, () => {
       this.gangsterAction = 'back';
       this.gangsterFront.anims.stop();
       this.gangsterFront.setVisible(false);
@@ -117,12 +134,12 @@ class Animation extends Phaser.GameObjects.Container {
       this.gangsterFront.y = gangsterAnimation.front.start.y;
       this.gangsterFront.setScale(gangsterAnimation.front.start.scale);
       this.gangsterBack.setVisible(true);
-      this.gangsterBack.play('gangster-back-run');
+      this.gangsterBack.play(animations.gangsterBackRun);
 
       /// update number of machines
     });
 
-    scene.game.events.on('animation-gangster-front', () => {
+    scene.game.events.on(events.animationGangsterFront, () => {
       this.coinbagPickupSound.play();
       this.gangsterAction = 'front';
       this.gangsterBack.anims.stop();
@@ -131,12 +148,12 @@ class Animation extends Phaser.GameObjects.Container {
       this.gangsterBack.y = gangsterAnimation.back.start.y;
       this.gangsterBack.setScale(gangsterAnimation.back.start.scale);
       this.gangsterFront.setVisible(true);
-      this.gangsterFront.play('gangster-front-run');
+      this.gangsterFront.play(animations.gangsterFrontRun);
 
       // update number of machines
     });
 
-    scene.game.events.on('animation-goon-back', () => {
+    scene.game.events.on(events.animationGoonBack, () => {
       this.goonAction = 'back';
       this.goonFront.anims.stop();
       this.goonFront.setVisible(false);
@@ -144,10 +161,10 @@ class Animation extends Phaser.GameObjects.Container {
       this.goonFront.y = goonAnimation.front.start.y;
       this.goonFront.setScale(goonAnimation.front.start.scale);
       this.goonBack.setVisible(true);
-      this.goonBack.play('goon-back-run');
+      this.goonBack.play(animations.goonBackRun);
     });
 
-    scene.game.events.on('animation-goon-front', () => {
+    scene.game.events.on(events.animationGoonFront, () => {
       this.coinbagPickupSound.play();
       this.goonAction = 'front';
       this.goonBack.anims.stop();
@@ -156,10 +173,10 @@ class Animation extends Phaser.GameObjects.Container {
       this.goonBack.y = goonAnimation.back.start.y;
       this.goonBack.setScale(goonAnimation.back.start.scale);
       this.goonFront.setVisible(true);
-      this.goonFront.play('goon-front-run');
+      this.goonFront.play(animations.goonFrontRun);
     });
 
-    scene.game.events.on('update-gangster-animation', ({ numberOfMachines }) => {
+    scene.game.events.on(events.updateGangsterAnimation, ({ numberOfMachines }) => {
       if (!numberOfMachines) {
         this.gangsterAction = null;
         this.gangsterFront.anims.stop();
@@ -188,12 +205,12 @@ class Animation extends Phaser.GameObjects.Container {
           this.gangsterFront.y = gangsterAnimation.front.start.y;
           this.gangsterFront.setScale(gangsterAnimation.front.start.scale);
           this.gangsterBack.setVisible(true);
-          this.gangsterBack.play('gangster-back-run');
+          this.gangsterBack.play(animations.gangsterBackRun);
         }
       }
     });
 
-    scene.game.events.on('update-goon-animation', ({ numberOfWorkers }) => {
+    scene.game.events.on(events.updateGoonAnimation, ({ numberOfWorkers }) => {
       if (!numberOfWorkers) {
         this.goonAction = null;
         this.goonFront.anims.stop();
@@ -222,7 +239,7 @@ class Animation extends Phaser.GameObjects.Container {
           this.goonFront.y = goonAnimation.front.start.y;
           this.goonFront.setScale(goonAnimation.front.start.scale);
           this.goonBack.setVisible(true);
-          this.goonBack.play('goon-back-run');
+          this.goonBack.play(animations.goonBackRun);
         }
       }
     });

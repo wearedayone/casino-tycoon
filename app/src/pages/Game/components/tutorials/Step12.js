@@ -29,7 +29,7 @@ class Step12 extends Phaser.GameObjects.Container {
       () => {
         scene.popupLeaderboard.setDepth(5);
         scene.popupLeaderboard.background?.destroy();
-        scene.popupLeaderboard.setVisible(true);
+        scene.popupLeaderboard.open();
         onNext();
       },
       { sound: 'button-1' }
