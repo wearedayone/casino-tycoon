@@ -211,6 +211,7 @@ contract FIAT is ERC20, Ownable, ERC20Burnable {
 
     if (liquidityTokens > 0 && ethForLiquidity > 0) {
       addLiquidity(liquidityTokens, ethForLiquidity);
+      // console.log(liquidityTokens, ethForLiquidity);
       emit SwapAndLiquify(amountToSwapForETH, ethForLiquidity, tokensForLiquidity);
     }
 
