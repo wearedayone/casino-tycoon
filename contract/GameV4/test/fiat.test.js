@@ -588,13 +588,13 @@ describe('FIAT', function () {
 
       const teamWalletETHBalanceBefore = await ethers.provider.getBalance(teamWallet.address);
       const revShareWalletETHBalanceBefore = await ethers.provider.getBalance(revShareWallet.address);
-      const reservesBefore = await pair.getReserves();
+      // const reservesBefore = await pair.getReserves();
 
       // start a txn to trigger swapback
       await token.updateSwapTokensAtAmount(0);
       const totalFees = await token.totalFees();
       const fees = (totalFees * tokenAmount) / BigInt(1000);
-      const amountOut1 = await router.getAmountsOut(tokenAmount - fees, paths);
+      // const amountOut1 = await router.getAmountsOut(tokenAmount - fees, paths);
       const txn1 = await router
         .connect(userWallet)
         .swapExactTokensForETHSupportingFeeOnTransferTokens(tokenAmount, 0, paths, userWallet.address, deadline);
@@ -607,11 +607,9 @@ describe('FIAT', function () {
       const revShareWalletETHBalanceAfter = await ethers.provider.getBalance(revShareWallet.address);
       expect(revShareWalletETHBalanceAfter).to.equal(revShareWalletETHBalanceBefore + ethForRevShare);
 
-      console.log('test', liquidityTokens, ethForLiquidity);
-      const reservesAfter = await pair.getReserves();
-      // expect(reservesAfter[0]).to.equal(
-      //   reservesBefore[0] + tokensForLiquidity + (tokenAmount * (BigInt(1000) - totalFees)) / BigInt(1000)
-      // );
+      // console.log('test', liquidityTokens, ethForLiquidity);
+      // const reservesAfter = await pair.getReserves();
+      // expect(reservesAfter[0]).to.equal(reservesBefore[0] + liquidityTokens + tokenAmount - fees);
       // expect(reservesAfter[1]).to.equal(reservesBefore[1] + ethForLiquidity - amountOut[1] - amountOut1[1]);
 
       const teamFee = await token.teamFee();
