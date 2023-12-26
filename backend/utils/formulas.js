@@ -65,6 +65,51 @@ export const calculateReward = (prizePool, rankingRewards, rankIndex) => {
   return prizePool * rankingReward.share;
 };
 
+export const generateRankingRewards = ({ totalPlayers, prizePool, leaderboardConfig }) => {
+  const {
+    rewardScalingRatio,
+    devFeePercent,
+    higherRanksCutoffPercent,
+    lowerRanksCutoffPercent,
+    minRewardHigherRanks,
+    minRewardLowerRanks,
+  } = leaderboardConfig;
+  const totalPaidPlayersCount = Math.round(lowerRanksCutoffPercent * totalPlayers);
+  const higherRanksPlayersCount = Math.round(higherRanksCutoffPercent * totalPlayers);
+  const lowerRanksPlayersCount = totalPaidPlayersCount - higherRanksPlayersCount;
+  const minRewardPercentHigherRanks = minRewardHigherRanks / prizePool;
+  const minRewardPercentLowerRanks = minRewardLowerRanks / prizePool;
+
+  const remainingPoolPercent =
+    1 -
+    (minRewardPercentHigherRanks * higherRanksPlayersCount +
+      minRewardPercentLowerRanks * lowerRanksPlayersCount +
+      devFeePercent);
+
+  let totalExtraRewardWeight = 0;
+  let rankingRewards = [];
+  for (let rank = 1; rank <= totalPaidPlayersCount; rank++) {
+    const extraRewardWeight = Math.pow(rewardScalingRatio, totalPaidPlayersCount - rank);
+    totalExtraRewardWeight += extraRewardWeight;
+
+    rankingRewards.push({ rankStart: rank, rankEnd: rank, extraRewardWeight });
+  }
+
+  for (let player of rankingRewards) {
+    const minRewardPercent =
+      player.rankStart <= higherRanksPlayersCount ? minRewardPercentHigherRanks : minRewardPercentLowerRanks;
+    const extraRewardPercent = (player.extraRewardWeight / totalExtraRewardWeight) * remainingPoolPercent;
+
+    player.share = minRewardPercent + extraRewardPercent;
+    player.prizeValue = prizePool * player.share;
+    delete player.extraRewardWeight;
+  }
+
+  // console.log('rankingRewards', rankingRewards);
+
+  return rankingRewards;
+};
+
 export const generateCode = (length) => {
   const charset = 'abcdefghijklmnopqrstuvwxyz0123456789';
   let retVal = '';

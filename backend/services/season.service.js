@@ -1,9 +1,11 @@
 import schedule from 'node-schedule';
 
+import { getAllActiveGamePlay } from './gamePlay.service.js';
 import { firestore } from '../configs/firebase.config.js';
 import { setGameClosed, setWinner } from './worker.service.js';
 import logger from '../utils/logger.js';
 import environments from '../utils/environments.js';
+import { generateRankingRewards } from '../utils/formulas.js';
 
 const { SYSTEM_ADDRESS } = environments;
 
@@ -17,8 +19,11 @@ export const getActiveSeasonId = async () => {
 export const getActiveSeason = async () => {
   const activeSeasonId = await getActiveSeasonId();
   const snapshot = await firestore.collection('season').doc(activeSeasonId).get();
+  const { leaderboardConfig, prizePool, ...rest } = snapshot.data();
 
-  return { id: snapshot.id, ...snapshot.data() };
+  const totalPlayers = await getAllActiveGamePlay();
+  const rankingRewards = generateRankingRewards({ totalPlayers, prizePool, leaderboardConfig });
+  return { id: snapshot.id, ...rest, prizePool, rankingRewards, leaderboardConfig };
 };
 
 const TAKE_SEASON_SNAPSHOT = 'take-season-snapshot';
