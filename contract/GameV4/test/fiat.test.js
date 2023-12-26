@@ -61,8 +61,8 @@ describe('FIAT', function () {
     const routerAddress = await router.getAddress();
     // console.log('Router: ', routerAddress);
 
-    const tokenAmount = parseUnits('1000');
-    const ethAmount = parseUnits('1');
+    const tokenAmount = parseUnits('1000000');
+    const ethAmount = parseUnits('10');
     const deadline = Math.floor(Date.now() / 1000 + 10 * 60);
 
     const approveTx = await token.approve(routerAddress, ethers.MaxUint256);
@@ -265,7 +265,11 @@ describe('FIAT', function () {
       const ethAmount = parseUnits('1');
       const amountOut = await router.getAmountsOut(ethAmount, paths);
 
-      const tokenBalanceBeforeSwapping = await token.balanceOf(userWallet.address);
+      const userTokenBalanceBeforeSwapping = await token.balanceOf(userWallet.address);
+      const userEthBalanceBeforeSwapping = await ethers.provider.getBalance(userWallet.address);
+      const beforeTokensForRevShare = await token.tokensForRevShare();
+      const beforeTokensForLiquidity = await token.tokensForLiquidity();
+      const beforeTokensForTeam = await token.tokensForTeam();
 
       const txn = await router
         .connect(userWallet)
@@ -285,28 +289,33 @@ describe('FIAT', function () {
 
       const fees = (totalFees * amountOut[1]) / BigInt(1000);
 
-      const tokenBalanceAfterSwapping = await token.balanceOf(userWallet.address);
-      expect(tokenBalanceAfterSwapping).to.equal(tokenBalanceBeforeSwapping + amountOut[1] - fees);
+      const userTokenBalanceAfterSwapping = await token.balanceOf(userWallet.address);
+      expect(userTokenBalanceAfterSwapping).to.equal(userTokenBalanceBeforeSwapping + amountOut[1] - fees);
 
       const revShareFee = await token.revShareFee();
       const revShareTokens = (fees * revShareFee) / totalFees;
       const tokensForRevShare = await token.tokensForRevShare();
-      expect(revShareTokens).to.equal(tokensForRevShare);
+      expect(revShareTokens).to.equal(tokensForRevShare - beforeTokensForRevShare);
 
       const liquidityFee = await token.liquidityFee();
       const liquidityTokens = (fees * liquidityFee) / totalFees;
       const tokensForLiquidity = await token.tokensForLiquidity();
-      expect(liquidityTokens).to.equal(tokensForLiquidity);
+      expect(liquidityTokens).to.equal(tokensForLiquidity - beforeTokensForLiquidity);
 
       const teamFee = await token.teamFee();
       const teamTokens = (fees * teamFee) / totalFees;
       const tokensForTeam = await token.tokensForTeam();
-      expect(teamTokens).to.equal(tokensForTeam);
+      expect(teamTokens).to.equal(tokensForTeam - beforeTokensForTeam);
 
       const burnFee = await token.burnFee();
       const burnTokens = Math.floor(Number((fees * burnFee) / totalFees / BigInt(1e18)));
-      const tokensForBurn = Math.floor(Number(fees - tokensForRevShare - tokensForLiquidity - tokensForTeam) / 1e18);
+      const tokensForBurn = Math.floor(Number(fees - revShareTokens - liquidityTokens - teamTokens) / 1e18);
       expect(burnTokens).to.equal(tokensForBurn);
+
+      const userEthBalanceAfterSwapping = await ethers.provider.getBalance(userWallet.address);
+      expect(userEthBalanceAfterSwapping).to.equal(
+        userEthBalanceBeforeSwapping - receipt.gasUsed * receipt.gasPrice - ethAmount
+      );
     });
 
     it('swap eth to token includes burning', async function () {
@@ -337,7 +346,11 @@ describe('FIAT', function () {
       const ethAmount = parseUnits('1');
       const amountOut = await router.getAmountsOut(ethAmount, paths);
 
-      const tokenBalanceBeforeSwapping = await token.balanceOf(userWallet.address);
+      const userTokenBalanceBeforeSwapping = await token.balanceOf(userWallet.address);
+      const userEthBalanceBeforeSwapping = await ethers.provider.getBalance(userWallet.address);
+      const beforeTokensForRevShare = await token.tokensForRevShare();
+      const beforeTokensForLiquidity = await token.tokensForLiquidity();
+      const beforeTokensForTeam = await token.tokensForTeam();
 
       const txn = await router
         .connect(userWallet)
@@ -357,31 +370,207 @@ describe('FIAT', function () {
 
       const fees = (totalFees * amountOut[1]) / BigInt(1000);
 
-      const tokenBalanceAfterSwapping = await token.balanceOf(userWallet.address);
-      expect(tokenBalanceAfterSwapping).to.equal(tokenBalanceBeforeSwapping + amountOut[1] - fees);
+      const userTokenBalanceAfterSwapping = await token.balanceOf(userWallet.address);
+      expect(userTokenBalanceAfterSwapping).to.equal(userTokenBalanceBeforeSwapping + amountOut[1] - fees);
 
       const revShareFee = await token.revShareFee();
       const revShareTokens = (fees * revShareFee) / totalFees;
       const tokensForRevShare = await token.tokensForRevShare();
-      expect(revShareTokens).to.equal(tokensForRevShare);
+      expect(revShareTokens).to.equal(tokensForRevShare - beforeTokensForRevShare);
 
       const liquidityFee = await token.liquidityFee();
       const liquidityTokens = (fees * liquidityFee) / totalFees;
       const tokensForLiquidity = await token.tokensForLiquidity();
-      expect(liquidityTokens).to.equal(tokensForLiquidity);
+      expect(liquidityTokens).to.equal(tokensForLiquidity - beforeTokensForLiquidity);
 
       const teamFee = await token.teamFee();
       const teamTokens = (fees * teamFee) / totalFees;
       const tokensForTeam = await token.tokensForTeam();
-      expect(teamTokens).to.equal(tokensForTeam);
+      expect(teamTokens).to.equal(tokensForTeam - beforeTokensForTeam);
+
+      const burnFee = await token.burnFee();
+      const burnTokens = Math.floor(Number((fees * burnFee) / totalFees / BigInt(1e18)));
+      const tokensForBurn = Math.floor(Number(fees - revShareTokens - liquidityTokens - teamTokens) / 1e18);
+      expect(burnTokens).to.equal(tokensForBurn);
+
+      const userEthBalanceAfterSwapping = await ethers.provider.getBalance(userWallet.address);
+      expect(userEthBalanceAfterSwapping).to.equal(
+        userEthBalanceBeforeSwapping - receipt.gasUsed * receipt.gasPrice - ethAmount
+      );
+    });
+
+    it('swap token to eth no burn', async function () {
+      const {
+        token,
+        tokenAddress,
+        factory,
+        factoryAddress,
+        weth,
+        wethAddress,
+        router,
+        routerAddress,
+        pair,
+        pairAddress,
+        ownerWallet,
+        teamWallet,
+        revShareWallet,
+        userWallet,
+      } = await loadFixture(deployStakingFixture);
+
+      await token.updateUniswapAddresses(pairAddress, routerAddress);
+
+      const tokenBalanceBefore = await token.balanceOf(tokenAddress);
+
+      const paths = [tokenAddress, wethAddress];
+      const deadline = Math.floor(Date.now() / 1000 + 10 * 60);
+      const tokenAmount = parseUnits('1000');
+
+      const userTokenBalanceBeforeSwapping = await token.balanceOf(userWallet.address);
+      const userEthBalanceBeforeSwapping = await ethers.provider.getBalance(userWallet.address);
+      const beforeTokensForRevShare = await token.tokensForRevShare();
+      const beforeTokensForLiquidity = await token.tokensForLiquidity();
+      const beforeTokensForTeam = await token.tokensForTeam();
+
+      const approveTxn = await token.connect(userWallet).approve(routerAddress, ethers.MaxUint256);
+      const receipt1 = await approveTxn.wait();
+
+      const totalFees = await token.totalFees();
+      const fees = (totalFees * tokenAmount) / BigInt(1000);
+
+      const amountOut = await router.getAmountsOut(tokenAmount - fees, paths);
+
+      const txn = await router
+        .connect(userWallet)
+        .swapExactTokensForETHSupportingFeeOnTransferTokens(tokenAmount, 0, paths, userWallet.address, deadline);
+      const receipt2 = await txn.wait();
+
+      const userTokenBalanceAfterSwapping = await token.balanceOf(userWallet.address);
+      expect(userTokenBalanceAfterSwapping).to.equal(userTokenBalanceBeforeSwapping - tokenAmount);
+
+      const tokenBalanceAfter = await token.balanceOf(tokenAddress);
+      const tokenReceived = tokenBalanceAfter - tokenBalanceBefore;
+
+      const percentage = tokenReceived / tokenAmount;
+
+      const totalFeesInNumber = totalFees / BigInt(1000);
+      expect(percentage).to.equal(totalFeesInNumber);
+
+      const revShareFee = await token.revShareFee();
+      const revShareTokens = (fees * revShareFee) / totalFees;
+      const tokensForRevShare = await token.tokensForRevShare();
+      expect(revShareTokens).to.equal(tokensForRevShare - beforeTokensForRevShare);
+
+      const liquidityFee = await token.liquidityFee();
+      const liquidityTokens = (fees * liquidityFee) / totalFees;
+      const tokensForLiquidity = await token.tokensForLiquidity();
+      expect(liquidityTokens).to.equal(tokensForLiquidity - beforeTokensForLiquidity);
+
+      const teamFee = await token.teamFee();
+      const teamTokens = (fees * teamFee) / totalFees;
+      const tokensForTeam = await token.tokensForTeam();
+      expect(teamTokens).to.equal(tokensForTeam - beforeTokensForTeam);
 
       const burnFee = await token.burnFee();
       const burnTokens = Math.floor(Number((fees * burnFee) / totalFees / BigInt(1e18)));
       const tokensForBurn = Math.floor(Number(fees - tokensForRevShare - tokensForLiquidity - tokensForTeam) / 1e18);
       expect(burnTokens).to.equal(tokensForBurn);
+
+      // const amountOut0 = await router.getAmountsOut(tokenAmount, paths);
+      const userEthBalanceAfterSwapping = await ethers.provider.getBalance(userWallet.address);
+      expect(userEthBalanceAfterSwapping).to.equal(
+        userEthBalanceBeforeSwapping -
+          receipt1.gasUsed * receipt1.gasPrice -
+          receipt2.gasUsed * receipt2.gasPrice +
+          amountOut[1]
+      );
     });
 
-    // it('swap token to eth no burn', async function () {
+    it('swap token to eth includes burning', async function () {
+      const {
+        token,
+        tokenAddress,
+        factory,
+        factoryAddress,
+        weth,
+        wethAddress,
+        router,
+        routerAddress,
+        pair,
+        pairAddress,
+        ownerWallet,
+        teamWallet,
+        revShareWallet,
+        userWallet,
+      } = await loadFixture(deployStakingFixture);
+
+      await token.updateUniswapAddresses(pairAddress, routerAddress);
+      await token.updateFees(20, 10, 20, 10);
+
+      const tokenBalanceBefore = await token.balanceOf(tokenAddress);
+
+      const paths = [tokenAddress, wethAddress];
+      const deadline = Math.floor(Date.now() / 1000 + 10 * 60);
+      const tokenAmount = parseUnits('1000');
+
+      const userTokenBalanceBeforeSwapping = await token.balanceOf(userWallet.address);
+      const userEthBalanceBeforeSwapping = await ethers.provider.getBalance(userWallet.address);
+      const beforeTokensForRevShare = await token.tokensForRevShare();
+      const beforeTokensForLiquidity = await token.tokensForLiquidity();
+      const beforeTokensForTeam = await token.tokensForTeam();
+
+      const approveTxn = await token.connect(userWallet).approve(routerAddress, ethers.MaxUint256);
+      const receipt1 = await approveTxn.wait();
+
+      const totalFees = await token.totalFees();
+      const fees = (totalFees * tokenAmount) / BigInt(1000);
+      const amountOut = await router.getAmountsOut(tokenAmount - fees, paths);
+
+      const txn = await router
+        .connect(userWallet)
+        .swapExactTokensForETHSupportingFeeOnTransferTokens(tokenAmount, 0, paths, userWallet.address, deadline);
+      const receipt2 = await txn.wait();
+
+      const userTokenBalanceAfterSwapping = await token.balanceOf(userWallet.address);
+      expect(userTokenBalanceAfterSwapping).to.equal(userTokenBalanceBeforeSwapping - tokenAmount);
+
+      const tokenBalanceAfter = await token.balanceOf(tokenAddress);
+      const tokenReceived = tokenBalanceAfter - tokenBalanceBefore;
+
+      const percentage = tokenReceived / tokenAmount;
+
+      const totalFeesInNumber = totalFees / BigInt(1000);
+      expect(percentage).to.equal(totalFeesInNumber);
+
+      const revShareFee = await token.revShareFee();
+      const revShareTokens = (fees * revShareFee) / totalFees;
+      const tokensForRevShare = await token.tokensForRevShare();
+      expect(revShareTokens).to.equal(tokensForRevShare - beforeTokensForRevShare);
+
+      const liquidityFee = await token.liquidityFee();
+      const liquidityTokens = (fees * liquidityFee) / totalFees;
+      const tokensForLiquidity = await token.tokensForLiquidity();
+      expect(liquidityTokens).to.equal(tokensForLiquidity - beforeTokensForLiquidity);
+
+      const teamFee = await token.teamFee();
+      const teamTokens = (fees * teamFee) / totalFees;
+      const tokensForTeam = await token.tokensForTeam();
+      expect(teamTokens).to.equal(tokensForTeam - beforeTokensForTeam);
+
+      const burnFee = await token.burnFee();
+      const burnTokens = Math.floor(Number((fees * burnFee) / totalFees / BigInt(1e18)));
+      const tokensForBurn = Math.floor(Number(fees - tokensForRevShare - tokensForLiquidity - tokensForTeam) / 1e18);
+      expect(burnTokens).to.equal(tokensForBurn);
+
+      const userEthBalanceAfterSwapping = await ethers.provider.getBalance(userWallet.address);
+      expect(userEthBalanceAfterSwapping).to.equal(
+        userEthBalanceBeforeSwapping -
+          receipt1.gasUsed * receipt1.gasPrice -
+          receipt2.gasUsed * receipt2.gasPrice +
+          amountOut[1]
+      );
+    });
+
+    // it('swap token to eth swapback', async function () {
     //   const {
     //     token,
     //     tokenAddress,
@@ -401,62 +590,41 @@ describe('FIAT', function () {
 
     //   await token.updateUniswapAddresses(pairAddress, routerAddress);
 
-    //   const tokenBalanceBefore = await token.balanceOf(tokenAddress);
-
+    //   // init a txn to swapback in next txn
     //   const paths = [tokenAddress, wethAddress];
     //   const deadline = Math.floor(Date.now() / 1000 + 10 * 60);
     //   const tokenAmount = parseUnits('1000');
 
-    //   const tokenBalanceBeforeSwapping = await token.balanceOf(userWallet.address);
-    //   const ethBalanceBeforeSwapping = await ethers.provider.getBalance(userWallet.address);
-
     //   const approveTxn = await token.connect(userWallet).approve(routerAddress, ethers.MaxUint256);
-    //   const receipt1 = await approveTxn.wait();
+    //   await approveTxn.wait();
 
     //   const txn = await router
     //     .connect(userWallet)
     //     .swapExactTokensForETHSupportingFeeOnTransferTokens(tokenAmount, 0, paths, userWallet.address, deadline);
-    //   const receipt2 = await txn.wait();
+    //   await txn.wait();
 
-    //   const tokenBalanceAfterSwapping = await token.balanceOf(userWallet.address);
-    //   expect(tokenBalanceAfterSwapping).to.equal(tokenBalanceBeforeSwapping - tokenAmount);
-
-    //   const tokenBalanceAfter = await token.balanceOf(tokenAddress);
-    //   const tokenReceived = tokenBalanceAfter - tokenBalanceBefore;
-
-    //   const percentage = tokenReceived / tokenAmount;
-
-    //   const totalFees = await token.totalFees();
-    //   const totalFeesInNumber = totalFees / BigInt(1000);
-    //   expect(percentage).to.equal(totalFeesInNumber);
-
-    //   const fees = (totalFees * tokenAmount) / BigInt(1000);
-
-    //   const amountOut = await router.getAmountsOut(tokenAmount - tokenReceived, paths);
-    //   const ethBalanceAfterSwapping = await ethers.provider.getBalance(userWallet.address);
-    //   expect(ethBalanceAfterSwapping).to.equal(
-    //     ethBalanceBeforeSwapping - receipt1.gasUsed - receipt2.gasUsed + amountOut[1]
-    //   );
-
-    //   const revShareFee = await token.revShareFee();
-    //   const revShareTokens = (fees * revShareFee) / totalFees;
     //   const tokensForRevShare = await token.tokensForRevShare();
-    //   expect(revShareTokens).to.equal(tokensForRevShare);
-
-    //   const liquidityFee = await token.liquidityFee();
-    //   const liquidityTokens = (fees * liquidityFee) / totalFees;
     //   const tokensForLiquidity = await token.tokensForLiquidity();
-    //   expect(liquidityTokens).to.equal(tokensForLiquidity);
-
-    //   const teamFee = await token.teamFee();
-    //   const teamTokens = (fees * teamFee) / totalFees;
     //   const tokensForTeam = await token.tokensForTeam();
-    //   expect(teamTokens).to.equal(tokensForTeam);
+    //   const totalTokensToSwap = tokensForRevShare + tokensForLiquidity + tokensForTeam;
 
-    //   const burnFee = await token.burnFee();
-    //   const burnTokens = Math.floor(Number((fees * burnFee) / totalFees / BigInt(1e18)));
-    //   const tokensForBurn = Math.floor(Number(fees - tokensForRevShare - tokensForLiquidity - tokensForTeam) / 1e18);
-    //   expect(burnTokens).to.equal(tokensForBurn);
+    //   const tokenContractBalance = await token.balanceOf(tokenAddress);
+    //   const liquidityTokens = (tokenContractBalance * tokensForLiquidity) / totalTokensToSwap;
+    //   const amountToSwapForETH = tokenContractBalance - liquidityTokens;
+    //   const amountOut = await router.getAmountsOut(amountToSwapForETH, paths);
+
+    //   // const ethForTeam = (amountOut * tokensForTeam) / totalTokensToSwap;
+    //   // const ethForLiquidity = (amountOut * tokensForLiquidity) / totalTokensToSwap;
+
+    //   // start a txn to trigger swapback
+    //   await token.updateSwapTokensAtAmount(0);
+    //   const txn1 = await router
+    //     .connect(userWallet)
+    //     .swapExactTokensForETHSupportingFeeOnTransferTokens(tokenAmount, 0, paths, userWallet.address, deadline);
+    //   const receipt = await txn1.wait();
+    //   // console.log(receipt);
+
+    //   // swap should be trigger already this time
     // });
   });
 });

@@ -11,6 +11,8 @@ import './interfaces/IUniswapV2Factory.sol';
 import './interfaces/IUniswapV2Pair.sol';
 import './interfaces/IUniswapV2Router02.sol';
 
+// import 'hardhat/console.sol';
+
 contract FIAT is ERC20, Ownable, ERC20Burnable {
   using SafeMath for uint256;
   using SafeTransferLib for address payable;
