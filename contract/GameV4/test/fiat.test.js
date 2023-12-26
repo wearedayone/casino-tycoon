@@ -53,8 +53,8 @@ describe('FIAT', function () {
     // console.log('Pair: ', pairAddress);
 
     const pair = new Contract(pairAddress, pairArtifact.abi, ownerWallet);
-    // const reserves = await pair.getReserves();
-    // console.log('Reserves: ', reserves);
+    const reserves = await pair.getReserves();
+    console.log('Reserves: ', reserves);
 
     const Router = new ContractFactory(routerArtifact.abi, routerArtifact.bytecode, ownerWallet);
     const router = await Router.deploy(factoryAddress, wethAddress);
@@ -81,8 +81,8 @@ describe('FIAT', function () {
     // const newOwnerBalance = await ethers.provider.getBalance(ownerWallet.address);
     // console.log('New owner balance: ', newOwnerBalance);
 
-    // const newReserves = await pair.getReserves();
-    // console.log('New reserves: ', newReserves);
+    const newReserves = await pair.getReserves();
+    console.log('New reserves: ', newReserves);
 
     return {
       token,
@@ -570,61 +570,92 @@ describe('FIAT', function () {
       );
     });
 
-    // it('swap token to eth swapback', async function () {
-    //   const {
-    //     token,
-    //     tokenAddress,
-    //     factory,
-    //     factoryAddress,
-    //     weth,
-    //     wethAddress,
-    //     router,
-    //     routerAddress,
-    //     pair,
-    //     pairAddress,
-    //     ownerWallet,
-    //     teamWallet,
-    //     revShareWallet,
-    //     userWallet,
-    //   } = await loadFixture(deployStakingFixture);
+    it('swap token to eth swapback', async function () {
+      const {
+        token,
+        tokenAddress,
+        factory,
+        factoryAddress,
+        weth,
+        wethAddress,
+        router,
+        routerAddress,
+        pair,
+        pairAddress,
+        ownerWallet,
+        teamWallet,
+        revShareWallet,
+        userWallet,
+      } = await loadFixture(deployStakingFixture);
 
-    //   await token.updateUniswapAddresses(pairAddress, routerAddress);
+      await token.updateUniswapAddresses(pairAddress, routerAddress);
 
-    //   // init a txn to swapback in next txn
-    //   const paths = [tokenAddress, wethAddress];
-    //   const deadline = Math.floor(Date.now() / 1000 + 10 * 60);
-    //   const tokenAmount = parseUnits('1000');
+      // init a txn to swapback in next txn
+      const paths = [tokenAddress, wethAddress];
+      const deadline = Math.floor(Date.now() / 1000 + 10 * 60);
+      const tokenAmount = parseUnits('1000');
 
-    //   const approveTxn = await token.connect(userWallet).approve(routerAddress, ethers.MaxUint256);
-    //   await approveTxn.wait();
+      const approveTxn = await token.connect(userWallet).approve(routerAddress, ethers.MaxUint256);
+      await approveTxn.wait();
 
-    //   const txn = await router
-    //     .connect(userWallet)
-    //     .swapExactTokensForETHSupportingFeeOnTransferTokens(tokenAmount, 0, paths, userWallet.address, deadline);
-    //   await txn.wait();
+      const txn = await router
+        .connect(userWallet)
+        .swapExactTokensForETHSupportingFeeOnTransferTokens(tokenAmount, 0, paths, userWallet.address, deadline);
+      await txn.wait();
 
-    //   const tokensForRevShare = await token.tokensForRevShare();
-    //   const tokensForLiquidity = await token.tokensForLiquidity();
-    //   const tokensForTeam = await token.tokensForTeam();
-    //   const totalTokensToSwap = tokensForRevShare + tokensForLiquidity + tokensForTeam;
+      const tokensForRevShare = await token.tokensForRevShare();
+      const tokensForLiquidity = await token.tokensForLiquidity();
+      const tokensForTeam = await token.tokensForTeam();
+      const totalTokensToSwap = tokensForRevShare + tokensForLiquidity + tokensForTeam;
 
-    //   const tokenContractBalance = await token.balanceOf(tokenAddress);
-    //   const liquidityTokens = (tokenContractBalance * tokensForLiquidity) / totalTokensToSwap;
-    //   const amountToSwapForETH = tokenContractBalance - liquidityTokens;
-    //   const amountOut = await router.getAmountsOut(amountToSwapForETH, paths);
+      const tokenContractBalance = await token.balanceOf(tokenAddress);
+      const liquidityTokens = (tokenContractBalance * tokensForLiquidity) / totalTokensToSwap;
+      const amountToSwapForETH = tokenContractBalance - liquidityTokens;
+      const amountOut = await router.getAmountsOut(amountToSwapForETH, paths);
 
-    //   // const ethForTeam = (amountOut * tokensForTeam) / totalTokensToSwap;
-    //   // const ethForLiquidity = (amountOut * tokensForLiquidity) / totalTokensToSwap;
+      const ethForTeam = (amountOut[1] * tokensForTeam) / totalTokensToSwap;
+      const ethForLiquidity = (amountOut[1] * tokensForLiquidity) / totalTokensToSwap;
+      const ethForRevShare = amountOut[1] - ethForTeam - ethForLiquidity;
 
-    //   // start a txn to trigger swapback
-    //   await token.updateSwapTokensAtAmount(0);
-    //   const txn1 = await router
-    //     .connect(userWallet)
-    //     .swapExactTokensForETHSupportingFeeOnTransferTokens(tokenAmount, 0, paths, userWallet.address, deadline);
-    //   const receipt = await txn1.wait();
-    //   // console.log(receipt);
+      const teamWalletETHBalanceBefore = await ethers.provider.getBalance(teamWallet.address);
+      const revShareWalletETHBalanceBefore = await ethers.provider.getBalance(revShareWallet.address);
+      const reservesBefore = await pair.getReserves();
 
-    //   // swap should be trigger already this time
-    // });
+      // start a txn to trigger swapback
+      await token.updateSwapTokensAtAmount(0);
+      const totalFees = await token.totalFees();
+      const fees = (totalFees * tokenAmount) / BigInt(1000);
+      const amountOut1 = await router.getAmountsOut(tokenAmount - fees, paths);
+      const txn1 = await router
+        .connect(userWallet)
+        .swapExactTokensForETHSupportingFeeOnTransferTokens(tokenAmount, 0, paths, userWallet.address, deadline);
+      await txn1.wait();
+
+      // swap should be trigger already this time
+      const teamWalletETHBalanceAfter = await ethers.provider.getBalance(teamWallet.address);
+      expect(teamWalletETHBalanceAfter).to.equal(teamWalletETHBalanceBefore + ethForTeam);
+
+      const revShareWalletETHBalanceAfter = await ethers.provider.getBalance(revShareWallet.address);
+      expect(revShareWalletETHBalanceAfter).to.equal(revShareWalletETHBalanceBefore + ethForRevShare);
+
+      console.log('test', liquidityTokens, ethForLiquidity);
+      const reservesAfter = await pair.getReserves();
+      // expect(reservesAfter[0]).to.equal(
+      //   reservesBefore[0] + tokensForLiquidity + (tokenAmount * (BigInt(1000) - totalFees)) / BigInt(1000)
+      // );
+      // expect(reservesAfter[1]).to.equal(reservesBefore[1] + ethForLiquidity - amountOut[1] - amountOut1[1]);
+
+      const teamFee = await token.teamFee();
+      const liquidityFee = await token.liquidityFee();
+      const revShareFee = await token.revShareFee();
+
+      const newTokensForTeam = await token.tokensForTeam();
+      const newTokensForLiquidity = await token.tokensForLiquidity();
+      const newTokensForRevShare = await token.tokensForRevShare();
+
+      expect(newTokensForTeam).to.equal((teamFee * tokenAmount) / BigInt(1000));
+      expect(newTokensForLiquidity).to.equal((liquidityFee * tokenAmount) / BigInt(1000));
+      expect(newTokensForRevShare).to.equal((revShareFee * tokenAmount) / BigInt(1000));
+    });
   });
 });
