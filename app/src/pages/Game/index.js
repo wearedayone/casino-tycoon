@@ -18,6 +18,7 @@ import {
   updateLastTimeSeenGangWarResult,
 } from '../../services/gamePlay.service';
 import { getLatestWar } from '../../services/war.service';
+import { getRankingRewards } from '../../services/season.service';
 import QueryKeys from '../../utils/queryKeys';
 import { calculateHouseLevel } from '../../utils/formulas';
 import useSmartContract from '../../hooks/useSmartContract';
@@ -754,6 +755,18 @@ const Game = () => {
           });
       });
 
+      gameRef.current?.events.on('request-ranking-rewards', () => {
+        getRankingRewards()
+          .then((res) => {
+            const { rankingRewards, leaderboardConfig } = res.data;
+            gameRef.current?.events.emit('update-ranking-rewards', { rankingRewards, leaderboardConfig });
+          })
+          .catch((err) => {
+            console.error(err);
+            Sentry.captureException(err);
+          });
+      });
+
       gameRef.current?.events.emit('user-info-loaded');
 
       return () => {
@@ -816,11 +829,6 @@ const Game = () => {
   useEffect(() => {
     if (isLeaderboardModalOpen) gameRef.current?.events.emit('update-leaderboard', leaderboardData?.data || []);
   }, [isLeaderboardModalOpen, leaderboardData?.data]);
-
-  useEffect(() => {
-    if (isLeaderboardModalOpen)
-      gameRef.current?.events.emit('update-ranking-rewards', activeSeason?.rankingRewards || []);
-  }, [isLeaderboardModalOpen, activeSeason?.rankingRewards]);
 
   useEffect(() => {
     gameRef.current?.events.emit('update-season-countdown', countdownString);

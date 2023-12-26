@@ -79,24 +79,16 @@ class PopupPrizePool extends Popup {
     const subtitleBg = scene.add
       .rectangle(width / 2, subtitleY, this.popup.width - 56, subtitleBgHeight, 0xf9cb73, 0.2)
       .setOrigin(0.5, 0.5);
-    const subtitle = scene.add
-      .text(width / 2, subtitleY, 'Players with higher reputation ranking\nwin a bigger share of reward.', {
+    this.subtitle = scene.add
+      .text(width / 2, subtitleY, 'Top --% players wins prize. The no. of\nwinners scales based on no. of players', {
         fontSize: '50px',
         color: colors.black,
         fontFamily: fontFamilies.bold,
         align: 'center',
       })
       .setOrigin(0.5, 1);
-    const bigger = scene.add
-      .text(width / 2, subtitleY, 'bigger', {
-        fontSize: '50px',
-        color: colors.black,
-        fontFamily: fontFamilies.extraBold,
-      })
-      .setOrigin(1.3, 1);
     this.add(subtitleBg);
-    this.add(subtitle);
-    this.add(bigger);
+    this.add(this.subtitle);
 
     this.buttonBack = new TextButton(
       scene,
@@ -117,10 +109,18 @@ class PopupPrizePool extends Popup {
     this.add(this.buttonBack);
 
     scene.game.events.on('update-season', (data) => this.updateValues(data));
-    scene.game.events.on('update-ranking-rewards', (data) => this.updateRewardAllocation(data));
+    scene.game.events.on('update-ranking-rewards', ({ rankingRewards, leaderboardConfig }) => {
+      const { lowerRanksCutoffPercent } = leaderboardConfig;
+      this.subtitle.text = `Top ${
+        lowerRanksCutoffPercent * 100
+      }% players wins prize. The no. of\nwinners scales based on no. of players`;
+      this.updateRewardAllocation(rankingRewards);
+    });
+    scene.game.events.emit('request-ranking-rewards');
   }
 
   onOpen() {
+    this.scene.game.events.emit('request-ranking-rewards');
     if (this.table) {
       this.table.setMouseWheelScrollerEnable(true);
     }
