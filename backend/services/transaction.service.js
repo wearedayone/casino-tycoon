@@ -25,7 +25,8 @@ const { SYSTEM_ADDRESS } = environments;
 export const initTransaction = async ({ userId, type, ...data }) => {
   logger.info(`init transaction user:${userId} - type:${type}`);
   const activeSeason = await getActiveSeason();
-  if (activeSeason.status !== 'open') throw new Error('Season ended');
+
+  if (type !== 'withdraw' && data.token !== 'NFT' && activeSeason.status !== 'open') throw new Error('Season ended');
 
   const { machine, machineSold, workerSold, buildingSold, worker, building } = activeSeason;
   const txnData = {};
@@ -167,8 +168,8 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
       if (token === 'FIAT' && to.toLowerCase() !== TOKEN_ADDRESS.toLowerCase())
         throw new Error(`Bad request: invalid receiver for ${type}, txn: ${JSON.stringify(receipt)}`);
 
-      if (!bnValue.eq(transactionValue))
-        throw new Error(`Bad request: Value doesnt match, ${JSON.stringify({ transactionValue, bnValue })}`);
+      // if (!bnValue.eq(transactionValue))
+      //   throw new Error(`Bad request: Value doesnt match, ${JSON.stringify({ transactionValue, bnValue })}`);
     }
 
     if (['buy-worker', 'buy-building'].includes(type)) {
