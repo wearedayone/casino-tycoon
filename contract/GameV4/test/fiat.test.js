@@ -53,8 +53,8 @@ describe('FIAT', function () {
     // console.log('Pair: ', pairAddress);
 
     const pair = new Contract(pairAddress, pairArtifact.abi, ownerWallet);
-    const reserves = await pair.getReserves();
-    console.log('Reserves: ', reserves);
+    // const reserves = await pair.getReserves();
+    // console.log('Reserves: ', reserves);
 
     const Router = new ContractFactory(routerArtifact.abi, routerArtifact.bytecode, ownerWallet);
     const router = await Router.deploy(factoryAddress, wethAddress);
@@ -81,8 +81,8 @@ describe('FIAT', function () {
     // const newOwnerBalance = await ethers.provider.getBalance(ownerWallet.address);
     // console.log('New owner balance: ', newOwnerBalance);
 
-    const newReserves = await pair.getReserves();
-    console.log('New reserves: ', newReserves);
+    // const newReserves = await pair.getReserves();
+    // console.log('New reserves: ', newReserves);
 
     return {
       token,
@@ -281,13 +281,9 @@ describe('FIAT', function () {
       const tokenBalanceAfter = await token.balanceOf(tokenAddress);
       const tokenReceived = tokenBalanceAfter - tokenBalanceBefore;
 
-      const percentage = tokenReceived / amountOut[1];
-
       const totalFees = await token.totalFees();
-      const totalFeesInNumber = totalFees / BigInt(1000);
-      expect(percentage).to.equal(totalFeesInNumber);
-
       const fees = (totalFees * amountOut[1]) / BigInt(1000);
+      expect(tokenReceived).to.equal(fees);
 
       const userTokenBalanceAfterSwapping = await token.balanceOf(userWallet.address);
       expect(userTokenBalanceAfterSwapping).to.equal(userTokenBalanceBeforeSwapping + amountOut[1] - fees);
@@ -306,11 +302,6 @@ describe('FIAT', function () {
       const teamTokens = (fees * teamFee) / totalFees;
       const tokensForTeam = await token.tokensForTeam();
       expect(teamTokens).to.equal(tokensForTeam - beforeTokensForTeam);
-
-      const burnFee = await token.burnFee();
-      const burnTokens = Math.floor(Number((fees * burnFee) / totalFees / BigInt(1e18)));
-      const tokensForBurn = Math.floor(Number(fees - revShareTokens - liquidityTokens - teamTokens) / 1e18);
-      expect(burnTokens).to.equal(tokensForBurn);
 
       const userEthBalanceAfterSwapping = await ethers.provider.getBalance(userWallet.address);
       expect(userEthBalanceAfterSwapping).to.equal(
@@ -362,13 +353,11 @@ describe('FIAT', function () {
       const tokenBalanceAfter = await token.balanceOf(tokenAddress);
       const tokenReceived = tokenBalanceAfter - tokenBalanceBefore;
 
-      const percentage = tokenReceived / amountOut[1];
-
       const totalFees = await token.totalFees();
-      const totalFeesInNumber = totalFees / BigInt(1000);
-      expect(percentage).to.equal(totalFeesInNumber);
-
+      const burnFee = await token.burnFee();
       const fees = (totalFees * amountOut[1]) / BigInt(1000);
+      const tokensForBurn = (fees * burnFee) / totalFees;
+      expect(tokenReceived).to.equal(fees - tokensForBurn);
 
       const userTokenBalanceAfterSwapping = await token.balanceOf(userWallet.address);
       expect(userTokenBalanceAfterSwapping).to.equal(userTokenBalanceBeforeSwapping + amountOut[1] - fees);
@@ -387,11 +376,6 @@ describe('FIAT', function () {
       const teamTokens = (fees * teamFee) / totalFees;
       const tokensForTeam = await token.tokensForTeam();
       expect(teamTokens).to.equal(tokensForTeam - beforeTokensForTeam);
-
-      const burnFee = await token.burnFee();
-      const burnTokens = Math.floor(Number((fees * burnFee) / totalFees / BigInt(1e18)));
-      const tokensForBurn = Math.floor(Number(fees - revShareTokens - liquidityTokens - teamTokens) / 1e18);
-      expect(burnTokens).to.equal(tokensForBurn);
 
       const userEthBalanceAfterSwapping = await ethers.provider.getBalance(userWallet.address);
       expect(userEthBalanceAfterSwapping).to.equal(
@@ -449,11 +433,7 @@ describe('FIAT', function () {
 
       const tokenBalanceAfter = await token.balanceOf(tokenAddress);
       const tokenReceived = tokenBalanceAfter - tokenBalanceBefore;
-
-      const percentage = tokenReceived / tokenAmount;
-
-      const totalFeesInNumber = totalFees / BigInt(1000);
-      expect(percentage).to.equal(totalFeesInNumber);
+      expect(tokenReceived).to.equal(fees);
 
       const revShareFee = await token.revShareFee();
       const revShareTokens = (fees * revShareFee) / totalFees;
@@ -469,11 +449,6 @@ describe('FIAT', function () {
       const teamTokens = (fees * teamFee) / totalFees;
       const tokensForTeam = await token.tokensForTeam();
       expect(teamTokens).to.equal(tokensForTeam - beforeTokensForTeam);
-
-      const burnFee = await token.burnFee();
-      const burnTokens = Math.floor(Number((fees * burnFee) / totalFees / BigInt(1e18)));
-      const tokensForBurn = Math.floor(Number(fees - tokensForRevShare - tokensForLiquidity - tokensForTeam) / 1e18);
-      expect(burnTokens).to.equal(tokensForBurn);
 
       // const amountOut0 = await router.getAmountsOut(tokenAmount, paths);
       const userEthBalanceAfterSwapping = await ethers.provider.getBalance(userWallet.address);
@@ -536,10 +511,9 @@ describe('FIAT', function () {
       const tokenBalanceAfter = await token.balanceOf(tokenAddress);
       const tokenReceived = tokenBalanceAfter - tokenBalanceBefore;
 
-      const percentage = tokenReceived / tokenAmount;
-
-      const totalFeesInNumber = totalFees / BigInt(1000);
-      expect(percentage).to.equal(totalFeesInNumber);
+      const burnFee = await token.burnFee();
+      const tokensForBurn = (fees * burnFee) / totalFees;
+      expect(tokenReceived).to.equal(fees - tokensForBurn);
 
       const revShareFee = await token.revShareFee();
       const revShareTokens = (fees * revShareFee) / totalFees;
@@ -555,11 +529,6 @@ describe('FIAT', function () {
       const teamTokens = (fees * teamFee) / totalFees;
       const tokensForTeam = await token.tokensForTeam();
       expect(teamTokens).to.equal(tokensForTeam - beforeTokensForTeam);
-
-      const burnFee = await token.burnFee();
-      const burnTokens = Math.floor(Number((fees * burnFee) / totalFees / BigInt(1e18)));
-      const tokensForBurn = Math.floor(Number(fees - tokensForRevShare - tokensForLiquidity - tokensForTeam) / 1e18);
-      expect(burnTokens).to.equal(tokensForBurn);
 
       const userEthBalanceAfterSwapping = await ethers.provider.getBalance(userWallet.address);
       expect(userEthBalanceAfterSwapping).to.equal(
