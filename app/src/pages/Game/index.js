@@ -736,7 +736,7 @@ const Game = () => {
         gameRef.current?.events.emit('update-machines', {
           numberOfMachines,
           networth,
-          balance: ETHBalance,
+          balance: 0.002,
           basePrice: machine.basePrice,
           whitelistPrice: machine.whitelistPrice,
           dailyReward: machine.dailyReward,
@@ -987,7 +987,7 @@ const Game = () => {
     gameRef.current?.events.emit('update-machines', {
       numberOfMachines,
       networth,
-      balance: ETHBalance,
+      balance: 0.002,
       basePrice: machine.basePrice,
       whitelistPrice: machine.whitelistPrice,
       dailyReward: machine.dailyReward,
