@@ -4,7 +4,7 @@ import PopupProcessing from './PopupProcessing';
 import Button from '../button/Button';
 import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
-import { formatter } from '../../../../utils/numbers';
+import { customFormat, formatter } from '../../../../utils/numbers';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
 
 const { width, height } = configs;
@@ -19,6 +19,7 @@ const largeBlackExtraBold = {
 const smallGreenBold = { fontSize: fontSizes.small, color: colors.green, fontFamily: fontFamilies.bold };
 
 class PopupBuyGangster extends Popup {
+  gas = 0;
   numberOfMachines = 0;
   networth = 0;
   networthIncrease = 0;
@@ -218,19 +219,17 @@ class PopupBuyGangster extends Popup {
       .setVisible(false);
     this.add(this.alternativePrice);
     this.add(this.priceStrikethrough);
-    this.whitelistNote = scene.add
-      .text(this.priceTextX, counterY, '(WL)', {
+
+    this.gasPrice = scene.add
+      .text(this.priceTextX, counterY, '+0 ETH (gas)', {
         fontSize: fontSizes.small,
         color: colors.black,
         fontFamily: fontFamilies.bold,
-        align: 'center',
       })
-      .setOrigin(0.5, -1)
-      .setVisible(false);
-    this.add(this.whitelistNote);
-
+      .setOrigin(0, -1);
+    this.add(this.gasPrice);
     this.insufficientBalance = scene.add
-      .text(this.priceTextX, counterY, 'Insufficient ETH', {
+      .text(this.priceTextX, counterY + 48, 'Insufficient ETH', {
         fontSize: fontSizes.small,
         color: colors.black,
         fontFamily: fontFamilies.bold,
@@ -244,6 +243,15 @@ class PopupBuyGangster extends Popup {
 
     scene.game.events.on('buy-gangster-completed', () => {
       this.quantity = DEFAULT_QUANTITY;
+      this.updateValues();
+    });
+
+    scene.game.events.on('update-gas', ({ gas }) => {
+      if (isNaN(gas)) return;
+
+      this.gas = gas;
+      this.estimatedMaxPurchase =
+        this.balance && this.basePrice ? Math.floor((this.balance - this.gas) / this.basePrice) : 0;
       this.updateValues();
     });
 
@@ -286,7 +294,7 @@ class PopupBuyGangster extends Popup {
         this.numberOfMachinesText.text = numberOfMachines.toLocaleString();
         this.networthText.text = `${networth.toLocaleString()}`;
         this.rateText.text = `${formatter.format(numberOfMachines * dailyReward)}`;
-        this.estimatedMaxPurchase = balance && basePrice ? Math.floor(balance / basePrice) : 0;
+        this.estimatedMaxPurchase = balance && basePrice ? Math.floor((balance - this.gas) / basePrice) : 0;
         this.maxQuantity =
           isWhitelisted && whitelistAmountLeft ? Math.min(whitelistAmountLeft, MAX_QUANTITY) : MAX_QUANTITY;
         this.updateValues();
@@ -294,6 +302,7 @@ class PopupBuyGangster extends Popup {
     );
 
     scene.game.events.emit('request-machines');
+    scene.game.events.emit('get-gas');
   }
 
   updateValues() {
@@ -314,18 +323,24 @@ class PopupBuyGangster extends Popup {
     this.bonusText.text = `${formatter.format(bonus)}`;
     this.bonusCoin.x = this.bonusText.x + this.bonusText.width + 20;
     this.priceText.text = `${formatter.format(this.quantity * this.basePrice)}`;
-    const referralDiscount = this.mintFunction === 'mintReferral' ? ` (-${this.referralDiscount * 100}%)` : '';
-    this.alternativePrice.text = `${formatter.format(estimatedPrice)}${referralDiscount}`;
+    const discountNote =
+      this.mintFunction === 'mintReferral'
+        ? ` (-${this.referralDiscount * 100}%)`
+        : this.mintFunction === 'mintWL'
+        ? ' (WL)'
+        : '';
+    this.alternativePrice.text = `${formatter.format(estimatedPrice)}${discountNote}`;
     this.priceStrikethrough.width = this.priceText.width;
+    const formattedGas = customFormat(this.gas, 4) === '0' ? '<0.0001' : customFormat(this.gas, 4);
+    this.gasPrice.text = `+${formattedGas} ETH (gas)`;
     this.coin.x = this.priceText.x + this.priceText.width + 20;
-    this.whitelistNote.x = this.priceTextX + this.priceText.width / 2;
 
     const hasDifferentPrice = this.mintFunction !== 'mint';
-    this.whitelistNote.setVisible(this.mintFunction === 'mintWL');
     this.alternativePrice.setVisible(hasDifferentPrice);
     this.priceStrikethrough.setVisible(hasDifferentPrice);
-    this.insufficientBalance.setVisible(this.quantity > this.estimatedMaxPurchase);
-    this.upgradeBtn.setDisabledState(this.scene.isGameEnded || this.quantity > this.estimatedMaxPurchase);
+    const insufficientBalance = this.quantity > this.estimatedMaxPurchase;
+    this.insufficientBalance.setVisible(insufficientBalance);
+    this.upgradeBtn.setDisabledState(this.scene.isGameEnded || insufficientBalance);
   }
 }
 

@@ -562,6 +562,10 @@ const Game = () => {
         gameRef.current?.events.emit('claim-completed', { amount });
       });
 
+      gameRef.current?.events.on('get-gas', () => {
+        gameRef.current.events.emit('update-gas', { gas: activeSeason?.currentGasPrice });
+      });
+
       gameRef.current?.events.on('upgrade-safehouse', async ({ quantity }) => {
         try {
           await buyBuilding(quantity);
@@ -790,6 +794,10 @@ const Game = () => {
   useEffect(() => {
     gameRef.current?.events.emit('update-eth-balance', { address, ETHBalance });
   }, [address, ETHBalance]);
+
+  useEffect(() => {
+    gameRef.current?.events.emit('update-gas', { gas: activeSeason?.currentGasPrice });
+  }, [activeSeason?.currentGasPrice]);
 
   useEffect(() => {
     gameRef.current?.events.emit('update-balances', { dailyMoney, ETHBalance, tokenBalance });
