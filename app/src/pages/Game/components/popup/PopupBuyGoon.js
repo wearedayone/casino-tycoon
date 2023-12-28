@@ -3,7 +3,7 @@ import PopupProcessing from './PopupProcessing';
 import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
 import { estimateNumberOfWorkerCanBuy, calculateNextWorkerBuyPriceBatch } from '../../../../utils/formulas';
-import { formatter } from '../../../../utils/numbers';
+import { customFormat, formatter } from '../../../../utils/numbers';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
 
 const { width, height } = configs;
@@ -18,6 +18,7 @@ const largeBlackExtraBold = {
 const smallGreenBold = { fontSize: fontSizes.small, color: colors.green, fontFamily: fontFamilies.bold };
 
 class PopupBuyGoon extends Popup {
+  gas = 0;
   numberOfWorkers = 0;
   networth = 0;
   networthIncrease = 0;
@@ -174,8 +175,16 @@ class PopupBuyGoon extends Popup {
     const priceTextX = this.popup.x + 160;
     this.priceText = scene.add.text(priceTextX, counterY, '0', largeBlackExtraBold).setOrigin(0, 0.5);
     this.add(this.priceText);
+    this.gasPrice = scene.add
+      .text(priceTextX, counterY, '+0 ETH (gas)', {
+        fontSize: fontSizes.small,
+        color: colors.black,
+        fontFamily: fontFamilies.bold,
+      })
+      .setOrigin(0, -1);
+    this.add(this.gasPrice);
     this.insufficientBalance = scene.add
-      .text(priceTextX, counterY, 'Insufficient $FIAT', {
+      .text(priceTextX, counterY + 48, 'Insufficient $FIAT', {
         fontSize: fontSizes.small,
         color: colors.black,
         fontFamily: fontFamilies.bold,
@@ -187,6 +196,18 @@ class PopupBuyGoon extends Popup {
     this.coin = scene.add.image(this.priceText.x + this.priceText.width + 40, counterY, 'coin2').setOrigin(0, 0.5);
     this.add(this.coin);
 
+    scene.game.events.on('update-gas', ({ gas }) => {
+      if (isNaN(gas)) return;
+
+      this.gas = gas;
+      this.estimatedMaxPurchase = estimateNumberOfWorkerCanBuy(
+        this.sold,
+        this.balance - this.gas,
+        this.basePrice,
+        this.priceStep
+      );
+      this.updateValues();
+    });
     scene.game.events.on('buy-goon-completed', () => {
       this.quantity = DEFAULT_QUANTITY;
       this.updateValues();
@@ -210,12 +231,13 @@ class PopupBuyGoon extends Popup {
         this.numberOfWorkersText.text = numberOfWorkers.toLocaleString();
         this.networthText.text = `${networth.toLocaleString()}`;
         this.rateText.text = `${formatter.format(numberOfWorkers * dailyReward)}`;
-        this.estimatedMaxPurchase = estimateNumberOfWorkerCanBuy(sold, balance, basePrice, priceStep);
+        this.estimatedMaxPurchase = estimateNumberOfWorkerCanBuy(sold, balance - this.gas, basePrice, priceStep);
         this.updateValues();
       }
     );
 
     scene.game.events.emit('request-workers');
+    scene.game.events.emit('get-gas');
   }
 
   updateValues() {
@@ -233,10 +255,13 @@ class PopupBuyGoon extends Popup {
     this.quantityText.text = this.quantity;
     this.roiText.text = `${roi}%`;
     this.priceText.text = `${formatter.format(estimatedPrice)}`;
+    const formattedGas = customFormat(this.gas, 4) === '0' ? '<0.0001' : customFormat(this.gas, 4);
+    this.gasPrice.text = `+${formattedGas} ETH (gas)`;
     this.coin.x = this.priceText.x + this.priceText.width + 20;
 
-    this.insufficientBalance.setVisible(this.quantity > this.estimatedMaxPurchase);
-    this.upgradeBtn.setDisabledState(this.scene.isGameEnded || this.quantity > this.estimatedMaxPurchase);
+    const insufficientBalance = this.quantity > this.estimatedMaxPurchase;
+    this.insufficientBalance.setVisible(insufficientBalance);
+    this.upgradeBtn.setDisabledState(this.scene.isGameEnded || insufficientBalance);
   }
 }
 

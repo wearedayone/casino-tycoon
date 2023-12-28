@@ -3,7 +3,7 @@ import PopupProcessing from './PopupProcessing';
 import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
 import { estimateNumberOfBuildingCanBuy, calculateNextBuildingBuyPriceBatch } from '../../../../utils/formulas';
-import { formatter } from '../../../../utils/numbers';
+import { customFormat, formatter } from '../../../../utils/numbers';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
 
 const { width, height } = configs;
@@ -17,6 +17,7 @@ const largeBlackExtraBold = {
 };
 
 class PopupSafeHouseUpgrade extends Popup {
+  gas = 0;
   numberOfBuildings = 0;
   networth = 0;
   networthIncrease = 0;
@@ -158,8 +159,16 @@ class PopupSafeHouseUpgrade extends Popup {
     const priceTextX = this.popup.x + 160;
     this.priceText = scene.add.text(priceTextX, counterY, '0', largeBlackExtraBold).setOrigin(0, 0.5);
     this.add(this.priceText);
+    this.gasPrice = scene.add
+      .text(priceTextX, counterY, '+0 ETH (gas)', {
+        fontSize: fontSizes.small,
+        color: colors.black,
+        fontFamily: fontFamilies.bold,
+      })
+      .setOrigin(0, -1);
+    this.add(this.gasPrice);
     this.insufficientBalance = scene.add
-      .text(priceTextX, counterY, 'Insufficient $FIAT', {
+      .text(priceTextX, counterY + 48, 'Insufficient $FIAT', {
         fontSize: fontSizes.small,
         color: colors.black,
         fontFamily: fontFamilies.bold,
@@ -179,6 +188,19 @@ class PopupSafeHouseUpgrade extends Popup {
     scene.game.events.on('game-ended', () => {
       this.upgradeBtn.setDisabledState(true);
     });
+    scene.game.events.on('update-gas', ({ gas }) => {
+      if (isNaN(gas)) return;
+
+      this.gas = gas;
+      this.estimatedMaxPurchase = estimateNumberOfBuildingCanBuy(
+        this.sold,
+        this.balance - this.gas,
+        this.basePrice,
+        this.priceStep
+      );
+      this.updateValues();
+    });
+
     scene.game.events.on(
       'update-buildings',
       ({ numberOfBuildings, networth, balance, sold, basePrice, priceStep, networthIncrease }) => {
@@ -192,12 +214,13 @@ class PopupSafeHouseUpgrade extends Popup {
 
         this.numberOfBuildingsText.text = numberOfBuildings.toLocaleString();
         this.networthText.text = `${networth.toLocaleString()}`;
-        this.estimatedMaxPurchase = estimateNumberOfBuildingCanBuy(sold, balance, basePrice, priceStep);
+        this.estimatedMaxPurchase = estimateNumberOfBuildingCanBuy(sold, balance - this.gas, basePrice, priceStep);
         this.updateValues();
       }
     );
 
     scene.game.events.emit('request-buildings');
+    scene.game.events.emit('get-gas');
   }
 
   updateValues() {
@@ -212,10 +235,13 @@ class PopupSafeHouseUpgrade extends Popup {
 
     this.quantityText.text = this.quantity;
     this.priceText.text = `${formatter.format(estimatedPrice)}`;
+    const formattedGas = customFormat(this.gas, 4) === '0' ? '<0.0001' : customFormat(this.gas, 4);
+    this.gasPrice.text = `+${formattedGas} ETH (gas)`;
     this.coin.x = this.priceText.x + this.priceText.width + 20;
 
-    this.insufficientBalance.setVisible(this.quantity > this.estimatedMaxPurchase);
-    this.upgradeBtn.setDisabledState(this.scene.isGameEnded || this.quantity > this.estimatedMaxPurchase);
+    const insufficientBalance = this.quantity > this.estimatedMaxPurchase;
+    this.insufficientBalance.setVisible(insufficientBalance);
+    this.upgradeBtn.setDisabledState(this.scene.isGameEnded || insufficientBalance);
   }
 }
 
