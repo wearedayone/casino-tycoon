@@ -32,15 +32,21 @@ export const calculateMachineSellPrice = (machinePrice) => {
   return machinePrice * 0.6;
 };
 
-export const calculateNextWorkerBuyPrice = (workerSold, basePrice, priceStep) => {
-  return workerSold * priceStep + basePrice;
+export const calculateNextWorkerBuyPrice = (salesLastPeriod, targetDailyPurchase, targetPrice, startPrice) => {
+  return Math.pow(salesLastPeriod / targetDailyPurchase, 2) * targetPrice + startPrice;
 };
 
-export const calculateNextWorkerBuyPriceBatch = (workerSold, quantity, basePrice, priceStep) => {
-  let soldCount = workerSold;
+export const calculateNextWorkerBuyPriceBatch = (
+  salesLastPeriod,
+  targetDailyPurchase,
+  targetPrice,
+  startPrice,
+  quantity
+) => {
+  let soldCount = salesLastPeriod;
   const prices = [];
-  while (soldCount < workerSold + quantity) {
-    prices.push(calculateNextWorkerBuyPrice(soldCount, basePrice, priceStep));
+  while (soldCount < salesLastPeriod + quantity) {
+    prices.push(calculateNextWorkerBuyPrice(salesLastPeriod, targetDailyPurchase, targetPrice, startPrice));
     soldCount++;
   }
 
@@ -50,15 +56,21 @@ export const calculateNextWorkerBuyPriceBatch = (workerSold, quantity, basePrice
   };
 };
 
-export const calculateNextBuildingBuyPrice = (buildingSold, basePrice, priceStep) => {
-  return buildingSold * priceStep + basePrice;
+export const calculateNextBuildingBuyPrice = (salesLastPeriod, targetDailyPurchase, targetPrice, startPrice) => {
+  return Math.pow(salesLastPeriod / targetDailyPurchase, 2) * targetPrice + startPrice;
 };
 
-export const calculateNextBuildingBuyPriceBatch = (buildingSold, quantity, basePrice, priceStep) => {
-  let soldCount = buildingSold;
+export const calculateNextBuildingBuyPriceBatch = (
+  salesLastPeriod,
+  targetDailyPurchase,
+  targetPrice,
+  startPrice,
+  quantity
+) => {
+  let soldCount = salesLastPeriod;
   const prices = [];
-  while (soldCount < buildingSold + quantity) {
-    prices.push(calculateNextBuildingBuyPrice(soldCount, basePrice, priceStep));
+  while (soldCount < salesLastPeriod + quantity) {
+    prices.push(calculateNextWorkerBuyPrice(salesLastPeriod, targetDailyPurchase, targetPrice, startPrice));
     soldCount++;
   }
 

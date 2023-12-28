@@ -15,8 +15,8 @@ const warConfig = {
 
 const assetsConfig = {
   machine: { basePrice: 0.001, whitelistPrice: 0.0006, dailyReward: 1000, networth: 5 },
-  worker: { basePrice: 250, priceStep: 5, dailyReward: 1000, networth: 3 },
-  building: { basePrice: 500, priceStep: 10, dailyReward: 0, networth: 4 },
+  worker: { basePrice: 250, targetDailyPurchase: 100, targetPrice: 1000, dailyReward: 1000, networth: 3 },
+  building: { basePrice: 500, targetDailyPurchase: 100, targetPrice: 1000, dailyReward: 0, networth: 4 },
 };
 
 const main = async () => {
@@ -30,9 +30,7 @@ const main = async () => {
     .collection('system')
     .doc('default')
     .set({
-      machine: { basePrice: 0.001, dailyReward: 1000, networth: 5 },
-      worker: { basePrice: 250, priceStep: 5, dailyReward: 100, networth: 3 },
-      building: { basePrice: 500, priceStep: 10, dailyReward: 0, networth: 4 },
+      ...assetsConfig,
       activeSeasonId,
       appVersion: '0.9.9',
     });
