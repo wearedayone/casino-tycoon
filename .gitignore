@@ -18,3 +18,5 @@ package-lock.json
 listener/logs/
 backend/logs/
 */serviceAccounts/*.json
+
+test.json

@@ -6,6 +6,7 @@ import logger from '../utils/logger.js';
 import { getActiveSeasonId, getActiveSeason } from './season.service.js';
 import { calculateGeneratedReward, initTransaction, validateNonWeb3Transaction } from './transaction.service.js';
 import { claimToken as claimTokenTask, burnNFT as burnNFTTask, burnGoon as burnGoonTask } from './worker.service.js';
+import { parseEther } from '@ethersproject/units';
 
 const BONUS_LIMIT = 0.5;
 
@@ -315,6 +316,10 @@ export const generateDailyWarSnapshot = async () => {
 
     const users = gamePlays.reduce((result, gamePlay) => {
       const earnUnits = workerBonusMultiple * gamePlay.numberOfWorkers + gamePlay.warDeployment.numberOfMachinesToEarn;
+
+      console.log(gamePlay.userId);
+      if (!gamePlay.userId.startsWith('did:privy:')) return result;
+
       return {
         ...result,
         [gamePlay.userId]: {
@@ -343,8 +348,6 @@ export const generateDailyWarSnapshot = async () => {
       };
     }, {});
 
-    const bonusUsers = [];
-    const penaltyUsers = [];
     for (const user of Object.values(users)) {
       const { userId, attackUserId, attackUnits } = user;
 
@@ -384,8 +387,7 @@ export const generateDailyWarSnapshot = async () => {
       }
     }
 
-    // fs.writeFileSync('./test.json', JSON.stringify(users), { encoding: 'utf-8' });
-    logger.info(`Users war snapshot, ${JSON.stringify(users)}`);
+    // logger.info(`Users war snapshot, ${JSON.stringify(users)}`);
 
     const promises = Object.values(users).map((data) =>
       firestore
@@ -397,9 +399,95 @@ export const generateDailyWarSnapshot = async () => {
     );
     await Promise.all(promises);
 
+    // send rewards and burn NFT
+    const bonusUsers = Object.values(users).map((item) => ({ userId: item.userId, amount: item.totalTokenReward }));
+    const penaltyUsers = Object.values(users)
+      .filter((item) => !!item.machinesLost)
+      .map((item) => ({ userId: item.userId, amount: item.machinesLost }));
+
+    // fs.writeFileSync('../test.json', JSON.stringify({ users, bonusUsers, penaltyUsers }), { encoding: 'utf-8' });
+
+    for (const bonusUser of bonusUsers) {
+      await claimWarReward(bonusUser);
+    }
+
+    await burnMachinesLost(penaltyUsers);
+
     logger.info('\n---------finish taking daily war snapshot--------\n\n');
   } catch (err) {
     console.error(err);
     logger.error(err.message);
+  }
+};
+
+export const claimWarReward = async ({ userId, amount }) => {
+  const userSnapshot = await firestore.collection('user').doc(userId).get();
+  if (!userSnapshot.exists) return;
+
+  const { address } = userSnapshot.data();
+
+  const txn = await initTransaction({
+    userId,
+    type: 'war-bonus',
+    value: amount,
+  });
+
+  const { txnHash, status } = await claimTokenTask({
+    address,
+    amount: parseEther(`${amount}`),
+  });
+
+  await firestore.collection('transaction').doc(txn.id).update({
+    txnHash,
+    status,
+  });
+};
+
+export const burnMachinesLost = async (penaltyUsers) => {
+  if (!penaltyUsers.length) return;
+
+  const userIds = penaltyUsers.map((item) => item.userId);
+  const userPromises = userIds.map((id) => firestore.collection('user').doc(id).get());
+  const userSnapshots = await Promise.all(userPromises);
+  const users = [];
+  for (const index in userSnapshots) {
+    const snapshot = userSnapshots[index];
+    if (!snapshot.exists) continue;
+
+    const txn = await initTransaction({
+      userId: snapshot.id,
+      type: 'war-penalty',
+      machinesDeadCount: penaltyUsers[index].amount,
+    });
+
+    users.push({
+      userId: snapshot.id,
+      txnId: txn.id,
+      address: snapshot.data().address,
+      amount: penaltyUsers[index].amount,
+    });
+  }
+
+  const addresses = users.map((item) => item.address);
+  const ids = Array(users.length).fill(1);
+  const amounts = users.map((item) => item.amount);
+  const { txnHash, status } = await burnNFTTask({ addresses, ids, amounts });
+
+  logger.info(`Gangster penalties, ${JSON.stringify({ addresses, ids, amounts, txnHash, status })}`);
+
+  const updateTxnPromises = users.map((item) => {
+    return firestore.collection('transaction').doc(item.txnId).update({
+      txnHash,
+      status,
+    });
+  });
+
+  await Promise.all(updateTxnPromises);
+
+  if (status === 'Success') {
+    const updateUserGamePlayPromises = users.map((item) =>
+      validateNonWeb3Transaction({ userId: item.userId, transactionId: item.txnId })
+    );
+    await Promise.all(updateUserGamePlayPromises);
   }
 };
