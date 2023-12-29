@@ -20,6 +20,11 @@ const main = () => {
     res.send('OK');
   });
 
+  // app.get('/test-schedule', async (req, res) => {
+  //   await generateDailyWarSnapshot();
+  //   return res.sendStatus(200);
+  // });
+
   app.use('/api', routes);
 
   app.listen(PORT, () => console.log(`server is running on port ${PORT}`));

@@ -68,14 +68,14 @@ export const decodeTokenTxnLogs = async (name, log) => {
 };
 
 export const claimToken = async ({ address, amount }) => {
-  let txnHash;
+  let txnHash = '';
   try {
     logger.info('start claimToken');
     logger.info({ address, amount });
     const workerWallet = await getWorkerWallet();
     const tokenContract = await getTokenContract(workerWallet);
     logger.info('start Transaction:');
-    const tx = await tokenContract.mint(address, amount, { gasLimit: 200000 });
+    const tx = await tokenContract.mint(address, amount);
     logger.info('Transaction:' + tx.hash);
     txnHash = tx.hash;
     const receipt = await tx.wait();
@@ -142,7 +142,7 @@ export const claimTokenBonus = async ({ address, amount }) => {
 };
 
 export const burnNFT = async ({ addresses, ids, amounts }) => {
-  let txnHash;
+  let txnHash = '';
   try {
     logger.info('start burnNFT');
     logger.info({ addresses, ids, amounts });
@@ -150,10 +150,9 @@ export const burnNFT = async ({ addresses, ids, amounts }) => {
     const gameContract = await getGameContract(workerWallet);
     logger.info('start Transaction:');
     const tx = await gameContract.burnNFT(addresses, ids, amounts);
+    txnHash = tx.hash;
     logger.info('Transaction:' + tx.hash);
     const receipt = await tx.wait();
-
-    txnHash = receipt.transactionHash;
 
     if (receipt.status !== 1) {
       logger.error(`Unsuccessful txn: ${JSON.stringify(receipt)}`);
@@ -180,7 +179,7 @@ export const burnNFT = async ({ addresses, ids, amounts }) => {
 };
 
 export const burnGoon = async ({ addresses, amounts }) => {
-  let txnHash;
+  let txnHash = '';
   try {
     logger.info('start burnGoon');
     logger.info({ addresses, amounts });
@@ -189,9 +188,8 @@ export const burnGoon = async ({ addresses, amounts }) => {
     logger.info('start Transaction:');
     const tx = await gameContract.burnGoon(addresses, amounts);
     logger.info('Transaction:' + tx.hash);
+    txnHash = tx.hash;
     const receipt = await tx.wait();
-
-    txnHash = receipt.transactionHash;
 
     if (receipt.status !== 1) {
       logger.error(`Unsuccessful txn: ${JSON.stringify(receipt)}`);
@@ -218,7 +216,7 @@ export const burnGoon = async ({ addresses, amounts }) => {
 };
 
 export const setGameClosed = async (isGameClosed) => {
-  let txnHash;
+  let txnHash = '';
   try {
     logger.info('start setGameClosed');
     logger.info({ isGameClosed });
@@ -227,9 +225,8 @@ export const setGameClosed = async (isGameClosed) => {
     logger.info('start Transaction:');
     const tx = await gameContract.setGameClosed(Boolean(isGameClosed));
     logger.info('Transaction:' + tx.hash);
+    txnHash = tx.hash;
     const receipt = await tx.wait();
-
-    txnHash = receipt.transactionHash;
 
     if (receipt.status !== 1) {
       logger.error(`Unsuccessful txn: ${JSON.stringify(receipt)}`);
@@ -256,7 +253,7 @@ export const setGameClosed = async (isGameClosed) => {
 };
 
 export const setWinner = async ({ winners, points }) => {
-  let txnHash;
+  let txnHash = '';
   try {
     logger.info('start setWinner');
     logger.info({ winners, points });
@@ -265,6 +262,7 @@ export const setWinner = async ({ winners, points }) => {
     logger.info('start Transaction:');
     const tx = await gameContract.setWinner(winners, points);
     logger.info('Transaction:' + tx.hash);
+    txnHash = tx.hash;
     const receipt = await tx.wait();
 
     txnHash = receipt.transactionHash;

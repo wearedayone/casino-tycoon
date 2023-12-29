@@ -109,9 +109,8 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       txnData.token = 'FIAT';
       break;
     case 'war-penalty':
-      const { machinesDeadCount, workersDeadCount } = data;
+      const { machinesDeadCount } = data;
       txnData.machinesDeadCount = machinesDeadCount;
-      txnData.workersDeadCount = workersDeadCount;
       break;
     default:
       break;
@@ -135,8 +134,6 @@ export const initTransaction = async ({ userId, type, ...data }) => {
     nonce,
     ...txnData,
   };
-  console.log('transaction', transaction);
-
   const newTransaction = await firestore.collection('transaction').add({
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
     ...transaction,
@@ -377,13 +374,11 @@ const updateUserGamePlay = async (userId, transactionId) => {
       gamePlayData = { war: isWarEnabled };
       break;
     case 'war-penalty':
-      const { machinesDeadCount, workersDeadCount } = snapshot.data();
+      const { machinesDeadCount } = snapshot.data();
       assets.numberOfMachines -= machinesDeadCount;
-      assets.numberOfWorkers -= workersDeadCount;
 
       gamePlayData = {
         numberOfMachines: admin.firestore.FieldValue.increment(-machinesDeadCount),
-        numberOfWorkers: admin.firestore.FieldValue.increment(-workersDeadCount),
       };
       break;
     default:

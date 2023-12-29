@@ -35,7 +35,7 @@ const main = async () => {
           continue;
         }
         for (const transaction of transactionSnapshot.docs) {
-          const { type, amount, machinesDeadCount, workersDeadCount } = transaction.data();
+          const { type, amount, machinesDeadCount } = transaction.data();
           switch (type) {
             case 'buy-worker':
               calNumberOfWorkers += amount;
@@ -47,7 +47,6 @@ const main = async () => {
               calNumberOfBuildings += amount;
               break;
             case 'war-penalty':
-              calNumberOfWorkers -= workersDeadCount;
               calNumberOfMachines -= machinesDeadCount;
               break;
             case 'withdraw-machine':

@@ -36,7 +36,7 @@ const main = async ({ userId }) => {
         return;
       }
       for (const transaction of transactionSnapshot.docs) {
-        const { type, amount, machinesDeadCount, workersDeadCount, createdAt, txnHash } = transaction.data();
+        const { type, amount, machinesDeadCount, createdAt, txnHash } = transaction.data();
         const createdAtDate = new Date(createdAt.seconds * 1000);
         if (type == 'buy-machine' || type == 'buy-worker' || type == 'buy-building') {
           // if (moment(createdAtDate) > moment(Date.now()).subtract(60 * 60 * 24))
@@ -57,7 +57,6 @@ const main = async ({ userId }) => {
             calNumberOfBuildings += amount;
             break;
           case 'war-penalty':
-            calNumberOfWorkers -= workersDeadCount;
             calNumberOfMachines -= machinesDeadCount;
             break;
           case 'withdraw-machine':
