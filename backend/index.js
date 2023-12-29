@@ -6,6 +6,7 @@ import routes from './routes/index.js';
 import environments from './utils/environments.js';
 import { takeDailyWarSnapshot } from './services/warSnapshot.service.js';
 import { updateSeasonSnapshotSchedule } from './services/season.service.js';
+import { updateEstimatedGasPrice } from './services/system.service.js';
 
 const { PORT } = environments;
 
@@ -32,4 +33,9 @@ main();
 // everyday at 1am
 cron.schedule('0 1 * * *', function () {
   takeDailyWarSnapshot();
+});
+
+// every 5 minutes
+cron.schedule('*/5 * * * *', function () {
+  updateEstimatedGasPrice();
 });

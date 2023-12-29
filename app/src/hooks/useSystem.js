@@ -10,6 +10,7 @@ const useSystem = () => {
   const setConfigs = useSystemStore((state) => state.setConfigs);
   const setActiveSeason = useSystemStore((state) => state.setActiveSeason);
   const setMarket = useSystemStore((state) => state.setMarket);
+  const setEstimatedGas = useSystemStore((state) => state.setEstimatedGas);
   const setOpenUpdate = useModalStore((state) => state.setOpenUpdate);
 
   useEffect(() => {
@@ -30,6 +31,18 @@ const useSystem = () => {
         setMarket(snapshot.data());
       } else {
         setMarket(null);
+      }
+    });
+
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(doc(firestore, 'system', 'estimated-gas'), (snapshot) => {
+      if (snapshot.exists()) {
+        setEstimatedGas(snapshot.data());
+      } else {
+        setEstimatedGas(null);
       }
     });
 

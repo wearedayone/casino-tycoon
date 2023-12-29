@@ -188,7 +188,7 @@ class PopupSafeHouseUpgrade extends Popup {
     scene.game.events.on('game-ended', () => {
       this.upgradeBtn.setDisabledState(true);
     });
-    scene.game.events.on('update-gas', ({ gas }) => {
+    scene.game.events.on('update-gas-upgrade-safehouse', ({ gas }) => {
       if (isNaN(gas)) return;
 
       this.gas = gas;
@@ -220,7 +220,7 @@ class PopupSafeHouseUpgrade extends Popup {
     );
 
     scene.game.events.emit('request-buildings');
-    scene.game.events.emit('get-gas');
+    scene.game.events.emit('request-gas-upgrade-safehouse');
   }
 
   updateValues() {

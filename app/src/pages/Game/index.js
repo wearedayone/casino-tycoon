@@ -46,6 +46,7 @@ const Game = () => {
   const activeSeason = useSystemStore((state) => state.activeSeason);
   const configs = useSystemStore((state) => state.configs);
   const market = useSystemStore((state) => state.market);
+  const estimatedGas = useSystemStore((state) => state.estimatedGas);
   const sound = useSettingStore((state) => state.sound);
   const toggleSound = useSettingStore((state) => state.toggleSound);
   const {
@@ -562,8 +563,16 @@ const Game = () => {
         gameRef.current?.events.emit('claim-completed', { amount });
       });
 
-      gameRef.current?.events.on('get-gas', () => {
-        gameRef.current.events.emit('update-gas', { gas: activeSeason?.currentGasPrice });
+      gameRef.current?.events.on('request-gas-mint', () => {
+        gameRef.current.events.emit('update-gas-mint', { gas: estimatedGas?.game?.mint });
+      });
+
+      gameRef.current?.events.on('request-gas-buy-goon', () => {
+        gameRef.current.events.emit('update-gas-buy-goon', { gas: estimatedGas?.game?.buyGoon });
+      });
+
+      gameRef.current?.events.on('request-gas-upgrade-safehouse', () => {
+        gameRef.current.events.emit('update-gas-upgrade-safehouse', { gas: estimatedGas?.game?.buySafeHouse });
       });
 
       gameRef.current?.events.on('upgrade-safehouse', async ({ quantity }) => {
@@ -796,8 +805,16 @@ const Game = () => {
   }, [address, ETHBalance]);
 
   useEffect(() => {
-    gameRef.current?.events.emit('update-gas', { gas: activeSeason?.currentGasPrice });
-  }, [activeSeason?.currentGasPrice]);
+    gameRef.current?.events.emit('update-gas-mint', { gas: estimatedGas?.game?.mint });
+  }, [estimatedGas?.game?.mint]);
+
+  useEffect(() => {
+    gameRef.current?.events.emit('update-gas-buy-goon', { gas: estimatedGas?.game?.buyGoon });
+  }, [estimatedGas?.game?.buyGoon]);
+
+  useEffect(() => {
+    gameRef.current?.events.emit('update-gas-upgrade-safehouse', { gas: estimatedGas?.game?.buySafeHouse });
+  }, [estimatedGas?.game?.buySafeHouse]);
 
   useEffect(() => {
     gameRef.current?.events.emit('update-balances', { dailyMoney, ETHBalance, tokenBalance });

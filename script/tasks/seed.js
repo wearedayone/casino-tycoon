@@ -30,6 +30,12 @@ const main = async () => {
     nftPrice: '0.001',
     tokenPrice: '0.00001',
   });
+  await firestore
+    .collection('system')
+    .doc('estimated-gas')
+    .set({
+      game: { mint: 0, buyGoon: 0, buySafeHouse: 0 },
+    });
   await firestore.collection('system').doc('data').set({ nonce: 0 });
   console.log('created system configs');
 

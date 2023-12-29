@@ -246,7 +246,7 @@ class PopupBuyGangster extends Popup {
       this.updateValues();
     });
 
-    scene.game.events.on('update-gas', ({ gas }) => {
+    scene.game.events.on('update-gas-mint', ({ gas }) => {
       if (isNaN(gas)) return;
 
       this.gas = gas;
@@ -302,7 +302,7 @@ class PopupBuyGangster extends Popup {
     );
 
     scene.game.events.emit('request-machines');
-    scene.game.events.emit('get-gas');
+    scene.game.events.emit('request-gas-mint');
   }
 
   updateValues() {
