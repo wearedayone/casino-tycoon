@@ -4,7 +4,7 @@ import cors from 'cors';
 
 import routes from './routes/index.js';
 import environments from './utils/environments.js';
-import { takeDailyWarSnapshot, generateDailyWarSnapshot } from './services/warSnapshot.service.js';
+import { generateDailyWarSnapshot } from './services/warSnapshot.service.js';
 import { updateSeasonSnapshotSchedule } from './services/season.service.js';
 import { updateEstimatedGasPrice } from './services/system.service.js';
 
