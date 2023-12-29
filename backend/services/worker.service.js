@@ -1,8 +1,8 @@
 import { Contract } from '@ethersproject/contracts';
 import { Wallet } from '@ethersproject/wallet';
 import { ethers } from 'ethers';
-import { formatBytes32String } from '@ethersproject/strings';
 import { getParsedEthersError } from '@enzoferey/ethers-error-parser';
+import { Utils } from 'alchemy-sdk';
 
 import tokenABI from '../assets/abis/Token.json' assert { type: 'json' };
 import gameContractABI from '../assets/abis/GameContract.json' assert { type: 'json' };
@@ -31,6 +31,33 @@ const getGameContract = async (signer) => {
   const { gameAddress: GAME_CONTRACT_ADDRESS } = activeSeason || {};
   const contract = new Contract(GAME_CONTRACT_ADDRESS, gameContractABI.abi, signer);
   return contract;
+};
+
+const getContractMap = {
+  game: getGameContract,
+  token: getTokenContract,
+};
+export const estimateTxnFee = async ({ contractName = 'game', functionName, params, value }) => {
+  try {
+    const workerWallet = await getWorkerWallet();
+    const contract = await getContractMap[contractName](workerWallet);
+    const ethersProvider = await alchemy.config.getProvider();
+    const feeData = await ethersProvider.getFeeData();
+    const lastBaseFeePerGas = Number(Utils.formatUnits(feeData.lastBaseFeePerGas, 'ether'));
+    const maxPriorityFeePerGas = Number(Utils.formatUnits(feeData.maxPriorityFeePerGas, 'ether'));
+    const gasPrice = lastBaseFeePerGas + maxPriorityFeePerGas; // based on real txns
+    if (value) params.push({ value: BigInt(Math.ceil(value * 1e18)) });
+    const estimatedGasCostInHex = await contract.estimateGas[functionName](...params);
+    const gasLimit = Utils.formatUnits(estimatedGasCostInHex, 'wei');
+    const transactionFee = gasPrice * gasLimit;
+
+    // console.log({ gasPrice, gasLimit, transactionFee });
+    logger.info(`The gas cost estimation for the tx calling ${functionName} is: ${transactionFee} ether`);
+
+    return transactionFee;
+  } catch (error) {
+    logger.error(error);
+  }
 };
 
 export const decodeTokenTxnLogs = async (name, log) => {

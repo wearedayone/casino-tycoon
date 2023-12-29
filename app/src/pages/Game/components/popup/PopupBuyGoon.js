@@ -196,7 +196,7 @@ class PopupBuyGoon extends Popup {
     this.coin = scene.add.image(this.priceText.x + this.priceText.width + 40, counterY, 'coin2').setOrigin(0, 0.5);
     this.add(this.coin);
 
-    scene.game.events.on('update-gas', ({ gas }) => {
+    scene.game.events.on('update-gas-buy-goon', ({ gas }) => {
       if (isNaN(gas)) return;
 
       this.gas = gas;
@@ -237,7 +237,7 @@ class PopupBuyGoon extends Popup {
     );
 
     scene.game.events.emit('request-workers');
-    scene.game.events.emit('get-gas');
+    scene.game.events.emit('request-gas-buy-goon');
   }
 
   updateValues() {
