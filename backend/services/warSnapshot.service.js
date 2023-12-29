@@ -284,15 +284,26 @@ export const generateDailyWarSnapshot = async () => {
       .where('seasonId', '==', seasonId)
       .get();
 
-    const gamePlays = gamePlaySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    const attackers = {};
+    const gamePlays = gamePlaySnapshot.docs.map((doc) => {
+      const attackUserId = doc.data().warDeployment.attackUserId;
+      if (attackUserId) {
+        attackers[attackUserId] = [
+          ...(attackers[attackUserId] || []),
+          { userId: doc.data().userId, attackUnits: doc.data().warDeployment.numberOfMachinesToAttack },
+        ];
+      }
+
+      return { id: doc.id, ...doc.data() };
+    });
 
     // create warSnapshot
-    // const todayDateString = moment().format('YYYYMMDD-HHmmss');
-    // await firestore.collection('warSnapshot').doc(todayDateString).set({
-    //   seasonId,
-    //   usersCount: gamePlays.length,
-    //   createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    // });
+    const todayDateString = moment().format('YYYYMMDD-HHmmss');
+    await firestore.collection('warSnapshot').doc(todayDateString).set({
+      seasonId,
+      usersCount: gamePlays.length,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
 
     const {
       buildingBonusMultiple,
@@ -312,7 +323,7 @@ export const generateDailyWarSnapshot = async () => {
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
           numberOfMachines: gamePlay.numberOfMachines,
           numberOfWorkers: gamePlay.numberOfWorkers,
-          numberOfBuildings: gamePlay.numberOfbuildings,
+          numberOfBuildings: gamePlay.numberOfBuildings,
           numberOfMachinesToEarn: gamePlay.warDeployment.numberOfMachinesToEarn,
           numberOfMachinesToAttack: gamePlay.warDeployment.numberOfMachinesToAttack,
           numberOfMachinesToDefend: gamePlay.warDeployment.numberOfMachinesToDefend,
@@ -332,6 +343,8 @@ export const generateDailyWarSnapshot = async () => {
       };
     }, {});
 
+    const bonusUsers = [];
+    const penaltyUsers = [];
     for (const user of Object.values(users)) {
       const { userId, attackUserId, attackUnits } = user;
 
@@ -339,12 +352,18 @@ export const generateDailyWarSnapshot = async () => {
         const attackedUser = users[attackUserId];
 
         if (attackUnits > attackedUser.defendUnits) {
-          const stolenToken = earningStealPercent * attackedUser.tokenEarnFromEarning;
+          const winningAttackers = attackers[attackedUser.userId].filter(
+            (user) => user.attackUnits > attackedUser.defendUnits
+          );
+          const totalAttackUnits = winningAttackers.reduce((total, item) => total + item.attackUnits, 0);
+          const winningRatio = attackUnits / totalAttackUnits;
+
+          const stolenToken = Math.floor(winningRatio * earningStealPercent * attackedUser.tokenEarnFromEarning);
           user.tokenEarnFromAttacking = stolenToken;
           user.totalTokenReward += stolenToken;
           user.attackResults.push({ userId: attackedUser.userId, result: 'win' });
 
-          attackedUser.tokenStolen = stolenToken;
+          attackedUser.tokenStolen += stolenToken;
           attackedUser.totalTokenReward -= stolenToken;
           attackedUser.defendResults.push({ userId, result: 'lose' });
         }
@@ -365,19 +384,18 @@ export const generateDailyWarSnapshot = async () => {
       }
     }
 
-    console.log(users);
-    fs.writeFileSync('./test.json', JSON.stringify(users), { encoding: 'utf-8' });
+    // fs.writeFileSync('./test.json', JSON.stringify(users), { encoding: 'utf-8' });
     logger.info(`Users war snapshot, ${JSON.stringify(users)}`);
 
-    // const promises = Object.values(users).map((data) =>
-    //   firestore
-    //     .collection('warSnapshot')
-    //     .doc(todayDateString)
-    //     .collection('warResult')
-    //     .doc(data.userId)
-    //     .set({ ...data })
-    // );
-    // await Promise.all(promises);
+    const promises = Object.values(users).map((data) =>
+      firestore
+        .collection('warSnapshot')
+        .doc(todayDateString)
+        .collection('warResult')
+        .doc(data.userId)
+        .set({ ...data })
+    );
+    await Promise.all(promises);
 
     logger.info('\n---------finish taking daily war snapshot--------\n\n');
   } catch (err) {
