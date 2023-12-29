@@ -1,4 +1,5 @@
 import moment from 'moment';
+import fs from 'fs';
 
 import admin, { firestore } from '../configs/firebase.config.js';
 import logger from '../utils/logger.js';
@@ -228,9 +229,9 @@ export const getWarHistory = async (userId) => {
     .orderBy('createdAt', 'desc')
     .get();
 
-  const warHistory = warHistorySnapshot.docs.map((doc) => {
+  const warHistory = warHistorySnapshot.docs.map((doc, index) => {
     const { createdAt, ...rest } = doc.data();
-    return { id: doc.id, createdAt: createdAt.toDate(), ...rest };
+    return { id: `${index}-${doc.id}`, createdAt: createdAt.toDate(), ...rest };
   });
   return warHistory;
 };
@@ -268,4 +269,119 @@ const getUserDailyIncome = async (userId) => {
   const { numberOfMachines, numberOfWorkers } = userGamePlay;
 
   return machine.dailyReward * numberOfMachines + worker.dailyReward * numberOfWorkers;
+};
+
+export const generateDailyWarSnapshot = async () => {
+  try {
+    logger.info('\n\n---------taking daily war snapshot--------\n');
+
+    const activeSeason = await getActiveSeason();
+    const { id: seasonId, warConfig } = activeSeason;
+
+    const gamePlaySnapshot = await firestore
+      .collection('gamePlay')
+      .where('active', '==', true)
+      .where('seasonId', '==', seasonId)
+      .get();
+
+    const gamePlays = gamePlaySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+    // create warSnapshot
+    // const todayDateString = moment().format('YYYYMMDD-HHmmss');
+    // await firestore.collection('warSnapshot').doc(todayDateString).set({
+    //   seasonId,
+    //   usersCount: gamePlays.length,
+    //   createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    // });
+
+    const {
+      buildingBonusMultiple,
+      workerBonusMultiple,
+      earningStealPercent,
+      tokenRewardPerEarner,
+      machinePercentLost,
+    } = warConfig;
+
+    const users = gamePlays.reduce((result, gamePlay) => {
+      const earnUnits = workerBonusMultiple * gamePlay.numberOfWorkers + gamePlay.warDeployment.numberOfMachinesToEarn;
+      return {
+        ...result,
+        [gamePlay.userId]: {
+          seasonId,
+          userId: gamePlay.userId,
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          numberOfMachines: gamePlay.numberOfMachines,
+          numberOfWorkers: gamePlay.numberOfWorkers,
+          numberOfBuildings: gamePlay.numberOfbuildings,
+          numberOfMachinesToEarn: gamePlay.warDeployment.numberOfMachinesToEarn,
+          numberOfMachinesToAttack: gamePlay.warDeployment.numberOfMachinesToAttack,
+          numberOfMachinesToDefend: gamePlay.warDeployment.numberOfMachinesToDefend,
+          earnUnits,
+          attackUnits: gamePlay.warDeployment.numberOfMachinesToAttack,
+          defendUnits:
+            buildingBonusMultiple * gamePlay.numberOfBuildings + gamePlay.warDeployment.numberOfMachinesToDefend,
+          attackUserId: gamePlay.warDeployment.attackUserId,
+          tokenEarnFromEarning: tokenRewardPerEarner * earnUnits,
+          tokenEarnFromAttacking: 0, // havent been calculated at this time
+          tokenStolen: 0, // havent been calculated at this time
+          totalTokenReward: tokenRewardPerEarner * earnUnits, // havent been fully calculated at this time
+          machinesLost: 0, // havent been calculated at this time
+          attackResults: [], // havent been calculated at this time
+          defendResults: [], // havent been calculated at this time
+        },
+      };
+    }, {});
+
+    for (const user of Object.values(users)) {
+      const { userId, attackUserId, attackUnits } = user;
+
+      if (attackUserId) {
+        const attackedUser = users[attackUserId];
+
+        if (attackUnits > attackedUser.defendUnits) {
+          const stolenToken = earningStealPercent * attackedUser.tokenEarnFromEarning;
+          user.tokenEarnFromAttacking = stolenToken;
+          user.totalTokenReward += stolenToken;
+          user.attackResults.push({ userId: attackedUser.userId, result: 'win' });
+
+          attackedUser.tokenStolen = stolenToken;
+          attackedUser.totalTokenReward -= stolenToken;
+          attackedUser.defendResults.push({ userId, result: 'lose' });
+        }
+
+        if (attackUnits < attackedUser.defendUnits) {
+          const machinesLost = Math.max(Math.floor(attackUnits * machinePercentLost), 1);
+          user.machinesLost = machinesLost;
+          user.attackResults.push({ userId: attackedUser.userId, result: 'lose' });
+
+          attackedUser.defendResults.push({ userId, result: 'win' });
+        }
+
+        if (attackUnits === attackedUser.defendUnits) {
+          user.attackResults.push({ userId: attackedUser.userId, result: 'draw' });
+
+          attackedUser.defendResults.push({ userId, result: 'draw' });
+        }
+      }
+    }
+
+    console.log(users);
+    fs.writeFileSync('./test.json', JSON.stringify(users), { encoding: 'utf-8' });
+    logger.info(`Users war snapshot, ${JSON.stringify(users)}`);
+
+    // const promises = Object.values(users).map((data) =>
+    //   firestore
+    //     .collection('warSnapshot')
+    //     .doc(todayDateString)
+    //     .collection('warResult')
+    //     .doc(data.userId)
+    //     .set({ ...data })
+    // );
+    // await Promise.all(promises);
+
+    logger.info('\n---------finish taking daily war snapshot--------\n\n');
+  } catch (err) {
+    console.error(err);
+    logger.error(err.message);
+  }
 };
