@@ -210,35 +210,58 @@ const updateNumberOfGangster = async ({ address, newBalance, active = false }) =
   const { activeSeasonId } = system.data();
   const user = await firestore.collection('user').where('address', '==', address).limit(1).get();
   if (!user.empty) {
-    const gamePlay = await firestore
+    const gamePlaySnapshot = await firestore
       .collection('gamePlay')
       .where('userId', '==', user.docs[0].id)
       .where('seasonId', '==', activeSeasonId)
       .limit(1)
       .get();
-    if (!gamePlay.empty) {
+    if (!gamePlaySnapshot.empty) {
+      const gamePlay = gamePlaySnapshot.docs[0];
+      const { numberOfMachines, warDeployment } = gamePlay.data();
       const now = Date.now();
       const generatedReward = await calculateGeneratedReward(user.docs[0].id);
-      if (active) {
-        await firestore
-          .collection('gamePlay')
-          .doc(gamePlay.docs[0].id)
-          .update({
-            numberOfMachines: Number(newBalance),
-            startRewardCountingTime: admin.firestore.Timestamp.fromMillis(now),
-            pendingReward: admin.firestore.FieldValue.increment(generatedReward),
-            active: true,
-          });
-      } else {
-        await firestore
-          .collection('gamePlay')
-          .doc(gamePlay.docs[0].id)
-          .update({
-            numberOfMachines: Number(newBalance),
-            startRewardCountingTime: admin.firestore.Timestamp.fromMillis(now),
-            pendingReward: admin.firestore.FieldValue.increment(generatedReward),
-          });
+
+      const newNumberOfMachines = Number(newBalance);
+      let numberOfMachinesToEarn = warDeployment.numberOfMachinesToEarn;
+      let numberOfMachinesToAttack = warDeployment.numberOfMachinesToAttack;
+      let numberOfMachinesToDefend = warDeployment.numberOfMachinesToDefend;
+
+      // when mint, deposit --> increasement is added to machinesToEarn
+      if (newNumberOfMachines > numberOfMachines) {
+        numberOfMachinesToDefend = Math.min(numberOfMachinesToDefend, newNumberOfMachines);
+        numberOfMachinesToAttack = Math.max(
+          0,
+          Math.min(numberOfMachinesToAttack, newNumberOfMachines - numberOfMachinesToDefend)
+        );
+        numberOfMachinesToEarn = Math.max(0, newNumberOfMachines - numberOfMachinesToDefend - numberOfMachinesToAttack);
       }
+
+      // when withdraw --> withdraw order: attack -> defend -> earn
+      if (newNumberOfMachines < numberOfMachines) {
+        numberOfMachinesToEarn = Math.min(numberOfMachinesToEarn, newNumberOfMachines);
+        numberOfMachinesToDefend = Math.max(
+          0,
+          Math.min(numberOfMachinesToDefend, newNumberOfMachines - numberOfMachinesToEarn)
+        );
+        numberOfMachinesToAttack = Math.max(0, newNumberOfMachines - numberOfMachinesToDefend - numberOfMachinesToEarn);
+      }
+
+      await firestore
+        .collection('gamePlay')
+        .doc(gamePlay.id)
+        .update({
+          numberOfMachines: newNumberOfMachines,
+          warDeploment: {
+            ...warDeployment,
+            numberOfMachinesToEarn,
+            numberOfMachinesToAttack,
+            numberOfMachinesToDefend,
+          },
+          startRewardCountingTime: admin.firestore.Timestamp.fromMillis(now),
+          pendingReward: admin.firestore.FieldValue.increment(generatedReward),
+          active: !!active || gamePlay.data().active,
+        });
     }
   }
 };

@@ -321,7 +321,7 @@ const updateUserGamePlay = async (userId, transactionId) => {
     .get();
   const userGamePlay = gamePlaySnapshot.docs[0];
   logger.debug(`userGamePlay before update: ${JSON.stringify(userGamePlay.data())}`);
-  const { numberOfWorkers, numberOfMachines, numberOfBuildings } = userGamePlay.data();
+  const { numberOfWorkers, numberOfMachines, numberOfBuildings, warDeployment } = userGamePlay.data();
   const assets = {
     numberOfBuildings,
     numberOfMachines,
@@ -378,6 +378,10 @@ const updateUserGamePlay = async (userId, transactionId) => {
 
       gamePlayData = {
         numberOfMachines: admin.firestore.FieldValue.increment(-machinesDeadCount),
+        warDeployment: {
+          ...warDeployment,
+          numberOfMachinesToAttack: warDeployment.numberOfMachinesToAttack - machinesDeadCount,
+        },
       };
       break;
     default:
