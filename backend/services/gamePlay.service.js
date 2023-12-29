@@ -5,6 +5,24 @@ import { getActiveSeason, getActiveSeasonId } from './season.service.js';
 import { getUserDisplayInfos } from './user.service.js';
 import { calculateReward } from '../utils/formulas.js';
 
+export const getUserGamePlay = async (userId) => {
+  const activeSeasonId = await getActiveSeasonId();
+  const gamePlaySnapshot = await firestore
+    .collection('gamePlay')
+    .where('userId', '==', userId)
+    .where('seasonId', '==', activeSeasonId)
+    .limit(1)
+    .get();
+  if (gamePlaySnapshot.empty) return null;
+
+  const userGamePlay = {
+    id: gamePlaySnapshot.docs[0].id,
+    ...gamePlaySnapshot.docs[0].data(),
+  };
+
+  return userGamePlay;
+};
+
 export const getLeaderboard = async (userId) => {
   const { id, prizePool, prizePoolConfig, rankingRewards } = await getActiveSeason();
 
@@ -69,4 +87,50 @@ export const getAllActiveGamePlay = async () => {
     .get();
 
   return snapshot.size;
+};
+
+export const updateUserWarDeployment = async ({
+  userId,
+  numberOfMachinesToEarn,
+  numberOfMachinesToAttack,
+  numberOfMachinesToDefend,
+}) => {
+  if (
+    [numberOfMachinesToEarn, numberOfMachinesToAttack, numberOfMachinesToDefend].some((num) => num % 1 !== 0 || num < 0)
+  )
+    throw new Error('Bad request: invalid input');
+
+  const gamePlay = await getUserGamePlay(userId);
+  if (!gamePlay) throw new Error('Gameplay doesnt exist');
+
+  const totalMachinesForWar = numberOfMachinesToEarn + numberOfMachinesToAttack + numberOfMachinesToDefend;
+  const { numberOfMachines } = gamePlay;
+  if (numberOfMachines !== totalMachinesForWar)
+    throw new Error('Bad request: total machines need to be used for war deployment');
+
+  await firestore
+    .collection('gamePlay')
+    .doc(gamePlay.id)
+    .update({
+      warDeployment: {
+        ...(gamePlay.warDeployment || {}),
+        numberOfMachinesToEarn,
+        numberOfMachinesToAttack,
+        numberOfMachinesToDefend,
+      },
+    });
+};
+
+export const updateUserAttackUser = async ({ userId, attackUserId }) => {
+  if (userId === attackUserId) throw new Error('Bad request: invalid attack user');
+  const attackUserSnapshot = await firestore.collection('user').doc(attackUserId).get();
+  if (!attackUserSnapshot.exists) throw new Error('Bad request: not found attack user');
+
+  const gamePlay = await getUserGamePlay(userId);
+  if (!gamePlay) throw new Error('Gameplay doesnt exist');
+
+  await firestore
+    .collection('gamePlay')
+    .doc(gamePlay.id)
+    .update({ warDeployment: { ...(gamePlay.warDeployment || {}), attackUserId } });
 };

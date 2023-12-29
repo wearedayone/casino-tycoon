@@ -4,11 +4,21 @@ import admin, { firestore } from '../configs/admin.config.js';
 import environments from '../utils/environments.js';
 
 const { TOKEN_ADDRESS, NFT_ADDRESS, GAME_CONTRACT_ADDRESS } = environments;
+
+const warConfig = {
+  buildingBonusMultiple: 1,
+  workerBonusMultiple: 1,
+  earningStealPercent: 0.5,
+  tokenRewardPerEarner: 500,
+  machinePercentLost: 0.1,
+};
+
 const assetsConfig = {
   machine: { basePrice: 0.001, whitelistPrice: 0.0006, dailyReward: 1000, networth: 5 },
   worker: { basePrice: 250, priceStep: 5, dailyReward: 1000, networth: 3 },
   building: { basePrice: 500, priceStep: 10, dailyReward: 0, networth: 4 },
 };
+
 const main = async () => {
   console.log('init data');
   // web3Listener
@@ -98,10 +108,7 @@ const main = async () => {
         // reputation leaderboard
         earlyRetirementTax: 0.2,
       },
-      warConfig: {
-        warBonus: 1,
-        dieChance: 0.15,
-      },
+      warConfig,
       referralConfig: {
         referralBonus: 0.1,
         referralDiscount: 0.1,
