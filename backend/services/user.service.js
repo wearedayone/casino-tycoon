@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { formatEther } from '@ethersproject/units';
+import chunk from 'lodash.chunk';
 
 import admin, { firestore } from '../configs/firebase.config.js';
 import privy from '../configs/privy.config.js';
@@ -172,4 +173,18 @@ export const applyInviteCode = async (userId, code) => {
   if (inviteCode) throw new Error('Cannot apply more than one invite code');
 
   await userRef.update({ inviteCode: appliedCode });
+};
+
+export const getUserUsernames = async (userIds) => {
+  const chunkIdsArrays = chunk(userIds, 10);
+
+  const promises = chunkIdsArrays.map((ids) =>
+    firestore.collection('user').where(admin.firestore.FieldPath.documentId(), 'in', ids).get()
+  );
+  const snapshots = await Promise.all(promises);
+
+  const usernames = {};
+  snapshots.map((snapshot) => snapshot.docs.map((doc) => (usernames[doc.id] = doc.data().username)));
+
+  return usernames;
 };
