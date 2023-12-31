@@ -558,3 +558,63 @@ export const burnMachinesLost = async (penaltyUsers) => {
     await Promise.all(updateUserGamePlayPromises);
   }
 };
+
+export const getUsersToAttack = async ({ page, limit, search }) => {
+  const activeSeasonId = await getActiveSeasonId();
+
+  const gamePlaySnapshot = await firestore
+    .collection('gamePlay')
+    .where('seasonId', '==', activeSeasonId)
+    .orderBy('networth', 'desc')
+    .orderBy('createdAt', 'asc')
+    .get();
+
+  let filteredGamePlaySnapshotDocs = gamePlaySnapshot.docs;
+
+  const searchString = (search || '').toLowerCase().trim();
+  if (searchString) {
+    filteredGamePlaySnapshotDocs = filteredGamePlaySnapshotDocs.filter((doc) =>
+      doc.data().username.toLowerCase().includes(searchString)
+    );
+  }
+  const totalDocs = filteredGamePlaySnapshotDocs.length;
+
+  const start = page * limit;
+  const end = (page + 1) * limit;
+  filteredGamePlaySnapshotDocs = filteredGamePlaySnapshotDocs.slice(start, end);
+
+  const userIds = filteredGamePlaySnapshotDocs.map((item) => item.data().userId);
+  const usernames = await getUserUsernames(userIds);
+
+  const lastWarSnapshotSnapshot = await firestore.collection('warSnapshot').orderBy('createdAt', 'desc').limit(1).get();
+  console.log('exists', lastWarSnapshotSnapshot.empty);
+  if (lastWarSnapshotSnapshot.empty) {
+    const users = filteredGamePlaySnapshotDocs.map((doc, index) => ({
+      id: doc.data().userId,
+      rank: index + 1,
+      username: usernames[doc.data().userId],
+      lastDayTokenReward: 0,
+    }));
+
+    return { totalDocs, docs: users };
+  }
+
+  const lastWarResultSnasphot = await firestore
+    .collection('warSnapshot')
+    .doc(lastWarSnapshotSnapshot.docs[0].id)
+    .collection('warResult')
+    .get();
+  const totalTokenRewards = lastWarResultSnasphot.docs.reduce(
+    (result, item) => ({ ...result, [item.data().userId]: item.data().totalTokenReward }),
+    {}
+  );
+
+  const users = filteredGamePlaySnapshotDocs.map((doc, index) => ({
+    id: doc.data().userId,
+    rank: index + 1,
+    username: usernames[doc.data().userId],
+    lastDayTokenReward: totalTokenRewards[doc.data().userId] || 0,
+  }));
+
+  return { totalDocs, docs: users };
+};
