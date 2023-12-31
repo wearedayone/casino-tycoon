@@ -8,6 +8,7 @@ import { calculateGeneratedReward, initTransaction, validateNonWeb3Transaction }
 import { claimToken as claimTokenTask, burnNFT as burnNFTTask, burnGoon as burnGoonTask } from './worker.service.js';
 import { getUserUsernames } from './user.service.js';
 import { parseEther } from '@ethersproject/units';
+import { getUserGamePlay } from './gamePlay.service.js';
 
 const BONUS_LIMIT = 0.5;
 
@@ -262,11 +263,11 @@ export const getWarHistoryDetail = async ({ userId, warSnapshotId, warResultId }
     ...snapshot.data(),
     attackResults: attackResults.map((item) => ({
       ...item,
-      user: usernames[item.userId],
+      userUsername: usernames[item.userId],
     })),
     defendResults: defendResults.map((item) => ({
       ...item,
-      user: usernames[item.userId],
+      userUsername: usernames[item.userId],
     })),
   };
 };
@@ -587,7 +588,6 @@ export const getUsersToAttack = async ({ page, limit, search }) => {
   const usernames = await getUserUsernames(userIds);
 
   const lastWarSnapshotSnapshot = await firestore.collection('warSnapshot').orderBy('createdAt', 'desc').limit(1).get();
-  console.log('exists', lastWarSnapshotSnapshot.empty);
   if (lastWarSnapshotSnapshot.empty) {
     const users = filteredGamePlaySnapshotDocs.map((doc, index) => ({
       id: doc.data().userId,
@@ -617,4 +617,44 @@ export const getUsersToAttack = async ({ page, limit, search }) => {
   }));
 
   return { totalDocs, docs: users };
+};
+
+export const getUserToAttackDetail = async (userId) => {
+  const userGamePlay = await getUserGamePlay(userId);
+  if (!userGamePlay) throw new Error('Bad request: cannot find game play');
+
+  const { numberOfMachines, numberOfWorkers, numberOfBuildings } = userGamePlay;
+
+  const seasonId = await getActiveSeasonId();
+  const warHistorySnapshot = await firestore
+    .collectionGroup('warResult')
+    .where('seasonId', '==', seasonId)
+    .where('userId', '==', userId)
+    .orderBy('createdAt', 'desc')
+    .get();
+
+  const userIds = [];
+  warHistorySnapshot.docs.map((doc) => {
+    const attackUserIds = doc.data().attackResults?.map((item) => item.userId) || [];
+    const defendUserIds = doc.data().defendResults?.map((item) => item.userId) || [];
+    userIds.push(...[...attackUserIds, ...defendUserIds]);
+  });
+
+  const usernames = await getUserUsernames([...new Set(userIds)]);
+  const warResults = warHistorySnapshot.docs.map((doc) => {
+    const { createdAt, attackResults, defendResults } = doc.data();
+    return {
+      id: doc.id,
+      warSnapshotId: doc.ref.parent.parent.id,
+      date: moment(createdAt.toDate()).format('DD/MM'),
+      ...doc.data(),
+      attackResults: (attackResults || []).map((item) => ({ ...item, userUsername: usernames[item.userId] })),
+      defendResults: (defendResults || []).map((item) => ({ ...item, userUsername: usernames[item.userId] })),
+    };
+  });
+
+  return {
+    gamePlay: { numberOfMachines, numberOfWorkers, numberOfBuildings },
+    warResults,
+  };
 };
