@@ -121,7 +121,7 @@ export const updateUserWarDeployment = async ({
     });
 };
 
-export const updateUserAttackUser = async ({ userId, attackUserId }) => {
+export const updateUserWarAttackUser = async ({ userId, attackUserId }) => {
   if (userId === attackUserId) throw new Error('Bad request: invalid attack user');
   const attackUserSnapshot = await firestore.collection('user').doc(attackUserId).get();
   if (!attackUserSnapshot.exists) throw new Error('Bad request: not found attack user');

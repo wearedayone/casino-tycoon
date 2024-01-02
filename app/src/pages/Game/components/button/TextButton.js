@@ -34,6 +34,7 @@ class TextButton extends Button {
         textStrokeColor = '#9e0a2e';
         break;
       case 'button-green-long':
+      case 'button-green':
         textStrokeColor = '#0c661e';
         break;
     }

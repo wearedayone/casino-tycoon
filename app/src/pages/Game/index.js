@@ -16,6 +16,8 @@ import {
   getNextWarSnapshotUnixTime,
   getTotalVoters,
   updateLastTimeSeenGangWarResult,
+  updateUserWarAttack,
+  updateUserWarMachines,
 } from '../../services/gamePlay.service';
 import { getLatestWar } from '../../services/war.service';
 import QueryKeys from '../../utils/queryKeys';
@@ -110,13 +112,27 @@ const Game = () => {
     tokenBalance: 0,
     ETHBalance: 0,
   };
-  const { numberOfMachines, numberOfWorkers, numberOfBuildings, networth, isWhitelisted, whitelistAmountLeft } =
-    gamePlay || {
-      numberOfMachines: 0,
-      numberOfWorkers: 0,
-      numberOfBuildings: 0,
-      networth: 0,
-    };
+  const {
+    numberOfMachines,
+    numberOfWorkers,
+    numberOfBuildings,
+    networth,
+    isWhitelisted,
+    whitelistAmountLeft,
+    warDeployment,
+  } = gamePlay || {
+    numberOfMachines: 0,
+    numberOfWorkers: 0,
+    numberOfBuildings: 0,
+    networth: 0,
+    warDeployment: {
+      numberOfMachinesToEarn: 0,
+      numberOfMachinesToAttack: 0,
+      numberOfMachinesToDefend: 0,
+      attackUserId: null,
+      acttackUser: null,
+    },
+  };
   const {
     machine,
     worker,
@@ -825,6 +841,32 @@ const Game = () => {
         gameRef.current?.events.emit('update-retire-data', { earlyRetirementTax: prizePoolConfig.earlyRetirementTax });
       });
 
+      gameRef.current?.events.on('request-game-play', () => {
+        gameRef.current?.events.emit('update-game-play', {
+          numberOfMachines,
+          ...warDeployment,
+        });
+      });
+
+      gameRef.current?.events.on('update-war-machines', (data) => {
+        const { numberOfMachines, numberOfMachinesToEarn, numberOfMachinesToAttack, numberOfMachinesToDefend } = data;
+        if (numberOfMachines !== numberOfMachinesToEarn + numberOfMachinesToAttack + numberOfMachinesToDefend) {
+          enqueueSnackbar(
+            `You still have ${
+              numberOfMachines - numberOfMachinesToEarn - numberOfMachinesToAttack - numberOfMachinesToDefend
+            } pending Gangsters`,
+            { variant: 'error' }
+          );
+          return;
+        }
+        updateUserWarMachines(data)
+          .then(() => gameRef.current?.events.emit('update-war-machines-completed'))
+          .catch((err) => {
+            console.error(err);
+            Sentry.captureException(err);
+          });
+      });
+
       gameRef.current?.events.emit('user-info-loaded');
 
       return () => {
@@ -1068,6 +1110,13 @@ const Game = () => {
       gameRef.current?.events.emit('music-on');
     }
   }, [userHasInteractive]);
+
+  useEffect(() => {
+    gameRef.current?.events.emit('update-game-play', {
+      numberOfMachines,
+      ...warDeployment,
+    });
+  }, [numberOfMachines, warDeployment]);
 
   return (
     <Box
