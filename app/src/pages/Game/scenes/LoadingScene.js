@@ -140,6 +140,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('popup-statistic', '/images/popup-statistic.png');
     this.load.image('popup-referral', '/images/popup-referral.png');
     this.load.image('popup-war-machines', '/images/popup-war-machines.png');
+    this.load.image('popup-gang-war-explain', '/images/popup-gang-war-explain.png');
 
     this.load.image('ribbon-welcome', '/images/ribbon-welcome.png');
     this.load.image('ribbon-daily-gang-war', '/images/ribbon-daily-gang-war.png');
@@ -149,6 +150,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('ribbon-portfolio', '/images/ribbon-portfolio.png');
     this.load.image('ribbon-statistic', '/images/ribbon-statistic.png');
     this.load.image('ribbon-referral', '/images/ribbon-referral.png');
+    this.load.image('ribbon-gang-war-explain', '/images/ribbon-gang-war-explain.png');
 
     this.load.image('glow', '/images/glow.png');
     this.load.image('coin', '/images/coin.png');
@@ -273,6 +275,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-goon-buy-fail', '/images/icons/goon-buy-fail.png');
 
     this.load.image('icon-info', '/images/icons/info.png');
+    this.load.image('icon-info-blue', '/images/icon-info.png');
     this.load.image('icon-loading', '/images/icons/loading.png');
     this.load.image('icon-logout', '/images/icons/logout.png');
     this.load.image('icon-nft-done', '/images/icons/nft-done.png');

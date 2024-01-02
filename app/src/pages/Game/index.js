@@ -867,6 +867,15 @@ const Game = () => {
           });
       });
 
+      gameRef.current?.events.on('request-war-config', () => {
+        const { tokenRewardPerEarner, earningStealPercent, machinePercentLost } = activeSeason.warConfig;
+        gameRef.current?.events.emit('update-war-config', {
+          tokenRewardPerEarner,
+          earningStealPercent,
+          machinePercentLost,
+        });
+      });
+
       gameRef.current?.events.emit('user-info-loaded');
 
       return () => {
@@ -1117,6 +1126,17 @@ const Game = () => {
       ...warDeployment,
     });
   }, [numberOfMachines, warDeployment]);
+
+  useEffect(() => {
+    if (activeSeason?.warConfig) {
+      const { tokenRewardPerEarner, earningStealPercent, machinePercentLost } = activeSeason.warConfig;
+      gameRef.current?.events.emit('update-war-config', {
+        tokenRewardPerEarner,
+        earningStealPercent,
+        machinePercentLost,
+      });
+    }
+  }, [activeSeason?.warConfig]);
 
   return (
     <Box
