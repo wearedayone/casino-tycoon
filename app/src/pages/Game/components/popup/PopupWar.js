@@ -20,7 +20,7 @@ class PopupWar extends Phaser.GameObjects.Container {
     });
     this.warBtn.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
       this.btnSound.play();
-      scene.popupDailyGangWar.open();
+      scene.popupWarMachines.open();
     });
 
     this.add(this.popup);
