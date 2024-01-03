@@ -373,6 +373,7 @@ class PopupWarMachines extends Popup {
     scene.game.events.on('update-war-machines-completed', () => {
       this.loading = false;
       if (this.visible) {
+        scene.popupWarAttackConfirmation?.updateNumberOfMachines(this.attackUnits);
         this.close();
         scene.popupWarAttack?.open();
       }

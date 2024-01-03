@@ -28,6 +28,7 @@ const formatUsername = ({ username }) => {
 };
 
 class PopupWarAttack extends Popup {
+  uid = null;
   loading = false;
   page = 0;
   limit = 50;
@@ -81,8 +82,6 @@ class PopupWarAttack extends Popup {
     this.add(this.listContainer);
     this.contentContainer = scene.add.container().setSize(this.popup.width * 0.8, 0);
 
-    this.reloadData();
-
     scene.game.events.on('update-user-list-to-attack', ({ totalPages, users }) => {
       this.totalPages = totalPages;
       this.users = users;
@@ -101,7 +100,13 @@ class PopupWarAttack extends Popup {
       this.timeText.text = timeText;
     });
 
+    scene.game.events.on('update-auth', ({ uid }) => {
+      this.uid = uid;
+      this.reloadData();
+    });
+
     scene.game.events.emit('request-next-war-time');
+    scene.game.events.emit('request-auth');
   }
 
   onOpen() {
@@ -159,7 +164,7 @@ class PopupWarAttack extends Popup {
         const bg = this.scene.add.image(this.popup.width / 2 - 90, y, 'row-container').setOrigin(0.5, 0);
         this.items.push(bg);
       }
-      const { rank, username, lastDayTokenReward } = this.users[i];
+      const { id, rank, username, lastDayTokenReward } = this.users[i];
       const rankText = this.scene.add
         .text(this.popup.width * 0.05, y + rowHeight / 2, `${rank}`, smallBlackBoldCenter)
         .setOrigin(0.5, 0.5);
@@ -169,6 +174,7 @@ class PopupWarAttack extends Popup {
       const lastDayTokenRewardText = this.scene.add
         .text(this.popup.width * 0.42, y + rowHeight / 2, formatter.format(lastDayTokenReward), smallBlackBoldCenter)
         .setOrigin(0.5, 0.5);
+
       const profileBtn = new TextButton(
         this.scene,
         this.popup.width * 0.58,
@@ -180,18 +186,26 @@ class PopupWarAttack extends Popup {
         { fontSize: '36px' }
       );
 
-      const attackBtn = new TextButton(
-        this.scene,
-        this.popup.width * 0.58 + 200,
-        y + rowHeight / 2,
-        'button-blue-small',
-        'button-blue-small',
-        () => {},
-        'Raid',
-        { fontSize: '36px' }
-      );
+      this.items.push(rankText, usernameText, lastDayTokenRewardText, profileBtn);
 
-      this.items.push(rankText, usernameText, lastDayTokenRewardText, profileBtn, attackBtn);
+      if (id !== this.uid) {
+        const attackBtn = new TextButton(
+          this.scene,
+          this.popup.width * 0.58 + 200,
+          y + rowHeight / 2,
+          'button-blue-small',
+          'button-blue-small',
+          () => {
+            this.scene.popupWarAttackConfirmation?.updateAttackUser({ id, username });
+            this.close();
+            this.scene.popupWarAttackConfirmation?.open();
+          },
+          'Raid',
+          { fontSize: '36px' }
+        );
+
+        this.items.push(attackBtn);
+      }
     }
     this.contentContainer.add(this.items);
 
