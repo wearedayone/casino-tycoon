@@ -65,26 +65,30 @@ export const calculateReward = (prizePool, rankingRewards, rankIndex) => {
   return prizePool * rankingReward.share;
 };
 
-export const generateRankingRewards = ({ totalPlayers, prizePool, leaderboardConfig }) => {
+export const generateRankingRewards = ({ totalPlayers, prizePool, prizePoolConfig }) => {
   const {
+    allocation: {
+      devFeePercent,
+      burnPercent,
+      reputationRewardsPercent,
+      // rank rankingRewards is the remaining
+    },
     rewardScalingRatio,
-    devFeePercent,
     higherRanksCutoffPercent,
     lowerRanksCutoffPercent,
     minRewardHigherRanks,
     minRewardLowerRanks,
-  } = leaderboardConfig;
+  } = prizePoolConfig;
   const totalPaidPlayersCount = Math.round(lowerRanksCutoffPercent * totalPlayers);
   const higherRanksPlayersCount = Math.round(higherRanksCutoffPercent * totalPlayers);
   const lowerRanksPlayersCount = totalPaidPlayersCount - higherRanksPlayersCount;
   const minRewardPercentHigherRanks = minRewardHigherRanks / prizePool;
   const minRewardPercentLowerRanks = minRewardLowerRanks / prizePool;
 
-  const remainingPoolPercent =
-    1 -
-    (minRewardPercentHigherRanks * higherRanksPlayersCount +
-      minRewardPercentLowerRanks * lowerRanksPlayersCount +
-      devFeePercent);
+  const rankPoolPercent = 1 - (devFeePercent + burnPercent + reputationRewardsPercent);
+  const remainingRankPoolPercent =
+    rankPoolPercent -
+    (minRewardPercentHigherRanks * higherRanksPlayersCount + minRewardPercentLowerRanks * lowerRanksPlayersCount);
 
   let totalExtraRewardWeight = 0;
   let rankingRewards = [];
@@ -98,7 +102,7 @@ export const generateRankingRewards = ({ totalPlayers, prizePool, leaderboardCon
   for (let player of rankingRewards) {
     const minRewardPercent =
       player.rankStart <= higherRanksPlayersCount ? minRewardPercentHigherRanks : minRewardPercentLowerRanks;
-    const extraRewardPercent = (player.extraRewardWeight / totalExtraRewardWeight) * remainingPoolPercent;
+    const extraRewardPercent = (player.extraRewardWeight / totalExtraRewardWeight) * remainingRankPoolPercent;
 
     player.share = minRewardPercent + extraRewardPercent;
     player.prizeValue = prizePool * player.share;

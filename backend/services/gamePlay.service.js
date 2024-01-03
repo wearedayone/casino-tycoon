@@ -6,11 +6,11 @@ import { getUserDisplayInfos } from './user.service.js';
 import { calculateReward } from '../utils/formulas.js';
 
 export const getLeaderboard = async (userId) => {
-  const season = await getActiveSeason();
+  const { id, prizePool, prizePoolConfig, rankingRewards } = await getActiveSeason();
 
   const snapshot = await firestore
     .collection('gamePlay')
-    .where('seasonId', '==', season.id)
+    .where('seasonId', '==', id)
     .orderBy('networth', 'desc')
     .orderBy('createdAt', 'asc')
     .get();
@@ -18,6 +18,8 @@ export const getLeaderboard = async (userId) => {
   const docs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
   const userPromises = docs.map((doc) => getUserDisplayInfos(doc.userId)).filter(Boolean);
   const userDatas = await Promise.all(userPromises);
+  const totalReputation = docs.reduce((sum, doc) => sum + doc.networth, 0);
+  const reputationPrizePool = prizePoolConfig.allocation.reputationRewardsPercent * prizePool;
 
   // implement logic calculate reward
   return docs.map((doc, index) => ({
@@ -27,7 +29,8 @@ export const getLeaderboard = async (userId) => {
     isUser: userDatas[index].id === userId,
     rank: index + 1,
     networth: doc.networth,
-    reward: calculateReward(season.prizePool, season.rankingRewards, index),
+    reward: calculateReward(prizePool, rankingRewards, index),
+    reputationReward: (doc.networth / totalReputation) * reputationPrizePool,
   }));
 };
 

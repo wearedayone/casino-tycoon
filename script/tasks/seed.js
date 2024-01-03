@@ -82,13 +82,21 @@ const main = async () => {
       tokenAddress: TOKEN_ADDRESS,
       nftAddress: NFT_ADDRESS,
       gameAddress: GAME_CONTRACT_ADDRESS,
-      leaderboardConfig: {
+      prizePoolConfig: {
+        allocation: {
+          devFeePercent: 0.05,
+          burnPercent: 0,
+          reputationRewardsPercent: 0.3,
+          // rank rewards is the remaining
+        },
         rewardScalingRatio: 1.25,
-        devFeePercent: 0.05,
+        // rank leaderboard
         higherRanksCutoffPercent: 0.1,
         lowerRanksCutoffPercent: 0.2,
         minRewardHigherRanks: 0.004, // in ETH
         minRewardLowerRanks: 0.002, // in ETH
+        // reputation leaderboard
+        earlyRetirementTax: 0.2,
       },
       warConfig: {
         warBonus: 1,
