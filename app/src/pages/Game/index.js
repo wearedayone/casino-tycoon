@@ -868,6 +868,20 @@ const Game = () => {
           });
       });
 
+      gameRef.current?.events.on('update-war-attack', (data) => {
+        const { attackUserId } = data;
+
+        updateUserWarAttack({ attackUserId })
+          .then(() => {
+            gameRef.current?.events.emit('update-war-attack-completed');
+            enqueueSnackbar('War deployment saved', { variant: 'success' });
+          })
+          .catch((err) => {
+            console.error(err);
+            Sentry.captureException(err);
+          });
+      });
+
       gameRef.current?.events.on('request-war-config', () => {
         const { tokenRewardPerEarner, earningStealPercent, machinePercentLost } = activeSeason.warConfig;
         gameRef.current?.events.emit('update-war-config', {
@@ -888,6 +902,10 @@ const Game = () => {
             console.error(err);
             Sentry.captureException(err);
           });
+      });
+
+      gameRef.current?.events.on('request-auth', () => {
+        gameRef.current?.events.emit('update-auth', { uid: profile.id });
       });
 
       gameRef.current?.events.emit('user-info-loaded');
