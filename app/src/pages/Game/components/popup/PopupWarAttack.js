@@ -236,7 +236,7 @@ class PopupWarAttack extends Popup {
       panel: { child: this.contentContainer, mask: { padding: 1 } },
       slider: { thumb: this.thumb },
       mouseWheelScroller: { focus: true, speed: 0.3 },
-      space: { left: 10, right: 20, top: 20, bottom: 20, panel: 20, header: 10, footer: 10 },
+      space: { left: 20, right: 20, top: 20, bottom: 20, panel: 20, header: 10, footer: 10 },
     }).layout();
     if (this.users.length <= 7) {
       this.table.setScrollerEnable(false);
