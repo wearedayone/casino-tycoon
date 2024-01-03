@@ -571,12 +571,18 @@ export const getUsersToAttack = async ({ page, limit, search }) => {
     .get();
 
   let filteredGamePlaySnapshotDocs = gamePlaySnapshot.docs;
+  const ranks = filteredGamePlaySnapshotDocs.reduce((result, doc, index) => {
+    result[doc.data().userId] = index + 1;
+    return result;
+  }, {});
 
   const searchString = (search || '').toLowerCase().trim();
   if (searchString) {
-    filteredGamePlaySnapshotDocs = filteredGamePlaySnapshotDocs.filter((doc) =>
-      doc.data().username.toLowerCase().includes(searchString)
-    );
+    const userSnapshot = await firestore.collection('user').get();
+    const userIds = userSnapshot.docs
+      .filter((doc) => doc.data().username.toLowerCase().includes(searchString))
+      .map((doc) => doc.id);
+    filteredGamePlaySnapshotDocs = filteredGamePlaySnapshotDocs.filter((doc) => userIds.includes(doc.data().userId));
   }
   const totalDocs = filteredGamePlaySnapshotDocs.length;
 
@@ -611,7 +617,7 @@ export const getUsersToAttack = async ({ page, limit, search }) => {
 
   const users = filteredGamePlaySnapshotDocs.map((doc, index) => ({
     id: doc.data().userId,
-    rank: index + 1,
+    rank: ranks[doc.data().userId],
     username: usernames[doc.data().userId],
     lastDayTokenReward: totalTokenRewards[doc.data().userId] || 0,
   }));

@@ -141,6 +141,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('popup-referral', '/images/popup-referral.png');
     this.load.image('popup-war-machines', '/images/popup-war-machines.png');
     this.load.image('popup-gang-war-explain', '/images/popup-gang-war-explain.png');
+    this.load.image('popup-war-attack', '/images/popup-war-attack.png');
 
     this.load.image('ribbon-welcome', '/images/ribbon-welcome.png');
     this.load.image('ribbon-daily-gang-war', '/images/ribbon-daily-gang-war.png');
@@ -158,6 +159,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('eth-coin', '/images/eth-coin.png');
     this.load.image('slider-thumb', '/images/slider-thumb.png');
     this.load.image('counter', '/images/counter.png');
+    this.load.image('row-container', '/images/row-container.png');
 
     this.load.image('button-approve', '/images/button-approve.png');
     this.load.image('button-approve-pressed', '/images/button-approve-pressed.png');
@@ -228,6 +230,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-yes-pressed', '/images/button-yes-pressed.png');
     this.load.image('button-green', '/images/button-green.png');
     this.load.image('button-green-pressed', '/images/button-green-pressed.png');
+    this.load.image('button-blue-small', '/images/button-blue-small.png');
 
     this.load.image('button-buy-safehouse', '/images/button-buy-safehouse.png');
     this.load.image('button-buy-safehouse-pressed', '/images/button-buy-safehouse-pressed.png');
@@ -239,12 +242,17 @@ class LoadingScene extends Phaser.Scene {
 
     this.load.image('text-input', '/images/text-input.png');
     this.load.image('text-input-small', '/images/text-input-small.png');
+    this.load.image('search-input', '/images/search-input.png');
+    this.load.image('pagination', '/images/pagination.png');
+    this.load.image('pagination-active', '/images/pagination-active.png');
+    this.load.image('pagination-disabled', '/images/pagination-disabled.png');
 
     this.load.image('text-container', '/images/text-container.png');
     this.load.image('text-container-outlined', '/images/text-container-outlined.png');
     this.load.image('tabs-container', '/images/tabs-container.png');
     this.load.image('container-large', '/images/container-large.png');
     this.load.image('container-large-2', '/images/container-large-2.png');
+    this.load.image('container-large-3', '/images/container-large-3.png');
     this.load.image('player-rank-container', '/images/player-rank-container.png');
 
     // settings
@@ -289,6 +297,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-sound-off', '/images/icons/sound-off.png');
     this.load.image('icon-star', '/images/icons/star.png');
     this.load.image('icon-wallet', '/images/icons/wallet.png');
+    this.load.image('icon-search', '/images/icon-search.png');
 
     this.load.image('icon-history', '/images/icon-history.png');
     this.load.image('icon-war', '/images/icon-war.png');
