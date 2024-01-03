@@ -18,7 +18,6 @@ import {
   updateLastTimeSeenGangWarResult,
 } from '../../services/gamePlay.service';
 import { getLatestWar } from '../../services/war.service';
-import { getRankingRewards } from '../../services/season.service';
 import QueryKeys from '../../utils/queryKeys';
 import { calculateHouseLevel } from '../../utils/formulas';
 import useSmartContract from '../../hooks/useSmartContract';
@@ -118,18 +117,39 @@ const Game = () => {
       numberOfBuildings: 0,
       networth: 0,
     };
-  const { machine, worker, building, workerSold, buildingSold, reservePool, reservePoolReward, houseLevels } =
-    activeSeason || {
-      machine: { dailyReward: 0, basePrice: 0, whitelistPrice: 0, networth: 0 },
-      worker: { dailyReward: 0, basePrice: 0, networth: 0, priceStep: 0 },
-      building: { basePrice: 0, priceStep: 0, networth: 0 },
-      buildingSold: 0,
-      workerSold: 0,
-      machineSold: 0,
-      reservePool: 0,
-      reservePoolReward: 0,
-      houseLevels: [],
-    };
+  const {
+    machine,
+    worker,
+    building,
+    workerSold,
+    buildingSold,
+    reservePool,
+    reservePoolReward,
+    houseLevels,
+    prizePoolConfig,
+  } = activeSeason || {
+    machine: { dailyReward: 0, basePrice: 0, whitelistPrice: 0, networth: 0 },
+    worker: { dailyReward: 0, basePrice: 0, networth: 0, priceStep: 0 },
+    building: { basePrice: 0, priceStep: 0, networth: 0 },
+    buildingSold: 0,
+    workerSold: 0,
+    machineSold: 0,
+    reservePool: 0,
+    reservePoolReward: 0,
+    houseLevels: [],
+    prizePoolConfig: {
+      allocation: {
+        devFeePercent: 0,
+        burnPercent: 0,
+        reputationRewardsPercent: 0,
+        // rank rewards is the remaining
+      },
+      // rank leaderboard
+      lowerRanksCutoffPercent: 0,
+      // reputation leaderboard
+      earlyRetirementTax: 0,
+    },
+  };
 
   const dailyMoney = numberOfMachines * machine.dailyReward + numberOfWorkers * worker.dailyReward;
 
@@ -769,15 +789,11 @@ const Game = () => {
       });
 
       gameRef.current?.events.on('request-ranking-rewards', () => {
-        getRankingRewards()
-          .then((res) => {
-            const { rankingRewards, leaderboardConfig } = res.data;
-            gameRef.current?.events.emit('update-ranking-rewards', { rankingRewards, leaderboardConfig });
-          })
-          .catch((err) => {
-            console.error(err);
-            Sentry.captureException(err);
-          });
+        gameRef.current?.events.emit('update-ranking-rewards', { prizePoolConfig });
+      });
+
+      gameRef.current?.events.on('request-retire-data', () => {
+        gameRef.current?.events.emit('update-retire-data', { earlyRetirementTax: prizePoolConfig.earlyRetirementTax });
       });
 
       gameRef.current?.events.emit('user-info-loaded');
@@ -854,6 +870,16 @@ const Game = () => {
   useEffect(() => {
     if (isLeaderboardModalOpen) gameRef.current?.events.emit('update-leaderboard', leaderboardData?.data || []);
   }, [isLeaderboardModalOpen, leaderboardData?.data]);
+
+  useEffect(() => {
+    gameRef.current?.events.emit('update-ranking-rewards', { prizePoolConfig });
+  }, [prizePoolConfig]);
+
+  useEffect(() => {
+    gameRef.current?.events.emit('update-retire-data', {
+      earlyRetirementTax: prizePoolConfig.earlyRetirementTax,
+    });
+  }, [prizePoolConfig.earlyRetirementTax]);
 
   useEffect(() => {
     gameRef.current?.events.emit('update-season-countdown', countdownString);

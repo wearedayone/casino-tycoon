@@ -23,6 +23,7 @@ import PopupLeaderboard from '../components/popup/PopupLeaderboard';
 import PopupDeposit from '../components/popup/PopupDeposit';
 import PopupReferralProgram from '../components/popup/PopupReferralProgram';
 import PopupPrizePool from '../components/popup/PopupPrizePool';
+import PopupRetire from '../components/popup/PopupRetire';
 
 const { goonAnimation, gangsterAnimation, width } = configs;
 
@@ -137,6 +138,9 @@ class MainScene extends Phaser.Scene {
 
       this.popupPrizePool = new PopupPrizePool(this);
       this.add.existing(this.popupPrizePool);
+
+      this.popupRetire = new PopupRetire(this);
+      this.add.existing(this.popupRetire);
 
       this.popupWarHistory = new PopupWarHistory(this);
       this.add.existing(this.popupWarHistory);

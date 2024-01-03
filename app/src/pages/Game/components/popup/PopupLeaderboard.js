@@ -1,3 +1,4 @@
+import Phaser from 'phaser';
 import { ScrollablePanel } from 'phaser3-rex-plugins/templates/ui/ui-components.js';
 
 import Popup from './Popup';
@@ -80,7 +81,7 @@ class PopupLeaderboard extends Popup {
       .image(width / 2, prizePoolContainerY, 'text-container-outlined')
       .setOrigin(0.5, 0.5);
     const totalPrizePool = scene.add
-      .text(paddedX, prizePoolContainerY, 'Total Prize Pool', largeBlackExtraBold)
+      .text(paddedX, prizePoolContainerY, 'Rank Prize Pool', largeBlackExtraBold)
       .setOrigin(0, 0.5);
     const infoButton = new Button(
       scene,
@@ -104,10 +105,27 @@ class PopupLeaderboard extends Popup {
     this.add(this.prizePool);
     this.add(ethIcon);
 
-    const reputationContainer = scene.add.image(width / 2, reputationY, 'text-container-large').setOrigin(0.5, 0.5);
-    const reputationTitle = scene.add.text(width / 2, reputationY, 'Reputation', largeBlackBold).setOrigin(0.5, 0.5);
-    this.add(reputationContainer);
-    this.add(reputationTitle);
+    this.modeSwitch = new ModeSwitch(scene, width / 2, reputationY, {
+      modeOne: {
+        title: 'Ranking',
+        onClick: () => {
+          this.buttonBack.setX(width / 2);
+          this.buttonRetire.setVisible(false);
+          this.ethRewards.text = this.rankingRewardsString;
+          this.playerReward.text = `~${formatter.format(this.userRankingReward)}`;
+        },
+      },
+      modeTwo: {
+        title: 'Reputation',
+        onClick: () => {
+          this.buttonBack.setX(width / 2 - this.popup.width * 0.23);
+          this.buttonRetire.setVisible(true);
+          this.ethRewards.text = this.reputationRewardsString;
+          this.playerReward.text = `~${formatter.format(this.userReputationReward)}`;
+        },
+      },
+    });
+    this.add(this.modeSwitch);
 
     const rank = scene.add.text(paddedX, leaderboardHeaderY, 'Rank', smallBrownBold);
     const name = scene.add.text(leftMargin + this.popup.width * 0.3, leaderboardHeaderY, 'Name', smallBrownBold);
@@ -197,6 +215,19 @@ class PopupLeaderboard extends Popup {
     );
     this.add(this.buttonBack);
 
+    this.buttonRetire = new Button(
+      scene,
+      width / 2 + this.popup.width * 0.23,
+      height / 2 + this.popup.height / 2 - 20,
+      'button-retire',
+      'button-retire-pressed',
+      () => {
+        this.close();
+        scene.popupRetire.open();
+      }
+    ).setVisible(false);
+    this.add(this.buttonRetire);
+
     this.nextSeason = scene.add
       .text(width / 2, height / 2 + this.popup.height / 2 - 80, 'Next season will begin soon', {
         fontSize: fontSizes.large,
@@ -264,12 +295,19 @@ class PopupLeaderboard extends Popup {
     this.rankNumbers.text = leaderboard.map(({ rank }) => rank).join('\n\n');
     this.usernames.text = leaderboard.map(formatUsername).join('\n\n');
     this.networths.text = leaderboard.map(({ networth }) => networth).join('\n\n');
-    this.ethRewards.text = leaderboard.map(({ reward }) => `~${formatter.format(reward)}`).join('\n\n');
+    this.rankingRewardsString = leaderboard.map(({ reward }) => `~${formatter.format(reward)}`).join('\n\n');
+    this.reputationRewardsString = leaderboard
+      .map(({ reputationReward }) => `~${formatter.format(reputationReward)}`)
+      .join('\n\n');
+    const isRankingMode = this.modeSwitch.mode === 'Ranking';
+    this.ethRewards.text = isRankingMode ? this.rankingRewardsString : this.reputationRewardsString;
 
     const userRecord = leaderboard.find(({ isUser }) => isUser);
+    this.userRankingReward = userRecord.reward;
+    this.userReputationReward = userRecord.reputationReward;
     this.playerRank.text = userRecord.rank.toLocaleString();
     this.playerNetworth.text = userRecord.networth;
-    this.playerReward.text = `~${formatter.format(userRecord.reward)}`;
+    this.playerReward.text = `~${formatter.format(isRankingMode ? this.userRankingReward : this.userReputationReward)}`;
     this.finishedAt.text = `${userRecord.rank.toLocaleString()}${getOrdinalSuffix(userRecord.rank)} place`;
     this.finishedReward.text = formatter.format(userRecord.reward);
 
@@ -342,5 +380,50 @@ const formatUsername = ({ username }) => {
 
   return `@${displayedUsername}${ellipses}`;
 };
+
+class ModeSwitch extends Phaser.GameObjects.Container {
+  mode = '';
+
+  constructor(scene, x, y, { containerImg = 'tabs-container', modeOne, modeTwo } = {}) {
+    super(scene, 0, 0);
+    this.mode = modeOne.title;
+    const textStyle = { fontSize: '56px', color: '#ffffff', fontFamily: fontFamilies.bold, align: 'center' };
+
+    this.container = scene.add.image(x, y, containerImg).setOrigin(0.5, 0.5);
+    this.add(this.container);
+
+    const buttonOffset = this.container.width / 4;
+    this.btnOne = scene.add.image(x - buttonOffset, y, 'button-blue-med').setOrigin(0.5, 0.5);
+    this.btnTwo = scene.add
+      .image(x + buttonOffset, y, 'button-blue-med')
+      .setOrigin(0.5, 0.5)
+      .setAlpha(0);
+    this.add(this.btnOne);
+    this.add(this.btnTwo);
+
+    this.textOne = scene.add
+      .text(x - buttonOffset, y, modeOne.title, textStyle)
+      .setStroke('#0004a0', 10)
+      .setOrigin(0.5, 0.5);
+    this.textTwo = scene.add
+      .text(x + buttonOffset, y, modeTwo.title, textStyle)
+      .setStroke('#0004a0', 10)
+      .setOrigin(0.5, 0.5);
+    this.add(this.textOne);
+    this.add(this.textTwo);
+
+    this.container
+      .setInteractive()
+      .on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, (pointer, localX, localY, event) => {
+        const isModeOneClicked = localX <= this.container.width / 2;
+        this.btnOne.setAlpha(Number(isModeOneClicked));
+        this.btnTwo.setAlpha(Number(!isModeOneClicked));
+
+        const newMode = isModeOneClicked ? modeOne : modeTwo;
+        this.mode = newMode.title;
+        newMode.onClick();
+      });
+  }
+}
 
 export default PopupLeaderboard;

@@ -3,6 +3,7 @@ import Phaser from 'phaser';
 import Button from '../button/Button';
 import configs from '../../configs/configs';
 
+const LARGE_TITLE_LIMIT_WITH_ICON = 13;
 const LARGE_TITLE_LIMIT = 15;
 const XL_TITLE_LIMIT = 20;
 class Popup extends Phaser.GameObjects.Container {
@@ -70,7 +71,7 @@ class Popup extends Phaser.GameObjects.Container {
     }
 
     if (title) {
-      const isTitleTooLong = title.length > LARGE_TITLE_LIMIT;
+      const isTitleTooLong = title.length > (titleIcon ? LARGE_TITLE_LIMIT_WITH_ICON : LARGE_TITLE_LIMIT);
       const isTitleWayTooLong = title.length > XL_TITLE_LIMIT;
       const titleRibbon = isTitleTooLong ? 'popup-title-large' : 'popup-title';
       this.ribbon = scene.add

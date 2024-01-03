@@ -19,11 +19,11 @@ export const getActiveSeasonId = async () => {
 export const getActiveSeason = async () => {
   const activeSeasonId = await getActiveSeasonId();
   const snapshot = await firestore.collection('season').doc(activeSeasonId).get();
-  const { leaderboardConfig, prizePool, ...rest } = snapshot.data();
+  const { prizePoolConfig, prizePool, ...rest } = snapshot.data();
 
   const totalPlayers = await getAllActiveGamePlay();
-  const rankingRewards = generateRankingRewards({ totalPlayers, prizePool, leaderboardConfig });
-  return { id: snapshot.id, ...rest, prizePool, rankingRewards, leaderboardConfig };
+  const rankingRewards = generateRankingRewards({ totalPlayers, prizePool, prizePoolConfig });
+  return { id: snapshot.id, ...rest, prizePool, rankingRewards, prizePoolConfig };
 };
 
 const TAKE_SEASON_SNAPSHOT = 'take-season-snapshot';
@@ -49,8 +49,7 @@ const takeSeasonLeaderboardSnapshot = async () => {
     await setGameClosed(true);
 
     // get rewards allocation config
-    const seasonSnapshot = await seasonRef.get();
-    const { rankingRewards, prizePool } = seasonSnapshot.data();
+    const { rankingRewards, prizePool } = await getActiveSeason();
     const winnerAllocations = [];
     for (let i = 0; i < rankingRewards.length; i++) {
       const { rankStart, rankEnd, share } = rankingRewards[i];

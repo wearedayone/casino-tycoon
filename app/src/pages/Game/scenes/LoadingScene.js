@@ -205,6 +205,8 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-referral-pressed', '/images/button-referral-pressed.png');
     this.load.image('button-refresh', '/images/button-refresh.png');
     this.load.image('button-refresh-pressed', '/images/button-refresh-pressed.png');
+    this.load.image('button-retire', '/images/button-retire.png');
+    this.load.image('button-retire-pressed', '/images/button-retire-pressed.png');
     this.load.image('button-setting', '/images/button-setting.png');
     this.load.image('button-setting-pressed', '/images/button-setting-pressed.png');
     this.load.image('button-stake', '/images/button-stake.png');
@@ -218,6 +220,8 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-back-portfolio-pressed', '/images/button-back-portfolio-pressed.png');
     this.load.image('button-square', '/images/button-square.png');
     this.load.image('button-square-pressed', '/images/button-square-pressed.png');
+    this.load.image('button-yes', '/images/button-yes.png');
+    this.load.image('button-yes-pressed', '/images/button-yes-pressed.png');
 
     this.load.image('button-buy-safehouse', '/images/button-buy-safehouse.png');
     this.load.image('button-buy-safehouse-pressed', '/images/button-buy-safehouse-pressed.png');
@@ -230,8 +234,8 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('text-input', '/images/text-input.png');
 
     this.load.image('text-container', '/images/text-container.png');
-    this.load.image('text-container-large', '/images/text-container-large.png');
     this.load.image('text-container-outlined', '/images/text-container-outlined.png');
+    this.load.image('tabs-container', '/images/tabs-container.png');
     this.load.image('container-large', '/images/container-large.png');
     this.load.image('container-large-2', '/images/container-large-2.png');
     this.load.image('player-rank-container', '/images/player-rank-container.png');
