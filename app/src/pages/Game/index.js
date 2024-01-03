@@ -19,7 +19,8 @@ import {
   updateUserWarAttack,
   updateUserWarMachines,
 } from '../../services/gamePlay.service';
-import { getLatestWar } from '../../services/war.service';
+import { getLatestWar, getUserListToAttack } from '../../services/war.service';
+import { getRankingRewards } from '../../services/season.service';
 import QueryKeys from '../../utils/queryKeys';
 import { calculateHouseLevel } from '../../utils/formulas';
 import useSmartContract from '../../hooks/useSmartContract';
@@ -874,6 +875,19 @@ const Game = () => {
           earningStealPercent,
           machinePercentLost,
         });
+      });
+
+      gameRef.current?.events.on('request-user-list-to-attack', ({ page, limit, search }) => {
+        getUserListToAttack({ page, limit, search })
+          .then((res) => {
+            const { totalDocs, docs } = res.data;
+            const totalPages = Math.ceil(totalDocs / limit);
+            gameRef.current?.events.emit('update-user-list-to-attack', { totalPages, users: docs });
+          })
+          .catch((err) => {
+            console.error(err);
+            Sentry.captureException(err);
+          });
       });
 
       gameRef.current?.events.emit('user-info-loaded');

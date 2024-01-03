@@ -11,6 +11,7 @@ class TextInput extends Phaser.GameObjects.Container {
   isDisabled = false;
   isFocused = false;
   value = '';
+  onBlur = () => {};
 
   constructor(
     scene,
@@ -27,6 +28,8 @@ class TextInput extends Phaser.GameObjects.Container {
       valueRegex = /.*/,
       characterRegex = /./,
       maxDisplayedCharacters = 0, // currently hardcoding this
+      inputImg = 'text-input',
+      onBlur = () => {},
     } = {}
   ) {
     super(scene, 0, 0);
@@ -35,8 +38,9 @@ class TextInput extends Phaser.GameObjects.Container {
     this.maxDisplayedCharacters = maxDisplayedCharacters;
     this.onChange = onChange;
     this.textTransform = textTransform;
+    this.onBlur = onBlur;
 
-    this.container = scene.add.image(x, y, 'text-input').setOrigin(0.5, 0.5);
+    this.container = scene.add.image(x, y, inputImg).setOrigin(0.5, 0.5);
     this.container.setInteractive();
     this.add(this.container);
 
@@ -174,6 +178,8 @@ class TextInput extends Phaser.GameObjects.Container {
         if (isMobileDevice()) {
           this.hiddenDomInput.blur();
         }
+
+        this.onBlur?.();
       }
     });
   }
