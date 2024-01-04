@@ -8,6 +8,9 @@ export const applyInviteCode = (data) => api.put('/api/v1/users/me/invite-code',
 
 export const getWarHistory = () => api.get('/api/v1/users/me/war-history');
 
+export const getWarHistoryDetail = ({ warSnapshotId, warResultId }) =>
+  api.get(`/api/v1/users/me/war-history/${warSnapshotId}/${warResultId}`);
+
 export const completeAskingWalletPassword = () => api.put('/api/v1/users/me/wallet-password-ask');
 
 export const updateBalance = () => api.put('/api/v1/users/me/balances');

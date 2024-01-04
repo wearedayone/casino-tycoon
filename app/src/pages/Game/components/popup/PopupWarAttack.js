@@ -2,10 +2,10 @@ import { ScrollablePanel } from 'phaser3-rex-plugins/templates/ui/ui-components.
 
 import Popup from './Popup';
 import TextButton from '../button/TextButton';
+import TextInput from '../inputs/TextInput';
 import { formatter } from '../../../../utils/numbers';
 import configs from '../../configs/configs';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
-import TextInput from '../inputs/TextInput';
 
 const { width, height } = configs;
 

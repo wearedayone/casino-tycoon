@@ -144,6 +144,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('popup-war-attack', '/images/popup-war-attack.png');
     this.load.image('popup-war-attack-confirmation', '/images/popup-attack-confirmation.png');
     this.load.image('popup-war-attack-detail', '/images/popup-war-attack-detail.png');
+    this.load.image('popup-war-history', '/images/popup-war-history.png');
 
     this.load.image('ribbon-welcome', '/images/ribbon-welcome.png');
     this.load.image('ribbon-daily-gang-war', '/images/ribbon-daily-gang-war.png');
@@ -257,6 +258,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('container-large-2', '/images/container-large-2.png');
     this.load.image('container-large-3', '/images/container-large-3.png');
     this.load.image('container-small', '/images/container-small.png');
+    this.load.image('container-super-large', '/images/container-super-large.png');
     this.load.image('player-rank-container', '/images/player-rank-container.png');
 
     // settings
@@ -285,6 +287,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-goon-mini', '/images/icons/goon-mini.png');
     this.load.image('icon-goon-buy-done', '/images/icons/goon-buy-done.png');
     this.load.image('icon-goon-buy-fail', '/images/icons/goon-buy-fail.png');
+    this.load.image('icon-gangster-mini', '/images/icon-gangster.png');
 
     this.load.image('icon-info', '/images/icons/info.png');
     this.load.image('icon-info-blue', '/images/icon-info.png');

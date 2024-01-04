@@ -4,46 +4,26 @@ import Popup from './Popup';
 import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
-import { customFormat } from '../../../../utils/numbers';
+import { formatter } from '../../../../utils/numbers';
 
 const { width, height } = configs;
-const rowHeight = 86.3;
-const smallBrownBold = { fontSize: fontSizes.small, color: colors.brown, fontFamily: fontFamilies.bold };
+const rowHeight = 139;
 const smallBlackBoldCenter = {
   fontSize: fontSizes.small,
   color: colors.black,
-  fontFamily: fontFamilies.bold,
+  fontFamily: fontFamilies.extraBold,
   align: 'center',
 };
-
-const iconWidth = 50;
-
 class PopupWarHistory extends Popup {
+  data = [];
+  listY = height / 2 - 660;
   items = [];
 
   constructor(scene) {
-    super(scene, 'popup-medium', { title: 'Daily History & Outcomes' });
+    super(scene, 'popup-war-history', { title: 'Daily History & Outcomes' });
+    this.scene = scene;
 
-    const leftMargin = this.popup.x - this.popup.width / 2;
-    const startingY = this.popup.y - this.popup.height / 2;
-    const tableHeaderY = startingY + 130;
-    this.tableY = tableHeaderY + 60;
-
-    const date = scene.add.text(leftMargin + this.popup.width * 0.1, tableHeaderY, 'Date', smallBrownBold);
-    const yourVote = scene.add.text(leftMargin + this.popup.width * 0.25, tableHeaderY, 'Your Vote', smallBrownBold);
-    const votePercent = scene.add.text(leftMargin + this.popup.width * 0.45, tableHeaderY, 'Vote%', smallBrownBold);
-    const shareOfPrize = scene.add.text(leftMargin + this.popup.width * 0.65, tableHeaderY, 'Outcome', smallBrownBold);
-    this.add(date);
-    this.add(yourVote);
-    this.add(votePercent);
-    this.add(shareOfPrize);
-
-    this.tableContainer = scene.add.image(width / 2, this.tableY, 'container-large-2').setOrigin(0.5, 0);
-    this.add(this.tableContainer);
-
-    this.contentContainer = scene.add.container().setSize(this.popup.width * 0.8, 0);
-
-    this.buttonBack = new TextButton(
+    this.backBtn = new TextButton(
       scene,
       width / 2,
       height / 2 + this.popup.height / 2 - 20,
@@ -51,129 +31,113 @@ class PopupWarHistory extends Popup {
       'button-blue-pressed',
       () => this.close(),
       'Back',
-      { fontSize: '82px', sound: 'close' }
+      { sound: 'close' }
     );
-    this.add(this.buttonBack);
+    this.add(this.backBtn);
 
-    scene.game.events.on('update-war-history', (data) => this.updateTable(data));
+    this.timeText = scene.add.text(width / 2 + 100, this.popup.y + this.popup.height / 2 - 225, '0h 00m', {
+      fontSize: '50px',
+      color: '#29000B',
+      fontFamily: fontFamilies.extraBold,
+    });
+    this.add(this.timeText);
+
+    this.listContainer = scene.add.image(width / 2, this.listY, 'container-super-large').setOrigin(0.5, 0);
+    this.add(this.listContainer);
+    this.contentContainer = scene.add.container().setSize(this.popup.width * 0.8, 0);
+
+    scene.game.events.on('update-next-war-time', ({ time }) => {
+      const now = Date.now();
+      const diffInMins = (time - now) / (60 * 1000);
+      const hours = Math.floor(diffInMins / 60);
+      const mins = Math.floor(diffInMins % 60);
+
+      const timeText = `${hours}h ${mins.toString().padStart(2, '0')}m`;
+      this.timeText.text = timeText;
+    });
+
+    scene.game.events.on('update-war-history', (data) => {
+      this.data = data;
+      this.updateList();
+    });
+
+    scene.game.events.emit('request-next-war-time');
+    scene.game.events.emit('request-war-history');
   }
 
-  onOpen() {
-    this.scene.game.events.emit('request-war-history');
-  }
+  updateList() {
+    if (!this.data.length) return;
 
-  cleanup() {
-    if (this.table) {
-      this.table.setMouseWheelScrollerEnable(false);
-    }
-  }
+    this.items.map((item) => {
+      this.contentContainer.remove(item);
+      item.destroy();
+    });
 
-  updateTable(data) {
-    console.log('data', data);
-    const contentContainerHeight = data.length * rowHeight;
-    this.contentContainer.setSize(this.popup.width * 0.8, contentContainerHeight);
-    if (this.table) {
-      this.remove(this.table);
-      this.table.destroy(true);
-    }
-    if (this.items.length) {
-      for (let item of this.items) {
-        item.destroy();
-        this.remove(item);
-      }
-    }
     this.items = [];
-    const outcomeX = this.popup.width * 0.65;
-    const penaltyOutcomeOffset = this.popup.width * 0.065;
-
-    for (let i = 0; i < data.length; i++) {
+    for (let i = 0; i < this.data.length; i++) {
       const y = i * rowHeight;
-      if (i % 2 !== 0) {
-        const bg = this.scene.rexUI.add
-          .roundRectangle(this.popup.width / 2, y, this.popup.width, rowHeight, 11, 0xfffffa)
-          .setOrigin(0.5, 0);
+      if (i % 2 === 1) {
+        const bg = this.scene.add.image(this.popup.width / 2 - 90, y, 'row-container').setOrigin(0.5, 0);
         this.items.push(bg);
       }
-      const { createdAt, isWarEnabled, voteRatio, bonus, penalty } = data[i];
-      const createdAtDate = new Date(createdAt);
-      const date = this.scene.add
-        .text(
-          this.popup.width * 0.05,
-          y,
-          `${createdAtDate.getDate()}/${createdAtDate.getMonth() + 1}`,
-          smallBlackBoldCenter
-        )
-        .setOrigin(0.5, -0.5);
-      const userVote = this.scene.add
-        .text(this.popup.width * 0.23, y, isWarEnabled ? 'War' : 'Peace', smallBlackBoldCenter)
-        .setOrigin(0.5, -0.5);
-      const votePercent = this.scene.add
-        .text(this.popup.width * 0.4, y, `${Math.round(voteRatio * 100)}%`, smallBlackBoldCenter)
-        .setOrigin(0.5, -0.5);
+      const { id, warSnapshotId, date, totalTokenReward, machinesLost } = this.data[i];
+      const dateText = this.scene.add
+        .text(this.popup.width * 0.07, y + rowHeight / 2, date, smallBlackBoldCenter)
+        .setOrigin(0.5, 0.5);
+      const prefix = totalTokenReward > 0 ? '+' : '-';
+      const color = totalTokenReward > 0 ? colors.black : '#7C2828';
+      const totalTokenRewardText = this.scene.add
+        .text(this.popup.width * 0.25, y + rowHeight / 2, `${prefix}${formatter.format(totalTokenReward || 0)}`, {
+          ...smallBlackBoldCenter,
+          color,
+        })
+        .setOrigin(0.5, 0.5);
+      const totalTokenRewardIcon = this.scene.add
+        .image(this.popup.width * 0.25 + totalTokenRewardText.width / 2 + 30, y + rowHeight / 2, 'coin3')
+        .setOrigin(0.5, 0.5);
+      const machinesLostText = this.scene.add
+        .text(this.popup.width * 0.5, y + rowHeight / 2, `-${machinesLost || 0}`, smallBlackBoldCenter)
+        .setOrigin(0.5, 0.5);
+      const machinesLostIcon = this.scene.add
+        .image(this.popup.width * 0.5 + machinesLostText.width / 2 + 45, y + rowHeight / 2, 'icon-gangster-mini')
+        .setOrigin(0.5, 0.5);
 
-      this.items.push(date, userVote, votePercent);
-      if (isWarEnabled) {
-        if (bonus) {
-          const userBonus = this.scene.add
-            .text(outcomeX - iconWidth, y, `+${customFormat(bonus || 0, 1)}`, {
-              ...smallBlackBoldCenter,
-              fontFamily: fontFamilies.extraBold,
-            })
-            .setOrigin(0.5, -0.5);
-          const coin = this.scene.add.image(outcomeX + userBonus.width / 2, y, 'icon-coin-mini').setOrigin(0.5, 0);
+      const viewBtn = new TextButton(
+        this.scene,
+        this.popup.width * 0.75,
+        y + rowHeight / 2,
+        'button-blue-small',
+        'button-blue-small',
+        () => {
+          this.loading = false;
+          this.close();
+        },
+        'View',
+        { fontSize: '36px' }
+      );
 
-          this.items.push(userBonus, coin);
-        } else {
-          const hasNoPenalties = penalty?.gangster + penalty?.goon === 0;
-          const hasTwoPenalties = penalty?.gangster * penalty?.goon > 0;
-          const gangsterX = hasTwoPenalties || hasNoPenalties ? outcomeX - penaltyOutcomeOffset : outcomeX;
-          const goonX = hasTwoPenalties || hasNoPenalties ? outcomeX + penaltyOutcomeOffset : outcomeX;
-
-          if (penalty?.gangster) {
-            const userPenalty = this.scene.add
-              .text(gangsterX - iconWidth, y, `-${penalty.gangster.toLocaleString()}`, smallBlackBoldCenter)
-              .setOrigin(0.5, -0.5);
-            const gangster = this.scene.add
-              .image(gangsterX + userPenalty.width / 2, y, 'icon-gangster-mini')
-              .setOrigin(0.5, 0);
-
-            this.items.push(userPenalty, gangster);
-          }
-          if (penalty?.goon) {
-            const userPenalty = this.scene.add
-              .text(goonX - iconWidth, y, `-${penalty.goon.toLocaleString()}`, smallBlackBoldCenter)
-              .setOrigin(0.5, -0.5);
-
-            const goon = this.scene.add.image(goonX + userPenalty.width / 2, y, 'icon-goon-mini').setOrigin(0.5, 0);
-            this.items.push(userPenalty, goon);
-          }
-
-          if (hasNoPenalties) {
-            const gangsterPenalty = this.scene.add
-              .text(gangsterX - iconWidth, y, `-0`, smallBlackBoldCenter)
-              .setOrigin(0.5, -0.5);
-            const gangster = this.scene.add
-              .image(gangsterX + gangsterPenalty.width / 2, y, 'icon-gangster-mini')
-              .setOrigin(0.5, 0);
-            const goonPenalty = this.scene.add
-              .text(goonX - iconWidth, y, `-0`, smallBlackBoldCenter)
-              .setOrigin(0.5, -0.5);
-            const goon = this.scene.add.image(goonX + goonPenalty.width / 2, y, 'icon-goon-mini').setOrigin(0.5, 0);
-
-            this.items.push(gangsterPenalty, gangster);
-            this.items.push(goonPenalty, goon);
-          }
-        }
-      } else {
-        const safeText = this.scene.add.text(outcomeX, y, `Safe`, smallBlackBoldCenter).setOrigin(0.5, -0.5);
-        this.items.push(safeText);
-      }
+      this.items.push(
+        dateText,
+        totalTokenRewardText,
+        totalTokenRewardIcon,
+        machinesLostText,
+        machinesLostIcon,
+        viewBtn
+      );
     }
     this.contentContainer.add(this.items);
 
-    const tableHeight = this.tableContainer.height;
+    const contentContainerHeight = this.data.length * rowHeight;
+    this.contentContainer.setSize(0, contentContainerHeight);
+    if (this.table) {
+      this.remove(this.table);
+      this.table.destroy(true);
+      this.table = null;
+    }
+
+    const tableHeight = this.listContainer.height;
     const visibleRatio = tableHeight / contentContainerHeight;
-    this.tableScrollerThumb = this.scene.rexUI.add
+    this.thumb = this.scene.rexUI.add
       .roundRectangle({
         height: visibleRatio < 1 ? tableHeight * visibleRatio : 0,
         radius: 13,
@@ -183,23 +147,42 @@ class PopupWarHistory extends Popup {
 
     this.table = new ScrollablePanel(this.scene, {
       x: width / 2,
-      y: this.tableY + tableHeight / 2,
-      width: this.popup.width * 0.8,
+      y: this.listY + tableHeight / 2,
+      width: this.listContainer.width,
       height: tableHeight,
       scrollMode: 'y',
       background: this.scene.rexUI.add.roundRectangle({ radius: 10 }),
       panel: { child: this.contentContainer, mask: { padding: 1 } },
-      slider: { thumb: this.tableScrollerThumb },
+      slider: { thumb: this.thumb },
       mouseWheelScroller: { focus: true, speed: 0.3 },
-      space: { left: 30, right: 30, top: 30, bottom: 30, panel: 20, header: 10, footer: 10 },
+      space: { left: 20, right: 20, top: 20, bottom: 20, panel: 20, header: 10, footer: 10 },
     }).layout();
+    if (this.data.length <= 9) {
+      this.table.setScrollerEnable(false);
+    } else {
+      this.table.setScrollerEnable(true);
+    }
     this.add(this.table);
-    // this.table.setMouseWheelScrollerEnable(false);
 
-    this.table.on('scroll', () => {
-      if (this.tableScrollerThumb.visible) return;
-      this.tableScrollerThumb.setVisible(true);
+    this.table.on('scroll', (e) => {
+      // console.log('scroll', e.t); // e.t === scrolled percentage
+      if (this.thumb.visible) return;
+      this.thumb.setVisible(true);
     });
+  }
+
+  onOpen() {
+    if (this.table) {
+      this.table.setMouseWheelScrollerEnable(true);
+    }
+    this.scene.game.events.emit('request-next-war-time');
+    this.scene.game.events.emit('request-war-history');
+  }
+
+  cleanup() {
+    if (this.table) {
+      this.table.setMouseWheelScrollerEnable(false);
+    }
   }
 }
 
