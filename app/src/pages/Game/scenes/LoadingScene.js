@@ -143,6 +143,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('popup-gang-war-explain', '/images/popup-gang-war-explain.png');
     this.load.image('popup-war-attack', '/images/popup-war-attack.png');
     this.load.image('popup-war-attack-confirmation', '/images/popup-attack-confirmation.png');
+    this.load.image('popup-war-attack-detail', '/images/popup-war-attack-detail.png');
 
     this.load.image('ribbon-welcome', '/images/ribbon-welcome.png');
     this.load.image('ribbon-daily-gang-war', '/images/ribbon-daily-gang-war.png');
@@ -157,6 +158,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('glow', '/images/glow.png');
     this.load.image('coin', '/images/coin.png');
     this.load.image('coin2', '/images/coin-2.png');
+    this.load.image('coin3', '/images/coin-3.png');
     this.load.image('eth-coin', '/images/eth-coin.png');
     this.load.image('slider-thumb', '/images/slider-thumb.png');
     this.load.image('counter', '/images/counter.png');
@@ -254,6 +256,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('container-large', '/images/container-large.png');
     this.load.image('container-large-2', '/images/container-large-2.png');
     this.load.image('container-large-3', '/images/container-large-3.png');
+    this.load.image('container-small', '/images/container-small.png');
     this.load.image('player-rank-container', '/images/player-rank-container.png');
 
     // settings

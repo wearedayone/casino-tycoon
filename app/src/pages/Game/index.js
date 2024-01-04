@@ -19,7 +19,7 @@ import {
   updateUserWarAttack,
   updateUserWarMachines,
 } from '../../services/gamePlay.service';
-import { getLatestWar, getUserListToAttack } from '../../services/war.service';
+import { getLatestWar, getUserListToAttack, getUserDetailToAttack } from '../../services/war.service';
 import { getRankingRewards } from '../../services/season.service';
 import QueryKeys from '../../utils/queryKeys';
 import { calculateHouseLevel } from '../../utils/formulas';
@@ -897,6 +897,18 @@ const Game = () => {
             const { totalDocs, docs } = res.data;
             const totalPages = Math.ceil(totalDocs / limit);
             gameRef.current?.events.emit('update-user-list-to-attack', { totalPages, users: docs });
+          })
+          .catch((err) => {
+            console.error(err);
+            Sentry.captureException(err);
+          });
+      });
+
+      gameRef.current?.events.on('request-user-to-attack-detail', ({ userId }) => {
+        getUserDetailToAttack(userId)
+          .then((res) => {
+            const { user, gamePlay, warResults } = res.data;
+            gameRef.current?.events.emit('update-user-to-attack-detail', { user, gamePlay, warResults });
           })
           .catch((err) => {
             console.error(err);

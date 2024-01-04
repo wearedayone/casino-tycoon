@@ -639,7 +639,7 @@ export const getUserToAttackDetail = async (userId) => {
     .orderBy('createdAt', 'desc')
     .get();
 
-  const userIds = [];
+  const userIds = [userId];
   warHistorySnapshot.docs.map((doc) => {
     const attackUserIds = doc.data().attackResults?.map((item) => item.userId) || [];
     const defendUserIds = doc.data().defendResults?.map((item) => item.userId) || [];
@@ -660,6 +660,7 @@ export const getUserToAttackDetail = async (userId) => {
   });
 
   return {
+    user: { id: userId, username: usernames[userId] },
     gamePlay: { numberOfMachines, numberOfWorkers, numberOfBuildings },
     warResults,
   };
