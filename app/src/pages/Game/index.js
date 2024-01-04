@@ -9,7 +9,14 @@ import * as Sentry from '@sentry/react';
 import useUserStore from '../../stores/user.store';
 import useSystemStore from '../../stores/system.store';
 import useSettingStore from '../../stores/setting.store';
-import { applyInviteCode, getRank, getWarHistory, toggleWarStatus, updateBalance } from '../../services/user.service';
+import {
+  applyInviteCode,
+  getRank,
+  getWarHistory,
+  getWarHistoryDetail,
+  toggleWarStatus,
+  updateBalance,
+} from '../../services/user.service';
 import { claimToken } from '../../services/transaction.service';
 import {
   getLeaderboard,
@@ -909,6 +916,17 @@ const Game = () => {
           .then((res) => {
             const { user, gamePlay, warResults } = res.data;
             gameRef.current?.events.emit('update-user-to-attack-detail', { user, gamePlay, warResults });
+          })
+          .catch((err) => {
+            console.error(err);
+            Sentry.captureException(err);
+          });
+      });
+
+      gameRef.current?.events.on('request-war-history-detail', ({ warSnapshotId, warResultId }) => {
+        getWarHistoryDetail({ warSnapshotId, warResultId })
+          .then((res) => {
+            gameRef.current?.events.emit('update-war-history-detail', res.data);
           })
           .catch((err) => {
             console.error(err);

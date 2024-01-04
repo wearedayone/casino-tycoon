@@ -160,6 +160,12 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('coin', '/images/coin.png');
     this.load.image('coin2', '/images/coin-2.png');
     this.load.image('coin3', '/images/coin-3.png');
+    this.load.image('coin4', '/images/coin-4.png');
+    this.load.image('guard', '/images/guard.png');
+    this.load.image('mini-gangster-2', '/images/mini-gangster-2.png');
+    this.load.image('percent', '/images/percent.png');
+    this.load.image('gun', '/images/gun.png');
+    this.load.image('man', '/images/man.png');
     this.load.image('eth-coin', '/images/eth-coin.png');
     this.load.image('slider-thumb', '/images/slider-thumb.png');
     this.load.image('counter', '/images/counter.png');
@@ -259,6 +265,10 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('container-large-3', '/images/container-large-3.png');
     this.load.image('container-small', '/images/container-small.png');
     this.load.image('container-super-large', '/images/container-super-large.png');
+    this.load.image('container-border', '/images/container-border.png');
+    this.load.image('container-border-top', '/images/container-border-top.png');
+    this.load.image('container-border-middle', '/images/container-border-middle.png');
+    this.load.image('container-border-bottom', '/images/container-border-bottom.png');
     this.load.image('player-rank-container', '/images/player-rank-container.png');
 
     // settings

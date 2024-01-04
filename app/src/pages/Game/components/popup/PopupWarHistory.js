@@ -110,7 +110,9 @@ class PopupWarHistory extends Popup {
         'button-blue-small',
         () => {
           this.loading = false;
+          this.scene.popupWarHistoryDetail?.updateWarIds({ warSnapshotId, warResultId: id });
           this.close();
+          this.scene.popupWarHistoryDetail?.open();
         },
         'View',
         { fontSize: '36px' }
