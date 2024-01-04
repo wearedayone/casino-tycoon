@@ -29,6 +29,7 @@ import PopupWarExplain from '../components/popup/PopupWarExplain';
 import PopupWarAttack from '../components/popup/PopupWarAttack';
 import PopupWarAttackConfirmation from '../components/popup/PopupWarAttackConfirmation';
 import PopupWarAttackDetail from '../components/popup/PopupWarAttackDetail';
+import PopupWarHistoryDetail from '../components/popup/PopupWarHistoryDetail';
 
 const { goonAnimation, gangsterAnimation, width } = configs;
 
@@ -108,6 +109,9 @@ class MainScene extends Phaser.Scene {
 
     this.popupWarAttackDetail = new PopupWarAttackDetail(this);
     this.add.existing(this.popupWarAttackDetail);
+
+    this.popupWarHistoryDetail = new PopupWarHistoryDetail(this);
+    this.add.existing(this.popupWarHistoryDetail);
 
     this.game.events.on('music-on', () => {
       this.bgMusic.play();

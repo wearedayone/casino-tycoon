@@ -255,17 +255,17 @@ export const getWarHistoryDetail = async ({ userId, warSnapshotId, warResultId }
   if (!snapshot.exists) return null;
 
   const { attackResults, defendResults } = snapshot.data();
-  const userIds = [...new Set([...attackResults, ...defendResults].map((item) => item.userId))];
+  const userIds = [...new Set([...(attackResults || []), ...(defendResults || [])].map((item) => item.userId))];
   const usernames = await getUserUsernames(userIds);
 
   return {
     id: snapshot.id,
     ...snapshot.data(),
-    attackResults: attackResults.map((item) => ({
+    attackResults: (attackResults || []).map((item) => ({
       ...item,
       userUsername: usernames[item.userId],
     })),
-    defendResults: defendResults.map((item) => ({
+    defendResults: (defendResults || []).map((item) => ({
       ...item,
       userUsername: usernames[item.userId],
     })),
