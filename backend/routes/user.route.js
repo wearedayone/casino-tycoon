@@ -4,6 +4,7 @@ import auth from '../middlewares/auth.middleware.js';
 import {
   getMe,
   getUserWarHistory,
+  getUserWarHistoryDetail,
   toggleWar,
   completeAskingWalletPassword,
   updateBalance,
@@ -18,6 +19,7 @@ router.get('/me', auth, getMe);
 router.put('/me/war', auth, toggleWar);
 router.put('/me/invite-code', auth, applyReferralCode);
 router.get('/me/war-history', auth, getUserWarHistory);
+router.get('/me/war-history/:warSnapshotId/:warResultId', auth, getUserWarHistoryDetail);
 router.put('/me/wallet-password-ask', auth, completeAskingWalletPassword);
 router.put('/me/balances', auth, updateBalance);
 router.get('/me/rank', auth, getRank);
