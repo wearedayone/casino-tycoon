@@ -150,8 +150,6 @@ class PopupWarAttack extends Popup {
   updateList() {
     if (!this.users.length) return;
 
-    const tableHeight = this.listContainer.height;
-
     this.items.map((item) => {
       this.contentContainer.remove(item);
       item.destroy();
@@ -181,7 +179,12 @@ class PopupWarAttack extends Popup {
         y + rowHeight / 2,
         'button-blue-small',
         'button-blue-small',
-        () => {},
+        () => {
+          this.loading = false;
+          this.close();
+          this.scene.popupWarAttackDetail?.updateUserId(id);
+          this.scene.popupWarAttackDetail?.open();
+        },
         'Profile',
         { fontSize: '36px' }
       );
@@ -196,6 +199,7 @@ class PopupWarAttack extends Popup {
           'button-blue-small',
           'button-blue-small',
           () => {
+            this.loading = false;
             this.scene.popupWarAttackConfirmation?.updateAttackUser({ id, username });
             this.close();
             this.scene.popupWarAttackConfirmation?.open();
@@ -217,6 +221,7 @@ class PopupWarAttack extends Popup {
       this.table = null;
     }
 
+    const tableHeight = this.listContainer.height;
     const visibleRatio = tableHeight / contentContainerHeight;
     this.thumb = this.scene.rexUI.add
       .roundRectangle({
