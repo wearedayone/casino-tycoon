@@ -1,6 +1,6 @@
 import schedule from 'node-schedule';
 
-import { getAllActiveGamePlay } from './gamePlay.service.js';
+import { getAllActiveGamePlay, getLeaderboard } from './gamePlay.service.js';
 import { firestore } from '../configs/firebase.config.js';
 import { setGameClosed, setWinner } from './worker.service.js';
 import logger from '../utils/logger.js';
@@ -48,38 +48,23 @@ const takeSeasonLeaderboardSnapshot = async () => {
     await seasonRef.update({ status: 'closed' });
     await setGameClosed(true);
 
-    // get rewards allocation config
-    const { rankingRewards, prizePool } = await getActiveSeason();
-    const winnerAllocations = [];
-    for (let i = 0; i < rankingRewards.length; i++) {
-      const { rankStart, rankEnd, share } = rankingRewards[i];
-      const rankRange = rankEnd - rankStart + 1;
-
-      for (let j = 0; j < rankRange; j++) {
-        // calculate rewards allocation points
-        winnerAllocations.push({ rank: rankStart + j, prizeShare: share, prizeValue: prizePool * share });
-      }
-    }
+    const { prizePool } = await getActiveSeason();
 
     // take leaderboard snapshot
-    const gamePlaysSnapshot = await firestore
-      .collection('gamePlay')
-      .where('seasonId', '==', activeSeasonId)
-      .orderBy('networth', 'desc')
-      .get();
-    const gamePlays = gamePlaysSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-    let totalSharePaid = 0;
-    for (let i = 0; i < winnerAllocations.length; i++) {
-      const player = gamePlays[i];
-      // exclude players with 0 networth
-      if (player && player.networth > 0) {
-        const userSnapshot = await firestore.collection('user').doc(player.userId).get();
-        const { address } = userSnapshot.data();
-        winnerAllocations[i].address = address;
-        winnerAllocations[i].networth = player.networth;
-        totalSharePaid += winnerAllocations[i].prizeShare;
-      } else break;
-    }
+    const leaderboard = await getLeaderboard();
+    const userPromises = leaderboard.map(({ userId }) => firestore.collection('user').doc(userId).get());
+    const userAddresses = (await Promise.all(userPromises)).map((doc) => doc.data().address);
+
+    const winnerAllocations = leaderboard
+      .filter(({ networth }) => networth > 0)
+      .map((doc, index) => {
+        const { networth, reward, reputationReward } = doc;
+        const prizeValue = reward + reputationReward;
+        const prizeShare = prizeValue / prizePool;
+        return { rank: index + 1, networth, prizeValue, prizeShare, address: userAddresses[index] };
+      });
+
+    const totalSharePaid = winnerAllocations.reduce((sum, player) => sum + player.prizeShare, 0);
 
     // dev fee is remaining prize pool
     const devFee = 1 - totalSharePaid;
@@ -93,12 +78,12 @@ const takeSeasonLeaderboardSnapshot = async () => {
 
     // save snapshot to firestore
     // TODO: use event listener to update for accurate prizeValue
+    logger.info(`winnerAllocations: ${winnerAllocations}`);
     await seasonRef.update({ winnerSnapshot: winnerAllocations });
 
     // call on-chain `setWinner` method
-    const actualWinners = winnerAllocations.filter(({ address }) => !!address);
-    const winners = actualWinners.map(({ address }) => address);
-    const points = actualWinners.map(({ prizeShare }) => Math.round(prizeShare * Math.pow(10, 6))); // eliminate decimals
+    const winners = winnerAllocations.map(({ address }) => address);
+    const points = winnerAllocations.map(({ prizeShare }) => Math.round(prizeShare * Math.pow(10, 6))); // eliminate decimals
     await setWinner({ winners, points });
   } catch (ex) {
     logger.error(ex);
