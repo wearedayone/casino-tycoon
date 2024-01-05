@@ -11,7 +11,6 @@ import Footer from '../components/action-buttons/Footer';
 import PopupBuy from '../components/popup/PopupBuy';
 import PopupWar from '../components/popup/PopupWar';
 import PopupSettings from '../components/popup/PopupSettings';
-import PopupDailyGangWar from '../components/popup/PopupDailyGangWar';
 import PopupWarHistory from '../components/popup/PopupWarHistory';
 import PopupSafeHouseUpgrade from '../components/popup/PopupSafeHouseUpgrade';
 import PopupBuyGoon from '../components/popup/PopupBuyGoon';
@@ -100,9 +99,6 @@ class MainScene extends Phaser.Scene {
 
     this.popupStatistic = new PopupStatistic(this);
     this.add.existing(this.popupStatistic);
-
-    this.popupDailyGangWar = new PopupDailyGangWar(this);
-    this.add.existing(this.popupDailyGangWar);
 
     this.popupWarAttackConfirmation = new PopupWarAttackConfirmation(this);
     this.add.existing(this.popupWarAttackConfirmation);

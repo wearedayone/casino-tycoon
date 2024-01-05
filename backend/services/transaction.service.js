@@ -100,9 +100,6 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       txnData.value = buildingPrices.total;
       txnData.prices = buildingPrices.prices;
       break;
-    case 'war-switch':
-      txnData.isWarEnabled = data.isWarEnabled;
-      break;
     case 'war-bonus':
       txnData.value = data.value;
       txnData.token = 'FIAT';
@@ -367,10 +364,6 @@ const updateUserGamePlay = async (userId, transactionId) => {
     case 'buy-building':
       gamePlayData = { numberOfBuildings: admin.firestore.FieldValue.increment(amount) };
       assets.numberOfBuildings += amount;
-      break;
-    case 'war-switch':
-      const { isWarEnabled } = snapshot.data();
-      gamePlayData = { war: isWarEnabled };
       break;
     case 'war-penalty':
       const { machinesDeadCount } = snapshot.data();
