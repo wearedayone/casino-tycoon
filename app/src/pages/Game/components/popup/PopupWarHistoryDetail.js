@@ -8,6 +8,8 @@ import { formatter } from '../../../../utils/numbers';
 
 const { width, height } = configs;
 
+const NUMBER_OF_TOP_ATTACKERS = 5;
+
 const MAX_USERNAME_LENGTH = 12;
 const formatUsername = ({ username }) => {
   const displayedUsername = username.slice(0, MAX_USERNAME_LENGTH);
@@ -181,6 +183,7 @@ class PopupWarHistoryDetail extends Popup {
 
     const attackers = (defendResults || [])
       .sort((user1, user2) => (user2.attackUnits = user1.attackUnits))
+      .slice(0, NUMBER_OF_TOP_ATTACKERS)
       .map((user) => ({ username: user.userUsername, attackUnits: user.attackUnits }));
     y += 131;
 
