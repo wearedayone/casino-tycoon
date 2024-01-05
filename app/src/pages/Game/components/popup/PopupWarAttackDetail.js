@@ -232,13 +232,13 @@ class PopupWarAttackDetail extends Popup {
       const outgoingResultText = this.scene.add
         .text(this.popup.width * 0.23, y + rowHeight / 2, outgoingResult, {
           ...smallBlackBoldCenter,
-          color: outgoingResult === 'Lose' ? '#7C2828' : colors.black,
+          color: outgoingResult === 'Lose' ? '#E93D45' : colors.black,
         })
         .setOrigin(0.5, 0.5);
       const incomingResultText = this.scene.add
         .text(this.popup.width * 0.42, y + rowHeight / 2, incomingResult, {
           ...smallBlackBoldCenter,
-          color: incomingResult === 'Lose' ? '#7C2828' : colors.black,
+          color: incomingResult === 'Lose' ? '#E93D45' : colors.black,
         })
         .setOrigin(0.5, 0.5);
       const earnUnitsText = this.scene.add

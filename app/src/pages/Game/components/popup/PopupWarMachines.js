@@ -4,6 +4,7 @@ import Popup from './Popup';
 import TextButton from '../button/TextButton';
 import { fontFamilies } from '../../../../utils/styles';
 import configs from '../../configs/configs';
+import { formatter } from '../../../../utils/numbers';
 
 const { width, height } = configs;
 
@@ -17,11 +18,12 @@ class PopupWarMachines extends Popup {
   attackUnits = 0;
   defendUnits = 0;
   attackUser = null;
+  workerBonusToken = 0;
+  buildingBonus = 0;
   loading = false;
 
   constructor(scene) {
     super(scene, 'popup-war-machines', { title: 'Gang War' });
-
     this.scene = scene;
 
     this.backBtn = new TextButton(
@@ -58,7 +60,7 @@ class PopupWarMachines extends Popup {
     this.add(this.nextBtn);
 
     this.infoBtn = scene.add
-      .image(width / 2 + 310, height / 2 - this.popup.height / 2 + 250, 'icon-info-blue')
+      .image(width / 2 + this.popup.width / 2 - 100, height / 2 - this.popup.height / 2 + 220, 'icon-info-blue')
       .setOrigin(0.5, 0.5);
     this.infoBtn.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
       this.close();
@@ -66,8 +68,8 @@ class PopupWarMachines extends Popup {
     });
     this.add(this.infoBtn);
 
-    const inputY = this.popup.y - this.popup.height / 2 + 520;
-    const inputGap = 270;
+    const inputY = this.popup.y - this.popup.height / 2 + 490;
+    const inputGap = 370;
 
     this.machinesToEarnInput = scene.add.image(width / 2, inputY, 'text-input-small').setOrigin(0.5, 0.5);
     this.add(this.machinesToEarnInput);
@@ -157,6 +159,15 @@ class PopupWarMachines extends Popup {
     );
     this.add(this.machinesToEarnPlusBtn);
 
+    this.workerBonusTokenText = scene.add
+      .text(width / 2, inputY + 115, `Goon Bonus: ${formatter.format(this.workerBonusToken)} $FIAT`, {
+        fontSize: '50px',
+        color: '#7C2828',
+        fontFamily: fontFamilies.bold,
+      })
+      .setOrigin(0.5, 0.5);
+    this.add(this.workerBonusTokenText);
+
     this.machinesToDefendInput = scene.add.image(width / 2, inputY + inputGap, 'text-input-small').setOrigin(0.5, 0.5);
     this.add(this.machinesToDefendInput);
     this.machinesToDefendUnitsText = scene.add
@@ -241,6 +252,15 @@ class PopupWarMachines extends Popup {
       }
     );
     this.add(this.machinesToDefendPlusBtn);
+
+    this.buildingBonusText = scene.add
+      .text(width / 2, inputY + inputGap + 115, `Safehouse Bonus: ${formatter.format(this.buildingBonus)}`, {
+        fontSize: '50px',
+        color: '#7C2828',
+        fontFamily: fontFamilies.bold,
+      })
+      .setOrigin(0.5, 0.5);
+    this.add(this.buildingBonusText);
 
     this.machinesToAttackInput = scene.add
       .image(width / 2, inputY + 2 * inputGap, 'text-input-small')
@@ -330,7 +350,7 @@ class PopupWarMachines extends Popup {
     this.add(this.machinesToAttackPlusBtn);
 
     this.numberOfMachinesText = scene.add
-      .text(width / 2, inputY + 2 * inputGap + 150, `Available Gangsters: ${this.numberOfMachines}`, {
+      .text(width / 2, inputY + 2 * inputGap + 200, `Available Gangsters: ${this.numberOfMachines}`, {
         fontSize: '50px',
         color: '#7C2828',
         fontFamily: fontFamilies.bold,
@@ -341,7 +361,7 @@ class PopupWarMachines extends Popup {
     this.attackUserText = scene.add
       .text(
         width / 2,
-        this.numberOfMachinesText.y + 200,
+        this.numberOfMachinesText.y + 150,
         `Raid user: ${this.attackUser ? `@${this.attackUser.username}` : 'null'}`,
         {
           fontSize: '50px',
@@ -356,12 +376,19 @@ class PopupWarMachines extends Popup {
       'update-game-play',
       ({
         numberOfMachines,
+        numberOfWorkers,
+        numberOfBuildings,
         numberOfMachinesToEarn,
         numberOfMachinesToAttack,
         numberOfMachinesToDefend,
         attackUser,
+        workerBonusMultiple,
+        buildingBonusMultiple,
+        tokenRewardPerEarner,
       }) => {
         this.numberOfMachines = numberOfMachines;
+        this.workerBonusToken = numberOfWorkers * (tokenRewardPerEarner || 0) * (workerBonusMultiple || 0);
+        this.buildingBonus = numberOfBuildings * (buildingBonusMultiple || 0);
         this.earnUnits = numberOfMachinesToEarn;
         this.attackUnits = numberOfMachinesToAttack;
         this.defendUnits = numberOfMachinesToDefend;
@@ -388,6 +415,8 @@ class PopupWarMachines extends Popup {
     this.machinesToDefendUnitsText.text = `${this.defendUnits}`;
     this.numberOfMachinesText.text = `Available Gangsters: ${this.numberOfMachines}`;
     this.attackUserText.text = `Raid user: ${this.attackUser ? `@${this.attackUser.username}` : 'null'}`;
+    this.workerBonusTokenText.text = `Goon Bonus: ${formatter.format(this.workerBonusToken)} $FIAT`;
+    this.buildingBonusText.text = `Safehouse Bonus: ${formatter.format(this.buildingBonus)}`;
   }
 }
 

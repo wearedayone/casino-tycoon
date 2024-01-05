@@ -857,7 +857,10 @@ const Game = () => {
       gameRef.current?.events.on('request-game-play', () => {
         gameRef.current?.events.emit('update-game-play', {
           numberOfMachines,
+          numberOfWorkers,
+          numberOfBuildings,
           ...warDeployment,
+          ...activeSeason.warConfig,
         });
       });
 
@@ -1201,9 +1204,12 @@ const Game = () => {
   useEffect(() => {
     gameRef.current?.events.emit('update-game-play', {
       numberOfMachines,
+      numberOfWorkers,
+      numberOfBuildings,
       ...warDeployment,
+      ...activeSeason?.warConfig,
     });
-  }, [numberOfMachines, warDeployment]);
+  }, [numberOfMachines, numberOfWorkers, numberOfBuildings, warDeployment, activeSeason?.warConfig]);
 
   useEffect(() => {
     if (activeSeason?.warConfig) {
