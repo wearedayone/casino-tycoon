@@ -433,6 +433,9 @@ class PopupWarHistoryDetail extends Popup {
     }).layout();
 
     this.add(this.table);
+    if (!this.visible) {
+      this.table.setMouseWheelScrollerEnable(false);
+    }
 
     this.table.on('scroll', (e) => {
       // console.log('scroll', e.t); // e.t === scrolled percentage

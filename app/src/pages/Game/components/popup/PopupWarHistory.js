@@ -159,7 +159,7 @@ class PopupWarHistory extends Popup {
       mouseWheelScroller: { focus: true, speed: 0.3 },
       space: { left: 20, right: 20, top: 20, bottom: 20, panel: 20, header: 10, footer: 10 },
     }).layout();
-    if (this.data.length <= 9) {
+    if (this.data.length <= 9 || !this.visible) {
       this.table.setScrollerEnable(false);
     } else {
       this.table.setScrollerEnable(true);

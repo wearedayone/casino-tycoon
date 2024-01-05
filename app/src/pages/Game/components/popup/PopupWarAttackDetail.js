@@ -321,7 +321,7 @@ class PopupWarAttackDetail extends Popup {
       mouseWheelScroller: { focus: true, speed: 0.3 },
       space: { left: 20, right: 20, top: 20, bottom: 20, panel: 20, header: 10, footer: 10 },
     }).layout();
-    if (formattedWarResults.length <= 3) {
+    if (formattedWarResults.length <= 3 || !this.visible) {
       this.resultTable.setScrollerEnable(false);
     } else {
       this.resultTable.setScrollerEnable(true);
@@ -364,7 +364,7 @@ class PopupWarAttackDetail extends Popup {
       mouseWheelScroller: { focus: true, speed: 0.3 },
       space: { left: 20, right: 20, top: 20, bottom: 20, panel: 20, header: 10, footer: 10 },
     }).layout();
-    if (formattedWarResults.length <= 3) {
+    if (formattedWarResults.length <= 3 || !this.visible) {
       this.earnTable.setScrollerEnable(false);
     } else {
       this.earnTable.setScrollerEnable(true);
