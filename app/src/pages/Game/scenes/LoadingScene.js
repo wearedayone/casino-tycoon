@@ -164,6 +164,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-disabled', '/images/button-disabled.png');
     this.load.image('button-blue-med', '/images/button-blue-med.png');
     this.load.image('button-blue-med-pressed', '/images/button-blue-med-pressed.png');
+    this.load.image('button-blue-med-outlined', '/images/button-blue-med-outlined.png');
     this.load.image('button-red-med', '/images/button-red-med.png');
     this.load.image('button-red-med-pressed', '/images/button-red-med-pressed.png');
     this.load.image('button-blue-long', '/images/button-blue-long.png');
@@ -272,6 +273,8 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-logout', '/images/icons/logout.png');
     this.load.image('icon-nft-done', '/images/icons/nft-done.png');
     this.load.image('icon-open-link', '/images/icons/open-link.png');
+    this.load.image('icon-retire-done', '/images/icons/retire-done.png');
+    this.load.image('icon-retire-fail', '/images/icons/retire-fail.png');
     this.load.image('icon-safehouse-upgrade-done', '/images/icons/safehouse-upgrade-done.png');
     this.load.image('icon-safehouse-upgrade-fail', '/images/icons/safehouse-upgrade-fail.png');
     this.load.image('icon-settings', '/images/icons/settings.png');

@@ -686,6 +686,35 @@ const Game = () => {
         }
       });
 
+      gameRef.current?.events.on('init-retire', async () => {
+        try {
+          const txnHash = 'test-txnHash';
+          gameRef.current?.events.emit('retire-completed', { txnHash });
+        } catch (err) {
+          console.log({ err });
+          let message = err.message;
+          let errorCode = err.code?.toString();
+          if (!errorCode && message === 'Network Error') {
+            errorCode = '12002';
+          }
+          switch (errorCode) {
+            case 'UNPREDICTABLE_GAS_LIMIT':
+            case '-32603':
+              message = 'INSUFFICIENT GAS';
+              break;
+            case 'INSUFFICIENT_FUNDS':
+              message = 'INSUFFICIENT ETH';
+              break;
+            default:
+          }
+          gameRef.current?.events.emit('retire-completed', {
+            status: 'failed',
+            message: message,
+            code: errorCode,
+          });
+        }
+      });
+
       gameRef.current?.events.on('request-reserve-pool', () => {
         gameRef.current?.events.emit('update-reserve-pool', { reservePool, reservePoolReward });
       });

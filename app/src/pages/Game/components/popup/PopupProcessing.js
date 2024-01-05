@@ -96,6 +96,7 @@ class PopupProcessing extends Popup {
           'withdraw-token-completed',
           'withdraw-eth-completed',
           'withdraw-nft-completed',
+          'retire-completed',
         ];
 
         if (!hasTxnHashEvents.includes(completedEvent)) return;
@@ -123,6 +124,10 @@ class PopupProcessing extends Popup {
           case 'withdraw-nft-completed':
             title = `${amount.toLocaleString()} NFT${amount > 1 ? 's' : ''}`;
             desc = 'Withdraw completed.';
+            break;
+          case 'retire-completed':
+            title = '';
+            desc = 'You have retired from the game.\nAll progress in game is deleted.';
             break;
         }
 

@@ -13,7 +13,7 @@ class PopupTxnCompleted extends Popup {
     super(scene, 'popup-small', { title: 'Completed', openOnCreate: true });
 
     const startingY = this.popup.y - this.popup.height / 2;
-    const iconY = startingY + 300;
+    const iconY = startingY + (title ? 300 : 400);
     const titleY = iconY + 180;
     const descriptionY = titleY + 260;
     const viewTxnHashY = descriptionY + 200;

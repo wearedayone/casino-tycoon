@@ -81,7 +81,7 @@ class PopupLeaderboard extends Popup {
       .image(width / 2, prizePoolContainerY, 'text-container-outlined')
       .setOrigin(0.5, 0.5);
     const totalPrizePool = scene.add
-      .text(paddedX, prizePoolContainerY, 'Rank Prize Pool', largeBlackExtraBold)
+      .text(paddedX, prizePoolContainerY, 'Total Prize Pool', largeBlackExtraBold)
       .setOrigin(0, 0.5);
     const infoButton = new Button(
       scene,
@@ -393,12 +393,16 @@ class ModeSwitch extends Phaser.GameObjects.Container {
     this.add(this.container);
 
     const buttonOffset = this.container.width / 4;
+    this.btnOneInactive = scene.add.image(x - buttonOffset, y, 'button-blue-med-outlined').setOrigin(0.5, 0.5);
     this.btnOne = scene.add.image(x - buttonOffset, y, 'button-blue-med').setOrigin(0.5, 0.5);
+    this.btnTwoInactive = scene.add.image(x + buttonOffset, y, 'button-blue-med-outlined').setOrigin(0.5, 0.5);
     this.btnTwo = scene.add
       .image(x + buttonOffset, y, 'button-blue-med')
       .setOrigin(0.5, 0.5)
       .setAlpha(0);
+    this.add(this.btnOneInactive);
     this.add(this.btnOne);
+    this.add(this.btnTwoInactive);
     this.add(this.btnTwo);
 
     this.textOne = scene.add
