@@ -163,7 +163,6 @@ export const generateDailyWarSnapshot = async () => {
     const todayDateString = moment().format('YYYYMMDD-HHmmss');
     await firestore.collection('warSnapshot').doc(todayDateString).set({
       seasonId,
-      usersCount: gamePlays.length,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
