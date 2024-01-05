@@ -297,7 +297,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-goon-mini', '/images/icons/goon-mini.png');
     this.load.image('icon-goon-buy-done', '/images/icons/goon-buy-done.png');
     this.load.image('icon-goon-buy-fail', '/images/icons/goon-buy-fail.png');
-    this.load.image('icon-gangster-mini', '/images/icon-gangster.png');
+    // this.load.image('icon-gangster-mini', '/images/icon-gangster.png');
 
     this.load.image('icon-info', '/images/icons/info.png');
     this.load.image('icon-info-blue', '/images/icon-info.png');

@@ -1,4 +1,9 @@
-import { getLatestWar, getUsersToAttack, getUserToAttackDetail } from '../services/warSnapshot.service.js';
+import {
+  getLatestWar,
+  getUsersToAttack,
+  getUserToAttackDetail,
+  getWarHistoryLatest,
+} from '../services/warSnapshot.service.js';
 import logger from '../utils/logger.js';
 
 export const getLastestWarSnapshot = async (req, res) => {
@@ -28,6 +33,17 @@ export const getUserAttackDetail = async (req, res) => {
   try {
     const { id } = req.params;
     const result = await getUserToAttackDetail(id);
+    return res.status(200).send(result);
+  } catch (err) {
+    console.error(err);
+    logger.error(err.message);
+    return res.status(400).send(err.message);
+  }
+};
+
+export const getUserWarHistoryLatest = async (req, res) => {
+  try {
+    const result = await getWarHistoryLatest({ userId: req.userId });
     return res.status(200).send(result);
   } catch (err) {
     console.error(err);
