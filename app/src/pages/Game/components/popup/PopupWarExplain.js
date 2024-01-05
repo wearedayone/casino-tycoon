@@ -1,7 +1,7 @@
 import Popup from './Popup';
 import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
-import { fontFamilies } from '../../../../utils/styles';
+import { colors, fontFamilies } from '../../../../utils/styles';
 
 const { width, height } = configs;
 
@@ -29,18 +29,18 @@ class PopupWarExplain extends Popup {
     this.add(this.backBtn);
 
     this.tokenRewardText = scene.add
-      .text(width / 2 + 220, height / 2 - 384, `${this.tokenRewardPerEarner.toLocaleString()}`, {
+      .text(width / 2 + 250, height / 2 - 384, `${this.tokenRewardPerEarner.toLocaleString()}`, {
         fontSize: '56px',
-        color: '#7B2A29',
+        color: colors.black,
         fontFamily: fontFamilies.bold,
       })
       .setOrigin(0, 1);
     this.add(this.tokenRewardText);
 
     this.earningStealPercentText = scene.add
-      .text(width / 2 + 280, height / 2 + 28, `${this.earningStealPercent.toLocaleString()}`, {
+      .text(width / 2 + 290, height / 2 + 28, `${this.earningStealPercent.toLocaleString()}`, {
         fontSize: '56px',
-        color: '#7B2A29',
+        color: colors.black,
         fontFamily: fontFamilies.bold,
       })
       .setOrigin(0, 1);
@@ -49,7 +49,7 @@ class PopupWarExplain extends Popup {
     this.machinePercentLostText = scene.add
       .text(width / 2 + 280, height / 2 + 397, `${this.machinePercentLost * 100}%`, {
         fontSize: '56px',
-        color: '#7B2A29',
+        color: colors.black,
         fontFamily: fontFamilies.bold,
       })
       .setOrigin(0, 1);
