@@ -26,7 +26,12 @@ import {
   updateUserWarAttack,
   updateUserWarMachines,
 } from '../../services/gamePlay.service';
-import { getLatestWar, getUserListToAttack, getUserDetailToAttack } from '../../services/war.service';
+import {
+  getLatestWar,
+  getUserListToAttack,
+  getUserDetailToAttack,
+  getLatestWarResult,
+} from '../../services/war.service';
 import { getRankingRewards } from '../../services/season.service';
 import QueryKeys from '../../utils/queryKeys';
 import { calculateHouseLevel } from '../../utils/formulas';
@@ -408,10 +413,10 @@ const Game = () => {
             ? gamePlay?.lastTimeSeenWarResult.toDate().getTime()
             : 0;
           const {
-            data: { latestWar, war },
+            data: { latestWar },
           } = await getLatestWar();
           const latestWarUnixTime = latestWar.createdAt;
-          const showWarPopup = war && lastUnixTimeSeenWarResult < latestWarUnixTime;
+          const showWarPopup = lastUnixTimeSeenWarResult < latestWarUnixTime;
 
           let startTime = gamePlay.startRewardCountingTime.toDate().getTime();
           if (profile.lastOnlineTime) {
@@ -927,6 +932,17 @@ const Game = () => {
         getWarHistoryDetail({ warSnapshotId, warResultId })
           .then((res) => {
             gameRef.current?.events.emit('update-war-history-detail', res.data);
+          })
+          .catch((err) => {
+            console.error(err);
+            Sentry.captureException(err);
+          });
+      });
+
+      gameRef.current?.events.on('request-war-history-latest', () => {
+        getLatestWarResult()
+          .then((res) => {
+            gameRef.current?.events.emit('update-war-history-latest', res.data);
           })
           .catch((err) => {
             console.error(err);

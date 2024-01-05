@@ -24,18 +24,6 @@ export const getLatestWar = async (userId) => {
 
   const result = { latestWar };
 
-  const warResultSnapshot = await firestore
-    .collection('warSnapshot')
-    .doc(latestWar.id)
-    .collection('warResult')
-    .where('userId', '==', userId)
-    .limit(1)
-    .get();
-  if (!warResultSnapshot.empty) {
-    const { isWarEnabled } = warResultSnapshot.docs[0].data();
-    result.war = isWarEnabled;
-  }
-
   return result;
 };
 
@@ -269,6 +257,27 @@ export const getWarHistoryDetail = async ({ userId, warSnapshotId, warResultId }
       ...item,
       userUsername: usernames[item.userId],
     })),
+  };
+};
+
+export const getWarHistoryLatest = async ({ userId }) => {
+  const seasonId = await getActiveSeasonId();
+
+  const warHistorySnapshot = await firestore
+    .collectionGroup('warResult')
+    .where('seasonId', '==', seasonId)
+    .where('userId', '==', userId)
+    .orderBy('createdAt', 'desc')
+    .limit(1)
+    .get();
+
+  if (warHistorySnapshot.empty) return null;
+
+  const snapshot = warHistorySnapshot.docs[0];
+
+  return {
+    id: snapshot.id,
+    ...snapshot.data(),
   };
 };
 

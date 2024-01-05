@@ -20,12 +20,15 @@ class PopupWelcomeWar extends Popup {
       onClose: () => scene.game.events.emit('update-last-time-seen-war-result'),
     });
 
+    this.line1Y = height / 2 + this.popup.height / 2 - 385;
+    this.line2Y = this.line1Y + 80;
+    this.numberGap = 370;
+
     const leftMargin = this.popup.x - this.popup.width / 2;
     const topMargin = this.popup.y - this.popup.height / 2;
-    const outcomeTextY = topMargin + this.popup.height - 280;
 
     this.valueText = scene.add
-      .text(leftMargin + this.popup.width * 0.25, topMargin + this.popup.height * 0.3, `+${formatter.format(value)}`, {
+      .text(leftMargin + this.popup.width * 0.28, topMargin + this.popup.height * 0.27, `+${formatter.format(value)}`, {
         fontSize: '88px',
         color: '#fff',
         fontFamily: fontFamilies.extraBold,
@@ -34,67 +37,138 @@ class PopupWelcomeWar extends Popup {
     this.valueText.setStroke(colors.brown, 20);
     this.add(this.valueText);
 
-    this.outcomeText = scene.add
-      .text(width / 2, outcomeTextY, ``, {
-        fontSize: fontSizes.medium,
+    this.earnValueText = scene.add
+      .text(width / 2 - this.numberGap, this.line1Y, '0', {
+        fontSize: '56px',
         color: colors.black,
         fontFamily: fontFamilies.bold,
       })
-      .setOrigin(0.5, 0);
-    this.add(this.outcomeText);
-
-    this.outcomeBonusAmount = scene.add
-      .text(width / 2, outcomeTextY, '+0', {
-        fontSize: fontSizes.medium,
+      .setOrigin(0.5, 0.5)
+      .setVisible(false);
+    this.add(this.earnValueText);
+    this.earnTokenText = scene.add
+      .text(width / 2 - this.numberGap, this.line2Y, '$FIAT', {
+        fontSize: '56px',
         color: colors.black,
         fontFamily: fontFamilies.bold,
       })
-      .setOrigin(0.5, 0)
+      .setOrigin(0.5, 0.5)
       .setVisible(false);
-    this.outcomeIconCoin = scene.add
-      .image(width / 2, outcomeTextY, 'icon-coin-mini')
-      .setOrigin(0.5, 0.2)
+    this.add(this.earnTokenText);
+
+    this.defendValueText = scene.add
+      .text(width / 2, this.line1Y, '0', {
+        fontSize: '56px',
+        color: colors.black,
+        fontFamily: fontFamilies.bold,
+      })
+      .setOrigin(0.5, 0.5)
       .setVisible(false);
-    this.add(this.outcomeBonusAmount);
-    this.add(this.outcomeIconCoin);
-
-    const iconGangsterX = width / 2 + 40;
-    this.outcomeIconGangster = scene.add
-      .image(iconGangsterX, outcomeTextY, 'icon-gangster-mini')
-      .setOrigin(0.5, 0.2)
+    this.add(this.defendValueText);
+    this.defendTokenText = scene.add
+      .text(width / 2, this.line2Y, '$FIAT', {
+        fontSize: '56px',
+        color: colors.black,
+        fontFamily: fontFamilies.bold,
+      })
+      .setOrigin(0.5, 0.5)
       .setVisible(false);
-    this.outcomeIconGoon = this.scene.add
-      .image(iconGangsterX + 150, outcomeTextY, 'icon-goon-mini')
-      .setOrigin(0.5, 0.2)
+    this.add(this.defendTokenText);
+    this.defendNoLossText = scene.add
+      .text(width / 2, (this.line1Y + this.line2Y) / 2, 'No Loss', {
+        fontSize: '56px',
+        color: colors.black,
+        fontFamily: fontFamilies.bold,
+      })
+      .setOrigin(0.5, 0.5)
       .setVisible(false);
-    this.add(this.outcomeIconGangster);
-    this.add(this.outcomeIconGoon);
+    this.add(this.defendNoLossText);
 
-    scene.game.events.on('update-war-history', (data = []) => {
-      if (!data.length) return;
+    this.attackValueText = scene.add
+      .text(width / 2 + this.numberGap, this.line1Y, '0', {
+        fontSize: '56px',
+        color: colors.black,
+        fontFamily: fontFamilies.bold,
+      })
+      .setOrigin(0.5, 0.5)
+      .setVisible(false);
+    this.add(this.attackValueText);
+    this.attackTokenText = scene.add
+      .text(width / 2 + this.numberGap, this.line2Y, '$FIAT', {
+        fontSize: '56px',
+        color: colors.black,
+        fontFamily: fontFamilies.bold,
+      })
+      .setOrigin(0.5, 0.5)
+      .setVisible(false);
+    this.add(this.attackTokenText);
+    this.attackNoAttackText = scene.add
+      .text(width / 2 + this.numberGap, (this.line1Y + this.line2Y) / 2, 'No Attack', {
+        fontSize: '56px',
+        color: colors.black,
+        fontFamily: fontFamilies.bold,
+      })
+      .setOrigin(0.5, 0.5)
+      .setVisible(false);
+    this.add(this.attackNoAttackText);
+    this.attackLostText = scene.add
+      .text(width / 2 + this.numberGap, this.line1Y, 'Lost', {
+        fontSize: '56px',
+        color: colors.black,
+        fontFamily: fontFamilies.bold,
+      })
+      .setOrigin(0.5, 0.5)
+      .setVisible(false);
+    this.add(this.attackLostText);
+    this.attackLostValueText = scene.add
+      .text(width / 2 + this.numberGap - 35, this.line2Y, '1000', {
+        fontSize: '56px',
+        color: colors.black,
+        fontFamily: fontFamilies.bold,
+      })
+      .setOrigin(0.5, 0.5)
+      .setVisible(false);
+    this.add(this.attackLostValueText);
+    this.attackLostIcon = scene.add
+      .image(width / 2 + this.numberGap + this.attackLostValueText.width / 2 + 20, this.line2Y, 'icon-gangster-mini')
+      .setOrigin(0.5, 0.5)
+      .setVisible(false);
+    this.add(this.attackLostIcon);
 
-      this.latestWar = data[0];
-      console.log('this.latestWar', this.latestWar);
-      const { bonus, penalty } = this.latestWar;
-      const hasNoPenalties = Number(penalty?.gangster) + Number(penalty?.goon) === 0;
+    scene.game.events.on('update-war-history-latest', (data) => {
+      if (!data) return;
 
-      if (bonus) {
-        this.outcomeText.text = `You gained +${formatter.format(bonus)}            Bonus.`;
-        this.outcomeBonusAmount.text = `+${formatter.format(bonus)}`;
-        this.outcomeIconCoin.setX(width / 2 + this.outcomeBonusAmount.width / 2 + 50);
+      this.reset();
+      const { tokenEarnFromEarning, tokenEarnFromAttacking, machinesLost, tokenStolen, attackUserId } = data;
+
+      // earn
+      this.earnValueText.text = `+${formatter.format(tokenEarnFromEarning || 0)}`;
+      this.earnValueText.setVisible(true);
+      this.earnTokenText.setVisible(true);
+
+      // defend
+      if (!tokenStolen) {
+        this.defendNoLossText.setVisible(true);
       } else {
-        if (hasNoPenalties) this.outcomeText.text = `Your gang escaped. Nothing was lost.`;
-        else {
-          this.outcomeText.text = `You lost -${Number(penalty?.gangster)}            -${Number(
-            penalty?.goon
-          )}            `;
-        }
+        this.defendTokenText.setVisible(true);
+        this.defendValueText.text = `-${formatter.format(tokenStolen)}`;
+        this.defendValueText.setVisible(true);
       }
 
-      this.outcomeBonusAmount.setVisible(bonus);
-      this.outcomeIconCoin.setVisible(bonus);
-      this.outcomeIconGangster.setVisible(!bonus && !hasNoPenalties);
-      this.outcomeIconGoon.setVisible(!bonus && !hasNoPenalties);
+      // attack
+      if (!attackUserId) {
+        this.attackNoAttackText.setVisible(true);
+      } else if (!!machinesLost) {
+        this.attackLostText.setVisible(true);
+        this.attackLostValueText.text = `-${formatter.format(machinesLost)}`;
+        this.attackLostValueText.setVisible(true);
+        this.attackLostIcon.x = width / 2 + this.numberGap + this.attackLostValueText.width / 2 + 20;
+        this.attackLostIcon.setVisible(true);
+      } else {
+        this.attackTokenText.setVisible(true);
+        this.attackValueText.text = `+${formatter.format(tokenEarnFromAttacking)}`;
+        this.attackValueText.setVisible(true);
+      }
     });
 
     scene.game.events.on('update-claimable-status', ({ claimable, active }) => {
@@ -132,8 +206,22 @@ class PopupWelcomeWar extends Popup {
       }
     });
 
-    scene.game.events.emit('request-war-history');
+    scene.game.events.emit('request-war-history-latest');
     scene.game.events.emit('request-claimable-status');
+  }
+
+  reset() {
+    this.earnValueText.setVisible(false);
+    this.earnTokenText.setVisible(false);
+    this.defendValueText.setVisible(false);
+    this.defendTokenText.setVisible(false);
+    this.defendNoLossText.setVisible(false);
+    this.attackValueText.setVisible(false);
+    this.attackTokenText.setVisible(false);
+    this.attackNoAttackText.setVisible(false);
+    this.attackLostValueText.setVisible(false);
+    this.attackLostText.setVisible(false);
+    this.attackLostIcon.setVisible(false);
   }
 }
 
