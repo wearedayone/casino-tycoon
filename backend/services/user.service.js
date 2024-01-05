@@ -31,7 +31,6 @@ const createGamePlayIfNotExist = async (userId) => {
       numberOfBuildings: 0,
       lastClaimTime: admin.firestore.FieldValue.serverTimestamp(),
       point: 0,
-      war: false,
       pendingReward: 0,
       startRewardCountingTime: admin.firestore.FieldValue.serverTimestamp(),
       active: false,
@@ -97,11 +96,6 @@ export const createUserIfNotExist = async (userId) => {
   }
 
   await createGamePlayIfNotExist(userId);
-};
-
-export const toggleWarStatus = async (userId, isWarEnabled) => {
-  const transaction = await initTransaction({ userId, type: 'war-switch', isWarEnabled });
-  await validateNonWeb3Transaction({ userId, transactionId: transaction.id });
 };
 
 export const updateWalletPasswordAsked = async (userId) => {

@@ -1,6 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 
-// import Home from '../pages/Home';
 import Game from '../pages/Game';
 
 const MainRoutes = () => {
@@ -8,7 +7,6 @@ const MainRoutes = () => {
     <div>
       <Routes>
         <Route path="/game" element={<Game />} />
-        {/* <Route path="/" element={<Game />} /> */}
         <Route path="*" element={<Navigate to="/game" replace />} />
       </Routes>
     </div>

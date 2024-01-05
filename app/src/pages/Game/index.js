@@ -14,7 +14,6 @@ import {
   getRank,
   getWarHistory,
   getWarHistoryDetail,
-  toggleWarStatus,
   updateBalance,
 } from '../../services/user.service';
 import { claimToken } from '../../services/transaction.service';
@@ -533,10 +532,6 @@ const Game = () => {
           });
       });
 
-      gameRef.current?.events.on('request-war-status', () => {
-        gameRef.current.events.emit('update-war-status', { war: gamePlay.war });
-      });
-
       gameRef.current?.events.on('request-war-die-chance', () => {
         gameRef.current.events.emit('update-war-die-chance', { dieChance: activeSeason.warConfig.dieChance });
       });
@@ -562,15 +557,6 @@ const Game = () => {
             console.log('err', err);
             gameRef.current.events.emit('complete-apply-invite-code', { status: 'Error', message: err.message });
           });
-      });
-
-      gameRef.current?.events.on('change-war-status', ({ war }) => {
-        gameRef.current.events.emit('update-war-status', { war });
-        toggleWarStatus({ war }).catch((err) => {
-          console.error(err);
-          Sentry.captureException(err);
-          gameRef.current.events.emit('update-war-status', { war: !war });
-        });
       });
 
       gameRef.current?.events.on('request-next-war-time', () => {
@@ -1073,12 +1059,6 @@ const Game = () => {
       gameRef.current?.events.emit('update-claimable-reward', { reward: claimableReward });
     }
   }, [gamePlay?.startRewardCountingTime, gamePlay?.pendingreward, dailyMoney]);
-
-  useEffect(() => {
-    if (gamePlay) {
-      gameRef.current?.events.emit('update-war-status', { war: gamePlay.war });
-    }
-  }, [gamePlay?.war]);
 
   useEffect(() => {
     getNFTBalance(address).then((balance) => {

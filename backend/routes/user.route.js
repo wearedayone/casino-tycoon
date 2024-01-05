@@ -5,7 +5,6 @@ import {
   getMe,
   getUserWarHistory,
   getUserWarHistoryDetail,
-  toggleWar,
   completeAskingWalletPassword,
   updateBalance,
   getRank,
@@ -16,7 +15,6 @@ import {
 const router = Router();
 
 router.get('/me', auth, getMe);
-router.put('/me/war', auth, toggleWar);
 router.put('/me/invite-code', auth, applyReferralCode);
 router.get('/me/war-history', auth, getUserWarHistory);
 router.get('/me/war-history/:warSnapshotId/:warResultId', auth, getUserWarHistoryDetail);
