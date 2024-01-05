@@ -31,7 +31,6 @@ import {
   getUserDetailToAttack,
   getLatestWarResult,
 } from '../../services/war.service';
-import { getRankingRewards } from '../../services/season.service';
 import QueryKeys from '../../utils/queryKeys';
 import { calculateHouseLevel } from '../../utils/formulas';
 import useSmartContract from '../../hooks/useSmartContract';
