@@ -1,4 +1,5 @@
 import Popup from './Popup';
+import PopupProcessing from './PopupProcessing';
 import TextButton from '../button/TextButton';
 import Button from '../button/Button';
 import configs from '../../configs/configs';
@@ -19,6 +20,13 @@ class PopupRetire extends Popup {
 
   constructor(scene) {
     super(scene, 'popup-small', { title: 'Retire From Game' });
+    this.popupBuyProcessing = new PopupProcessing(scene, {
+      completedEvent: 'retire-completed',
+      completedIcon: 'icon-retire-done',
+      failedIcon: 'icon-retire-fail',
+      description: '',
+    });
+    scene.add.existing(this.popupBuyProcessing);
 
     const leftMargin = this.popup.x - this.popup.width / 2;
     const paddedX = leftMargin + this.popup.width * 0.1;
@@ -89,7 +97,10 @@ class PopupRetire extends Popup {
       'button-yes',
       'button-yes-pressed',
       () => {
-        console.log('yes');
+        this.popupBuyProcessing.initLoading(`Your payout will take\na few minutes to process`);
+        this.close();
+
+        scene.game.events.emit('init-retire');
       }
     );
     this.add(this.buttonYes);
