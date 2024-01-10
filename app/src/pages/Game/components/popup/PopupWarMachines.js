@@ -22,9 +22,18 @@ class PopupWarMachines extends Popup {
   buildingBonus = 0;
   loading = false;
 
-  constructor(scene) {
+  constructor(scene, { isSimulator, onClickInfoButton, onClickClose } = {}) {
     super(scene, 'popup-war-machines', { title: 'Gang War' });
     this.scene = scene;
+    this.onClickClose = onClickClose;
+
+    const events = {
+      requestGamePlay: isSimulator ? 'simulator-request-game-play' : 'request-game-play',
+      updateWarMachinesCompleted: isSimulator
+        ? 'simulator-update-war-machines-completed'
+        : 'update-war-machines-completed',
+      updateGamePlay: isSimulator ? 'simulator-update-game-play' : 'update-game-play',
+    };
 
     this.backBtn = new TextButton(
       scene,
@@ -32,7 +41,10 @@ class PopupWarMachines extends Popup {
       height / 2 + this.popup.height / 2 - 20,
       'button-blue',
       'button-blue-pressed',
-      this.close,
+      () => {
+        this.close();
+        this.onClickClose?.();
+      },
       'Back',
       { sound: 'close', fontSize: '82px' }
     );
@@ -45,7 +57,7 @@ class PopupWarMachines extends Popup {
       'button-green',
       'button-green-pressed',
       () => {
-        if (this.loading) return;
+        if (this.loading || isSimulator) return;
         this.loading = true;
         scene.game.events.emit('update-war-machines', {
           numberOfMachines: this.numberOfMachines,
@@ -65,6 +77,7 @@ class PopupWarMachines extends Popup {
     this.infoBtn.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
       this.close();
       scene.popupWarExplain?.open();
+      onClickInfoButton?.();
     });
     this.add(this.infoBtn);
 
@@ -373,7 +386,7 @@ class PopupWarMachines extends Popup {
     this.add(this.attackUserText);
 
     scene.game.events.on(
-      'update-game-play',
+      events.updateGamePlay,
       ({
         numberOfMachines,
         numberOfWorkers,
@@ -397,7 +410,7 @@ class PopupWarMachines extends Popup {
       }
     );
 
-    scene.game.events.on('update-war-machines-completed', () => {
+    scene.game.events.on(events.updateWarMachinesCompleted, () => {
       this.loading = false;
       if (this.visible) {
         scene.popupWarAttackConfirmation?.updateNumberOfMachines(this.attackUnits);
@@ -406,7 +419,7 @@ class PopupWarMachines extends Popup {
       }
     });
 
-    scene.game.events.emit('request-game-play');
+    scene.game.events.emit(events.requestGamePlay);
   }
 
   updateValues() {

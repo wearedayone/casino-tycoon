@@ -11,23 +11,14 @@ class Step15 extends Phaser.GameObjects.Container {
 
     this.setVisible(false);
 
-    const next = () => {
-      scene.popupDailyGangWar.setVisible(false);
-      onNext();
-    };
+    this.character = new TutorialCharacter(scene, width / 2, height / 2 - 600, 'tutorial-15', onNext);
+    this.add(this.character);
 
-    scene.popupDailyGangWar.list.map((item) => (item.y -= 270));
+    this.goon = scene.add.image(300, height / 2 + 300, 'tutorial-15-goon');
+    this.add(this.goon);
 
-    this.image = scene.add.image(width / 2, height - 300, 'tutorial-15').setOrigin(0.5, 0.5);
-    this.add(this.image);
-
-    this.nextButton = scene.add
-      .image(this.image.x + this.image.width / 2 - 100, this.image.y - this.image.height / 2 + 120, 'tutorial-next')
-      .setOrigin(0.5, 0.5);
-    this.add(this.nextButton);
-    this.nextButton.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
-      next();
-    });
+    this.arrow = scene.add.image(300 + this.goon.width / 2, height / 2 + 300, 'tutorial-arrow-left').setOrigin(0, 0.5);
+    this.add(this.arrow);
   }
 }
 

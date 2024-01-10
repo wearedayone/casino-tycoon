@@ -269,7 +269,7 @@ class PopupBuyGoon extends Popup {
     ).total;
     const roi = estimatedPrice ? (((this.rateIncrease * this.quantity) / estimatedPrice) * 100).toFixed(1) : 0;
 
-    this.quantityText.text = this.quantity;
+    this.quantityText.text = `${this.quantity}`;
     this.roiText.text = `${roi}%`;
     this.priceText.text = `${formatter.format(estimatedPrice)}`;
     const formattedGas = customFormat(this.gas, 4) === '0' ? '<0.0001' : customFormat(this.gas, 4);
@@ -278,7 +278,7 @@ class PopupBuyGoon extends Popup {
 
     const insufficientBalance = this.quantity > this.estimatedMaxPurchase;
     this.insufficientBalance.setVisible(insufficientBalance);
-    this.upgradeBtn.setDisabledState(this.scene.isGameEnded || insufficientBalance);
+    this.upgradeBtn.setDisabledState(this.scene?.isGameEnded || insufficientBalance);
   }
 }
 

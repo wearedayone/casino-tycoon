@@ -11,7 +11,6 @@ const buttonWidth = 288;
 const y = 2600;
 
 class Step7 extends Phaser.GameObjects.Container {
-  clicked = false;
   constructor(scene, onNext) {
     super(scene, 0, 0);
 
@@ -19,9 +18,9 @@ class Step7 extends Phaser.GameObjects.Container {
 
     const next = () => {
       scene.popupBuy.setVisible(false);
-      scene.popupBuyGoon.setDepth(5);
-      scene.popupBuyGoon.background?.destroy();
-      scene.popupBuyGoon.setVisible(true);
+      scene.popupSafeHouseUpgrade.setDepth(5);
+      scene.popupSafeHouseUpgrade.background?.destroy();
+      scene.popupSafeHouseUpgrade.setVisible(true);
       onNext();
     };
 
@@ -35,15 +34,13 @@ class Step7 extends Phaser.GameObjects.Container {
       'button-buy',
       'button-buy-pressed',
       () => {
-        if (this.clicked) return;
-        this.clicked = true;
-
         this.character.y -= 400;
-        this.arrow1.setVisible(false);
         this.arrow.setVisible(true);
+        this.arrow1.setVisible(false);
+
         scene.popupWar.setVisible(false);
         scene.popupBuy.setDepth(5);
-        scene.popupBuy.updateDisabled({ goonDisabled: false, gangsterDisabled: true, houseDisabled: true });
+        scene.popupBuy.updateDisabled({ goonDisabled: true, gangsterDisabled: true, houseDisabled: false });
         scene.popupBuy.updateCallback(() => next());
         scene.popupBuy.setVisible(!scene.popupBuy.visible);
       },
@@ -56,7 +53,7 @@ class Step7 extends Phaser.GameObjects.Container {
       .setOrigin(0.5, 1);
     this.add(this.arrow1);
 
-    this.arrow = scene.add.image(width - 360, 2180, 'tutorial-arrow-right').setOrigin(1, 0);
+    this.arrow = scene.add.image(width - 360, 1620, 'tutorial-arrow-right').setOrigin(1, 0);
     this.arrow.setVisible(false);
     this.add(this.arrow);
   }

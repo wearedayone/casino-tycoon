@@ -250,7 +250,7 @@ class PopupSafeHouseUpgrade extends Popup {
       this.priceStep
     ).total;
 
-    this.quantityText.text = this.quantity;
+    this.quantityText.text = `${this.quantity}`;
     this.priceText.text = `${formatter.format(estimatedPrice)}`;
     const formattedGas = customFormat(this.gas, 4) === '0' ? '<0.0001' : customFormat(this.gas, 4);
     this.gasPrice.text = `+${formattedGas} ETH (gas)`;
@@ -258,7 +258,7 @@ class PopupSafeHouseUpgrade extends Popup {
 
     const insufficientBalance = this.quantity > this.estimatedMaxPurchase;
     this.insufficientBalance.setVisible(insufficientBalance);
-    this.upgradeBtn.setDisabledState(this.scene.isGameEnded || insufficientBalance);
+    this.upgradeBtn.setDisabledState(this.scene?.isGameEnded || insufficientBalance);
   }
 }
 

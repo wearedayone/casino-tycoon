@@ -26,9 +26,6 @@ class Step2 extends Phaser.GameObjects.Container {
       onNext();
     };
 
-    this.character = new TutorialCharacter(scene, width / 2, height / 2 - 200, 'tutorial-2', next);
-    this.add(this.character);
-
     this.activeButton = new Button(
       scene,
       width - px - buttonWidth / 2,
@@ -37,8 +34,11 @@ class Step2 extends Phaser.GameObjects.Container {
       'button-buy-pressed',
       () => {
         if (this.clicked) return;
+        this.clicked = true;
 
-        this.character.y -= 400;
+        this.character = new TutorialCharacter(scene, width / 2, height / 2 - 600, 'tutorial-2', next);
+        this.add(this.character);
+
         this.arrow1.setVisible(false);
         this.arrow.setVisible(true);
         scene.popupWar.setVisible(false);

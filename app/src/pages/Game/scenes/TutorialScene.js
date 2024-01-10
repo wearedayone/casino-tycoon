@@ -2,30 +2,24 @@ import Phaser from 'phaser';
 
 import configs from '../configs/configs';
 import Background from '../components/common/Background';
-// import PopupWelcomeNoWar from '../components/popup/PopupWelcomeNoWar';
-// import PopupWelcomeWar from '../components/popup/PopupWelcomeWar';
 import Header from '../components/action-buttons/Header';
 import InfoButtons from '../components/action-buttons/InfoButtons';
 import GangsterHouse from '../components/common/GangsterHouse';
 import Footer from '../components/action-buttons/Footer';
 import PopupBuy from '../components/popup/PopupBuy';
 import PopupWar from '../components/popup/PopupWar';
-// import PopupSettings from '../components/popup/PopupSettings';
-// import PopupDailyGangWar from '../components/popup/PopupDailyGangWar';
-// import PopupWarHistory from '../components/popup/PopupWarHistory';
+import PopupWarMachines from '../components/popup/PopupWarMachines';
+import PopupWarExplain from '../components/popup/PopupWarExplain';
 import PopupSafeHouseUpgrade from '../components/popup/PopupSafeHouseUpgrade';
 import PopupBuyGoon from '../components/popup/PopupBuyGoon';
 import PopupBuyGangster from '../components/popup/PopupBuyGangster';
-// import PopupPortfolio from '../components/popup/PopupPortfolio';
 import Animation from '../components/common/Animation';
-// import PopupStatistic from '../components/popup/PopupStatistic';
 import PopupLeaderboard from '../components/popup/PopupLeaderboard';
 import PopupDeposit from '../components/popup/PopupDeposit';
-// import PopupReferralProgram from '../components/popup/PopupReferralProgram';
 import PopupPrizePool from '../components/popup/PopupPrizePool';
 import Tutorial from '../components/tutorials/Tutorial';
 
-const { goonAnimation, gangsterAnimation, width } = configs;
+const { goonAnimation, gangsterAnimation, width, height } = configs;
 
 const gangsterBackAnimationSpeed = {
   x: Math.abs(gangsterAnimation.back.end.x - gangsterAnimation.back.start.x) / gangsterAnimation.back.time,
@@ -71,7 +65,17 @@ class TutorialScene extends Phaser.Scene {
     const gangsterHouse = new GangsterHouse(this, 2200, { isSimulator: true }); // done
     this.add.existing(gangsterHouse);
 
-    this.popupDeposit = new PopupDeposit(this, null, { isSimulator: true }); // done
+    this.popupDeposit = new PopupDeposit(this, null, {
+      isSimulator: true,
+      onOpen: () => {
+        this.tutorial.step16.setVisible(false);
+      },
+      onClose: () => {
+        this.game.events.emit('simulator-end');
+        this.scene.stop();
+        this.scene.start('MainScene');
+      },
+    }); // done
     this.add.existing(this.popupDeposit);
 
     this.popupBuy = new PopupBuy(this, width - 335, 1600); // done
@@ -82,27 +86,6 @@ class TutorialScene extends Phaser.Scene {
 
     this.popupWar = new PopupWar(this, 35, 1850); // done
     this.add.existing(this.popupWar);
-
-    // this.popupSettings = new PopupSettings(this);
-    // this.add.existing(this.popupSettings);
-
-    // this.popupReferralProgram = new PopupReferralProgram(this);
-    // this.add.existing(this.popupReferralProgram);
-
-    // this.popupPortfolio = new PopupPortfolio(this);
-    // this.add.existing(this.popupPortfolio);
-
-    // this.popupStatistic = new PopupStatistic(this);
-    // this.add.existing(this.popupStatistic);
-
-    // this.popupDailyGangWar = new PopupDailyGangWar(this, {
-    //   isSimulator: true,
-    //   onCompleted: () => {
-    //     this.tutorial.step15.setVisible(false);
-    //     this.tutorial.step16.setVisible(true);
-    //   },
-    // }); // done
-    // this.add.existing(this.popupDailyGangWar);
 
     this.game.events.on('music-on', () => {
       this.bgMusic.play();
@@ -137,7 +120,7 @@ class TutorialScene extends Phaser.Scene {
           this.tutorial.setVisible(false);
           setTimeout(() => {
             this.tutorial.setVisible(true);
-            this.tutorial.step11.setVisible(true);
+            this.tutorial.step9.setVisible(true);
           }, 2000);
         },
       }); // done
@@ -150,7 +133,7 @@ class TutorialScene extends Phaser.Scene {
           this.tutorial.setVisible(false);
           setTimeout(() => {
             this.tutorial.setVisible(true);
-            this.tutorial.step9.setVisible(true);
+            this.tutorial.step7.setVisible(true);
           }, 2000);
         },
       }); // done
@@ -171,9 +154,12 @@ class TutorialScene extends Phaser.Scene {
 
       this.popupLeaderboard = new PopupLeaderboard(this, {
         isSimulator: true,
-        onClickBackButton: () => {
-          this.tutorial.step13.setVisible(false);
-          this.tutorial.step14.setVisible(true);
+        onClose: () => {
+          this.tutorial.step11.setVisible(false);
+          this.tutorial.step12.setVisible(false);
+          this.tutorial.background.setDisplaySize(width, height);
+          this.tutorial.lowerBackground?.destroy();
+          this.tutorial.step13.setVisible(true);
         },
       }); // done
       this.add.existing(this.popupLeaderboard);
@@ -181,8 +167,27 @@ class TutorialScene extends Phaser.Scene {
       this.popupPrizePool = new PopupPrizePool(this, { isSimulator: true }); // done
       this.add.existing(this.popupPrizePool);
 
-      // this.popupWarHistory = new PopupWarHistory(this);
-      // this.add.existing(this.popupWarHistory);
+      this.popupWarMachines = new PopupWarMachines(this, {
+        isSimulator: true,
+        onClickInfoButton: () => {
+          this.tutorial.step13.setVisible(false);
+          this.popupWarExplain.background?.destroy();
+          this.tutorial.step14.setVisible(true);
+        },
+        onClickClose: () => {
+          this.tutorial.step13.setVisible(false);
+          this.tutorial.step15.setVisible(true);
+        },
+      });
+      this.add.existing(this.popupWarMachines);
+
+      this.popupWarExplain = new PopupWarExplain(this, {
+        onClickBackButton: () => {
+          this.tutorial.step14.setVisible(false);
+          this.tutorial.step15.setVisible(true);
+        },
+      });
+      this.add.existing(this.popupWarExplain);
 
       const footer = new Footer(this, 2600, { isSimulator: true }); // done
       footer.setDepth(1);
@@ -195,19 +200,6 @@ class TutorialScene extends Phaser.Scene {
     this.tutorial = new Tutorial(this);
     this.add.existing(this.tutorial);
     this.tutorial.setDepth(2);
-
-    // this.game.events.on('update-user-away-reward', ({ showWarPopup, claimableReward }) => {
-    //   this.popupWelcome = showWarPopup
-    //     ? new PopupWelcomeWar(this, claimableReward)
-    //     : new PopupWelcomeNoWar(this, claimableReward);
-    //   this.add.existing(this.popupWelcome);
-    // });
-    // this.game.events.on('game-ended', () => {
-    //   console.log('trigger game end');
-    //   this.isGameEnded = true;
-    // });
-    // this.game.events.emit('request-game-ended-status');
-    // this.game.events.emit('request-user-away-reward');
   }
 
   create() {}

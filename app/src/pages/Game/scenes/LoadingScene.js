@@ -341,20 +341,16 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('tutorial-2', '/images/tutorial-2.png');
     this.load.image('tutorial-4', '/images/tutorial-4.png');
     this.load.image('tutorial-4-gangster', '/images/tutorial-4-gangster.png');
+    this.load.image('tutorial-4-claim-btn', '/images/tutorial-4-claim-btn.png');
+    this.load.image('tutorial-4-claim-btn-light', '/images/tutorial-4-claim-btn-light.png');
     this.load.image('tutorial-5', '/images/tutorial-5.png');
-    this.load.image('tutorial-5-gangster', '/images/tutorial-5-gangster.png');
-    this.load.image('tutorial-6', '/images/tutorial-6.png');
-    this.load.image('tutorial-6-claim-btn', '/images/tutorial-6-claim-btn.png');
-    this.load.image('tutorial-6-claim-btn-light', '/images/tutorial-6-claim-btn-light.png');
     this.load.image('tutorial-7', '/images/tutorial-7.png');
     this.load.image('tutorial-9', '/images/tutorial-9.png');
     this.load.image('tutorial-11', '/images/tutorial-11.png');
-    this.load.image('tutorial-12', '/images/tutorial-12.png');
-    this.load.image('tutorial-14', '/images/tutorial-14.png');
+    this.load.image('tutorial-13', '/images/tutorial-13.png');
     this.load.image('tutorial-15', '/images/tutorial-15.png');
+    this.load.image('tutorial-15-goon', '/images/tutorial-15-goon.png');
     this.load.image('tutorial-16', '/images/tutorial-16.png');
-    this.load.image('tutorial-17', '/images/tutorial-17.png');
-    this.load.image('tutorial-17-goon', '/images/tutorial-17-goon.png');
 
     this.load.path = '/images/animation/';
     this.load.multiatlas('gangster-front', 'gangster_front.json');
