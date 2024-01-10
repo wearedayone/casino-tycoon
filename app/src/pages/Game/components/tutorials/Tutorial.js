@@ -16,7 +16,6 @@ import Step13 from './Step13';
 import Step14 from './Step14';
 import Step15 from './Step15';
 import Step16 from './Step16';
-import Step17 from './Step17';
 import configs from '../../configs/configs';
 
 const { width, height } = configs;
@@ -25,8 +24,7 @@ class Tutorial extends Phaser.GameObjects.Container {
   constructor(scene) {
     super(scene, 0, 0);
 
-    this.background = scene.add.rectangle(0, 0, configs.width, configs.height, 0x260343, 0.8).setOrigin(0, 0);
-    this.background.depth = 5;
+    this.background = scene.add.rectangle(0, 0, width, height, 0x260343, 0.8).setOrigin(0, 0).setDepth(5);
     this.add(this.background);
 
     this.step1 = new Step1(scene, () => {
@@ -72,6 +70,7 @@ class Tutorial extends Phaser.GameObjects.Container {
 
     this.step8 = new Step8(scene, () => {
       this.step8.setVisible(false);
+      this.step9.setVisible(true);
     });
     this.add(this.step8);
 
@@ -83,6 +82,7 @@ class Tutorial extends Phaser.GameObjects.Container {
 
     this.step10 = new Step10(scene, () => {
       this.step10.setVisible(false);
+      this.step11.setVisible(true);
     });
     this.add(this.step10);
 
@@ -117,17 +117,11 @@ class Tutorial extends Phaser.GameObjects.Container {
 
     this.step16 = new Step16(scene, () => {
       this.step16.setVisible(false);
-      this.step17.setVisible(true);
-    });
-    this.add(this.step16);
-
-    this.step17 = new Step17(scene, () => {
-      this.step17.setVisible(false);
       scene.game.events.emit('simulator-end');
       scene.scene.stop();
       scene.scene.start('MainScene');
     });
-    this.add(this.step17);
+    this.add(this.step16);
 
     this.step1.setVisible(true);
   }

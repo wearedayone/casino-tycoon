@@ -48,6 +48,7 @@ class PopupBuyGangster extends Popup {
       requestMachines: isSimulator ? 'simulator-request-machines' : 'request-machines',
     };
     this.onCompleted = onCompleted;
+    this.isSimulator = isSimulator;
 
     // child modals
     const popupBuyBonusInfo = new PopupBuyBonusInfo(scene, this, { isSimulator });
@@ -70,6 +71,7 @@ class PopupBuyGangster extends Popup {
       'button-blue-pressed',
       () => {
         if (!this.quantity) return;
+        if (isSimulator) this.quantity = 1;
         this.popupBuyProcessing.initLoading(
           `Hiring ${this.quantity} Gangster${this.quantity > 1 ? 's' : ''}.\nPlease, wait`
         );
@@ -123,6 +125,7 @@ class PopupBuyGangster extends Popup {
       'button-info',
       'button-info-pressed',
       () => {
+        if (isSimulator) return;
         this.close();
         popupBuyBonusInfo.open();
       },
@@ -250,7 +253,10 @@ class PopupBuyGangster extends Popup {
       .setVisible(false);
     this.add(this.insufficientBalance);
 
-    this.coin = scene.add.image(this.priceText.x + this.priceText.width + 40, counterY, 'eth-coin').setOrigin(0, 0.5);
+    this.coin = scene.add
+      .image(this.priceText.x + this.priceText.width + 40, counterY, 'eth-coin')
+      .setOrigin(0, 0.5)
+      .setVisible(!isSimulator);
     this.add(this.coin);
 
     scene.game.events.on(events.completed, () => {
@@ -322,6 +328,11 @@ class PopupBuyGangster extends Popup {
   }
 
   updateValues() {
+    if (this.isSimulator) {
+      this.priceText.text = 'SAMPLE';
+      this.gasPrice.text = '';
+      return;
+    }
     this.networthIncreaseText.text = `+${(this.networthIncrease * this.quantity).toLocaleString()}`;
     this.rateIncreaseText.text = `+${(this.rateIncrease * this.quantity).toLocaleString()} /d`;
 
@@ -334,7 +345,7 @@ class PopupBuyGangster extends Popup {
     const remainingReservePercent = Math.pow(1 - this.reservePoolReward, this.quantity);
     const bonus = this.reservePool * (1 - remainingReservePercent);
 
-    this.quantityText.text = this.quantity;
+    this.quantityText.text = `${this.quantity}`;
     this.roiText.text = `${roi}%`;
     this.bonusText.text = `${formatter.format(bonus)}`;
     this.bonusCoin.x = this.bonusText.x + this.bonusText.width + 20;
@@ -356,7 +367,7 @@ class PopupBuyGangster extends Popup {
     this.priceStrikethrough.setVisible(hasDifferentPrice);
     const insufficientBalance = this.quantity > this.estimatedMaxPurchase;
     this.insufficientBalance.setVisible(insufficientBalance);
-    this.upgradeBtn.setDisabledState(this.scene.isGameEnded || insufficientBalance);
+    this.upgradeBtn.setDisabledState(this.scene?.isGameEnded || insufficientBalance);
   }
 }
 

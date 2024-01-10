@@ -28,9 +28,10 @@ class PopupLeaderboard extends Popup {
   numberOfRows = 0;
   stars = [];
 
-  constructor(scene, { isSimulator, onClickBackButton } = {}) {
+  constructor(scene, { isSimulator, onClose } = {}) {
     super(scene, 'popup-extra-large', { title: 'Season Leaderboard', noCloseBtn: true });
 
+    this.onCloseCallback = onClose;
     const events = {
       updateSeason: isSimulator ? 'simulator-update-season' : 'update-season',
       updateLeaderboard: isSimulator ? 'simulator-update-leaderboard' : 'update-leaderboard',
@@ -45,8 +46,8 @@ class PopupLeaderboard extends Popup {
     const startingY = this.popup.y - this.popup.height / 2;
     const gameEndsY = startingY + 150;
     const endTimeExtensionY = gameEndsY + 90;
-    const prizePoolContainerY = endTimeExtensionY + 180;
-    const reputationY = prizePoolContainerY + 210;
+    this.prizePoolContainerY = endTimeExtensionY + 180;
+    const reputationY = this.prizePoolContainerY + 210;
     const leaderboardHeaderY = reputationY + 140;
     this.leaderboardY = leaderboardHeaderY + 80;
 
@@ -87,27 +88,28 @@ class PopupLeaderboard extends Popup {
     this.add(this.ethIcon);
 
     const prizePoolContainer = scene.add
-      .image(width / 2, prizePoolContainerY, 'text-container-outlined')
+      .image(width / 2, this.prizePoolContainerY, 'text-container-outlined')
       .setOrigin(0.5, 0.5);
     const totalPrizePool = scene.add
-      .text(paddedX, prizePoolContainerY, 'Total Prize Pool', largeBlackExtraBold)
+      .text(paddedX, this.prizePoolContainerY, 'Total Prize Pool', largeBlackExtraBold)
       .setOrigin(0, 0.5);
     const infoButton = new Button(
       scene,
       width / 2 + 20,
-      prizePoolContainerY - 20,
+      this.prizePoolContainerY - 20,
       'button-info',
       'button-info-pressed',
       () => {
+        if (isSimulator) return;
         this.close();
         scene.popupPrizePool.open();
       },
       { sound: 'open' }
     );
     this.prizePool = scene.add
-      .text(width - paddedX - 140, prizePoolContainerY, '0.00', largeBlackExtraBold)
+      .text(width - paddedX - 140, this.prizePoolContainerY, '0.00', largeBlackExtraBold)
       .setOrigin(1, 0.5);
-    const ethIcon = scene.add.image(width - paddedX, prizePoolContainerY, 'icon-eth').setOrigin(1, 0.5);
+    const ethIcon = scene.add.image(width - paddedX, this.prizePoolContainerY, 'icon-eth').setOrigin(1, 0.5);
     this.add(prizePoolContainer);
     this.add(totalPrizePool);
     this.add(infoButton);
@@ -220,7 +222,6 @@ class PopupLeaderboard extends Popup {
       'button-blue-pressed',
       () => {
         this.close();
-        onClickBackButton?.();
       },
       'Back',
       { fontSize: '82px', sound: 'close' }
@@ -263,6 +264,7 @@ class PopupLeaderboard extends Popup {
   }
 
   cleanup() {
+    this.onCloseCallback?.();
     if (this.table) {
       this.table.setMouseWheelScrollerEnable(false);
     }

@@ -13,7 +13,7 @@ class PopupPrizePool extends Popup {
     super(scene, 'popup-small', { title: 'Rank Prize Pool', titleIcon: 'icon-info', noCloseBtn: true });
 
     const events = {
-      updateSeason: isSimulator ? 'simulator-update-season' : 'update-season',
+      requestRankingRewards: isSimulator ? 'simulator-request-ranking-rewards' : 'request-ranking-rewards',
       updateRankingRewards: isSimulator ? 'simulator-update-ranking-rewards' : 'update-ranking-rewards',
     };
 
@@ -56,7 +56,7 @@ class PopupPrizePool extends Popup {
     );
     this.add(this.buttonBack);
 
-    scene.game.events.on('update-ranking-rewards', ({ prizePoolConfig }) => {
+    scene.game.events.on(events.updateRankingRewards, ({ prizePoolConfig }) => {
       const { devFeePercent, burnPercent, reputationRewardsPercent } = prizePoolConfig.allocation;
       const rankRewardsPercent = 1 - (devFeePercent + burnPercent + reputationRewardsPercent);
       this.allocation.text = `${rankRewardsPercent * 100}% of ETH from buying\nGangsters goes into Prize Pool`;
@@ -64,7 +64,7 @@ class PopupPrizePool extends Popup {
         prizePoolConfig.lowerRanksCutoffPercent * 100
       }% of players get paid when\ngame ends.`;
     });
-    scene.game.events.emit('request-ranking-rewards');
+    scene.game.events.emit(events.requestRankingRewards);
   }
 }
 

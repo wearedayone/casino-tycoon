@@ -56,7 +56,10 @@ class Popup extends Phaser.GameObjects.Container {
         configs.height / 2 - this.popup.height / 2 + 50,
         'button-close',
         'button-close-pressed',
-        this.close,
+        () => {
+          this.close();
+          this.onClickClose?.();
+        },
         { sound: 'close' }
       );
       this.add(this.closeButton);

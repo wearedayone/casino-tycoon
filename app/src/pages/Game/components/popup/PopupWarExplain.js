@@ -10,8 +10,9 @@ class PopupWarExplain extends Popup {
   earningStealPercent = 0;
   machinePercentLost = 0;
 
-  constructor(scene) {
+  constructor(scene, { onClickBackButton } = {}) {
     super(scene, 'popup-gang-war-explain', { ribbon: 'ribbon-gang-war-explain' });
+    this.onClickClose = onClickBackButton;
 
     this.backBtn = new TextButton(
       scene,
@@ -21,6 +22,10 @@ class PopupWarExplain extends Popup {
       'button-blue-pressed',
       () => {
         this.close();
+        if (onClickBackButton) {
+          onClickBackButton();
+          return;
+        }
         scene.popupWarMachines?.open();
       },
       'Back',

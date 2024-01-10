@@ -13,8 +13,10 @@ class PopupDeposit extends Popup {
   address = '';
   isSimulator;
 
-  constructor(scene, parentModal, { isSimulator } = {}) {
+  constructor(scene, parentModal, { isSimulator, onOpen, onClose } = {}) {
     super(scene, 'popup-small', { title: 'Deposit' });
+    this.onOpenCallback = onOpen;
+    this.cleanup = onClose;
     this.isSimulator = isSimulator;
 
     const events = {
@@ -162,6 +164,7 @@ class PopupDeposit extends Popup {
 
   onOpen() {
     this.scene.game.events.emit(this.events?.requestEthBalance || '');
+    this.onOpenCallback?.();
   }
 
   updateAddress(address) {

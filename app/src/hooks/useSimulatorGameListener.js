@@ -47,6 +47,13 @@ const useSimulatorGameListener = () => {
     numberOfWorkers: 0,
     numberOfBuildings: 0,
     networth: 0,
+    warDeployment: {
+      numberOfMachinesToEarn: 0,
+      numberOfMachinesToAttack: 0,
+      numberOfMachinesToDefend: 0,
+      attackUserId: null,
+      acttackUser: null,
+    },
   });
   const [isLeaderboardModalOpen, setLeaderboardModalOpen] = useState(false);
   const { isEnded, countdownString } = useSeasonCountdown({ open: isLeaderboardModalOpen });
@@ -64,17 +71,20 @@ const useSimulatorGameListener = () => {
         username: user.username,
         isUser: true,
       },
-    ]
-      .sort((user1, user2) => user2.networth - user1.networth)
-      .map((user, index) => {
-        return {
-          ...user,
-          rank: index + 1,
-          reward: calculateReward(activeSeason.prizePool, activeSeason?.rankingRewards, index),
-        };
-      });
+    ].sort((user1, user2) => user2.networth - user1.networth);
 
-    return allUsers;
+    const totalReputation = allUsers.reduce((sum, user) => sum + user.networth, 0);
+    const reputationPrizePool =
+      activeSeason.prizePoolConfig.allocation.reputationRewardsPercent * activeSeason.prizePool;
+
+    return allUsers.map((user, index) => {
+      return {
+        ...user,
+        rank: index + 1,
+        reward: calculateReward(activeSeason.prizePool, activeSeason?.rankingRewards, index),
+        reputationReward: (user.networth / totalReputation) * reputationPrizePool,
+      };
+    });
   }, [user, activeSeason?.prizePool, assets?.networth, activeSeason?.rankingRewards]);
 
   const setupSimulatorGameListener = (game) => {
@@ -89,6 +99,10 @@ const useSimulatorGameListener = () => {
           Sentry.captureException(err);
         });
       setGameRef(null);
+    });
+
+    game.events.on('simulator-request-ranking-rewards', () => {
+      game.events.emit('simulator-update-ranking-rewards', { prizePoolConfig: activeSeason?.prizePoolConfig });
     });
 
     game.events.on('simulator-request-reserve-pool', () => {
@@ -208,6 +222,16 @@ const useSimulatorGameListener = () => {
       }
     });
 
+    game.events.on('simulator-request-game-play', () => {
+      game.events.emit('simulator-update-game-play', {
+        numberOfMachines: assets.numberOfMachines,
+        numberOfWorkers: assets.numberOfWorkers,
+        numberOfBuildings: assets.numberOfBuildings,
+        ...assets.warDeployment,
+        ...activeSeason?.warConfig,
+      });
+    });
+
     game.events.on('simulator-request-next-war-time', () => {
       game.events.emit('simulator-update-next-war-time', { time: Date.now() + 24 * 60 * 60 * 1000 });
     });
@@ -222,6 +246,10 @@ const useSimulatorGameListener = () => {
 
     game.events.on('simulator-request-war-status', () => {
       game.events.emit('simulator-update-war-status', { war: false });
+    });
+
+    game.events.on('simulator-update-war-machines', () => {
+      game.events.emit('simulator-update-war-machines-completed');
     });
 
     game.events.on('simulator-refresh-eth-balance', () => {
@@ -353,8 +381,8 @@ const useSimulatorGameListener = () => {
 
   useEffect(() => {
     if (isLeaderboardModalOpen && gameRef)
-      gameRef.events.emit('simulator-update-ranking-rewards', activeSeason?.rankingRewards || []);
-  }, [isLeaderboardModalOpen, activeSeason?.rankingRewards]);
+      gameRef.events.emit('simulator-update-ranking-rewards', { prizePoolConfig: activeSeason?.prizePoolConfig });
+  }, [isLeaderboardModalOpen, activeSeason?.prizePoolConfig]);
 
   useEffect(() => {
     if (gameRef) {
