@@ -56,7 +56,7 @@ const takeSeasonLeaderboardSnapshot = async () => {
     const userAddresses = (await Promise.all(userPromises)).map((doc) => doc.data().address);
 
     const winnerAllocations = leaderboard
-      .filter(({ networth }) => networth > 0)
+      .filter(({ active, reward, reputationReward }) => active && reward + reputationReward > 0)
       .map((doc, index) => {
         const { networth, reward, reputationReward } = doc;
         const prizeValue = reward + reputationReward;
@@ -78,7 +78,7 @@ const takeSeasonLeaderboardSnapshot = async () => {
 
     // save snapshot to firestore
     // TODO: use event listener to update for accurate prizeValue
-    logger.info(`winnerAllocations: ${winnerAllocations}`);
+    logger.info(`winnerAllocations: ${JSON.stringify(winnerAllocations)}`);
     await seasonRef.update({ winnerSnapshot: winnerAllocations });
 
     // call on-chain `setWinner` method
