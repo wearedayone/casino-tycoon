@@ -12,13 +12,23 @@ const warConfig = {
   tokenRewardPerEarner: 500,
   machinePercentLost: 0.1,
 };
-
 const assetsConfig = {
   machine: { basePrice: 0.001, whitelistPrice: 0.0006, dailyReward: 1000, networth: 5 },
   worker: { basePrice: 250, targetDailyPurchase: 100, targetPrice: 1000, dailyReward: 1000, networth: 3 },
   building: { basePrice: 500, targetDailyPurchase: 100, targetPrice: 1000, dailyReward: 0, networth: 4 },
 };
-
+const prizePoolConfig = {
+  rankRewardsPercent: 0.7,
+  rewardScalingRatio: 1.25,
+  // rank leaderboard
+  higherRanksCutoffPercent: 0.1,
+  lowerRanksCutoffPercent: 0.2,
+  minRewardHigherRanks: 0.004, // in ETH
+  minRewardLowerRanks: 0.002, // in ETH
+  // reputation leaderboard
+  earlyRetirementTax: 0.2,
+};
+const referralConfig = { referralBonus: 0.1, referralDiscount: 0.1 };
 const main = async () => {
   console.log('init data');
   // web3Listener
@@ -61,7 +71,10 @@ const main = async () => {
       startTime,
       estimatedEndTime,
       claimGapInSeconds: 300,
-      prizePool: 0,
+      rankPrizePool: 0,
+      reputationPrizePool: 0,
+      burnValue: 0,
+      devFee: 0,
       reservePool: 0,
       reservePoolReward: 0.01,
       timeStepInHours: 0.25,
@@ -90,27 +103,9 @@ const main = async () => {
       tokenAddress: TOKEN_ADDRESS,
       nftAddress: NFT_ADDRESS,
       gameAddress: GAME_CONTRACT_ADDRESS,
-      prizePoolConfig: {
-        allocation: {
-          devFeePercent: 0.05,
-          burnPercent: 0,
-          reputationRewardsPercent: 0.3,
-          // rank rewards is the remaining
-        },
-        rewardScalingRatio: 1.25,
-        // rank leaderboard
-        higherRanksCutoffPercent: 0.1,
-        lowerRanksCutoffPercent: 0.2,
-        minRewardHigherRanks: 0.004, // in ETH
-        minRewardLowerRanks: 0.002, // in ETH
-        // reputation leaderboard
-        earlyRetirementTax: 0.2,
-      },
+      prizePoolConfig,
       warConfig,
-      referralConfig: {
-        referralBonus: 0.1,
-        referralDiscount: 0.1,
-      },
+      referralConfig,
     });
   console.log('created season');
 
@@ -126,11 +121,17 @@ const main = async () => {
       metadata: {
         startTime,
         estimatedEndTime,
-        prizePool: 0,
+        rankPrizePool: 0,
+        reputationPrizePool: 0,
+        burnValue: 0,
+        devFee: 0,
         reservePool: 0,
         machineSold: 0,
         workerSold: 0,
         buildingSold: 0,
+        prizePoolConfig,
+        warConfig,
+        referralConfig,
         ...assetsConfig,
       },
     });

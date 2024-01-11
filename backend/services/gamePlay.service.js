@@ -24,7 +24,7 @@ export const getUserGamePlay = async (userId) => {
 };
 
 export const getLeaderboard = async (userId) => {
-  const { id, prizePool, prizePoolConfig, rankingRewards } = await getActiveSeason();
+  const { id, rankPrizePool, reputationPrizePool, rankingRewards } = await getActiveSeason();
 
   const snapshot = await firestore
     .collection('gamePlay')
@@ -37,7 +37,6 @@ export const getLeaderboard = async (userId) => {
   const userPromises = docs.map((doc) => getUserDisplayInfos(doc.userId)).filter(Boolean);
   const userDatas = await Promise.all(userPromises);
   const totalActiveReputation = docs.filter(({ active }) => !!active).reduce((sum, doc) => sum + doc.networth, 0);
-  const reputationPrizePool = prizePoolConfig.allocation.reputationRewardsPercent * prizePool;
 
   // implement logic calculate reward
   return docs.map((doc, index) => ({
@@ -48,8 +47,8 @@ export const getLeaderboard = async (userId) => {
     rank: index + 1,
     networth: doc.networth,
     active: doc.active,
-    reward: calculateReward(prizePool, rankingRewards, index),
-    reputationReward: doc.active ? (doc.networth / totalActiveReputation) * reputationPrizePool : 0,
+    rankReward: calculateReward(rankPrizePool, rankingRewards, index),
+    reputationReward: (doc.networth / totalActiveReputation) * reputationPrizePool,
   }));
 };
 

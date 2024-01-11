@@ -4,10 +4,7 @@ import { getAllActiveGamePlay, getLeaderboard } from './gamePlay.service.js';
 import { firestore } from '../configs/firebase.config.js';
 import { setGameClosed, setWinner } from './worker.service.js';
 import logger from '../utils/logger.js';
-import environments from '../utils/environments.js';
 import { generateRankingRewards } from '../utils/formulas.js';
-
-const { SYSTEM_ADDRESS } = environments;
 
 export const getActiveSeasonId = async () => {
   const snapshot = await firestore.collection('system').doc('default').get();
@@ -19,11 +16,11 @@ export const getActiveSeasonId = async () => {
 export const getActiveSeason = async () => {
   const activeSeasonId = await getActiveSeasonId();
   const snapshot = await firestore.collection('season').doc(activeSeasonId).get();
-  const { prizePoolConfig, prizePool, ...rest } = snapshot.data();
+  const { prizePoolConfig, rankPrizePool, ...rest } = snapshot.data();
 
   const totalPlayers = await getAllActiveGamePlay();
-  const rankingRewards = generateRankingRewards({ totalPlayers, prizePool, prizePoolConfig });
-  return { id: snapshot.id, ...rest, prizePool, rankingRewards, prizePoolConfig };
+  const rankingRewards = generateRankingRewards({ totalPlayers, rankPrizePool, prizePoolConfig });
+  return { id: snapshot.id, ...rest, rankPrizePool, rankingRewards, prizePoolConfig };
 };
 
 const TAKE_SEASON_SNAPSHOT = 'take-season-snapshot';
@@ -48,7 +45,7 @@ const takeSeasonLeaderboardSnapshot = async () => {
     await seasonRef.update({ status: 'closed' });
     await setGameClosed(true);
 
-    const { prizePool } = await getActiveSeason();
+    const { rankPrizePool, reputationPrizePool } = await getActiveSeason();
 
     // take leaderboard snapshot
     const leaderboard = await getLeaderboard();
@@ -58,22 +55,10 @@ const takeSeasonLeaderboardSnapshot = async () => {
     const winnerAllocations = leaderboard
       .filter(({ active, reward, reputationReward }) => active && reward + reputationReward > 0)
       .map((doc, index) => {
-        const { networth, reward, reputationReward } = doc;
-        const prizeValue = reward + reputationReward;
-        const prizeShare = prizeValue / prizePool;
-        return { rank: index + 1, networth, prizeValue, prizeShare, address: userAddresses[index] };
-      });
-
-    const totalSharePaid = winnerAllocations.reduce((sum, player) => sum + player.prizeShare, 0);
-
-    // dev fee is remaining prize pool
-    const devFee = 1 - totalSharePaid;
-    if (devFee)
-      winnerAllocations.push({
-        address: SYSTEM_ADDRESS,
-        isWorker: true,
-        prizeShare: devFee,
-        prizeValue: prizePool * devFee,
+        const { networth, rankReward, reputationReward } = doc;
+        const prizeValue = rankReward + reputationReward;
+        const prizeShare = prizeValue / (rankPrizePool + reputationPrizePool);
+        return { rank: index + 1, networth, prizeValue, prizeShare, address: userAddresses[index], rankReward, reputationReward };
       });
 
     // save snapshot to firestore
