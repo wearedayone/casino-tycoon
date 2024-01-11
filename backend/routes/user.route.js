@@ -12,6 +12,7 @@ import {
   applyReferralCode,
   completeTutorial,
   getUser,
+  checkUserCode,
 } from '../controllers/user.controller.js';
 
 const router = Router();
@@ -26,5 +27,6 @@ router.get('/me/rank', auth, getRank);
 router.put('/me/last-online-time', auth, setLastOnlineTime);
 router.put('/me/tutorial', auth, completeTutorial);
 router.get('/code', getUser);
+router.put('/code', auth, checkUserCode);
 
 export default router;

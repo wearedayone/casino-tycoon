@@ -15,6 +15,7 @@ import {
   getWarHistory,
   getWarHistoryDetail,
   updateBalance,
+  checkUserCode,
 } from '../../services/user.service';
 import { claimToken } from '../../services/transaction.service';
 import {
@@ -466,6 +467,10 @@ const Game = () => {
       });
 
       gameRef.current?.events.on('request-deposit-code', () => {
+        checkUserCode().catch((err) => {
+          console.error(err);
+          Sentry.captureException(err);
+        });
         gameRef.current.events.emit('update-deposit-code', profile.code);
       });
       gameRef.current?.events.on('request-eth-balance', async () => {
@@ -1046,6 +1051,12 @@ const Game = () => {
   useEffect(() => {
     gameRef.current?.events.emit('game-sound-changed', { sound });
   }, [sound]);
+
+  useEffect(() => {
+    if (profile?.code) {
+      gameRef.current.events.emit('update-deposit-code', profile?.code);
+    }
+  }, [profile?.code]);
 
   useEffect(() => {
     if (activeSeason?.estimatedEndTime && activeSeason?.claimGapInSeconds && gamePlay?.lastClaimTime) {

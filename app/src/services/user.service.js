@@ -20,3 +20,5 @@ export const setLastOnlineTime = () => api.put('/api/v1/users/me/last-online-tim
 export const completeTutorial = () => api.put('/api/v1/users/me/tutorial');
 
 export const getByCode = (code) => api.get('/api/v1/users/code', { params: { code } });
+
+export const checkUserCode = () => api.put('/api/v1/users/code');

@@ -198,6 +198,23 @@ export const getUserByCode = async (code) => {
   return { id: user.docs[0].id, ...user.docs[0].data() };
 };
 
+export const checkCodeDuplicate = async (userId) => {
+  const user = await firestore.collection('user').doc(userId).get();
+  if (user.exists) {
+    const { code } = user.data();
+    const snapshot = await firestore.collection('user').where('code', '==', code).get();
+    if (snapshot.size) {
+      const duplicateDocs = snapshot.docs.filter((doc) => doc.id !== userId);
+      if (duplicateDocs.length) {
+        const maxCodeUser = await firestore.collection('user').orderBy('code', 'desc').limit(1).get();
+        const maxCode = maxCodeUser.docs[0]?.data()?.code;
+
+        await user.ref.update({ code: numberToCodeString(Number(maxCode) + 1) });
+      }
+    }
+  }
+};
+
 const numberToCodeString = (number) => {
   return `00000${number}`.slice(-6);
 };
