@@ -19,3 +19,5 @@ export const getOrdinalSuffix = (number) => {
 export const capitalize = (str) => {
   return str[0].toUpperCase() + str.slice(1);
 };
+
+export const toHexString = (decimalString) => `0x${(+decimalString).toString(16)}`;

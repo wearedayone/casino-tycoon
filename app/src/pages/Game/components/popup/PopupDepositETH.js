@@ -11,7 +11,7 @@ const { width, height } = configs;
 class PopupDepositETH extends Popup {
   code = '-----';
 
-  constructor(scene, parentModal) {
+  constructor(scene) {
     super(scene, 'popup-small', { title: 'Deposit ETH' });
 
     const leftMargin = this.popup.x - this.popup.width / 2;
@@ -52,7 +52,7 @@ class PopupDepositETH extends Popup {
       'button-blue-pressed',
       () => {
         this.close();
-        parentModal.open();
+        scene.popupDeposit.open();
       },
       'Back',
       { fontSize: '82px', sound: 'close' }

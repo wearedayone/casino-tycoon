@@ -1,5 +1,4 @@
 import Popup from './Popup';
-import PopupDepositETH from './PopupDepositETH';
 import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
@@ -28,10 +27,6 @@ class PopupDeposit extends Popup {
       requestEthBalance: isSimulator ? 'simulator-request-eth-balance' : 'request-eth-balance',
     };
     this.events = events;
-
-    // child modals
-    this.popupDepositETH = new PopupDepositETH(scene, this);
-    scene.add.existing(this.popupDepositETH);
 
     const leftMargin = this.popup.x - this.popup.width / 2;
     const paddedX = leftMargin + this.popup.width * 0.1;
@@ -72,11 +67,10 @@ class PopupDeposit extends Popup {
       'button-deposit-pressed',
       () => {
         this.close();
-        this.popupDepositETH.open();
+        scene.popupDepositETH?.open();
       },
-      { sound: 'open', disabledImage: 'button-deposit-disabled' }
+      { sound: 'open' }
     );
-    depositButton.setDisabledState(true);
 
     const baseName = scene.add
       .text(paddedX, baseContainerY, 'Deposit ETH, Coins or NFTs', sectionNameStyle)

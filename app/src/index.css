@@ -1,6 +1,18 @@
 /* fonts */
 @import url('https://fonts.googleapis.com/css2?family=Inknut+Antiqua:wght@300;400;500;600;700;800;900&family=Lilita+One&display=swap');
 
+@font-face {
+  font-family: WixMadeforDisplayBold;
+  font-weight: 700;
+  src: url('../public/fonts/WixMadeforDisplay-Bold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: WixMadeforDisplayExtraBold;
+  font-weight: 800;
+  src: url('../public/fonts/WixMadeforDisplay-ExtraBold.ttf') format('truetype');
+}
+
 * {
   margin: 0;
   box-sizing: border-box;

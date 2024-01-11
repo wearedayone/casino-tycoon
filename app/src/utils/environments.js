@@ -12,6 +12,8 @@ const environments = {
   GAME_VERSION: process.env.REACT_APP_GAME_VERSION,
   ENVIRONMENT: process.env.REACT_APP_ENVIRONMENT,
   SENTRY_DSN: process.env.REACT_APP_SENTRY_DSN,
+  LAYER_1_NETWORK_ID: process.env.REACT_APP_LAYER_1_NETWORK_ID,
+  DEPOSIT_LAYER_1_ADDRESS: process.env.REACT_APP_DEPOSIT_LAYER_1_ADDRESS,
 };
 
 export default environments;
