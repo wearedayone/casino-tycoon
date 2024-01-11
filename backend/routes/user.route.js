@@ -11,6 +11,7 @@ import {
   setLastOnlineTime,
   applyReferralCode,
   completeTutorial,
+  getUser,
 } from '../controllers/user.controller.js';
 
 const router = Router();
@@ -24,5 +25,6 @@ router.put('/me/balances', auth, updateBalance);
 router.get('/me/rank', auth, getRank);
 router.put('/me/last-online-time', auth, setLastOnlineTime);
 router.put('/me/tutorial', auth, completeTutorial);
+router.get('/code', getUser);
 
 export default router;

@@ -20,6 +20,7 @@ import Animation from '../components/common/Animation';
 import PopupStatistic from '../components/popup/PopupStatistic';
 import PopupLeaderboard from '../components/popup/PopupLeaderboard';
 import PopupDeposit from '../components/popup/PopupDeposit';
+import PopupDepositETH from '../components/popup/PopupDepositETH';
 import PopupReferralProgram from '../components/popup/PopupReferralProgram';
 import PopupPrizePool from '../components/popup/PopupPrizePool';
 import PopupRetire from '../components/popup/PopupRetire';
@@ -75,6 +76,9 @@ class MainScene extends Phaser.Scene {
 
     const gangsterHouse = new GangsterHouse(this, 2200);
     this.add.existing(gangsterHouse);
+
+    this.popupDepositETH = new PopupDepositETH(this);
+    this.add.existing(this.popupDepositETH);
 
     this.popupDeposit = new PopupDeposit(this);
     this.add.existing(this.popupDeposit);

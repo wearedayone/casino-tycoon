@@ -61,6 +61,9 @@ export const createUserIfNotExist = async (userId) => {
       }
     }
 
+    const numberOfUserSnapshot = await firestore.collection('user').count().get();
+    const numberOfUsers = numberOfUserSnapshot.data().count;
+
     await firestore
       .collection('user')
       .doc(userId)
@@ -75,6 +78,7 @@ export const createUserIfNotExist = async (userId) => {
         referralCode,
         referralTotalReward: 0,
         referralTotalDiscount: 0,
+        code: numberToCodeString(numberOfUsers + 1),
       });
   } else {
     const { wallet } = user;
@@ -185,4 +189,15 @@ export const getUserUsernames = async (userIds) => {
 
 export const updateViewedTutorial = async (userId) => {
   await firestore.collection('user').doc(userId).update({ completedTutorial: true });
+};
+
+export const getUserByCode = async (code) => {
+  const user = await firestore.collection('user').where('code', '==', code).limit(1).get();
+  if (user.empty) return null;
+
+  return { id: user.docs[0].id, ...user.docs[0].data() };
+};
+
+const numberToCodeString = (number) => {
+  return `00000${number}`.slice(-6);
 };

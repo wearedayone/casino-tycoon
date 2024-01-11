@@ -73,7 +73,7 @@ const createTransaction = async ({ address, ...data }) => {
   }
 };
 
-const sendETHToUserWalletLayer2 = async ({ receiver, amount }) => {
+const sendETHToUserWalletLayer2 = async ({ receiver, amount, txnHashL1 }) => {
   const depositSystemWallet = await getDepositSystemWallet();
   const depositLayerL2Contract = new Contract(DEPOSIT_LAYER_2_ADDRESS, depositLayerL2.abi, depositSystemWallet);
 

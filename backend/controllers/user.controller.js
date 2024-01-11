@@ -6,6 +6,7 @@ import {
   updateLastOnlineTime,
   applyInviteCode,
   updateViewedTutorial,
+  getUserByCode,
 } from '../services/user.service.js';
 import { getWarHistory, getWarHistoryDetail } from '../services/warSnapshot.service.js';
 
@@ -96,6 +97,16 @@ export const completeTutorial = async (req, res) => {
     return res.sendStatus(200);
   } catch (err) {
     console.error(err);
+    return res.status(400).send(err);
+  }
+};
+
+export const getUser = async (req, res) => {
+  try {
+    const result = await getUserByCode(req.query?.code || '');
+    return res.status(200).send(result);
+  } catch (err) {
+    console.log({ err });
     return res.status(400).send(err);
   }
 };
