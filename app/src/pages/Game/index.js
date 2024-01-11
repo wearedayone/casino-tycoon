@@ -466,7 +466,7 @@ const Game = () => {
       });
 
       gameRef.current?.events.on('request-deposit-code', () => {
-        gameRef.current.events.emit('update-deposit-code', '683382');
+        gameRef.current.events.emit('update-deposit-code', profile.code);
       });
       gameRef.current?.events.on('request-eth-balance', async () => {
         const newBalance = await getETHBalance(address);
