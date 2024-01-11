@@ -9,6 +9,7 @@ import { getActiveSeason, getActiveSeasonId } from './season.service.js';
 import { initTransaction, validateNonWeb3Transaction } from './transaction.service.js';
 import environments from '../utils/environments.js';
 import { calculateReward, generateCode } from '../utils/formulas.js';
+import { getLeaderboard } from './gamePlay.service.js';
 
 const { NETWORK_ID } = environments;
 const CODE_LENGTH = 10;
@@ -134,19 +135,12 @@ export const updateBalance = async (userId) => {
 // TODO: might need update flow to store leaderboard
 // in another collection for easier query and snapshot listen
 export const getUserRankAndReward = async (userId) => {
-  const activeSeason = await getActiveSeason();
+  const leaderboard = await getLeaderboard(userId);
 
-  const gamePlaySnapshot = await firestore
-    .collection('gamePlay')
-    .where('seasonId', '==', activeSeason.id)
-    .orderBy('networth', 'desc')
-    .orderBy('createdAt', 'asc')
-    .get();
-
-  const rankIndex = gamePlaySnapshot.docs.findIndex((item) => item.data().userId === userId);
-  if (rankIndex !== -1) {
-    const reward = calculateReward(activeSeason.prizePool, activeSeason.rankingRewards, rankIndex);
-    return { rank: rankIndex + 1, reward, totalPlayers: gamePlaySnapshot.docs.length };
+  const user = leaderboard.find((item) => item.isUser);
+  if (user) {
+    const { rank, rankReward, reputationReward } = user;
+    return { rank, reward: rankReward + reputationReward, totalPlayers: leaderboard.length };
   }
 
   return null;

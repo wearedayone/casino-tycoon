@@ -62,7 +62,7 @@ export const calculateReservePoolBonus = (reservePool, reservePoolReward, quanti
   return (reservePool * percentage) / 100;
 };
 
-export const calculateReward = (prizePool, rankingRewards, rankIndex) => {
+export const calculateReward = (rankPrizePool, rankingRewards, rankIndex) => {
   // check ranking rewards
   const totalPercentages = rankingRewards.reduce(
     (total, rankingReward) => total + rankingReward.share * (rankingReward.rankEnd - rankingReward.rankStart + 1),
@@ -74,17 +74,11 @@ export const calculateReward = (prizePool, rankingRewards, rankIndex) => {
   const rankingReward = rankingRewards.find((item) => item.rankStart <= rank && rank <= item.rankEnd);
   if (!rankingReward) return 0;
 
-  return prizePool * rankingReward.share;
+  return rankPrizePool * rankingReward.share;
 };
 
-export const generateRankingRewards = ({ totalPlayers, prizePool, prizePoolConfig }) => {
+export const generateRankingRewards = ({ totalPlayers, rankPrizePool, prizePoolConfig }) => {
   const {
-    allocation: {
-      devFeePercent,
-      burnPercent,
-      reputationRewardsPercent,
-      // rank rankingRewards is the remaining
-    },
     rewardScalingRatio,
     higherRanksCutoffPercent,
     lowerRanksCutoffPercent,
@@ -94,13 +88,11 @@ export const generateRankingRewards = ({ totalPlayers, prizePool, prizePoolConfi
   const totalPaidPlayersCount = Math.round(lowerRanksCutoffPercent * totalPlayers);
   const higherRanksPlayersCount = Math.round(higherRanksCutoffPercent * totalPlayers);
   const lowerRanksPlayersCount = totalPaidPlayersCount - higherRanksPlayersCount;
-  const minRewardPercentHigherRanks = minRewardHigherRanks / prizePool;
-  const minRewardPercentLowerRanks = minRewardLowerRanks / prizePool;
+  const minRewardPercentHigherRanks = minRewardHigherRanks / rankPrizePool;
+  const minRewardPercentLowerRanks = minRewardLowerRanks / rankPrizePool;
 
-  const rankPoolPercent = 1 - (devFeePercent + burnPercent + reputationRewardsPercent);
   const remainingRankPoolPercent =
-    rankPoolPercent -
-    (minRewardPercentHigherRanks * higherRanksPlayersCount + minRewardPercentLowerRanks * lowerRanksPlayersCount);
+    1 - (minRewardPercentHigherRanks * higherRanksPlayersCount + minRewardPercentLowerRanks * lowerRanksPlayersCount);
 
   let totalExtraRewardWeight = 0;
   let rankingRewards = [];
@@ -117,7 +109,7 @@ export const generateRankingRewards = ({ totalPlayers, prizePool, prizePoolConfi
     const extraRewardPercent = (player.extraRewardWeight / totalExtraRewardWeight) * remainingRankPoolPercent;
 
     player.share = minRewardPercent + extraRewardPercent;
-    player.prizeValue = prizePool * player.share;
+    player.prizeValue = rankPrizePool * player.share;
     delete player.extraRewardWeight;
   }
 

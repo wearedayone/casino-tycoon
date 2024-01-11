@@ -57,8 +57,7 @@ class PopupPrizePool extends Popup {
     this.add(this.buttonBack);
 
     scene.game.events.on(events.updateRankingRewards, ({ prizePoolConfig }) => {
-      const { devFeePercent, burnPercent, reputationRewardsPercent } = prizePoolConfig.allocation;
-      const rankRewardsPercent = 1 - (devFeePercent + burnPercent + reputationRewardsPercent);
+      const { rankRewardsPercent } = prizePoolConfig;
       this.allocation.text = `${rankRewardsPercent * 100}% of ETH from buying\nGangsters goes into Prize Pool`;
       this.rankRewardsPercent.text = `Top ${
         prizePoolConfig.lowerRanksCutoffPercent * 100

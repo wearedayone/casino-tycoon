@@ -163,6 +163,8 @@ const Game = () => {
     houseLevels,
     prizePoolConfig,
   } = activeSeason || {
+    rankPrizePool: 0,
+    reputationPrizePool: 0,
     machine: { dailyReward: 0, basePrice: 0, whitelistPrice: 0, networth: 0 },
     worker: { basePrice: 0, targetDailyPurchase: 1, targetPrice: 0, dailyReward: 0, networth: 0 },
     building: { basePrice: 0, targetDailyPurchase: 1, targetPrice: 0, dailyReward: 0, networth: 0 },
@@ -173,13 +175,8 @@ const Game = () => {
     reservePoolReward: 0,
     houseLevels: [],
     prizePoolConfig: {
-      allocation: {
-        devFeePercent: 0,
-        burnPercent: 0,
-        reputationRewardsPercent: 0,
-        // rank rewards is the remaining
-      },
       // rank leaderboard
+      rankRewardsPercent: 0,
       lowerRanksCutoffPercent: 0,
       // reputation leaderboard
       earlyRetirementTax: 0,
@@ -375,8 +372,8 @@ const Game = () => {
 
   useEffect(() => {
     if (rankData && rankData.data) {
-      const { rank, reward } = rankData.data;
-      gameRef.current?.events.emit('update-rank', { rank, reward });
+      const { rank } = rankData.data;
+      gameRef.current?.events.emit('update-rank', { rank });
     }
   }, [rankData]);
 
@@ -462,11 +459,11 @@ const Game = () => {
       });
       gameRef.current?.events.on('open-leaderboard-modal', () => {
         setLeaderboardModalOpen(true);
-        const { name, timeStepInHours, prizePool } = activeSeason || {};
+        const { name, timeStepInHours, rankPrizePool, reputationPrizePool } = activeSeason || {};
         gameRef.current.events.emit('update-season', {
           name,
           timeStepInHours,
-          prizePool,
+          prizePool: rankPrizePool + reputationPrizePool,
           isEnded,
         });
       });
@@ -518,7 +515,7 @@ const Game = () => {
 
       gameRef.current?.events.on('request-rank', () => {
         getRank()
-          .then((res) => gameRef.current.events.emit('update-rank', { rank: res.data.rank, reward: res.data.reward }))
+          .then((res) => gameRef.current.events.emit('update-rank', { rank: res.data.rank }))
           .catch((err) => {
             console.error(err);
             Sentry.captureException(err);
@@ -802,7 +799,7 @@ const Game = () => {
 
       gameRef.current?.events.on('request-portfolio', () => {
         getRank().then((res) => {
-          const { rank, reward: rankReward } = res.data;
+          const { reward: rankReward } = res.data;
           const tokenValue = tokenBalance * parseFloat(tokenPrice); // TODO: update formulas to calculate token value
           const machineValue = numberOfMachines * parseFloat(nftPrice); // TODO: update formulas to calculate machine value
           const totalBalance = parseFloat(ETHBalance) + tokenValue + machineValue + rankReward;
@@ -1044,11 +1041,11 @@ const Game = () => {
 
   useEffect(() => {
     if (isLeaderboardModalOpen) {
-      const { name, timeStepInHours, prizePool } = activeSeason || {};
+      const { name, timeStepInHours, rankPrizePool, reputationPrizePool } = activeSeason || {};
       gameRef.current?.events.emit('update-season', {
         name,
         timeStepInHours,
-        prizePool,
+        prizePool: rankPrizePool + reputationPrizePool,
         isEnded,
       });
     }
@@ -1056,7 +1053,8 @@ const Game = () => {
     isLeaderboardModalOpen,
     activeSeason?.name,
     activeSeason?.timeStepInHours,
-    activeSeason?.prizePool,
+    activeSeason?.rankPrizePool,
+    activeSeason?.reputationPrizePool,
     machine.networth,
     isEnded,
   ]);

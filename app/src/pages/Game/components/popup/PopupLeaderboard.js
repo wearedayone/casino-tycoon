@@ -309,7 +309,7 @@ class PopupLeaderboard extends Popup {
     this.rankNumbers.text = leaderboard.map(({ rank }) => rank).join('\n\n');
     this.usernames.text = leaderboard.map(formatUsername).join('\n\n');
     this.networths.text = leaderboard.map(({ networth }) => networth).join('\n\n');
-    this.rankingRewardsString = leaderboard.map(({ reward }) => `~${formatter.format(reward)}`).join('\n\n');
+    this.rankingRewardsString = leaderboard.map(({ rankReward }) => `~${formatter.format(rankReward)}`).join('\n\n');
     this.reputationRewardsString = leaderboard
       .map(({ reputationReward }) => `~${formatter.format(reputationReward)}`)
       .join('\n\n');
@@ -317,13 +317,13 @@ class PopupLeaderboard extends Popup {
     this.ethRewards.text = isRankingMode ? this.rankingRewardsString : this.reputationRewardsString;
 
     const userRecord = leaderboard.find(({ isUser }) => isUser);
-    this.userRankingReward = userRecord.reward;
+    this.userRankingReward = userRecord.rankReward;
     this.userReputationReward = userRecord.reputationReward;
     this.playerRank.text = userRecord.rank.toLocaleString();
     this.playerNetworth.text = userRecord.networth;
     this.playerReward.text = `~${formatter.format(isRankingMode ? this.userRankingReward : this.userReputationReward)}`;
     this.finishedAt.text = `${userRecord.rank.toLocaleString()}${getOrdinalSuffix(userRecord.rank)} place`;
-    this.finishedReward.text = formatter.format(userRecord.reward);
+    this.finishedReward.text = formatter.format(userRecord.rankReward);
 
     if (this.numberOfRows === leaderboard.length) return;
     this.numberOfRows = leaderboard.length;
