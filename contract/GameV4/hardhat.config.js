@@ -32,17 +32,17 @@ module.exports = {
     //   url: secrets.sepolia_url || ``,
     //   accounts: [secrets.sepolia_key],
     // },
-    // base_goerli: {
-    //   url: secrets.base_goerli_url || ``,
-    //   accounts: [secrets.base_goerli_key],
-    //   gasPrice: 1000000000,
-    //   verify: {
-    //     etherscan: {
-    //       apiUrl: 'https://api-goerli.basescan.org',
-    //       apiKey: process.env.ETHERSCAN_API_KEY ?? 'ETHERSCAN_API_KEY',
-    //     },
-    //   },
-    // },
+    base_goerli: {
+      url: secrets.base_goerli_url || ``,
+      accounts: [secrets.base_goerli_key],
+      gasPrice: 1000000000,
+      verify: {
+        etherscan: {
+          apiUrl: 'https://api-goerli.basescan.org',
+          apiKey: process.env.ETHERSCAN_API_KEY ?? 'ETHERSCAN_API_KEY',
+        },
+      },
+    },
     // base_mainnet: {
     //   url: secrets.base_mainnet_url || ``,
     //   accounts: [secrets.base_mainnet_key],

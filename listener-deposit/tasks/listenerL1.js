@@ -1,5 +1,7 @@
 import { Contract } from '@ethersproject/contracts';
 import { Wallet } from '@ethersproject/wallet';
+import { formatEther } from '@ethersproject/units';
+import moment from 'moment';
 
 import depositLayerL1 from '../assets/abis/DepositLayerL1.json' assert { type: 'json' };
 import depositLayerL2 from '../assets/abis/DepositLayerL2.json' assert { type: 'json' };
@@ -9,8 +11,14 @@ import logger from '../utils/logger.js';
 import { DepositEvent } from '../utils/constants.js';
 import environments from '../utils/environments.js';
 
-const { NETWORK_ID_LAYER_1, DEPOSIT_LAYER_1_ADDRESS, DEPOSIT_LAYER_2_ADDRESS, DEPOSIT_SYSTEM_WALLET_PRIVATE_KEY } =
-  environments;
+const {
+  NETWORK_ID_LAYER_1,
+  DEPOSIT_LAYER_1_ADDRESS,
+  DEPOSIT_LAYER_2_ADDRESS,
+  DEPOSIT_SYSTEM_WALLET_PRIVATE_KEY,
+  ADMIN_EMAIL,
+  EMAIL_NOTIFICATION_RECEIVER,
+} = environments;
 
 const listenerL1 = async () => {
   logger.info(`Start listen contract ${DEPOSIT_LAYER_1_ADDRESS} on Network ${NETWORK_ID_LAYER_1}`);
@@ -77,7 +85,53 @@ const sendETHToUserWalletLayer2 = async ({ receiver, amount, txnHashL1 }) => {
   const depositSystemWallet = await getDepositSystemWallet();
   const depositLayerL2Contract = new Contract(DEPOSIT_LAYER_2_ADDRESS, depositLayerL2.abi, depositSystemWallet);
 
-  await depositLayerL2Contract.approveDepositProposal(receiver, txnHashL1, { value: amount });
+  const tx = await depositLayerL2Contract.approveDepositProposal(receiver, txnHashL1, { value: amount });
+  const receipt = await tx.wait();
+  console.log('receipt', receipt.status, receipt);
+  if (receipt.status !== 1) {
+    const userSnapshot = await firestore
+      .collection('user')
+      .where('address', '==', receiver.toLowerCase())
+      .limit(1)
+      .get();
+    if (userSnapshot.empty) return;
+
+    const transactionSnapshot = await firestore
+      .collection('transaction')
+      .where('userId', '==', userSnapshot.docs[0].id)
+      .where('txnHashL1', '==', txnHashL1)
+      .limit(1)
+      .get();
+
+    if (!transactionSnapshot.empty) {
+      const doc = transactionSnapshot.docs[0];
+      await doc.ref.update({
+        txnHashL2: tx.hash,
+        status: 'Failed',
+      });
+
+      await admin
+        .firestore()
+        .collection('email')
+        .add({
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          status: 'Pending',
+          from: `GangsterArena <${ADMIN_EMAIL}>`,
+          to: EMAIL_NOTIFICATION_RECEIVER,
+          subject: 'Deposit bridge error',
+          template: 'deposit-error',
+          variables: {
+            userId: userSnapshot.docs[0].id,
+            username: userSnapshot.docs[0].data().username,
+            amount: formatEther(amount),
+            txnHashL1,
+            txnHashL2: tx.hash,
+            createdAt: moment(doc.data().createdAt.toDate()).format('DD/MM/YYYY HH:mm:ss'),
+            receipt: JSON.stringify(receipt),
+          },
+        });
+    }
+  }
 };
 
 const getDepositSystemWallet = async () => {
