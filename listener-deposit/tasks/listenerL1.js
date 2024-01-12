@@ -54,7 +54,7 @@ const processDepositProposalCreatedEvent = async ({ receiver, amount, event, con
       type: 'L1-deposit',
       txnHashL1: transactionHash,
       token: 'ETH',
-      amount: Number(amount.toString()),
+      amount: Number(formatEther(amount)),
       status: 'Pending',
       value: 0,
     });
