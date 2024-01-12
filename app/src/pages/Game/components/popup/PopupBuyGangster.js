@@ -29,6 +29,7 @@ class PopupBuyGangster extends Popup {
   balance = 0;
   basePrice = 0;
   whitelistPrice = 0;
+  daysElapsed = 0;
   quantity = DEFAULT_QUANTITY;
   maxQuantity = MAX_QUANTITY;
   isWhitelisted = false;
@@ -46,6 +47,8 @@ class PopupBuyGangster extends Popup {
       gameEnded: isSimulator ? 'simulator-game-ended' : 'game-ended',
       updateMachines: isSimulator ? 'simulator-update-machines' : 'update-machines',
       requestMachines: isSimulator ? 'simulator-request-machines' : 'request-machines',
+      updateBuyBonus: isSimulator ? 'simulator-update-buy-bonus' : 'update-buy-bonus',
+      requestBuyBonus: isSimulator ? 'simulator-request-buy-bonus' : 'request-buy-bonus',
     };
     this.onCompleted = onCompleted;
     this.isSimulator = isSimulator;
@@ -276,6 +279,10 @@ class PopupBuyGangster extends Popup {
     scene.game.events.on(events.gameEnded, () => {
       this.upgradeBtn.setDisabledState(true);
     });
+    scene.game.events.on(events.updateBuyBonus, ({ daysElapsed }) => {
+      this.daysElapsed = daysElapsed;
+      this.updateValues();
+    });
     scene.game.events.on(
       events.updateMachines,
       ({
@@ -320,6 +327,7 @@ class PopupBuyGangster extends Popup {
     );
 
     scene.game.events.emit(events.requestMachines);
+    scene.game.events.emit(events.requestBuyBonus);
     scene.game.events.emit('request-gas-mint');
   }
 
@@ -342,8 +350,7 @@ class PopupBuyGangster extends Popup {
     const roi = estimatedPrice
       ? (((this.rateIncrease * this.quantity * this.tokenPrice) / estimatedPrice) * 100).toFixed(1)
       : 0;
-    const remainingReservePercent = Math.pow(1 - this.reservePoolReward, this.quantity);
-    const bonus = this.reservePool * (1 - remainingReservePercent);
+    const bonus = this.daysElapsed * this.rateIncrease * this.quantity;
 
     this.quantityText.text = `${this.quantity}`;
     this.roiText.text = `${roi}%`;

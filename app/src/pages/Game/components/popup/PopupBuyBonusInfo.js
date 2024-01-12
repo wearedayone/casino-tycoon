@@ -12,35 +12,39 @@ class PopupBuyBonusInfo extends Popup {
     super(scene, 'popup-small', { title: 'Buy Bonus', titleIcon: 'icon-info' });
 
     const events = {
-      updateReservePool: isSimulator ? 'simulator-update-reserve-pool' : 'update-reserve-pool',
-      requestReservePool: isSimulator ? 'simulator-request-reserve-pool' : 'request-reserve-pool',
+      updateBuyBonus: isSimulator ? 'simulator-update-buy-bonus' : 'update-buy-bonus',
+      requestBuyBonus: isSimulator ? 'simulator-request-buy-bonus' : 'request-buy-bonus',
     };
+
+    this.events = events;
 
     const leftMargin = this.popup.x - this.popup.width / 2;
     this.paddedX = leftMargin + this.popup.width * 0.1;
     const startingY = this.popup.y - this.popup.height / 2;
-    const firstParagraphY = startingY + 220;
+    const firstParagraphY = startingY + 320;
     const secondParagraphY = firstParagraphY + 400;
 
-    this.reservePoolHidden = scene.add.text(this.paddedX, secondParagraphY, '---', largeBlackBold).setVisible(false);
+    this.bonusAmountHidden = scene.add.text(this.paddedX, secondParagraphY, '---', largeBlackBold).setVisible(false);
+    const staticCoin = scene.add.image(width / 2 - 120, firstParagraphY, 'coin2').setOrigin(0.5, 0);
     this.coinIcon = scene.add
-      .image(width / 2 + this.reservePoolHidden.width + 80, secondParagraphY, 'coin')
+      .image(width / 2 + this.bonusAmountHidden.width + 20, secondParagraphY, 'coin2')
       .setOrigin(0.5, 0);
-    this.reservePool = scene.add.text(
-      this.paddedX,
-      secondParagraphY,
-      'There is currently ---         \n$FIAT in the reserve pool, which \nwill increase with every Goon \nand Safehouse purchase',
-      largeBlackBold
-    );
-    this.bonusPercent = scene.add.text(
+    this.staticText = scene.add.text(
       this.paddedX,
       firstParagraphY,
-      'Players receive -% of the reserve \npool as a bonus for buying 1\nGangster.',
+      'Get bonus         $FIAT as if you\nbought Gangsters at game launch',
       largeBlackBold
     );
-    this.add(this.reservePool);
+    this.bonusAmount = scene.add.text(
+      this.paddedX,
+      secondParagraphY,
+      'Current bonus: ---         $FIAT',
+      largeBlackBold
+    );
+    this.add(this.staticText);
+    this.add(staticCoin);
     this.add(this.coinIcon);
-    this.add(this.bonusPercent);
+    this.add(this.bonusAmount);
 
     this.buttonBack = new TextButton(
       scene,
@@ -57,19 +61,20 @@ class PopupBuyBonusInfo extends Popup {
     );
     this.add(this.buttonBack);
 
-    scene.game.events.on(events.updateReservePool, (data) => this.updateData(data));
-    scene.game.events.emit(events.requestReservePool);
+    scene.game.events.on(events.updateBuyBonus, (data) => this.updateData(data));
   }
 
-  updateData({ reservePool, reservePoolReward }) {
-    const amount = formatter.format(reservePool);
-    this.reservePoolHidden.text = amount;
-    this.reservePool.text = `There is currently ${amount}         \n$FIAT in the reserve pool, which \nwill increase with every Goon \nand Safehouse purchase.`;
-    this.bonusPercent.text = `Players receive ${
-      reservePoolReward * 100
-    }% of the reserve\npool as a bonus for buying 1\nGangster.`;
+  onOpen() {
+    this.scene.game.events.emit(this.events.requestBuyBonus);
+  }
 
-    this.coinIcon.setX(width / 2 + this.reservePoolHidden.width + 80);
+  updateData({ daysElapsed, gangsterDailyReward }) {
+    const amount = formatter.format(daysElapsed * gangsterDailyReward);
+    console.log({ daysElapsed, gangsterDailyReward, amount });
+    this.bonusAmountHidden.text = amount;
+    this.bonusAmount.text = `Current bonus: ${amount}         $FIAT`;
+
+    this.coinIcon.setX(width / 2 + this.bonusAmountHidden.width + 20);
   }
 }
 
