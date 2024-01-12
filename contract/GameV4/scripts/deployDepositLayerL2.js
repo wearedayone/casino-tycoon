@@ -2,10 +2,11 @@ const fs = require('fs');
 const { ethers } = require('hardhat');
 
 async function main() {
-  const adminWallet = '29d2bf86f2d42bd92f45663619ffe26f4ae6c4eade595d58327bfdf37bbe729c';
+  const adminWallet = '0xd88A3D28c2a04b39A6c6521F8D8037C3c3B5e96c';
 
   const depositLayerL2Contract = await ethers.getContractFactory('DepositLayerL2');
   const depositLayerL2 = await depositLayerL2Contract.deploy(adminWallet);
+
   const depositLayerL2Address = await depositLayerL2.getAddress();
   console.log(`depositLayerL2 is deployed to ${depositLayerL2Address}`);
   console.log(
