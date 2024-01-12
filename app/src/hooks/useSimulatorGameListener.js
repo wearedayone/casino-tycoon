@@ -105,12 +105,9 @@ const useSimulatorGameListener = () => {
       game.events.emit('simulator-update-ranking-rewards', { prizePoolConfig: activeSeason?.prizePoolConfig });
     });
 
-    game.events.on('simulator-request-reserve-pool', () => {
-      game.events.emit('simulator-update-reserve-pool', {
-        reservePool: activeSeason?.reservePool || 0,
-        reservePoolReward: activeSeason?.reservePoolReward || 0,
-      });
-    });
+    // game.events.on('simulator-request-buy-bonus', () => {
+    //   game.events.emit('simulator-update-buy-bonus', {});
+    // });
 
     game.events.on('simulator-request-balances', () => {
       game.events.emit('simulator-update-balances', balances);
@@ -386,7 +383,7 @@ const useSimulatorGameListener = () => {
 
   useEffect(() => {
     if (gameRef) {
-      gameRef.events.emit('simulator-update-reserve-pool', {
+      gameRef.events.emit('simulator-update-buy-bonus', {
         reservePool: activeSeason?.reservePool || 0,
         reservePoolReward: activeSeason?.reservePoolReward || 0,
       });

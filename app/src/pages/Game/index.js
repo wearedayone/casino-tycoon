@@ -343,6 +343,15 @@ const Game = () => {
     gameRef.current?.events.emit('claimable-reward-added');
   };
 
+  const calculateBuyBonusRef = useRef();
+  calculateBuyBonusRef.current = () => {
+    if (!activeSeason?.startTime) return;
+    gameRef.current?.events.emit('update-buy-bonus', {
+      daysElapsed: (Date.now() - (activeSeason?.startTime.toDate().getTime() || Date.now())) / MILISECONDS_IN_A_DAY,
+      gangsterDailyReward: machine.dailyReward,
+    });
+  };
+
   const checkGameEndRef = useRef();
   checkGameEndRef.current = () => {
     if (!activeSeason) return;
@@ -529,6 +538,7 @@ const Game = () => {
       });
 
       gameRef.current?.events.on('request-claimable-reward', () => calculateClaimableRewardRef.current?.());
+      gameRef.current?.events.on('request-buy-bonus', () => calculateBuyBonusRef.current?.());
       gameRef.current?.events.on('check-game-ended', () => checkGameEndRef.current?.());
 
       gameRef.current?.events.on('request-claimable-status', () => {
@@ -744,10 +754,6 @@ const Game = () => {
             code: errorCode,
           });
         }
-      });
-
-      gameRef.current?.events.on('request-reserve-pool', () => {
-        gameRef.current?.events.emit('update-reserve-pool', { reservePool, reservePoolReward });
       });
 
       gameRef.current?.events.on('request-workers', () => {
@@ -1099,10 +1105,6 @@ const Game = () => {
       networthIncrease: building.networth,
     });
   }, [numberOfBuildings, networth, tokenBalance, building, buildingSold]);
-
-  useEffect(() => {
-    gameRef.current?.events.emit('update-reserve-pool', { reservePool, reservePoolReward });
-  }, [reservePool, reservePoolReward]);
 
   useEffect(() => {
     gameRef.current?.events.emit('update-workers', {
