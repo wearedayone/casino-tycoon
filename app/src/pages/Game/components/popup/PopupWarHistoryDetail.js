@@ -91,7 +91,7 @@ class PopupWarHistoryDetail extends Popup {
     } = this.data;
 
     let y = 80;
-    const earnIcon = this.scene.add.image(this.popup.width * 0.2, y, 'coin4').setOrigin(0, 0.5);
+    const earnIcon = this.scene.add.image(this.popup.width * 0.2, y, 'coin2').setOrigin(0, 0.5);
     const earnTitle = this.scene.add
       .text(this.popup.width * 0.2 + earnIcon.width / 2 + 50, y, 'Earn Details', {
         fontSize: fontSizes.large,
@@ -104,7 +104,7 @@ class PopupWarHistoryDetail extends Popup {
     const earnItemContainer = this.scene.add
       .image(this.popup.width / 2 - 90, y, 'container-border')
       .setOrigin(0.5, 0.5);
-    const earnItemIcon = this.scene.add.image(this.popup.width * 0.13, y, 'coin4').setOrigin(0.5, 0.5);
+    const earnItemIcon = this.scene.add.image(this.popup.width * 0.13, y, 'coin2').setOrigin(0.5, 0.5);
     const earnItemText = this.scene.add
       .text(
         this.popup.width * 0.13 + earnItemIcon.width / 2 + 30,
@@ -159,7 +159,7 @@ class PopupWarHistoryDetail extends Popup {
     const tokenStolenItemContainer = this.scene.add
       .image(this.popup.width / 2 - 90, y, 'container-border')
       .setOrigin(0.5, 0.5);
-    const tokenStolenItemIcon = this.scene.add.image(this.popup.width * 0.13, y, 'coin4').setOrigin(0.5, 0.5);
+    const tokenStolenItemIcon = this.scene.add.image(this.popup.width * 0.13, y, 'coin2').setOrigin(0.5, 0.5);
     const tokenStolenItemText = this.scene.add
       .text(this.popup.width * 0.13 + tokenStolenItemIcon.width / 2 + 30, y, `$FIAT Lost: ${tokenStolen || 0}`, {
         fontSize: '50px',
@@ -326,7 +326,7 @@ class PopupWarHistoryDetail extends Popup {
       .image(this.popup.width / 2 - 90, y, 'container-border')
       .setOrigin(0.5, 0.5);
     const tokenEarnedFromAttackingItemIcon = this.scene.add
-      .image(this.popup.width * 0.13, y, 'coin4')
+      .image(this.popup.width * 0.13, y, 'coin2')
       .setOrigin(0.5, 0.5);
     const tokenEarnedFromAttackingItemText = this.scene.add
       .text(
