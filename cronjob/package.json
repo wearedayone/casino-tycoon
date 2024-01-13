@@ -17,6 +17,7 @@
     "ethers": "^6.9.0",
     "firebase-admin": "^12.0.0",
     "jsbi": "^3.2.5",
+    "moment": "^2.30.1",
     "node-cron": "^3.0.3"
   }
 }
