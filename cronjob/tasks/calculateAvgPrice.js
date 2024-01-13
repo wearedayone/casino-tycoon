@@ -30,14 +30,14 @@ const calculateAvgPrice = async () => {
     await firestore
       .collection('season')
       .doc(activeSeasonId)
-      .collection('worker-prices')
+      .collection('worker-price')
       .doc(today)
       .set({ date, value: avgWorkerPrice, createdAt: admin.firestore.FieldValue.serverTimestamp() });
   } else {
     await firestore
       .collection('season')
       .doc(activeSeasonId)
-      .collection('worker-prices')
+      .collection('worker-price')
       .doc(today)
       .set({ date, value: 0, createdAt: admin.firestore.FieldValue.serverTimestamp() });
   }
@@ -59,14 +59,14 @@ const calculateAvgPrice = async () => {
     await firestore
       .collection('season')
       .doc(activeSeasonId)
-      .collection('building-prices')
+      .collection('building-price')
       .doc(today)
       .set({ date, value: avgBuildingPrice, createdAt: admin.firestore.FieldValue.serverTimestamp() });
   } else {
     await firestore
       .collection('season')
       .doc(activeSeasonId)
-      .collection('building-prices')
+      .collection('building-price')
       .doc(today)
       .set({ date, value: 0, createdAt: admin.firestore.FieldValue.serverTimestamp() });
   }
