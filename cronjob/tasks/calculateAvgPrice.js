@@ -10,14 +10,8 @@ const calculateAvgPrice = async () => {
   const today = now.subtract(1, 'day').format('DD-MM-YYYY');
   const date = now.subtract(1, 'day').format('DD/MM');
 
-  console.log({
-    now,
-    today,
-    startTime,
-    endTime,
-    startDate: new Date(startTime),
-    endDate: new Date(endTime),
-  });
+  const configs = await firestore.collection('system').doc('default').get();
+  const { activeSeasonId } = configs.data();
 
   const workerTxns = await firestore
     .collection('transaction')
@@ -34,11 +28,15 @@ const calculateAvgPrice = async () => {
     const totalWorkerPrices = allWorkerPrices.reduce((total, price) => total + price, 0);
     const avgWorkerPrice = Number((totalWorkerPrices / allWorkerPrices.length).toFixed(1));
     await firestore
+      .collection('season')
+      .doc(activeSeasonId)
       .collection('worker-prices')
       .doc(today)
       .set({ date, value: avgWorkerPrice, createdAt: admin.firestore.FieldValue.serverTimestamp() });
   } else {
     await firestore
+      .collection('season')
+      .doc(activeSeasonId)
       .collection('worker-prices')
       .doc(today)
       .set({ date, value: 0, createdAt: admin.firestore.FieldValue.serverTimestamp() });
@@ -59,11 +57,15 @@ const calculateAvgPrice = async () => {
     const totalBuildingPrices = allBuildingPrices.reduce((total, price) => total + price, 0);
     const avgBuildingPrice = Number((totalBuildingPrices / allBuildingPrices.length).toFixed(1));
     await firestore
+      .collection('season')
+      .doc(activeSeasonId)
       .collection('building-prices')
       .doc(today)
       .set({ date, value: avgBuildingPrice, createdAt: admin.firestore.FieldValue.serverTimestamp() });
   } else {
     await firestore
+      .collection('season')
+      .doc(activeSeasonId)
       .collection('building-prices')
       .doc(today)
       .set({ date, value: 0, createdAt: admin.firestore.FieldValue.serverTimestamp() });
