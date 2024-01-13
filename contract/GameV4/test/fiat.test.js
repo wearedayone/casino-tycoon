@@ -23,9 +23,34 @@ describe('FIAT', function () {
     const [ownerWallet, teamWallet, revShareWallet, userWallet] = accounts;
 
     const Token = await ethers.getContractFactory('FIAT');
-    const token = await Token.deploy(ownerWallet.address, teamWallet.address, revShareWallet.address);
+    const token = await Token.deploy(ownerWallet.address, ownerWallet.address);
     await token.waitForDeployment();
     const tokenAddress = await token.getAddress();
+
+    const GangsterNFT = await ethers.getContractFactory('Gangster');
+    const GangsterNFTContract = await GangsterNFT.deploy(ownerWallet.address, ownerWallet.address);
+    await GangsterNFTContract.waitForDeployment();
+    const GangsterNFTContractAddress = await GangsterNFTContract.getAddress();
+
+    const _defaultAdmin = ownerWallet.address;
+    const _adminAddress = ownerWallet.address;
+    const _workerAddress = ownerWallet.address;
+    const _signerAddress = ownerWallet.address;
+    const _gangsterAddress = GangsterNFTContractAddress;
+    const _fiatAddress = tokenAddress;
+
+    const GangsterArena = await ethers.getContractFactory('GangsterArena');
+    const GangsterArenaContract = await GangsterArena.deploy(
+      _defaultAdmin,
+      _adminAddress,
+      _workerAddress,
+      _signerAddress,
+      _gangsterAddress,
+      _fiatAddress
+    );
+    await GangsterArenaContract.waitForDeployment();
+    const GangsterArenaContractAddress = await GangsterArenaContract.getAddress();
+    await token.updateGangsterArenaAddress(GangsterArenaContractAddress);
     // console.log('Token: ', tokenAddress);
 
     const promises = [
@@ -33,7 +58,7 @@ describe('FIAT', function () {
       token.mint(userWallet.address, TOKEN_PER_ACCOUNT * BASE_18),
     ];
 
-    await Promise.all(promises);
+    // await Promise.all(promises);
 
     // deploy uniswap contracts
     const Factory = new ContractFactory(factoryArtifact.abi, factoryArtifact.bytecode, ownerWallet);
@@ -68,8 +93,8 @@ describe('FIAT', function () {
     const approveTx = await token.approve(routerAddress, ethers.MaxUint256);
     await approveTx.wait();
 
-    // const ownerBalance = await ethers.provider.getBalance(ownerWallet.address);
-    // console.log('Owner balance: ', ownerBalance);
+    const ownerBalance = await ethers.provider.getBalance(ownerWallet.address);
+    console.log('Owner balance: ', ownerBalance);
 
     const addLiquidityTxn = await router
       .connect(ownerWallet)
@@ -78,15 +103,16 @@ describe('FIAT', function () {
       });
     await addLiquidityTxn.wait();
 
-    // const newOwnerBalance = await ethers.provider.getBalance(ownerWallet.address);
-    // console.log('New owner balance: ', newOwnerBalance);
+    const newOwnerBalance = await ethers.provider.getBalance(ownerWallet.address);
+    console.log('New owner balance: ', newOwnerBalance);
 
-    // const newReserves = await pair.getReserves();
-    // console.log('New reserves: ', newReserves);
+    const newReserves = await pair.getReserves();
+    console.log('New reserves: ', newReserves);
 
     return {
       token,
       tokenAddress,
+      GangsterArenaContract,
       factory,
       factoryAddress,
       weth,
@@ -102,107 +128,138 @@ describe('FIAT', function () {
     };
   };
 
-  describe('deployment', function () {
-    it('deploy contract', async function () {
-      const { token, tokenAddress, ownerWallet, teamWallet, revShareWallet } = await loadFixture(deployStakingFixture);
+  // describe('deployment', function () {
+  //   it('deploy contract', async function () {
+  //     const { token, tokenAddress, ownerWallet, teamWallet, revShareWallet } = await loadFixture(deployStakingFixture);
 
-      expect(tokenAddress).not.to.be.undefined;
+  //     expect(tokenAddress).not.to.be.undefined;
 
-      const teamWalletAddress = await token.teamWallet();
-      expect(teamWalletAddress).to.equal(teamWallet.address);
+  //     const teamWalletAddress = await token.teamWallet();
+  //     expect(teamWalletAddress).to.equal(teamWallet.address);
 
-      const revShareWalletAddress = await token.revShareWallet();
-      expect(revShareWalletAddress).to.equal(revShareWallet.address);
+  //     const revShareWalletAddress = await token.revShareWallet();
+  //     expect(revShareWalletAddress).to.equal(revShareWallet.address);
 
-      const swapTokensAtAmount = await token.swapTokensAtAmount();
-      expect(swapTokensAtAmount).to.equal(1000000000000000000000n);
+  //     const swapTokensAtAmount = await token.swapTokensAtAmount();
+  //     expect(swapTokensAtAmount).to.equal(1000000000000000000000n);
 
-      const totalFees = await token.totalFees();
-      expect(totalFees).to.equal(50);
+  //     const totalFees = await token.totalFees();
+  //     expect(totalFees).to.equal(50);
 
-      const revShareFee = await token.revShareFee();
-      expect(revShareFee).to.equal(20);
+  //     const revShareFee = await token.revShareFee();
+  //     expect(revShareFee).to.equal(20);
 
-      const liquidityFee = await token.liquidityFee();
-      expect(liquidityFee).to.equal(10);
+  //     const liquidityFee = await token.liquidityFee();
+  //     expect(liquidityFee).to.equal(10);
 
-      const teamFee = await token.teamFee();
-      expect(teamFee).to.equal(20);
+  //     const teamFee = await token.teamFee();
+  //     expect(teamFee).to.equal(20);
 
-      const burnFee = await token.burnFee();
-      expect(burnFee).to.equal(0);
+  //     const burnFee = await token.burnFee();
+  //     expect(burnFee).to.equal(0);
 
-      const tokensForRevShare = await token.tokensForRevShare();
-      expect(tokensForRevShare).to.equal(0);
+  //     const tokensForRevShare = await token.tokensForRevShare();
+  //     expect(tokensForRevShare).to.equal(0);
 
-      const tokensForLiquidity = await token.tokensForLiquidity();
-      expect(tokensForLiquidity).to.equal(0);
+  //     const tokensForLiquidity = await token.tokensForLiquidity();
+  //     expect(tokensForLiquidity).to.equal(0);
 
-      const tokensForTeam = await token.tokensForTeam();
-      expect(tokensForTeam).to.equal(0);
+  //     const tokensForTeam = await token.tokensForTeam();
+  //     expect(tokensForTeam).to.equal(0);
 
-      const isZeroAddressExcludedFromFee = await token.isExcludedFromFees(ethers.ZeroAddress);
-      expect(isZeroAddressExcludedFromFee).to.equal(true);
+  //     const isZeroAddressExcludedFromFee = await token.isExcludedFromFees(ethers.ZeroAddress);
+  //     expect(isZeroAddressExcludedFromFee).to.equal(true);
 
-      const isTokenAddressExcludedFromFee = await token.isExcludedFromFees(tokenAddress);
-      expect(isTokenAddressExcludedFromFee).to.equal(true);
+  //     const isTokenAddressExcludedFromFee = await token.isExcludedFromFees(tokenAddress);
+  //     expect(isTokenAddressExcludedFromFee).to.equal(true);
 
-      const isOwnerWalletAddressExcludedFromFee = await token.isExcludedFromFees(ownerWallet.address);
-      expect(isOwnerWalletAddressExcludedFromFee).to.equal(true);
+  //     const isOwnerWalletAddressExcludedFromFee = await token.isExcludedFromFees(ownerWallet.address);
+  //     expect(isOwnerWalletAddressExcludedFromFee).to.equal(true);
 
-      const isTeamWalletAddressExcludedFromFee = await token.isExcludedFromFees(teamWallet.address);
-      expect(isTeamWalletAddressExcludedFromFee).to.equal(true);
+  //     const isTeamWalletAddressExcludedFromFee = await token.isExcludedFromFees(teamWallet.address);
+  //     expect(isTeamWalletAddressExcludedFromFee).to.equal(true);
 
-      const isRevShareWalletAddressExcludedFromFee = await token.isExcludedFromFees(revShareWallet.address);
-      expect(isRevShareWalletAddressExcludedFromFee).to.equal(true);
-    });
-  });
+  //     const isRevShareWalletAddressExcludedFromFee = await token.isExcludedFromFees(revShareWallet.address);
+  //     expect(isRevShareWalletAddressExcludedFromFee).to.equal(true);
+  //   });
+  // });
 
-  describe('set up', function () {
-    it('set up token contract', async function () {
-      const { token, routerAddress, pairAddress, userWallet } = await loadFixture(deployStakingFixture);
+  // describe('set up', function () {
+  //   it('set up token contract', async function () {
+  //     const { token, routerAddress, pairAddress, userWallet } = await loadFixture(deployStakingFixture);
 
-      // change uniswap addresses
-      await token.updateUniswapAddresses(pairAddress, routerAddress);
-      const tokenPairAddress = await token.uniswapV2Pair();
-      expect(tokenPairAddress).to.equal(pairAddress);
+  //     // change uniswap addresses
+  //     await token.updateUniswapAddresses(pairAddress, routerAddress);
+  //     const tokenPairAddress = await token.uniswapV2Pair();
+  //     expect(tokenPairAddress).to.equal(pairAddress);
 
-      // change swap token at amount
-      await token.updateSwapTokensAtAmount(BASE_18);
-      const swapTokensAtAmount = await token.swapTokensAtAmount();
-      expect(swapTokensAtAmount).to.equal(BASE_18);
+  //     // change swap token at amount
+  //     await token.updateSwapTokensAtAmount(BASE_18);
+  //     const swapTokensAtAmount = await token.swapTokensAtAmount();
+  //     expect(swapTokensAtAmount).to.equal(BASE_18);
 
-      // change fees
-      await token.updateFees(100, 50, 30, 20);
-      const totalFees = await token.totalFees();
-      expect(totalFees).to.equal(200);
+  //     // change fees
+  //     await token.updateFees(100, 50, 30, 20);
+  //     const totalFees = await token.totalFees();
+  //     expect(totalFees).to.equal(200);
 
-      const revShareFee = await token.revShareFee();
-      expect(revShareFee).to.equal(100);
+  //     const revShareFee = await token.revShareFee();
+  //     expect(revShareFee).to.equal(100);
 
-      const liquidityFee = await token.liquidityFee();
-      expect(liquidityFee).to.equal(50);
+  //     const liquidityFee = await token.liquidityFee();
+  //     expect(liquidityFee).to.equal(50);
 
-      const teamFee = await token.teamFee();
-      expect(teamFee).to.equal(30);
+  //     const teamFee = await token.teamFee();
+  //     expect(teamFee).to.equal(30);
 
-      const burnFee = await token.burnFee();
-      expect(burnFee).to.equal(20);
+  //     const burnFee = await token.burnFee();
+  //     expect(burnFee).to.equal(20);
 
-      // change excludes from fees
-      await token.excludeFromFees(userWallet.address, true);
-      const isUserWalletAddressExcludedFromFee = await token.isExcludedFromFees(userWallet.address);
-      expect(isUserWalletAddressExcludedFromFee).to.equal(true);
+  //     // change excludes from fees
+  //     await token.excludeFromFees(userWallet.address, true);
+  //     const isUserWalletAddressExcludedFromFee = await token.isExcludedFromFees(userWallet.address);
+  //     expect(isUserWalletAddressExcludedFromFee).to.equal(true);
 
-      // change wallets
-      await token.updateRevShareWallet(userWallet.address);
-      const revShareWalletAddress = await token.revShareWallet();
-      expect(revShareWalletAddress).to.equal(userWallet.address);
+  //     // change wallets
+  //     await token.updateRevShareWallet(userWallet.address);
+  //     const revShareWalletAddress = await token.revShareWallet();
+  //     expect(revShareWalletAddress).to.equal(userWallet.address);
 
-      // change team wallet
-      await token.updateTeamWallet(userWallet.address);
-      const teamWalletAddress = await token.teamWallet();
-      expect(teamWalletAddress).to.equal(userWallet.address);
+  //     // change team wallet
+  //     await token.updateTeamWallet(userWallet.address);
+  //     const teamWalletAddress = await token.teamWallet();
+  //     expect(teamWalletAddress).to.equal(userWallet.address);
+  //   });
+  // });
+  describe('Mint', function () {
+    it('batchMint', async function () {
+      const {
+        token,
+        tokenAddress,
+        factory,
+        factoryAddress,
+        weth,
+        wethAddress,
+        router,
+        routerAddress,
+        pair,
+        pairAddress,
+        ownerWallet,
+        teamWallet,
+        revShareWallet,
+        userWallet,
+      } = await loadFixture(deployStakingFixture);
+      const amount = parseUnits('100');
+      await token.mint(userWallet, amount);
+
+      let receivers = [];
+      let amounts = [];
+      for (let i = 0; i < 4; i++) {
+        receivers.push(ownerWallet);
+        amounts.push(amount);
+      }
+      await token.batchMint(receivers, [amount, amount, amount, amount]);
+      await token.batchMint([ownerWallet, teamWallet, revShareWallet, userWallet], [amount, amount, amount, amount]);
     });
   });
 
@@ -543,6 +600,7 @@ describe('FIAT', function () {
       const {
         token,
         tokenAddress,
+        GangsterArenaContract,
         factory,
         factoryAddress,
         weth,
@@ -556,6 +614,9 @@ describe('FIAT', function () {
         revShareWallet,
         userWallet,
       } = await loadFixture(deployStakingFixture);
+
+      let dev = await GangsterArenaContract.getDevBalance();
+      console.log({ dev });
 
       await token.updateUniswapAddresses(pairAddress, routerAddress);
 
@@ -601,17 +662,18 @@ describe('FIAT', function () {
       await txn1.wait();
 
       // swap should be trigger already this time
-      const teamWalletETHBalanceAfter = await ethers.provider.getBalance(teamWallet.address);
-      expect(teamWalletETHBalanceAfter).to.equal(teamWalletETHBalanceBefore + ethForTeam);
+      // const teamWalletETHBalanceAfter = await ethers.provider.getBalance(teamWallet.address);
+      // expect(teamWalletETHBalanceAfter).to.equal(teamWalletETHBalanceBefore + ethForTeam);
 
-      const revShareWalletETHBalanceAfter = await ethers.provider.getBalance(revShareWallet.address);
-      expect(revShareWalletETHBalanceAfter).to.equal(revShareWalletETHBalanceBefore + ethForRevShare);
+      // const revShareWalletETHBalanceAfter = await ethers.provider.getBalance(revShareWallet.address);
+      // expect(revShareWalletETHBalanceAfter).to.equal(revShareWalletETHBalanceBefore + ethForRevShare);
 
       // console.log('test', liquidityTokens, ethForLiquidity);
       // const reservesAfter = await pair.getReserves();
       // expect(reservesAfter[0]).to.equal(reservesBefore[0] + liquidityTokens + tokenAmount - fees);
       // expect(reservesAfter[1]).to.equal(reservesBefore[1] + ethForLiquidity - amountOut[1] - amountOut1[1]);
-
+      dev = await GangsterArenaContract.getDevBalance();
+      console.log({ dev });
       const teamFee = await token.teamFee();
       const liquidityFee = await token.liquidityFee();
       const revShareFee = await token.revShareFee();

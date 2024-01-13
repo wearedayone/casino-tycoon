@@ -17,7 +17,9 @@ module.exports = {
     defaultNetwork: {
       url: 'hardhat',
     },
-    hardhat: {},
+    hardhat: {
+      allowUnlimitedContractSize: true,
+    },
     eth_goerli: {
       url: secrets.eth_goerli_url,
       accounts: [
