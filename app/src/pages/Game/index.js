@@ -17,6 +17,7 @@ import {
   updateBalance,
   checkUserCode,
 } from '../../services/user.service';
+import { getWorkerPrices, getBuildingPrices } from '../../services/season.service';
 import { claimToken } from '../../services/transaction.service';
 import {
   getLeaderboard,
@@ -966,6 +967,24 @@ const Game = () => {
       });
 
       gameRef.current?.events.on('update-price-worker-building', updateNow);
+
+      gameRef.current?.events.on('request-goon-price', () => {
+        getWorkerPrices()
+          .then((res) => gameRef.current?.events.emit('update-goon-price', res.data))
+          .catch((err) => {
+            console.error(err);
+            Sentry.captureException(err);
+          });
+      });
+
+      gameRef.current?.events.on('request-house-price', () => {
+        getBuildingPrices()
+          .then((res) => gameRef.current?.events.emit('update-house-price', res.data))
+          .catch((err) => {
+            console.error(err);
+            Sentry.captureException(err);
+          });
+      });
 
       gameRef.current?.events.on('request-auth', () => {
         gameRef.current?.events.emit('update-auth', { uid: profile.id });

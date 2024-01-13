@@ -30,6 +30,8 @@ import PopupWarAttack from '../components/popup/PopupWarAttack';
 import PopupWarAttackConfirmation from '../components/popup/PopupWarAttackConfirmation';
 import PopupWarAttackDetail from '../components/popup/PopupWarAttackDetail';
 import PopupWarHistoryDetail from '../components/popup/PopupWarHistoryDetail';
+import PopupGoonPrice from '../components/popup/PopupGoonPrice';
+import PopupSafehousePrice from '../components/popup/PopupSafehousePrice';
 
 const { goonAnimation, gangsterAnimation, width } = configs;
 
@@ -113,6 +115,12 @@ class MainScene extends Phaser.Scene {
     this.popupWarHistoryDetail = new PopupWarHistoryDetail(this);
     this.add.existing(this.popupWarHistoryDetail);
 
+    this.popupGoonPrice = new PopupGoonPrice(this);
+    this.add.existing(this.popupGoonPrice);
+
+    this.popupSafehousePrice = new PopupSafehousePrice(this);
+    this.add.existing(this.popupSafehousePrice);
+
     this.game.events.on('music-on', () => {
       this.bgMusic.play();
     });
@@ -176,12 +184,12 @@ class MainScene extends Phaser.Scene {
 
     const infoButtons = new InfoButtons(this, 550);
     this.add.existing(infoButtons);
-    this.game.events.on('update-user-away-reward', ({ showWarPopup, claimableReward }) => {
-      this.popupWelcome = showWarPopup
-        ? new PopupWelcomeWar(this, claimableReward)
-        : new PopupWelcomeNoWar(this, claimableReward);
-      this.add.existing(this.popupWelcome);
-    });
+    // this.game.events.on('update-user-away-reward', ({ showWarPopup, claimableReward }) => {
+    //   this.popupWelcome = showWarPopup
+    //     ? new PopupWelcomeWar(this, claimableReward)
+    //     : new PopupWelcomeNoWar(this, claimableReward);
+    //   this.add.existing(this.popupWelcome);
+    // });
     this.game.events.on('game-ended', () => {
       console.log('trigger game end');
       this.isGameEnded = true;
