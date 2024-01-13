@@ -14,7 +14,7 @@ import './interfaces/IUniswapV2Pair.sol';
 import './interfaces/IUniswapV2Router02.sol';
 import './IGangsterArena.sol';
 
-import 'hardhat/console.sol';
+// import 'hardhat/console.sol';
 
 contract FIAT is ERC20, AccessControl, ERC20Burnable, ERC20Permit {
   using SafeMath for uint256;
@@ -209,11 +209,8 @@ contract FIAT is ERC20, AccessControl, ERC20Burnable, ERC20Permit {
       // console.log(liquidityTokens, ethForLiquidity);
       emit SwapAndLiquify(amountToSwapForETH, ethForLiquidity, tokensForLiquidity);
     }
-    console.log('xxxxxxxxxxxxxxxxxxxxxxxxxx');
-    console.log(ethForTeam);
-    console.log(ethForRevShare);
+
     gangsterArena.addReward{value: ethForTeam + ethForRevShare}(ethForTeam, 0, ethForRevShare, 0);
-    console.log('xxxxxxxxxxxxxxxxxxxxxxxxxx');
     tokensForLiquidity = 0;
     tokensForRevShare = 0;
     tokensForTeam = 0;

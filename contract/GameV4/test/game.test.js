@@ -74,7 +74,7 @@ describe('Gangster Arena', function () {
 
     // update config for gangster arena
     // await GangsterArenaContract.setContractAddress(GangsterNFTContract.getAddress());
-    await GangsterArenaContract.setTokenMaxSupply([0, 10000]);
+    await GangsterNFTContract.setTokenMaxSupply([0, 10000]);
 
     const promises = [];
     token.mint(GangsterArenaContractAddress, 1000000n * BASE_18);
@@ -115,9 +115,6 @@ describe('Gangster Arena', function () {
       );
       const nftPrice = 69000000000000000n;
       await token.mint(owner.address, nftPrice);
-      console.log(await token.getAddress());
-      console.log(await GangsterArenaContract.getAddress());
-      console.log(owner.address);
 
       const message = ethers.solidityPackedKeccak256(
         // Array of types: declares the data types in the message.
@@ -198,7 +195,6 @@ describe('Gangster Arena', function () {
         [data.address, data.token, data.amount]
       );
       let signature = await owner.signMessage(ethers.toBeArray(message));
-      console.log({ signature });
 
       await GangsterArenaContract.burnNFT(data.address, data.token, data.amount, signature);
       await GangsterArenaContract.burnGoon(data.address, data.amount);

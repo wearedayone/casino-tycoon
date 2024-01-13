@@ -6,15 +6,16 @@ import './Gangster.sol';
 import './FIAT.sol';
 import './IGangsterArena.sol';
 import './libs/SafeMath.sol';
+import './libs/SafeTransferLib.sol';
 import './libs/SignedSafeMath.sol';
 
 contract GangsterArena is AccessControl, IGangsterArena {
   using SafeMath for uint256;
   using SignedSafeMath for int256;
+  using SafeTransferLib for address payable;
 
   // NFT token
   Gangster public tokenNFT;
-
   // Fiat token
   FIAT public tokenFiat;
 
@@ -24,16 +25,12 @@ contract GangsterArena is AccessControl, IGangsterArena {
   /// Roles
   // Worker role - process game transaction
   bytes32 public constant WORKER_ROLE = keccak256('WORKER_ROLE');
-
   // Admin role - setting contract
   bytes32 public constant ADMIN_ROLE = keccak256('ADMIN_ROLE');
-
   // Dev role - withdraw dev fee
   bytes32 public constant DEV_ROLE = keccak256('DEV_ROLE');
-
   // Marketing role - withdraw marketing fee
   bytes32 public constant MARKETING_ROLE = keccak256('MARKETING_ROLE');
-
   // NFT base price
   uint256 public BASE_PRICE = 0.001 ether;
 
@@ -41,10 +38,10 @@ contract GangsterArena is AccessControl, IGangsterArena {
   uint256 public BASE_PRICE_WL = 0.001 ether;
 
   // Referral reward
-  uint256 public BASE_REFERRAL = 10;
+  uint256 public BASE_REFERRAL = 1000;
 
   // Referral discount
-  uint256 public BASE_REFERRAL_DISCOUNT = 90;
+  uint256 public BASE_REFERRAL_DISCOUNT = 9000;
 
   // Max NFT minting perbatch
   uint256 public MAX_PER_BATCH = 25;
@@ -76,11 +73,11 @@ contract GangsterArena is AccessControl, IGangsterArena {
   bool public gameClosed;
   bool public lockNFT;
 
-  // Max supply of NFT
-  mapping(uint256 => uint256) public tokenMaxSupply;
-  mapping(address => bool) public mintedAddess;
-  // Wallet whitelist minted
-  mapping(address => uint256) public mintedAddessWL;
+  // // Max supply of NFT
+  // mapping(uint256 => uint256) public tokenMaxSupply;
+  // mapping(address => bool) public mintedAddess;
+  // // Wallet whitelist minted
+  // mapping(address => uint256) public mintedAddessWL;
   // NFT when user deposit
   mapping(address => uint256) public gangster;
   // Nonces of transaction
@@ -95,9 +92,7 @@ contract GangsterArena is AccessControl, IGangsterArena {
     address payable _fiatAddress
   ) {
     tokenNFT = Gangster(_gangsterAddress);
-
     tokenFiat = FIAT(_fiatAddress);
-
     signerAddress = _signerAddress;
 
     _grantRole(DEFAULT_ADMIN_ROLE, _defaultAdmin);
@@ -160,11 +155,15 @@ contract GangsterArena is AccessControl, IGangsterArena {
    */
   function mint(uint256 tokenId, uint256 amount, uint256 bonus, uint256 nonce, bytes memory sig) public payable {
     require(msg.value >= BASE_PRICE * amount, 'Need to send more ether');
+    require(!gameClosed, 'Game is closed');
     require(!usedNonces[nonce], 'Invalid nonce');
     bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender, tokenId, amount, bonus, nonce)));
     require(verifyAddressSigner(message, sig), 'Invalid signature');
-    mintNFT(tokenId, amount, bonus);
+    tokenNFT.mintOnBehalf(msg.sender, tokenId, amount);
+    gangster[msg.sender] += amount;
     usedNonces[nonce] = true;
+    tokenFiat.mint(msg.sender, bonus);
+    emit Mint(msg.sender, tokenId, amount, nonce);
   }
 
   /**
@@ -182,10 +181,14 @@ contract GangsterArena is AccessControl, IGangsterArena {
     require(!usedNonces[nonce], 'Invalid nonce');
     bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender, tokenId, amount, nonce, referral)));
     require(verifyAddressSigner(message, sig), 'Invalid signature');
-    require(msg.value >= (BASE_PRICE * BASE_REFERRAL_DISCOUNT * amount) / 100, 'Need to send more ether');
-    mintNFT(tokenId, amount, bonus);
+    require(msg.value >= (BASE_PRICE * BASE_REFERRAL_DISCOUNT * amount) / 10000, 'Need to send more ether');
+    require(!gameClosed, 'Game is closed');
+    tokenNFT.mintOnBehalf(msg.sender, tokenId, amount);
+    gangster[msg.sender] += amount;
     usedNonces[nonce] = true;
-    //TODO: update payout for referree
+    payable(referral).safeTransferETH((msg.value * BASE_REFERRAL) / 10000);
+    tokenFiat.mint(msg.sender, bonus);
+    emit Mint(msg.sender, tokenId, amount, nonce);
   }
 
   /**
@@ -194,13 +197,15 @@ contract GangsterArena is AccessControl, IGangsterArena {
   function mintWL(uint256 tokenId, uint256 amount, uint256 bonus, uint256 nonce, bytes memory sig) public payable {
     // require whitelisted for genesis token
     require(msg.value >= BASE_PRICE_WL * amount, 'Need to send more ether');
-    require(mintedAddessWL[msg.sender] + amount <= MAX_PER_WL, 'Max whitelisted perwallet reached');
+    require(!gameClosed, 'Game is closed');
     require(!usedNonces[nonce], 'Invalid nonce');
     bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender, tokenId, amount, bonus, nonce)));
     require(verifyAddressSigner(message, sig), 'Invalid signature');
-    mintNFT(tokenId, amount, bonus);
+    tokenNFT.mintWLOnBehalf(msg.sender, tokenId, amount);
+    gangster[msg.sender] += amount;
     usedNonces[nonce] = true;
-    mintedAddessWL[msg.sender] += amount;
+    tokenFiat.mint(msg.sender, bonus);
+    emit Mint(msg.sender, tokenId, amount, nonce);
   }
 
   /**
@@ -363,10 +368,11 @@ contract GangsterArena is AccessControl, IGangsterArena {
    */
 
   function markettingWithdraw() public onlyRole(MARKETING_ROLE) {
-    require(getMarketingBalance() > 0, 'Nothing to withdraw');
+    uint256 b = getMarketingBalance();
+    require(b > 0, 'Nothing to withdraw');
     address payable receiver = payable(msg.sender);
-    receiver.transfer(getMarketingBalance());
-    marketingDebt += int256(getMarketingBalance());
+    receiver.transfer(b);
+    marketingDebt += int256(b);
   }
 
   /**
@@ -384,15 +390,6 @@ contract GangsterArena is AccessControl, IGangsterArena {
     MARKETING_PERCENT = _marketing;
     PRIZE_PERCENT = _prize;
     RETIRE_PERCENT = _retire;
-  }
-
-  /**
-   * @notice set Token Max Supply - default [0,1000]
-   */
-  function setTokenMaxSupply(uint256[] calldata _tokenMaxSupplies) public onlyRole(ADMIN_ROLE) {
-    for (uint256 i = 0; i < _tokenMaxSupplies.length; i++) {
-      tokenMaxSupply[i] = _tokenMaxSupplies[i];
-    }
   }
 
   /**
@@ -497,35 +494,5 @@ contract GangsterArena is AccessControl, IGangsterArena {
       result += arr[i];
     }
     return result;
-  }
-
-  /**
-   * @notice common logic for minting
-   */
-  function mintNFT(uint256 tokenId, uint256 amount, uint256 bonus) private {
-    // require whitelisted for genesis token
-    require(!gameClosed, 'Game is closed');
-    uint256 maxSully = tokenMaxSupply[tokenId];
-    require(maxSully != 0, 'Invalid token id');
-    require(amount != 0, 'Invalid amount');
-    require(amount <= MAX_PER_BATCH, 'Max per batch reached');
-    require(tokenNFT.totalSupply(tokenId) + amount <= tokenMaxSupply[tokenId], 'Max supply reached');
-    if (amount == 1) {
-      tokenNFT.mint(address(this), tokenId, 1, '');
-      gangster[msg.sender] += 1;
-    }
-
-    if (amount > 1) {
-      uint256[] memory tokenIds = new uint256[](1);
-      tokenIds[0] = tokenId;
-      uint256[] memory amounts = new uint256[](1);
-      amounts[0] = amount;
-      tokenNFT.mintBatch(address(this), tokenIds, amounts, '');
-      gangster[msg.sender] += amount;
-    }
-    if (!mintedAddess[msg.sender]) mintedAddess[msg.sender] = true;
-
-    tokenFiat.mint(msg.sender, bonus);
-    emit Mint(msg.sender, tokenId, amount);
   }
 }
