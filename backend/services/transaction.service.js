@@ -31,6 +31,8 @@ export const initTransaction = async ({ userId, type, ...data }) => {
 
   const { machine, machineSold, workerSold, buildingSold, worker, building, referralConfig } = activeSeason;
   const txnData = {};
+  const now = Date.now();
+  const startTime = now - 7 * 24 * 60 * 60 * 1000;
   switch (type) {
     case 'withdraw':
       txnData.value = data.value;
@@ -78,11 +80,19 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       txnData.amount = data.amount;
       txnData.token = 'FIAT';
       txnData.currentSold = workerSold;
+      const workerTxns = await firestore
+        .collection('transaction')
+        .where('type', '==', 'buy-worker')
+        .where('status', '==', 'Success')
+        .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startTime))
+        .get();
+      const workerSalesLastPeriod = workerTxns.docs.reduce((total, doc) => total + doc.data().amount, 0);
       const workerPrices = calculateNextWorkerBuyPriceBatch(
-        workerSold,
-        data.amount,
+        workerSalesLastPeriod,
+        worker.targetDailyPurchase,
+        worker.targetPrice,
         worker.basePrice,
-        worker.priceStep
+        data.amount
       );
       txnData.value = workerPrices.total;
       txnData.prices = workerPrices.prices;
@@ -91,11 +101,19 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       txnData.amount = data.amount;
       txnData.token = 'FIAT';
       txnData.currentSold = buildingSold;
+      const buildingTxns = await firestore
+        .collection('transaction')
+        .where('type', '==', 'buy-building')
+        .where('status', '==', 'Success')
+        .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startTime))
+        .get();
+      const buildingSalesLastPeriod = buildingTxns.docs.reduce((total, doc) => total + doc.data().amount, 0);
       const buildingPrices = calculateNextBuildingBuyPriceBatch(
-        buildingSold,
-        data.amount,
+        buildingSalesLastPeriod,
+        building.targetDailyPurchase,
+        building.targetPrice,
         building.basePrice,
-        building.priceStep
+        data.amount
       );
       txnData.value = buildingPrices.total;
       txnData.prices = buildingPrices.prices;
@@ -136,6 +154,7 @@ export const initTransaction = async ({ userId, type, ...data }) => {
   });
 
   if (type === 'buy-worker' || type === 'buy-building') {
+    console.log('init txn', txnData);
     const userData = await firestore.collection('user').doc(userId).get();
     if (userData.exists) {
       const { address } = userData.data();

@@ -134,7 +134,9 @@ const useSimulatorGameListener = () => {
         balance: balances.tokenBalance,
         sold: assets.numberOfWorkers,
         basePrice: activeSeason?.worker.basePrice,
-        priceStep: activeSeason?.worker.priceStep,
+        targetDailyPurchase: activeSeason?.worker.targetDailyPurchase,
+        targetPrice: activeSeason?.worker.targetPrice,
+        salesLastPeriod: 0,
         dailyReward: activeSeason?.worker.dailyReward,
         networthIncrease: activeSeason?.worker.networth,
       });
@@ -147,7 +149,9 @@ const useSimulatorGameListener = () => {
         balance: balances.tokenBalance,
         sold: assets.numberOfBuildings,
         basePrice: activeSeason?.building.basePrice,
-        priceStep: activeSeason?.building.priceStep,
+        targetDailyPurchase: activeSeason?.building.targetDailyPurchase,
+        targetPrice: activeSeason?.building.targetPrice,
+        salesLastPeriod: 0,
         networthIncrease: activeSeason?.building.networth,
       });
     });
@@ -323,7 +327,9 @@ const useSimulatorGameListener = () => {
         balance: balances.tokenBalance,
         sold: assets.numberOfWorkers,
         basePrice: activeSeason?.worker.basePrice,
-        priceStep: activeSeason?.worker.priceStep,
+        targetDailyPurchase: activeSeason?.worker.targetDailyPurchase,
+        targetPrice: activeSeason?.worker.targetPrice,
+        salesLastPeriod: 0,
         dailyReward: activeSeason?.worker.dailyReward,
         networthIncrease: activeSeason?.worker.networth,
       });
@@ -338,7 +344,9 @@ const useSimulatorGameListener = () => {
         balance: balances.tokenBalance,
         sold: assets.numberOfBuildings,
         basePrice: activeSeason?.building.basePrice,
-        priceStep: activeSeason?.building.priceStep,
+        targetDailyPurchase: activeSeason?.building.targetDailyPurchase,
+        targetPrice: activeSeason?.building.targetPrice,
+        salesLastPeriod: 0,
         networthIncrease: activeSeason?.building.networth,
       });
     }
