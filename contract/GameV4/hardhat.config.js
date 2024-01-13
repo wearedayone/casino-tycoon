@@ -2,12 +2,24 @@ require('dotenv').config();
 
 require('@nomicfoundation/hardhat-toolbox');
 require('hardhat-gas-reporter');
+require('hardhat-contract-sizer');
 
 const secrets = require('./secrets.json');
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
   solidity: '0.8.20',
+  settings: {
+    optimizer: {
+      enabled: true,
+      runs: 200,
+    },
+  },
+  contractSizer: {
+    alphaSort: true,
+    runOnCompile: true,
+    disambiguatePaths: false,
+  },
   networks: {
     // eth_mainnet: {
     //   url: secrets.eth_mainnet_url || ``,

@@ -616,7 +616,6 @@ describe('FIAT', function () {
       } = await loadFixture(deployStakingFixture);
 
       let dev = await GangsterArenaContract.getDevBalance();
-      console.log({ dev });
 
       await token.updateUniswapAddresses(pairAddress, routerAddress);
 
@@ -673,7 +672,7 @@ describe('FIAT', function () {
       // expect(reservesAfter[0]).to.equal(reservesBefore[0] + liquidityTokens + tokenAmount - fees);
       // expect(reservesAfter[1]).to.equal(reservesBefore[1] + ethForLiquidity - amountOut[1] - amountOut1[1]);
       dev = await GangsterArenaContract.getDevBalance();
-      console.log({ dev });
+      // console.log({ dev });
       const teamFee = await token.teamFee();
       const liquidityFee = await token.liquidityFee();
       const revShareFee = await token.revShareFee();

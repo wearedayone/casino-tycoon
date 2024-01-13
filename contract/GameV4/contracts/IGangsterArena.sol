@@ -7,7 +7,7 @@ interface IGangsterArena {
     Event
   ***************************
    */
-  event Mint(address indexed to, uint256 tokenId, uint256 amount);
+  event Mint(address indexed to, uint256 tokenId, uint256 amount, uint256 nonce);
   event BuyGoon(address indexed to, uint256 amount, uint256 nonce);
   event BuySafeHouse(address indexed to, uint256 amount, uint256 nonce);
   event Deposit(address indexed to, uint256 tokenId, uint256 amount);
