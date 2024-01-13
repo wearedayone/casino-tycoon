@@ -1,30 +1,64 @@
 // TODO: update logic calculateMachineSellPrice later
 // will get sell price from opensea
 
-export const estimateNumberOfBuildingCanBuy = (buildingSold, balance, basePrice, priceStep) => {
-  const x = priceStep;
-  const y = basePrice;
+const MAX_PER_BATCH = 25;
 
-  const A = x / 2;
-  const B = buildingSold * x + y - (3 * x) / 2;
-  const C = x - balance;
-  const dental = Math.pow(B, 2) - 4 * A * C;
+export const estimateNumberOfBuildingCanBuy = (
+  balance,
+  salesLastPeriod,
+  targetDailyPurchase,
+  targetPrice,
+  startPrice
+) => {
+  let quantity = 0;
+  let total = calculateNextBuildingBuyPriceBatch(
+    salesLastPeriod,
+    targetDailyPurchase,
+    targetPrice,
+    startPrice,
+    quantity
+  ).total;
+  while (quantity < MAX_PER_BATCH && total < balance) {
+    quantity++;
+    total = calculateNextBuildingBuyPriceBatch(
+      salesLastPeriod,
+      targetDailyPurchase,
+      targetPrice,
+      startPrice,
+      quantity
+    ).total;
+  }
 
-  const value = Math.floor((Math.sqrt(dental) - B) / (2 * A));
-  return value > 0 ? value : 0;
+  return quantity;
 };
 
-export const estimateNumberOfWorkerCanBuy = (workerSold, balance, basePrice, priceStep) => {
-  const x = priceStep;
-  const y = basePrice;
+export const estimateNumberOfWorkerCanBuy = (
+  balance,
+  salesLastPeriod,
+  targetDailyPurchase,
+  targetPrice,
+  startPrice
+) => {
+  let quantity = 0;
+  let total = calculateNextWorkerBuyPriceBatch(
+    salesLastPeriod,
+    targetDailyPurchase,
+    targetPrice,
+    startPrice,
+    quantity
+  ).total;
+  while (quantity < MAX_PER_BATCH && total < balance) {
+    quantity++;
+    total = calculateNextWorkerBuyPriceBatch(
+      salesLastPeriod,
+      targetDailyPurchase,
+      targetPrice,
+      startPrice,
+      quantity
+    ).total;
+  }
 
-  const A = x / 2;
-  const B = workerSold * x + y - (3 * x) / 2;
-  const C = x - balance;
-  const dental = Math.pow(B, 2) - 4 * A * C;
-
-  const value = Math.floor((Math.sqrt(dental) - B) / (2 * A));
-  return value > 0 ? value : 0;
+  return quantity;
 };
 
 // TODO: update this formula
@@ -46,7 +80,7 @@ export const calculateNextWorkerBuyPriceBatch = (
   let soldCount = salesLastPeriod;
   const prices = [];
   while (soldCount < salesLastPeriod + quantity) {
-    prices.push(calculateNextWorkerBuyPrice(salesLastPeriod, targetDailyPurchase, targetPrice, startPrice));
+    prices.push(calculateNextWorkerBuyPrice(soldCount, targetDailyPurchase, targetPrice, startPrice));
     soldCount++;
   }
 
@@ -70,7 +104,7 @@ export const calculateNextBuildingBuyPriceBatch = (
   let soldCount = salesLastPeriod;
   const prices = [];
   while (soldCount < salesLastPeriod + quantity) {
-    prices.push(calculateNextWorkerBuyPrice(salesLastPeriod, targetDailyPurchase, targetPrice, startPrice));
+    prices.push(calculateNextWorkerBuyPrice(soldCount, targetDailyPurchase, targetPrice, startPrice));
     soldCount++;
   }
 

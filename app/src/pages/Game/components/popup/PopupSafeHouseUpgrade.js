@@ -22,22 +22,27 @@ class PopupSafeHouseUpgrade extends Popup {
   networth = 0;
   networthIncrease = 0;
   balance = 0;
-  sold = 0;
   basePrice = 0;
-  priceStep = 0;
+  targetDailyPurchase = 1;
+  targetPrice = 0;
+  salesLastPeriod = 0;
   quantity = DEFAULT_QUANTITY;
   onCompleted;
 
   constructor(scene, { isSimulator, onCompleted } = {}) {
     super(scene, 'popup-safehouse-upgrade', { ribbon: 'ribbon-safehouse-upgrade' });
-
+    this.scene = scene;
     const events = {
       completed: isSimulator ? 'simulator-upgrade-safehouse-completed' : 'upgrade-safehouse-completed',
       upgradeHouse: isSimulator ? 'simulator-upgrade-safehouse' : 'upgrade-safehouse',
       gameEnded: isSimulator ? 'simulator-game-ended' : 'game-ended',
       updateBuildings: isSimulator ? 'simulator-update-buildings' : 'update-buildings',
       requestBuildings: isSimulator ? 'simulator-request-buildings' : 'request-buildings',
+      updatePriceWorkerBuilding: isSimulator
+        ? 'simulator-update-price-worker-building'
+        : 'update-price-worker-building',
     };
+    this.events = events;
     this.onCompleted = onCompleted;
 
     this.popupBuyProcessing = new PopupProcessing(scene, {
@@ -206,34 +211,55 @@ class PopupSafeHouseUpgrade extends Popup {
 
       this.gas = gas;
       this.estimatedMaxPurchase = estimateNumberOfBuildingCanBuy(
-        this.sold,
         this.balance - this.gas,
-        this.basePrice,
-        this.priceStep
+        this.salesLastPeriod,
+        this.targetDailyPurchase,
+        this.targetPrice,
+        this.basePrice
       );
       this.updateValues();
     });
 
     scene.game.events.on(
       events.updateBuildings,
-      ({ numberOfBuildings, networth, balance, sold, basePrice, priceStep, networthIncrease }) => {
+      ({
+        numberOfBuildings,
+        networth,
+        balance,
+        basePrice,
+        targetDailyPurchase,
+        targetPrice,
+        salesLastPeriod,
+        networthIncrease,
+      }) => {
         this.balance = balance;
-        this.sold = sold;
         this.basePrice = basePrice;
-        this.priceStep = priceStep;
+        this.targetDailyPurchase = targetDailyPurchase;
+        this.targetPrice = targetPrice;
+        this.salesLastPeriod = salesLastPeriod;
         this.numberOfBuildings = numberOfBuildings;
         this.networth = networth;
         this.networthIncrease = networthIncrease;
 
         this.numberOfBuildingsText.text = numberOfBuildings.toLocaleString();
         this.networthText.text = `${networth.toLocaleString()}`;
-        this.estimatedMaxPurchase = estimateNumberOfBuildingCanBuy(sold, balance - this.gas, basePrice, priceStep);
+        this.estimatedMaxPurchase = estimateNumberOfBuildingCanBuy(
+          balance - this.gas,
+          salesLastPeriod,
+          targetDailyPurchase,
+          targetPrice,
+          basePrice
+        );
         this.updateValues();
       }
     );
 
     scene.game.events.emit(events.requestBuildings);
     scene.game.events.emit('request-gas-upgrade-safehouse');
+  }
+
+  onOpen() {
+    this.scene.game.events.emit(this.events.updatePriceWorkerBuilding);
   }
 
   cleanup() {
@@ -244,10 +270,11 @@ class PopupSafeHouseUpgrade extends Popup {
     this.networthIncreaseText.text = `+${(this.networthIncrease * this.quantity).toLocaleString()}`;
 
     const estimatedPrice = calculateNextBuildingBuyPriceBatch(
-      this.sold,
-      this.quantity,
+      this.salesLastPeriod,
+      this.targetDailyPurchase,
+      this.targetPrice,
       this.basePrice,
-      this.priceStep
+      this.quantity
     ).total;
 
     this.quantityText.text = `${this.quantity}`;

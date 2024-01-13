@@ -44,6 +44,7 @@ import TutorialScene from './scenes/TutorialScene';
 import useUserWallet from '../../hooks/useUserWallet';
 import useSeasonCountdown from '../../hooks/useSeasonCountdown';
 import useSimulatorGameListener from '../../hooks/useSimulatorGameListener';
+import useSalesLast24h from '../../hooks/useSalesLast24h';
 
 const { width, height } = gameConfigs;
 const MILISECONDS_IN_A_DAY = 86400 * 1000;
@@ -79,6 +80,7 @@ const Game = () => {
   const [isLeaderboardModalOpen, setLeaderboardModalOpen] = useState(false);
   const { isEnded, countdownString } = useSeasonCountdown({ open: isLeaderboardModalOpen });
   const [showBg, setShowBg] = useState(true);
+  const { workerSoldLast24h, buildingSoldLast24h, updateNow } = useSalesLast24h();
 
   const { appVersion } = configs || {};
   const { tokenPrice, nftPrice } = market || {};
@@ -161,8 +163,8 @@ const Game = () => {
     prizePoolConfig,
   } = activeSeason || {
     machine: { dailyReward: 0, basePrice: 0, whitelistPrice: 0, networth: 0 },
-    worker: { dailyReward: 0, basePrice: 0, networth: 0, priceStep: 0 },
-    building: { basePrice: 0, priceStep: 0, networth: 0 },
+    worker: { basePrice: 0, targetDailyPurchase: 1, targetPrice: 0, dailyReward: 0, networth: 0 },
+    building: { basePrice: 0, targetDailyPurchase: 1, targetPrice: 0, dailyReward: 0, networth: 0 },
     buildingSold: 0,
     workerSold: 0,
     machineSold: 0,
@@ -668,9 +670,10 @@ const Game = () => {
           numberOfBuildings,
           networth,
           balance: tokenBalance,
-          sold: buildingSold,
           basePrice: building.basePrice,
-          priceStep: building.priceStep,
+          targetDailyPurchase: building.targetDailyPurchase,
+          targetPrice: building.targetPrice,
+          salesLastPeriod: buildingSoldLast24h,
           networthIncrease: building.networth,
         });
       });
@@ -761,9 +764,10 @@ const Game = () => {
           numberOfWorkers,
           networth,
           balance: tokenBalance,
-          sold: workerSold,
           basePrice: worker.basePrice,
-          priceStep: worker.priceStep,
+          targetDailyPurchase: worker.targetDailyPurchase,
+          targetPrice: worker.targetPrice,
+          salesLastPeriod: workerSoldLast24h,
           dailyReward: worker.dailyReward,
           networthIncrease: worker.networth,
         });
@@ -961,6 +965,8 @@ const Game = () => {
           });
       });
 
+      gameRef.current?.events.on('update-price-worker-building', updateNow);
+
       gameRef.current?.events.on('request-auth', () => {
         gameRef.current?.events.emit('update-auth', { uid: profile.id });
       });
@@ -1099,25 +1105,27 @@ const Game = () => {
       numberOfBuildings,
       networth,
       balance: tokenBalance,
-      sold: buildingSold,
       basePrice: building.basePrice,
-      priceStep: building.priceStep,
+      targetDailyPurchase: building.targetDailyPurchase,
+      targetPrice: building.targetPrice,
+      salesLastPeriod: buildingSoldLast24h,
       networthIncrease: building.networth,
     });
-  }, [numberOfBuildings, networth, tokenBalance, building, buildingSold]);
+  }, [numberOfBuildings, networth, tokenBalance, building, workerSoldLast24h]);
 
   useEffect(() => {
     gameRef.current?.events.emit('update-workers', {
       numberOfWorkers,
       networth,
       balance: tokenBalance,
-      sold: workerSold,
       basePrice: worker.basePrice,
-      priceStep: worker.priceStep,
+      targetDailyPurchase: worker.targetDailyPurchase,
+      targetPrice: worker.targetPrice,
+      salesLastPeriod: workerSoldLast24h,
       dailyReward: worker.dailyReward,
       networthIncrease: worker.networth,
     });
-  }, [numberOfWorkers, networth, tokenBalance, worker, workerSold]);
+  }, [numberOfWorkers, networth, tokenBalance, worker]);
 
   useEffect(() => {
     gameRef.current?.events.emit('update-machines', {

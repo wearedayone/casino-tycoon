@@ -24,9 +24,10 @@ class PopupBuyGoon extends Popup {
   networthIncrease = 0;
   rateIncrease = 0;
   balance = 0;
-  sold = 0;
   basePrice = 0;
-  priceStep = 0;
+  targetDailyPurchase = 1;
+  targetPrice = 0;
+  salesLastPeriod = 0;
   quantity = DEFAULT_QUANTITY;
   estimatedMaxPurchase = 0;
   onCompleted;
@@ -34,13 +35,18 @@ class PopupBuyGoon extends Popup {
   constructor(scene, { isSimulator, onCompleted } = {}) {
     super(scene, 'popup-buy-goon', { ribbon: 'ribbon-buy-goon' });
 
+    this.scene = scene;
     const events = {
       completed: isSimulator ? 'simulator-buy-goon-completed' : 'buy-goon-completed',
       buyGoon: isSimulator ? 'simulator-buy-goon' : 'buy-goon',
       gameEnded: isSimulator ? 'simulator-game-ended' : 'game-ended',
       updateWorkers: isSimulator ? 'simulator-update-workers' : 'update-workers',
       requestWorkers: isSimulator ? 'simulator-request-workers' : 'request-workers',
+      updatePriceWorkerBuilding: isSimulator
+        ? 'simulator-update-price-worker-building'
+        : 'update-price-worker-building',
     };
+    this.events = events;
     this.onCompleted = onCompleted;
 
     this.popupBuyProcessing = new PopupProcessing(scene, {
@@ -214,10 +220,11 @@ class PopupBuyGoon extends Popup {
 
       this.gas = gas;
       this.estimatedMaxPurchase = estimateNumberOfWorkerCanBuy(
-        this.sold,
         this.balance - this.gas,
-        this.basePrice,
-        this.priceStep
+        this.salesLastPeriod,
+        this.targetDailyPurchase,
+        this.targetPrice,
+        this.basePrice
       );
       this.updateValues();
     });
@@ -231,11 +238,22 @@ class PopupBuyGoon extends Popup {
     });
     scene.game.events.on(
       events.updateWorkers,
-      ({ numberOfWorkers, networth, balance, sold, basePrice, priceStep, dailyReward, networthIncrease }) => {
+      ({
+        numberOfWorkers,
+        networth,
+        balance,
+        basePrice,
+        targetDailyPurchase,
+        targetPrice,
+        salesLastPeriod,
+        dailyReward,
+        networthIncrease,
+      }) => {
         this.balance = balance;
-        this.sold = sold;
         this.basePrice = basePrice;
-        this.priceStep = priceStep;
+        this.targetDailyPurchase = targetDailyPurchase;
+        this.targetPrice = targetPrice;
+        this.salesLastPeriod = salesLastPeriod;
         this.numberOfWorkers = numberOfWorkers;
         this.networth = networth;
         this.networthIncrease = networthIncrease;
@@ -244,13 +262,23 @@ class PopupBuyGoon extends Popup {
         this.numberOfWorkersText.text = numberOfWorkers.toLocaleString();
         this.networthText.text = `${networth.toLocaleString()}`;
         this.rateText.text = `${formatter.format(numberOfWorkers * dailyReward)}`;
-        this.estimatedMaxPurchase = estimateNumberOfWorkerCanBuy(sold, balance - this.gas, basePrice, priceStep);
+        this.estimatedMaxPurchase = estimateNumberOfWorkerCanBuy(
+          balance - this.gas,
+          salesLastPeriod,
+          targetDailyPurchase,
+          targetPrice,
+          basePrice
+        );
         this.updateValues();
       }
     );
 
     scene.game.events.emit(events.requestWorkers);
     scene.game.events.emit('request-gas-buy-goon');
+  }
+
+  onOpen() {
+    this.scene.game.events.emit(this.events.updatePriceWorkerBuilding);
   }
 
   cleanup() {
@@ -262,10 +290,11 @@ class PopupBuyGoon extends Popup {
     this.rateIncreaseText.text = `+${(this.rateIncrease * this.quantity).toLocaleString()} /d`;
 
     const estimatedPrice = calculateNextWorkerBuyPriceBatch(
-      this.sold,
-      this.quantity,
+      this.salesLastPeriod,
+      this.targetDailyPurchase,
+      this.targetPrice,
       this.basePrice,
-      this.priceStep
+      this.quantity
     ).total;
     const roi = estimatedPrice ? (((this.rateIncrease * this.quantity) / estimatedPrice) * 100).toFixed(1) : 0;
 
