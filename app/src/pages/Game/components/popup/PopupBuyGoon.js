@@ -1,6 +1,7 @@
 import Popup from './Popup';
 import PopupProcessing from './PopupProcessing';
 import TextButton from '../button/TextButton';
+import Button from '../button/Button';
 import configs from '../../configs/configs';
 import { estimateNumberOfWorkerCanBuy, calculateNextWorkerBuyPriceBatch } from '../../../../utils/formulas';
 import { customFormat, formatter } from '../../../../utils/numbers';
@@ -215,6 +216,21 @@ class PopupBuyGoon extends Popup {
     this.coin = scene.add.image(this.priceText.x + this.priceText.width + 40, counterY, 'coin2').setOrigin(0, 0.5);
     this.add(this.coin);
 
+    this.infoButton = new Button(
+      scene,
+      this.coin.x + this.coin.width + 40,
+      counterY - 40,
+      'button-info',
+      'button-info-pressed',
+      () => {
+        if (isSimulator) return;
+        this.close();
+        scene.popupGoonPrice?.open();
+      },
+      { sound: 'open' }
+    );
+    this.add(this.infoButton);
+
     scene.game.events.on('update-gas-buy-goon', ({ gas }) => {
       if (isNaN(gas)) return;
 
@@ -304,6 +320,7 @@ class PopupBuyGoon extends Popup {
     const formattedGas = customFormat(this.gas, 4) === '0' ? '<0.0001' : customFormat(this.gas, 4);
     this.gasPrice.text = `+${formattedGas} ETH (gas)`;
     this.coin.x = this.priceText.x + this.priceText.width + 20;
+    this.infoButton.x = this.coin.x + this.coin.width + 40;
 
     const insufficientBalance = this.quantity > this.estimatedMaxPurchase;
     this.insufficientBalance.setVisible(insufficientBalance);

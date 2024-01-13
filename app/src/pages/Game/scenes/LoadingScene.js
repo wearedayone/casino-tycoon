@@ -150,6 +150,8 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('popup-war-attack-confirmation', '/images/popup-attack-confirmation.png');
     this.load.image('popup-war-attack-detail', '/images/popup-war-attack-detail.png');
     this.load.image('popup-war-history', '/images/popup-war-history.png');
+    this.load.image('popup-house-price', '/images/popup-house-price.png');
+    this.load.image('popup-goon-price', '/images/popup-goon-price.png');
 
     this.load.image('ribbon-welcome', '/images/ribbon-welcome.png');
     this.load.image('ribbon-daily-gang-war', '/images/ribbon-daily-gang-war.png');
@@ -174,6 +176,8 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('slider-thumb', '/images/slider-thumb.png');
     this.load.image('counter', '/images/counter.png');
     this.load.image('row-container', '/images/row-container.png');
+    this.load.image('goon-mini', '/images/goon-mini.png');
+    this.load.image('safehouse-mini', '/images/safehouse-mini.png');
 
     this.load.image('button-approve', '/images/button-approve.png');
     this.load.image('button-approve-pressed', '/images/button-approve-pressed.png');
@@ -273,6 +277,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('container-border-top', '/images/container-border-top.png');
     this.load.image('container-border-middle', '/images/container-border-middle.png');
     this.load.image('container-border-bottom', '/images/container-border-bottom.png');
+    this.load.image('container-price', '/images/container-price.png');
     this.load.image('player-rank-container', '/images/player-rank-container.png');
 
     // settings

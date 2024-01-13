@@ -89,3 +89,29 @@ const takeSeasonLeaderboardSnapshot = async () => {
     logger.error(ex);
   }
 };
+
+export const getWorkerPrices = async () => {
+  const activeSeasonId = await getActiveSeasonId();
+
+  const snapshot = await firestore
+    .collection('season')
+    .doc(activeSeasonId)
+    .collection('worker-price')
+    .orderBy('createdAt', 'desc')
+    .get();
+
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+};
+
+export const getBuildingPrices = async () => {
+  const activeSeasonId = await getActiveSeasonId();
+
+  const snapshot = await firestore
+    .collection('season')
+    .doc(activeSeasonId)
+    .collection('building-price')
+    .orderBy('createdAt', 'desc')
+    .get();
+
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+};
