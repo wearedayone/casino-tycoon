@@ -179,7 +179,7 @@ contract GangsterArena is AccessControl, IGangsterArena {
   ) public payable {
     // require whitelisted for genesis token
     require(!usedNonces[nonce], 'Invalid nonce');
-    bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender, tokenId, amount, nonce, referral)));
+    bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender, tokenId, amount, bonus, nonce, referral)));
     require(verifyAddressSigner(message, sig), 'Invalid signature');
     require(msg.value >= (BASE_PRICE * BASE_REFERRAL_DISCOUNT * amount) / 10000, 'Need to send more ether');
     require(!gameClosed, 'Game is closed');
@@ -216,7 +216,6 @@ contract GangsterArena is AccessControl, IGangsterArena {
     require(!usedNonces[nonce], 'Nonce is used');
     bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender, amount, value, nonce)));
     require(verifyAddressSigner(message, sig), 'Invalid signature');
-    // tokenFiat.transferFrom(msg.sender, address(this), value);
     tokenFiat.burnFrom(msg.sender, value);
     usedNonces[nonce] = true;
     emit BuyGoon(msg.sender, amount, nonce);
@@ -229,7 +228,7 @@ contract GangsterArena is AccessControl, IGangsterArena {
     require(!gameClosed, 'Game is closed');
     bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender, amount, value, nonce)));
     require(verifyAddressSigner(message, sig), 'Invalid signature');
-    tokenFiat.transferFrom(msg.sender, address(0), value);
+    tokenFiat.burnFrom(msg.sender, value);
     usedNonces[nonce] = true;
     emit BuySafeHouse(msg.sender, amount, nonce);
   }

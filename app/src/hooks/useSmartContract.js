@@ -98,7 +98,7 @@ const useSmartContract = () => {
       chainId: Number(NETWORK_ID),
       data,
       // eslint-disable-next-line
-      value: BigInt(Math.ceil(value * 1e18)),
+      value: BigInt(parseEther(value.toString()).toString()),
     };
 
     const uiConfig = {
