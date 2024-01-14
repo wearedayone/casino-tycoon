@@ -167,12 +167,7 @@ const useSmartContract = () => {
     // eslint-disable-next-line no-undef
     const valueBigint = BigInt(parseEther(value + '').toString());
     const data = gameContract.interface.encodeFunctionData('buyGoon', [amount, valueBigint, nonce, signature]);
-
-    const unsignedTx = {
-      to: GAME_CONTRACT_ADDRESS,
-      chainId: Number(NETWORK_ID),
-      data,
-    };
+    const unsignedTx = { to: GAME_CONTRACT_ADDRESS, chainId: Number(NETWORK_ID), data };
 
     const uiConfig = {
       header: `Buy ${amount} Goon${amount > 1 ? 's' : ''} with ${formatter.format(value)} FIAT`,
@@ -212,14 +207,10 @@ const useSmartContract = () => {
     // eslint-disable-next-line no-undef
     const valueBigint = BigInt(parseEther(value + '').toString());
     const data = gameContract.interface.encodeFunctionData('buySafeHouse', [amount, valueBigint, nonce, signature]);
-    const unsignedTx = {
-      to: GAME_CONTRACT_ADDRESS,
-      chainId: Number(NETWORK_ID),
-      data,
-    };
+    const unsignedTx = { to: GAME_CONTRACT_ADDRESS, chainId: Number(NETWORK_ID), data };
 
     const uiConfig = {
-      header: `Buy ${amount} buildings with ${formatter.format(value)} FIAT`,
+      header: `Upgrade Safehouse ${amount} time${amount > 1 ? 's' : ''} with ${formatter.format(value)} FIAT`,
       description: '',
       buttonText: 'Send transaction',
     };
