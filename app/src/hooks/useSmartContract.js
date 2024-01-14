@@ -250,6 +250,34 @@ const useSmartContract = () => {
     }
   };
 
+  const retire = async ({ value, nonce, signature }) => {
+    console.log('Start retire');
+    if (!loadedAssets) return;
+    const privyProvider = await embeddedWallet.getEthereumProvider();
+    const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
+
+    // eslint-disable-next-line
+    const valueBigInt = BigInt(parseEther(value + '').toString());
+    const params = [valueBigInt, nonce, signature];
+    const data = gameContract.interface.encodeFunctionData('retired', params);
+
+    const unsignedTx = {
+      to: GAME_CONTRACT_ADDRESS,
+      chainId: Number(NETWORK_ID),
+      data,
+    };
+
+    const uiConfig = {
+      header: `Retire now to receive ${formatter.format(value)} ETH`,
+      description: '',
+      buttonText: 'Send transaction',
+    };
+    console.log('Start sendTransaction');
+    const receipt = await sendTransaction(unsignedTx, uiConfig);
+    console.log('Finish retire', receipt);
+    return receipt;
+  };
+
   const getNFTBalance = async (address) => {
     if (!loadedAssets) return 0;
     const privyProvider = await embeddedWallet.getEthereumProvider();
@@ -292,6 +320,7 @@ const useSmartContract = () => {
     withdrawToken,
     withdrawNFT,
     stakeNFT,
+    retire,
     getNFTBalance,
     getETHBalance,
     getStakedNFTBalance,

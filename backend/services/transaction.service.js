@@ -4,6 +4,7 @@ import { formatEther, parseEther } from '@ethersproject/units';
 import admin, { firestore } from '../configs/firebase.config.js';
 import alchemy from '../configs/alchemy.config.js';
 import { getActiveSeason, updateSeasonSnapshotSchedule } from './season.service.js';
+import { getLeaderboard } from './gamePlay.service.js';
 import {
   claimToken as claimTokenTask,
   claimTokenBonus,
@@ -11,6 +12,7 @@ import {
   isMinted,
   signMessageBuyGoon,
   signMessageBuyGangster,
+  signMessageRetire,
 } from './worker.service.js';
 import {
   calculateNextBuildingBuyPriceBatch,
@@ -30,7 +32,17 @@ export const initTransaction = async ({ userId, type, ...data }) => {
 
   if (type !== 'withdraw' && data.token !== 'NFT' && activeSeason.status !== 'open') throw new Error('Season ended');
 
-  const { machine, machineSold, workerSold, buildingSold, worker, building, referralConfig, startTime } = activeSeason;
+  const {
+    machine,
+    machineSold,
+    workerSold,
+    buildingSold,
+    worker,
+    building,
+    referralConfig,
+    prizePoolConfig,
+    startTime,
+  } = activeSeason;
   const txnData = {};
   const now = Date.now();
   const oneWeekAgo = now - 7 * 24 * 60 * 60 * 1000;
@@ -131,6 +143,13 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       const { machinesDeadCount } = data;
       txnData.machinesDeadCount = machinesDeadCount;
       break;
+    case 'retire':
+      const leaderboard = await getLeaderboard(userId);
+      const { reputationReward } = leaderboard.find(({ isUser }) => isUser);
+      const retireReward = getAccurate(reputationReward * (1 - prizePoolConfig.earlyRetirementTax));
+      txnData.value = retireReward;
+      txnData.token = 'ETH';
+      break;
     default:
       break;
   }
@@ -185,6 +204,15 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       };
       if (txnData.referrerAddress) signedData.referral = txnData.referrerAddress;
       const signature = await signMessageBuyGangster(signedData);
+      return { id: newTransaction.id, ...transaction, signature };
+    }
+  }
+  if (type === 'retire') {
+    const userData = await firestore.collection('user').doc(userId).get();
+    if (userData.exists) {
+      const { address } = userData.data();
+      const signedData = { address, reward: txnData.value, nonce };
+      const signature = await signMessageRetire(signedData);
       return { id: newTransaction.id, ...transaction, signature };
     }
   }
@@ -402,6 +430,20 @@ const updateUserGamePlay = async (userId, transactionId) => {
         },
       };
       break;
+    case 'retire':
+      assets.numberOfMachines = 0;
+      assets.numberOfBuildings = 0;
+      assets.numberOfWorkers = 0;
+      gamePlayData = {
+        ...assets,
+        warDeployment: {
+          numberOfMachinesToEarn: 0,
+          numberOfMachinesToAttack: 0,
+          numberOfMachinesToDefend: 0,
+          attackUserId: null,
+        },
+      };
+      break;
     default:
       break;
   }
@@ -595,6 +637,6 @@ export const calculateGeneratedReward = async (userId, { start, end, numberOfMac
 };
 
 /* all txn types that change user's token generation rate */
-const userTokenGenerationRateChangedTypes = ['buy-machine', 'buy-worker', 'war-penalty'];
+const userTokenGenerationRateChangedTypes = ['buy-machine', 'buy-worker', 'war-penalty', 'retire'];
 const userNetworthChangedTypes = userTokenGenerationRateChangedTypes.concat('buy-building');
 export const userPendingRewardChangedTypes = userTokenGenerationRateChangedTypes.concat('claim-token');

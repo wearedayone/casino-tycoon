@@ -76,6 +76,7 @@ const Game = () => {
     buySafeHouse,
     buyMachine,
     buyGoon,
+    retire,
   } = useSmartContract();
   const { ready, authenticated, user, exportWallet: exportWalletPrivy, logout } = usePrivy();
   const [isLeaderboardModalOpen, setLeaderboardModalOpen] = useState(false);
@@ -323,6 +324,22 @@ const Game = () => {
       const res = await create({ type: 'buy-machine', amount: quantity });
       const { id, amount, value, nonce, bonusAmount, signature, referrerAddress } = res.data;
       const receipt = await buyMachine({ amount, value, nonce, bonusAmount, signature, referrerAddress, mintFunction });
+      if (receipt.status === 1) {
+        await validate({ transactionId: id, txnHash: receipt.transactionHash });
+        return receipt.transactionHash;
+      }
+    } catch (err) {
+      console.error(err);
+      Sentry.captureException(err);
+      throw err;
+    }
+  };
+
+  const startRetirement = async () => {
+    try {
+      const res = await create({ type: 'retire' });
+      const { id, value, nonce, signature } = res.data;
+      const receipt = await retire({ value, nonce, signature });
       if (receipt.status === 1) {
         await validate({ transactionId: id, txnHash: receipt.transactionHash });
         return receipt.transactionHash;
@@ -730,7 +747,7 @@ const Game = () => {
 
       gameRef.current?.events.on('init-retire', async () => {
         try {
-          const txnHash = 'test-txnHash';
+          const txnHash = await startRetirement();
           gameRef.current?.events.emit('retire-completed', { txnHash });
         } catch (err) {
           console.log({ err });

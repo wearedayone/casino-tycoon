@@ -16,7 +16,7 @@ class PopupTxnCompleted extends Popup {
     this.onCompleted = onCompleted;
     const startingY = this.popup.y - this.popup.height / 2;
     const iconY = startingY + (title ? 300 : 400);
-    const titleY = iconY + 180;
+    const titleY = title ? iconY + 180 : iconY + 80;
     const descriptionY = titleY + 260;
     const viewTxnHashY = descriptionY + 200;
 
