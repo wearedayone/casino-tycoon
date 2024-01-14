@@ -5,7 +5,7 @@ import admin, { firestore } from '../configs/firebase.config.js';
 import logger from '../utils/logger.js';
 import { getActiveSeasonId, getActiveSeason } from './season.service.js';
 import { calculateGeneratedReward, initTransaction, validateNonWeb3Transaction } from './transaction.service.js';
-import { claimToken as claimTokenTask, burnNFT as burnNFTTask, burnGoon as burnGoonTask } from './worker.service.js';
+import { claimTokenBatch, burnNFT as burnNFTTask, burnGoon as burnGoonTask } from './worker.service.js';
 import { getUserUsernames } from './user.service.js';
 import { parseEther } from '@ethersproject/units';
 import { getUserGamePlay } from './gamePlay.service.js';
@@ -300,11 +300,8 @@ export const generateDailyWarSnapshot = async () => {
 
     // fs.writeFileSync('../test.json', JSON.stringify({ users, bonusUsers, penaltyUsers }), { encoding: 'utf-8' });
 
-    for (const bonusUser of bonusUsers) {
-      await claimWarReward(bonusUser);
-    }
-
     await burnMachinesLost(penaltyUsers);
+    // await claimWarReward(bonusUsers);
 
     logger.info('\n---------finish taking daily war snapshot--------\n\n');
   } catch (err) {
@@ -313,27 +310,52 @@ export const generateDailyWarSnapshot = async () => {
   }
 };
 
-export const claimWarReward = async ({ userId, amount }) => {
-  const userSnapshot = await firestore.collection('user').doc(userId).get();
-  if (!userSnapshot.exists) return;
+export const claimWarReward = async (bonusUsers) => {
+  if (!bonusUsers.length) return;
 
-  const { address } = userSnapshot.data();
+  const userIds = bonusUsers.map((item) => item.userId);
+  const userPromises = userIds.map((id) => firestore.collection('user').doc(id).get());
+  const userSnapshots = await Promise.all(userPromises);
+  const users = [];
+  for (const index in userSnapshots) {
+    const snapshot = userSnapshots[index];
+    if (!snapshot.exists) continue;
 
-  const txn = await initTransaction({
-    userId,
-    type: 'war-bonus',
-    value: amount,
+    const txn = await initTransaction({
+      userId: snapshot.id,
+      type: 'war-bonus',
+      value: bonusUsers[index].amount,
+    });
+
+    users.push({
+      userId: snapshot.id,
+      txnId: txn.id,
+      address: snapshot.data().address,
+      amount: bonusUsers[index].amount,
+    });
+  }
+
+  const addresses = users.map((item) => item.address);
+  const amounts = users.map((item) => parseEther(`${item.amount}`));
+  const { txnHash, status } = await claimTokenBatch({ addresses, amounts });
+
+  logger.info(`War bonus, ${JSON.stringify({ addresses, amounts, txnHash, status })}`);
+
+  const updateTxnPromises = users.map((item) => {
+    return firestore.collection('transaction').doc(item.txnId).update({
+      txnHash,
+      status,
+    });
   });
 
-  const { txnHash, status } = await claimTokenTask({
-    address,
-    amount: parseEther(`${amount}`),
-  });
+  await Promise.all(updateTxnPromises);
 
-  await firestore.collection('transaction').doc(txn.id).update({
-    txnHash,
-    status,
-  });
+  if (status === 'Success') {
+    const updateUserGamePlayPromises = users.map((item) =>
+      validateNonWeb3Transaction({ userId: item.userId, transactionId: item.txnId })
+    );
+    await Promise.all(updateUserGamePlayPromises);
+  }
 };
 
 export const burnMachinesLost = async (penaltyUsers) => {
