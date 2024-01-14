@@ -364,16 +364,21 @@ export const signMessageBuyGoon = async ({ address, amount, value, nonce }) => {
   return signature;
 };
 
-export const signMessageBuyGangster = async ({ address, amount, nonce, referral }) => {
+export const signMessageBuyGangster = async ({ address, amount, nonce, bonus, referral }) => {
   const workerWallet = await getWorkerWallet();
   console.log({ address, amount, nonce, referral });
 
   // Array of types: declares the data types in the message.
-  const types = ['address', 'uint256', 'uint256', 'uint256'];
+  const types = ['address', 'uint256', 'uint256', 'uint256', 'uint256'];
   // Array of values: actual values of the parameters to be hashed.
-  const values = [address, 1, amount, nonce];
+  const values = [address, 1, amount, bonus, nonce];
 
   if (referral) {
+    // temporary remove bonus from referral signature
+    // TODO: remove these 2 lines when contract is updated
+    types.splice(3, 1);
+    values.splice(3, 1);
+    // end 2 lines
     types.push('address');
     values.push(referral);
   }

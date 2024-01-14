@@ -324,8 +324,8 @@ const Game = () => {
   const buyGangster = async (quantity, mintFunction) => {
     try {
       const res = await create({ type: 'buy-machine', amount: quantity });
-      const { id, amount, value, nonce, signature, referrerAddress } = res.data;
-      const receipt = await buyMachine({ amount, value, nonce, signature, referrerAddress, mintFunction });
+      const { id, amount, value, nonce, bonusAmount, signature, referrerAddress } = res.data;
+      const receipt = await buyMachine({ amount, value, nonce, bonusAmount, signature, referrerAddress, mintFunction });
       if (receipt.status === 1) {
         await validate({ transactionId: id, txnHash: receipt.transactionHash });
         return receipt.transactionHash;

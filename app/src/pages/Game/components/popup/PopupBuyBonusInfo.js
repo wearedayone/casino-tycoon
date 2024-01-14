@@ -69,7 +69,7 @@ class PopupBuyBonusInfo extends Popup {
   }
 
   updateData({ daysElapsed, gangsterDailyReward }) {
-    const amount = formatter.format(daysElapsed * gangsterDailyReward);
+    const amount = formatter.format(Math.floor(daysElapsed * gangsterDailyReward));
     console.log({ daysElapsed, gangsterDailyReward, amount });
     this.bonusAmountHidden.text = amount;
     this.bonusAmount.text = `Current bonus: ${amount}         $FIAT`;

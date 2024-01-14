@@ -80,17 +80,16 @@ const useSmartContract = () => {
     }
   };
 
-  const buyMachine = async ({ amount, value, nonce, referrerAddress, signature, mintFunction }) => {
+  const buyMachine = async ({ amount, value, nonce, bonusAmount, referrerAddress, signature, mintFunction }) => {
     console.log('Start buyMachine');
     if (!loadedAssets) return;
     const privyProvider = await embeddedWallet.getEthereumProvider();
     const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
 
-    const params = [1, amount];
-    if (mintFunction === 'mintWL') params.push(nonce, signature);
-    else if (mintFunction === 'mintReferral') {
+    const params = [1, amount, bonusAmount, nonce, signature];
+    if (mintFunction === 'mintReferral') {
       if (!referrerAddress) mintFunction = 'mint';
-      else params.push(nonce, referrerAddress, signature);
+      else params.splice(4, 0, referrerAddress);
     }
     const data = gameContract.interface.encodeFunctionData(mintFunction, params);
 
