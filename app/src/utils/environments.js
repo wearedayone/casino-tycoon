@@ -8,9 +8,9 @@ const environments = {
   FIREBASE_MEASUREMENT_ID: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID,
   API_URL: process.env.REACT_APP_API_URL,
   PRIVY_APP_ID: process.env.REACT_APP_PRIVY_APP_ID,
-  // NETWORK_ID: process.env.REACT_APP_NETWORK_ID,
+  NETWORK_ID: process.env.REACT_APP_NETWORK_ID,
   // NETWORK_ID: '5',
-  NETWORK_ID: '80001', // polygon mumbai
+  // NETWORK_ID: '80001', // polygon mumbai
   GAME_VERSION: process.env.REACT_APP_GAME_VERSION,
   ENVIRONMENT: process.env.REACT_APP_ENVIRONMENT,
   SENTRY_DSN: process.env.REACT_APP_SENTRY_DSN,
