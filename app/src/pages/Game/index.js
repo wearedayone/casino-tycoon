@@ -156,13 +156,14 @@ const Game = () => {
     numberOfBuildings,
     networth,
     isWhitelisted,
-    whitelistAmountLeft,
+    whitelistAmountMinted,
     warDeployment,
   } = gamePlay || {
     numberOfMachines: 0,
     numberOfWorkers: 0,
     numberOfBuildings: 0,
     networth: 0,
+    whitelistAmountMinted: 0,
     warDeployment: {
       numberOfMachinesToEarn: 0,
       numberOfMachinesToAttack: 0,
@@ -867,7 +868,7 @@ const Game = () => {
           networthIncrease: machine.networth,
           tokenPrice,
           isWhitelisted,
-          whitelistAmountLeft,
+          whitelistAmountLeft: machine.maxWhitelistAmount - whitelistAmountMinted,
           hasInviteCode: Boolean(inviteCode),
           referralDiscount: inviteCode ? Number(activeSeason?.referralConfig?.referralDiscount) : 0,
         });
@@ -1306,7 +1307,7 @@ const Game = () => {
       networthIncrease: machine.networth,
       tokenPrice,
       isWhitelisted: Boolean(isWhitelisted),
-      whitelistAmountLeft: Number(whitelistAmountLeft),
+      whitelistAmountLeft: Number(machine.maxWhitelistAmount - whitelistAmountMinted),
       hasInviteCode: Boolean(inviteCode),
       referralDiscount: inviteCode ? Number(activeSeason?.referralConfig?.referralDiscount) : 0,
     });
@@ -1319,7 +1320,7 @@ const Game = () => {
     reservePoolReward,
     tokenPrice,
     isWhitelisted,
-    whitelistAmountLeft,
+    whitelistAmountMinted,
     inviteCode,
     activeSeason?.referralConfig?.referralDiscount,
   ]);
