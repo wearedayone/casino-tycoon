@@ -15,9 +15,6 @@ import nftAbi from '../assets/abis/NFT.json';
 import { formatter } from '../utils/numbers';
 import environments from '../utils/environments';
 
-// test
-import RAKKU from '../assets/abis/RAKKU.json';
-
 const {
   NETWORK_ID,
   UNISWAP_QUOTER_V2_ADDRESS,
@@ -362,8 +359,8 @@ const useSmartContract = () => {
     const ethAddress = UNISWAP_WETH_ADDRESS;
 
     const tokenDecimals = Number(TOKEN_DECIMALS);
-    const tokenAddress = '0x8C2226F10D1abc6cFF3DD170f5b07101dd5D6E37'; // for test
-    // const tokenAddress = TOKEN_ADDRESS //  for release
+    // const tokenAddress = '0x8C2226F10D1abc6cFF3DD170f5b07101dd5D6E37'; // for test
+    const tokenAddress = TOKEN_ADDRESS; //  for release
 
     const factoryContract = new Contract(factoryAddress, UniswapV3Factory.abi, privyProvider.provider);
     const poolAddress = await factoryContract.getPool(ethAddress, tokenAddress, fee);
@@ -500,7 +497,7 @@ const useSmartContract = () => {
 
     const { amount: ethAmount } = await convertTokenInputToEth(amount);
 
-    const tokenContract = new Contract(tokenAddress, RAKKU.abi, privyProvider.provider);
+    const tokenContract = new Contract(tokenAddress, tokenAbi.abi, privyProvider.provider);
 
     const approveData = tokenContract.interface.encodeFunctionData('approve', [swapRouterAddress, amountIn.toString()]);
     const approveUnsignedTx = {

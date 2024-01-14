@@ -234,6 +234,8 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
     if (!txnSnapshot.empty) throw new Error('Existed txnHash');
 
     const tx = await alchemy.core.getTransaction(txnHash);
+    console.log({ userId, transactionId, txnHash, tx });
+
     const receipt = await tx.wait();
     // console.log(`transaction ${txnHash}`, tx, 'receipt', receipt);
     const { from, to, status, logs } = receipt;
