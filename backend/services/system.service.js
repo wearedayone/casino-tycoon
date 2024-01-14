@@ -1,10 +1,9 @@
-import { formatEther, parseEther } from '@ethersproject/units';
+import { parseEther } from '@ethersproject/units';
 
 import { firestore } from '../configs/firebase.config.js';
 import environments from '../utils/environments.js';
-import { calculateNextBuildingBuyPriceBatch, calculateNextWorkerBuyPriceBatch } from '../utils/formulas.js';
 import { getActiveSeason } from './season.service.js';
-import { estimateTxnFee, signMessageBuyGoon } from './worker.service.js';
+import { estimateTxnFee, signMessageBuyGangster, signMessageBuyGoon } from './worker.service.js';
 
 const { SYSTEM_ADDRESS } = environments;
 
@@ -18,29 +17,24 @@ export const updateEstimatedGasPrice = async () => {
   // amount = 0 since worker wallet has no fiat balance -> contract throws err if amount > 0
   const fiatBuyValue = parseEther('0');
 
-  const workerSignature = await signMessageBuyGoon({
+  const machineSignature = await signMessageBuyGangster({
+    address: SYSTEM_ADDRESS,
+    amount: 1,
+    nonce,
+    bonus: 0,
+  });
+  const workerOrBuildingSignature = await signMessageBuyGoon({
     address: SYSTEM_ADDRESS,
     amount: 0,
     value: fiatBuyValue,
     nonce,
   });
-  const buildingSignature = await signMessageBuyGoon({
-    address: SYSTEM_ADDRESS,
-    amount: 0,
-    value: fiatBuyValue,
-    nonce,
-  });
+  const buyWorkerOrBuildingParams = [0, BigInt(fiatBuyValue.toString()), nonce, workerOrBuildingSignature];
 
   const [mint, buyGoon, buySafeHouse] = await Promise.all([
-    estimateTxnFee({ functionName: 'mint', params: [1, 1], value: machine.basePrice }),
-    estimateTxnFee({
-      functionName: 'buyGoon',
-      params: [0, BigInt(fiatBuyValue.toString()), nonce, workerSignature],
-    }),
-    estimateTxnFee({
-      functionName: 'buySafeHouse',
-      params: [0, BigInt(fiatBuyValue.toString()), nonce, buildingSignature],
-    }),
+    estimateTxnFee({ functionName: 'mint', params: [1, 1, 0, nonce, machineSignature], value: machine.basePrice }),
+    estimateTxnFee({ functionName: 'buyGoon', params: buyWorkerOrBuildingParams }),
+    estimateTxnFee({ functionName: 'buySafeHouse', params: buyWorkerOrBuildingParams }),
   ]);
 
   const updatedGas = {};
@@ -61,3 +55,5 @@ export const updateEstimatedGasPrice = async () => {
       },
     });
 };
+
+updateEstimatedGasPrice();
