@@ -252,8 +252,8 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
     const { type, value, token } = snapshot.data();
 
     const transactionValue = token === 'ETH' ? tx.value : BigNumber.from(logs[0].data);
-    const bnValue = BigNumber.from(BigInt(Math.round(value * 1e12))).mul(BigNumber.from(1e6));
-    console.log({ logdata: logs[0]?.data, value, bnValue, v1: BigNumber.from(BigInt(Math.round(value * 1e12))) });
+    const bnValue = parseEther(value.toString());
+    console.log({ logdata: logs[0]?.data, value, bnValue });
 
     const activeSeason = await getActiveSeason();
     const { tokenAddress: TOKEN_ADDRESS } = activeSeason || {};
@@ -484,7 +484,7 @@ const sendUserBonus = async (userId, transactionId) => {
 
     const { txnHash, status } = await claimTokenBonus({
       address,
-      amount: BigInt(bonus * 1e6) * BigInt(1e12),
+      amount: BigInt(parseEther(bonus.toString()).toString()),
     });
 
     console.log('claimed bonus', { txnHash, status });
@@ -592,7 +592,7 @@ export const claimToken = async ({ userId }) => {
 export const finishClaimToken = async ({ address, claimedAmount, transactionId }) => {
   const { txnHash, status } = await claimTokenTask({
     address,
-    amount: BigInt(claimedAmount * 1e12) * BigInt(1e6),
+    amount: BigInt(parseEther(claimedAmount.toString()).toString()),
   });
   console.log({ address, claimedAmount, transactionId, txnHash, status });
   if (txnHash && status) {
