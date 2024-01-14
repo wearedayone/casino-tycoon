@@ -23,7 +23,7 @@ const useUserGamePlay = () => {
       unsubscribe = onSnapshot(q, async (snapshot) => {
         if (!snapshot.empty) {
           const warDeployment = snapshot.docs[0].data().warDeployment;
-          if (warDeployment.attackUserId) {
+          if (warDeployment?.attackUserId) {
             if (usernames[warDeployment.attackUserId]) {
               warDeployment.attackUser = {
                 id: warDeployment.attackUserId,
