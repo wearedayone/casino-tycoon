@@ -10,7 +10,7 @@ import { completeTutorial } from '../services/user.service';
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const calculateReward = (prizePool, rankingRewards, rankIndex) => {
+const calculateRankReward = (rankrizePool, rankingRewards, rankIndex) => {
   const totalPercentages = rankingRewards.reduce(
     (total, rankingReward) => total + rankingReward.share * (rankingReward.rankEnd - rankingReward.rankStart + 1),
     0
@@ -21,7 +21,7 @@ const calculateReward = (prizePool, rankingRewards, rankIndex) => {
   const rankingReward = rankingRewards.find((item) => item.rankStart <= rank && rank <= item.rankEnd);
   if (!rankingReward) return 0;
 
-  return prizePool * rankingReward.share;
+  return rankrizePool * rankingReward.share;
 };
 
 const mockUsers = Array.from({ length: 20 }, () => ({
@@ -74,18 +74,21 @@ const useSimulatorGameListener = () => {
     ].sort((user1, user2) => user2.networth - user1.networth);
 
     const totalReputation = allUsers.reduce((sum, user) => sum + user.networth, 0);
-    const reputationPrizePool =
-      activeSeason.prizePoolConfig.allocation.reputationRewardsPercent * activeSeason.prizePool;
-
     return allUsers.map((user, index) => {
       return {
         ...user,
         rank: index + 1,
-        reward: calculateReward(activeSeason.prizePool, activeSeason?.rankingRewards, index),
-        reputationReward: (user.networth / totalReputation) * reputationPrizePool,
+        rankReward: calculateRankReward(activeSeason.rankPrizePool, activeSeason?.rankingRewards, index),
+        reputationReward: (user.networth / totalReputation) * activeSeason.reputationPrizePool,
       };
     });
-  }, [user, activeSeason?.prizePool, assets?.networth, activeSeason?.rankingRewards]);
+  }, [
+    user,
+    activeSeason?.rankPrizePool,
+    activeSeason?.reputationPrizePool,
+    assets?.networth,
+    activeSeason?.rankingRewards,
+  ]);
 
   const setupSimulatorGameListener = (game) => {
     setGameRef(game);
@@ -202,11 +205,11 @@ const useSimulatorGameListener = () => {
 
     game.events.on('simulator-open-leaderboard-modal', () => {
       setLeaderboardModalOpen(true);
-      const { name, timeStepInHours, prizePool } = activeSeason || {};
+      const { name, timeStepInHours, rankPrizePool, reputationPrizePool } = activeSeason || {};
       game.events.emit('simulator-update-season', {
         name,
         timeStepInHours,
-        prizePool,
+        prizePool: rankPrizePool + reputationPrizePool,
         isEnded,
       });
     });
@@ -219,7 +222,10 @@ const useSimulatorGameListener = () => {
       const index = leaderboardData.findIndex((item) => item.isUser);
       if (index > -1) {
         const thisUser = leaderboardData[index];
-        game.events.emit('simulator-update-rank', { rank: index + 1, reward: thisUser.reward });
+        game.events.emit('simulator-update-rank', {
+          rank: index + 1,
+          reward: thisUser.rankReward + thisUser.reputationReward,
+        });
       }
     });
 
@@ -273,7 +279,10 @@ const useSimulatorGameListener = () => {
       const index = leaderboardData.findIndex((item) => item.isUser);
       if (index > -1) {
         const thisUser = leaderboardData[index];
-        gameRef.events.emit('simulator-update-rank', { rank: index + 1, reward: thisUser.reward });
+        gameRef.events.emit('simulator-update-rank', {
+          rank: index + 1,
+          reward: thisUser.rankReward + thisUser.reputationReward,
+        });
       }
     }
   }, [leaderboardData]);
@@ -354,12 +363,12 @@ const useSimulatorGameListener = () => {
 
   useEffect(() => {
     if (isLeaderboardModalOpen) {
-      const { name, timeStepInHours, prizePool } = activeSeason || {};
+      const { name, timeStepInHours, rankPrizePool, reputationPrizePool } = activeSeason || {};
       gameRef &&
         gameRef.events.emit('simulator-update-season', {
           name,
           timeStepInHours,
-          prizePool,
+          prizePool: rankPrizePool + reputationPrizePool,
           isEnded,
         });
     }
@@ -367,7 +376,8 @@ const useSimulatorGameListener = () => {
     isLeaderboardModalOpen,
     activeSeason?.name,
     activeSeason?.timeStepInHours,
-    activeSeason?.prizePool,
+    activeSeason?.rankPrizePool,
+    activeSeason?.reputationPrizePool,
     activeSeason?.machine?.networth,
     isEnded,
   ]);
