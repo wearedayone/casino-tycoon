@@ -371,7 +371,7 @@ export const signMessageBuyGangster = async ({ address, amount, nonce, bonus, re
   // Array of types: declares the data types in the message.
   const types = ['address', 'uint256', 'uint256', 'uint256', 'uint256'];
   // Array of values: actual values of the parameters to be hashed.
-  const values = [address, 1, amount, bonus, nonce];
+  const values = [address, 1, amount, BigInt(parseEther(bonus.toString()).toString()), nonce];
 
   if (referral) {
     types.push('address');

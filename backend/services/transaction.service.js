@@ -63,9 +63,10 @@ export const initTransaction = async ({ userId, type, ...data }) => {
         .limit(1)
         .get();
       const userSnapshot = await firestore.collection('user').doc(userId).get();
-      const { isWhitelisted, whitelistAmountLeft } = gamePlaySnapshot.docs[0].data();
+      const { isWhitelisted, whitelistAmountMinted } = gamePlaySnapshot.docs[0].data();
       const { inviteCode } = userSnapshot.data();
       let userReferralDiscount = 0;
+      const whitelistAmountLeft = machine.maxWhitelistAmount - whitelistAmountMinted;
       const isMintWhitelist = Boolean(isWhitelisted && whitelistAmountLeft);
       txnData.isMintWhitelist = isMintWhitelist;
       txnData.amount = isMintWhitelist ? Math.min(data.amount, whitelistAmountLeft) : data.amount; // cannot exceed whitelistAmountLeft
@@ -386,7 +387,7 @@ const updateUserGamePlay = async (userId, transactionId) => {
       // gamePlayData = { numberOfMachines: admin.firestore.FieldValue.increment(amount) };
       assets.numberOfMachines += amount;
       // TODO: move this to listener later
-      if (isMintWhitelist) gamePlayData = { whitelistAmountLeft: admin.firestore.FieldValue.increment(-amount) };
+      if (isMintWhitelist) gamePlayData = { whitelistAmountMinted: admin.firestore.FieldValue.increment(amount) };
       if (referrerAddress) {
         // update discount
         const user = await firestore.collection('user').doc(userId).get();

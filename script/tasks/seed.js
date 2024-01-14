@@ -13,7 +13,7 @@ const warConfig = {
   machinePercentLost: 0.1,
 };
 const assetsConfig = {
-  machine: { basePrice: 0.001, whitelistPrice: 0.0006, dailyReward: 1000, networth: 5 },
+  machine: { basePrice: 0.001, whitelistPrice: 0.001, maxWhitelistAmount: 20, dailyReward: 1000, networth: 5 },
   worker: { basePrice: 250, targetDailyPurchase: 100, targetPrice: 1000, dailyReward: 1000, networth: 3 },
   building: { basePrice: 500, targetDailyPurchase: 100, targetPrice: 1000, dailyReward: 0, networth: 4 },
 };

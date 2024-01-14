@@ -36,7 +36,7 @@ const createGamePlayIfNotExist = async (userId) => {
       startRewardCountingTime: admin.firestore.FieldValue.serverTimestamp(),
       active: false,
       isWhitelisted: false,
-      whitelistAmountLeft: 0,
+      whitelistAmountMinted: 0,
       warDeployment: {
         numberOfMachinesToEarn: 0,
         numberOfMachinesToAttack: 0,
