@@ -254,7 +254,7 @@ const updateNumberOfGangster = async ({ address, newBalance, active = false }) =
         .doc(gamePlay.id)
         .update({
           numberOfMachines: newNumberOfMachines,
-          warDeploment: {
+          warDeployment: {
             ...warDeployment,
             numberOfMachinesToEarn,
             numberOfMachinesToAttack,
