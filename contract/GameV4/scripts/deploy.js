@@ -18,8 +18,8 @@ async function main() {
   // const workerAddress = '0xb63b1c3450b74A6Def7106028a091d3324B1e981';
   const _defaultAdmin = '0x890611302Ee344d5bD94DA9811C18e2De5588077';
   const _adminAddress = '0x890611302Ee344d5bD94DA9811C18e2De5588077';
-  const _workerAddress = '0xb63b1c3450b74A6Def7106028a091d3324B1e981';
-  const _signerAddress = '0x890611302Ee344d5bD94DA9811C18e2De5588077';
+  const _workerAddress = '0xd0A8dBf15F547604Ff836be3176206DbDc3bcadF';
+  const _signerAddress = '0x9e3B61bb59493aD1d4E5deA89eE02bF6CEfC8fA8';
 
   const FIAT = await ethers.getContractFactory('FIAT');
   const FIATToken = await FIAT.deploy(_defaultAdmin, _workerAddress);

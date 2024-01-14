@@ -259,11 +259,11 @@ contract GangsterArena is AccessControl, IGangsterArena {
     require(getRetireBalance() >= reward, 'Invalid reward');
     bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender, reward, nonce)));
     require(verifyAddressSigner(message, sig), 'Invalid signature');
-
+    tokenNFT.burn(address(this), 1, gangster[msg.sender]);
+    gangster[msg.sender] = 0;
     address payable receiver = payable(msg.sender);
     receiver.transfer(reward);
     retireDebt += int256(reward);
-
     emit Retire(msg.sender, reward, nonce);
   }
 
@@ -273,8 +273,7 @@ contract GangsterArena is AccessControl, IGangsterArena {
   function burnNFT(
     address[] memory to,
     uint256[] memory tokenId,
-    uint256[] memory amount,
-    bytes memory sig
+    uint256[] memory amount
   ) public onlyRole(WORKER_ROLE) {
     require(!gameClosed, 'Game is closed');
     require(to.length == tokenId.length && tokenId.length == amount.length, 'Input array is not match');
@@ -291,15 +290,6 @@ contract GangsterArena is AccessControl, IGangsterArena {
       gangster[to[i]] -= amount[i];
     }
     emit Burn(to, tokenId, amount);
-  }
-
-  /**
-   * @notice Burn goon for gangwar
-   */
-  function burnGoon(address[] memory to, uint256[] memory amount) public onlyRole(WORKER_ROLE) {
-    require(!gameClosed, 'Game is closed');
-    require(to.length == amount.length, 'Input array is not match');
-    emit BurnGoon(to, amount);
   }
 
   /**

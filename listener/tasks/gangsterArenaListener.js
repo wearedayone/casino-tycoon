@@ -76,8 +76,11 @@ const processMintEvent = async ({ to, tokenId, amount, nonce, event, contract })
     });
 
     // TODO: update separate fields: rankPrizePool, reputationPrizePool, burnValue, devFee
-    const prizePool = await contract.getBalance();
+    const prizePool = await contract.getPrizeBalance();
     await updatePrizePool(parseFloat(formatEther(prizePool)).toFixed(6));
+
+    const retirePool = await contract.getRetireBalance();
+    await updateReputationPool(parseFloat(formatEther(retirePool)).toFixed(6));
   } catch (err) {
     logger.error(err);
   }
@@ -345,7 +348,19 @@ const updatePrizePool = async (value) => {
     .collection('season')
     .doc(activeSeasonId)
     .update({
-      prizePool: Number(value),
+      rankPrizePool: Number(value),
+    });
+};
+
+const updateReputationPool = async (value) => {
+  const system = await firestore.collection('system').doc('default').get();
+  const { activeSeasonId } = system.data();
+
+  await firestore
+    .collection('season')
+    .doc(activeSeasonId)
+    .update({
+      reputationPrizePool: Number(value),
     });
 };
 

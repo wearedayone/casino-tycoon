@@ -12,11 +12,17 @@ import alchemy from '../configs/alchemy.config.js';
 import logger from '../utils/logger.js';
 import { getActiveSeason } from './season.service.js';
 
-const { WORKER_WALLET_PRIVATE_KEY } = environments;
+const { WORKER_WALLET_PRIVATE_KEY, SIGNER_WALLET_PRIVATE_KEY } = environments;
 
 const getWorkerWallet = async () => {
   const ethersProvider = await alchemy.config.getProvider();
   const workerWallet = new Wallet(WORKER_WALLET_PRIVATE_KEY, ethersProvider);
+  return workerWallet;
+};
+
+const getSignerWallet = async () => {
+  const ethersProvider = await alchemy.config.getProvider();
+  const workerWallet = new Wallet(SIGNER_WALLET_PRIVATE_KEY, ethersProvider);
   return workerWallet;
 };
 
@@ -345,27 +351,27 @@ export const isMinted = async (address) => {
 };
 
 export const signMessage = async (message) => {
-  const workerWallet = await getWorkerWallet();
-  const signature = await workerWallet.signMessage(ethers.toBeArray(message));
+  const signerWallet = await getSignerWallet();
+  const signature = await signerWallet.signMessage(ethers.toBeArray(message));
   return signature;
 };
 
 export const signMessageBuyGoon = async ({ address, amount, value, nonce }) => {
-  const workerWallet = await getWorkerWallet();
-  console.log({ address, amount, value: value.toString(10), nonce });
+  const signerWallet = await getSignerWallet();
+  console.log({ address, amount, value: value.toString(), nonce });
   let message = ethers.solidityPackedKeccak256(
     // Array of types: declares the data types in the message.
     ['address', 'uint256', 'uint256', 'uint256'],
     // Array of values: actual values of the parameters to be hashed.
-    [address, amount, value.toString(10), nonce]
+    [address, amount, value.toString(), nonce]
   );
 
-  const signature = await workerWallet.signMessage(ethers.toBeArray(message));
+  const signature = await signerWallet.signMessage(ethers.toBeArray(message));
   return signature;
 };
 
 export const signMessageBuyGangster = async ({ address, amount, nonce, bonus, referral }) => {
-  const workerWallet = await getWorkerWallet();
+  const signerWallet = await getSignerWallet();
   console.log({ address, amount, nonce, referral });
 
   // Array of types: declares the data types in the message.
@@ -380,12 +386,12 @@ export const signMessageBuyGangster = async ({ address, amount, nonce, bonus, re
 
   let message = ethers.solidityPackedKeccak256(types, values);
 
-  const signature = await workerWallet.signMessage(ethers.toBeArray(message));
+  const signature = await signerWallet.signMessage(ethers.toBeArray(message));
   return signature;
 };
 
 export const signMessageRetire = async ({ address, reward, nonce }) => {
-  const workerWallet = await getWorkerWallet();
+  const signerWallet = await getSignerWallet();
   // Array of types: declares the data types in the message.
   const types = ['address', 'uint256', 'uint256'];
   // Array of values: actual values of the parameters to be hashed.
@@ -395,6 +401,6 @@ export const signMessageRetire = async ({ address, reward, nonce }) => {
 
   console.log('message', message);
 
-  const signature = await workerWallet.signMessage(ethers.toBeArray(message));
+  const signature = await signerWallet.signMessage(ethers.toBeArray(message));
   return signature;
 };
