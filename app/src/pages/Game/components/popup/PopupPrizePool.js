@@ -6,9 +6,6 @@ import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
 const { width, height } = configs;
 const largeBlackBold = { fontSize: fontSizes.large, color: colors.black, fontFamily: fontFamilies.bold };
 class PopupPrizePool extends Popup {
-  prizePool = 0;
-  items = [];
-
   constructor(scene, { isSimulator } = {}) {
     super(scene, 'popup-small', { title: 'Rank Prize Pool', titleIcon: 'icon-info', noCloseBtn: true });
 
