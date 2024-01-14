@@ -109,17 +109,17 @@ class PopupTxnError extends Popup {
     } else {
       this.viewTxnHash.setVisible(false);
     }
-    const buttonGreat = new TextButton(
+    const buttonOkay = new TextButton(
       scene,
       width / 2,
       height / 2 + this.popup.height / 2 - 20,
       'button-blue',
       'button-blue-pressed',
       this.close,
-      'Great',
+      'Okay',
       { fontSize: '82px', sound: 'close' }
     );
-    this.add(buttonGreat);
+    this.add(buttonOkay);
 
     this.viewTxnHash
       .setInteractive()
