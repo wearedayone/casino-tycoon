@@ -301,7 +301,7 @@ export const generateDailyWarSnapshot = async () => {
     // fs.writeFileSync('../test.json', JSON.stringify({ users, bonusUsers, penaltyUsers }), { encoding: 'utf-8' });
 
     await burnMachinesLost(penaltyUsers);
-    // await claimWarReward(bonusUsers);
+    await claimWarReward(bonusUsers);
 
     logger.info('\n---------finish taking daily war snapshot--------\n\n');
   } catch (err) {
