@@ -64,7 +64,7 @@ interface IGangsterArena {
   /**
    * Burn gangster NFTs
    */
-  function burnNFT(address[] memory to, uint256[] memory tokenId, uint256[] memory amount, bytes memory sig) external;
+  function burnNFT(address[] memory to, uint256[] memory tokenId, uint256[] memory amount) external;
 
   /**
    * user retire game

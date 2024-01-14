@@ -66,7 +66,7 @@ class PopupDepositETH extends Popup {
       })
       .on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
         depositLink.setAlpha(1);
-        window.open(`https://gangsterarena.com/deposit`);
+        window.open(`${process.env.PUBLIC_URL}/deposit/user?code=${this.code}`);
       });
 
     scene.game.events.on('update-deposit-code', (code) => {
