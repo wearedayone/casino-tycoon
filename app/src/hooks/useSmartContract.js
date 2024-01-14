@@ -279,9 +279,9 @@ const useSmartContract = () => {
   const isMinted = async (address) => {
     if (!loadedAssets) return false;
     const privyProvider = await embeddedWallet.getEthereumProvider();
-    const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
+    const nftContract = new Contract(NFT_ADDRESS, nftAbi.abi, privyProvider.provider);
 
-    const minted = await gameContract.mintedAddess(address);
+    const minted = await nftContract.mintedAddess(address);
     return minted;
   };
 

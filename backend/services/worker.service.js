@@ -5,6 +5,7 @@ import { getParsedEthersError } from '@enzoferey/ethers-error-parser';
 import { Utils } from 'alchemy-sdk';
 
 import tokenABI from '../assets/abis/Token.json' assert { type: 'json' };
+import nftABI from '../assets/abis/NFT.json' assert { type: 'json' };
 import gameContractABI from '../assets/abis/GameContract.json' assert { type: 'json' };
 import environments from '../utils/environments.js';
 import alchemy from '../configs/alchemy.config.js';
@@ -23,6 +24,13 @@ const getTokenContract = async (signer) => {
   const activeSeason = await getActiveSeason();
   const { tokenAddress: TOKEN_ADDRESS } = activeSeason || {};
   const contract = new Contract(TOKEN_ADDRESS, tokenABI.abi, signer);
+  return contract;
+};
+
+const getNftContract = async (signer) => {
+  const activeSeason = await getActiveSeason();
+  const { nftAddress } = activeSeason || {};
+  const contract = new Contract(nftAddress, nftABI.abi, signer);
   return contract;
 };
 
@@ -141,6 +149,43 @@ export const claimTokenBonus = async ({ address, amount }) => {
   }
 };
 
+export const claimTokenBatch = async ({ addresses, amounts }) => {
+  let txnHash = '';
+  try {
+    logger.info('start claimTokenBatch');
+    logger.info({ addresses, amounts });
+    const workerWallet = await getWorkerWallet();
+    const tokenContract = await getTokenContract(workerWallet);
+    logger.info('start Transaction:');
+    const tx = await tokenContract.batchMint(addresses, amounts);
+    txnHash = tx.hash;
+    logger.info('Transaction:' + tx.hash);
+    const receipt = await tx.wait();
+
+    if (receipt.status !== 1) {
+      logger.error(`Unsuccessful txn: ${JSON.stringify(receipt)}`);
+      throw new Error(`Unsuccessful txn: ${JSON.stringify(receipt)}`);
+    }
+
+    return { txnHash, status: 'Success' };
+  } catch (err) {
+    console.error(err);
+    const newError = getParsedEthersError(err);
+    const regex = /(execution reverted: )([A-Za-z\s])*/;
+    if (newError.context) {
+      const message = newError.context.match(regex);
+      if (message) {
+        const error = new Error(message[0]);
+        logger.error(error.message);
+      }
+    } else {
+      logger.error(err.message);
+    }
+
+    return { txnHash, status: 'Failed' };
+  }
+};
+
 export const burnNFT = async ({ addresses, ids, amounts }) => {
   let txnHash = '';
   try {
@@ -149,7 +194,7 @@ export const burnNFT = async ({ addresses, ids, amounts }) => {
     const workerWallet = await getWorkerWallet();
     const gameContract = await getGameContract(workerWallet);
     logger.info('start Transaction:');
-    const tx = await gameContract.burnNFT(addresses, ids, amounts);
+    const tx = await gameContract.burnNFT(addresses, ids, amounts, '0x12');
     txnHash = tx.hash;
     logger.info('Transaction:' + tx.hash);
     const receipt = await tx.wait();
@@ -293,9 +338,9 @@ export const setWinner = async ({ winners, points }) => {
 
 export const isMinted = async (address) => {
   const workerWallet = await getWorkerWallet();
-  const gameContract = await getGameContract(workerWallet);
+  const nftContract = await getNftContract(workerWallet);
 
-  const minted = await gameContract.mintedAddess(address);
+  const minted = await nftContract.mintedAddess(address);
   return minted;
 };
 
