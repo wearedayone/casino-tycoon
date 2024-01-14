@@ -58,7 +58,8 @@ const useSmartContract = () => {
       const privyProvider = await embeddedWallet.getEthereumProvider();
       const tokenContract = new Contract(TOKEN_ADDRESS, tokenAbi.abi, privyProvider.provider);
 
-      const valueInWei = (value * 1e18).toLocaleString('fullwide', { useGrouping: false });
+      // eslint-disable-next-line no-undef
+      const valueInWei = BigInt(parseEther(value.toString()).toString());
       const data = tokenContract.interface.encodeFunctionData('transfer', [to, valueInWei]);
 
       const unsignedTx = {
@@ -89,7 +90,7 @@ const useSmartContract = () => {
         to,
         chainId: Number(NETWORK_ID),
         // eslint-disable-next-line
-        value: BigInt(Math.ceil(value * 1e18)),
+        value: BigInt(parseEther(value.toString()).toString()),
       };
 
       const uiConfig = {
@@ -111,7 +112,9 @@ const useSmartContract = () => {
     const privyProvider = await embeddedWallet.getEthereumProvider();
     const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
 
-    const params = [1, amount, bonusAmount, nonce, signature];
+    // eslint-disable-next-line no-undef
+    const bonusBigint = BigInt(parseEther(bonusAmount.toString()).toString());
+    const params = [1, amount, bonusBigint, nonce, signature];
     if (mintFunction === 'mintReferral') {
       if (!referrerAddress) mintFunction = 'mint';
       else params.splice(4, 0, referrerAddress);

@@ -1,6 +1,6 @@
 import { Contract } from '@ethersproject/contracts';
 import { Wallet } from '@ethersproject/wallet';
-import { ethers } from 'ethers';
+import { ethers, parseEther } from 'ethers';
 import { getParsedEthersError } from '@enzoferey/ethers-error-parser';
 import { Utils } from 'alchemy-sdk';
 
@@ -54,7 +54,7 @@ export const estimateTxnFee = async ({ contractName = 'game', functionName, para
     const lastBaseFeePerGas = Number(Utils.formatUnits(feeData.lastBaseFeePerGas, 'ether'));
     const maxPriorityFeePerGas = Number(Utils.formatUnits(feeData.maxPriorityFeePerGas, 'ether'));
     const gasPrice = lastBaseFeePerGas + maxPriorityFeePerGas; // based on real txns
-    if (value) params.push({ value: BigInt(Math.ceil(value * 1e18)) });
+    if (value) params.push({ value: BigInt(parseEther(value.toString()).toString()) });
     const estimatedGasCostInHex = await contract.estimateGas[functionName](...params);
     const gasLimit = Utils.formatUnits(estimatedGasCostInHex, 'wei');
     const transactionFee = gasPrice * gasLimit;
@@ -394,7 +394,7 @@ export const signMessageRetire = async ({ address, reward, nonce }) => {
   // Array of types: declares the data types in the message.
   const types = ['address', 'uint256', 'uint256'];
   // Array of values: actual values of the parameters to be hashed.
-  const values = [address, BigInt(reward * 1e18), nonce];
+  const values = [address, BigInt(parseEther(reward.toString()).toString()), nonce];
 
   let message = ethers.solidityPackedKeccak256(types, values);
 
