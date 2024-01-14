@@ -37,6 +37,12 @@ const createGamePlayIfNotExist = async (userId) => {
       active: false,
       isWhitelisted: false,
       whitelistAmountLeft: 0,
+      warDeployment: {
+        numberOfMachinesToEarn: 0,
+        numberOfMachinesToAttack: 0,
+        numberOfMachinesToDefend: 0,
+        attackUserId: null,
+      },
     });
   }
 };
