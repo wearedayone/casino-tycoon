@@ -17,9 +17,10 @@ const gangsterArenaListener = async () => {
   const ethersProvider = await alchemy.config.getWebSocketProvider();
   const contract = new Contract(GAME_CONTRACT_ADDRESS, GangsterArenaABI.abi, ethersProvider);
 
-  contract.on(GangsterEvent.Mint, async (from, to, amount, event) => {
+  contract.on(GangsterEvent.Mint, async (to, tokenId, amount, nonce, event) => {
+    console.log({ to, tokenId, amount, nonce, event });
     await firestore.collection('web3Listener').doc(NETWORK_ID).update({ lastBlock: event.blockNumber });
-    await processMintEvent({ from, to, amount, event, contract });
+    await processMintEvent({ to, tokenId, amount, nonce, event, contract });
   });
 
   contract.on(GangsterEvent.Deposit, async (from, to, amount, event) => {
@@ -60,16 +61,16 @@ const gangsterArenaListener = async () => {
 //   }
 // };
 
-const processMintEvent = async ({ from, to, amount, event, contract }) => {
+const processMintEvent = async ({ to, tokenId, amount, nonce, event, contract }) => {
   try {
     logger.info('NFT minted');
-    logger.info({ from, to, amount, event });
+    logger.info({ to, tokenId, amount, nonce, event });
     const { transactionHash } = event;
 
-    const gangsterNumber = await contract.gangster(from);
+    const gangsterNumber = await contract.gangster(to);
     const newBalance = gangsterNumber.toString();
     await updateNumberOfGangster({
-      address: from.toLowerCase(),
+      address: to.toLowerCase(),
       newBalance,
       active: true,
     });
