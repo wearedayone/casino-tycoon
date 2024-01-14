@@ -374,11 +374,6 @@ export const signMessageBuyGangster = async ({ address, amount, nonce, bonus, re
   const values = [address, 1, amount, bonus, nonce];
 
   if (referral) {
-    // temporary remove bonus from referral signature
-    // TODO: remove these 2 lines when contract is updated
-    types.splice(3, 1);
-    values.splice(3, 1);
-    // end 2 lines
     types.push('address');
     values.push(referral);
   }
