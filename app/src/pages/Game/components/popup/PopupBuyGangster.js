@@ -350,7 +350,7 @@ class PopupBuyGangster extends Popup {
     const roi = estimatedPrice
       ? (((this.rateIncrease * this.quantity * this.tokenPrice) / estimatedPrice) * 100).toFixed(1)
       : 0;
-    const bonus = this.daysElapsed * this.rateIncrease * this.quantity;
+    const bonus = Math.floor(this.daysElapsed * this.rateIncrease * this.quantity);
 
     this.quantityText.text = `${this.quantity}`;
     this.roiText.text = `${roi}%`;

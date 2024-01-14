@@ -29,10 +29,10 @@ export const initTransaction = async ({ userId, type, ...data }) => {
   const activeSeason = await getActiveSeason();
   if (activeSeason.status !== 'open') throw new Error('Season ended');
 
-  const { machine, machineSold, workerSold, buildingSold, worker, building, referralConfig } = activeSeason;
+  const { machine, machineSold, workerSold, buildingSold, worker, building, referralConfig, startTime } = activeSeason;
   const txnData = {};
   const now = Date.now();
-  const startTime = now - 7 * 24 * 60 * 60 * 1000;
+  const oneWeekAgo = now - 7 * 24 * 60 * 60 * 1000;
   switch (type) {
     case 'withdraw':
       txnData.value = data.value;
@@ -75,6 +75,10 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       const estimatedPrice = data.amount * unitPrice;
       txnData.value = getAccurate(estimatedPrice);
       txnData.prices = Array.from({ length: data.amount }, () => unitPrice);
+      // bonus
+      const daysElapsed = (now - startTime.toDate().getTime()) / (24 * 60 * 60 * 1000);
+      const bonus = Math.floor(daysElapsed * machine.dailyReward * data.amount);
+      txnData.bonusAmount = bonus;
       break;
     case 'buy-worker':
       txnData.amount = data.amount;
@@ -84,7 +88,7 @@ export const initTransaction = async ({ userId, type, ...data }) => {
         .collection('transaction')
         .where('type', '==', 'buy-worker')
         .where('status', '==', 'Success')
-        .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startTime))
+        .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(oneWeekAgo))
         .get();
       const workerSalesLastPeriod = workerTxns.docs.reduce((total, doc) => total + doc.data().amount, 0);
       const workerPrices = calculateNextWorkerBuyPriceBatch(
@@ -105,7 +109,7 @@ export const initTransaction = async ({ userId, type, ...data }) => {
         .collection('transaction')
         .where('type', '==', 'buy-building')
         .where('status', '==', 'Success')
-        .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startTime))
+        .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(oneWeekAgo))
         .get();
       const buildingSalesLastPeriod = buildingTxns.docs.reduce((total, doc) => total + doc.data().amount, 0);
       const buildingPrices = calculateNextBuildingBuyPriceBatch(
@@ -168,13 +172,14 @@ export const initTransaction = async ({ userId, type, ...data }) => {
     }
   }
 
-  if (type === 'buy-machine' && (txnData.isMintWhitelist || txnData.referrerAddress)) {
+  if (type === 'buy-machine') {
     const userData = await firestore.collection('user').doc(userId).get();
     if (userData.exists) {
       const { address } = userData.data();
       const signedData = {
         address,
         amount: txnData.amount,
+        bonus: txnData.bonusAmount,
         nonce,
       };
       if (txnData.referrerAddress) signedData.referral = txnData.referrerAddress;
