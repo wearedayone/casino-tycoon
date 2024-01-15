@@ -323,6 +323,9 @@ const useSmartContract = () => {
     const tokenContract = new Contract(tokenAddress, tokenAbi.abi, privyProvider.provider);
     const pairContract = new Contract(pairAddress, PairABI.abi, privyProvider.provider);
 
+    const totalFees = await tokenContract.totalFees();
+    const swapReceivePercent = (1000 - Number(totalFees.toString())) / 1000;
+
     return {
       routerAddress,
       tokenAddress,
@@ -330,6 +333,7 @@ const useSmartContract = () => {
       routerContract,
       tokenContract,
       pairContract,
+      swapReceivePercent,
     };
   };
 
@@ -345,11 +349,11 @@ const useSmartContract = () => {
 
   const convertEthInputToToken = async (ethAmount) => {
     if (!loadedAssets) return 0;
-    const { tokenAddress, wethAddress, routerContract } = await getSwapContractInfo();
+    const { tokenAddress, wethAddress, routerContract, swapReceivePercent } = await getSwapContractInfo();
 
     const amountIn = parseEther(`${ethAmount}`);
     const res = await routerContract.getAmountsOut(amountIn, [wethAddress, tokenAddress]);
-    const amount = formatEther(res[1]);
+    const amount = Number(formatEther(res[1]).toString()) * swapReceivePercent;
 
     const { tokenInPool } = await currentPoolState();
     const priceImpact = Number(res[1].toString()) / Number(tokenInPool.toString());
@@ -359,7 +363,7 @@ const useSmartContract = () => {
 
   const convertEthOutputToToken = async (ethAmount) => {
     if (!loadedAssets) return 0;
-    const { tokenAddress, wethAddress, routerContract } = await getSwapContractInfo();
+    const { tokenAddress, wethAddress, routerContract, swapReceivePercent } = await getSwapContractInfo();
     const { wethInPool } = await currentPoolState();
     if (ethAmount >= Number(formatEther(wethInPool).toString()))
       throw new Error(
@@ -368,7 +372,7 @@ const useSmartContract = () => {
 
     const amountOut = parseEther(`${ethAmount}`);
     const res = await routerContract.getAmountsIn(amountOut, [tokenAddress, wethAddress]);
-    const amount = formatEther(res[0]);
+    const amount = Number(formatEther(res[0]).toString()) / swapReceivePercent;
 
     const priceImpact = Number(amountOut.toString()) / Number(wethInPool.toString());
 
@@ -377,9 +381,10 @@ const useSmartContract = () => {
 
   const convertTokenInputToEth = async (tokenAmount) => {
     if (!loadedAssets) return 0;
-    const { tokenAddress, wethAddress, routerContract } = await getSwapContractInfo();
+    const { tokenAddress, wethAddress, routerContract, swapReceivePercent } = await getSwapContractInfo();
 
-    const amountIn = parseEther(`${tokenAmount}`);
+    const tokenAmountFeesIncluded = tokenAmount * swapReceivePercent;
+    const amountIn = parseEther(`${tokenAmountFeesIncluded}`);
     const res = await routerContract.getAmountsOut(amountIn, [tokenAddress, wethAddress]);
     const amount = formatEther(res[1]);
 
@@ -391,15 +396,16 @@ const useSmartContract = () => {
 
   const convertTokenOutputToEth = async (tokenAmount) => {
     if (!loadedAssets) return 0;
-    const { tokenAddress, wethAddress, routerContract } = await getSwapContractInfo();
+    const { tokenAddress, wethAddress, routerContract, swapReceivePercent } = await getSwapContractInfo();
 
     const { tokenInPool } = await currentPoolState();
-    if (tokenAmount >= Number(formatEther(tokenInPool).toString()))
+    const tokenAmountFeesIncluded = tokenAmount / swapReceivePercent;
+    if (tokenAmountFeesIncluded >= Number(formatEther(tokenInPool).toString()))
       throw new Error(
         `Not enough $FIAT in pool, $FIAT left: ${formatter.format(Number(formatEther(tokenInPool).toString()))}`
       );
 
-    const amountOut = parseEther(`${tokenAmount}`);
+    const amountOut = parseEther(`${tokenAmountFeesIncluded}`);
     const res = await routerContract.getAmountsIn(amountOut, [wethAddress, tokenAddress]);
     const amount = formatEther(res[0]);
 
