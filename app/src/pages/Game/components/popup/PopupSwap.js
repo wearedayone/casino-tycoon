@@ -24,6 +24,7 @@ const mediumBrownBold = {
 
 class PopupSwap extends Popup {
   loading = false;
+  error = false;
   ethBalance = 0;
   tokenBalance = 0;
   tokenSwap = 'eth';
@@ -213,29 +214,37 @@ class PopupSwap extends Popup {
       this.popupProcessing.initLoading(`Swapping may take a few minutes.`);
       this.close();
     });
+    scene.game.events.on('swap-error', () => {
+      this.setLoading(false);
+      this.setError(true);
+    });
     scene.game.events.on('convert-eth-input-to-token-result', ({ amount, priceImpact }) => {
       // console.log('convert-eth-input-to-token-result', { amount, priceImpact });
       this.token2AmountInput.updateValue(`${amount}`, true, true);
       this.priceImpact.text = `~${(priceImpact * 100).toFixed(2)}%`;
       this.setLoading(false);
+      this.setError(false);
     });
     scene.game.events.on('convert-eth-output-to-token-result', ({ amount, priceImpact }) => {
       // console.log('convert-eth-output-to-token-result', { amount, priceImpact });
       this.token1AmountInput.updateValue(`${amount}`, true, true);
       this.priceImpact.text = `~${(priceImpact * 100).toFixed(2)}%`;
       this.setLoading(false);
+      this.setError(false);
     });
     scene.game.events.on('convert-token-input-to-eth-result', ({ amount, priceImpact }) => {
       // console.log('convert-token-input-to-eth-result', { amount, priceImpact });
       this.token2AmountInput.updateValue(`${amount}`, true, true);
       this.priceImpact.text = `~${(priceImpact * 100).toFixed(2)}%`;
       this.setLoading(false);
+      this.setError(false);
     });
     scene.game.events.on('convert-token-output-to-eth-result', ({ amount, priceImpact }) => {
       // console.log('convert-token-output-to-eth-result', { amount, priceImpact });
       this.token1AmountInput.updateValue(`${amount}`, true, true);
       this.priceImpact.text = `~${(priceImpact * 100).toFixed(2)}%`;
       this.setLoading(false);
+      this.setError(false);
     });
   }
 
@@ -279,6 +288,11 @@ class PopupSwap extends Popup {
   setLoading(state) {
     console.log('setLoading', state);
     this.loading = state;
+    this.buttonApprove.setDisabledState(state);
+  }
+
+  setError(state) {
+    this.error = state;
     this.buttonApprove.setDisabledState(state);
   }
 

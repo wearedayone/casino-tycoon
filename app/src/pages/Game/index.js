@@ -990,6 +990,7 @@ const Game = () => {
             })
           )
           .catch((err) => {
+            gameRef.current?.events.emit('swap-error');
             console.error(err);
             Sentry.captureException(err);
           });
@@ -1018,6 +1019,7 @@ const Game = () => {
             })
           )
           .catch((err) => {
+            gameRef.current?.events.emit('swap-error');
             console.error(err);
             Sentry.captureException(err);
           });
@@ -1054,6 +1056,7 @@ const Game = () => {
             })
           )
           .catch((err) => {
+            gameRef.current?.events.emit('swap-error');
             console.error(err);
             Sentry.captureException(err);
           });
@@ -1079,6 +1082,7 @@ const Game = () => {
             })
           )
           .catch((err) => {
+            gameRef.current?.events.emit('swap-error');
             console.error(err);
             Sentry.captureException(err);
           });
