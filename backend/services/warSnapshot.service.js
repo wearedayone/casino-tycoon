@@ -211,72 +211,72 @@ export const generateDailyWarSnapshot = async () => {
     for (const user of Object.values(users)) {
       const { userId, attackUserId, attackUnits } = user;
 
-      if (attackUserId) {
-        const attackedUser = users[attackUserId];
+      if (!attackUserId || !users[attackUserId]) continue;
 
-        if (attackUnits > attackedUser.defendUnits) {
-          const winningAttackers = attackers[attackedUser.userId].filter(
-            (user) => user.attackUnits > attackedUser.defendUnits
-          );
-          const totalAttackUnits = winningAttackers.reduce((total, item) => total + item.attackUnits, 0);
-          const winningRatio = attackUnits / totalAttackUnits;
+      const attackedUser = users[attackUserId];
 
-          const stolenToken = Math.floor(winningRatio * earningStealPercent * attackedUser.tokenEarnFromEarning);
-          user.tokenEarnFromAttacking = stolenToken;
-          user.totalTokenReward += stolenToken;
-          user.attackResults.push({
-            userId: attackedUser.userId,
-            result: 'win',
-            attackUnits,
-            defendUnits: attackedUser.defendUnits,
-            winningRatio,
-          });
+      if (attackUnits > attackedUser.defendUnits) {
+        const winningAttackers = attackers[attackedUser.userId].filter(
+          (user) => user.attackUnits > attackedUser.defendUnits
+        );
+        const totalAttackUnits = winningAttackers.reduce((total, item) => total + item.attackUnits, 0);
+        const winningRatio = attackUnits / totalAttackUnits;
 
-          attackedUser.tokenStolen += stolenToken;
-          attackedUser.totalTokenReward -= stolenToken;
-          attackedUser.defendResults.push({
-            userId,
-            result: 'lose',
-            attackUnits,
-            defendUnits: attackedUser.defendUnits,
-          });
-        }
+        const stolenToken = Math.floor(winningRatio * earningStealPercent * attackedUser.tokenEarnFromEarning);
+        user.tokenEarnFromAttacking = stolenToken;
+        user.totalTokenReward += stolenToken;
+        user.attackResults.push({
+          userId: attackedUser.userId,
+          result: 'win',
+          attackUnits,
+          defendUnits: attackedUser.defendUnits,
+          winningRatio,
+        });
 
-        if (attackUnits < attackedUser.defendUnits) {
-          const machinesLost = Math.max(Math.floor(attackUnits * machinePercentLost), 1);
-          user.machinesLost = machinesLost;
-          user.attackResults.push({
-            userId: attackedUser.userId,
-            result: 'lose',
-            attackUnits,
-            defendUnits: attackedUser.defendUnits,
-            winningRatio: 0,
-          });
+        attackedUser.tokenStolen += stolenToken;
+        attackedUser.totalTokenReward -= stolenToken;
+        attackedUser.defendResults.push({
+          userId,
+          result: 'lose',
+          attackUnits,
+          defendUnits: attackedUser.defendUnits,
+        });
+      }
 
-          attackedUser.defendResults.push({
-            userId,
-            result: 'win',
-            attackUnits,
-            defendUnits: attackedUser.defendUnits,
-          });
-        }
+      if (attackUnits < attackedUser.defendUnits) {
+        const machinesLost = Math.max(Math.floor(attackUnits * machinePercentLost), 1);
+        user.machinesLost = machinesLost;
+        user.attackResults.push({
+          userId: attackedUser.userId,
+          result: 'lose',
+          attackUnits,
+          defendUnits: attackedUser.defendUnits,
+          winningRatio: 0,
+        });
 
-        if (attackUnits === attackedUser.defendUnits) {
-          user.attackResults.push({
-            userId: attackedUser.userId,
-            result: 'draw',
-            attackUnits,
-            defendUnits: attackedUser.defendUnits,
-            winningRatio: 0,
-          });
+        attackedUser.defendResults.push({
+          userId,
+          result: 'win',
+          attackUnits,
+          defendUnits: attackedUser.defendUnits,
+        });
+      }
 
-          attackedUser.defendResults.push({
-            userId,
-            result: 'draw',
-            attackUnits,
-            defendUnits: attackedUser.defendUnits,
-          });
-        }
+      if (attackUnits === attackedUser.defendUnits) {
+        user.attackResults.push({
+          userId: attackedUser.userId,
+          result: 'draw',
+          attackUnits,
+          defendUnits: attackedUser.defendUnits,
+          winningRatio: 0,
+        });
+
+        attackedUser.defendResults.push({
+          userId,
+          result: 'draw',
+          attackUnits,
+          defendUnits: attackedUser.defendUnits,
+        });
       }
     }
 
@@ -447,6 +447,7 @@ export const getUsersToAttack = async ({ page, limit, search }) => {
       rank: index + 1,
       username: usernames[doc.data().userId],
       lastDayTokenReward: 0,
+      active: doc.data().active,
     }));
 
     return { totalDocs, docs: users };
@@ -467,6 +468,7 @@ export const getUsersToAttack = async ({ page, limit, search }) => {
     rank: ranks[doc.data().userId],
     username: usernames[doc.data().userId],
     lastDayTokenReward: totalTokenRewards[doc.data().userId] || 0,
+    active: doc.data().active,
   }));
 
   return { totalDocs, docs: users };
