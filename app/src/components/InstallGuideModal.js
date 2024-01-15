@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Box, Dialog, Typography } from '@mui/material';
 
 import { getPWADisplayMode, getUserOS } from '../utils/pwa';
@@ -13,6 +14,7 @@ const guideMap = {
 };
 
 const InstallGuideModal = () => {
+  const { pathname } = useLocation();
   const [modalStatus, setModalStatus] = useState({
     open: false,
     os: null,
@@ -22,7 +24,7 @@ const InstallGuideModal = () => {
     const displayMode = getPWADisplayMode();
     if (displayMode === 'browser') {
       const os = getUserOS();
-      if (['iOS', 'Android'].includes(os)) {
+      if (['iOS', 'Android'].includes(os) && pathname !== '/deposit') {
         setModalStatus({ open: true, os });
       }
     }
