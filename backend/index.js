@@ -35,8 +35,8 @@ const main = () => {
 
 main();
 
-// everyday at 1am
-cron.schedule('0 1 * * *', function () {
+// everyday every 4th hrs
+cron.schedule('0 */4 * * *', function () {
   generateDailyWarSnapshot();
 });
 

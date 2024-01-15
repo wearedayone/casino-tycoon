@@ -676,8 +676,10 @@ const Game = () => {
               token: tokenSwap === 'eth' ? '$FIAT' : 'ETH',
               description: tokenSwap === 'eth' ? 'Swap ETH to $FIAT completed' : 'Swap $FIAT to ETH completed',
             });
+            reloadBalance();
           }
         } catch (err) {
+          console.log({ err });
           let message = err.message;
           let errorCode = err.code?.toString();
           if (!errorCode && message === 'Network Error') {
