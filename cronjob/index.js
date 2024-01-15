@@ -1,9 +1,8 @@
 import cron from 'node-cron';
-import { updateFIATPrice } from './tasks/updateFIATPrice.js';
+import { updateFIATPriceUniswapV3, updateFIATPriceUniswapV2 } from './tasks/updateFIATPrice.js';
 import calculateAvgPrice from './tasks/calculateAvgPrice.js';
-
 cron.schedule('*/15 * * * *', function () {
-  updateFIATPrice();
+  updateFIATPriceUniswapV2();
 });
 
 // everyday at 1am

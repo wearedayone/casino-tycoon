@@ -208,6 +208,7 @@ class PopupSwap extends Popup {
     scene.game.events.on('update-balances', ({ ETHBalance, tokenBalance }) =>
       this.updateBalance({ ETHBalance, tokenBalance })
     );
+    this.scene.game.events.emit('request-balances');
     scene.game.events.on('swap-completed', () => this.setLoading(false));
     scene.game.events.on('swap-started', ({ txnHash }) => {
       this.setLoading(false);
@@ -270,7 +271,7 @@ class PopupSwap extends Popup {
   }
 
   onOpen() {
-    this.scene.game.events.emit('request-balances');
+    // this.scene.game.events.emit('request-balances');
   }
 
   validate() {
