@@ -162,7 +162,7 @@ class PopupWarAttack extends Popup {
         const bg = this.scene.add.image(this.popup.width / 2 - 90, y, 'row-container').setOrigin(0.5, 0);
         this.items.push(bg);
       }
-      const { id, rank, username, lastDayTokenReward } = this.users[i];
+      const { id, rank, username, lastDayTokenReward, active } = this.users[i];
       const rankText = this.scene.add
         .text(this.popup.width * 0.05, y + rowHeight / 2, `${rank}`, smallBlackBoldCenter)
         .setOrigin(0.5, 0.5);
@@ -191,7 +191,7 @@ class PopupWarAttack extends Popup {
 
       this.items.push(rankText, usernameText, lastDayTokenRewardText, profileBtn);
 
-      if (id !== this.uid) {
+      if (id !== this.uid && active) {
         const attackBtn = new TextButton(
           this.scene,
           this.popup.width * 0.58 + 200,
