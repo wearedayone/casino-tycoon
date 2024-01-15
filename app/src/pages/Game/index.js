@@ -1022,6 +1022,9 @@ const Game = () => {
             gameRef.current?.events.emit('swap-error');
             console.error(err);
             Sentry.captureException(err);
+            if (err.message.includes('Not enough')) {
+              enqueueSnackbar(err.message, { variant: 'error' });
+            }
           });
       });
 
@@ -1085,6 +1088,9 @@ const Game = () => {
             gameRef.current?.events.emit('swap-error');
             console.error(err);
             Sentry.captureException(err);
+            if (err.message.includes('Not enough')) {
+              enqueueSnackbar(err.message, { variant: 'error' });
+            }
           });
       });
 

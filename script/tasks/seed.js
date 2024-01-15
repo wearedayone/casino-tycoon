@@ -3,7 +3,7 @@ import moment from 'moment';
 import admin, { firestore } from '../configs/admin.config.js';
 import environments from '../utils/environments.js';
 
-const { TOKEN_ADDRESS, NFT_ADDRESS, GAME_CONTRACT_ADDRESS, ROUTER_ADDRESS, WETH_ADDRESS } = environments;
+const { TOKEN_ADDRESS, NFT_ADDRESS, GAME_CONTRACT_ADDRESS, ROUTER_ADDRESS, WETH_ADDRESS, PAIR_ADDRESS } = environments;
 
 const warConfig = {
   buildingBonusMultiple: 1,
@@ -105,6 +105,7 @@ const main = async () => {
       gameAddress: GAME_CONTRACT_ADDRESS,
       routerAddress: ROUTER_ADDRESS,
       wethAddress: WETH_ADDRESS,
+      pairAddress: PAIR_ADDRESS,
       prizePoolConfig,
       warConfig,
       referralConfig,
