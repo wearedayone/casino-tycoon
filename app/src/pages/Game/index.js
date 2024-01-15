@@ -600,6 +600,10 @@ const Game = () => {
         gameRef.current.events.emit('update-claimable-status', { claimable, active: gamePlay.active });
       });
 
+      gameRef.current?.events.on('request-active-status', () => {
+        gameRef.current.events.emit('update-active-status', { active: gamePlay.active });
+      });
+
       gameRef.current?.events.on('request-war-history', () => {
         getWarHistory()
           .then((res) => gameRef.current.events.emit('update-war-history', res.data))
@@ -1215,6 +1219,10 @@ const Game = () => {
   useEffect(() => {
     gameRef.current?.events.emit('update-season-countdown', countdownString);
   }, [countdownString]);
+
+  useEffect(() => {
+    gameRef.current?.events.emit('update-active-status', { active: gamePlay?.active });
+  }, [gamePlay?.active]);
 
   useEffect(() => {
     gameRef.current?.events.emit('game-sound-changed', { sound });

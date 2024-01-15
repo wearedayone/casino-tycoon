@@ -84,7 +84,7 @@ class PopupBuyGangster extends Popup {
         scene.game.events.emit(events.buyGangster, { quantity: this.quantity, mintFunction: this.mintFunction });
       },
       'Buy',
-      { sound: 'buy', disabledImage: 'button-disabled' }
+      { sound: 'buy' }
     );
     this.add(this.upgradeBtn);
 

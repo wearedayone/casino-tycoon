@@ -9,7 +9,16 @@ class TextButton extends Button {
     pressedImage,
     onClick,
     text,
-    { color = '#fff', fontSize = '60px', icon, iconPosition = 'start', sound, disabledImage, onHold, onRelease } = {}
+    {
+      color = '#fff',
+      fontSize = '60px',
+      icon,
+      iconPosition = 'start',
+      sound,
+      disabledImage = 'button-disabled',
+      onHold,
+      onRelease,
+    } = {}
   ) {
     super(scene, x, y, defaultImage, pressedImage, onClick, { sound, disabledImage, onHold, onRelease });
 
