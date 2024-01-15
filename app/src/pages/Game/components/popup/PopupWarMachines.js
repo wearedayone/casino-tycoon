@@ -430,6 +430,9 @@ class PopupWarMachines extends Popup {
     this.attackUserText.text = `Raid user: ${this.attackUser ? `@${this.attackUser.username}` : 'null'}`;
     this.workerBonusTokenText.text = `Goon Bonus: ${formatter.format(this.workerBonusToken)} $FIAT`;
     this.buildingBonusText.text = `Safehouse Bonus: ${formatter.format(this.buildingBonus)}`;
+
+    console.log('this.scene', this.scene);
+    this.nextBtn.setDisabledState(!this.scene?.isUserActive);
   }
 }
 

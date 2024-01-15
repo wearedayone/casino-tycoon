@@ -228,16 +228,18 @@ class PopupLeaderboard extends Popup {
     );
     this.add(this.buttonBack);
 
-    this.buttonRetire = new Button(
+    this.buttonRetire = new TextButton(
       scene,
       width / 2 + this.popup.width * 0.23,
       height / 2 + this.popup.height / 2 - 20,
-      'button-retire',
-      'button-retire-pressed',
+      'button-green',
+      'button-green-pressed',
       () => {
         this.close();
         scene.popupRetire.open();
-      }
+      },
+      'Retire',
+      { fontSize: '82px' }
     ).setVisible(false);
     this.add(this.buttonRetire);
 
@@ -254,6 +256,10 @@ class PopupLeaderboard extends Popup {
     scene.game.events.on(events.updateSeason, (data) => this.updateValues(data));
     scene.game.events.on(events.updateLeaderboard, (data) => this.updateLeaderboard(data));
     scene.game.events.on(events.updateSeasonCountdown, (string) => (this.gameEndTime.text = string));
+    scene.game.events.on('update-active-status', ({ active }) => {
+      this.buttonRetire.setDisabledState(!active);
+    });
+    scene.game.events.emit('request-active-status');
   }
 
   onOpen() {

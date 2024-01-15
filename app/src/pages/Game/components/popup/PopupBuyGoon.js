@@ -324,7 +324,7 @@ class PopupBuyGoon extends Popup {
 
     const insufficientBalance = this.quantity > this.estimatedMaxPurchase;
     this.insufficientBalance.setVisible(insufficientBalance);
-    this.upgradeBtn.setDisabledState(this.scene?.isGameEnded || insufficientBalance);
+    this.upgradeBtn.setDisabledState(this.scene?.isGameEnded || !this.scene?.isUserActive || insufficientBalance);
   }
 }
 
