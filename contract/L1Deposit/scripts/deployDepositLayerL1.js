@@ -2,7 +2,7 @@ const fs = require('fs');
 const { ethers } = require('hardhat');
 
 async function main() {
-  const adminWallet = '0xd88A3D28c2a04b39A6c6521F8D8037C3c3B5e96c';
+  const adminWallet = '0x2f9f3D08f9F5eD6527d02C42cbF4ac54Bef49D13';
 
   const depositLayerL1Contract = await ethers.getContractFactory('DepositLayerL1');
   const depositLayerL1 = await depositLayerL1Contract.deploy(adminWallet);

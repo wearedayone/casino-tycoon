@@ -2,22 +2,36 @@ require('dotenv').config();
 
 require('@nomicfoundation/hardhat-toolbox');
 require('hardhat-gas-reporter');
+require('hardhat-contract-sizer');
 
 const secrets = require('./secrets.json');
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
   solidity: '0.8.20',
-  networks: {
-    hardhat: {},
-    defaultNetwork: {
-      url: 'hardhat',
+  settings: {
+    optimizer: {
+      enabled: true,
+      runs: 200,
     },
+  },
+  contractSizer: {
+    alphaSort: true,
+    runOnCompile: true,
+    disambiguatePaths: false,
+  },
+  networks: {
     // eth_mainnet: {
     //   url: secrets.eth_mainnet_url || ``,
     //   accounts: [secrets.eth_mainnet_key],
     //   gasPrice: 15000000000,
     // },
+    defaultNetwork: {
+      url: 'hardhat',
+    },
+    hardhat: {
+      allowUnlimitedContractSize: true,
+    },
     eth_goerli: {
       url: secrets.eth_goerli_url,
       accounts: [
@@ -28,6 +42,32 @@ module.exports = {
       ],
       gasPrice: 15000000000,
     },
+    // eth_sepolia: {
+    //   url: secrets.sepolia_url || ``,
+    //   accounts: [secrets.sepolia_key],
+    // },
+    base_goerli: {
+      url: secrets.base_goerli_url || ``,
+      accounts: [secrets.base_goerli_key],
+      gasPrice: 1000000000,
+      verify: {
+        etherscan: {
+          apiUrl: 'https://api-goerli.basescan.org',
+          apiKey: process.env.ETHERSCAN_API_KEY ?? 'ETHERSCAN_API_KEY',
+        },
+      },
+    },
+    // base_mainnet: {
+    //   url: secrets.base_mainnet_url || ``,
+    //   accounts: [secrets.base_mainnet_key],
+    //   gasPrice: 1000000000,
+    //   verify: {
+    //     etherscan: {
+    //       apiUrl: 'https://api.basescan.org',
+    //       apiKey: process.env.BASE_ETHERSCAN_API_KEY ?? 'ETHERSCAN_API_KEY',
+    //     },
+    //   },
+    // },
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,
@@ -45,6 +85,22 @@ module.exports = {
       baseGoerli: 'TPCIRFTJIGMCKINI7RZFXUQDJ48YY1ZJ4I',
     },
     customChains: [
+      // {
+      //   network: 'mantle_testnet',
+      //   chainId: 5001,
+      //   urls: {
+      //     apiURL: 'https://explorer.testnet.mantle.xyz/api',
+      //     browserURL: 'https://explorer.testnet.mantle.xyz',
+      //   },
+      // },
+      // {
+      //   network: 'base_mainnet',
+      //   chainId: 8453,
+      //   urls: {
+      //     apiURL: 'https://api.basescan.org/api',
+      //     browserURL: 'https://goerli.basescan.org',
+      //   },
+      // },
       {
         network: 'base_mainnet',
         chainId: 8453,
