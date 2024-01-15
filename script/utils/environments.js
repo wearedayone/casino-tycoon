@@ -10,6 +10,8 @@ const environments = {
   TOKEN_ADDRESS: process.env.TOKEN_ADDRESS,
   NFT_ADDRESS: process.env.NFT_ADDRESS,
   GAME_CONTRACT_ADDRESS: process.env.GAME_CONTRACT_ADDRESS,
+  ROUTER_ADDRESS: process.env.ROUTER_ADDRESS,
+  WETH_ADDRESS: process.env.WETH_ADDRESS,
   PRIVY_APP_ID: process.env.PRIVY_APP_ID,
   PRIVY_APP_SECRET: process.env.PRIVY_APP_SECRET,
 };

@@ -1,11 +1,7 @@
 import { Contract } from '@ethersproject/contracts';
 import { usePrivy } from '@privy-io/react-auth';
-import { parseEther, parseUnits, formatEther } from '@ethersproject/units';
-import IUniswapV3PoolABI from '@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Pool.sol/IUniswapV3Pool.json';
-import SwapRouterABI from '@uniswap/v3-periphery/artifacts/contracts/interfaces/ISwapRouter.sol/ISwapRouter.json';
-import UniswapV3Factory from '@uniswap/v3-core/artifacts/contracts/UniswapV3Factory.sol/UniswapV3Factory.json';
-// import QuoterABI from '@uniswap/v3-periphery/artifacts/contracts/interfaces/IQuoter.sol/IQuoter.json';
-import QuoterV2ABI from '@uniswap/v3-periphery/artifacts/contracts/interfaces/IQuoterV2.sol/IQuoterV2.json';
+import { parseEther, formatEther } from '@ethersproject/units';
+import RouterABI from '@uniswap/v2-periphery/build/IUniswapV2Router02.json';
 
 import useUserWallet from './useUserWallet';
 import useSystemStore from '../stores/system.store';
@@ -15,27 +11,7 @@ import nftAbi from '../assets/abis/NFT.json';
 import { formatter } from '../utils/numbers';
 import environments from '../utils/environments';
 
-const {
-  NETWORK_ID,
-  UNISWAP_QUOTER_V2_ADDRESS,
-  UNISWAP_SWAP_ROUTER_ADDRESS,
-  UNISWAP_FACTORY_ADDRESS,
-  UNISWAP_POOL_FEE,
-  UNISWAP_WETH_ADDRESS,
-  ETH_DECIMALS,
-  TOKEN_DECIMALS,
-} = environments;
-
-console.log({
-  NETWORK_ID,
-  UNISWAP_QUOTER_V2_ADDRESS,
-  UNISWAP_SWAP_ROUTER_ADDRESS,
-  UNISWAP_FACTORY_ADDRESS,
-  UNISWAP_POOL_FEE,
-  UNISWAP_WETH_ADDRESS,
-  ETH_DECIMALS,
-  TOKEN_DECIMALS,
-});
+const { NETWORK_ID } = environments;
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -48,6 +24,8 @@ const useSmartContract = () => {
     tokenAddress: TOKEN_ADDRESS,
     gameAddress: GAME_CONTRACT_ADDRESS,
     nftAddress: NFT_ADDRESS,
+    routerAddress: ROUTER_ADDRESS,
+    wethAddress: WETH_ADDRESS,
   } = activeSeason || {};
 
   const loadedAssets = !!TOKEN_ADDRESS && !!GAME_CONTRACT_ADDRESS && !!NFT_ADDRESS && !!embeddedWallet;
@@ -331,198 +309,136 @@ const useSmartContract = () => {
     return minted;
   };
 
-  const getPoolState = async (poolContract) => {
-    const slot = await poolContract.slot0();
-
-    const state = {
-      sqrtPriceX96: slot[0],
-    };
-
-    return state;
-  };
-
   const getSwapContractInfo = async () => {
-    const quoterAddress = UNISWAP_QUOTER_V2_ADDRESS;
-    const swapRouterAddress = UNISWAP_SWAP_ROUTER_ADDRESS;
-    const factoryAddress = UNISWAP_FACTORY_ADDRESS;
-    const fee = Number(UNISWAP_POOL_FEE);
-
     const privyProvider = await embeddedWallet.getEthereumProvider();
 
-    const ethDecimals = Number(ETH_DECIMALS);
-    const ethAddress = UNISWAP_WETH_ADDRESS;
+    const tokenAddress = TOKEN_ADDRESS;
+    const routerAddress = ROUTER_ADDRESS;
+    const wethAddress = WETH_ADDRESS;
 
-    const tokenDecimals = Number(TOKEN_DECIMALS);
-    // const tokenAddress = '0x8C2226F10D1abc6cFF3DD170f5b07101dd5D6E37'; // for test
-    const tokenAddress = TOKEN_ADDRESS; //  for release
-
-    const factoryContract = new Contract(factoryAddress, UniswapV3Factory.abi, privyProvider.provider);
-    const poolAddress = await factoryContract.getPool(ethAddress, tokenAddress, fee);
-
-    const poolContract = new Contract(poolAddress, IUniswapV3PoolABI.abi, privyProvider.provider);
-    const swapRouterContract = new Contract(swapRouterAddress, SwapRouterABI.abi, privyProvider.provider);
-    const quoterContract = new Contract(quoterAddress, QuoterV2ABI.abi, privyProvider.provider);
+    const routerContract = new Contract(routerAddress, RouterABI.abi, privyProvider.provider);
+    const tokenContract = new Contract(tokenAddress, tokenAbi.abi, privyProvider.provider);
 
     return {
-      quoterAddress,
-      swapRouterAddress,
-      factoryAddress,
-      poolAddress,
-      ethAddress,
-      factoryContract,
-      poolContract,
-      swapRouterContract,
-      quoterContract,
-      ethDecimals,
+      routerAddress,
       tokenAddress,
-      tokenDecimals,
-      fee,
+      wethAddress,
+      routerContract,
+      tokenContract,
     };
   };
 
   const convertEthInputToToken = async (ethAmount) => {
     if (!loadedAssets) return 0;
-    const { fee, ethAddress, ethDecimals, tokenAddress, tokenDecimals, quoterContract, poolContract } =
-      await getSwapContractInfo();
+    const { tokenAddress, routerContract, wethAddress } = await getSwapContractInfo();
 
-    const { sqrtPriceX96 } = await getPoolState(poolContract);
+    const amountIn = parseEther(`${ethAmount}`);
+    const res = await routerContract.getAmountsOut(amountIn, [wethAddress, tokenAddress]);
+    const amount = formatEther(res[1]);
 
-    const amountIn = parseUnits(ethAmount.toString(), ethDecimals);
-    const res = await quoterContract.callStatic.quoteExactInputSingle([ethAddress, tokenAddress, amountIn, fee, '0']);
-    const resultAmount = res[0];
-    const sqrtPriceX96After = res[1];
-    const diff = Math.abs(Number(sqrtPriceX96After.toString()) - Number(sqrtPriceX96.toString()));
-    const priceImpact = diff / Number(sqrtPriceX96After.toString());
-    return { amount: (Number(resultAmount.toString()) / Math.pow(10, tokenDecimals)).toLocaleString(), priceImpact };
+    return { amount, priceImpact: 0 };
   };
 
   const convertEthOutputToToken = async (ethAmount) => {
     if (!loadedAssets) return 0;
-    const { fee, ethAddress, ethDecimals, tokenAddress, tokenDecimals, quoterContract, poolContract } =
-      await getSwapContractInfo();
+    const { tokenAddress, routerContract, wethAddress } = await getSwapContractInfo();
 
-    const { sqrtPriceX96 } = await getPoolState(poolContract);
+    const amountOut = parseEther(`${ethAmount}`);
+    const res = await routerContract.getAmountsIn(amountOut, [tokenAddress, wethAddress]);
 
-    const amountOut = parseUnits(ethAmount.toString(), ethDecimals);
-    const res = await quoterContract.callStatic.quoteExactOutputSingle([tokenAddress, ethAddress, amountOut, fee, '0']);
-    const resultAmount = res[0];
-    const sqrtPriceX96After = res[1];
-    const diff = Math.abs(Number(sqrtPriceX96After.toString()) - Number(sqrtPriceX96.toString()));
-    const priceImpact = diff / Number(sqrtPriceX96After.toString());
-    return { amount: (Number(resultAmount.toString()) / Math.pow(10, tokenDecimals)).toLocaleString(), priceImpact };
+    const amount = formatEther(res[0]);
+    return { amount, priceImpact: 0 };
   };
 
   const convertTokenInputToEth = async (tokenAmount) => {
     if (!loadedAssets) return 0;
-    const { fee, ethAddress, ethDecimals, tokenAddress, tokenDecimals, quoterContract, poolContract } =
-      await getSwapContractInfo();
+    const { tokenAddress, routerContract, wethAddress } = await getSwapContractInfo();
 
-    const { sqrtPriceX96 } = await getPoolState(poolContract);
+    const amountIn = parseEther(`${tokenAmount}`);
+    const res = await routerContract.getAmountsOut(amountIn, [tokenAddress, wethAddress]);
+    const amount = formatEther(res[1]);
 
-    const amountIn = parseUnits(tokenAmount.toString(), tokenDecimals);
-    const res = await quoterContract.callStatic.quoteExactInputSingle([tokenAddress, ethAddress, amountIn, fee, '0']);
-
-    const resultAmount = res[0];
-    const sqrtPriceX96After = res[1];
-    const diff = Math.abs(Number(sqrtPriceX96After.toString()) - Number(sqrtPriceX96.toString()));
-    const priceImpact = diff / Number(sqrtPriceX96After.toString());
-    return { amount: (Number(resultAmount.toString()) / Math.pow(10, ethDecimals)).toLocaleString(), priceImpact };
+    return { amount, priceImpact: 0 };
   };
 
   const convertTokenOutputToEth = async (tokenAmount) => {
     if (!loadedAssets) return 0;
-    const { fee, ethAddress, ethDecimals, tokenAddress, tokenDecimals, quoterContract, poolContract } =
-      await getSwapContractInfo();
+    const { tokenAddress, routerContract, wethAddress } = await getSwapContractInfo();
 
-    const { sqrtPriceX96 } = await getPoolState(poolContract);
+    const amountOut = parseEther(`${tokenAmount}`);
+    const res = await routerContract.getAmountsIn(amountOut, [wethAddress, tokenAddress]);
 
-    const amountOut = parseUnits(tokenAmount.toString(), tokenDecimals);
-    const res = await quoterContract.callStatic.quoteExactOutputSingle([ethAddress, tokenAddress, amountOut, fee, '0']);
-    console.log(res);
-    const resultAmount = res[0];
-    const sqrtPriceX96After = res[1];
-    const diff = Math.abs(Number(sqrtPriceX96After.toString()) - Number(sqrtPriceX96.toString()));
-    const priceImpact = diff / Number(sqrtPriceX96After.toString());
-    return { amount: (Number(resultAmount.toString()) / Math.pow(10, ethDecimals)).toLocaleString(), priceImpact };
+    const amount = formatEther(res[0]);
+    return { amount, priceImpact: 0 };
   };
 
   const swapEthToToken = async (amount) => {
     if (!loadedAssets) return false;
 
-    const { ethAddress, ethDecimals, tokenAddress, swapRouterAddress, fee } = await getSwapContractInfo();
-
-    const privyProvider = await embeddedWallet.getEthereumProvider();
-    const amountIn = parseUnits(amount.toString(), ethDecimals);
+    const { tokenAddress, routerContract, routerAddress, wethAddress } = await getSwapContractInfo();
 
     const { amount: tokenAmount } = await convertEthInputToToken(amount);
 
-    const swapRouterContract = new Contract(swapRouterAddress, SwapRouterABI.abi, privyProvider.provider);
+    const paths = [wethAddress, tokenAddress];
+    const deadline = Math.floor(Date.now() / 1000 + 10 * 60);
+    const params = [0, paths, embeddedWallet.address, deadline];
 
-    const params = {
-      tokenIn: ethAddress,
-      tokenOut: tokenAddress,
-      fee: fee,
-      recipient: embeddedWallet.address,
-      deadline: Math.floor(Date.now() / 1000) + 60 * 10,
-      amountIn,
-      amountOutMinimum: 0,
-      sqrtPriceLimitX96: 0,
-    };
-
-    const swapData = swapRouterContract.interface.encodeFunctionData('exactInputSingle', [params]);
-    const swapUnsignedTxn = {
-      to: swapRouterAddress,
+    const data = routerContract.interface.encodeFunctionData(
+      'swapExactETHForTokensSupportingFeeOnTransferTokens',
+      params
+    );
+    const unsignedTx = {
+      to: routerAddress,
       chainId: Number(NETWORK_ID),
-      data: swapData,
+      data,
       // eslint-disable-next-line
-      value: BigInt(amount * Math.pow(10, ethDecimals)),
+      value: BigInt(parseEther(`${amount}`).toString()),
     };
-    const receipt = await sendTransaction(swapUnsignedTxn);
+    const receipt = await sendTransaction(unsignedTx);
+
     return { receipt, receiveAmount: tokenAmount };
   };
 
   const swapTokenToEth = async (amount) => {
     if (!loadedAssets) return false;
 
-    const { ethAddress, tokenAddress, tokenDecimals, swapRouterAddress, fee } = await getSwapContractInfo();
+    const { tokenAddress, routerAddress, routerContract, wethAddress, tokenContract } = await getSwapContractInfo();
 
-    const privyProvider = await embeddedWallet.getEthereumProvider();
-    const amountIn = parseUnits(amount.toString(), tokenDecimals);
-
+    const amountIn = parseEther(`${amount}`);
     const { amount: ethAmount } = await convertTokenInputToEth(amount);
 
-    const tokenContract = new Contract(tokenAddress, tokenAbi.abi, privyProvider.provider);
+    const res = await tokenContract.allowance(embeddedWallet.address, routerAddress);
+    const approvedAmountInWei = res.toString();
+    const approvedAmountInToken = Number(approvedAmountInWei.slice(0, approvedAmountInWei.length - 18));
+    const needApprovedMore = approvedAmountInToken < amount;
 
-    const approveData = tokenContract.interface.encodeFunctionData('approve', [swapRouterAddress, amountIn.toString()]);
-    const approveUnsignedTx = {
-      to: tokenAddress,
+    if (needApprovedMore) {
+      // eslint-disable-next-line no-undef
+      const approveValueBigint = BigInt(parseEther(1e9 + '').toString());
+      const data = tokenContract.interface.encodeFunctionData('approve', [routerAddress, approveValueBigint]);
+      const unsignedTx = {
+        to: tokenAddress,
+        chainId: Number(NETWORK_ID),
+        data,
+      };
+      await sendTransaction(unsignedTx);
+      await delay(1000);
+    }
+
+    const paths = [tokenAddress, wethAddress];
+    const deadline = Math.floor(Date.now() / 1000 + 10 * 60);
+    const params = [amountIn, 0, paths, embeddedWallet.address, deadline];
+
+    const data = routerContract.interface.encodeFunctionData(
+      'swapExactTokensForETHSupportingFeeOnTransferTokens',
+      params
+    );
+    const unsignedTx = {
+      to: routerAddress,
       chainId: Number(NETWORK_ID),
-      data: approveData,
+      data,
     };
-    const signTxn = await sendTransaction(approveUnsignedTx);
-    console.log({ signTxn });
-    await delay(1000);
-
-    const swapRouterContract = new Contract(swapRouterAddress, SwapRouterABI.abi, privyProvider.provider);
-
-    const params = {
-      tokenIn: tokenAddress,
-      tokenOut: ethAddress,
-      fee: fee,
-      recipient: embeddedWallet.address,
-      deadline: Math.floor(Date.now() / 1000) + 60 * 10,
-      amountIn,
-      amountOutMinimum: 0,
-      sqrtPriceLimitX96: 0,
-    };
-
-    const swapData = swapRouterContract.interface.encodeFunctionData('exactInputSingle', [params]);
-    const swapUnsignedTxn = {
-      to: swapRouterAddress,
-      chainId: Number(NETWORK_ID),
-      data: swapData,
-    };
-    const receipt = await sendTransaction(swapUnsignedTxn);
+    const receipt = await sendTransaction(unsignedTx);
     return { receipt, receiveAmount: ethAmount };
   };
 

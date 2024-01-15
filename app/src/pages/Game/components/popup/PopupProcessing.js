@@ -113,15 +113,15 @@ class PopupProcessing extends Popup {
         switch (completedEvent) {
           case 'buy-gangster-completed':
           case 'simulator-buy-gangster-completed':
-            title = `${amount.toLocaleString()} Gangster${amount > 1 ? 's' : ''}`;
+            title = `${formatter.format(amount)} Gangster${amount > 1 ? 's' : ''}`;
             desc = 'Gangsters hired successfully.';
             break;
           case 'deposit-nft-completed':
-            title = `${amount.toLocaleString()} NFT${amount > 1 ? 's' : ''}`;
+            title = `${formatter.format(amount)} NFT${amount > 1 ? 's' : ''}`;
             desc = 'Staking completed.';
             break;
           case 'withdraw-token-completed':
-            title = `${amount.toLocaleString()} $FIAT`;
+            title = `${formatter.format(amount)} $FIAT`;
             desc = 'Withdraw completed.';
             break;
           case 'withdraw-eth-completed':
@@ -129,10 +129,10 @@ class PopupProcessing extends Popup {
             desc = 'Withdraw completed.';
             break;
           case 'withdraw-nft-completed':
-            title = `${amount.toLocaleString()} NFT${amount > 1 ? 's' : ''}`;
+            title = `${formatter.format(amount)} NFT${amount > 1 ? 's' : ''}`;
             desc = 'Withdraw completed.';
           case 'swap-completed':
-            title = `${amount.toLocaleString()} ${token}`;
+            title = `${formatter.format(amount)} ${token}`;
             desc = description;
             break;
           case 'retire-completed':
