@@ -2,6 +2,7 @@ import { Contract } from '@ethersproject/contracts';
 import { usePrivy } from '@privy-io/react-auth';
 import { parseEther, formatEther } from '@ethersproject/units';
 import RouterABI from '@uniswap/v2-periphery/build/IUniswapV2Router02.json';
+import PairABI from '@uniswap/v2-core/build/IUniswapV2Pair.json';
 
 import useUserWallet from './useUserWallet';
 import useSystemStore from '../stores/system.store';
@@ -26,6 +27,7 @@ const useSmartContract = () => {
     nftAddress: NFT_ADDRESS,
     routerAddress: ROUTER_ADDRESS,
     wethAddress: WETH_ADDRESS,
+    pairAddress: PAIR_ADDRESS,
   } = activeSeason || {};
 
   const loadedAssets = !!TOKEN_ADDRESS && !!GAME_CONTRACT_ADDRESS && !!NFT_ADDRESS && !!embeddedWallet;
@@ -315,9 +317,11 @@ const useSmartContract = () => {
     const tokenAddress = TOKEN_ADDRESS;
     const routerAddress = ROUTER_ADDRESS;
     const wethAddress = WETH_ADDRESS;
+    const pairAddress = PAIR_ADDRESS;
 
     const routerContract = new Contract(routerAddress, RouterABI.abi, privyProvider.provider);
     const tokenContract = new Contract(tokenAddress, tokenAbi.abi, privyProvider.provider);
+    const pairContract = new Contract(pairAddress, PairABI.abi, privyProvider.provider);
 
     return {
       routerAddress,
@@ -325,57 +329,89 @@ const useSmartContract = () => {
       wethAddress,
       routerContract,
       tokenContract,
+      pairContract,
     };
+  };
+
+  const currentPoolState = async () => {
+    const { pairContract, wethAddress } = await getSwapContractInfo();
+    const token0 = await pairContract.token0();
+    const reserves = await pairContract.getReserves();
+    const [wethInPool, tokenInPool] =
+      token0.toLowerCase() === wethAddress.toLowerCase() ? reserves : reserves.slice().reverse();
+    const k = reserves[0] * reserves[1];
+    return { wethInPool, tokenInPool, k };
   };
 
   const convertEthInputToToken = async (ethAmount) => {
     if (!loadedAssets) return 0;
-    const { tokenAddress, routerContract, wethAddress } = await getSwapContractInfo();
+    const { tokenAddress, wethAddress, routerContract } = await getSwapContractInfo();
 
     const amountIn = parseEther(`${ethAmount}`);
     const res = await routerContract.getAmountsOut(amountIn, [wethAddress, tokenAddress]);
     const amount = formatEther(res[1]);
 
-    return { amount, priceImpact: 0 };
+    const { tokenInPool } = await currentPoolState();
+    const priceImpact = Number(res[1].toString()) / Number(tokenInPool.toString());
+
+    return { amount, priceImpact };
   };
 
   const convertEthOutputToToken = async (ethAmount) => {
     if (!loadedAssets) return 0;
-    const { tokenAddress, routerContract, wethAddress } = await getSwapContractInfo();
+    const { tokenAddress, wethAddress, routerContract } = await getSwapContractInfo();
+    const { wethInPool } = await currentPoolState();
+    if (ethAmount >= Number(formatEther(wethInPool).toString()))
+      throw new Error(
+        `Not enough ETH in pool, ETH left: ${formatter.format(Number(formatEther(wethInPool).toString()))}`
+      );
 
     const amountOut = parseEther(`${ethAmount}`);
     const res = await routerContract.getAmountsIn(amountOut, [tokenAddress, wethAddress]);
-
     const amount = formatEther(res[0]);
-    return { amount, priceImpact: 0 };
+
+    const priceImpact = Number(amountOut.toString()) / Number(wethInPool.toString());
+
+    return { amount, priceImpact };
   };
 
   const convertTokenInputToEth = async (tokenAmount) => {
     if (!loadedAssets) return 0;
-    const { tokenAddress, routerContract, wethAddress } = await getSwapContractInfo();
+    const { tokenAddress, wethAddress, routerContract } = await getSwapContractInfo();
 
     const amountIn = parseEther(`${tokenAmount}`);
     const res = await routerContract.getAmountsOut(amountIn, [tokenAddress, wethAddress]);
     const amount = formatEther(res[1]);
 
-    return { amount, priceImpact: 0 };
+    const { wethInPool } = await currentPoolState();
+    const priceImpact = Number(res[1].toString()) / Number(wethInPool.toString());
+
+    return { amount, priceImpact };
   };
 
   const convertTokenOutputToEth = async (tokenAmount) => {
     if (!loadedAssets) return 0;
-    const { tokenAddress, routerContract, wethAddress } = await getSwapContractInfo();
+    const { tokenAddress, wethAddress, routerContract } = await getSwapContractInfo();
+
+    const { tokenInPool } = await currentPoolState();
+    if (tokenAmount >= Number(formatEther(tokenInPool).toString()))
+      throw new Error(
+        `Not enough $FIAT in pool, $FIAT left: ${formatter.format(Number(formatEther(tokenInPool).toString()))}`
+      );
 
     const amountOut = parseEther(`${tokenAmount}`);
     const res = await routerContract.getAmountsIn(amountOut, [wethAddress, tokenAddress]);
-
     const amount = formatEther(res[0]);
-    return { amount, priceImpact: 0 };
+
+    const priceImpact = Number(amountOut.toString()) / Number(tokenInPool.toString());
+
+    return { amount, priceImpact };
   };
 
   const swapEthToToken = async (amount) => {
     if (!loadedAssets) return false;
 
-    const { tokenAddress, routerContract, routerAddress, wethAddress } = await getSwapContractInfo();
+    const { tokenAddress, wethAddress, routerAddress, routerContract } = await getSwapContractInfo();
 
     const { amount: tokenAmount } = await convertEthInputToToken(amount);
 
@@ -402,7 +438,7 @@ const useSmartContract = () => {
   const swapTokenToEth = async (amount) => {
     if (!loadedAssets) return false;
 
-    const { tokenAddress, routerAddress, routerContract, wethAddress, tokenContract } = await getSwapContractInfo();
+    const { tokenAddress, wethAddress, routerAddress, routerContract, tokenContract } = await getSwapContractInfo();
 
     const amountIn = parseEther(`${amount}`);
     const { amount: ethAmount } = await convertTokenInputToEth(amount);
