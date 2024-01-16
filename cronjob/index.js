@@ -1,15 +1,24 @@
 import cron from 'node-cron';
-import { updateFIATPriceUniswapV3, updateFIATPriceUniswapV2 } from './tasks/updateFIATPrice.js';
+
+import { updateFIATPriceUniswapV2 } from './tasks/updateFIATPrice.js';
 import calculateAvgPrice from './tasks/calculateAvgPrice.js';
-cron.schedule('*/15 * * * *', function () {
+import estimateGasPrice from './tasks/estimateGas.js';
+import environments from './utils/environments.js';
+
+const { CRON_CALCULATE_WORKER_BUILDING_PRICE, CRON_UPDATE_FIAT_PRICE, CRON_ESTIMATE_GAS_PRICE } = environments;
+
+cron.schedule(CRON_UPDATE_FIAT_PRICE, function () {
   updateFIATPriceUniswapV2();
 });
 
-// everyday at 1am
 cron.schedule(
-  '0 1 * * *',
+  CRON_CALCULATE_WORKER_BUILDING_PRICE,
   () => {
     calculateAvgPrice();
   },
   { timezone: 'Etc/UTC' }
 );
+
+cron.schedule(CRON_ESTIMATE_GAS_PRICE, function () {
+  estimateGasPrice();
+});

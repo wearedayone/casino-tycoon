@@ -47,33 +47,6 @@ const getGameContract = async (signer) => {
   return contract;
 };
 
-const getContractMap = {
-  game: getGameContract,
-  token: getTokenContract,
-};
-export const estimateTxnFee = async ({ contractName = 'game', functionName, params, value }) => {
-  try {
-    const workerWallet = await getWorkerWallet();
-    const contract = await getContractMap[contractName](workerWallet);
-    const ethersProvider = await alchemy.config.getProvider();
-    const feeData = await ethersProvider.getFeeData();
-    const lastBaseFeePerGas = Number(Utils.formatUnits(feeData.lastBaseFeePerGas, 'ether'));
-    const maxPriorityFeePerGas = Number(Utils.formatUnits(feeData.maxPriorityFeePerGas, 'ether'));
-    const gasPrice = lastBaseFeePerGas + maxPriorityFeePerGas; // based on real txns
-    if (value) params.push({ value: BigInt(parseEther(value.toString()).toString()) });
-    const estimatedGasCostInHex = await contract.estimateGas[functionName](...params);
-    const gasLimit = Utils.formatUnits(estimatedGasCostInHex, 'wei');
-    const transactionFee = gasPrice * gasLimit;
-
-    // console.log({ gasPrice, gasLimit, transactionFee });
-    logger.info(`The gas cost estimation for the tx calling ${functionName} is: ${transactionFee} ether`);
-
-    return transactionFee;
-  } catch (error) {
-    logger.error(error);
-  }
-};
-
 export const decodeTokenTxnLogs = async (name, log) => {
   const { data, topics } = log;
   const workerWallet = await getWorkerWallet();
