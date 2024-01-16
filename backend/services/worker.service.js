@@ -173,7 +173,7 @@ export const burnNFT = async ({ addresses, ids, amounts }) => {
     const workerWallet = await getWorkerWallet();
     const gameContract = await getGameContract(workerWallet);
     logger.info('start Transaction:');
-    const tx = await gameContract.burnNFT(addresses, ids, amounts, '0x12');
+    const tx = await gameContract.burnNFT(addresses, ids, amounts);
     txnHash = tx.hash;
     logger.info('Transaction:' + tx.hash);
     const receipt = await tx.wait();
