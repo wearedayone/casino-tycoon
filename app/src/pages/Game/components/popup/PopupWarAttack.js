@@ -51,7 +51,7 @@ class PopupWarAttack extends Popup {
       'button-blue-pressed',
       () => {
         this.close();
-        this.popupWarMachines?.open();
+        scene.popupWarMachines?.open();
       },
       'Back',
       { fontSize: '82px', sound: 'close' }
