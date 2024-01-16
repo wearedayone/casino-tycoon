@@ -22,7 +22,7 @@ const prizePoolConfig = {
   rewardScalingRatio: 1.25,
   // rank leaderboard
   higherRanksCutoffPercent: 0.1,
-  lowerRanksCutoffPercent: 0.2,
+  lowerRanksCutoffPercent: 0.5,
   minRewardHigherRanks: 0.004, // in ETH
   minRewardLowerRanks: 0.002, // in ETH
   // reputation leaderboard
