@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 
-import { formatter } from '../../../../utils/numbers';
+import { formatter, customFormat } from '../../../../utils/numbers';
 import configs from '../../configs/configs';
 
 const { width } = configs;
@@ -28,7 +28,8 @@ class GangsterHouse extends Phaser.GameObjects.Container {
     this.add(this.valueText);
 
     scene.game.events.on(events.updateNetworth, ({ networth, level }) => {
-      this.valueText.text = `${formatter.format(networth)}`;
+      networth = 10328;
+      this.valueText.text = networth < 10000 ? `${networth}` : `${customFormat(networth, 2)}`;
       if (level) {
         this.house.setTexture(`gangster-house-${level}`);
       }
