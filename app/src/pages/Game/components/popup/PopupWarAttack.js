@@ -119,6 +119,7 @@ class PopupWarAttack extends Popup {
   cleanup() {
     if (this.table) {
       this.table.setMouseWheelScrollerEnable(false);
+      this.thumb?.setVisible(false);
     }
   }
 

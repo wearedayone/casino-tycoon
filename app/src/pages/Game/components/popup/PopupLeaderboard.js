@@ -273,6 +273,7 @@ class PopupLeaderboard extends Popup {
     this.onCloseCallback?.();
     if (this.table) {
       this.table.setMouseWheelScrollerEnable(false);
+      this.leaderboardThumb?.setVisible(false);
     }
     this.scene.game.events.emit(this.events?.closeLeaderboardModal || '');
   }
