@@ -124,7 +124,6 @@ class PopupSafehousePrice extends Popup {
       this.table.setScrollerEnable(true);
     }
     this.add(this.table);
-    console.log(this.table);
 
     this.table.on('scroll', (e) => {
       // console.log('scroll', e.t); // e.t === scrolled percentage
@@ -143,6 +142,7 @@ class PopupSafehousePrice extends Popup {
   cleanup() {
     if (this.table) {
       this.table.setMouseWheelScrollerEnable(false);
+      this.thumb?.setVisible(false);
     }
   }
 }

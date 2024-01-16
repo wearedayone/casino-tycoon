@@ -390,9 +390,11 @@ class PopupWarAttackDetail extends Popup {
   cleanup() {
     if (this.resultTable) {
       this.resultTable.setMouseWheelScrollerEnable(false);
+      this.resultThumb?.setVisible(false);
     }
     if (this.earnTable) {
       this.earnTable.setMouseWheelScrollerEnable(false);
+      this.earnThumb?.setVisible(false);
     }
   }
 }
