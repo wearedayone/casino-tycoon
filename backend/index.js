@@ -6,7 +6,6 @@ import routes from './routes/index.js';
 import environments from './utils/environments.js';
 import { generateDailyWarSnapshot } from './services/warSnapshot.service.js';
 import { updateSeasonSnapshotSchedule } from './services/season.service.js';
-import { updateEstimatedGasPrice } from './services/system.service.js';
 
 const { PORT } = environments;
 
@@ -19,11 +18,6 @@ const main = () => {
   app.get('/', (req, res) => {
     res.send('OK');
   });
-
-  // app.get('/test-schedule', async (req, res) => {
-  //   await generateDailyWarSnapshot();
-  //   return res.sendStatus(200);
-  // });
 
   app.use('/api', routes);
 
@@ -38,9 +32,4 @@ main();
 // everyday every 4th hrs
 cron.schedule('0 */4 * * *', function () {
   generateDailyWarSnapshot();
-});
-
-// every 5 minutes
-cron.schedule('*/5 * * * *', function () {
-  updateEstimatedGasPrice();
 });
