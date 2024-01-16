@@ -44,7 +44,9 @@ class PopupSafehousePrice extends Popup {
 
     scene.game.events.on('update-house-price', (data) => {
       this.data = data;
-      this.updateList();
+      if (this.visible) {
+        this.updateList();
+      }
     });
 
     scene.game.events.emit('request-house-price');
