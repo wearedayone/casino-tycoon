@@ -13,6 +13,10 @@ const btnGap = 50;
 const INTERVAL = 100;
 
 class PopupWarMachines extends Popup {
+  initEarnUnits = 0;
+  initAttackUnits = 0;
+  initDefendUnits = 0;
+
   numberOfMachines = 0;
   earnUnits = 0;
   attackUnits = 0;
@@ -32,6 +36,7 @@ class PopupWarMachines extends Popup {
       updateWarMachinesCompleted: isSimulator
         ? 'simulator-update-war-machines-completed'
         : 'update-war-machines-completed',
+      updateWarMachinesError: isSimulator ? 'simulator-update-war-machines-error' : 'update-war-machines-error',
       updateGamePlay: isSimulator ? 'simulator-update-game-play' : 'update-game-play',
     };
 
@@ -399,6 +404,10 @@ class PopupWarMachines extends Popup {
         buildingBonusMultiple,
         tokenRewardPerEarner,
       }) => {
+        this.initEarnUnits = numberOfMachinesToEarn;
+        this.initAttackUnits = numberOfMachinesToAttack;
+        this.initDefendUnits = numberOfMachinesToDefend;
+
         this.numberOfMachines = numberOfMachines;
         this.workerBonusToken = numberOfWorkers * (tokenRewardPerEarner || 0) * (workerBonusMultiple || 0);
         this.buildingBonus = numberOfBuildings * (buildingBonusMultiple || 0);
@@ -419,7 +428,18 @@ class PopupWarMachines extends Popup {
       }
     });
 
+    scene.game.events.on(events.updateWarMachinesError, () => {
+      this.loading = false;
+    });
+
     scene.game.events.emit(events.requestGamePlay);
+  }
+
+  cleanup() {
+    this.earnUnits = this.initEarnUnits;
+    this.attackUnits = this.initAttackUnits;
+    this.defendUnits = this.initDefendUnits;
+    this.updateValues();
   }
 
   updateValues() {
@@ -431,7 +451,6 @@ class PopupWarMachines extends Popup {
     this.workerBonusTokenText.text = `Goon Bonus: ${formatter.format(this.workerBonusToken)} $FIAT`;
     this.buildingBonusText.text = `Safehouse Bonus: ${formatter.format(this.buildingBonus)}`;
 
-    console.log('this.scene', this.scene);
     this.nextBtn.setDisabledState(!this.scene?.isUserActive);
   }
 }

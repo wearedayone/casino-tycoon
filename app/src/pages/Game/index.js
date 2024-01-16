@@ -973,6 +973,7 @@ const Game = () => {
             } pending Gangsters`,
             { variant: 'error' }
           );
+          gameRef.current?.events.emit('update-war-machines-error');
           return;
         }
         updateUserWarMachines(data)
@@ -980,6 +981,7 @@ const Game = () => {
           .catch((err) => {
             console.error(err);
             Sentry.captureException(err);
+            gameRef.current?.events.emit('update-war-machines-error');
           });
       });
 
