@@ -244,7 +244,7 @@ export const generateDailyWarSnapshot = async () => {
       }
 
       if (attackUnits < attackedUser.defendUnits) {
-        const machinesLost = Math.max(Math.floor(attackUnits * machinePercentLost), 1);
+        const machinesLost = attackUnits > 0 ? Math.max(Math.floor(attackUnits * machinePercentLost), 1) : 0;
         user.machinesLost = machinesLost;
         user.attackResults.push({
           userId: attackedUser.userId,
