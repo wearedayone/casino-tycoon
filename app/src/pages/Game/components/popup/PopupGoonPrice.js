@@ -44,7 +44,9 @@ class PopupGoonPrice extends Popup {
 
     scene.game.events.on('update-goon-price', (data) => {
       this.data = data;
-      this.updateList();
+      if (this.visible) {
+        this.updateList();
+      }
     });
 
     scene.game.events.emit('request-goon-price');
