@@ -17,18 +17,20 @@ class GangsterHouse extends Phaser.GameObjects.Container {
     this.house = scene.add.sprite(width / 2, y, '').setOrigin(0.5, 0.5);
 
     this.sign = scene.add.image(width / 2, y, 'gangster-house-sign').setOrigin(0.5, 0.5);
-    this.valueText = scene.add.text(width / 2, this.sign.y - 30, ``, {
-      fontSize: '82px',
-      fontFamily: 'WixMadeforDisplayExtraBold',
-      color: '#fff',
-    });
+    this.valueText = scene.add
+      .text(width / 2 + 90, this.sign.y + 20, ``, {
+        fontSize: '82px',
+        fontFamily: 'WixMadeforDisplayExtraBold',
+        color: '#fff',
+      })
+      .setOrigin(0.5, 0.5);
+    this.valueText.setStroke('#3D145F', 12);
 
     this.add(this.house);
     this.add(this.sign);
     this.add(this.valueText);
 
     scene.game.events.on(events.updateNetworth, ({ networth, level }) => {
-      networth = 10328;
       this.valueText.text = networth < 10000 ? `${networth}` : `${customFormat(networth, 2)}`;
       if (level) {
         this.house.setTexture(`gangster-house-${level}`);
