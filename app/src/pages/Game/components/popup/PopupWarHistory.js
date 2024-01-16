@@ -95,12 +95,6 @@ class PopupWarHistory extends Popup {
       const totalTokenRewardIcon = this.scene.add
         .image(this.popup.width * 0.25 + totalTokenRewardText.width / 2 + 30, y + rowHeight / 2, 'coin3')
         .setOrigin(0.5, 0.5);
-      const machinesLostText = this.scene.add
-        .text(this.popup.width * 0.5, y + rowHeight / 2, `-${machinesLost || 0}`, smallBlackBoldCenter)
-        .setOrigin(0.5, 0.5);
-      const machinesLostIcon = this.scene.add
-        .image(this.popup.width * 0.5 + machinesLostText.width / 2 + 45, y + rowHeight / 2, 'icon-gangster-mini')
-        .setOrigin(0.5, 0.5);
 
       const viewBtn = new TextButton(
         this.scene,
@@ -118,14 +112,26 @@ class PopupWarHistory extends Popup {
         { fontSize: '36px' }
       );
 
-      this.items.push(
-        dateText,
-        totalTokenRewardText,
-        totalTokenRewardIcon,
-        machinesLostText,
-        machinesLostIcon,
-        viewBtn
-      );
+      this.items.push(dateText, totalTokenRewardText, totalTokenRewardIcon, viewBtn);
+
+      if (machinesLost && machinesLost > 0) {
+        const machinesLostText = this.scene.add
+          .text(this.popup.width * 0.5, y + rowHeight / 2, `-${machinesLost || 0}`, {
+            ...smallBlackBoldCenter,
+            color: '#E93D45',
+          })
+          .setOrigin(0.5, 0.5);
+        const machinesLostIcon = this.scene.add
+          .image(this.popup.width * 0.5 + machinesLostText.width / 2 + 45, y + rowHeight / 2, 'icon-gangster-mini')
+          .setOrigin(0.5, 0.5);
+
+        this.items.push(machinesLostText, machinesLostIcon);
+      } else {
+        const machineNoLostText = this.scene.add
+          .text(this.popup.width * 0.5 + 40, y + rowHeight / 2, `-`, smallBlackBoldCenter)
+          .setOrigin(0.5, 0.5);
+        this.items.push(machineNoLostText);
+      }
     }
     this.contentContainer.add(this.items);
 
