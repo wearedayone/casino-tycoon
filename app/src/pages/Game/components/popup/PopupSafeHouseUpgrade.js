@@ -75,7 +75,7 @@ class PopupSafeHouseUpgrade extends Popup {
     );
     this.add(this.upgradeBtn);
 
-    this.numberOfBuildingsText = scene.add.text(this.popup.x + 400, this.popup.y - this.popup.height / 2 + 170, '0', {
+    this.numberOfBuildingsText = scene.add.text(this.popup.x + 150, this.popup.y - this.popup.height / 2 + 170, '0', {
       fontSize: fontSizes.extraLarge,
       color: colors.black,
       fontFamily: fontFamilies.extraBold,
