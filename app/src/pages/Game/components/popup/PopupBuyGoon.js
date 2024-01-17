@@ -32,6 +32,7 @@ class PopupBuyGoon extends Popup {
   quantity = DEFAULT_QUANTITY;
   estimatedMaxPurchase = 0;
   onCompleted;
+  isSimulator = false;
 
   constructor(scene, { isSimulator, onCompleted } = {}) {
     super(scene, 'popup-buy-goon', { ribbon: 'ribbon-buy-goon' });
@@ -49,6 +50,7 @@ class PopupBuyGoon extends Popup {
     };
     this.events = events;
     this.onCompleted = onCompleted;
+    this.isSimulator = isSimulator;
 
     this.popupBuyProcessing = new PopupProcessing(scene, {
       sound: 'minion',
@@ -324,7 +326,9 @@ class PopupBuyGoon extends Popup {
 
     const insufficientBalance = this.quantity > this.estimatedMaxPurchase;
     this.insufficientBalance.setVisible(insufficientBalance);
-    this.upgradeBtn.setDisabledState(this.scene?.isGameEnded || !this.scene?.isUserActive || insufficientBalance);
+    this.upgradeBtn.setDisabledState(
+      this.scene?.isGameEnded || (!this.scene?.isUserActive && !this.isSimulator) || insufficientBalance
+    );
   }
 }
 

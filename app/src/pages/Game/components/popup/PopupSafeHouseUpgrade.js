@@ -29,6 +29,7 @@ class PopupSafeHouseUpgrade extends Popup {
   salesLastPeriod = 0;
   quantity = DEFAULT_QUANTITY;
   onCompleted;
+  isSimulator = false;
 
   constructor(scene, { isSimulator, onCompleted } = {}) {
     super(scene, 'popup-safehouse-upgrade', { ribbon: 'ribbon-safehouse-upgrade' });
@@ -45,6 +46,7 @@ class PopupSafeHouseUpgrade extends Popup {
     };
     this.events = events;
     this.onCompleted = onCompleted;
+    this.isSimulator = isSimulator;
 
     this.popupBuyProcessing = new PopupProcessing(scene, {
       sound: 'house',
@@ -302,7 +304,9 @@ class PopupSafeHouseUpgrade extends Popup {
 
     const insufficientBalance = this.quantity > this.estimatedMaxPurchase;
     this.insufficientBalance.setVisible(insufficientBalance);
-    this.upgradeBtn.setDisabledState(this.scene?.isGameEnded || !this.scene?.isUserActive || insufficientBalance);
+    this.upgradeBtn.setDisabledState(
+      this.scene?.isGameEnded || (!this.scene?.isUserActive && !this.isSimulator) || insufficientBalance
+    );
   }
 }
 
