@@ -80,13 +80,13 @@ class PopupWarHistoryDetail extends Popup {
     this.items = [];
 
     const {
-      totalTokenReward,
       defendUnits,
       defendResults,
       tokenStolen,
       attackResults,
       attackUnits,
       tokenEarnFromAttacking,
+      tokenEarnFromEarning,
       machinesLost,
     } = this.data;
 
@@ -109,7 +109,7 @@ class PopupWarHistoryDetail extends Popup {
       .text(
         this.popup.width * 0.13 + earnItemIcon.width / 2 + 30,
         y,
-        `$FIAT Earned: ${formatter.format(totalTokenReward || 0)} $FIAT`,
+        `$FIAT Earned: ${formatter.format(tokenEarnFromEarning || 0)} $FIAT`,
         {
           fontSize: '50px',
           color: colors.black,
@@ -161,11 +161,16 @@ class PopupWarHistoryDetail extends Popup {
       .setOrigin(0.5, 0.5);
     const tokenStolenItemIcon = this.scene.add.image(this.popup.width * 0.13, y, 'coin2').setOrigin(0.5, 0.5);
     const tokenStolenItemText = this.scene.add
-      .text(this.popup.width * 0.13 + tokenStolenItemIcon.width / 2 + 30, y, `$FIAT Lost: ${tokenStolen || 0}`, {
-        fontSize: '50px',
-        color: colors.black,
-        fontFamily: fontFamilies.bold,
-      })
+      .text(
+        this.popup.width * 0.13 + tokenStolenItemIcon.width / 2 + 30,
+        y,
+        `$FIAT Lost: ${formatter.format(tokenStolen) || 0}`,
+        {
+          fontSize: '50px',
+          color: colors.black,
+          fontFamily: fontFamilies.bold,
+        }
+      )
       .setOrigin(0, 0.5);
     y += 165;
 
@@ -332,7 +337,7 @@ class PopupWarHistoryDetail extends Popup {
       .text(
         this.popup.width * 0.13 + tokenEarnedFromAttackingItemIcon.width / 2 + 30,
         y,
-        `$FIAT Stolen: ${tokenEarnFromAttacking || 0}`,
+        `$FIAT Stolen: ${formatter.format(tokenEarnFromAttacking) || 0}`,
         {
           fontSize: '50px',
           color: colors.black,
