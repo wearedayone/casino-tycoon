@@ -19,6 +19,7 @@ const assetsConfig = {
 };
 const prizePoolConfig = {
   rankRewardsPercent: 0.7,
+  reputationRewardsPercent: 0.2,
   rewardScalingRatio: 1.25,
   // rank leaderboard
   higherRanksCutoffPercent: 0.1,

@@ -7,7 +7,7 @@ const { width, height } = configs;
 const largeBlackBold = { fontSize: fontSizes.large, color: colors.black, fontFamily: fontFamilies.bold };
 class PopupPrizePool extends Popup {
   constructor(scene, { isSimulator } = {}) {
-    super(scene, 'popup-small', { title: 'Rank Prize Pool', titleIcon: 'icon-info', noCloseBtn: true });
+    super(scene, 'popup-small', { title: 'Total Prize Pool', titleIcon: 'icon-info', noCloseBtn: true });
 
     const events = {
       requestRankingRewards: isSimulator ? 'simulator-request-ranking-rewards' : 'request-ranking-rewards',
@@ -17,23 +17,23 @@ class PopupPrizePool extends Popup {
     const leftMargin = this.popup.x - this.popup.width / 2;
     const paddedX = leftMargin + this.popup.width * 0.1;
     const startingY = this.popup.y - this.popup.height / 2;
-    const firstParagraphY = startingY + 360;
-    const secondParagraphY = firstParagraphY + 300;
+    const firstParagraphY = startingY + 260;
+    const secondParagraphY = firstParagraphY + 400;
 
-    this.allocation = scene.add.text(
+    this.rankPrizePool = scene.add.text(
       paddedX,
       firstParagraphY,
       '--$ of ETH from buying\n$Gangsters goes into Prize Pool',
       largeBlackBold
     );
-    this.rankRewardsPercent = scene.add.text(
+    this.reputationPrizePool = scene.add.text(
       paddedX,
       secondParagraphY,
       'Top --% of players get paid when\ngame ends.',
       largeBlackBold
     );
-    this.add(this.allocation);
-    this.add(this.rankRewardsPercent);
+    this.add(this.rankPrizePool);
+    this.add(this.reputationPrizePool);
 
     this.buttonBack = new TextButton(
       scene,
@@ -54,11 +54,15 @@ class PopupPrizePool extends Popup {
     this.add(this.buttonBack);
 
     scene.game.events.on(events.updateRankingRewards, ({ prizePoolConfig }) => {
-      const { rankRewardsPercent } = prizePoolConfig;
-      this.allocation.text = `${rankRewardsPercent * 100}% of ETH from buying\nGangsters goes into Prize Pool`;
-      this.rankRewardsPercent.text = `Top ${
-        prizePoolConfig.lowerRanksCutoffPercent * 100
-      }% of players get paid when\ngame ends.`;
+      const { rankRewardsPercent, reputationRewardsPercent, lowerRanksCutoffPercent } = prizePoolConfig;
+      this.rankPrizePool.text = `${
+        rankRewardsPercent * 100
+      }% of ETH from buying Gangsters\ngoes into ranking pool that is\ndistributed to the Top ${
+        lowerRanksCutoffPercent * 100
+      }% players.`;
+      this.reputationPrizePool.text = `${
+        reputationRewardsPercent * 100
+      }% of ETH from buying Gangsters\ngoes into reputation pool that is\ndistributed amongst all players.`;
     });
     scene.game.events.emit(events.requestRankingRewards);
   }
