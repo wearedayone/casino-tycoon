@@ -32,6 +32,8 @@ class PopupWarMachines extends Popup {
     this.onClickClose = onClickClose;
 
     const events = {
+      requestNextWarTime: isSimulator ? 'simulator-request-next-war-time' : 'request-next-war-time',
+      updateNextWarTime: isSimulator ? 'simulator-update-next-war-time' : 'update-next-war-time',
       requestGamePlay: isSimulator ? 'simulator-request-game-play' : 'request-game-play',
       updateWarMachinesCompleted: isSimulator
         ? 'simulator-update-war-machines-completed'
@@ -39,6 +41,7 @@ class PopupWarMachines extends Popup {
       updateWarMachinesError: isSimulator ? 'simulator-update-war-machines-error' : 'update-war-machines-error',
       updateGamePlay: isSimulator ? 'simulator-update-game-play' : 'update-game-play',
     };
+    this.events = events;
 
     this.backBtn = new TextButton(
       scene,
@@ -86,13 +89,20 @@ class PopupWarMachines extends Popup {
     });
     this.add(this.infoBtn);
 
-    const inputY = this.popup.y - this.popup.height / 2 + 490;
+    this.timeText = scene.add.text(width / 2 + 100, this.popup.y - this.popup.height / 2 + 298, '0h 00m', {
+      fontSize: '50px',
+      color: '#29000B',
+      fontFamily: fontFamilies.extraBold,
+    });
+    this.add(this.timeText);
+
+    const inputY = this.popup.y - this.popup.height / 2 + 630;
     const inputGap = 370;
 
-    this.machinesToEarnInput = scene.add.image(width / 2, inputY, 'text-input-small').setOrigin(0.5, 0.5);
+    this.machinesToEarnInput = scene.add.image(width / 2, inputY - 20, 'text-input-small').setOrigin(0.5, 0.5);
     this.add(this.machinesToEarnInput);
     this.machinesToEarnUnitsText = scene.add
-      .text(width / 2, inputY, `${this.earnUnits}`, {
+      .text(width / 2, inputY - 20, `${this.earnUnits}`, {
         color: '#29000B',
         fontSize: '78px',
         fontFamily: fontFamilies.bold,
@@ -106,7 +116,7 @@ class PopupWarMachines extends Popup {
     this.machinesToEarnMinusBtn = new TextButton(
       scene,
       minusBtnX,
-      inputY,
+      inputY - 20,
       'button-square',
       'button-square-pressed',
       () => {
@@ -142,7 +152,7 @@ class PopupWarMachines extends Popup {
     this.machinesToEarnPlusBtn = new TextButton(
       scene,
       minusBtnX + 740,
-      inputY,
+      inputY - 20,
       'button-square',
       'button-square-pressed',
       () => {
@@ -178,7 +188,7 @@ class PopupWarMachines extends Popup {
     this.add(this.machinesToEarnPlusBtn);
 
     this.workerBonusTokenText = scene.add
-      .text(width / 2, inputY + 115, `Goon Bonus: ${formatter.format(this.workerBonusToken)} $FIAT`, {
+      .text(width / 2, inputY + 95, `Goon Bonus: ${formatter.format(this.workerBonusToken)} $FIAT`, {
         fontSize: '50px',
         color: '#7C2828',
         fontFamily: fontFamilies.bold,
@@ -368,19 +378,24 @@ class PopupWarMachines extends Popup {
     this.add(this.machinesToAttackPlusBtn);
 
     this.numberOfMachinesText = scene.add
-      .text(width / 2, inputY + 2 * inputGap + 200, `Available Gangsters: ${this.numberOfMachines}`, {
-        fontSize: '50px',
-        color: '#7C2828',
-        fontFamily: fontFamilies.bold,
-      })
+      .text(
+        width / 2,
+        inputY + 2 * inputGap + 200,
+        `Unallocated Gangsters: ${this.numberOfMachines - this.earnUnits - this.attackUnits - this.defendUnits}`,
+        {
+          fontSize: '50px',
+          color: '#7C2828',
+          fontFamily: fontFamilies.bold,
+        }
+      )
       .setOrigin(0.5, 0.5);
     this.add(this.numberOfMachinesText);
 
     this.attackUserText = scene.add
       .text(
         width / 2,
-        this.numberOfMachinesText.y + 150,
-        `Raid user: ${this.attackUser ? `@${this.attackUser.username}` : 'null'}`,
+        this.numberOfMachinesText.y + 130,
+        `Raid Player: ${this.attackUser ? `@${this.attackUser.username}` : 'null'}`,
         {
           fontSize: '50px',
           color: '#7C2828',
@@ -389,6 +404,16 @@ class PopupWarMachines extends Popup {
       )
       .setOrigin(0.5, 0.5);
     this.add(this.attackUserText);
+
+    scene.game.events.on(events.updateNextWarTime, ({ time }) => {
+      const now = Date.now();
+      const diffInMins = (time - now) / (60 * 1000);
+      const hours = Math.floor(diffInMins / 60);
+      const mins = Math.floor(diffInMins % 60);
+
+      const timeText = `${hours}h ${mins.toString().padStart(2, '0')}m`;
+      this.timeText.text = timeText;
+    });
 
     scene.game.events.on(
       events.updateGamePlay,
@@ -433,6 +458,11 @@ class PopupWarMachines extends Popup {
     });
 
     scene.game.events.emit(events.requestGamePlay);
+    scene.game.events.emit(events.requestNextWarTime);
+  }
+
+  onOpen() {
+    this.scene.game.events.emit(this.events.requestNextWarTime);
   }
 
   cleanup() {
@@ -446,8 +476,10 @@ class PopupWarMachines extends Popup {
     this.machinesToEarnUnitsText.text = `${this.earnUnits}`;
     this.machinesToAttackUnitsText.text = `${this.attackUnits}`;
     this.machinesToDefendUnitsText.text = `${this.defendUnits}`;
-    this.numberOfMachinesText.text = `Available Gangsters: ${this.numberOfMachines}`;
-    this.attackUserText.text = `Raid user: ${this.attackUser ? `@${this.attackUser.username}` : 'null'}`;
+    this.numberOfMachinesText.text = `Unallocated Gangsters: ${
+      this.numberOfMachines - this.earnUnits - this.attackUnits - this.defendUnits
+    }`;
+    this.attackUserText.text = `Raid Player: ${this.attackUser ? `@${this.attackUser.username}` : 'null'}`;
     this.workerBonusTokenText.text = `Goon Bonus: ${formatter.format(this.workerBonusToken)} $FIAT`;
     this.buildingBonusText.text = `Safehouse Bonus: ${formatter.format(this.buildingBonus)}`;
 
