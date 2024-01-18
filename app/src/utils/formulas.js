@@ -18,7 +18,14 @@ export const estimateNumberOfBuildingCanBuy = (
     startPrice,
     quantity
   ).total;
-  while (quantity < MAX_PER_BATCH && total < balance) {
+  let nextTotal = calculateNextBuildingBuyPriceBatch(
+    salesLastPeriod,
+    targetDailyPurchase,
+    targetPrice,
+    startPrice,
+    quantity + 1
+  ).total;
+  while (quantity < MAX_PER_BATCH && nextTotal <= balance) {
     quantity++;
     total = calculateNextBuildingBuyPriceBatch(
       salesLastPeriod,
@@ -26,6 +33,13 @@ export const estimateNumberOfBuildingCanBuy = (
       targetPrice,
       startPrice,
       quantity
+    ).total;
+    nextTotal = calculateNextBuildingBuyPriceBatch(
+      salesLastPeriod,
+      targetDailyPurchase,
+      targetPrice,
+      startPrice,
+      quantity + 1
     ).total;
   }
 
@@ -47,7 +61,14 @@ export const estimateNumberOfWorkerCanBuy = (
     startPrice,
     quantity
   ).total;
-  while (quantity < MAX_PER_BATCH && total < balance) {
+  let nextTotal = calculateNextWorkerBuyPriceBatch(
+    salesLastPeriod,
+    targetDailyPurchase,
+    targetPrice,
+    startPrice,
+    quantity + 1
+  ).total;
+  while (quantity < MAX_PER_BATCH && nextTotal <= balance) {
     quantity++;
     total = calculateNextWorkerBuyPriceBatch(
       salesLastPeriod,
@@ -55,6 +76,13 @@ export const estimateNumberOfWorkerCanBuy = (
       targetPrice,
       startPrice,
       quantity
+    ).total;
+    nextTotal = calculateNextWorkerBuyPriceBatch(
+      salesLastPeriod,
+      targetDailyPurchase,
+      targetPrice,
+      startPrice,
+      quantity + 1
     ).total;
   }
 
