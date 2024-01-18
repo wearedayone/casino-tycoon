@@ -29,10 +29,11 @@ class Step4 extends Phaser.GameObjects.Container {
       this.startCoinAnimation();
       scene.tutorial.setVisible(false);
       setTimeout(() => {
-        scene.tutorial.setVisible(true);
         scene.game.events.emit('simulator-claim-completed', { amount: 15000 });
-        setTimeout(onNext, 800);
-        onNext();
+        setTimeout(() => {
+          scene.tutorial.setVisible(true);
+          onNext();
+        }, 800);
       }, 2400);
     });
     this.add(this.claimButton);

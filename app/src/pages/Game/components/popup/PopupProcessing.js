@@ -141,7 +141,10 @@ class PopupProcessing extends Popup {
             break;
         }
 
-        this.popupTxnCompleted = new PopupTxnCompleted(scene, this.completedIcon, title, desc, txnHash, onCompleted);
+        this.popupTxnCompleted = new PopupTxnCompleted(scene, this.completedIcon, title, desc, txnHash, {
+          onCompleted,
+          hideTxnHash: completedEvent === 'simulator-buy-gangster-completed',
+        });
         scene.add.existing(this.popupTxnCompleted);
         this.onCompleted = null;
         this.close();

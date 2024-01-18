@@ -28,7 +28,7 @@ class PopupLeaderboard extends Popup {
   numberOfRows = 0;
   stars = [];
 
-  constructor(scene, { isSimulator, onClose } = {}) {
+  constructor(scene, { isSimulator, onClose, onClickRank, onClickReputation } = {}) {
     super(scene, 'popup-extra-large', { title: 'Season Leaderboard', noCloseBtn: true });
 
     this.onCloseCallback = onClose;
@@ -124,6 +124,7 @@ class PopupLeaderboard extends Popup {
           this.buttonRetire.setVisible(false);
           this.ethRewards.text = this.rankingRewardsString;
           this.playerReward.text = `~${formatter.format(this.userRankingReward)}`;
+          if (isSimulator) onClickRank();
         },
       },
       modeTwo: {
@@ -133,6 +134,7 @@ class PopupLeaderboard extends Popup {
           this.buttonRetire.setVisible(true);
           this.ethRewards.text = this.reputationRewardsString;
           this.playerReward.text = `~${formatter.format(this.userReputationReward)}`;
+          if (isSimulator) onClickReputation();
         },
       },
     });

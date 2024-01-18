@@ -7,30 +7,7 @@ import useUserStore from '../stores/user.store';
 import useSeasonCountdown from './useSeasonCountdown';
 import { calculateHouseLevel } from '../utils/formulas';
 import { completeTutorial } from '../services/user.service';
-
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const calculateRankReward = (rankrizePool, rankingRewards, rankIndex) => {
-  const totalPercentages = rankingRewards.reduce(
-    (total, rankingReward) => total + rankingReward.share * (rankingReward.rankEnd - rankingReward.rankStart + 1),
-    0
-  );
-  if (totalPercentages >= 100) throw new Error('Invalid ranking reward');
-
-  const rank = rankIndex + 1;
-  const rankingReward = rankingRewards.find((item) => item.rankStart <= rank && rank <= item.rankEnd);
-  if (!rankingReward) return 0;
-
-  return rankrizePool * rankingReward.share;
-};
-
-const mockUsers = Array.from({ length: 20 }, () => ({
-  avatarURL: faker.internet.avatar(),
-  id: faker.string.uuid(),
-  networth: faker.number.int({ min: 0, max: 1000 }),
-  userId: faker.string.uuid(),
-  username: faker.internet.userName(),
-}));
+import { getNextWarSnapshotUnixTime } from '../services/gamePlay.service';
 
 const useSimulatorGameListener = () => {
   const user = useUserStore((state) => state.profile);
@@ -59,7 +36,7 @@ const useSimulatorGameListener = () => {
   const { isEnded, countdownString } = useSeasonCountdown({ open: isLeaderboardModalOpen });
 
   const leaderboardData = useMemo(() => {
-    if (!user || !activeSeason?.rankingRewards) return [];
+    if (!user || !activeSeason?.prizePoolConfig) return [];
 
     const allUsers = [
       ...mockUsers,
@@ -73,12 +50,18 @@ const useSimulatorGameListener = () => {
       },
     ].sort((user1, user2) => user2.networth - user1.networth);
 
+    const rankingRewards = generateRankingRewards({
+      totalPlayers: allUsers.length,
+      rankPrizePool: activeSeason.rankPrizePool,
+      prizePoolConfig: activeSeason?.prizePoolConfig,
+    });
+
     const totalReputation = allUsers.reduce((sum, user) => sum + user.networth, 0);
     return allUsers.map((user, index) => {
       return {
         ...user,
         rank: index + 1,
-        rankReward: calculateRankReward(activeSeason.rankPrizePool, activeSeason?.rankingRewards, index),
+        rankReward: calculateRankReward(activeSeason.rankPrizePool, rankingRewards, index),
         reputationReward: (user.networth / totalReputation) * activeSeason.reputationPrizePool,
       };
     });
@@ -87,7 +70,7 @@ const useSimulatorGameListener = () => {
     activeSeason?.rankPrizePool,
     activeSeason?.reputationPrizePool,
     assets?.networth,
-    activeSeason?.rankingRewards,
+    activeSeason?.prizePoolConfig,
   ]);
 
   const setupSimulatorGameListener = (game) => {
@@ -159,6 +142,23 @@ const useSimulatorGameListener = () => {
       });
     });
 
+    // reset assets & giveaway 1 goon
+    game.events.on('simulator-reset-assets', () => {
+      setAssets({
+        numberOfMachines: 0,
+        numberOfWorkers: 0,
+        numberOfBuildings: 0,
+        networth: 0,
+        warDeployment: {
+          numberOfMachinesToEarn: 0,
+          numberOfMachinesToAttack: 0,
+          numberOfMachinesToDefend: 0,
+          attackUserId: null,
+          acttackUser: null,
+        },
+      });
+    });
+
     game.events.on('simulator-buy-gangster', async ({ quantity }) => {
       await delay(1000);
       setAssets((prevAssets) => ({
@@ -169,8 +169,8 @@ const useSimulatorGameListener = () => {
       game.events.emit('simulator-buy-gangster-completed', { txnHash: '', amount: quantity });
     });
 
-    game.events.on('simulator-buy-goon', async ({ quantity }) => {
-      await delay(1000);
+    game.events.on('simulator-buy-goon', async ({ quantity, delayDuration = 1000 }) => {
+      await delay(delayDuration);
       setAssets((prevAssets) => ({
         ...prevAssets,
         numberOfWorkers: prevAssets.numberOfWorkers + quantity,
@@ -240,7 +240,14 @@ const useSimulatorGameListener = () => {
     });
 
     game.events.on('simulator-request-next-war-time', () => {
-      game.events.emit('simulator-update-next-war-time', { time: Date.now() + 24 * 60 * 60 * 1000 });
+      getNextWarSnapshotUnixTime()
+        .then((res) => {
+          game.events.emit('simulator-update-next-war-time', { time: res.data.time });
+        })
+        .catch((err) => {
+          console.error(err);
+          Sentry.captureException(err);
+        });
     });
 
     game.events.on('simulator-request-war-die-chance', () => {
@@ -412,3 +419,67 @@ const useSimulatorGameListener = () => {
 };
 
 export default useSimulatorGameListener;
+
+// helpers
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const calculateRankReward = (rankrizePool, rankingRewards, rankIndex) => {
+  const totalPercentages = rankingRewards.reduce(
+    (total, rankingReward) => total + rankingReward.share * (rankingReward.rankEnd - rankingReward.rankStart + 1),
+    0
+  );
+  if (totalPercentages >= 100) throw new Error('Invalid ranking reward');
+
+  const rank = rankIndex + 1;
+  const rankingReward = rankingRewards.find((item) => item.rankStart <= rank && rank <= item.rankEnd);
+  if (!rankingReward) return 0;
+
+  return rankrizePool * rankingReward.share;
+};
+
+const mockUsers = Array.from({ length: 20 }, () => ({
+  avatarURL: faker.internet.avatar(),
+  id: faker.string.uuid(),
+  networth: faker.number.int({ min: 0, max: 1000 }),
+  userId: faker.string.uuid(),
+  username: faker.internet.userName(),
+}));
+
+const generateRankingRewards = ({ totalPlayers, rankPrizePool, prizePoolConfig }) => {
+  const {
+    rewardScalingRatio,
+    higherRanksCutoffPercent,
+    lowerRanksCutoffPercent,
+    minRewardHigherRanks,
+    minRewardLowerRanks,
+  } = prizePoolConfig;
+  const totalPaidPlayersCount = Math.round(lowerRanksCutoffPercent * totalPlayers);
+  const higherRanksPlayersCount = Math.round(higherRanksCutoffPercent * totalPlayers);
+  const lowerRanksPlayersCount = totalPaidPlayersCount - higherRanksPlayersCount;
+  const minRewardPercentHigherRanks = minRewardHigherRanks / rankPrizePool;
+  const minRewardPercentLowerRanks = minRewardLowerRanks / rankPrizePool;
+
+  const remainingRankPoolPercent =
+    1 - (minRewardPercentHigherRanks * higherRanksPlayersCount + minRewardPercentLowerRanks * lowerRanksPlayersCount);
+
+  let totalExtraRewardWeight = 0;
+  let rankingRewards = [];
+  for (let rank = 1; rank <= totalPaidPlayersCount; rank++) {
+    const extraRewardWeight = Math.pow(rewardScalingRatio, totalPaidPlayersCount - rank);
+    totalExtraRewardWeight += extraRewardWeight;
+
+    rankingRewards.push({ rankStart: rank, rankEnd: rank, extraRewardWeight });
+  }
+
+  for (let player of rankingRewards) {
+    const minRewardPercent =
+      player.rankStart <= higherRanksPlayersCount ? minRewardPercentHigherRanks : minRewardPercentLowerRanks;
+    const extraRewardPercent = (player.extraRewardWeight / totalExtraRewardWeight) * remainingRankPoolPercent;
+
+    player.share = minRewardPercent + extraRewardPercent;
+    player.prizeValue = rankPrizePool * player.share;
+    delete player.extraRewardWeight;
+  }
+
+  return rankingRewards;
+};

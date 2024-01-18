@@ -121,7 +121,7 @@ class TutorialScene extends Phaser.Scene {
           setTimeout(() => {
             this.tutorial.setVisible(true);
             this.tutorial.step9.setVisible(true);
-          }, 2000);
+          }, 300);
         },
       }); // done
       this.add.existing(this.popupSafeHouseUpgrade);
@@ -134,7 +134,7 @@ class TutorialScene extends Phaser.Scene {
           setTimeout(() => {
             this.tutorial.setVisible(true);
             this.tutorial.step7.setVisible(true);
-          }, 2000);
+          }, 300);
         },
       }); // done
       this.add.existing(this.popupBuyGoon);
@@ -147,7 +147,7 @@ class TutorialScene extends Phaser.Scene {
           setTimeout(() => {
             this.tutorial.setVisible(true);
             this.tutorial.step4.setVisible(true);
-          }, 2000);
+          }, 300);
         },
       }); // done
       this.add.existing(this.popupBuyGangster);
@@ -160,6 +160,12 @@ class TutorialScene extends Phaser.Scene {
           this.tutorial.background.setDisplaySize(width, height);
           this.tutorial.lowerBackground?.destroy();
           this.tutorial.step13.setVisible(true);
+        },
+        onClickRank: () => {
+          this.tutorial.step12.arrow.setX(width / 2);
+        },
+        onClickReputation: () => {
+          this.tutorial.step12.arrow.setX(width / 2 - this.popupLeaderboard.popup.width * 0.23);
         },
       }); // done
       this.add.existing(this.popupLeaderboard);
@@ -177,6 +183,7 @@ class TutorialScene extends Phaser.Scene {
         onClickClose: () => {
           this.tutorial.step13.setVisible(false);
           this.tutorial.step15.setVisible(true);
+          this.game.events.emit('simulator-reset-assets');
         },
       });
       this.add.existing(this.popupWarMachines);
@@ -185,6 +192,7 @@ class TutorialScene extends Phaser.Scene {
         onClickBackButton: () => {
           this.tutorial.step14.setVisible(false);
           this.tutorial.step15.setVisible(true);
+          this.game.events.emit('simulator-reset-assets');
         },
       });
       this.add.existing(this.popupWarExplain);

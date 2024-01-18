@@ -6,7 +6,7 @@ import TutorialCharacter from './TutorialCharacter';
 const { width, height } = configs;
 
 class Step14 extends Phaser.GameObjects.Container {
-  constructor(scene, onNext) {
+  constructor(scene) {
     super(scene, 0, 0);
 
     this.setVisible(false);
