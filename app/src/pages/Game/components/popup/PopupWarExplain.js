@@ -11,7 +11,7 @@ class PopupWarExplain extends Popup {
   machinePercentLost = 0;
 
   constructor(scene, { onClickBackButton } = {}) {
-    super(scene, 'popup-gang-war-explain', { ribbon: 'ribbon-gang-war-explain' });
+    super(scene, 'popup-gang-war-explain', { ribbon: 'ribbon-gang-war-explain', noCloseBtn: true });
     this.onClickClose = onClickBackButton;
 
     this.backBtn = new TextButton(
