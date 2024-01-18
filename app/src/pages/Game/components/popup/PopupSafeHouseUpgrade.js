@@ -73,7 +73,7 @@ class PopupSafeHouseUpgrade extends Popup {
         scene.game.events.emit(events.upgradeHouse, { quantity: this.quantity });
       },
       'Upgrade',
-      { sound: 'buy' }
+      { fontSize: '82px', sound: 'buy' }
     );
     this.add(this.upgradeBtn);
 
@@ -104,7 +104,7 @@ class PopupSafeHouseUpgrade extends Popup {
       'button-square',
       'button-square-pressed',
       () => {
-        if (this.quantity > DEFAULT_QUANTITY) {
+        if (this.quantity > DEFAULT_QUANTITY && !isSimulator) {
           this.quantity--;
           this.updateValues();
         }
@@ -140,7 +140,7 @@ class PopupSafeHouseUpgrade extends Popup {
       'button-square',
       'button-square-pressed',
       () => {
-        if (this.quantity < MAX_QUANTITY) {
+        if (this.quantity < MAX_QUANTITY && !isSimulator) {
           this.quantity++;
           this.updateValues();
         }
@@ -186,7 +186,8 @@ class PopupSafeHouseUpgrade extends Popup {
         color: colors.black,
         fontFamily: fontFamilies.bold,
       })
-      .setOrigin(0, -1);
+      .setOrigin(0, -1)
+      .setVisible(!isSimulator);
     this.add(this.gasPrice);
     this.insufficientBalance = scene.add
       .text(priceTextX, counterY + 48, 'Insufficient $FIAT', {

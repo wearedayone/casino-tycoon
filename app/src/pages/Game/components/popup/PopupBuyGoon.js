@@ -78,7 +78,7 @@ class PopupBuyGoon extends Popup {
         scene.game.events.emit(events.buyGoon, { quantity: this.quantity });
       },
       'Buy',
-      { sound: 'buy', disabledImage: 'button-disabled' }
+      { fontSize: '82px', sound: 'buy', disabledImage: 'button-disabled' }
     );
     this.add(this.upgradeBtn);
 
@@ -121,7 +121,7 @@ class PopupBuyGoon extends Popup {
       'button-square',
       'button-square-pressed',
       () => {
-        if (this.quantity > DEFAULT_QUANTITY) {
+        if (this.quantity > DEFAULT_QUANTITY && !isSimulator) {
           this.quantity--;
           this.updateValues();
         }
@@ -157,7 +157,7 @@ class PopupBuyGoon extends Popup {
       'button-square',
       'button-square-pressed',
       () => {
-        if (this.quantity < MAX_QUANTITY) {
+        if (this.quantity < MAX_QUANTITY && !isSimulator) {
           this.quantity++;
           this.updateValues();
         }
@@ -203,7 +203,8 @@ class PopupBuyGoon extends Popup {
         color: colors.black,
         fontFamily: fontFamilies.bold,
       })
-      .setOrigin(0, -1);
+      .setOrigin(0, -1)
+      .setVisible(!isSimulator);
     this.add(this.gasPrice);
     this.insufficientBalance = scene.add
       .text(priceTextX, counterY + 48, 'Insufficient $FIAT', {

@@ -10,7 +10,7 @@ const { NETWORK_ID } = environments;
 
 class PopupTxnCompleted extends Popup {
   onCompleted;
-  constructor(scene, icon, title, description, txnHash, onCompleted) {
+  constructor(scene, icon, title, description, txnHash, { onCompleted, hideTxnHash = false }) {
     super(scene, 'popup-small', { title: 'Completed', openOnCreate: true });
 
     this.onCompleted = onCompleted;
@@ -38,8 +38,7 @@ class PopupTxnCompleted extends Popup {
         align: 'center',
       })
       .setOrigin(0.5, 0.5);
-    this.viewTxnHash = scene.add.image(width / 2, viewTxnHashY, 'view-transaction');
-    console.log('this.viewTxnHash', this.viewTxnHash);
+    this.viewTxnHash = scene.add.image(width / 2, viewTxnHashY, 'view-transaction').setVisible(!hideTxnHash);
 
     this.add(this.icon);
     this.add(this.title);

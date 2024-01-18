@@ -58,7 +58,7 @@ class PopupWarMachines extends Popup {
     );
     this.add(this.backBtn);
 
-    this.nextBtn = new TextButton(
+    this.raidBtn = new TextButton(
       scene,
       width / 2 + buttonWidth / 2 + btnGap / 2,
       height / 2 + this.popup.height / 2 - 20,
@@ -74,10 +74,10 @@ class PopupWarMachines extends Popup {
           numberOfMachinesToDefend: this.defendUnits,
         });
       },
-      'Next',
+      'Go Raid',
       { sound: 'button-1', fontSize: '82px' }
     );
-    this.add(this.nextBtn);
+    this.add(this.raidBtn);
 
     this.infoBtn = scene.add
       .image(width / 2 + this.popup.width / 2 - 100, height / 2 - this.popup.height / 2 + 220, 'icon-info-blue')
@@ -395,7 +395,7 @@ class PopupWarMachines extends Popup {
       .text(
         width / 2,
         this.numberOfMachinesText.y + 130,
-        `Raid Player: ${this.attackUser ? `@${this.attackUser.username}` : 'null'}`,
+        `Raid Player: ${this.attackUser ? `@${this.attackUser.username}` : 'nil'}`,
         {
           fontSize: '50px',
           color: '#7C2828',
@@ -479,11 +479,11 @@ class PopupWarMachines extends Popup {
     this.numberOfMachinesText.text = `Unallocated Gangsters: ${
       this.numberOfMachines - this.earnUnits - this.attackUnits - this.defendUnits
     }`;
-    this.attackUserText.text = `Raid Player: ${this.attackUser ? `@${this.attackUser.username}` : 'null'}`;
+    this.attackUserText.text = `Raid Player: ${this.attackUser ? `@${this.attackUser.username}` : 'nil'}`;
     this.workerBonusTokenText.text = `Goon Bonus: ${formatter.format(this.workerBonusToken)} $FIAT`;
     this.buildingBonusText.text = `Safehouse Bonus: ${formatter.format(this.buildingBonus)}`;
 
-    this.nextBtn.setDisabledState(!this.scene?.isUserActive);
+    this.raidBtn.setDisabledState(!this.scene?.isUserActive);
   }
 }
 

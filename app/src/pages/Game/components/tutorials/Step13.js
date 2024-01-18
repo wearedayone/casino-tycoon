@@ -12,15 +12,22 @@ const y = 2600;
 
 class Step13 extends Phaser.GameObjects.Container {
   clicked = false;
-  constructor(scene, onNext) {
+  constructor(scene) {
     super(scene, 0, 0);
 
     this.setVisible(false);
 
     const next = () => {
+      this.arrow.setVisible(false);
+      this.character.destroy();
+      this.activeButton.destroy();
+
+      this.backBtnArrow = scene.add
+        .image(width / 2 - scene.popupWarMachines.popup.width * 0.23, height - 350, 'tutorial-arrow-up')
+        .setOrigin(0.5, 0);
+      this.add(this.backBtnArrow);
       scene.popupWar.setVisible(false);
       scene.popupWarMachines.background?.destroy();
-      onNext();
     };
 
     this.activeButton = new Button(

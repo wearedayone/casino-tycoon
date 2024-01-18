@@ -84,7 +84,7 @@ class PopupBuyGangster extends Popup {
         scene.game.events.emit(events.buyGangster, { quantity: this.quantity, mintFunction: this.mintFunction });
       },
       'Buy',
-      { sound: 'buy' }
+      { fontSize: '82px', sound: 'buy' }
     );
     this.add(this.upgradeBtn);
 
@@ -226,7 +226,7 @@ class PopupBuyGangster extends Popup {
     this.quantityText.setOrigin(0.5, 0.5);
     this.add(this.quantityText);
 
-    this.priceTextX = this.popup.x + 160;
+    this.priceTextX = this.popup.x + (isSimulator ? 200 : 160);
     this.priceText = scene.add.text(this.priceTextX, counterY, '0', largeBlackExtraBold).setOrigin(0, 0.5);
     this.add(this.priceText);
 
