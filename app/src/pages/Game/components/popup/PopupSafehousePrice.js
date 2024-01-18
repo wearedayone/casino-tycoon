@@ -121,9 +121,9 @@ class PopupSafehousePrice extends Popup {
       space: { left: 20, right: 20, top: 20, bottom: 20, panel: 20, header: 10, footer: 10 },
     }).layout();
     if (this.data.length <= 7 || !this.visible) {
-      this.table.setScrollerEnable(false);
+      this.table.setMouseWheelScrollerEnable(false);
     } else {
-      this.table.setScrollerEnable(true);
+      this.table.setMouseWheelScrollerEnable(true);
     }
     this.add(this.table);
 

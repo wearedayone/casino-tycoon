@@ -245,9 +245,9 @@ class PopupWarAttack extends Popup {
       space: { left: 20, right: 20, top: 20, bottom: 20, panel: 20, header: 10, footer: 10 },
     }).layout();
     if (this.users.length <= 7) {
-      this.table.setScrollerEnable(false);
+      this.table.setMouseWheelScrollerEnable(false);
     } else {
-      this.table.setScrollerEnable(true);
+      this.table.setMouseWheelScrollerEnable(true);
     }
     this.add(this.table);
     if (!this.visible) {

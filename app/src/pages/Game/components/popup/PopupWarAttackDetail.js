@@ -322,9 +322,9 @@ class PopupWarAttackDetail extends Popup {
       space: { left: 20, right: 20, top: 20, bottom: 20, panel: 20, header: 10, footer: 10 },
     }).layout();
     if (formattedWarResults.length <= 3 || !this.visible) {
-      this.resultTable.setScrollerEnable(false);
+      this.resultTable.setMouseWheelScrollerEnable(false);
     } else {
-      this.resultTable.setScrollerEnable(true);
+      this.resultTable.setMouseWheelScrollerEnable(true);
     }
     this.add(this.resultTable);
 
@@ -365,9 +365,9 @@ class PopupWarAttackDetail extends Popup {
       space: { left: 20, right: 20, top: 20, bottom: 20, panel: 20, header: 10, footer: 10 },
     }).layout();
     if (formattedWarResults.length <= 3 || !this.visible) {
-      this.earnTable.setScrollerEnable(false);
+      this.earnTable.setMouseWheelScrollerEnable(false);
     } else {
-      this.earnTable.setScrollerEnable(true);
+      this.earnTable.setMouseWheelScrollerEnable(true);
     }
     this.add(this.earnTable);
 
