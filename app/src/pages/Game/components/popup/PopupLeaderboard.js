@@ -382,9 +382,9 @@ class PopupLeaderboard extends Popup {
       space: { left: 50, right: 40, top: 40, bottom: 40, panel: 20, header: 10, footer: 10 },
     }).layout();
     if (leaderboard.length <= 10) {
-      this.table.setScrollerEnable(false);
+      this.table.setMouseWheelScrollerEnable(false);
     } else {
-      this.table.setScrollerEnable(true);
+      this.table.setMouseWheelScrollerEnable(true);
     }
     this.add(this.table);
 

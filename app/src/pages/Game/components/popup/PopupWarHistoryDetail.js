@@ -451,7 +451,7 @@ class PopupWarHistoryDetail extends Popup {
 
   onOpen() {
     if (this.table) {
-      this.table.setMouseWheelScrollerEnable(true);
+      // this.table.setMouseWheelScrollerEnable(true);
     }
   }
 

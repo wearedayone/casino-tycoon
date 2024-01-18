@@ -166,9 +166,9 @@ class PopupWarHistory extends Popup {
       space: { left: 20, right: 20, top: 20, bottom: 20, panel: 20, header: 10, footer: 10 },
     }).layout();
     if (this.data.length <= 9 || !this.visible) {
-      this.table.setScrollerEnable(false);
+      this.table.setMouseWheelScrollerEnable(false);
     } else {
-      this.table.setScrollerEnable(true);
+      this.table.setMouseWheelScrollerEnable(true);
     }
     this.add(this.table);
 
@@ -181,7 +181,7 @@ class PopupWarHistory extends Popup {
 
   onOpen() {
     if (this.table) {
-      this.table.setMouseWheelScrollerEnable(true);
+      // this.table.setMouseWheelScrollerEnable(true);
     }
     this.scene.game.events.emit('request-next-war-time');
     this.scene.game.events.emit('request-war-history');
