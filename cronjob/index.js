@@ -3,6 +3,7 @@ import cron from 'node-cron';
 import { updateFIATPriceUniswapV2 } from './tasks/updateFIATPrice.js';
 import calculateAvgPrice from './tasks/calculateAvgPrice.js';
 import estimateGasPrice from './tasks/estimateGas.js';
+import getEthPrice from './tasks/getEthPrice.js';
 import environments from './utils/environments.js';
 
 const { CRON_CALCULATE_WORKER_BUILDING_PRICE, CRON_UPDATE_FIAT_PRICE, CRON_ESTIMATE_GAS_PRICE } = environments;
@@ -21,4 +22,8 @@ cron.schedule(
 
 cron.schedule(CRON_ESTIMATE_GAS_PRICE, function () {
   estimateGasPrice();
+});
+
+cron.schedule('', function () {
+  getEthPrice();
 });
