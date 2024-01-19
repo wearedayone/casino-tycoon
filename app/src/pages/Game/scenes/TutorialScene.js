@@ -18,6 +18,7 @@ import PopupLeaderboard from '../components/popup/PopupLeaderboard';
 import PopupDeposit from '../components/popup/PopupDeposit';
 import PopupPrizePool from '../components/popup/PopupPrizePool';
 import Tutorial from '../components/tutorials/Tutorial';
+import PopupDepositETH from '../components/popup/PopupDepositETH';
 
 const { goonAnimation, gangsterAnimation, width, height } = configs;
 
@@ -65,18 +66,22 @@ class TutorialScene extends Phaser.Scene {
     const gangsterHouse = new GangsterHouse(this, 2200, { isSimulator: true }); // done
     this.add.existing(gangsterHouse);
 
+    const endTutorial = () => {
+      this.game.events.emit('simulator-end');
+      this.scene.stop();
+      this.scene.start('MainScene');
+    };
     this.popupDeposit = new PopupDeposit(this, null, {
       isSimulator: true,
       onOpen: () => {
         this.tutorial.step16.setVisible(false);
       },
-      onClose: () => {
-        this.game.events.emit('simulator-end');
-        this.scene.stop();
-        this.scene.start('MainScene');
-      },
+      onClose: endTutorial,
     }); // done
     this.add.existing(this.popupDeposit);
+
+    this.popupDepositETH = new PopupDepositETH(this, { onClose: endTutorial });
+    this.add.existing(this.popupDepositETH);
 
     this.popupBuy = new PopupBuy(this, width - 335, 1600); // done
     this.add.existing(this.popupBuy);
