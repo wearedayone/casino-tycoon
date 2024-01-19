@@ -464,6 +464,7 @@ class PopupWarHistoryDetail extends Popup {
     this.add(this.table);
     if (!this.visible) {
       this.table.setMouseWheelScrollerEnable(false);
+      this.table.setScrollerEnable(false);
     }
 
     this.table.on('scroll', (e) => {
@@ -476,12 +477,14 @@ class PopupWarHistoryDetail extends Popup {
   onOpen() {
     if (this.table) {
       // this.table.setMouseWheelScrollerEnable(true);
+      // this.table.setScrollerEnable(true)
     }
   }
 
   cleanup() {
     if (this.table) {
       this.table.setMouseWheelScrollerEnable(false);
+      this.table.setScrollerEnable(false);
       this.thumb?.setVisible(false);
     }
   }
