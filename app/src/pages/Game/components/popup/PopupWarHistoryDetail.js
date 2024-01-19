@@ -4,7 +4,7 @@ import Popup from './Popup';
 import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
 import { colors, fontSizes, fontFamilies } from '../../../../utils/styles';
-import { formatter } from '../../../../utils/numbers';
+import { formatter, customFormat } from '../../../../utils/numbers';
 
 const { width, height } = configs;
 
@@ -109,7 +109,7 @@ class PopupWarHistoryDetail extends Popup {
       .text(
         this.popup.width * 0.13 + earnItemIcon.width / 2 + 30,
         y,
-        `$FIAT Earned: ${formatter.format(tokenEarnFromEarning || 0)} $FIAT`,
+        `$FIAT Earned: ${customFormat(tokenEarnFromEarning || 0, 1)} $FIAT`,
         {
           fontSize: '50px',
           color: colors.black,
@@ -164,7 +164,7 @@ class PopupWarHistoryDetail extends Popup {
       .text(
         this.popup.width * 0.13 + tokenStolenItemIcon.width / 2 + 30,
         y,
-        `$FIAT Lost: ${formatter.format(tokenStolen) || 0}`,
+        `$FIAT Lost: ${customFormat(tokenStolen || 0, 1)}`,
         {
           fontSize: '50px',
           color: colors.black,
@@ -337,7 +337,7 @@ class PopupWarHistoryDetail extends Popup {
       .text(
         this.popup.width * 0.13 + tokenEarnedFromAttackingItemIcon.width / 2 + 30,
         y,
-        `$FIAT Stolen: ${formatter.format(tokenEarnFromAttacking) || 0}`,
+        `$FIAT Stolen: ${customFormat(tokenEarnFromAttacking || 0, 1)}`,
         {
           fontSize: '50px',
           color: colors.black,
