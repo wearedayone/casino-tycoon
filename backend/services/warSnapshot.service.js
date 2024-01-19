@@ -240,6 +240,7 @@ export const generateDailyWarSnapshot = async () => {
           result: 'lose',
           attackUnits,
           defendUnits: attackedUser.defendUnits,
+          machinesLost: 0,
         });
       }
 
@@ -259,6 +260,7 @@ export const generateDailyWarSnapshot = async () => {
           result: 'win',
           attackUnits,
           defendUnits: attackedUser.defendUnits,
+          machinesLost,
         });
       }
 
@@ -276,6 +278,7 @@ export const generateDailyWarSnapshot = async () => {
           result: 'draw',
           attackUnits,
           defendUnits: attackedUser.defendUnits,
+          machinesLost: 0,
         });
       }
     }
