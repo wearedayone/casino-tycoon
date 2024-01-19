@@ -287,7 +287,6 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('settings-wallet-container', '/images/settings-wallet-container.png');
     this.load.image('view-transaction', '/images/texts/view-transaction.png');
     this.load.image('deposit-instruction', '/images/texts/deposit-instruction.png');
-    this.load.image('deposit-link', '/images/texts/deposit-link.png');
     this.load.image('swap', '/images/swap.png');
 
     this.load.image('icon-chevron-right', '/images/icons/chevron-right.png');

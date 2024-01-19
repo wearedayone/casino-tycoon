@@ -1,5 +1,3 @@
-import Phaser from 'phaser';
-
 import Popup from './Popup';
 import TextButton from '../button/TextButton';
 import Button from '../button/Button';
@@ -11,8 +9,9 @@ const { width, height } = configs;
 class PopupDepositETH extends Popup {
   code = '-----';
 
-  constructor(scene) {
+  constructor(scene, { onClose } = {}) {
     super(scene, 'popup-small', { title: 'Deposit ETH' });
+    this.cleanup = onClose;
 
     const leftMargin = this.popup.x - this.popup.width / 2;
     const startingY = this.popup.y - this.popup.height / 2;
@@ -20,7 +19,6 @@ class PopupDepositETH extends Popup {
     const depositCodeY = instructionY + 340;
 
     const instruction = scene.add.image(width / 2, instructionY, 'deposit-instruction');
-    const depositLink = scene.add.image(width / 2, instructionY, 'deposit-link');
     const textContainer = scene.add.image(width / 2, depositCodeY, 'text-container');
     const depositCode = scene.add
       .text(width / 2, depositCodeY, '- - -  - - -', {
@@ -39,7 +37,6 @@ class PopupDepositETH extends Popup {
     );
 
     this.add(instruction);
-    this.add(depositLink);
     this.add(textContainer);
     this.add(depositCode);
     this.add(copyButton);
@@ -58,16 +55,6 @@ class PopupDepositETH extends Popup {
       { fontSize: '82px', sound: 'close' }
     );
     this.add(buttonBack);
-
-    depositLink
-      .setInteractive()
-      .on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
-        depositLink.setAlpha(0.5);
-      })
-      .on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
-        depositLink.setAlpha(1);
-        window.open(`${process.env.PUBLIC_URL}/deposit/user?code=${this.code}`);
-      });
 
     scene.game.events.on('update-deposit-code', (code) => {
       this.code = code;
