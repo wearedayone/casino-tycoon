@@ -104,13 +104,14 @@ class PopupSafeHouseUpgrade extends Popup {
       'button-square',
       'button-square-pressed',
       () => {
-        if (this.quantity > DEFAULT_QUANTITY && !isSimulator) {
+        if (this.quantity > DEFAULT_QUANTITY) {
           this.quantity--;
           this.updateValues();
         }
       },
       '-',
       {
+        disabledImage: 'button-square-disabled',
         fontSize: '82px',
         sound: 'button-1',
         onHold: () => {
@@ -131,6 +132,7 @@ class PopupSafeHouseUpgrade extends Popup {
         },
       }
     );
+    this.minusBtn.setDisabledState(isSimulator);
     this.add(this.minusBtn);
 
     this.plusBtn = new TextButton(
@@ -140,13 +142,14 @@ class PopupSafeHouseUpgrade extends Popup {
       'button-square',
       'button-square-pressed',
       () => {
-        if (this.quantity < MAX_QUANTITY && !isSimulator) {
+        if (this.quantity < MAX_QUANTITY) {
           this.quantity++;
           this.updateValues();
         }
       },
       '+',
       {
+        disabledImage: 'button-square-disabled',
         fontSize: '82px',
         sound: 'button-1',
         onHold: () => {
@@ -167,6 +170,7 @@ class PopupSafeHouseUpgrade extends Popup {
         },
       }
     );
+    this.plusBtn.setDisabledState(isSimulator);
     this.add(this.plusBtn);
 
     this.quantityText = scene.add.text(minusBtnX + 170, counterY, this.quantity, {
@@ -202,20 +206,22 @@ class PopupSafeHouseUpgrade extends Popup {
     this.coin = scene.add.image(this.priceText.x + this.priceText.width + 40, counterY, 'coin2').setOrigin(0, 0.5);
     this.add(this.coin);
 
-    this.infoButton = new Button(
-      scene,
-      this.coin.x + this.coin.width + 40,
-      counterY - 40,
-      'button-info',
-      'button-info-pressed',
-      () => {
-        if (isSimulator) return;
-        this.close();
-        this.scene.popupSafehousePrice?.open();
-      },
-      { sound: 'open' }
-    );
-    this.add(this.infoButton);
+    if (!isSimulator) {
+      this.infoButton = new Button(
+        scene,
+        this.coin.x + this.coin.width + 40,
+        counterY - 40,
+        'button-info',
+        'button-info-pressed',
+        () => {
+          if (isSimulator) return;
+          this.close();
+          this.scene.popupSafehousePrice?.open();
+        },
+        { sound: 'open' }
+      );
+      this.add(this.infoButton);
+    }
 
     scene.game.events.on(events.completed, () => {
       this.quantity = DEFAULT_QUANTITY;
@@ -301,7 +307,7 @@ class PopupSafeHouseUpgrade extends Popup {
     const formattedGas = customFormat(this.gas, 4) === '0' ? '<0.0001' : customFormat(this.gas, 4);
     this.gasPrice.text = `+${formattedGas} ETH (gas)`;
     this.coin.x = this.priceText.x + this.priceText.width + 20;
-    this.infoButton.x = this.coin.x + this.coin.width + 40;
+    if (this.infoButton) this.infoButton.x = this.coin.x + this.coin.width + 40;
 
     const insufficientBalance = this.quantity > this.estimatedMaxPurchase;
     this.insufficientBalance.setVisible(insufficientBalance);

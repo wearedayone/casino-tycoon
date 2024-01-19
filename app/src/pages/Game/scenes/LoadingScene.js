@@ -242,6 +242,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-back-portfolio-pressed', '/images/button-back-portfolio-pressed.png');
     this.load.image('button-square', '/images/button-square.png');
     this.load.image('button-square-pressed', '/images/button-square-pressed.png');
+    this.load.image('button-square-disabled', '/images/button-square-disabled.png');
     this.load.image('button-yes', '/images/button-yes.png');
     this.load.image('button-yes-pressed', '/images/button-yes-pressed.png');
     this.load.image('button-green', '/images/button-green.png');
