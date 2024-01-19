@@ -4,7 +4,7 @@ import TextButton from '../button/TextButton';
 import Button from '../button/Button';
 import configs from '../../configs/configs';
 import { estimateNumberOfBuildingCanBuy, calculateNextBuildingBuyPriceBatch } from '../../../../utils/formulas';
-import { customFormat, formatter } from '../../../../utils/numbers';
+import { customFormat } from '../../../../utils/numbers';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
 
 const { width, height } = configs;
@@ -303,7 +303,7 @@ class PopupSafeHouseUpgrade extends Popup {
     ).total;
 
     this.quantityText.text = `${this.quantity}`;
-    this.priceText.text = `${formatter.format(estimatedPrice)}`;
+    this.priceText.text = `${customFormat(estimatedPrice, 1)}`;
     const formattedGas = customFormat(this.gas, 4) === '0' ? '<0.0001' : customFormat(this.gas, 4);
     this.gasPrice.text = `+${formattedGas} ETH (gas)`;
     this.coin.x = this.priceText.x + this.priceText.width + 20;
