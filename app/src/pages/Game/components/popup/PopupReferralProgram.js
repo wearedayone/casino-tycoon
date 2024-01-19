@@ -30,28 +30,28 @@ class PopupReferralProgram extends Popup {
     super(scene, 'popup-referral', { title: 'Referral Program' });
     const leftMargin = this.popup.x - this.popup.width / 2;
     const startingY = this.popup.y - this.popup.height / 2;
-    const walletContainerY = startingY + 1300;
-    const earnedTextY = walletContainerY + 180;
+    const refCodeContainerY = startingY + 1430;
+    const earnedTextY = refCodeContainerY + 180;
     const inviteCodeY = startingY + 600;
 
     this.referTitle = scene.add
-      .text(width / 2, walletContainerY - 420, 'Give --%, Earn --%', largeBlackExtraBold)
+      .text(width / 2, refCodeContainerY - 420, 'Give --%, Earn --%', largeBlackExtraBold)
       .setOrigin(0.5, 0);
     this.referSubtitle = scene.add
       .text(
         width / 2,
-        walletContainerY - 300,
+        refCodeContainerY - 300,
         'Earn --% of all ETH your referral spends. \nYour referrals get --% discount on purchases.',
         mediumBrownBoldCenter
       )
       .setOrigin(0.5, 0);
     this.add(this.referTitle);
     this.add(this.referSubtitle);
-    this.walletContainer = scene.add.image(width / 2, walletContainerY, 'text-container');
+    this.walletContainer = scene.add.image(width / 2, refCodeContainerY, 'text-container');
     this.add(this.walletContainer);
 
     this.referralText = scene.add
-      .text(width / 2, walletContainerY, '', {
+      .text(width / 2, refCodeContainerY, '', {
         fontSize: fontSizes.extraLarge,
         color: colors.black,
         fontFamily: fontFamilies.extraBold,
@@ -61,20 +61,25 @@ class PopupReferralProgram extends Popup {
     this.buttonCopy = new Button(
       scene,
       leftMargin + this.popup.width * 0.85,
-      walletContainerY,
+      refCodeContainerY,
       'button-copy',
       'button-copy-pressed',
       () => navigator.clipboard.writeText(this.referralCode),
       { sound: 'button-2' }
     );
     this.add(this.buttonCopy);
+
+    this.earnedEthIcon = scene.add.image(width / 2, earnedTextY, 'eth-coin').setOrigin(0, 0.15);
     this.earnedText = scene.add.text(width / 2, earnedTextY, `ETH earned: 0 ETH`, earnedTextStyle);
     this.earnedText.setOrigin(0.5, 0);
     this.add(this.earnedText);
+    this.add(this.earnedEthIcon);
 
-    this.savedText = scene.add.text(width / 2, earnedTextY + 100, `ETH saved: 0 ETH`, earnedTextStyle);
+    this.savedEthIcon = scene.add.image(width / 2, inviteCodeY + 180, 'eth-coin').setOrigin(0, 0.15);
+    this.savedText = scene.add.text(width / 2, inviteCodeY + 180, `ETH saved: 0 ETH`, earnedTextStyle);
     this.savedText.setOrigin(0.5, 0);
     this.add(this.savedText);
+    this.add(this.savedEthIcon);
 
     this.referralDescription = scene.add
       .text(
@@ -158,9 +163,14 @@ class PopupReferralProgram extends Popup {
       this.referralCode = referralCode;
       this.referralText.text = referralCode?.toUpperCase();
     });
-    scene.game.events.on('update-referral-data', ({ referralTotalReward, referralTotalDiscount }) => {
-      this.earnedText.text = `ETH earned: ${customFormat(referralTotalReward, 4)} ETH`;
-      this.savedText.text = `ETH saved: ${customFormat(referralTotalDiscount, 4)} ETH`;
+    scene.game.events.on('update-referral-data', ({ referralTotalReward, referralTotalDiscount, ethPriceInUsd }) => {
+      const earnedInUsd = customFormat(referralTotalReward * ethPriceInUsd, 2);
+      const savedInUsd = customFormat(referralTotalDiscount * ethPriceInUsd, 2);
+
+      this.earnedText.text = `ETH earned: ${customFormat(referralTotalReward, 4)} ETH             (~$ ${earnedInUsd})`;
+      this.savedText.text = `ETH saved: ${customFormat(referralTotalDiscount, 4)} ETH             (~$ ${savedInUsd})`;
+      this.earnedEthIcon.x = (width + this.earnedText.width - earnedInUsd.length * 60) / 2 - 190;
+      this.savedEthIcon.x = (width + this.savedText.width - savedInUsd.length * 60) / 2 - 190;
     });
     scene.game.events.emit('request-referral-config');
     scene.game.events.emit('request-invite-code');

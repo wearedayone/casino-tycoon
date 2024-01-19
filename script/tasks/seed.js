@@ -46,6 +46,7 @@ const main = async () => {
       appVersion: '0.9.9',
     });
   await firestore.collection('system').doc('market').set({
+    ethPriceInUsd: '2471.94',
     nftPrice: '0.001',
     tokenPrice: '0.00001',
   });

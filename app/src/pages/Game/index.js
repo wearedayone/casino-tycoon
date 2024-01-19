@@ -103,7 +103,7 @@ const Game = () => {
   // }, [embeddedWallet]);
 
   const { appVersion } = configs || {};
-  const { tokenPrice, nftPrice } = market || {};
+  const { ethPriceInUsd, tokenPrice, nftPrice } = market || {};
 
   // Check that your user is authenticated
   const isAuthenticated = useMemo(() => ready && authenticated, [ready, authenticated]);
@@ -626,7 +626,11 @@ const Game = () => {
       });
 
       gameRef.current?.events.on('request-referral-data', () => {
-        gameRef.current.events.emit('update-referral-data', { referralTotalReward, referralTotalDiscount });
+        gameRef.current.events.emit('update-referral-data', {
+          referralTotalReward,
+          referralTotalDiscount,
+          ethPriceInUsd,
+        });
       });
 
       gameRef.current?.events.on('apply-invite-code', ({ code }) => {
@@ -1355,8 +1359,8 @@ const Game = () => {
   }, [networth, houseLevels]);
 
   useEffect(() => {
-    gameRef.current?.events.emit('update-referral-data', { referralTotalReward, referralTotalDiscount });
-  }, [referralTotalReward, referralTotalDiscount]);
+    gameRef.current?.events.emit('update-referral-data', { referralTotalReward, referralTotalDiscount, ethPriceInUsd });
+  }, [referralTotalReward, referralTotalDiscount, ethPriceInUsd]);
 
   useEffect(() => {
     gameRef.current?.events.emit('update-workers-machines', { numberOfWorkers, numberOfMachines });
