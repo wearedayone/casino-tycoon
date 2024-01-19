@@ -167,8 +167,10 @@ class PopupWarHistory extends Popup {
     }).layout();
     if (this.data.length <= 9 || !this.visible) {
       this.table.setMouseWheelScrollerEnable(false);
+      this.table.setScrollerEnable(false);
     } else {
       this.table.setMouseWheelScrollerEnable(true);
+      this.table.setScrollerEnable(true);
     }
     this.add(this.table);
 
@@ -190,6 +192,7 @@ class PopupWarHistory extends Popup {
   cleanup() {
     if (this.table) {
       this.table.setMouseWheelScrollerEnable(false);
+      this.table.setScrollerEnable(false);
       this.thumb?.setVisible(false);
     }
   }
