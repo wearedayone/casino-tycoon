@@ -131,7 +131,7 @@ class PopupLeaderboard extends Popup {
         title: 'Reputation',
         onClick: () => {
           this.buttonBack.setX(width / 2 - this.popup.width * 0.23);
-          this.buttonRetire.setVisible(true);
+          this.buttonRetire.setVisible(true && !this.isEnded);
           this.ethRewards.text = this.reputationRewardsString;
           this.playerReward.text = `~${formatter.format(this.userReputationReward)}`;
           if (isSimulator) onClickReputation();
@@ -299,8 +299,14 @@ class PopupLeaderboard extends Popup {
     this.gameEndTime.setVisible(!isEnded);
     this.endTimeExtension.setVisible(!isEnded);
     this.buttonBack.setVisible(!isEnded);
-    if (isEnded) this.remove(this.buttonBack);
-    else this.add(this.buttonBack);
+    this.buttonRetire.setVisible(!isEnded);
+    if (isEnded) {
+      this.remove(this.buttonBack);
+      this.remove(this.buttonRetire);
+    } else {
+      this.add(this.buttonBack);
+      this.add(this.buttonRetire);
+    }
 
     this.youFinished.setVisible(isEnded);
     this.finishedAt.setVisible(isEnded);
