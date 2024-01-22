@@ -53,12 +53,20 @@ const takeSeasonLeaderboardSnapshot = async () => {
     const userAddresses = (await Promise.all(userPromises)).map((doc) => doc.data().address);
 
     const winnerAllocations = leaderboard
-      .filter(({ active, reward, reputationReward }) => active && reward + reputationReward > 0)
+      .filter(({ active, rankReward, reputationReward }) => active && rankReward + reputationReward > 0)
       .map((doc, index) => {
         const { networth, rankReward, reputationReward } = doc;
         const prizeValue = rankReward + reputationReward;
         const prizeShare = prizeValue / (rankPrizePool + reputationPrizePool);
-        return { rank: index + 1, networth, prizeValue, prizeShare, address: userAddresses[index], rankReward, reputationReward };
+        return {
+          rank: index + 1,
+          networth,
+          prizeValue,
+          prizeShare,
+          address: userAddresses[index],
+          rankReward,
+          reputationReward,
+        };
       });
 
     // save snapshot to firestore
