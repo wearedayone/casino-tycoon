@@ -116,14 +116,20 @@ class Animation extends Phaser.GameObjects.Container {
     scene.game.events.on(events.stopAnimation, () => {
       this.gangsterAction = null;
       this.goonAction = null;
+
       this.gangsterFront.anims.stop();
       this.gangsterFront.setVisible(false);
       this.gangsterBack.anims.stop();
       this.gangsterBack.setVisible(false);
+      this.gangsterCounterContainer.setVisible(false);
+      this.gangsterCounterText.setVisible(false);
+
       this.goonFront.anims.stop();
       this.goonFront.setVisible(false);
       this.goonBack.anims.stop();
       this.goonBack.setVisible(false);
+      this.goonCounterContainer.setVisible(false);
+      this.goonCounterText.setVisible(false);
     });
 
     scene.game.events.on(events.animationGangsterBack, () => {
