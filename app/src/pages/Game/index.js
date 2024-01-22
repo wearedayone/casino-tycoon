@@ -683,6 +683,7 @@ const Game = () => {
             reloadBalance();
           }
         } catch (err) {
+          console.error(err);
           console.log({ err });
           let message = err.message;
           let errorCode = err.code?.toString();

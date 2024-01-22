@@ -6,6 +6,7 @@ import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol';
 import '@openzeppelin/contracts/access/AccessControl.sol';
 import '@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol';
+import '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
 // import '@openzeppelin/contracts/access/Ownable.sol';
 import './libs/SafeMath.sol';
 import './libs/SafeTransferLib.sol';
@@ -16,7 +17,7 @@ import './IGangsterArena.sol';
 
 // import 'hardhat/console.sol';
 
-contract FIAT is ERC20, AccessControl, ERC20Burnable, ERC20Permit {
+contract FIAT is ERC20, AccessControl, ERC20Burnable, ERC20Permit, ReentrancyGuard {
   using SafeMath for uint256;
   using SafeTransferLib for address payable;
   bytes32 public constant MINTER_ROLE = keccak256('MINTER_ROLE');
@@ -30,7 +31,7 @@ contract FIAT is ERC20, AccessControl, ERC20Burnable, ERC20Permit {
   // swap everytime this contract hold more than 1k fiat
   uint256 public swapTokensAtAmount = 1000 * 1e18;
 
-  uint256 public totalFees = 50; // 50/1000
+  uint256 public totalFees = 50; // Value is in basis points so 1000 = 100% , 10 = 1% etc
   uint256 public revShareFee = 20;
   uint256 public liquidityFee = 10;
   uint256 public teamFee = 20;
@@ -60,6 +61,12 @@ contract FIAT is ERC20, AccessControl, ERC20Burnable, ERC20Permit {
 
   receive() external payable {}
 
+  /**
+  ***************************
+  Public
+  ***************************
+   */
+
   function mint(address to, uint256 amount) public onlyRole(MINTER_ROLE) {
     _mint(to, amount);
   }
@@ -69,6 +76,16 @@ contract FIAT is ERC20, AccessControl, ERC20Burnable, ERC20Permit {
     for (uint32 i = 0; i < receivers.length; i++) {
       _mint(receivers[i], amounts[i]);
     }
+  }
+
+  /**
+  ***************************
+  Customization for the contract (ADMIN_ROLE)
+  ***************************
+   */
+
+  function manualSwapBack() public onlyRole(DEFAULT_ADMIN_ROLE) {
+    swapBack();
   }
 
   function updateUniswapAddresses(
@@ -83,9 +100,8 @@ contract FIAT is ERC20, AccessControl, ERC20Burnable, ERC20Permit {
     gangsterArena = IGangsterArena(_address);
   }
 
-  function updateSwapTokensAtAmount(uint256 newAmount) external onlyRole(DEFAULT_ADMIN_ROLE) returns (bool) {
+  function updateSwapTokensAtAmount(uint256 newAmount) public onlyRole(DEFAULT_ADMIN_ROLE) {
     swapTokensAtAmount = newAmount;
-    return true;
   }
 
   function updateFees(
@@ -111,18 +127,33 @@ contract FIAT is ERC20, AccessControl, ERC20Burnable, ERC20Permit {
     return _isExcludedFromFees[account];
   }
 
+  function withdrawStuckToken() external onlyRole(DEFAULT_ADMIN_ROLE) {
+    uint256 balance = IERC20(address(this)).balanceOf(address(this));
+    IERC20(address(this)).transfer(msg.sender, balance);
+    payable(msg.sender).transfer(address(this).balance);
+  }
+
+  function withdrawStuckEth(address toAddr) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    payable(toAddr).safeTransferETH(address(this).balance);
+  }
+
+  /**
+  ***************************
+  Private
+  ***************************
+   */
+
   function _update(address from, address to, uint256 amount) internal override {
     if (amount == 0) return;
 
     bool isBuy = from == uniswapV2Pair;
     bool isSell = to == uniswapV2Pair;
-    bool isSwap = isBuy || isSell;
 
     uint256 contractTokenBalance = balanceOf(address(this));
 
     bool canSwap = contractTokenBalance >= swapTokensAtAmount;
 
-    if (canSwap && isSwap && !_isExcludedFromFees[from] && !_isExcludedFromFees[to]) {
+    if (canSwap && isSell && !_isExcludedFromFees[from] && !_isExcludedFromFees[to]) {
       swapBack();
     }
 
@@ -181,7 +212,7 @@ contract FIAT is ERC20, AccessControl, ERC20Burnable, ERC20Permit {
     );
   }
 
-  function swapBack() private {
+  function swapBack() internal nonReentrant {
     uint256 contractBalance = balanceOf(address(this));
     uint256 totalTokensToSwap = tokensForLiquidity + tokensForRevShare + tokensForTeam;
 
@@ -214,15 +245,5 @@ contract FIAT is ERC20, AccessControl, ERC20Burnable, ERC20Permit {
     tokensForLiquidity = 0;
     tokensForRevShare = 0;
     tokensForTeam = 0;
-  }
-
-  function withdrawStuckToken() external onlyRole(DEFAULT_ADMIN_ROLE) {
-    uint256 balance = IERC20(address(this)).balanceOf(address(this));
-    IERC20(address(this)).transfer(msg.sender, balance);
-    payable(msg.sender).transfer(address(this).balance);
-  }
-
-  function withdrawStuckEth(address toAddr) external onlyRole(DEFAULT_ADMIN_ROLE) {
-    payable(toAddr).safeTransferETH(address(this).balance);
   }
 }

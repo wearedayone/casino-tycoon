@@ -13,9 +13,9 @@ const warConfig = {
   machinePercentLost: 0.1,
 };
 const assetsConfig = {
-  machine: { basePrice: 0.001, whitelistPrice: 0.001, maxWhitelistAmount: 20, dailyReward: 1000, networth: 5 },
-  worker: { basePrice: 250, targetDailyPurchase: 100, targetPrice: 1000, dailyReward: 1000, networth: 3 },
-  building: { basePrice: 500, targetDailyPurchase: 100, targetPrice: 1000, dailyReward: 0, networth: 4 },
+  machine: { basePrice: 0.001, whitelistPrice: 0.001, maxWhitelistAmount: 20, dailyReward: 1000, networth: 10 },
+  worker: { basePrice: 250, targetDailyPurchase: 100, targetPrice: 1000, dailyReward: 1000, networth: 2 },
+  building: { basePrice: 500, targetDailyPurchase: 100, targetPrice: 1000, dailyReward: 0, networth: 8 },
 };
 const prizePoolConfig = {
   rankRewardsPercent: 0.7,
