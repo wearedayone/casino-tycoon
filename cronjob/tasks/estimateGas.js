@@ -12,54 +12,58 @@ import environments from '../utils/environments.js';
 const { SYSTEM_ADDRESS, WORKER_WALLET_PRIVATE_KEY, SIGNER_WALLET_PRIVATE_KEY } = environments;
 
 const estimateGasPrice = async () => {
-  console.log(`\n\n**************** Start job estimateGasPrice ****************\n`);
-  const estimatedGasRef = firestore.collection('system').doc('estimated-gas');
-  const systemData = await firestore.collection('system').doc('data').get();
-  const { nonce } = systemData.data();
+  try {
+    console.log(`\n\n**************** Start job estimateGasPrice ****************\n`);
+    const estimatedGasRef = firestore.collection('system').doc('estimated-gas');
+    const systemData = await firestore.collection('system').doc('data').get();
+    const { nonce } = systemData.data();
 
-  const { machine } = await getActiveSeason();
+    const { machine } = await getActiveSeason();
 
-  // amount = 0 since worker wallet has no fiat balance -> contract throws err if amount > 0
-  const fiatBuyValue = parseEther('0');
+    // amount = 0 since worker wallet has no fiat balance -> contract throws err if amount > 0
+    const fiatBuyValue = parseEther('0');
 
-  const machineSignature = await signMessageBuyGangster({
-    address: SYSTEM_ADDRESS,
-    amount: 1,
-    nonce,
-    bonus: 0,
-  });
-  const workerOrBuildingSignature = await signMessageBuyGoon({
-    address: SYSTEM_ADDRESS,
-    amount: 0,
-    value: fiatBuyValue,
-    nonce,
-  });
-  const buyWorkerOrBuildingParams = [0, BigInt(fiatBuyValue.toString()), nonce, workerOrBuildingSignature];
-
-  const [mint, buyGoon, buySafeHouse] = await Promise.all([
-    estimateTxnFee({ functionName: 'mint', params: [1, 1, 0, nonce, machineSignature], value: machine.basePrice }),
-    estimateTxnFee({ functionName: 'buyGoon', params: buyWorkerOrBuildingParams }),
-    estimateTxnFee({ functionName: 'buySafeHouse', params: buyWorkerOrBuildingParams }),
-  ]);
-
-  const updatedGas = {};
-
-  if (!isNaN(mint)) updatedGas.mint = mint;
-  if (!isNaN(buyGoon)) updatedGas.buyGoon = buyGoon;
-  if (!isNaN(buySafeHouse)) updatedGas.buySafeHouse = buySafeHouse;
-
-  const { game } = (await estimatedGasRef.get()).data();
-
-  await firestore
-    .collection('system')
-    .doc('estimated-gas')
-    .update({
-      game: {
-        ...game,
-        ...updatedGas,
-      },
+    const machineSignature = await signMessageBuyGangster({
+      address: SYSTEM_ADDRESS,
+      amount: 1,
+      nonce,
+      bonus: 0,
     });
-  console.log(`\n**************** End job estimateGasPrice ****************\n\n`);
+    const workerOrBuildingSignature = await signMessageBuyGoon({
+      address: SYSTEM_ADDRESS,
+      amount: 0,
+      value: fiatBuyValue,
+      nonce,
+    });
+    const buyWorkerOrBuildingParams = [0, BigInt(fiatBuyValue.toString()), nonce, workerOrBuildingSignature];
+
+    const [mint, buyGoon, buySafeHouse] = await Promise.all([
+      estimateTxnFee({ functionName: 'mint', params: [1, 1, 0, nonce, machineSignature], value: machine.basePrice }),
+      estimateTxnFee({ functionName: 'buyGoon', params: buyWorkerOrBuildingParams }),
+      estimateTxnFee({ functionName: 'buySafeHouse', params: buyWorkerOrBuildingParams }),
+    ]);
+
+    const updatedGas = {};
+
+    if (!isNaN(mint)) updatedGas.mint = mint;
+    if (!isNaN(buyGoon)) updatedGas.buyGoon = buyGoon;
+    if (!isNaN(buySafeHouse)) updatedGas.buySafeHouse = buySafeHouse;
+
+    const { game } = (await estimatedGasRef.get()).data();
+
+    await firestore
+      .collection('system')
+      .doc('estimated-gas')
+      .update({
+        game: {
+          ...game,
+          ...updatedGas,
+        },
+      });
+    console.log(`\n**************** End job estimateGasPrice ****************\n\n`);
+  } catch (err) {
+    console.error(err);
+  }
 };
 
 export default estimateGasPrice;
