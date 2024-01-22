@@ -4,9 +4,9 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "deploy-prd": "firebase use prd && firebase deploy --only hosting:app-prd",
-    "deploy-stg": "firebase use stg && firebase deploy --only hosting:app-stg",
-    "deploy-dev": "firebase use dev && firebase deploy --only hosting:app-dev"
+    "deploy:prd": "firebase use prd && firebase deploy --only hosting:app-prd",
+    "deploy:stg": "firebase use stg && firebase deploy --only hosting:app-stg",
+    "deploy:dev": "firebase use dev && firebase deploy --only hosting:app-dev"
   },
   "dependencies": {
     "firebase-functions": "^4.5.0"
