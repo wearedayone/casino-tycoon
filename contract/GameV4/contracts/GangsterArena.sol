@@ -43,14 +43,6 @@ contract GangsterArena is AccessControl, IGangsterArena {
   // Referral discount
   uint256 public BASE_REFERRAL_DISCOUNT = 9000;
 
-  // Max NFT minting perbatch
-  uint256 public MAX_PER_BATCH = 25;
-
-  // Max NFT when whitelist mint per wallet
-  uint256 public MAX_PER_WL = 20;
-
-  uint256 public BONUS_FIAT = 10;
-
   // Dev fee - over 10000
   uint256 public DEV_PERCENT = 500;
   // Marketing fee - over 10000
@@ -302,7 +294,7 @@ contract GangsterArena is AccessControl, IGangsterArena {
 
     uint256 total = reduce(points);
     require(total > 0, 'Invalid points input');
-    uint256 totalBalance = address(this).balance;
+    uint256 totalBalance = getPrizeBalance() + getRetireBalance();
     for (uint256 i = 0; i < to.length; i++) {
       address payable receiver = payable(to[i]);
       uint256 reward = (totalBalance * points[i]) / total;
@@ -382,13 +374,6 @@ contract GangsterArena is AccessControl, IGangsterArena {
   }
 
   /**
-   * @notice set Max per batch
-   */
-  function setMaxPerBatch(uint256 _maxPerBatch) public onlyRole(ADMIN_ROLE) {
-    MAX_PER_BATCH = _maxPerBatch;
-  }
-
-  /**
    * @notice set Base Price Gangster
    */
   function setBasePrice(uint256 _basePrice) public onlyRole(ADMIN_ROLE) {
@@ -414,13 +399,6 @@ contract GangsterArena is AccessControl, IGangsterArena {
    */
   function setBaseReferralDiscount(uint256 refferral_discount) public onlyRole(ADMIN_ROLE) {
     BASE_REFERRAL_DISCOUNT = refferral_discount;
-  }
-
-  /**
-   * @notice set Max Per Whitelisted Wallet
-   */
-  function setMaxPerWL(uint256 _maxPerWL) public onlyRole(ADMIN_ROLE) {
-    MAX_PER_WL = _maxPerWL;
   }
 
   /**

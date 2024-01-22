@@ -31,6 +31,8 @@ contract Gangster is ERC1155, AccessControl, ERC1155Burnable, ERC1155Supply, ERC
 
   constructor(address defaultAdmin, address minter) ERC1155('') {
     _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
+    _grantRole(URI_SETTER_ROLE, defaultAdmin);
+    _grantRole(MINTER_ROLE, defaultAdmin);
     _grantRole(MINTER_ROLE, minter);
   }
 
