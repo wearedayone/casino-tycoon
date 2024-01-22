@@ -50,6 +50,12 @@ class PopupWarMachines extends Popup {
       'button-blue',
       'button-blue-pressed',
       () => {
+        scene.game.events.emit('update-war-machines', {
+          numberOfMachines: this.numberOfMachines,
+          numberOfMachinesToEarn: this.earnUnits,
+          numberOfMachinesToAttack: this.attackUnits,
+          numberOfMachinesToDefend: this.defendUnits,
+        });
         this.close();
         this.onClickClose?.();
       },
