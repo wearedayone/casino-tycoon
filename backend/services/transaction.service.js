@@ -99,6 +99,7 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       txnData.currentSold = workerSold;
       const workerTxns = await firestore
         .collection('transaction')
+        .where('seasonId', '==', activeSeason.id)
         .where('type', '==', 'buy-worker')
         .where('status', '==', 'Success')
         .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(oneWeekAgo))
@@ -120,6 +121,7 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       txnData.currentSold = buildingSold;
       const buildingTxns = await firestore
         .collection('transaction')
+        .where('seasonId', '==', activeSeason.id)
         .where('type', '==', 'buy-building')
         .where('status', '==', 'Success')
         .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(oneWeekAgo))
