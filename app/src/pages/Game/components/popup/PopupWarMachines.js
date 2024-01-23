@@ -119,6 +119,46 @@ class PopupWarMachines extends Popup {
 
     const earnSliderBg = scene.rexUI.add.roundRectangle(width / 2, sliderY, sliderWidth, 30, 30, 0xd68d6a);
     this.add(earnSliderBg);
+    const onChangeEarnQuantity = (value, _, slider) => {
+      if (!slider) {
+        slider = this.earnSlider;
+        slider.setValue(value);
+      }
+
+      if (this.loading) {
+        if (this.earnSlider) this.earnSlider.value = this.earnSlideValue;
+        return;
+      }
+      const maxPurchase = this.numberOfMachines;
+
+      if (maxPurchase === 0) {
+        if (this.earnSlider) {
+          this.earnSlider.value = 0;
+          this.earnSlideValue = 0;
+          if (this.earnSliderThumb) {
+            this.earnSliderThumb.x = sliderThumbX;
+            this.earnSliderThumbText.x = sliderThumbX;
+          }
+          return;
+        }
+      }
+
+      const availableQuantity = this.numberOfMachines - this.defendUnits - this.attackUnits;
+      const quantity = Math.round(value * maxPurchase);
+      if (quantity > availableQuantity) return slider.setValue(availableQuantity / maxPurchase);
+
+      this.earnSlideValue = value;
+
+      if (this.earnSliderThumb) {
+        const increaseX = value * sliderWidth - value * 70;
+        this.earnSliderThumb.x = sliderThumbX + increaseX;
+        this.earnSliderThumbText.x = sliderThumbX + increaseX;
+
+        this.earnSliderThumbText.text = `+${quantity}`;
+        this.earnUnits = quantity;
+        this.updateValues();
+      }
+    };
     this.earnSlider = scene.rexUI.add
       .slider({
         x: width / 2,
@@ -126,43 +166,10 @@ class PopupWarMachines extends Popup {
         width: sliderWidth,
         height: 40,
         orientation: 'x',
-
         track: scene.rexUI.add.roundRectangle(0, 0, 0, 0, 70, 0xd68d6a, 0),
         thumb: scene.rexUI.add.roundRectangle(0, 0, 70, 70, 35, 0xffffff),
         indicator: scene.rexUI.add.roundRectangle(0, 0, 0, 0, 30, 0x5ef736),
-
-        valuechangeCallback: (value) => {
-          if (this.loading) {
-            if (this.earnSlider) this.earnSlider.value = this.earnSlideValue;
-            return;
-          }
-          const maxPurchase = this.numberOfMachines - this.attackUnits - this.defendUnits;
-
-          if (maxPurchase === 0) {
-            if (this.earnSlider) {
-              this.earnSlider.value = 0;
-              this.earnSlideValue = 0;
-              if (this.earnSliderThumb) {
-                this.earnSliderThumb.x = sliderThumbX;
-                this.earnSliderThumbText.x = sliderThumbX;
-              }
-              return;
-            }
-          }
-
-          this.earnSlideValue = value;
-
-          if (this.earnSliderThumb) {
-            const increaseX = value * sliderWidth - value * 70;
-            this.earnSliderThumb.x = sliderThumbX + increaseX;
-            this.earnSliderThumbText.x = sliderThumbX + increaseX;
-
-            const quantity = Math.round(value * maxPurchase);
-            this.earnSliderThumbText.text = `+${quantity}`;
-            this.earnUnits = quantity;
-            this.updateValues();
-          }
-        },
+        valuechangeCallback: onChangeEarnQuantity,
         space: { top: 4, bottom: 4 },
         input: 'click', // 'drag'|'click'
       })
@@ -181,12 +188,12 @@ class PopupWarMachines extends Popup {
       scene,
       minusBtnX,
       inputY - 20,
-      'button-square',
-      'button-square-pressed',
+      'button-square-small',
+      'button-square-small-pressed',
       () => {
         if (this.earnUnits > 0) {
           this.earnUnits--;
-          this.updateValues();
+          onChangeEarnQuantity(this.earnUnits / this.numberOfMachines);
         }
       },
       '-',
@@ -200,7 +207,7 @@ class PopupWarMachines extends Popup {
           this.interval = setInterval(() => {
             if (this.earnUnits > 0) {
               this.earnUnits--;
-              this.updateValues();
+              onChangeEarnQuantity(this.earnUnits / this.numberOfMachines);
             }
           }, INTERVAL);
         },
@@ -217,13 +224,13 @@ class PopupWarMachines extends Popup {
       scene,
       addBtnX,
       inputY - 20,
-      'button-square',
-      'button-square-pressed',
+      'button-square-small',
+      'button-square-small-pressed',
       () => {
         const max = this.numberOfMachines - this.attackUnits - this.defendUnits;
         if (this.earnUnits < max) {
           this.earnUnits++;
-          this.updateValues();
+          onChangeEarnQuantity(this.earnUnits / this.numberOfMachines);
         }
       },
       '+',
@@ -238,7 +245,7 @@ class PopupWarMachines extends Popup {
           this.interval = setInterval(() => {
             if (this.earnUnits < max) {
               this.earnUnits++;
-              this.updateValues();
+              onChangeEarnQuantity(this.earnUnits / this.numberOfMachines);
             }
           }, INTERVAL);
         },
@@ -269,6 +276,46 @@ class PopupWarMachines extends Popup {
       0xd68d6a
     );
     this.add(defendSliderBg);
+    const onChangeDefendQuantity = (value, _, slider) => {
+      if (!slider) {
+        slider = this.defendSlider;
+        slider.setValue(value);
+      }
+
+      if (this.loading) {
+        if (this.defendSlider) this.defendSlider.value = this.defendSlideValue;
+        return;
+      }
+      const maxPurchase = this.numberOfMachines;
+
+      if (maxPurchase === 0) {
+        if (this.defendSlider) {
+          this.defendSlider.value = 0;
+          this.defendSlideValue = 0;
+          if (this.defendSliderThumb) {
+            this.defendSliderThumb.x = sliderThumbX;
+            this.defendSliderThumbText.x = sliderThumbX;
+          }
+          return;
+        }
+      }
+
+      const availableQuantity = this.numberOfMachines - this.earnUnits - this.attackUnits;
+      const quantity = Math.round(value * maxPurchase);
+      if (quantity > availableQuantity) return slider.setValue(availableQuantity / maxPurchase);
+
+      this.defendSlideValue = value;
+
+      if (this.defendSliderThumb) {
+        const increaseX = value * sliderWidth - value * 70;
+        this.defendSliderThumb.x = sliderThumbX + increaseX;
+        this.defendSliderThumbText.x = sliderThumbX + increaseX;
+
+        this.defendSliderThumbText.text = `+${quantity}`;
+        this.defendUnits = quantity;
+        this.updateValues();
+      }
+    };
     this.defendSlider = scene.rexUI.add
       .slider({
         x: width / 2,
@@ -281,38 +328,7 @@ class PopupWarMachines extends Popup {
         thumb: scene.rexUI.add.roundRectangle(0, 0, 70, 70, 35, 0xffffff),
         indicator: scene.rexUI.add.roundRectangle(0, 0, 0, 0, 30, 0x5ef736),
 
-        valuechangeCallback: (value) => {
-          if (this.loading) {
-            if (this.defendSlider) this.defendSlider.value = this.defendSlideValue;
-            return;
-          }
-          const maxPurchase = this.numberOfMachines - this.attackUnits - this.earnUnits;
-
-          if (maxPurchase === 0) {
-            if (this.defendSlider) {
-              this.defendSlider.value = 0;
-              this.defendSlideValue = 0;
-              if (this.defendSliderThumb) {
-                this.defendSliderThumb.x = sliderThumbX;
-                this.defendSliderThumbText.x = sliderThumbX;
-              }
-              return;
-            }
-          }
-
-          this.defendSlideValue = value;
-
-          if (this.defendSliderThumb) {
-            const increaseX = value * sliderWidth - value * 70;
-            this.defendSliderThumb.x = sliderThumbX + increaseX;
-            this.defendSliderThumbText.x = sliderThumbX + increaseX;
-
-            const quantity = Math.round(value * maxPurchase);
-            this.defendSliderThumbText.text = `+${quantity}`;
-            this.defendUnits = quantity;
-            this.updateValues();
-          }
-        },
+        valuechangeCallback: onChangeDefendQuantity,
         space: { top: 4, bottom: 4 },
         input: 'click', // 'drag'|'click'
       })
@@ -331,12 +347,12 @@ class PopupWarMachines extends Popup {
       scene,
       minusBtnX,
       inputY + inputGap,
-      'button-square',
-      'button-square-pressed',
+      'button-square-small',
+      'button-square-small-pressed',
       () => {
         if (this.defendUnits > 0) {
           this.defendUnits--;
-          this.updateValues();
+          onChangeDefendQuantity(this.defendUnits / this.numberOfMachines);
         }
       },
       '-',
@@ -350,7 +366,7 @@ class PopupWarMachines extends Popup {
           this.interval = setInterval(() => {
             if (this.defendUnits > 0) {
               this.defendUnits--;
-              this.updateValues();
+              onChangeDefendQuantity(this.defendUnits / this.numberOfMachines);
             }
           }, INTERVAL);
         },
@@ -367,13 +383,13 @@ class PopupWarMachines extends Popup {
       scene,
       addBtnX,
       inputY + inputGap,
-      'button-square',
-      'button-square-pressed',
+      'button-square-small',
+      'button-square-small-pressed',
       () => {
         const max = this.numberOfMachines - this.attackUnits - this.earnUnits;
         if (this.defendUnits < max) {
           this.defendUnits++;
-          this.updateValues();
+          onChangeDefendQuantity(this.defendUnits / this.numberOfMachines);
         }
       },
       '+',
@@ -388,7 +404,7 @@ class PopupWarMachines extends Popup {
           this.interval = setInterval(() => {
             if (this.defendUnits < max) {
               this.defendUnits++;
-              this.updateValues();
+              onChangeDefendQuantity(this.defendUnits / this.numberOfMachines);
             }
           }, INTERVAL);
         },
@@ -419,6 +435,46 @@ class PopupWarMachines extends Popup {
       0xd68d6a
     );
     this.add(attackSliderBg);
+    const onChangeAttackQuantity = (value, _, slider) => {
+      if (!slider) {
+        slider = this.attackSlider;
+        slider.setValue(value);
+      }
+
+      if (this.loading) {
+        if (this.attackSlider) this.attackSlider.value = this.attackSlideValue;
+        return;
+      }
+      const maxPurchase = this.numberOfMachines;
+
+      if (maxPurchase === 0) {
+        if (this.attackSlider) {
+          this.attackSlider.value = 0;
+          this.attackSlideValue = 0;
+          if (this.attackSliderThumb) {
+            this.attackSliderThumb.x = sliderThumbX;
+            this.attackSliderThumbText.x = sliderThumbX;
+          }
+          return;
+        }
+      }
+
+      const availableQuantity = this.numberOfMachines - this.earnUnits - this.defendUnits;
+      const quantity = Math.round(value * maxPurchase);
+      if (quantity > availableQuantity) return slider.setValue(availableQuantity / maxPurchase);
+
+      this.attackSlideValue = value;
+
+      if (this.attackSliderThumb) {
+        const increaseX = value * sliderWidth - value * 70;
+        this.attackSliderThumb.x = sliderThumbX + increaseX;
+        this.attackSliderThumbText.x = sliderThumbX + increaseX;
+
+        this.attackSliderThumbText.text = `+${quantity}`;
+        this.attackUnits = quantity;
+        this.updateValues();
+      }
+    };
     this.attackSlider = scene.rexUI.add
       .slider({
         x: width / 2,
@@ -431,38 +487,7 @@ class PopupWarMachines extends Popup {
         thumb: scene.rexUI.add.roundRectangle(0, 0, 70, 70, 35, 0xffffff),
         indicator: scene.rexUI.add.roundRectangle(0, 0, 0, 0, 30, 0x5ef736),
 
-        valuechangeCallback: (value) => {
-          if (this.loading) {
-            if (this.attackSlider) this.attackSlider.value = this.attackSlideValue;
-            return;
-          }
-          const maxPurchase = this.numberOfMachines - this.defendUnits - this.earnUnits;
-
-          if (maxPurchase === 0) {
-            if (this.attackSlider) {
-              this.attackSlider.value = 0;
-              this.attackSlideValue = 0;
-              if (this.attackSliderThumb) {
-                this.attackSliderThumb.x = sliderThumbX;
-                this.attackSliderThumbText.x = sliderThumbX;
-              }
-              return;
-            }
-          }
-
-          this.attackSlideValue = value;
-
-          if (this.attackSliderThumb) {
-            const increaseX = value * sliderWidth - value * 70;
-            this.attackSliderThumb.x = sliderThumbX + increaseX;
-            this.attackSliderThumbText.x = sliderThumbX + increaseX;
-
-            const quantity = Math.round(value * maxPurchase);
-            this.attackSliderThumbText.text = `+${quantity}`;
-            this.attackUnits = quantity;
-            this.updateValues();
-          }
-        },
+        valuechangeCallback: onChangeAttackQuantity,
         space: { top: 4, bottom: 4 },
         input: 'click', // 'drag'|'click'
       })
@@ -483,12 +508,12 @@ class PopupWarMachines extends Popup {
       scene,
       minusBtnX,
       inputY + 2 * inputGap,
-      'button-square',
-      'button-square-pressed',
+      'button-square-small',
+      'button-square-small-pressed',
       () => {
         if (this.attackUnits > 0) {
           this.attackUnits--;
-          this.updateValues();
+          onChangeAttackQuantity(this.attackUnits / this.numberOfMachines);
         }
       },
       '-',
@@ -502,7 +527,7 @@ class PopupWarMachines extends Popup {
           this.interval = setInterval(() => {
             if (this.attackUnits > 0) {
               this.attackUnits--;
-              this.updateValues();
+              onChangeAttackQuantity(this.attackUnits / this.numberOfMachines);
             }
           }, INTERVAL);
         },
@@ -519,13 +544,13 @@ class PopupWarMachines extends Popup {
       scene,
       addBtnX,
       inputY + 2 * inputGap,
-      'button-square',
-      'button-square-pressed',
+      'button-square-small',
+      'button-square-small-pressed',
       () => {
         const max = this.numberOfMachines - this.defendUnits - this.earnUnits;
         if (this.attackUnits < max) {
           this.attackUnits++;
-          this.updateValues();
+          onChangeAttackQuantity(this.attackUnits / this.numberOfMachines);
         }
       },
       '+',
@@ -540,7 +565,7 @@ class PopupWarMachines extends Popup {
           this.interval = setInterval(() => {
             if (this.attackUnits < max) {
               this.attackUnits++;
-              this.updateValues();
+              onChangeAttackQuantity(this.attackUnits / this.numberOfMachines);
             }
           }, INTERVAL);
         },
