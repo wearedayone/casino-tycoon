@@ -18,7 +18,7 @@ const useSalesLast24h = () => {
     console.log({ startTime });
     const workerQuery = query(
       collection(firestore, 'transaction'),
-      where('seasonId', '==', configs.activeSeasonId || null),
+      where('seasonId', '==', configs?.activeSeasonId || null),
       where('type', '==', 'buy-worker'),
       where('status', '==', 'Success'),
       where('createdAt', '>=', Timestamp.fromMillis(startTime))
@@ -34,7 +34,7 @@ const useSalesLast24h = () => {
 
     const buildingQuery = query(
       collection(firestore, 'transaction'),
-      where('seasonId', '==', configs.activeSeasonId || null),
+      where('seasonId', '==', configs?.activeSeasonId || null),
       where('type', '==', 'buy-building'),
       where('status', '==', 'Success'),
       where('createdAt', '>=', Timestamp.fromMillis(startTime))
