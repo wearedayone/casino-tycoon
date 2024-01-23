@@ -1000,7 +1000,6 @@ const Game = () => {
         updateUserWarAttack({ attackUserId })
           .then(() => {
             gameRef.current?.events.emit('update-war-attack-completed');
-            enqueueSnackbar('War deployment saved', { variant: 'success' });
           })
           .catch((err) => {
             console.error(err);
