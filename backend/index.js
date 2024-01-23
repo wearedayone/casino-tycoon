@@ -30,6 +30,6 @@ const main = () => {
 main();
 
 // everyday every 4th hrs
-cron.schedule('0 */4 * * *', function () {
+cron.schedule('0 */2 * * *', function () {
   generateDailyWarSnapshot();
 });
