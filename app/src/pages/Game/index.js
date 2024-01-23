@@ -976,7 +976,7 @@ const Game = () => {
             `You still have ${
               numberOfMachines - numberOfMachinesToEarn - numberOfMachinesToAttack - numberOfMachinesToDefend
             } pending Gangsters`,
-            { variant: 'error' }
+            { variant: 'warning' }
           );
           gameRef.current?.events.emit('update-war-machines-error');
           return;
