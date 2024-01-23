@@ -39,17 +39,23 @@ export const getLeaderboard = async (userId) => {
   const totalActiveReputation = docs.filter(({ active }) => !!active).reduce((sum, doc) => sum + doc.networth, 0);
 
   // implement logic calculate reward
-  return docs.map((doc, index) => ({
-    ...userDatas[index],
-    userId: userDatas[index].id,
-    id: doc.id,
-    isUser: userDatas[index].id === userId,
-    rank: index + 1,
-    networth: doc.networth,
-    active: doc.active,
-    rankReward: calculateReward(rankPrizePool, rankingRewards, index),
-    reputationReward: (doc.networth / totalActiveReputation) * reputationPrizePool,
-  }));
+  let rank = 0;
+  return docs.map((doc, index) => {
+    if (doc.active) {
+      rank++;
+    }
+    return {
+      ...userDatas[index],
+      userId: userDatas[index].id,
+      id: doc.id,
+      isUser: userDatas[index].id === userId,
+      rank: doc.active ? rank : '-',
+      networth: doc.networth,
+      active: doc.active,
+      rankReward: doc.active ? calculateReward(rankPrizePool, rankingRewards, rank - 1) : 0,
+      reputationReward: doc.active ? (doc.networth / totalActiveReputation) * reputationPrizePool : 0,
+    };
+  });
 };
 
 export const getNextWarSnapshotUnixTime = async () => {

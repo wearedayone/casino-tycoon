@@ -318,14 +318,17 @@ class PopupLeaderboard extends Popup {
 
   updateLeaderboard(leaderboard) {
     if (!leaderboard.length) return;
-    this.crownGold.setVisible(leaderboard.length >= 1);
-    this.crownSilver.setVisible(leaderboard.length >= 2);
-    this.crownCopper.setVisible(leaderboard.length >= 3);
-    this.rankNumbers.text = leaderboard.map(({ rank }) => rank).join('\n\n');
-    this.usernames.text = leaderboard.map(formatUsername).join('\n\n');
-    this.networths.text = leaderboard.map(({ networth }) => networth).join('\n\n');
-    this.rankingRewardsString = leaderboard.map(({ rankReward }) => `~${formatter.format(rankReward)}`).join('\n\n');
-    this.reputationRewardsString = leaderboard
+    const activeLeaderboard = leaderboard.filter((item) => item.active);
+    this.crownGold.setVisible(activeLeaderboard.length >= 1);
+    this.crownSilver.setVisible(activeLeaderboard.length >= 2);
+    this.crownCopper.setVisible(activeLeaderboard.length >= 3);
+    this.rankNumbers.text = activeLeaderboard.map(({ rank }) => rank).join('\n\n');
+    this.usernames.text = activeLeaderboard.map(formatUsername).join('\n\n');
+    this.networths.text = activeLeaderboard.map(({ networth }) => networth).join('\n\n');
+    this.rankingRewardsString = activeLeaderboard
+      .map(({ rankReward }) => `~${formatter.format(rankReward)}`)
+      .join('\n\n');
+    this.reputationRewardsString = activeLeaderboard
       .map(({ reputationReward }) => `~${formatter.format(reputationReward)}`)
       .join('\n\n');
     const isRankingMode = this.modeSwitch.mode === 'Ranking';
@@ -340,8 +343,8 @@ class PopupLeaderboard extends Popup {
     this.finishedAt.text = `${userRecord.rank.toLocaleString()}${getOrdinalSuffix(userRecord.rank)} place`;
     this.finishedReward.text = formatter.format(userRecord.rankReward);
 
-    if (this.numberOfRows === leaderboard.length) return;
-    this.numberOfRows = leaderboard.length;
+    if (this.numberOfRows === activeLeaderboard.length) return;
+    this.numberOfRows = activeLeaderboard.length;
 
     // redraw table if numberOfRows changed
     this.contentContainer.setSize(200, this.rankNumbers.height);
@@ -358,7 +361,7 @@ class PopupLeaderboard extends Popup {
     }
 
     this.stars = [];
-    for (let i = 0; i < leaderboard.length; i++) {
+    for (let i = 0; i < activeLeaderboard.length; i++) {
       const y = i * rowHeight;
       const star = this.scene.add.image(this.popup.width * 0.52, y, 'icon-star').setOrigin(0, 0);
       this.stars.push(star);
@@ -387,7 +390,7 @@ class PopupLeaderboard extends Popup {
       mouseWheelScroller: { focus: true, speed: 0.3 },
       space: { left: 50, right: 40, top: 40, bottom: 40, panel: 20, header: 10, footer: 10 },
     }).layout();
-    if (leaderboard.length <= 10) {
+    if (activeLeaderboard.length <= 10) {
       this.table.setMouseWheelScrollerEnable(false);
     } else {
       this.table.setMouseWheelScrollerEnable(true);
