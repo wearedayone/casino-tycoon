@@ -2,13 +2,18 @@ import Phaser from 'phaser';
 
 import Popup from './Popup';
 import TextButton from '../button/TextButton';
-import { fontFamilies } from '../../../../utils/styles';
 import configs from '../../configs/configs';
 import { formatter } from '../../../../utils/numbers';
+import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
 
 const { width, height } = configs;
 
 const buttonWidth = 506;
+const largeBlackExtraBold = {
+  fontSize: fontSizes.large,
+  color: colors.black,
+  fontFamily: fontFamilies.extraBold,
+};
 const btnGap = 50;
 const INTERVAL = 100;
 
@@ -42,6 +47,8 @@ class PopupWarMachines extends Popup {
       updateGamePlay: isSimulator ? 'simulator-update-game-play' : 'update-game-play',
     };
     this.events = events;
+
+    const sliderWidth = this.popup.width * 0.5;
 
     this.backBtn = new TextButton(
       scene,
@@ -102,22 +109,73 @@ class PopupWarMachines extends Popup {
     });
     this.add(this.timeText);
 
-    const inputY = this.popup.y - this.popup.height / 2 + 630;
+    const inputY = this.popup.y - this.popup.height / 2 + 650;
     const inputGap = 370;
+    const sliderGap = inputGap + 15;
+    const sliderY = inputY - 20;
+    const sliderThumbX = this.popup.x - sliderWidth / 2 + 50;
+    const minusBtnX = width / 2 - this.popup.width / 2 + 180;
+    const addBtnX = width / 2 + this.popup.width / 2 - 180;
 
-    this.machinesToEarnInput = scene.add.image(width / 2, inputY - 20, 'text-input-small').setOrigin(0.5, 0.5);
-    this.add(this.machinesToEarnInput);
-    this.machinesToEarnUnitsText = scene.add
-      .text(width / 2, inputY - 20, `${this.earnUnits}`, {
-        color: '#29000B',
-        fontSize: '78px',
-        fontFamily: fontFamilies.bold,
+    const earnSliderBg = scene.rexUI.add.roundRectangle(width / 2, sliderY, sliderWidth, 30, 30, 0xd68d6a);
+    this.add(earnSliderBg);
+    this.earnSlider = scene.rexUI.add
+      .slider({
+        x: width / 2,
+        y: sliderY,
+        width: sliderWidth,
+        height: 40,
+        orientation: 'x',
+
+        track: scene.rexUI.add.roundRectangle(0, 0, 0, 0, 70, 0xd68d6a, 0),
+        thumb: scene.rexUI.add.roundRectangle(0, 0, 70, 70, 35, 0xffffff),
+        indicator: scene.rexUI.add.roundRectangle(0, 0, 0, 0, 30, 0x5ef736),
+
+        valuechangeCallback: (value) => {
+          if (this.loading) {
+            if (this.earnSlider) this.earnSlider.value = this.earnSlideValue;
+            return;
+          }
+          const maxPurchase = this.numberOfMachines - this.attackUnits - this.defendUnits;
+
+          if (maxPurchase === 0) {
+            if (this.earnSlider) {
+              this.earnSlider.value = 0;
+              this.earnSlideValue = 0;
+              if (this.earnSliderThumb) {
+                this.earnSliderThumb.x = sliderThumbX;
+                this.earnSliderThumbText.x = sliderThumbX;
+              }
+              return;
+            }
+          }
+
+          this.earnSlideValue = value;
+
+          if (this.earnSliderThumb) {
+            const increaseX = value * sliderWidth - value * 70;
+            this.earnSliderThumb.x = sliderThumbX + increaseX;
+            this.earnSliderThumbText.x = sliderThumbX + increaseX;
+
+            const quantity = Math.round(value * maxPurchase);
+            this.earnSliderThumbText.text = `+${quantity}`;
+            this.earnUnits = quantity;
+            this.updateValues();
+          }
+        },
+        space: { top: 4, bottom: 4 },
+        input: 'click', // 'drag'|'click'
       })
-      .setOrigin(0.5, 0.5);
-    this.add(this.machinesToEarnUnitsText);
+      .layout();
+    this.add(this.earnSlider);
 
-    const minusBtnX = width / 2 - this.popup.width / 2 + 230;
-    // const minusBtnX = 200;
+    this.earnSliderThumb = scene.add.image(sliderThumbX, sliderY + 35, 'slider-thumb').setOrigin(0.5, 1);
+    this.earnSliderThumb.setDepth(5);
+    this.earnSliderThumbText = scene.add
+      .text(sliderThumbX, sliderY - 65, `+0`, largeBlackExtraBold)
+      .setOrigin(0.5, 0.5);
+    this.add(this.earnSliderThumb);
+    this.add(this.earnSliderThumbText);
 
     this.machinesToEarnMinusBtn = new TextButton(
       scene,
@@ -157,7 +215,7 @@ class PopupWarMachines extends Popup {
 
     this.machinesToEarnPlusBtn = new TextButton(
       scene,
-      minusBtnX + 740,
+      addBtnX,
       inputY - 20,
       'button-square',
       'button-square-pressed',
@@ -202,16 +260,72 @@ class PopupWarMachines extends Popup {
       .setOrigin(0.5, 0.5);
     this.add(this.workerBonusTokenText);
 
-    this.machinesToDefendInput = scene.add.image(width / 2, inputY + inputGap, 'text-input-small').setOrigin(0.5, 0.5);
-    this.add(this.machinesToDefendInput);
-    this.machinesToDefendUnitsText = scene.add
-      .text(width / 2, inputY + inputGap, `${this.defendUnits}`, {
-        color: '#29000B',
-        fontSize: '78px',
-        fontFamily: fontFamilies.bold,
+    const defendSliderBg = scene.rexUI.add.roundRectangle(
+      width / 2,
+      sliderY + sliderGap,
+      sliderWidth,
+      30,
+      30,
+      0xd68d6a
+    );
+    this.add(defendSliderBg);
+    this.defendSlider = scene.rexUI.add
+      .slider({
+        x: width / 2,
+        y: sliderY + sliderGap,
+        width: sliderWidth,
+        height: 40,
+        orientation: 'x',
+
+        track: scene.rexUI.add.roundRectangle(0, 0, 0, 0, 70, 0xd68d6a, 0),
+        thumb: scene.rexUI.add.roundRectangle(0, 0, 70, 70, 35, 0xffffff),
+        indicator: scene.rexUI.add.roundRectangle(0, 0, 0, 0, 30, 0x5ef736),
+
+        valuechangeCallback: (value) => {
+          if (this.loading) {
+            if (this.defendSlider) this.defendSlider.value = this.defendSlideValue;
+            return;
+          }
+          const maxPurchase = this.numberOfMachines - this.attackUnits - this.earnUnits;
+
+          if (maxPurchase === 0) {
+            if (this.defendSlider) {
+              this.defendSlider.value = 0;
+              this.defendSlideValue = 0;
+              if (this.defendSliderThumb) {
+                this.defendSliderThumb.x = sliderThumbX;
+                this.defendSliderThumbText.x = sliderThumbX;
+              }
+              return;
+            }
+          }
+
+          this.defendSlideValue = value;
+
+          if (this.defendSliderThumb) {
+            const increaseX = value * sliderWidth - value * 70;
+            this.defendSliderThumb.x = sliderThumbX + increaseX;
+            this.defendSliderThumbText.x = sliderThumbX + increaseX;
+
+            const quantity = Math.round(value * maxPurchase);
+            this.defendSliderThumbText.text = `+${quantity}`;
+            this.defendUnits = quantity;
+            this.updateValues();
+          }
+        },
+        space: { top: 4, bottom: 4 },
+        input: 'click', // 'drag'|'click'
       })
+      .layout();
+    this.add(this.defendSlider);
+
+    this.defendSliderThumb = scene.add.image(sliderThumbX, sliderY + sliderGap + 35, 'slider-thumb').setOrigin(0.5, 1);
+    this.defendSliderThumb.setDepth(5);
+    this.defendSliderThumbText = scene.add
+      .text(sliderThumbX, sliderY + sliderGap - 65, `+0`, largeBlackExtraBold)
       .setOrigin(0.5, 0.5);
-    this.add(this.machinesToDefendUnitsText);
+    this.add(this.defendSliderThumb);
+    this.add(this.defendSliderThumbText);
 
     this.machinesToDefendMinusBtn = new TextButton(
       scene,
@@ -251,7 +365,7 @@ class PopupWarMachines extends Popup {
 
     this.machinesToDefendPlusBtn = new TextButton(
       scene,
-      minusBtnX + 740,
+      addBtnX,
       inputY + inputGap,
       'button-square',
       'button-square-pressed',
@@ -296,18 +410,74 @@ class PopupWarMachines extends Popup {
       .setOrigin(0.5, 0.5);
     this.add(this.buildingBonusText);
 
-    this.machinesToAttackInput = scene.add
-      .image(width / 2, inputY + 2 * inputGap, 'text-input-small')
-      .setOrigin(0.5, 0.5);
-    this.add(this.machinesToAttackInput);
-    this.machinesToAttackUnitsText = scene.add
-      .text(width / 2, inputY + 2 * inputGap, `${this.attackUnits}`, {
-        color: '#29000B',
-        fontSize: '78px',
-        fontFamily: fontFamilies.bold,
+    const attackSliderBg = scene.rexUI.add.roundRectangle(
+      width / 2,
+      sliderY + 2 * sliderGap,
+      sliderWidth,
+      30,
+      30,
+      0xd68d6a
+    );
+    this.add(attackSliderBg);
+    this.attackSlider = scene.rexUI.add
+      .slider({
+        x: width / 2,
+        y: sliderY + 2 * sliderGap,
+        width: sliderWidth,
+        height: 40,
+        orientation: 'x',
+
+        track: scene.rexUI.add.roundRectangle(0, 0, 0, 0, 70, 0xd68d6a, 0),
+        thumb: scene.rexUI.add.roundRectangle(0, 0, 70, 70, 35, 0xffffff),
+        indicator: scene.rexUI.add.roundRectangle(0, 0, 0, 0, 30, 0x5ef736),
+
+        valuechangeCallback: (value) => {
+          if (this.loading) {
+            if (this.attackSlider) this.attackSlider.value = this.attackSlideValue;
+            return;
+          }
+          const maxPurchase = this.numberOfMachines - this.defendUnits - this.earnUnits;
+
+          if (maxPurchase === 0) {
+            if (this.attackSlider) {
+              this.attackSlider.value = 0;
+              this.attackSlideValue = 0;
+              if (this.attackSliderThumb) {
+                this.attackSliderThumb.x = sliderThumbX;
+                this.attackSliderThumbText.x = sliderThumbX;
+              }
+              return;
+            }
+          }
+
+          this.attackSlideValue = value;
+
+          if (this.attackSliderThumb) {
+            const increaseX = value * sliderWidth - value * 70;
+            this.attackSliderThumb.x = sliderThumbX + increaseX;
+            this.attackSliderThumbText.x = sliderThumbX + increaseX;
+
+            const quantity = Math.round(value * maxPurchase);
+            this.attackSliderThumbText.text = `+${quantity}`;
+            this.attackUnits = quantity;
+            this.updateValues();
+          }
+        },
+        space: { top: 4, bottom: 4 },
+        input: 'click', // 'drag'|'click'
       })
+      .layout();
+    this.add(this.attackSlider);
+
+    this.attackSliderThumb = scene.add
+      .image(sliderThumbX, sliderY + 2 * sliderGap + 35, 'slider-thumb')
+      .setOrigin(0.5, 1);
+    this.attackSliderThumb.setDepth(5);
+    this.attackSliderThumbText = scene.add
+      .text(sliderThumbX, sliderY + 2 * sliderGap - 65, `+0`, largeBlackExtraBold)
       .setOrigin(0.5, 0.5);
-    this.add(this.machinesToAttackUnitsText);
+    this.add(this.attackSliderThumb);
+    this.add(this.attackSliderThumbText);
 
     this.machinesToAttackMinusBtn = new TextButton(
       scene,
@@ -347,7 +517,7 @@ class PopupWarMachines extends Popup {
 
     this.machinesToAttackPlusBtn = new TextButton(
       scene,
-      minusBtnX + 740,
+      addBtnX,
       inputY + 2 * inputGap,
       'button-square',
       'button-square-pressed',
@@ -468,6 +638,7 @@ class PopupWarMachines extends Popup {
   }
 
   onOpen() {
+    this.scene.game.events.emit(this.events.requestGamePlay);
     this.scene.game.events.emit(this.events.requestNextWarTime);
   }
 
@@ -479,9 +650,6 @@ class PopupWarMachines extends Popup {
   }
 
   updateValues() {
-    this.machinesToEarnUnitsText.text = `${this.earnUnits}`;
-    this.machinesToAttackUnitsText.text = `${this.attackUnits}`;
-    this.machinesToDefendUnitsText.text = `${this.defendUnits}`;
     this.numberOfMachinesText.text = `Unallocated Gangsters: ${
       this.numberOfMachines - this.earnUnits - this.attackUnits - this.defendUnits
     }`;
@@ -490,6 +658,8 @@ class PopupWarMachines extends Popup {
     this.buildingBonusText.text = `Safehouse Bonus: ${formatter.format(this.buildingBonus)}`;
 
     this.raidBtn.setDisabledState(!this.scene?.isUserActive);
+    const isRaid = Boolean(this.attackUnits);
+    this.raidBtn.updateText(isRaid ? 'Go Raid' : 'Confirm');
   }
 }
 
