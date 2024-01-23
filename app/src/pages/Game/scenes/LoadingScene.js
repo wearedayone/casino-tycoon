@@ -280,6 +280,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('container-border-bottom', '/images/container-border-bottom.png');
     this.load.image('container-price', '/images/container-price.png');
     this.load.image('player-rank-container', '/images/player-rank-container.png');
+    this.load.image('slider-thumb', '/images/slider-thumb.png');
     this.load.image('swap-eth-token', '/images/swap-eth-token.png');
     this.load.image('swap-token-eth', '/images/swap-token-eth.png');
 
