@@ -338,12 +338,10 @@ const useSmartContract = () => {
   };
 
   const currentPoolState = async () => {
-    const { pairContract, wethAddress } = await getSwapContractInfo();
-    const token0 = await pairContract.token0();
+    const { pairContract } = await getSwapContractInfo();
     const reserves = await pairContract.getReserves();
-    const [wethInPool, tokenInPool] =
-      token0.toLowerCase() === wethAddress.toLowerCase() ? reserves : reserves.slice().reverse();
-    const k = reserves[0] * reserves[1];
+    const [tokenInPool, wethInPool] = reserves;
+    const k = tokenInPool * wethInPool;
     return { wethInPool, tokenInPool, k };
   };
 
@@ -357,6 +355,14 @@ const useSmartContract = () => {
 
     const { tokenInPool } = await currentPoolState();
     const priceImpact = Number(res[1].toString()) / Number(tokenInPool.toString());
+    console.log(
+      'amountOut: ',
+      Number(res[1].toString()),
+      'tokenInPool: ',
+      Number(tokenInPool.toString()),
+      'price impact: ',
+      priceImpact
+    );
 
     return { amount, priceImpact };
   };
