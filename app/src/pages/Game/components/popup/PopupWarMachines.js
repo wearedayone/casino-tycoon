@@ -641,15 +641,20 @@ class PopupWarMachines extends Popup {
         this.attackUnits = numberOfMachinesToAttack;
         this.defendUnits = numberOfMachinesToDefend;
         this.attackUser = attackUser;
+
+        onChangeEarnQuantity(this.earnUnits / this.numberOfMachines);
+        onChangeDefendQuantity(this.defendUnits / this.numberOfMachines);
+        onChangeAttackQuantity(this.attackUnits / this.numberOfMachines);
         this.updateValues();
       }
     );
 
-    scene.game.events.on(events.updateWarMachinesCompleted, () => {
+    scene.game.events.on(events.updateWarMachinesCompleted, ({ numberOfMachinesToAttack }) => {
       this.loading = false;
       if (this.visible) {
-        scene.popupWarAttackConfirmation?.updateNumberOfMachines(this.attackUnits);
         this.close();
+        if (!numberOfMachinesToAttack) return;
+        scene.popupWarAttackConfirmation?.updateNumberOfMachines(numberOfMachinesToAttack);
         scene.popupWarAttack?.open();
       }
     });
@@ -663,7 +668,6 @@ class PopupWarMachines extends Popup {
   }
 
   onOpen() {
-    this.scene.game.events.emit(this.events.requestGamePlay);
     this.scene.game.events.emit(this.events.requestNextWarTime);
   }
 
