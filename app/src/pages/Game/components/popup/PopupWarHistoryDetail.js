@@ -248,6 +248,13 @@ class PopupWarHistoryDetail extends Popup {
       }
     });
 
+    if (!attackers.length) {
+      const bottomAttackerItemContainerItem = this.scene.add
+        .image(this.popup.width / 2 - 90, y, 'container-border-bottom')
+        .setOrigin(0.5, 0.5);
+      attackerTexts.push(bottomAttackerItemContainerItem);
+    }
+
     y += 165;
 
     const gangsterKilledItemContainer = this.scene.add
@@ -260,7 +267,7 @@ class PopupWarHistoryDetail extends Popup {
       .text(
         this.popup.width * 0.13 + gangsterKilledItemIcon.width / 2 + 30,
         y,
-        `Gangsters Killed: ${defendResults.reduce((result, item) => result + item.machineLost || 0, 0)}`,
+        `Gangsters Killed: ${defendResults.reduce((result, item) => result + item.machinesLost || 0, 0)}`,
         {
           fontSize: '50px',
           color: colors.black,
