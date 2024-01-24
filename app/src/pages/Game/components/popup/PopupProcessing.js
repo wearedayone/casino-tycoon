@@ -131,6 +131,7 @@ class PopupProcessing extends Popup {
           case 'withdraw-nft-completed':
             title = `${formatter.format(amount)} NFT${amount > 1 ? 's' : ''}`;
             desc = 'Withdraw completed.';
+            break;
           case 'swap-completed':
             title = `${formatter.format(amount)} ${token}`;
             desc = description;
