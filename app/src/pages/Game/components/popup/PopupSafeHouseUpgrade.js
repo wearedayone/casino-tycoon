@@ -9,7 +9,6 @@ import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
 
 const { width, height } = configs;
 const DEFAULT_QUANTITY = 1;
-const MAX_QUANTITY = 25;
 const INTERVAL = 100;
 const largeBlackExtraBold = {
   fontSize: fontSizes.large,
@@ -24,6 +23,7 @@ class PopupSafeHouseUpgrade extends Popup {
   networthIncrease = 0;
   balance = 0;
   basePrice = 0;
+  maxPerBatch = 10;
   targetDailyPurchase = 1;
   targetPrice = 0;
   salesLastPeriod = 0;
@@ -142,7 +142,7 @@ class PopupSafeHouseUpgrade extends Popup {
       'button-square',
       'button-square-pressed',
       () => {
-        if (this.quantity < MAX_QUANTITY) {
+        if (this.quantity < this.maxPerBatch) {
           this.quantity++;
           this.updateValues();
         }
@@ -157,7 +157,7 @@ class PopupSafeHouseUpgrade extends Popup {
             clearInterval(this.interval);
           }
           this.interval = setInterval(() => {
-            if (this.quantity < MAX_QUANTITY) {
+            if (this.quantity < this.maxPerBatch) {
               this.quantity++;
               this.updateValues();
             }
@@ -252,6 +252,7 @@ class PopupSafeHouseUpgrade extends Popup {
         networth,
         balance,
         basePrice,
+        maxPerBatch,
         targetDailyPurchase,
         targetPrice,
         salesLastPeriod,
@@ -259,6 +260,7 @@ class PopupSafeHouseUpgrade extends Popup {
       }) => {
         this.balance = balance;
         this.basePrice = basePrice;
+        this.maxPerBatch = maxPerBatch;
         this.targetDailyPurchase = targetDailyPurchase;
         this.targetPrice = targetPrice;
         this.salesLastPeriod = salesLastPeriod;

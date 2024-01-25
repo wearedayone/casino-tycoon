@@ -9,7 +9,6 @@ import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
 
 const { width, height } = configs;
 const DEFAULT_QUANTITY = 1;
-const MAX_QUANTITY = 25;
 const INTERVAL = 100;
 const largeBlackExtraBold = {
   fontSize: fontSizes.large,
@@ -31,7 +30,7 @@ class PopupBuyGangster extends Popup {
   whitelistPrice = 0;
   daysElapsed = 0;
   quantity = DEFAULT_QUANTITY;
-  maxQuantity = MAX_QUANTITY;
+  maxQuantity = 10;
   isWhitelisted = false;
   whitelistAmountLeft = 0;
   referralDiscount = 0;
@@ -291,6 +290,7 @@ class PopupBuyGangster extends Popup {
         balance,
         basePrice,
         whitelistPrice,
+        maxPerBatch,
         dailyReward,
         reservePool,
         reservePoolReward,
@@ -321,7 +321,7 @@ class PopupBuyGangster extends Popup {
         this.rateText.text = `${formatter.format(numberOfMachines * dailyReward)}`;
         this.estimatedMaxPurchase = balance && basePrice ? Math.floor((balance - this.gas) / basePrice) : 0;
         this.maxQuantity =
-          isWhitelisted && whitelistAmountLeft ? Math.min(whitelistAmountLeft, MAX_QUANTITY) : MAX_QUANTITY;
+          isWhitelisted && whitelistAmountLeft ? Math.min(whitelistAmountLeft, maxPerBatch) : maxPerBatch;
         this.updateValues();
       }
     );
