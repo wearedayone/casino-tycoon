@@ -77,13 +77,13 @@ const Game = () => {
     buyMachine,
     buyGoon,
     retire,
-    swap,
     swapEthToToken,
     swapTokenToEth,
     convertEthInputToToken,
     convertEthOutputToToken,
     convertTokenInputToEth,
     convertTokenOutputToEth,
+    getTotalFees,
   } = useSmartContract();
   const { ready, authenticated, user, exportWallet: exportWalletPrivy, logout } = usePrivy();
   const [isLeaderboardModalOpen, setLeaderboardModalOpen] = useState(false);
@@ -987,7 +987,8 @@ const Game = () => {
           .then((result) =>
             gameRef.current?.events.emit('convert-eth-input-to-token-result', {
               amount: result.amount,
-              priceImpact: result.priceImpact,
+              tradingFee: result.tradingFee,
+              tradingFeeInUSD: result.tradingFeeInUSD,
             })
           )
           .catch((err) => {
@@ -1015,7 +1016,8 @@ const Game = () => {
           .then((result) =>
             gameRef.current?.events.emit('convert-eth-output-to-token-result', {
               amount: result.amount,
-              priceImpact: result.priceImpact,
+              tradingFee: result.tradingFee,
+              tradingFeeInUSD: result.tradingFeeInUSD,
             })
           )
           .catch((err) => {
@@ -1055,7 +1057,8 @@ const Game = () => {
           .then((result) =>
             gameRef.current?.events.emit('convert-token-input-to-eth-result', {
               amount: result.amount,
-              priceImpact: result.priceImpact,
+              tradingFee: result.tradingFee,
+              tradingFeeInUSD: result.tradingFeeInUSD,
             })
           )
           .catch((err) => {
@@ -1081,7 +1084,8 @@ const Game = () => {
           .then((result) =>
             gameRef.current?.events.emit('convert-token-output-to-eth-result', {
               amount: result.amount,
-              priceImpact: result.priceImpact,
+              tradingFee: result.tradingFee,
+              tradingFeeInUSD: result.tradingFeeInUSD,
             })
           )
           .catch((err) => {
@@ -1130,6 +1134,15 @@ const Game = () => {
       gameRef.current?.events.on('request-house-price', () => {
         getBuildingPrices()
           .then((res) => gameRef.current?.events.emit('update-house-price', res.data))
+          .catch((err) => {
+            console.error(err);
+            Sentry.captureException(err);
+          });
+      });
+
+      gameRef.current?.events.on('request-fee-percent', () => {
+        getTotalFees()
+          .then((res) => gameRef.current?.events.emit('update-fee-percent', { feePercent: res }))
           .catch((err) => {
             console.error(err);
             Sentry.captureException(err);

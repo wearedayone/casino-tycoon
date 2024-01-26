@@ -20,6 +20,9 @@ const useSmartContract = () => {
   const { sendTransaction } = usePrivy();
   const embeddedWallet = useUserWallet();
   const activeSeason = useSystemStore((state) => state.activeSeason);
+  const market = useSystemStore((state) => state.market);
+
+  const { tokenPrice } = market || { tokenPrice: 0 };
 
   const {
     tokenAddress: TOKEN_ADDRESS,
@@ -353,18 +356,10 @@ const useSmartContract = () => {
     const res = await routerContract.getAmountsOut(amountIn, [wethAddress, tokenAddress]);
     const amount = Number(formatEther(res[1]).toString()) * swapReceivePercent;
 
-    const { tokenInPool } = await currentPoolState();
-    const priceImpact = Number(res[1].toString()) / Number(tokenInPool.toString());
-    console.log(
-      'amountOut: ',
-      Number(res[1].toString()),
-      'tokenInPool: ',
-      Number(tokenInPool.toString()),
-      'price impact: ',
-      priceImpact
-    );
+    const tradingFee = Number(formatEther(res[1]).toString()) - amount;
+    const tradingFeeInUSD = tradingFee * parseFloat(tokenPrice);
 
-    return { amount, priceImpact };
+    return { amount, tradingFee: tradingFee.toFixed(2), tradingFeeInUSD: tradingFeeInUSD.toFixed(4) };
   };
 
   const convertEthOutputToToken = async (ethAmount) => {
@@ -380,9 +375,10 @@ const useSmartContract = () => {
     const res = await routerContract.getAmountsIn(amountOut, [tokenAddress, wethAddress]);
     const amount = Number(formatEther(res[0]).toString()) / swapReceivePercent;
 
-    const priceImpact = Number(amountOut.toString()) / Number(wethInPool.toString());
+    const tradingFee = amount - Number(formatEther(res[0]).toString());
+    const tradingFeeInUSD = tradingFee * parseFloat(tokenPrice);
 
-    return { amount, priceImpact };
+    return { amount, tradingFee: tradingFee.toFixed(2), tradingFeeInUSD: tradingFeeInUSD.toFixed(4) };
   };
 
   const convertTokenInputToEth = async (tokenAmount) => {
@@ -394,10 +390,10 @@ const useSmartContract = () => {
     const res = await routerContract.getAmountsOut(amountIn, [tokenAddress, wethAddress]);
     const amount = formatEther(res[1]);
 
-    const { wethInPool } = await currentPoolState();
-    const priceImpact = Number(res[1].toString()) / Number(wethInPool.toString());
+    const tradingFee = tokenAmountFeesIncluded - tokenAmount;
+    const tradingFeeInUSD = tradingFee * parseFloat(tokenPrice);
 
-    return { amount, priceImpact };
+    return { amount, tradingFee: tradingFee.toFixed(2), tradingFeeInUSD: tradingFeeInUSD.toFixed(4) };
   };
 
   const convertTokenOutputToEth = async (tokenAmount) => {
@@ -415,9 +411,10 @@ const useSmartContract = () => {
     const res = await routerContract.getAmountsIn(amountOut, [wethAddress, tokenAddress]);
     const amount = formatEther(res[0]);
 
-    const priceImpact = Number(amountOut.toString()) / Number(tokenInPool.toString());
+    const tradingFee = tokenAmountFeesIncluded - tokenAmount;
+    const tradingFeeInUSD = tradingFee * parseFloat(tokenPrice);
 
-    return { amount, priceImpact };
+    return { amount, tradingFee: tradingFee.toFixed(2), tradingFeeInUSD: tradingFeeInUSD.toFixed(4) };
   };
 
   const swapEthToToken = async (amount) => {
@@ -490,6 +487,20 @@ const useSmartContract = () => {
     return { receipt, receiveAmount: ethAmount };
   };
 
+  const getTotalFees = async () => {
+    if (!loadedAssets) return;
+
+    try {
+      const privyProvider = await embeddedWallet.getEthereumProvider();
+      const tokenContract = new Contract(TOKEN_ADDRESS, tokenAbi.abi, privyProvider.provider);
+
+      const totalFees = await tokenContract.totalFees();
+      return Number(totalFees.toString()) / 10;
+    } catch (err) {
+      return 0;
+    }
+  };
+
   return {
     buyMachine,
     buyGoon,
@@ -509,6 +520,7 @@ const useSmartContract = () => {
     convertEthOutputToToken,
     convertTokenInputToEth,
     convertTokenOutputToEth,
+    getTotalFees,
   };
 };
 
