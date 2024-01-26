@@ -1,14 +1,13 @@
 // TODO: update logic calculateMachineSellPrice later
 // will get sell price from opensea
 
-const MAX_PER_BATCH = 25;
-
 export const estimateNumberOfBuildingCanBuy = (
   balance,
   salesLastPeriod,
   targetDailyPurchase,
   targetPrice,
-  startPrice
+  startPrice,
+  maxPerBatch
 ) => {
   let quantity = 0;
   let total = calculateNextBuildingBuyPriceBatch(
@@ -25,7 +24,7 @@ export const estimateNumberOfBuildingCanBuy = (
     startPrice,
     quantity + 1
   ).total;
-  while (quantity < MAX_PER_BATCH && nextTotal <= balance) {
+  while (quantity < maxPerBatch && nextTotal <= balance) {
     quantity++;
     total = calculateNextBuildingBuyPriceBatch(
       salesLastPeriod,
@@ -51,7 +50,8 @@ export const estimateNumberOfWorkerCanBuy = (
   salesLastPeriod,
   targetDailyPurchase,
   targetPrice,
-  startPrice
+  startPrice,
+  maxPerBatch
 ) => {
   let quantity = 0;
   let total = calculateNextWorkerBuyPriceBatch(
@@ -68,7 +68,7 @@ export const estimateNumberOfWorkerCanBuy = (
     startPrice,
     quantity + 1
   ).total;
-  while (quantity < MAX_PER_BATCH && nextTotal <= balance) {
+  while (quantity < maxPerBatch && nextTotal <= balance) {
     quantity++;
     total = calculateNextWorkerBuyPriceBatch(
       salesLastPeriod,
