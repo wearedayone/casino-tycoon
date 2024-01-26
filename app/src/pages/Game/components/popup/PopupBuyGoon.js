@@ -249,7 +249,8 @@ class PopupBuyGoon extends Popup {
         this.salesLastPeriod,
         this.targetDailyPurchase,
         this.targetPrice,
-        this.basePrice
+        this.basePrice,
+        this.maxPerBatch
       );
       this.updateValues();
     });
@@ -294,7 +295,8 @@ class PopupBuyGoon extends Popup {
           salesLastPeriod,
           targetDailyPurchase,
           targetPrice,
-          basePrice
+          basePrice,
+          maxPerBatch
         );
         this.updateValues();
       }
