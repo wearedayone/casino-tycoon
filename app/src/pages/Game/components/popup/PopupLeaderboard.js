@@ -25,6 +25,7 @@ const smallBlackBold = { fontSize: fontSizes.small, color: colors.black, fontFam
 
 class PopupLeaderboard extends Popup {
   isEnded = false;
+  isUserActive = false;
   numberOfRows = 0;
   stars = [];
 
@@ -303,16 +304,25 @@ class PopupLeaderboard extends Popup {
     if (isEnded) {
       this.remove(this.buttonBack);
       this.remove(this.buttonRetire);
+      if (!this.isUserActive) {
+        this.youFinished.text = 'You did not qualify for the';
+        this.with.text = 'leaderboard this season.';
+
+        this.youFinished.setStyle({ ...mediumBlackBoldRight, align: 'center' });
+        this.youFinished.setOrigin(0.5, -0.13);
+        this.with.setStyle({ ...mediumBlackBoldRight, align: 'center' });
+        this.with.setOrigin(0.5, 0.2);
+      }
     } else {
       this.add(this.buttonBack);
       this.add(this.buttonRetire);
     }
 
     this.youFinished.setVisible(isEnded);
-    this.finishedAt.setVisible(isEnded);
+    this.finishedAt.setVisible(isEnded && this.isUserActive);
     this.with.setVisible(isEnded);
-    this.finishedReward.setVisible(isEnded);
-    this.ethIcon.setVisible(isEnded);
+    this.finishedReward.setVisible(isEnded && this.isUserActive);
+    this.ethIcon.setVisible(isEnded && this.isUserActive);
     this.nextSeason.setVisible(isEnded);
   }
 
@@ -335,6 +345,8 @@ class PopupLeaderboard extends Popup {
     this.ethRewards.text = isRankingMode ? this.rankingRewardsString : this.reputationRewardsString;
 
     const userRecord = leaderboard.find(({ isUser }) => isUser);
+    this.isUserActive = userRecord.active;
+
     this.userRankingReward = userRecord.rankReward;
     this.userReputationReward = userRecord.reputationReward;
     this.playerRank.text = userRecord.rank.toLocaleString();
