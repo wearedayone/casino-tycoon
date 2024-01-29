@@ -337,15 +337,15 @@ class PopupWarHistoryDetail extends Popup {
       .setOrigin(0, 0.5);
     y += 165;
 
-    const attackWinningRatioItemContainer = this.scene.add
+    const attackContributionItemContainer = this.scene.add
       .image(this.popup.width / 2 - 90, y, 'container-border')
       .setOrigin(0.5, 0.5);
-    const attackWinningRatioItemIcon = this.scene.add.image(this.popup.width * 0.13, y, 'percent').setOrigin(0.5, 0.5);
-    const attackWinningRatioItemText = this.scene.add
+    const attackContributionItemIcon = this.scene.add.image(this.popup.width * 0.13, y, 'percent').setOrigin(0.5, 0.5);
+    const attackContributionItemText = this.scene.add
       .text(
-        this.popup.width * 0.13 + attackWinningRatioItemIcon.width / 2 + 30,
+        this.popup.width * 0.13 + attackContributionItemIcon.width / 2 + 30,
         y,
-        `Atk Contribution: ${Math.round((attackResults?.[0]?.winningRatio || 0) * 100)}%`,
+        `Atk Contribution: ${Math.round((attackResults?.[0]?.attackContribution || 0) * 100)}%`,
         {
           fontSize: '50px',
           color: colors.black,
@@ -425,9 +425,9 @@ class PopupWarHistoryDetail extends Popup {
       attackUnitsItemContainer,
       attackUnitsItemIcon,
       attackUnitsItemText,
-      attackWinningRatioItemContainer,
-      attackWinningRatioItemIcon,
-      attackWinningRatioItemText,
+      attackContributionItemContainer,
+      attackContributionItemIcon,
+      attackContributionItemText,
       tokenEarnedFromAttackingItemContainer,
       tokenEarnedFromAttackingItemIcon,
       tokenEarnedFromAttackingItemText,
