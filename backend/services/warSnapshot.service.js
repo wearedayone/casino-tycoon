@@ -138,7 +138,11 @@ export const generateDailyWarSnapshot = async () => {
     logger.info('\n\n---------taking daily war snapshot--------\n');
 
     const activeSeason = await getActiveSeason();
-    const { id: seasonId, warConfig } = activeSeason;
+    const { id: seasonId, warConfig, status } = activeSeason;
+    if (status !== 'open') {
+      logger.info('\n\n---------no active season--------\n');
+      return;
+    }
 
     const gamePlaySnapshot = await firestore
       .collection('gamePlay')
