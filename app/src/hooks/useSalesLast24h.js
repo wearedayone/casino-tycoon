@@ -15,7 +15,7 @@ const useSalesLast24h = () => {
 
   useEffect(() => {
     const startTime = now - MILISECONDS_IN_7_DAYS;
-    console.log({ startTime });
+    // console.log({ startTime });
     const workerQuery = query(
       collection(firestore, 'transaction'),
       where('seasonId', '==', configs?.activeSeasonId || null),

@@ -1310,7 +1310,7 @@ const Game = () => {
       salesLastPeriod: buildingSoldLast24h,
       networthIncrease: building.networth,
     });
-  }, [numberOfBuildings, networth, tokenBalance, building, workerSoldLast24h]);
+  }, [numberOfBuildings, networth, tokenBalance, building, buildingSoldLast24h]);
 
   useEffect(() => {
     gameRef.current?.events.emit('update-workers', {
@@ -1325,7 +1325,7 @@ const Game = () => {
       dailyReward: worker.dailyReward,
       networthIncrease: worker.networth,
     });
-  }, [numberOfWorkers, networth, tokenBalance, worker]);
+  }, [numberOfWorkers, networth, tokenBalance, worker, workerSoldLast24h]);
 
   useEffect(() => {
     gameRef.current?.events.emit('update-machines', {
