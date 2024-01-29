@@ -40,6 +40,7 @@ class PopupWarMachines extends Popup {
       requestNextWarTime: isSimulator ? 'simulator-request-next-war-time' : 'request-next-war-time',
       updateNextWarTime: isSimulator ? 'simulator-update-next-war-time' : 'update-next-war-time',
       requestGamePlay: isSimulator ? 'simulator-request-game-play' : 'request-game-play',
+      updateWarMachines: isSimulator ? 'simulator-update-war-machines' : 'update-war-machines',
       updateWarMachinesCompleted: isSimulator
         ? 'simulator-update-war-machines-completed'
         : 'update-war-machines-completed',
@@ -57,7 +58,7 @@ class PopupWarMachines extends Popup {
       'button-blue',
       'button-blue-pressed',
       () => {
-        scene.game.events.emit('update-war-machines', {
+        scene.game.events.emit(events.updateWarMachines, {
           numberOfMachines: this.numberOfMachines,
           numberOfMachinesToEarn: this.earnUnits,
           numberOfMachinesToAttack: this.attackUnits,
@@ -80,7 +81,7 @@ class PopupWarMachines extends Popup {
       () => {
         if (this.loading || isSimulator) return;
         this.loading = true;
-        scene.game.events.emit('update-war-machines', {
+        scene.game.events.emit(events.updateWarMachines, {
           numberOfMachines: this.numberOfMachines,
           numberOfMachinesToEarn: this.earnUnits,
           numberOfMachinesToAttack: this.attackUnits,
