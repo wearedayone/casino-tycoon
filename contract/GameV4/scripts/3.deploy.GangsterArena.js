@@ -16,8 +16,8 @@ async function main() {
   // const _adminAddress = '0x9EC95637ff4fA040a54CbDCDD0312e46F7a204CF';
   // const _workerAddress = '0x9EC95637ff4fA040a54CbDCDD0312e46F7a204CF';
   // const _signerAddress = '0x9EC95637ff4fA040a54CbDCDD0312e46F7a204CF';
-  const _nftAddress = '0x294b79f38d62dCCE605815BDfAFb8f9E7d03Ea40';
-  const _fiatAddress = '0xc297F2b5A27a7a5C8cF71C41c70e1075f02D586f';
+  const _nftAddress = '0x8147879efE745F773a6b23232b851FB6AA5C655c';
+  const _fiatAddress = '0xB830Dbac42B35D9821A511F205332D733158Bcda';
 
   const _defaultAdmin = '0x890611302Ee344d5bD94DA9811C18e2De5588077';
   const _adminAddress = '0x890611302Ee344d5bD94DA9811C18e2De5588077';
