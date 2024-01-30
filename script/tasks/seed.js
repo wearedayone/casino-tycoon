@@ -6,7 +6,7 @@ import environments from '../utils/environments.js';
 const { TOKEN_ADDRESS, NFT_ADDRESS, GAME_CONTRACT_ADDRESS, ROUTER_ADDRESS, WETH_ADDRESS, PAIR_ADDRESS } = environments;
 
 const warConfig = {
-  buildingBonusMultiple: 1,
+  buildingBonusMultiple: 0.1,
   workerBonusMultiple: 1,
   earningStealPercent: 0.5,
   tokenRewardPerEarner: 500,
@@ -77,7 +77,10 @@ const main = async () => {
     .set({
       game: { mint: 0, buyGoon: 0, buySafeHouse: 0 },
     });
-  await firestore.collection('system').doc('data').set({ nonce: 0 });
+  await firestore
+    .collection('system')
+    .doc('data')
+    .set({ nonce: admin.firestore.FieldValue.increment(1) });
   console.log('created system configs');
 
   console.log('create season');
