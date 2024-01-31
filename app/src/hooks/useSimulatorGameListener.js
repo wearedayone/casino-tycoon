@@ -266,7 +266,7 @@ const useSimulatorGameListener = () => {
     });
 
     game.events.on('simulator-update-war-machines', () => {
-      game.events.emit('simulator-update-war-machines-completed');
+      game.events.emit('simulator-update-war-machines-completed', {});
     });
 
     game.events.on('simulator-refresh-eth-balance', () => {
