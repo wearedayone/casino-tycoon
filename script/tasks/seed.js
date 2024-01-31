@@ -8,45 +8,45 @@ const { TOKEN_ADDRESS, NFT_ADDRESS, GAME_CONTRACT_ADDRESS, ROUTER_ADDRESS, WETH_
 const warConfig = {
   buildingBonusMultiple: 0.1,
   workerBonusMultiple: 0.2,
-  earningStealPercent: 0.75,
+  earningStealPercent: 0.7,
   tokenRewardPerEarner: 1000,
   machinePercentLost: 0.05,
 };
 const assetsConfig = {
   machine: {
-    basePrice: 0.001,
+    basePrice: 0.002,
     whitelistPrice: 0.001,
-    maxWhitelistAmount: 20,
+    maxWhitelistAmount: 10,
     dailyReward: 1000,
     networth: 10,
     maxPerBatch: 100,
   },
   worker: {
-    basePrice: 200,
-    targetDailyPurchase: 50,
-    targetPrice: 1000,
+    basePrice: 250,
+    targetDailyPurchase: 100,
+    targetPrice: 2000,
     dailyReward: 200,
     networth: 2,
     maxPerBatch: 100,
   },
   building: {
     basePrice: 500,
-    targetDailyPurchase: 50,
-    targetPrice: 1000,
+    targetDailyPurchase: 100,
+    targetPrice: 2000,
     dailyReward: 0,
     networth: 8,
     maxPerBatch: 100,
   },
 };
 const prizePoolConfig = {
-  rankRewardsPercent: 0.7,
-  reputationRewardsPercent: 0.2,
-  rewardScalingRatio: 1.28,
+  rankRewardsPercent: 0.4,
+  reputationRewardsPercent: 0.5,
+  rewardScalingRatio: 1.25,
   // rank leaderboard
   higherRanksCutoffPercent: 0.1,
-  lowerRanksCutoffPercent: 0.2,
-  minRewardHigherRanks: 0.004, // in ETH
-  minRewardLowerRanks: 0.0, // in ETH
+  lowerRanksCutoffPercent: 0.5,
+  minRewardHigherRanks: 0.01, // in ETH
+  minRewardLowerRanks: 0.05, // in ETH
   // reputation leaderboard
   earlyRetirementTax: 0.2,
 };
