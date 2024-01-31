@@ -1,56 +1,11 @@
 import moment from 'moment';
 
 import admin, { firestore } from '../configs/admin.config.js';
+import gameConfigs from '../configs/game.config.js';
 import environments from '../utils/environments.js';
 
 const { TOKEN_ADDRESS, NFT_ADDRESS, GAME_CONTRACT_ADDRESS, ROUTER_ADDRESS, WETH_ADDRESS, PAIR_ADDRESS } = environments;
 
-const warConfig = {
-  buildingBonusMultiple: 0.1,
-  workerBonusMultiple: 0.2,
-  earningStealPercent: 0.7,
-  tokenRewardPerEarner: 1000,
-  machinePercentLost: 0.05,
-};
-const assetsConfig = {
-  machine: {
-    basePrice: 0.002,
-    whitelistPrice: 0.001,
-    maxWhitelistAmount: 10,
-    dailyReward: 1000,
-    networth: 10,
-    maxPerBatch: 100,
-  },
-  worker: {
-    basePrice: 250,
-    targetDailyPurchase: 100,
-    targetPrice: 2000,
-    dailyReward: 200,
-    networth: 2,
-    maxPerBatch: 100,
-  },
-  building: {
-    basePrice: 500,
-    targetDailyPurchase: 100,
-    targetPrice: 2000,
-    dailyReward: 0,
-    networth: 8,
-    maxPerBatch: 100,
-  },
-};
-const prizePoolConfig = {
-  rankRewardsPercent: 0.4,
-  reputationRewardsPercent: 0.5,
-  rewardScalingRatio: 1.25,
-  // rank leaderboard
-  higherRanksCutoffPercent: 0.1,
-  lowerRanksCutoffPercent: 0.5,
-  minRewardHigherRanks: 0.01, // in ETH
-  minRewardLowerRanks: 0.05, // in ETH
-  // reputation leaderboard
-  earlyRetirementTax: 0.2,
-};
-const referralConfig = { referralBonus: 0.1, referralDiscount: 0.1 };
 const main = async () => {
   console.log('init data');
   // web3Listener
@@ -62,7 +17,7 @@ const main = async () => {
     .collection('system')
     .doc('default')
     .set({
-      ...assetsConfig,
+      ...gameConfigs.assets,
       activeSeasonId,
       appVersion: '0.9.9',
     });
@@ -96,45 +51,29 @@ const main = async () => {
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       startTime,
       estimatedEndTime,
-      claimGapInSeconds: 300,
+      claimGapInSeconds: gameConfigs.claimGapInSeconds,
       rankPrizePool: 0,
       reputationPrizePool: 0,
       burnValue: 0,
       devFee: 0,
       reservePool: 0,
       reservePoolReward: 0.01,
-      timeStepInHours: 0.25,
+      timeStepInHours: gameConfigs.timeStepInHours,
       machineSold: 0,
       workerSold: 0,
       buildingSold: 0,
-      ...assetsConfig,
+      ...gameConfigs.assets,
       status: 'open',
-      houseLevels: [
-        { networthStart: 0, networthEnd: 24, level: 1 },
-        { networthStart: 25, networthEnd: 49, level: 2 },
-        { networthStart: 50, networthEnd: 74, level: 3 },
-        { networthStart: 75, networthEnd: 99, level: 4 },
-        { networthStart: 100, networthEnd: 124, level: 5 },
-        { networthStart: 125, networthEnd: 149, level: 6 },
-        { networthStart: 150, networthEnd: 199, level: 7 },
-        { networthStart: 200, networthEnd: 249, level: 8 },
-        { networthStart: 250, networthEnd: 349, level: 9 },
-        { networthStart: 350, networthEnd: 499, level: 10 },
-        { networthStart: 500, networthEnd: 749, level: 11 },
-        { networthStart: 750, networthEnd: 1249, level: 12 },
-        { networthStart: 1250, networthEnd: 1999, level: 13 },
-        { networthStart: 2000, networthEnd: 4999, level: 14 },
-        { networthStart: 5000, level: 15 },
-      ],
+      houseLevels: gameConfigs.houseLevels,
       tokenAddress: TOKEN_ADDRESS,
       nftAddress: NFT_ADDRESS,
       gameAddress: GAME_CONTRACT_ADDRESS,
       routerAddress: ROUTER_ADDRESS,
       wethAddress: WETH_ADDRESS,
       pairAddress: PAIR_ADDRESS,
-      prizePoolConfig,
-      warConfig,
-      referralConfig,
+      prizePoolConfig: gameConfigs.prizePool,
+      warConfig: gameConfigs.war,
+      referralConfig: gameConfigs.referral,
     });
   console.log('created season');
 
@@ -158,10 +97,10 @@ const main = async () => {
         machineSold: 0,
         workerSold: 0,
         buildingSold: 0,
-        prizePoolConfig,
-        warConfig,
-        referralConfig,
-        ...assetsConfig,
+        prizePoolConfig: gameConfigs.prizePool,
+        warConfig: gameConfigs.war,
+        referralConfig: gameConfigs.referral,
+        ...gameConfigs.assets,
       },
     });
   console.log('created season log');
