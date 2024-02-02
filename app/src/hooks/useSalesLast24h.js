@@ -47,7 +47,7 @@ const useSalesLast24h = () => {
       unsubscribeWorker();
       unsubscribeBuilding();
     };
-  }, [now]);
+  }, [now, configs?.activeSeasonId]);
 
   const updateNow = () => setNow(Date.now());
 
