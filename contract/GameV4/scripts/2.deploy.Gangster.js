@@ -5,7 +5,7 @@
 // will compile your contracts, add the Hardhat Runtime Environment's members to the
 // global scope, and execute the script.
 const fs = require('fs');
-const { ethers } = require('hardhat');
+const { ethers, run } = require('hardhat');
 const factoryArtifact = require('@uniswap/v2-core/build/UniswapV2Factory.json');
 const routerArtifact = require('@uniswap/v2-periphery/build/UniswapV2Router02.json');
 const pairArtifact = require('@uniswap/v2-periphery/build/IUniswapV2Pair.json');
@@ -26,6 +26,12 @@ async function main() {
   const GangsterNFT = await Gangster.deploy(_defaultAdmin, _workerAddress);
   const _nftAddress = await GangsterNFT.getAddress();
   console.log(`NFT contract is deployed to ${_nftAddress}`);
+
+  await run('verify:verify', {
+    address: _nftAddress,
+    constructorArguments: [_defaultAdmin, _workerAddress],
+  });
+  console.log('verified');
 }
 
 // We recommend this pattern to be able to use async/await everywhere
