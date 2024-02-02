@@ -14,7 +14,7 @@ import { getLeaderboard } from './gamePlay.service.js';
 const { NETWORK_ID } = environments;
 const CODE_LENGTH = 10;
 
-const createGamePlayIfNotExist = async (userId) => {
+const createGamePlayIfNotExist = async (userId, isWhitelisted) => {
   const season = await getActiveSeason();
   const snapshot = await firestore
     .collection('gamePlay')
@@ -35,7 +35,7 @@ const createGamePlayIfNotExist = async (userId) => {
       pendingReward: 0,
       startRewardCountingTime: admin.firestore.FieldValue.serverTimestamp(),
       active: false,
-      isWhitelisted: false,
+      isWhitelisted,
       whitelistAmountMinted: 0,
       warDeployment: {
         numberOfMachinesToEarn: 0,
@@ -52,6 +52,8 @@ export const createUserIfNotExist = async (userId) => {
   const snapshot = await firestore.collection('user').doc(userId).get();
   const user = await privy.getUser(userId);
   // console.log({ user });
+  let isWhitelisted = false;
+
   if (!snapshot.exists) {
     const { wallet, twitter } = user;
     // create user
@@ -81,6 +83,7 @@ export const createUserIfNotExist = async (userId) => {
         avatarURL,
         tokenBalance: 0,
         ETHBalance: 0,
+        isWhitelisted: false,
         walletPasswordAsked: false,
         referralCode,
         referralTotalReward: 0,
@@ -88,6 +91,8 @@ export const createUserIfNotExist = async (userId) => {
         code: numberToCodeString(numberOfUsers + 1),
       });
   } else {
+    isWhitelisted = Boolean(snapshot.data().isWhitelisted);
+
     const { wallet } = user;
     if (wallet) {
       const ethersProvider = await alchemy.config.getProvider();
@@ -106,7 +111,7 @@ export const createUserIfNotExist = async (userId) => {
     }
   }
 
-  await createGamePlayIfNotExist(userId);
+  await createGamePlayIfNotExist(userId, isWhitelisted);
 };
 
 export const updateWalletPasswordAsked = async (userId) => {
