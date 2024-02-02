@@ -65,11 +65,10 @@ class PopupWarAttackDetail extends Popup {
       'button-blue',
       'button-blue-pressed',
       () => {
-        if (this.loading) return;
-        this.loading = true;
-        scene.game.events.emit('update-war-attack', {
-          attackUserId: this.userId,
-        });
+        this.loading = false;
+        scene.popupWarAttackConfirmation?.updateAttackUser({ id: this.userId, username: this.user.username });
+        this.close();
+        scene.popupWarAttackConfirmation?.open();
       },
       'Raid',
       { sound: 'button-1', fontSize: '82px' }
