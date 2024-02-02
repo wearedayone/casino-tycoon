@@ -38,7 +38,7 @@ class PopupBuyGangster extends Popup {
   onCompleted;
 
   constructor(scene, { isSimulator, onCompleted } = {}) {
-    super(scene, 'popup-buy-gangster', { ribbon: 'ribbon-buy-gangster' });
+    super(scene, 'popup-buy-gangster', { ribbon: 'ribbon-buy-gangster', noCloseBtn: !!isSimulator });
 
     const events = {
       completed: isSimulator ? 'simulator-buy-gangster-completed' : 'buy-gangster-completed',
@@ -159,6 +159,7 @@ class PopupBuyGangster extends Popup {
       },
       '-',
       {
+        disabledImage: 'button-square-disabled',
         fontSize: '82px',
         sound: 'button-1',
         onHold: () => {
@@ -179,6 +180,7 @@ class PopupBuyGangster extends Popup {
         },
       }
     );
+    this.minusBtn.setDisabledState(isSimulator);
     this.add(this.minusBtn);
 
     this.plusBtn = new TextButton(
@@ -195,6 +197,7 @@ class PopupBuyGangster extends Popup {
       },
       '+',
       {
+        disabledImage: 'button-square-disabled',
         fontSize: '82px',
         sound: 'button-1',
         onHold: () => {
@@ -215,6 +218,7 @@ class PopupBuyGangster extends Popup {
         },
       }
     );
+    this.plusBtn.setDisabledState(isSimulator);
     this.add(this.plusBtn);
 
     this.quantityText = scene.add.text(minusBtnX + 170, counterY, this.quantity, {

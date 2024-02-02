@@ -35,7 +35,7 @@ class PopupBuyGoon extends Popup {
   isSimulator = false;
 
   constructor(scene, { isSimulator, onCompleted } = {}) {
-    super(scene, 'popup-buy-goon', { ribbon: 'ribbon-buy-goon' });
+    super(scene, 'popup-buy-goon', { ribbon: 'ribbon-buy-goon', noCloseBtn: !!isSimulator });
 
     this.scene = scene;
     const events = {
