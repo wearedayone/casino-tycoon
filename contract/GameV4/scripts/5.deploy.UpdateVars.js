@@ -9,10 +9,10 @@ const {
   referral,
 } = gameConfigs;
 
-async function main() {
-  const _nftAddress = '0x8147879efE745F773a6b23232b851FB6AA5C655c';
-  const _gaAddress = '0xc7B23C14153ac59a7b4e58DE24e08730cAea772d';
+const _nftAddress = '0x999E7E6Cf4D8F49d9002d8595C71699A7c26D53F';
+const _gaAddress = '0x23cA98298Fc555aFa6cC6E556c02bB5bBB445577';
 
+async function main() {
   const GangsterNFT = await ethers.getContractAt('Gangster', _nftAddress);
   if (machine.maxPerBatch) {
     console.log('update maxPerBatch');

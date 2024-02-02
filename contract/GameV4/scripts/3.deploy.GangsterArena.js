@@ -11,13 +11,14 @@ const routerArtifact = require('@uniswap/v2-periphery/build/UniswapV2Router02.js
 const pairArtifact = require('@uniswap/v2-periphery/build/IUniswapV2Pair.json');
 const WETH9 = require('../WETH9.json');
 
+const _nftAddress = '0x999E7E6Cf4D8F49d9002d8595C71699A7c26D53F';
+const _fiatAddress = '0x068a561Cd3Cf611c630237DAe8588f261358e3dF';
+
 async function main() {
   // const _defaultAdmin = '0xd97612bD2272eDc1F66BbA99666C6a0fAa6046F4';
   // const _adminAddress = '0x9EC95637ff4fA040a54CbDCDD0312e46F7a204CF';
   // const _workerAddress = '0x9EC95637ff4fA040a54CbDCDD0312e46F7a204CF';
   // const _signerAddress = '0x9EC95637ff4fA040a54CbDCDD0312e46F7a204CF';
-  const _nftAddress = '0x8147879efE745F773a6b23232b851FB6AA5C655c';
-  const _fiatAddress = '0xB830Dbac42B35D9821A511F205332D733158Bcda';
 
   const _defaultAdmin = '0x890611302Ee344d5bD94DA9811C18e2De5588077';
   const _adminAddress = '0x890611302Ee344d5bD94DA9811C18e2De5588077';

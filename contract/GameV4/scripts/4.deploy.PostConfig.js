@@ -11,11 +11,11 @@ const routerArtifact = require('@uniswap/v2-periphery/build/UniswapV2Router02.js
 const pairArtifact = require('@uniswap/v2-periphery/build/IUniswapV2Pair.json');
 const WETH9 = require('../WETH9.json');
 
-async function main() {
-  const _nftAddress = '0x8147879efE745F773a6b23232b851FB6AA5C655c';
-  const _fiatAddress = '0xB830Dbac42B35D9821A511F205332D733158Bcda';
-  const _gaAddress = '0xc7B23C14153ac59a7b4e58DE24e08730cAea772d';
+const _nftAddress = '0x999E7E6Cf4D8F49d9002d8595C71699A7c26D53F';
+const _fiatAddress = '0x068a561Cd3Cf611c630237DAe8588f261358e3dF';
+const _gaAddress = '0x23cA98298Fc555aFa6cC6E556c02bB5bBB445577';
 
+async function main() {
   const FIATToken = await ethers.getContractAt('FIAT', _fiatAddress);
   let minterRole = await FIATToken.MINTER_ROLE();
   await FIATToken.grantRole(minterRole, _gaAddress);

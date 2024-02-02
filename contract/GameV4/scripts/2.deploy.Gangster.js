@@ -27,11 +27,17 @@ async function main() {
   const _nftAddress = await GangsterNFT.getAddress();
   console.log(`NFT contract is deployed to ${_nftAddress}`);
 
-  await run('verify:verify', {
-    address: _nftAddress,
-    constructorArguments: [_defaultAdmin, _workerAddress],
-  });
-  console.log('verified');
+  await GangsterNFT.setURI('https://gangsterarena.com/nft/{id}.json');
+  console.log('Set URI');
+
+  await GangsterNFT.mint(_defaultAdmin, 1, 1, '0x11');
+  console.log('minted');
+
+  // await run('verify:verify', {
+  //   address: _nftAddress,
+  //   constructorArguments: [_defaultAdmin, _workerAddress],
+  // });
+  // console.log('verified');
 }
 
 // We recommend this pattern to be able to use async/await everywhere
