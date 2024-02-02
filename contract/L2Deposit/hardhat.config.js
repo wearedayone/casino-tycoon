@@ -57,6 +57,17 @@ module.exports = {
         },
       },
     },
+    base_sepolia: {
+      url: secrets.base_sepolia_url || ``,
+      accounts: [secrets.base_sepolia_key],
+      gasPrice: 1000000000,
+      verify: {
+        etherscan: {
+          apiUrl: 'https://api-sepolia.basescan.org',
+          apiKey: '2JSFYE3G4DEMNFY5X1C34H28XNVUKGWWJ4',
+        },
+      },
+    },
     // base_mainnet: {
     //   url: secrets.base_mainnet_url || ``,
     //   accounts: [secrets.base_mainnet_key],
@@ -83,6 +94,7 @@ module.exports = {
       eth_goerli: '2JSFYE3G4DEMNFY5X1C34H28XNVUKGWWJ4',
       base_mainnet: process.env.BASE_ETHERSCAN_API_KEY ?? 'ETHERSCAN_API_KEY',
       baseGoerli: 'TPCIRFTJIGMCKINI7RZFXUQDJ48YY1ZJ4I',
+      base_sepolia: 'TPCIRFTJIGMCKINI7RZFXUQDJ48YY1ZJ4I',
     },
     customChains: [
       // {
@@ -107,6 +119,14 @@ module.exports = {
         urls: {
           apiURL: 'https://api.basescan.org/api',
           browserURL: 'https://goerli.basescan.org',
+        },
+      },
+      {
+        network: 'base_sepolia',
+        chainId: 84532,
+        urls: {
+          apiURL: 'https://api-sepolia.basescan.org/api',
+          browserURL: 'https://sepolia.basescan.org',
         },
       },
     ],
