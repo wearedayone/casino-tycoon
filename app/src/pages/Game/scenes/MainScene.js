@@ -11,6 +11,7 @@ import Footer from '../components/action-buttons/Footer';
 import PopupBuy from '../components/popup/PopupBuy';
 import PopupWar from '../components/popup/PopupWar';
 import PopupSettings from '../components/popup/PopupSettings';
+import PopupSwap from '../components/popup/PopupSwap';
 import PopupWarHistory from '../components/popup/PopupWarHistory';
 import PopupSafeHouseUpgrade from '../components/popup/PopupSafeHouseUpgrade';
 import PopupBuyGoon from '../components/popup/PopupBuyGoon';
@@ -97,6 +98,9 @@ class MainScene extends Phaser.Scene {
 
     this.popupSettings = new PopupSettings(this);
     this.add.existing(this.popupSettings);
+
+    this.popupSwap = new PopupSwap(this, this.popupSettings);
+    this.add.existing(this.popupSwap);
 
     this.popupReferralProgram = new PopupReferralProgram(this);
     this.add.existing(this.popupReferralProgram);
