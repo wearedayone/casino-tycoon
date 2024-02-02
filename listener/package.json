@@ -10,7 +10,7 @@
     "dev": "env-cmd -f .env.dev nodemon index.js"
   },
   "dependencies": {
-    "alchemy-sdk": "^2.10.1",
+    "alchemy-sdk": "^3.1.0",
     "dotenv": "^16.3.1",
     "env-cmd": "^10.1.0",
     "firebase-admin": "^11.11.0",

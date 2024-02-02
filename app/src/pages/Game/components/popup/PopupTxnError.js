@@ -136,6 +136,7 @@ class PopupTxnError extends Popup {
 export const BASESCAN_PREFIX = {
   8453: '',
   84531: 'goerli.',
+  84532: 'sepolia.',
 };
 
 export default PopupTxnError;
