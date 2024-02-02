@@ -6,10 +6,12 @@ async function main() {
 
   const depositLayerL1Contract = await ethers.getContractFactory('DepositLayerL1');
   const depositLayerL1 = await depositLayerL1Contract.deploy(adminWallet);
+  console.log({ depositLayerL1 });
+  await depositLayerL1.waitForDeployment();
 
   const depositLayerL1Address = await depositLayerL1.getAddress();
   console.log(
-    `Run this script to verify this contract: \n npx hardhat verify --network [your_network] ${depositLayerL1Address} "${adminWallet}"`
+    `Run this script to verify this contract: \n npx hardhat verify --network eth_sepolia ${depositLayerL1Address} ${adminWallet}`
   );
 }
 
