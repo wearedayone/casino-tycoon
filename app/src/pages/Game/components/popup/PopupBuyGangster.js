@@ -27,6 +27,7 @@ class PopupBuyGangster extends Popup {
   reservePoolReward = 0;
   balance = 0;
   basePrice = 0;
+  unitPrice = 0;
   whitelistPrice = 0;
   daysElapsed = 0;
   quantity = DEFAULT_QUANTITY;
@@ -38,7 +39,7 @@ class PopupBuyGangster extends Popup {
   onCompleted;
 
   constructor(scene, { isSimulator, onCompleted } = {}) {
-    super(scene, 'popup-buy-gangster', { ribbon: 'ribbon-buy-gangster' });
+    super(scene, 'popup-buy-gangster', { ribbon: 'ribbon-buy-gangster', noCloseBtn: !!isSimulator });
 
     const events = {
       completed: isSimulator ? 'simulator-buy-gangster-completed' : 'buy-gangster-completed',
@@ -159,6 +160,7 @@ class PopupBuyGangster extends Popup {
       },
       '-',
       {
+        disabledImage: 'button-square-disabled',
         fontSize: '82px',
         sound: 'button-1',
         onHold: () => {
@@ -179,6 +181,7 @@ class PopupBuyGangster extends Popup {
         },
       }
     );
+    this.minusBtn.setDisabledState(isSimulator);
     this.add(this.minusBtn);
 
     this.plusBtn = new TextButton(
@@ -195,6 +198,7 @@ class PopupBuyGangster extends Popup {
       },
       '+',
       {
+        disabledImage: 'button-square-disabled',
         fontSize: '82px',
         sound: 'button-1',
         onHold: () => {
@@ -215,6 +219,7 @@ class PopupBuyGangster extends Popup {
         },
       }
     );
+    this.plusBtn.setDisabledState(isSimulator);
     this.add(this.plusBtn);
 
     this.quantityText = scene.add.text(minusBtnX + 170, counterY, this.quantity, {
@@ -271,7 +276,7 @@ class PopupBuyGangster extends Popup {
 
       this.gas = gas;
       this.estimatedMaxPurchase =
-        this.balance && this.basePrice ? Math.floor((this.balance - this.gas) / this.basePrice) : 0;
+        this.balance && this.unitPrice ? Math.floor((this.balance - this.gas) / this.unitPrice) : 0;
       this.updateValues();
     });
 
@@ -315,11 +320,13 @@ class PopupBuyGangster extends Popup {
         this.whitelistAmountLeft = whitelistAmountLeft;
         this.referralDiscount = referralDiscount;
         this.mintFunction = isWhitelisted && whitelistAmountLeft ? 'mintWL' : hasInviteCode ? 'mintReferral' : 'mint';
+        this.unitPrice =
+          this.mintFunction === 'mintWL' ? this.whitelistPrice : this.basePrice * (1 - this.referralDiscount);
 
         this.numberOfMachinesText.text = numberOfMachines.toLocaleString();
         this.networthText.text = `${networth.toLocaleString()}`;
         this.rateText.text = `${formatter.format(numberOfMachines * dailyReward)}`;
-        this.estimatedMaxPurchase = balance && basePrice ? Math.floor((balance - this.gas) / basePrice) : 0;
+        this.estimatedMaxPurchase = balance && this.unitPrice ? Math.floor((balance - this.gas) / this.unitPrice) : 0;
         this.maxQuantity =
           isWhitelisted && whitelistAmountLeft ? Math.min(whitelistAmountLeft, maxPerBatch) : maxPerBatch;
         this.updateValues();
@@ -344,9 +351,7 @@ class PopupBuyGangster extends Popup {
     this.networthIncreaseText.text = `+${(this.networthIncrease * this.quantity).toLocaleString()}`;
     this.rateIncreaseText.text = `+${(this.rateIncrease * this.quantity).toLocaleString()} /d`;
 
-    const unitPrice =
-      this.mintFunction === 'mintWL' ? this.whitelistPrice : this.basePrice * (1 - this.referralDiscount);
-    const estimatedPrice = this.quantity * unitPrice;
+    const estimatedPrice = this.quantity * this.unitPrice;
     const roi = estimatedPrice
       ? (((this.rateIncrease * this.quantity * this.tokenPrice) / estimatedPrice) * 100).toFixed(1)
       : 0;

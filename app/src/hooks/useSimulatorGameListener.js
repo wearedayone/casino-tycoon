@@ -162,6 +162,13 @@ const useSimulatorGameListener = () => {
       });
     });
 
+    game.events.on('simulator-claim-completed', async ({ amount }) => {
+      setBalances((prevState) => ({
+        ...prevState,
+        tokenBalance: prevState.tokenBalance + amount,
+      }));
+    });
+
     game.events.on('simulator-buy-gangster', async ({ quantity }) => {
       await delay(1000);
       setAssets((prevAssets) => ({
@@ -172,14 +179,14 @@ const useSimulatorGameListener = () => {
       game.events.emit('simulator-buy-gangster-completed', { txnHash: '', amount: quantity });
     });
 
-    game.events.on('simulator-buy-goon', async ({ quantity, delayDuration = 1000 }) => {
+    game.events.on('simulator-buy-goon', async ({ quantity, delayDuration = 1000, hideSuccessPopup = false }) => {
       await delay(delayDuration);
       setAssets((prevAssets) => ({
         ...prevAssets,
         numberOfWorkers: prevAssets.numberOfWorkers + quantity,
         networth: prevAssets.networth + quantity * activeSeason.worker.networth,
       }));
-      game.events.emit('simulator-buy-goon-completed', { txnHash: '', amount: quantity });
+      if (!hideSuccessPopup) game.events.emit('simulator-buy-goon-completed', { txnHash: '', amount: quantity });
     });
 
     game.events.on('simulator-upgrade-safehouse', async ({ quantity }) => {

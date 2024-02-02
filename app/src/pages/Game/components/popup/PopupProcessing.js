@@ -1,11 +1,12 @@
 import Popup from './Popup';
 import PopupTxnCompleted from './PopupTxnCompleted';
+import PopupTxnError from './PopupTxnError';
+import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
 import { colors, fontFamilies } from '../../../../utils/styles';
 import { formatter } from '../../../../utils/numbers';
-import PopupTxnError from './PopupTxnError';
 
-const { width } = configs;
+const { width, height } = configs;
 
 class PopupProcessing extends Popup {
   onCompleted;
@@ -94,9 +95,15 @@ class PopupProcessing extends Popup {
         this.description.text = 'Your reputation & earnings \n are updated';
         this.doneSound?.play();
         this.iconDone.setVisible(true);
-        const hasTxnHashEvents = [
-          'buy-gangster-completed',
+
+        const simulatorBuyEvents = [
           'simulator-buy-gangster-completed',
+          'simulator-buy-goon-completed',
+          'simulator-upgrade-safehouse-completed',
+        ];
+        const hasTxnHashEvents = [
+          ...simulatorBuyEvents,
+          'buy-gangster-completed',
           'deposit-nft-completed',
           'withdraw-token-completed',
           'withdraw-eth-completed',
@@ -105,7 +112,22 @@ class PopupProcessing extends Popup {
           'swap-completed',
         ];
 
-        if (!hasTxnHashEvents.includes(completedEvent)) return;
+        if (!hasTxnHashEvents.includes(completedEvent)) {
+          const buttonGreat = new TextButton(
+            scene,
+            width / 2,
+            height / 2 + this.popup.height / 2 - 20,
+            'button-blue',
+            'button-blue-pressed',
+            this.close,
+            'Great',
+            { fontSize: '82px', sound: 'close' }
+          );
+          this.add(buttonGreat);
+
+          return;
+        }
+
         const { txnHash, amount, description, token } = data;
         let title = '',
           desc = '';
@@ -115,6 +137,16 @@ class PopupProcessing extends Popup {
           case 'simulator-buy-gangster-completed':
             title = `${formatter.format(amount)} Gangster${amount > 1 ? 's' : ''}`;
             desc = 'Gangsters hired successfully.';
+            break;
+          case 'buy-goon-completed':
+          case 'simulator-buy-goon-completed':
+            title = `${formatter.format(amount)} Goon${amount > 1 ? 's' : ''}`;
+            desc = 'Goons hired successfully.';
+            break;
+          case 'upgrade-safehouse-completed':
+          case 'simulator-upgrade-safehouse-completed':
+            title = `${formatter.format(amount)} Safehouse level${amount > 1 ? 's' : ''}`;
+            desc = 'Safehouse upgraded successfully.';
             break;
           case 'deposit-nft-completed':
             title = `${formatter.format(amount)} NFT${amount > 1 ? 's' : ''}`;
@@ -144,7 +176,7 @@ class PopupProcessing extends Popup {
 
         this.popupTxnCompleted = new PopupTxnCompleted(scene, this.completedIcon, title, desc, txnHash, {
           onCompleted,
-          hideTxnHash: completedEvent === 'simulator-buy-gangster-completed',
+          hideTxnHash: simulatorBuyEvents.includes(completedEvent),
         });
         scene.add.existing(this.popupTxnCompleted);
         this.onCompleted = null;
