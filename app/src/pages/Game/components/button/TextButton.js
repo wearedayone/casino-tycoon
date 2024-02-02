@@ -35,6 +35,7 @@ class TextButton extends Button {
     let textStrokeColor;
     switch (defaultImage) {
       case 'button-blue':
+      case 'button-blue-mini':
       case 'button-blue-med':
       case 'button-blue-long':
         textStrokeColor = '#0004a0';

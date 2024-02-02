@@ -1,17 +1,11 @@
 import Popup from './Popup';
-import PopupTxnProcessingSwap from './PopupTxnProcessingSwap';
 import PopupProcessing from './PopupProcessing';
 import Button from '../button/Button';
 import TextInput from '../inputs/TextInput';
 import TextButton from '../button/TextButton';
 import ImageButton from '../button/ImageButton';
 import configs from '../../configs/configs';
-import {
-  integerCharacterRegex,
-  integerInputRegex,
-  numberCharacterRegex,
-  numberInputRegex,
-} from '../../../../utils/strings';
+import { numberCharacterRegex, numberInputRegex } from '../../../../utils/strings';
 import { formatter } from '../../../../utils/numbers';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
 
@@ -92,14 +86,17 @@ class PopupSwap extends Popup {
         );
       },
     });
+
     this.balanceText = scene.add
-      .text(width - textX, token1AmountInputY, '0.00', {
+      .text(width - textX, token1AmountInputY + 15, '0.00', {
         fontSize: fontSizes.medium,
         color: colors.black,
         fontFamily: fontFamilies.bold,
       })
-      .setOrigin(1, 1);
-    const available = scene.add.text(width - textX, token1AmountInputY, 'Available', mediumBrownBold).setOrigin(1, 0);
+      .setOrigin(1, 0);
+    const available = scene.add
+      .text(width - textX - 200, token1AmountInputY + 15, 'Balance', mediumBrownBold)
+      .setOrigin(1, 0);
     this.add(youPay);
     this.add(this.token1AmountInput);
     this.add(this.balanceText);
@@ -210,6 +207,21 @@ class PopupSwap extends Popup {
     );
     this.add(buttonBack);
     this.add(this.buttonApprove);
+
+    this.maxBtn = new TextButton(
+      scene,
+      width - textX - 80,
+      token1AmountInputY - 30,
+      'button-blue-mini',
+      'button-blue-mini-pressed',
+      () => {
+        const balance = this.tokenSwap === 'eth' ? this.ethBalance : this.tokenBalance;
+        this.token1AmountInput.updateValue(balance.toString(), true, true);
+      },
+      'Max',
+      { fontSize: '46px', sound: 'button-1' }
+    );
+    this.add(this.maxBtn);
 
     scene.game.events.on('update-balances', ({ ETHBalance, tokenBalance }) =>
       this.updateBalance({ ETHBalance, tokenBalance })
