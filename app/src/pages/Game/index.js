@@ -897,10 +897,10 @@ const Game = () => {
 
       gameRef.current?.events.on('request-portfolio', () => {
         getRank().then((res) => {
-          const { reward: rankReward } = res.data;
+          const { rankReward, reputationReward } = res.data;
           const tokenValue = tokenBalance * parseFloat(tokenPrice); // TODO: update formulas to calculate token value
           const machineValue = numberOfMachines * parseFloat(nftPrice); // TODO: update formulas to calculate machine value
-          const totalBalance = parseFloat(ETHBalance) + tokenValue + machineValue + rankReward;
+          const totalBalance = parseFloat(ETHBalance) + tokenValue + machineValue + rankReward + reputationReward;
           gameRef.current?.events.emit('update-portfolio', {
             address,
             totalBalance,
@@ -910,6 +910,7 @@ const Game = () => {
             numberOfMachines,
             machineValue,
             rankReward,
+            reputationReward,
           });
         });
       });
@@ -1376,11 +1377,11 @@ const Game = () => {
 
   useEffect(() => {
     if (rankData?.data) {
-      const { reward: rankReward } = rankData.data;
+      const { rankReward, reputationReward } = rankData.data;
 
       const tokenValue = tokenBalance * parseFloat(tokenPrice);
       const machineValue = numberOfMachines * parseFloat(nftPrice);
-      const totalBalance = parseFloat(ETHBalance) + tokenValue + machineValue + rankReward;
+      const totalBalance = parseFloat(ETHBalance) + tokenValue + machineValue + rankReward + reputationReward;
       gameRef.current?.events.emit('update-portfolio', {
         address,
         totalBalance,
@@ -1390,6 +1391,7 @@ const Game = () => {
         numberOfMachines,
         machineValue,
         rankReward,
+        reputationReward,
       });
     }
   }, [rankData, address, tokenBalance, numberOfMachines, ETHBalance]);
