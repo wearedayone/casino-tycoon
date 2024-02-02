@@ -28,6 +28,12 @@ module.exports = {
       ],
       gasPrice: 15000000000,
     },
+
+    eth_sepolia: {
+      url: secrets.sepolia_url,
+      accounts: [secrets.sepolia_key],
+      gasPrice: 15000000000,
+    },
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,
@@ -40,6 +46,7 @@ module.exports = {
     apiKey: {
       // mantle_testnet: 'xyz', //random value
       goerli: '2JSFYE3G4DEMNFY5X1C34H28XNVUKGWWJ4',
+      sepolia: '2JSFYE3G4DEMNFY5X1C34H28XNVUKGWWJ4',
       eth_goerli: '2JSFYE3G4DEMNFY5X1C34H28XNVUKGWWJ4',
       base_mainnet: process.env.BASE_ETHERSCAN_API_KEY ?? 'ETHERSCAN_API_KEY',
       baseGoerli: 'TPCIRFTJIGMCKINI7RZFXUQDJ48YY1ZJ4I',
