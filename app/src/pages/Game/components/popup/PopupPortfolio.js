@@ -44,7 +44,7 @@ class PopupPortfolio extends Popup {
     this.add(this.statisticBtn);
 
     this.addressText = scene.add
-      .text(this.popup.x - 160, this.popup.y - 490, '', {
+      .text(this.popup.x - 160, this.popup.y - 590, '', {
         fontSize: '60px',
         color: '#7D2E00',
         fontFamily: 'WixMadeforDisplayExtraBold',
@@ -64,7 +64,7 @@ class PopupPortfolio extends Popup {
     this.add(this.copyBtn);
 
     this.totalBalanceText = scene.add
-      .text(this.popup.x + 10, this.popup.y - 220, '', {
+      .text(this.popup.x + 10, this.popup.y - 320, '', {
         fontSize: '60px',
         color: '#30030B',
         fontFamily: 'WixMadeforDisplayExtraBold',
@@ -73,7 +73,7 @@ class PopupPortfolio extends Popup {
     this.add(this.totalBalanceText);
 
     this.balanceText = scene.add
-      .text(this.popup.x + 350, this.popup.y - 80, '', {
+      .text(this.popup.x + 350, this.popup.y - 180, '', {
         fontSize: '48px',
         color: '#30030B',
         fontFamily: 'WixMadeforDisplayBold',
@@ -82,7 +82,7 @@ class PopupPortfolio extends Popup {
     this.add(this.balanceText);
 
     this.tokenBalanceText = scene.add
-      .text(this.popup.x - 330, this.balanceText.y + lineGap, '', {
+      .text(this.popup.x - 330, this.balanceText.y + lineGap - 10, '', {
         fontSize: '48px',
         color: '#30030B',
         fontFamily: 'WixMadeforDisplayBold',
@@ -118,17 +118,35 @@ class PopupPortfolio extends Popup {
     this.add(this.machineValueText);
 
     this.rankRewardText = scene.add
-      .text(this.balanceText.x, this.machineValueText.y + lineGap, '', {
+      .text(this.balanceText.x, this.machineValueText.y + lineGap + 10, '', {
         fontSize: '48px',
         color: '#30030B',
         fontFamily: 'WixMadeforDisplayBold',
       })
       .setOrigin(1, 0.5);
     this.add(this.rankRewardText);
+    this.reputationRewardText = scene.add
+      .text(this.balanceText.x, this.machineValueText.y + lineGap * 2 + 20, '', {
+        fontSize: '48px',
+        color: '#30030B',
+        fontFamily: 'WixMadeforDisplayBold',
+      })
+      .setOrigin(1, 0.5);
+    this.add(this.reputationRewardText);
 
     scene.game.events.on(
       'update-portfolio',
-      ({ address, totalBalance, ETHBalance, tokenBalance, tokenValue, numberOfMachines, machineValue, rankReward }) => {
+      ({
+        address,
+        totalBalance,
+        ETHBalance,
+        tokenBalance,
+        tokenValue,
+        numberOfMachines,
+        machineValue,
+        rankReward,
+        reputationReward,
+      }) => {
         this.address = address;
         this.addressText.text = this.formatAddress(address);
         this.copyBtn.x = this.addressText.x + this.addressText.width + 120;
@@ -139,6 +157,7 @@ class PopupPortfolio extends Popup {
         this.numberOfMachinesText.text = `${numberOfMachines} Gangster NFTs`;
         this.machineValueText.text = `~${formatter.format(machineValue)}`;
         this.rankRewardText.text = `~${formatter.format(rankReward)}`;
+        this.reputationRewardText.text = `~${formatter.format(reputationReward)}`;
       }
     );
 

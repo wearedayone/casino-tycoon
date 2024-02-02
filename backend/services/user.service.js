@@ -146,7 +146,7 @@ export const getUserRankAndReward = async (userId) => {
   const user = leaderboard.find((item) => item.isUser);
   if (user) {
     const { rank, rankReward, reputationReward } = user;
-    return { rank, reward: rankReward + reputationReward, totalPlayers: leaderboard.length };
+    return { rank, rankReward, reputationReward, totalPlayers: leaderboard.length };
   }
 
   return null;
