@@ -107,7 +107,7 @@ class Tutorial extends Phaser.GameObjects.Container {
     this.step15 = new Step15(scene, () => {
       this.step15.setVisible(false);
       this.step16.setVisible(true);
-      scene.game.events.emit('simulator-buy-goon', { quantity: 1, delayDuration: 0 });
+      scene.game.events.emit('simulator-buy-goon', { quantity: 1, delayDuration: 0, hideSuccessPopup: true });
     });
     this.add(this.step15);
 
