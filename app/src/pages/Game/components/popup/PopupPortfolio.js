@@ -12,7 +12,7 @@ const lineGap = 130;
 
 class PopupPortfolio extends Popup {
   constructor(scene) {
-    super(scene, 'popup-portfolio', { ribbon: 'ribbon-portfolio' });
+    super(scene, 'popup-portfolio-with-reputation', { ribbon: 'ribbon-portfolio' });
 
     this.setVisible(false);
 
