@@ -36,7 +36,7 @@ class Step2 extends Phaser.GameObjects.Container {
         if (this.clicked) return;
         this.clicked = true;
 
-        this.character = new TutorialCharacter(scene, width / 2, height / 2 - 600, 'tutorial-2', next);
+        this.character = new TutorialCharacter(scene, width / 2, height / 2 - 600, 'tutorial-2', () => {});
         this.add(this.character);
 
         this.arrow1.setVisible(false);

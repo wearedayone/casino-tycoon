@@ -25,7 +25,7 @@ class Step5 extends Phaser.GameObjects.Container {
       onNext();
     };
 
-    this.character = new TutorialCharacter(scene, width / 2, height / 2 - 200, 'tutorial-5', next);
+    this.character = new TutorialCharacter(scene, width / 2, height / 2 - 200, 'tutorial-5', () => {});
     this.add(this.character);
 
     this.activeButton = new Button(
