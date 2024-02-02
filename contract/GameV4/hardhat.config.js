@@ -96,7 +96,7 @@ module.exports = {
       eth_goerli: '2JSFYE3G4DEMNFY5X1C34H28XNVUKGWWJ4',
       base_mainnet: process.env.BASE_ETHERSCAN_API_KEY ?? 'ETHERSCAN_API_KEY',
       baseGoerli: 'TPCIRFTJIGMCKINI7RZFXUQDJ48YY1ZJ4I',
-      base_sepolia: '2JSFYE3G4DEMNFY5X1C34H28XNVUKGWWJ4',
+      base_sepolia: 'TPCIRFTJIGMCKINI7RZFXUQDJ48YY1ZJ4I',
     },
     customChains: [
       // {
