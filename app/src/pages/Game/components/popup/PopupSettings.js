@@ -7,7 +7,6 @@ import PopupDepositNFT from './PopupDepositNFT';
 import Button from '../button/Button';
 import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
-import PopupSwap from './PopupSwap';
 
 const { width, height } = configs;
 
@@ -39,11 +38,9 @@ class PopupSettings extends Popup {
     const popupWithdraw = new PopupWithdraw(scene, this);
     this.popupDeposit = new PopupDeposit(scene, this);
     const popupStaking = new PopupDepositNFT(scene, this);
-    const popupSwap = new PopupSwap(scene, this);
     scene.add.existing(popupWithdraw);
     scene.add.existing(this.popupDeposit);
     scene.add.existing(popupStaking);
-    scene.add.existing(popupSwap);
 
     // user details
     this.username = scene.add.text(paddedX, usernameY, 'username', {
@@ -159,7 +156,7 @@ class PopupSettings extends Popup {
       'button-blue-long-pressed',
       () => {
         this.close();
-        popupSwap.open();
+        scene.popupSwap.open();
       },
       'Swap',
       { disabledImage: 'button-long-disabled', sound: 'open' }
