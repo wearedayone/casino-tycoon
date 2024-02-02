@@ -27,7 +27,7 @@
     "hardhat-contract-sizer": "^2.10.0"
   },
   "scripts": {
-    "deploy:staging": "npx hardhat run scripts/deployDepositLayerL2.js --network base_goerli",
+    "deploy:staging": "npx hardhat run scripts/deployDepositLayerL2.js --network base_sepolia",
     "deploy:production": "npx hardhat run scripts/deploy.js --network base_mainnet",
     "deploy:production:tournament": "npx hardhat run scripts/deployTournament.js --network base_mainnet",
     "compile": "npx hardhat compile",
