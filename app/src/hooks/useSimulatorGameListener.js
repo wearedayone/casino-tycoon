@@ -162,6 +162,13 @@ const useSimulatorGameListener = () => {
       });
     });
 
+    game.events.on('simulator-claim-completed', async ({ amount }) => {
+      setBalances((prevState) => ({
+        ...prevState,
+        tokenBalance: prevState.tokenBalance + amount,
+      }));
+    });
+
     game.events.on('simulator-buy-gangster', async ({ quantity }) => {
       await delay(1000);
       setAssets((prevAssets) => ({
