@@ -5,6 +5,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
+    "cron:demo": "env-cmd -f .env.demo node index.js",
     "cron:stg": "env-cmd -f .env.stg node index.js",
     "cron:prd": "env-cmd -f .env.prd node index.js"
   },
