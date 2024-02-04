@@ -9,8 +9,8 @@ const {
   referral,
 } = gameConfigs;
 
-const _nftAddress = '0x999E7E6Cf4D8F49d9002d8595C71699A7c26D53F';
-const _gaAddress = '0x23cA98298Fc555aFa6cC6E556c02bB5bBB445577';
+const _nftAddress = '0xd4C9821eeEDe45F478a58CaE6030698F7f757fC8';
+const _gaAddress = '0x22013908546b2Cb174Bc165fCbe221bda52d621C';
 
 async function main() {
   const GangsterNFT = await ethers.getContractAt('Gangster', _nftAddress);

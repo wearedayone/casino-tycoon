@@ -13,10 +13,10 @@ const Login = () => {
 
     const style = document.createElement('style');
     style.innerHTML = `
-      #privy-dialog { display: none }
+      #privy-dialog { visibility: hidden }
     `;
     style.id = 'privy-css';
-
+    console.log('added css');
     document.head.appendChild(style);
   };
 
@@ -27,6 +27,7 @@ const Login = () => {
     login();
     await delay(200);
     const privyDialog = document.querySelector('#privy-dialog');
+    console.log({ privyDialog });
     const buttons = [...privyDialog.querySelectorAll('button')];
     const twitterLoginButton = buttons.at(-1);
     twitterLoginButton?.click();

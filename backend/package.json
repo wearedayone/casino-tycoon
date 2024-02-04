@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "env-cmd -f .env.dev nodemon index.js",
     "stg": "env-cmd -f .env.stg nodemon index.js",
+    "demo": "env-cmd -f .env.demo nodemon index.js",
     "start": "env-cmd -f .env.prd nodemon index.js"
   },
   "dependencies": {

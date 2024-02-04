@@ -8,6 +8,9 @@ const pairArtifact = require('@uniswap/v2-periphery/build/IUniswapV2Pair.json');
 const WETH9 = require('../WETH9.json');
 
 const _fiatAddress = '0x74d285da90a98C8247aA5A07906735bD8Db5F9f4';
+const _factoryAddress = '0xD7b9d88D97d1A542fB57fB276D6532145cb8fF3f';
+const _wethAddress = '0x19c6b88868343c38538C6a1709b4cBc9cb8011aa';
+const _routerAddress = '0x1255050930Be7b365Ee93e091ff9C2c633471c02';
 
 async function main() {
   const _defaultAdmin = '0x890611302Ee344d5bD94DA9811C18e2De5588077';
@@ -19,26 +22,23 @@ async function main() {
   await fiatToken.mint(_defaultAdmin, parseEther('100000'));
 
   const Factory = await ethers.getContractFactory(factoryArtifact.abi, factoryArtifact.bytecode);
-  const factoryContract = await Factory.deploy(_defaultAdmin);
-  const factoryContractAddress = await factoryContract.getAddress();
+  const factoryContract = await Factory.attach(_factoryAddress);
 
   const Weth = await ethers.getContractFactory(WETH9.abi, WETH9.bytecode);
-  const weth = await Weth.deploy();
-  const wethAddress = await weth.getAddress();
+  // const weth = await Weth.attach(_wethAddress);
 
-  const tx1 = await factoryContract.createPair(_fiatAddress, wethAddress);
+  const tx1 = await factoryContract.createPair(_fiatAddress, _wethAddress);
   await tx1.wait();
 
-  const pairAddress = await factoryContract.getPair(_fiatAddress, wethAddress);
+  const pairAddress = await factoryContract.getPair(_fiatAddress, _wethAddress);
 
   const Router = await ethers.getContractFactory(routerArtifact.abi, routerArtifact.bytecode);
-  const router = await Router.deploy(factoryContractAddress, wethAddress);
-  const routerAddress = await router.getAddress();
+  const router = await Router.attach(_routerAddress);
 
-  console.log({ wethAddress, factoryContractAddress, pairAddress, routerAddress });
+  console.log({ pairAddress });
 
   // add liquidity
-  const tx2 = await fiatToken.approve(routerAddress, parseEther('100000'));
+  const tx2 = await fiatToken.approve(_routerAddress, parseEther('100000'));
   await tx2.wait();
 
   const deadline = Math.floor(Date.now() / 1000 + 10 * 60);

@@ -11,9 +11,9 @@ const routerArtifact = require('@uniswap/v2-periphery/build/UniswapV2Router02.js
 const pairArtifact = require('@uniswap/v2-periphery/build/IUniswapV2Pair.json');
 const WETH9 = require('../WETH9.json');
 
-const _nftAddress = '0x999E7E6Cf4D8F49d9002d8595C71699A7c26D53F';
-const _fiatAddress = '0x068a561Cd3Cf611c630237DAe8588f261358e3dF';
-const _gaAddress = '0x23cA98298Fc555aFa6cC6E556c02bB5bBB445577';
+const _nftAddress = '0xd4C9821eeEDe45F478a58CaE6030698F7f757fC8';
+const _fiatAddress = '0x74d285da90a98C8247aA5A07906735bD8Db5F9f4';
+const _gaAddress = '0x22013908546b2Cb174Bc165fCbe221bda52d621C';
 
 async function main() {
   const FIATToken = await ethers.getContractAt('FIAT', _fiatAddress);
