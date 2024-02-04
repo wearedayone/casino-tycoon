@@ -27,7 +27,7 @@ async function main() {
   const _nftAddress = await GangsterNFT.getAddress();
   console.log(`NFT contract is deployed to ${_nftAddress}`);
 
-  await GangsterNFT.setURI('https://gangsterarena.com/nft/{id}.json');
+  await GangsterNFT.setURI('https://gangsterarena.com/nft/1.json');
   console.log('Set URI');
 
   await GangsterNFT.mint(_defaultAdmin, 1, 1, '0x11');
