@@ -33,7 +33,7 @@ const configs = {
     higherRanksCutoffPercent: 0.1,
     lowerRanksCutoffPercent: 0.5,
     minRewardHigherRanks: 0.01, // in ETH
-    minRewardLowerRanks: 0.05, // in ETH
+    minRewardLowerRanks: 0.005, // in ETH
     // reputation leaderboard
     earlyRetirementTax: 0.2,
   },
