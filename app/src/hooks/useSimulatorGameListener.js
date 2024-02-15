@@ -456,6 +456,7 @@ const mockUsers = Array.from({ length: 20 }, () => ({
   networth: faker.number.int({ min: 0, max: 1000 }),
   userId: faker.string.uuid(),
   username: faker.internet.userName(),
+  active: true,
 }));
 
 const generateRankingRewards = ({ totalPlayers, rankPrizePool, prizePoolConfig }) => {
