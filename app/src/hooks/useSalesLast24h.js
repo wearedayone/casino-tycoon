@@ -5,7 +5,6 @@ import { firestore } from '../configs/firebase.config';
 import useSystemStore from '../stores/system.store';
 
 const MILISECONDS_IN_A_DAY = 24 * 60 * 60 * 1000;
-const MILISECONDS_IN_7_DAYS = 7 * MILISECONDS_IN_A_DAY;
 
 const useSalesLast24h = () => {
   const [now, setNow] = useState(Date.now());
@@ -14,7 +13,7 @@ const useSalesLast24h = () => {
   const configs = useSystemStore((state) => state.configs);
 
   useEffect(() => {
-    const startTime = now - MILISECONDS_IN_7_DAYS;
+    const startTime = now - MILISECONDS_IN_A_DAY;
     // console.log({ startTime });
     const workerQuery = query(
       collection(firestore, 'transaction'),
