@@ -68,7 +68,7 @@ export const calculateReward = (rankPrizePool, rankingRewards, rankIndex) => {
     (total, rankingReward) => total + rankingReward.share * (rankingReward.rankEnd - rankingReward.rankStart + 1),
     0
   );
-  if (totalPercentages >= 100) throw new Error('Invalid ranking reward');
+  if (totalPercentages >= 100) throw new Error('API error: Invalid ranking reward');
 
   const rank = rankIndex + 1;
   const rankingReward = rankingRewards.find((item) => item.rankStart <= rank && rank <= item.rankEnd);

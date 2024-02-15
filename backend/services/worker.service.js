@@ -70,7 +70,7 @@ export const claimToken = async ({ address, amount }) => {
     if (receipt.status !== 1) {
       logger.info(`error: ${JSON.stringify(receipt)}`);
       logger.error(`error: ${JSON.stringify(receipt)}`);
-      throw new Error(`error: ${JSON.stringify(receipt)}`);
+      throw new Error(`API error: Txn failed`);
     }
 
     return { txnHash, status: 'Success' };
@@ -107,7 +107,7 @@ export const claimTokenBonus = async ({ address, amount }) => {
     if (receipt.status !== 1) {
       logger.info(`error: ${JSON.stringify(receipt)}`);
       logger.error(`error: ${JSON.stringify(receipt)}`);
-      throw new Error(`error: ${JSON.stringify(receipt)}`);
+      throw new Error(`API error: Txn failed`);
     }
 
     return { txnHash, status: 'Success' };
@@ -143,7 +143,7 @@ export const claimTokenBatch = async ({ addresses, amounts }) => {
 
     if (receipt.status !== 1) {
       logger.error(`Unsuccessful txn: ${JSON.stringify(receipt)}`);
-      throw new Error(`Unsuccessful txn: ${JSON.stringify(receipt)}`);
+      throw new Error(`API error: Txn failed`);
     }
 
     return { txnHash, status: 'Success' };
@@ -180,7 +180,7 @@ export const burnNFT = async ({ addresses, ids, amounts }) => {
 
     if (receipt.status !== 1) {
       logger.error(`Unsuccessful txn: ${JSON.stringify(receipt)}`);
-      throw new Error(`Unsuccessful txn: ${JSON.stringify(receipt)}`);
+      throw new Error(`API error: Txn failed`);
     }
 
     return { txnHash, status: 'Success' };
@@ -217,7 +217,7 @@ export const burnGoon = async ({ addresses, amounts }) => {
 
     if (receipt.status !== 1) {
       logger.error(`Unsuccessful txn: ${JSON.stringify(receipt)}`);
-      throw new Error(`Unsuccessful txn: ${JSON.stringify(receipt)}`);
+      throw new Error(`API error: Txn failed`);
     }
 
     return { txnHash, status: 'Success' };
@@ -254,7 +254,7 @@ export const setGameClosed = async (isGameClosed) => {
 
     if (receipt.status !== 1) {
       logger.error(`Unsuccessful txn: ${JSON.stringify(receipt)}`);
-      throw new Error(`Unsuccessful txn: ${JSON.stringify(receipt)}`);
+      throw new Error(`API error: Txn failed`);
     }
 
     return { txnHash, status: 'Success' };
@@ -293,7 +293,7 @@ export const setWinner = async ({ winners, points }) => {
 
     if (receipt.status !== 1) {
       logger.error(`Unsuccessful txn: ${JSON.stringify(receipt)}`);
-      throw new Error(`Unsuccessful txn: ${JSON.stringify(receipt)}`);
+      throw new Error(`API error: Txn failed`);
     }
 
     return { txnHash, status: 'Success' };

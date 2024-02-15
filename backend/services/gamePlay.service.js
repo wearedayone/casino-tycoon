@@ -77,7 +77,7 @@ export const updateLastTimeSeenWarResult = async (userId) => {
     .where('seasonId', '==', activeSeasonId)
     .limit(1)
     .get();
-  if (gamePlaySnapshot.empty) throw new Error("Cannot find user's game play");
+  if (gamePlaySnapshot.empty) throw new Error("API error: Cannot find user's game play");
 
   await gamePlaySnapshot.docs[0].ref.update({
     lastTimeSeenWarResult: admin.firestore.FieldValue.serverTimestamp(),
@@ -104,14 +104,14 @@ export const updateUserWarDeployment = async ({
   if (
     [numberOfMachinesToEarn, numberOfMachinesToAttack, numberOfMachinesToDefend].some((num) => num % 1 !== 0 || num < 0)
   )
-    throw new Error('Bad request: invalid input');
+    throw new Error('API error: Bad request - invalid input');
 
   const gamePlay = await getUserGamePlay(userId);
-  if (!gamePlay) throw new Error('Gameplay doesnt exist');
+  if (!gamePlay) throw new Error('API error: Gameplay doesnt exist');
 
   const { numberOfMachines } = gamePlay;
   const totalDeployedMachines = numberOfMachinesToEarn + numberOfMachinesToAttack + numberOfMachinesToDefend;
-  if (totalDeployedMachines > numberOfMachines) throw new Error('Bad request: invalid number of machines');
+  if (totalDeployedMachines > numberOfMachines) throw new Error('API error: Bad request - invalid number of machines');
 
   await firestore
     .collection('gamePlay')
@@ -127,12 +127,12 @@ export const updateUserWarDeployment = async ({
 };
 
 export const updateUserWarAttackUser = async ({ userId, attackUserId }) => {
-  if (userId === attackUserId) throw new Error('Bad request: invalid attack user');
+  if (userId === attackUserId) throw new Error('API error: Bad request - invalid attack user');
   const attackUserSnapshot = await firestore.collection('user').doc(attackUserId).get();
-  if (!attackUserSnapshot.exists) throw new Error('Bad request: not found attack user');
+  if (!attackUserSnapshot.exists) throw new Error('API error: Bad request - not found attack user');
 
   const gamePlay = await getUserGamePlay(userId);
-  if (!gamePlay) throw new Error('Gameplay doesnt exist');
+  if (!gamePlay) throw new Error('API error: Gameplay doesnt exist');
 
   await firestore
     .collection('gamePlay')
