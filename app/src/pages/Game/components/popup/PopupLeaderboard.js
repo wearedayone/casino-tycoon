@@ -283,47 +283,63 @@ class PopupLeaderboard extends Popup {
 
   updateValues(season) {
     const { name, timeStepInHours, prizePool, isEnded } = season;
-    this.updateEndedState(isEnded);
 
+    this.isEnded = isEnded;
+    this.updateEndedState();
     const title = this.isEnded ? `${name} Ended` : `${name} Leaderboard`;
     this.setTitle(title);
     this.endTimeExtension.text = `Every Gangster purchased increases time by ${timeStepInHours} hour`;
     this.prizePool.text = formatter.format(prizePool);
   }
 
-  updateEndedState(isEnded) {
-    if (this.isEnded === isEnded) return;
-    this.isEnded = isEnded;
-
-    this.gameEndsIn.setVisible(!isEnded);
-    this.clockIcon.setVisible(!isEnded);
-    this.gameEndTime.setVisible(!isEnded);
-    this.endTimeExtension.setVisible(!isEnded);
-    this.buttonBack.setVisible(!isEnded);
-    this.buttonRetire.setVisible(!isEnded);
-    if (isEnded) {
+  updateEndedState() {
+    this.gameEndsIn.setVisible(!this.isEnded);
+    this.clockIcon.setVisible(!this.isEnded);
+    this.gameEndTime.setVisible(!this.isEnded);
+    this.endTimeExtension.setVisible(!this.isEnded);
+    this.buttonBack.setVisible(!this.isEnded);
+    this.buttonRetire.setVisible(!this.isEnded);
+    if (this.isEnded) {
       this.remove(this.buttonBack);
       this.remove(this.buttonRetire);
-      if (!this.isUserActive) {
-        this.youFinished.text = 'You did not qualify for the';
-        this.with.text = 'leaderboard this season.';
+      let topText;
+      let bottomText;
+      let textAlign;
+      let textOriginX;
+      let bottomTextOriginY;
 
-        this.youFinished.setStyle({ ...mediumBlackBoldRight, align: 'center' });
-        this.youFinished.setOrigin(0.5, -0.13);
-        this.with.setStyle({ ...mediumBlackBoldRight, align: 'center' });
-        this.with.setOrigin(0.5, 0.2);
+      if (this.isUserActive) {
+        topText = 'You finished at';
+        bottomText = 'with';
+        textAlign = 'right';
+        textOriginX = 1;
+        bottomTextOriginY = -0.12;
+      } else {
+        topText = 'You did not qualify for the';
+        bottomText = 'leaderboard this season.';
+        textAlign = 'center';
+        textOriginX = 0.5;
+        bottomTextOriginY = 0.2;
       }
+
+      this.youFinished.text = topText;
+      this.with.text = bottomText;
+
+      this.youFinished.setStyle({ ...mediumBlackBoldRight, align: textAlign });
+      this.youFinished.setOrigin(textOriginX, -0.13);
+      this.with.setStyle({ ...mediumBlackBoldRight, align: textAlign });
+      this.with.setOrigin(textOriginX, bottomTextOriginY);
     } else {
       this.add(this.buttonBack);
       this.add(this.buttonRetire);
     }
 
-    this.youFinished.setVisible(isEnded);
-    this.finishedAt.setVisible(isEnded && this.isUserActive);
-    this.with.setVisible(isEnded);
-    this.finishedReward.setVisible(isEnded && this.isUserActive);
-    this.ethIcon.setVisible(isEnded && this.isUserActive);
-    this.nextSeason.setVisible(isEnded);
+    this.youFinished.setVisible(this.isEnded);
+    this.finishedAt.setVisible(this.isEnded && this.isUserActive);
+    this.with.setVisible(this.isEnded);
+    this.finishedReward.setVisible(this.isEnded && this.isUserActive);
+    this.ethIcon.setVisible(this.isEnded && this.isUserActive);
+    this.nextSeason.setVisible(this.isEnded);
   }
 
   updateLeaderboard(leaderboard) {
@@ -345,7 +361,9 @@ class PopupLeaderboard extends Popup {
     this.ethRewards.text = isRankingMode ? this.rankingRewardsString : this.reputationRewardsString;
 
     const userRecord = leaderboard.find(({ isUser }) => isUser);
+    console.log('userRecord', userRecord);
     this.isUserActive = userRecord.active;
+    this.updateEndedState();
 
     this.userRankingReward = userRecord.rankReward;
     this.userReputationReward = userRecord.reputationReward;
