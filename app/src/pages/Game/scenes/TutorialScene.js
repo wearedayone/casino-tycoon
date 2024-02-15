@@ -69,7 +69,7 @@ class TutorialScene extends Phaser.Scene {
     const endTutorial = () => {
       this.game.events.emit('simulator-end');
       this.scene.stop();
-      this.scene.start('MainScene');
+      this.scene.start('MainScene', { isFromTutorial: true });
     };
     this.popupDeposit = new PopupDeposit(this, null, {
       isSimulator: true,

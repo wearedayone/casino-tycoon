@@ -115,7 +115,7 @@ class Tutorial extends Phaser.GameObjects.Container {
       this.step16.setVisible(false);
       scene.game.events.emit('simulator-end');
       scene.scene.stop();
-      scene.scene.start('MainScene');
+      scene.scene.start('MainScene', { isFromTutorial: true });
     });
     this.add(this.step16);
 

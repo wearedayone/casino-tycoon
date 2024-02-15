@@ -64,9 +64,15 @@ const goonFrontAnimationSpeed = {
 class MainScene extends Phaser.Scene {
   isGameEnded = false;
   isUserActive = false;
+  isFromTutorial = false;
 
   constructor() {
     super('MainScene');
+  }
+
+  init(data) {
+    const { isFromTutorial } = data;
+    this.isFromTutorial = isFromTutorial;
   }
 
   preload() {
@@ -204,7 +210,7 @@ class MainScene extends Phaser.Scene {
     });
     this.game.events.emit('request-game-ended-status');
     this.game.events.emit('request-active-status');
-    this.game.events.emit('request-user-away-reward');
+    if (!this.isFromTutorial) this.game.events.emit('request-user-away-reward');
   }
 
   create() {}
