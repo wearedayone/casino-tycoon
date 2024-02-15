@@ -2,6 +2,10 @@ import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Box, Typography } from '@mui/material';
 
+import environments from '../../utils/environments';
+
+const { LAYER_1_NETWORK_ID } = environments;
+
 const DepositSuccess = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -9,7 +13,7 @@ const DepositSuccess = () => {
 
   const txnHash = searchParams.get('txnHash');
 
-  const openTxnHash = () => window.open(`https://etherscan.io/tx/${txnHash}`);
+  const openTxnHash = () => window.open(`https://${ETHERSCAN_PREFIX[LAYER_1_NETWORK_ID]}etherscan.io/tx/${txnHash}`);
 
   return (
     <Box
@@ -92,6 +96,12 @@ const DepositSuccess = () => {
       </Box>
     </Box>
   );
+};
+
+const ETHERSCAN_PREFIX = {
+  1: '',
+  5: 'goerli.',
+  11155111: 'sepolia.',
 };
 
 export default DepositSuccess;
