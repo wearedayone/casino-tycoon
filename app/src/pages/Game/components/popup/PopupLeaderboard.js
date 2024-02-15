@@ -33,6 +33,7 @@ class PopupLeaderboard extends Popup {
     super(scene, 'popup-extra-large', { title: 'Season Leaderboard', noCloseBtn: true });
 
     this.onCloseCallback = onClose;
+    this.isSimulator = isSimulator;
     const events = {
       updateSeason: isSimulator ? 'simulator-update-season' : 'update-season',
       updateLeaderboard: isSimulator ? 'simulator-update-leaderboard' : 'update-leaderboard',
@@ -132,7 +133,7 @@ class PopupLeaderboard extends Popup {
         title: 'Reputation',
         onClick: () => {
           this.buttonBack.setX(width / 2 - this.popup.width * 0.23);
-          this.buttonRetire.setVisible(true && !this.isEnded);
+          this.buttonRetire.setVisible((true && !this.isEnded) || isSimulator);
           this.ethRewards.text = this.reputationRewardsString;
           this.playerReward.text = `~${formatter.format(this.userReputationReward)}`;
           if (isSimulator) onClickReputation();
@@ -300,8 +301,10 @@ class PopupLeaderboard extends Popup {
     this.buttonBack.setVisible(!this.isEnded);
     this.buttonRetire.setVisible(!this.isEnded);
     if (this.isEnded) {
-      this.remove(this.buttonBack);
-      this.remove(this.buttonRetire);
+      if (!this.isSimulator) {
+        this.remove(this.buttonBack);
+        this.remove(this.buttonRetire);
+      }
       let topText;
       let bottomText;
       let textAlign;
@@ -339,7 +342,7 @@ class PopupLeaderboard extends Popup {
     this.with.setVisible(this.isEnded);
     this.finishedReward.setVisible(this.isEnded && this.isUserActive);
     this.ethIcon.setVisible(this.isEnded && this.isUserActive);
-    this.nextSeason.setVisible(this.isEnded);
+    this.nextSeason.setVisible(this.isEnded && !this.isSimulator);
   }
 
   updateLeaderboard(leaderboard) {
