@@ -109,6 +109,10 @@ export const updateUserWarDeployment = async ({
   const gamePlay = await getUserGamePlay(userId);
   if (!gamePlay) throw new Error('Gameplay doesnt exist');
 
+  const { numberOfMachines } = gamePlay;
+  const totalDeployedMachines = numberOfMachinesToEarn + numberOfMachinesToAttack + numberOfMachinesToDefend;
+  if (totalDeployedMachines > numberOfMachines) throw new Error('Bad request: invalid number of machines');
+
   await firestore
     .collection('gamePlay')
     .doc(gamePlay.id)
