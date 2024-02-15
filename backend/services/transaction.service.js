@@ -32,6 +32,18 @@ export const initTransaction = async ({ userId, type, ...data }) => {
 
   if (type !== 'withdraw' && data.token !== 'NFT' && activeSeason.status !== 'open') throw new Error('Season ended');
 
+  if (type === 'buy-machine') {
+    if (data.amount > activeSeason.machine.maxPerBatch) throw new Error('Bad request: over max per batch');
+  }
+
+  if (type === 'buy-worker') {
+    if (data.amount > activeSeason.worker.maxPerBatch) throw new Error('Bad request: over max per batch');
+  }
+
+  if (type === 'buy-building') {
+    if (data.amount > activeSeason.building.maxPerBatch) throw new Error('Bad request: over max per batch');
+  }
+
   const {
     machine,
     machineSold,
