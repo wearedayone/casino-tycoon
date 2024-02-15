@@ -242,7 +242,7 @@ const DepositUser = () => {
                   bgcolor: '#104DFD',
                 },
               }}
-              onClick={() => !isDepositing && setAmount(Number(formatter.format(balance)))}>
+              onClick={() => !isDepositing && setAmount(Number(formatter.format(balance)).toString())}>
               Max
             </Button>
           </Box>

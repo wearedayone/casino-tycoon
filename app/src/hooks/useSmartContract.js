@@ -353,9 +353,10 @@ const useSmartContract = () => {
     const { tokenAddress, wethAddress, routerContract, swapReceivePercent } = await getSwapContractInfo();
 
     const amountIn = parseEther(`${ethAmount}`);
+    console.log({ tokenAddress, wethAddress, routerContract, swapReceivePercent, amountIn, ROUTER_ADDRESS });
     const res = await routerContract.getAmountsOut(amountIn, [wethAddress, tokenAddress]);
     const amount = Number(formatEther(res[1]).toString()) * swapReceivePercent;
-
+    console.log({ res, amount, routerContract });
     const tradingFee = Number(formatEther(res[1]).toString()) - amount;
     const tradingFeeInUSD = tradingFee * parseFloat(tokenPrice);
 

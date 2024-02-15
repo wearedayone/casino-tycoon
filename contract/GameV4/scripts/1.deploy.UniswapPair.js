@@ -7,7 +7,7 @@ const routerArtifact = require('@uniswap/v2-periphery/build/UniswapV2Router02.js
 const pairArtifact = require('@uniswap/v2-periphery/build/IUniswapV2Pair.json');
 const WETH9 = require('../WETH9.json');
 
-const _fiatAddress = '0x74d285da90a98C8247aA5A07906735bD8Db5F9f4';
+const _fiatAddress = '0x5d65b9C3f33999979b440c31e2694890dD571791';
 const _factoryAddress = '0xD7b9d88D97d1A542fB57fB276D6532145cb8fF3f';
 const _wethAddress = '0x19c6b88868343c38538C6a1709b4cBc9cb8011aa';
 const _routerAddress = '0x1255050930Be7b365Ee93e091ff9C2c633471c02';
