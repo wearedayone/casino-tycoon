@@ -314,7 +314,7 @@ class PopupWarHistoryDetail extends Popup {
       .text(
         this.popup.width * 0.13 + targetDefenseItemIcon.width / 2 + 30,
         y,
-        `Target Defense: ${attackResults?.[0]?.defendUnits || 0}`,
+        `Target Defense: ${formatter.format(attackResults?.[0]?.defendUnits) || 0}`,
         {
           fontSize: '50px',
           color: colors.black,
