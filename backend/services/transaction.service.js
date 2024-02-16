@@ -567,7 +567,7 @@ export const claimToken = async ({ userId }) => {
   console.log('Claim token');
   const userSnapshot = await firestore.collection('user').doc(userId).get();
   const activeSeason = await getActiveSeason();
-  if (activeSeason.status !== 'open') throw new Error('Season ended');
+  if (activeSeason.status !== 'open') throw new Error('API error: Season ended');
 
   if (userSnapshot.exists) {
     const { address, tokenBalance } = userSnapshot.data();
