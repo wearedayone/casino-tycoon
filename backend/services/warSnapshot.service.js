@@ -1,16 +1,14 @@
 import moment from 'moment';
-import fs from 'fs';
+import { parseEther } from '@ethersproject/units';
 
 import admin, { firestore } from '../configs/firebase.config.js';
-import logger from '../utils/logger.js';
 import { getActiveSeasonId, getActiveSeason } from './season.service.js';
-import { calculateGeneratedReward, initTransaction, validateNonWeb3Transaction } from './transaction.service.js';
-import { claimTokenBatch, burnNFT as burnNFTTask, burnGoon as burnGoonTask } from './worker.service.js';
+import { initTransaction, validateNonWeb3Transaction } from './transaction.service.js';
+import { claimTokenBatch, burnNFT as burnNFTTask } from './worker.service.js';
 import { getUserUsernames } from './user.service.js';
-import { parseEther } from '@ethersproject/units';
 import { getUserGamePlay } from './gamePlay.service.js';
-
-const BONUS_LIMIT = 0.5;
+import logger from '../utils/logger.js';
+import { getAccurate } from '../utils/math.js';
 
 export const getLatestWar = async (userId) => {
   const snapshot = await firestore.collection('warSnapshot').orderBy('createdAt', 'desc').limit(1).get();
@@ -179,7 +177,8 @@ export const generateDailyWarSnapshot = async () => {
     } = warConfig;
 
     const users = gamePlays.reduce((result, gamePlay) => {
-      const earnUnits = workerBonusMultiple * gamePlay.numberOfWorkers + gamePlay.warDeployment.numberOfMachinesToEarn;
+      const earnUnits =
+        getAccurate(workerBonusMultiple * gamePlay.numberOfWorkers) + gamePlay.warDeployment.numberOfMachinesToEarn;
 
       console.log(gamePlay.userId);
       if (!gamePlay.userId.startsWith('did:privy:')) return result;
@@ -199,7 +198,8 @@ export const generateDailyWarSnapshot = async () => {
           earnUnits,
           attackUnits: gamePlay.warDeployment.numberOfMachinesToAttack,
           defendUnits:
-            buildingBonusMultiple * gamePlay.numberOfBuildings + gamePlay.warDeployment.numberOfMachinesToDefend,
+            getAccurate(buildingBonusMultiple * gamePlay.numberOfBuildings) +
+            gamePlay.warDeployment.numberOfMachinesToDefend,
           attackUserId: gamePlay.warDeployment.attackUserId,
           tokenEarnFromEarning: tokenRewardPerEarner * earnUnits,
           tokenEarnFromAttacking: 0, // havent been calculated at this time
