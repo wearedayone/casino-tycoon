@@ -37,12 +37,15 @@ const createGamePlayIfNotExist = async (userId, isWhitelisted) => {
       active: false,
       isWhitelisted,
       whitelistAmountMinted: 0,
-      warDeployment: {
-        numberOfMachinesToEarn: 0,
-        numberOfMachinesToAttack: 0,
-        numberOfMachinesToDefend: 0,
-        attackUserId: null,
-      },
+    });
+
+    await firestore.collection('warDeployment').add({
+      userId,
+      seasonId: season.id,
+      numberOfMachinesToEarn: 0,
+      numberOfMachinesToAttack: 0,
+      numberOfMachinesToDefend: 0,
+      attackUserId: null,
     });
   }
 };

@@ -5,6 +5,7 @@ import {
   getAllActiveGamePlay,
   updateUserWarDeployment,
   updateUserWarAttackUser,
+  getUserWarDeployment,
 } from '../services/gamePlay.service.js';
 import logger from '../utils/logger.js';
 
@@ -78,6 +79,18 @@ export const updateUserWarAttack = async (req, res) => {
       ...req.body,
     });
     return res.sendStatus(200);
+  } catch (err) {
+    console.error(err);
+    logger.error(err.message);
+    const message = err.message.startsWith('API error') ? err.message : 'Something is wrong';
+    return res.status(400).send(message);
+  }
+};
+
+export const getWarDeployment = async (req, res) => {
+  try {
+    const data = await getUserWarDeployment(req.userId);
+    return res.status(200).send(data);
   } catch (err) {
     console.error(err);
     logger.error(err.message);

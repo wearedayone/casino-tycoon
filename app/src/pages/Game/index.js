@@ -60,6 +60,7 @@ const Game = () => {
   const [loaded, setLoaded] = useState(false);
   const profile = useUserStore((state) => state.profile);
   const gamePlay = useUserStore((state) => state.gamePlay);
+  const reloadWarDeployment = useUserStore((state) => state.reloadWarDeployment);
   const activeSeason = useSystemStore((state) => state.activeSeason);
   const configs = useSystemStore((state) => state.configs);
   const market = useSystemStore((state) => state.market);
@@ -92,6 +93,15 @@ const Game = () => {
   const { workerSoldLast24h, buildingSoldLast24h, updateNow } = useSalesLast24h();
 
   const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  const reloadUserWarDeployment = async () => {
+    try {
+      await reloadWarDeployment();
+    } catch (err) {
+      console.error(err);
+      Sentry.captureException(err);
+    }
+  };
 
   // useEffect(() => {
   //   if (!!embeddedWallet) {
@@ -976,6 +986,7 @@ const Game = () => {
       gameRef.current?.events.on('update-war-machines', (data) => {
         updateUserWarMachines(data)
           .then(() => gameRef.current?.events.emit('update-war-machines-completed', data))
+          .then(reloadUserWarDeployment)
           .catch((err) => {
             console.error(err);
             Sentry.captureException(err);
@@ -1006,6 +1017,7 @@ const Game = () => {
           .then(() => {
             gameRef.current?.events.emit('update-war-attack-completed');
           })
+          .then(reloadUserWarDeployment)
           .catch((err) => {
             console.error(err);
             Sentry.captureException(err);

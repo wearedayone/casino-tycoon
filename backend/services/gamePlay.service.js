@@ -113,17 +113,20 @@ export const updateUserWarDeployment = async ({
   const totalDeployedMachines = numberOfMachinesToEarn + numberOfMachinesToAttack + numberOfMachinesToDefend;
   if (totalDeployedMachines > numberOfMachines) throw new Error('API error: Bad request - invalid number of machines');
 
-  await firestore
-    .collection('gamePlay')
-    .doc(gamePlay.id)
-    .update({
-      warDeployment: {
-        ...(gamePlay.warDeployment || {}),
-        numberOfMachinesToEarn,
-        numberOfMachinesToAttack,
-        numberOfMachinesToDefend,
-      },
-    });
+  const snapshot = await admin
+    .firestore()
+    .collection('warDeployment')
+    .where('userId', '==', userId)
+    .where('seasonId', '==', gamePlay.seasonId)
+    .limit(1)
+    .get();
+  if (snapshot.empty) throw new Error('API error: War deployment doesnt exist');
+
+  await snapshot.docs[0].ref.update({
+    numberOfMachinesToEarn,
+    numberOfMachinesToAttack,
+    numberOfMachinesToDefend,
+  });
 };
 
 export const updateUserWarAttackUser = async ({ userId, attackUserId }) => {
@@ -134,8 +137,29 @@ export const updateUserWarAttackUser = async ({ userId, attackUserId }) => {
   const gamePlay = await getUserGamePlay(userId);
   if (!gamePlay) throw new Error('API error: Gameplay doesnt exist');
 
-  await firestore
-    .collection('gamePlay')
-    .doc(gamePlay.id)
-    .update({ warDeployment: { ...(gamePlay.warDeployment || {}), attackUserId } });
+  const snapshot = await admin
+    .firestore()
+    .collection('warDeployment')
+    .where('userId', '==', userId)
+    .where('seasonId', '==', gamePlay.seasonId)
+    .limit(1)
+    .get();
+  if (snapshot.empty) throw new Error('API error: War deployment doesnt exist');
+
+  await snapshot.docs[0].ref.update({ attackUserId });
+};
+
+export const getUserWarDeployment = async (userId) => {
+  const seasonId = await getActiveSeasonId();
+
+  const snapshot = await admin
+    .firestore()
+    .collection('warDeployment')
+    .where('userId', '==', userId)
+    .where('seasonId', '==', seasonId)
+    .limit(1)
+    .get();
+  if (snapshot.empty) return null;
+
+  return snapshot.docs[0].data();
 };

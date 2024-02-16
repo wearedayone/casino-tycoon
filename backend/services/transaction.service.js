@@ -401,6 +401,7 @@ const updateUserGamePlay = async (userId, transactionId) => {
   };
 
   let gamePlayData = {};
+  let warDeploymentData = {};
   switch (type) {
     case 'buy-machine':
       // gamePlayData = { numberOfMachines: admin.firestore.FieldValue.increment(amount) };
@@ -446,10 +447,9 @@ const updateUserGamePlay = async (userId, transactionId) => {
 
       gamePlayData = {
         numberOfMachines: admin.firestore.FieldValue.increment(-machinesDeadCount),
-        warDeployment: {
-          ...warDeployment,
-          numberOfMachinesToAttack: warDeployment.numberOfMachinesToAttack - machinesDeadCount,
-        },
+      };
+      warDeploymentData = {
+        numberOfMachinesToAttack: warDeployment.numberOfMachinesToAttack - machinesDeadCount,
       };
       break;
     case 'retire':
@@ -458,12 +458,12 @@ const updateUserGamePlay = async (userId, transactionId) => {
       assets.numberOfWorkers = 0;
       gamePlayData = {
         ...assets,
-        warDeployment: {
-          numberOfMachinesToEarn: 0,
-          numberOfMachinesToAttack: 0,
-          numberOfMachinesToDefend: 0,
-          attackUserId: null,
-        },
+      };
+      warDeploymentData = {
+        numberOfMachinesToEarn: 0,
+        numberOfMachinesToAttack: 0,
+        numberOfMachinesToDefend: 0,
+        attackUserId: null,
       };
       break;
     default:
@@ -479,6 +479,21 @@ const updateUserGamePlay = async (userId, transactionId) => {
 
   const isGamePlayChanged = Object.keys(gamePlayData).length > 0;
   if (isGamePlayChanged) await userGamePlay.ref.update({ ...gamePlayData });
+
+  const isWarDeploymentChanged = Object.keys(warDeploymentData).length > 0;
+  if (isWarDeploymentChanged) {
+    const warDeploymentSnapshot = await admin
+      .firestore()
+      .collection('warDeployment')
+      .where('userId', '==', userId)
+      .where('seasonId', '==', activeSeason.id)
+      .limit(1)
+      .get();
+
+    if (!warDeploymentSnapshot.empty) {
+      await warDeploymentSnapshot.docs[0].ref.update({ ...warDeploymentData });
+    }
+  }
 };
 
 const sendUserBonus = async (userId, transactionId) => {

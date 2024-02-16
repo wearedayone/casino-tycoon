@@ -287,7 +287,10 @@ const useSimulatorGameListener = () => {
 
   useEffect(() => {
     if (gameRef) {
-      gameRef.events.emit('simulator-update-eth-balance', { address: user.address, ETHBalance: balances.ETHBalance });
+      gameRef.events.emit('simulator-update-eth-balance', {
+        address: user?.address || '',
+        ETHBalance: balances.ETHBalance,
+      });
     }
   }, [balances.ETHBalance]);
 
