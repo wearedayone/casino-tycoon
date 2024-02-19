@@ -80,7 +80,7 @@ class TutorialScene extends Phaser.Scene {
     }); // done
     this.add.existing(this.popupDeposit);
 
-    this.popupDepositETH = new PopupDepositETH(this, { onClose: endTutorial });
+    this.popupDepositETH = new PopupDepositETH(this, { isSimulator: true, onClose: endTutorial });
     this.add.existing(this.popupDepositETH);
 
     this.popupBuy = new PopupBuy(this, width - 335, 1600); // done

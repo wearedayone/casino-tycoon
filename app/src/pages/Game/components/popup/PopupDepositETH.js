@@ -9,9 +9,15 @@ const { width, height } = configs;
 class PopupDepositETH extends Popup {
   code = '-----';
 
-  constructor(scene, { onClose } = {}) {
+  constructor(scene, { isSimulator, onClose } = {}) {
     super(scene, 'popup-small', { title: 'Deposit ETH' });
     this.cleanup = onClose;
+    this.isSimulator = isSimulator;
+
+    this.events = {
+      requestDepositCode: isSimulator ? 'simulator-request-deposit-code' : 'request-deposit-code',
+      updateDepositCode: isSimulator ? 'simulator-update-deposit-code' : 'update-deposit-code',
+    };
 
     const leftMargin = this.popup.x - this.popup.width / 2;
     const startingY = this.popup.y - this.popup.height / 2;
@@ -56,14 +62,14 @@ class PopupDepositETH extends Popup {
     );
     this.add(buttonBack);
 
-    scene.game.events.on('update-deposit-code', (code) => {
+    scene.game.events.on(this.events.updateDepositCode, (code) => {
       this.code = code;
       depositCode.text = `${code[0]} ${code[1]} ${code[2]}  ${code[3]} ${code[4]} ${code[5]}`;
     });
   }
 
   onOpen() {
-    this.scene.game.events.emit('request-deposit-code');
+    this.scene.game.events.emit(this.events.requestDepositCode);
   }
 }
 
