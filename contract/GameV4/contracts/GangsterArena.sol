@@ -9,18 +9,20 @@ import './libs/SafeMath.sol';
 import './libs/SafeTransferLib.sol';
 import './libs/SignedSafeMath.sol';
 
+import 'hardhat/console.sol';
+
 contract GangsterArena is AccessControl, IGangsterArena {
   using SafeMath for uint256;
   using SignedSafeMath for int256;
   using SafeTransferLib for address payable;
 
   // NFT token
-  Gangster public tokenNFT;
+  Gangster public nft;
   // Fiat token
-  FIAT public tokenFiat;
+  FIAT public fiat;
 
   // Signer address
-  address private signerAddress;
+  address private signer;
 
   /// Roles
   // Worker role - process game transaction
@@ -32,16 +34,15 @@ contract GangsterArena is AccessControl, IGangsterArena {
   // Marketing role - withdraw marketing fee
   bytes32 public constant MARKETING_ROLE = keccak256('MARKETING_ROLE');
   // NFT base price
-  uint256 public BASE_PRICE = 0.001 ether;
+  uint256 public bPrice_ = 0.002 ether; // base price
 
-  // NFT price for whitelisted
-  uint256 public BASE_PRICE_WL = 0.001 ether;
+  uint256 public bpwl_ = 0.001 ether; // NFT price for whitelisted
 
   // Referral reward
-  uint256 public BASE_REFERRAL = 1000;
+  uint256 public refReward_ = 1000;
 
   // Referral discount
-  uint256 public BASE_REFERRAL_DISCOUNT = 9000;
+  uint256 public refDiscount_ = 9000;
 
   // Dev fee - over 10000
   uint256 public DEV_PERCENT = 500;
@@ -51,6 +52,8 @@ contract GangsterArena is AccessControl, IGangsterArena {
   uint256 public PRIZE_PERCENT = 6000;
   // Retire pool value percentage - over 10000
   uint256 public RETIRE_PERCENT = 3000;
+
+  uint256 public vtd = 1000; // valid timestamp different
 
   // Value dev spent - use to calculate
   int256 public devDebt;
@@ -65,13 +68,14 @@ contract GangsterArena is AccessControl, IGangsterArena {
   bool public gameClosed;
   bool public lockNFT;
 
-  // // Max supply of NFT
-  // mapping(uint256 => uint256) public tokenMaxSupply;
-  // mapping(address => bool) public mintedAddess;
-  // // Wallet whitelist minted
-  // mapping(address => uint256) public mintedAddessWL;
-  // NFT when user deposit
-  mapping(address => uint256) public gangster;
+  // mapping(address => uint256) public goon; // address -> number of goon
+  // mapping(address => uint256) public safehouse; // address -> number of safehouse
+  uint256 public tgoon; // total goon bought
+  uint256 public tshouse; // total safehouse bought
+  uint256 public tgangster; // total gangster deposited
+
+  uint256 public tPBalance; // total prize balance when game end
+  uint256 public totalPoint; // total allocation points, use when calculate prize
   // Nonces of transaction
   mapping(uint256 => bool) usedNonces;
 
@@ -83,9 +87,9 @@ contract GangsterArena is AccessControl, IGangsterArena {
     address _gangsterAddress,
     address payable _fiatAddress
   ) {
-    tokenNFT = Gangster(_gangsterAddress);
-    tokenFiat = FIAT(_fiatAddress);
-    signerAddress = _signerAddress;
+    nft = Gangster(_gangsterAddress);
+    fiat = FIAT(_fiatAddress);
+    signer = _signerAddress;
 
     _grantRole(DEFAULT_ADMIN_ROLE, _defaultAdmin);
     _grantRole(ADMIN_ROLE, _adminAddress);
@@ -145,16 +149,24 @@ contract GangsterArena is AccessControl, IGangsterArena {
   /**
    * @notice Normal buy gangster
    */
-  function mint(uint256 tokenId, uint256 amount, uint256 bonus, uint256 nonce, bytes memory sig) public payable {
-    require(msg.value >= BASE_PRICE * amount, 'Need to send more ether');
+  function mint(
+    uint256 tokenId,
+    uint256 amount,
+    uint256 bonus,
+    uint256 time,
+    uint256 nonce,
+    bytes memory sig
+  ) public payable {
+    require(msg.value >= bPrice_ * amount, 'Need to send more ether');
     require(!gameClosed, 'Game is closed');
+    require(block.timestamp - time < vtd, 'Invalid timestamp');
     require(!usedNonces[nonce], 'Invalid nonce');
-    bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender, tokenId, amount, bonus, nonce)));
+    bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender, tokenId, amount, bonus, time, nonce, 'mint')));
     require(verifyAddressSigner(message, sig), 'Invalid signature');
-    tokenNFT.mintOnBehalf(msg.sender, tokenId, amount);
-    gangster[msg.sender] += amount;
+    nft.mintOnBehalf(msg.sender, tokenId, amount);
+    tgangster += amount;
     usedNonces[nonce] = true;
-    tokenFiat.mint(msg.sender, bonus);
+    fiat.mint(msg.sender, bonus);
     emit Mint(msg.sender, tokenId, amount, nonce);
   }
 
@@ -165,63 +177,103 @@ contract GangsterArena is AccessControl, IGangsterArena {
     uint256 tokenId,
     uint256 amount,
     uint256 bonus,
-    uint256 nonce,
     address referral,
+    uint256 time,
+    uint256 nonce,
     bytes memory sig
   ) public payable {
     // require whitelisted for genesis token
     require(!usedNonces[nonce], 'Invalid nonce');
-    bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender, tokenId, amount, bonus, nonce, referral)));
+    require(block.timestamp - time < vtd, 'Invalid timestamp');
+    bytes32 message = prefixed(
+      keccak256(abi.encodePacked(msg.sender, tokenId, amount, bonus, referral, time, nonce, 'mintReferral'))
+    );
     require(verifyAddressSigner(message, sig), 'Invalid signature');
-    require(msg.value >= (BASE_PRICE * BASE_REFERRAL_DISCOUNT * amount) / 10000, 'Need to send more ether');
+    require(msg.value >= (bPrice_ * refDiscount_ * amount) / 10000, 'Need to send more ether');
     require(!gameClosed, 'Game is closed');
-    tokenNFT.mintOnBehalf(msg.sender, tokenId, amount);
-    gangster[msg.sender] += amount;
+    nft.mintOnBehalf(msg.sender, tokenId, amount);
+    tgangster += amount;
     usedNonces[nonce] = true;
-    payable(referral).safeTransferETH((msg.value * BASE_REFERRAL) / 10000);
-    tokenFiat.mint(msg.sender, bonus);
+    payable(referral).safeTransferETH((msg.value * refReward_) / 10000);
+    fiat.mint(msg.sender, bonus);
     emit Mint(msg.sender, tokenId, amount, nonce);
   }
 
   /**
    * @notice Buy gangster with referral
    */
-  function mintWL(uint256 tokenId, uint256 amount, uint256 bonus, uint256 nonce, bytes memory sig) public payable {
+  function mintWL(
+    uint256 tokenId,
+    uint256 amount,
+    uint256 bonus,
+    uint256 time,
+    uint256 nonce,
+    bytes memory sig
+  ) public payable {
     // require whitelisted for genesis token
-    require(msg.value >= BASE_PRICE_WL * amount, 'Need to send more ether');
+    require(msg.value >= bpwl_ * amount, 'Need to send more ether');
     require(!gameClosed, 'Game is closed');
+    require(block.timestamp - time < vtd, 'Invalid timestamp');
     require(!usedNonces[nonce], 'Invalid nonce');
-    bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender, tokenId, amount, bonus, nonce)));
+    bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender, tokenId, amount, bonus, time, nonce, 'mintWL')));
     require(verifyAddressSigner(message, sig), 'Invalid signature');
-    tokenNFT.mintWLOnBehalf(msg.sender, tokenId, amount);
-    gangster[msg.sender] += amount;
+    nft.mintWLOnBehalf(msg.sender, tokenId, amount);
+    tgangster += amount;
     usedNonces[nonce] = true;
-    tokenFiat.mint(msg.sender, bonus);
+    fiat.mint(msg.sender, bonus);
     emit Mint(msg.sender, tokenId, amount, nonce);
   }
 
   /**
    * @notice Buy Goon
    */
-  function buyGoon(uint256 amount, uint256 value, uint256 nonce, bytes memory sig) public {
+  function buyGoon(
+    uint256 amount,
+    uint256 value,
+    uint256 totalGoon,
+    uint256 time,
+    uint256 nonce,
+    bytes memory sig
+  ) public {
     require(!gameClosed, 'Game is closed');
+    require(totalGoon == tgoon, 'Invalid total Goon');
+    require(block.timestamp - time < vtd, 'Invalid timestamp');
     require(!usedNonces[nonce], 'Nonce is used');
-    bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender, amount, value, nonce)));
+    bytes32 message = prefixed(
+      keccak256(abi.encodePacked(msg.sender, amount, value, totalGoon, time, nonce, 'buyGoon'))
+    );
     require(verifyAddressSigner(message, sig), 'Invalid signature');
-    tokenFiat.burnFrom(msg.sender, value);
+    fiat.burnFrom(msg.sender, value);
     usedNonces[nonce] = true;
+    // goon[msg.sender] += amount;
+    tgoon += amount;
     emit BuyGoon(msg.sender, amount, nonce);
   }
 
   /**
    * @notice Buy Safehouse
    */
-  function buySafeHouse(uint256 amount, uint256 value, uint256 nonce, bytes memory sig) public {
+  function buySafeHouse(
+    uint256 amount,
+    uint256 value,
+    uint256 totalSafehouse,
+    uint256 time,
+    uint256 nonce,
+    bytes memory sig
+  ) public {
     require(!gameClosed, 'Game is closed');
-    bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender, amount, value, nonce)));
+    require(totalSafehouse == tshouse, 'Invalid total Safehouse');
+    require(block.timestamp - time < vtd, 'Invalid timestamp');
+    require(!usedNonces[nonce], 'Nonce is used');
+
+    bytes32 message = prefixed(
+      keccak256(abi.encodePacked(msg.sender, amount, value, totalSafehouse, time, nonce, 'buySafeHouse'))
+    );
     require(verifyAddressSigner(message, sig), 'Invalid signature');
-    tokenFiat.burnFrom(msg.sender, value);
+    fiat.burnFrom(msg.sender, value);
     usedNonces[nonce] = true;
+    // safehouse[msg.sender] += amount;
+    tshouse += amount;
     emit BuySafeHouse(msg.sender, amount, nonce);
   }
 
@@ -230,8 +282,7 @@ contract GangsterArena is AccessControl, IGangsterArena {
    */
   function depositNFT(address to, uint256 tokenId, uint256 amount) public {
     require(!gameClosed, 'Game is closed');
-    tokenNFT.safeTransferFrom(msg.sender, address(this), tokenId, amount, '');
-    gangster[to] += amount;
+    nft.depositNFT(to, tokenId, amount);
     emit Deposit(to, tokenId, amount);
   }
 
@@ -240,22 +291,28 @@ contract GangsterArena is AccessControl, IGangsterArena {
    */
   function withdrawNFT(address to, uint256 tokenId, uint256 amount) public {
     require(!lockNFT, 'NFT is locked');
-    require(gangster[msg.sender] >= amount, 'Insufficient balance');
-    tokenNFT.safeTransferFrom(address(this), to, tokenId, amount, '');
-    gangster[msg.sender] -= amount;
+    console.log('withdrawNFT', msg.sender);
+    console.log('withdrawNFT', to);
+
+    nft.withdrawNFT(msg.sender, to, tokenId, amount);
+    tgangster -= amount;
     emit Withdraw(msg.sender, tokenId, amount);
   }
 
-  function retired(uint256 reward, uint256 nonce, bytes memory sig) public {
+  function retired(uint256 reward, uint256 _nGangster, uint256 nonce, bytes memory sig) public {
     require(!gameClosed, 'Game is closed');
+    uint numberOfGangster = nft.gangster(msg.sender);
+    require(numberOfGangster > _nGangster, 'Invalid number of gangster');
+    require(!usedNonces[nonce], 'Nonce is used');
     require(getRetireBalance() >= reward, 'Invalid reward');
-    bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender, reward, nonce)));
+
+    bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender, reward, _nGangster, nonce)));
     require(verifyAddressSigner(message, sig), 'Invalid signature');
-    tokenNFT.burn(address(this), 1, gangster[msg.sender]);
-    gangster[msg.sender] = 0;
+    nft.retired(msg.sender, _nGangster);
     address payable receiver = payable(msg.sender);
     receiver.transfer(reward);
     retireDebt += int256(reward);
+    usedNonces[nonce] = true;
     emit Retire(msg.sender, reward, nonce);
   }
 
@@ -268,19 +325,9 @@ contract GangsterArena is AccessControl, IGangsterArena {
     uint256[] memory amount
   ) public onlyRole(WORKER_ROLE) {
     require(!gameClosed, 'Game is closed');
-    require(to.length == tokenId.length && tokenId.length == amount.length, 'Input array is not match');
-    // bytes32 message = prefixed(keccak256(abi.encodePacked(to, tokenId, amount)));
-    // require(verifyAddressSigner(message, sig), 'Invalid signature');
 
-    for (uint256 i = 0; i < to.length; i++) {
-      require(gangster[to[i]] >= amount[i], 'Invalid amount to burn');
-    }
-
-    uint256 total = reduce(amount);
-    tokenNFT.burn(address(this), tokenId[0], total);
-    for (uint256 i = 0; i < to.length; i++) {
-      gangster[to[i]] -= amount[i];
-    }
+    nft.burnNFT(to, tokenId, amount);
+    // tgangster -= total;
     emit Burn(to, tokenId, amount);
   }
 
@@ -288,16 +335,13 @@ contract GangsterArena is AccessControl, IGangsterArena {
    * @notice update winners and payout
    */
   function setWinner(address[] memory to, uint256[] memory points) public onlyRole(WORKER_ROLE) {
-    require(gameClosed, 'Game is not closed');
+    require(gameClosed && tPBalance > 0 && totalPoint > 0, 'Game is not closed');
     require(address(this).balance > 0, 'Nothing to withdraw');
     require(to.length == points.length, 'Invalid input array length');
 
-    uint256 total = reduce(points);
-    require(total > 0, 'Invalid points input');
-    uint256 totalBalance = getPrizeBalance() + getRetireBalance();
     for (uint256 i = 0; i < to.length; i++) {
       address payable receiver = payable(to[i]);
-      uint256 reward = (totalBalance * points[i]) / total;
+      uint256 reward = (tPBalance * points[i]) / totalPoint;
       if (reward > 0) receiver.transfer(reward);
     }
   }
@@ -305,8 +349,10 @@ contract GangsterArena is AccessControl, IGangsterArena {
   /**
    * @notice set game close status
    */
-  function setGameClosed(bool value) public onlyRole(WORKER_ROLE) {
+  function setGameClosed(bool value, uint256 _totalPoint) public onlyRole(WORKER_ROLE) {
     gameClosed = value;
+    tPBalance = getPrizeBalance() + getRetireBalance();
+    totalPoint = _totalPoint;
   }
 
   /**
@@ -314,19 +360,6 @@ contract GangsterArena is AccessControl, IGangsterArena {
    */
   function setLockNFT(bool value) public onlyRole(WORKER_ROLE) {
     lockNFT = value;
-  }
-
-  /**
-   * @notice ERC1155 receiver
-   */
-  function onERC1155Received(
-    address operator,
-    address from,
-    uint256 id,
-    uint256 value,
-    bytes calldata data
-  ) external returns (bytes4) {
-    return bytes4(keccak256('onERC1155Received(address,address,uint256,uint256,bytes)'));
   }
 
   /**
@@ -377,28 +410,28 @@ contract GangsterArena is AccessControl, IGangsterArena {
    * @notice set Base Price Gangster
    */
   function setBasePrice(uint256 _basePrice) public onlyRole(ADMIN_ROLE) {
-    BASE_PRICE = _basePrice;
+    bPrice_ = _basePrice;
   }
 
   /**
    * @notice set Base Price of Gangster for Whitelisted
    */
   function setBasePriceWL(uint256 _basePrice) public onlyRole(ADMIN_ROLE) {
-    BASE_PRICE_WL = _basePrice;
+    bpwl_ = _basePrice;
   }
 
   /**
    * @notice set Base Referral /10000
    */
   function setBaseReferral(uint256 _refferral) public onlyRole(ADMIN_ROLE) {
-    BASE_REFERRAL = _refferral;
+    refReward_ = _refferral;
   }
 
   /**
    * @notice set Base Referral Discount /10000
    */
   function setBaseReferralDiscount(uint256 refferral_discount) public onlyRole(ADMIN_ROLE) {
-    BASE_REFERRAL_DISCOUNT = refferral_discount;
+    refDiscount_ = refferral_discount;
   }
 
   /**
@@ -423,7 +456,7 @@ contract GangsterArena is AccessControl, IGangsterArena {
    * @notice Verify signature
    */
   function verifyAddressSigner(bytes32 message, bytes memory sig) internal view returns (bool) {
-    return signerAddress == recoverSignerFromSignature(message, sig);
+    return signer == recoverSignerFromSignature(message, sig);
   }
 
   //function to get the public address of the signer

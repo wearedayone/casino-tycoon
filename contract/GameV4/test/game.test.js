@@ -115,20 +115,22 @@ describe('Gangster Arena', function () {
       );
       const nftPrice = 69000000000000000n;
       await token.mint(owner.address, nftPrice);
+      const timestamp = Math.floor(Date.now() / 1000);
 
       const message = ethers.solidityPackedKeccak256(
         // Array of types: declares the data types in the message.
-        ['address', 'uint256', 'uint256', 'uint256', 'uint256'],
+        ['address', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'string'],
         // Array of values: actual values of the parameters to be hashed.
-        [owner.address, 1, 10, 1, 1]
+        [owner.address, 1, 10, 1, timestamp, 1, 'mint']
       );
       const signature = await owner.signMessage(ethers.toBeArray(message));
-
-      await GangsterArenaContract.mint(1, 10, 1, 1, signature, { from: owner.address, value: nftPrice * 10n });
-
-      const balance = await GangsterNFTContract.balanceOf(await GangsterArenaContract.getAddress(), 1);
+      await GangsterArenaContract.mint(1, 10, 1, timestamp, 1, signature, {
+        from: owner.address,
+        value: nftPrice * 10n,
+      });
+      const balance = await GangsterNFTContract.balanceOf(await GangsterNFTContract.getAddress(), 1);
       expect(balance).to.be.equal(10);
-      const gangsterCount = await GangsterArenaContract.gangster(owner.address);
+      const gangsterCount = await GangsterNFTContract.gangster(owner.address);
       expect(gangsterCount).to.be.equal(10);
     });
   });
@@ -138,26 +140,37 @@ describe('Gangster Arena', function () {
       const { GangsterNFTContract, GangsterArenaContract, token, owner, acc1 } = await loadFixture(
         deployStakingFixture
       );
-      const nftPrice = 1000000000000000n;
+      const nftPrice = 2000000000000000n;
+      let timestamp = Math.floor(Date.now() / 1000);
       const message1 = ethers.solidityPackedKeccak256(
         // Array of types: declares the data types in the message.
-        ['address', 'uint256', 'uint256', 'uint256', 'uint256'],
+        ['address', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'string'],
         // Array of values: actual values of the parameters to be hashed.
-        [owner.address, 1, 10, 1, 1]
+        [owner.address, 1, 10, 1, timestamp, 1, 'mint']
       );
       const signature1 = await owner.signMessage(ethers.toBeArray(message1));
 
-      await GangsterArenaContract.mint(1, 10, 1, 1, signature1, { from: owner.address, value: nftPrice * 10n });
+      await GangsterArenaContract.mint(1, 10, 1, timestamp, 1, signature1, {
+        from: owner.address,
+        value: nftPrice * 10n,
+      });
 
-      const gangsterCount = await GangsterArenaContract.gangster(owner.address);
+      const gangsterCount = await GangsterNFTContract.gangster(owner.address);
       expect(gangsterCount).to.be.equal(10);
+      console.log('we are here', {
+        GangsterNFTContract: await GangsterNFTContract.getAddress(),
+        GangsterArenaContract: await GangsterArenaContract.getAddress(),
+      });
       await GangsterArenaContract.withdrawNFT(acc1.address, 1, 4);
-      const balance = await GangsterNFTContract.balanceOf(await GangsterArenaContract.getAddress(), 1);
+      console.log('we are here');
+      const balance = await GangsterNFTContract.balanceOf(await GangsterNFTContract.getAddress(), 1);
       expect(balance).to.be.equal(6);
 
       const balance1 = await GangsterNFTContract.balanceOf(acc1.address, 1);
       expect(balance1).to.be.equal(4);
+      console.log('we are here');
       await GangsterNFTContract.connect(acc1).setApprovalForAll(await GangsterArenaContract.getAddress(), true);
+      console.log('we are here');
       await GangsterArenaContract.connect(acc1).depositNFT(owner.address, 1, 3);
       await GangsterArenaContract.connect(acc1).depositNFT(acc1.address, 1, 1);
       const balance2 = await GangsterNFTContract.balanceOf(acc1.address, 1);
@@ -170,16 +183,17 @@ describe('Gangster Arena', function () {
         token: [],
         amount: [],
       };
-
       for (let i = 0; i < 100; i++) {
+        timestamp = Math.floor(Date.now() / 1000);
+        console.log({ i, timestamp });
         const message = ethers.solidityPackedKeccak256(
           // Array of types: declares the data types in the message.
-          ['address', 'uint256', 'uint256', 'uint256', 'uint256'],
+          ['address', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'string'],
           // Array of values: actual values of the parameters to be hashed.
-          [acc1.address, 1, 25, i, i + 2]
+          [acc1.address, 1, 25, i, timestamp, i + 2, 'mint']
         );
         const signature = await owner.signMessage(ethers.toBeArray(message));
-        await GangsterArenaContract.connect(acc1).mint(1, 25, i, i + 2, signature, {
+        await GangsterArenaContract.connect(acc1).mint(1, 25, i, timestamp, i + 2, signature, {
           from: acc1.address,
           value: nftPrice * 25n,
         });
@@ -188,16 +202,7 @@ describe('Gangster Arena', function () {
         data.amount.push(25);
       }
 
-      let message = ethers.solidityPackedKeccak256(
-        // Array of types: declares the data types in the message.
-        ['address[]', 'uint256[]', 'uint256[]'],
-        // Array of values: actual values of the parameters to be hashed.
-        [data.address, data.token, data.amount]
-      );
-      let signature = await owner.signMessage(ethers.toBeArray(message));
-
-      await GangsterArenaContract.burnNFT(data.address, data.token, data.amount, signature);
-      await GangsterArenaContract.burnGoon(data.address, data.amount);
+      await GangsterArenaContract.burnNFT(data.address, data.token, data.amount);
 
       const balance4 = await GangsterNFTContract.balanceOf(await GangsterArenaContract.getAddress(), 1);
       expect(balance4).to.be.equal(10);
@@ -211,16 +216,16 @@ describe('Gangster Arena', function () {
       const { GangsterNFTContract, GangsterArenaContract, token, owner, acc1 } = await loadFixture(
         deployStakingFixture
       );
-
+      let timestamp = Math.floor(Date.now() / 1000);
       const message = ethers.solidityPackedKeccak256(
         // Array of types: declares the data types in the message.
-        ['address', 'uint256', 'uint256', 'uint256', 'uint256'],
+        ['address', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'string'],
         // Array of values: actual values of the parameters to be hashed.
-        [acc1.address, 1, 2, 3, 4]
+        [acc1.address, 1, 2, 3, timestamp, 4, 'mintWL']
       );
       const signature = await owner.signMessage(ethers.toBeArray(message));
 
-      await GangsterArenaContract.connect(acc1).mintWL(1, 2, 3, 4, signature, {
+      await GangsterArenaContract.connect(acc1).mintWL(1, 2, 3, timestamp, 4, signature, {
         from: acc1.address,
         value: nftPrice * 2n,
       });
@@ -231,16 +236,16 @@ describe('Gangster Arena', function () {
       expect(balance).to.be.equal(2);
       const gangsterCount = await GangsterArenaContract.gangster(acc1.address);
       expect(gangsterCount).to.be.equal(2);
-
+      timestamp = Math.floor(Date.now() / 1000);
       const message1 = ethers.solidityPackedKeccak256(
         // Array of types: declares the data types in the message.
-        ['address', 'uint256', 'uint256', 'uint256', 'uint256'],
+        ['address', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'string'],
         // Array of values: actual values of the parameters to be hashed.
-        [acc1.address, 1, 3, 3, 3]
+        [acc1.address, 1, 3, 3, timestamp, 3, 'mintWL']
       );
       const signature1 = await owner.signMessage(ethers.toBeArray(message1));
 
-      await GangsterArenaContract.connect(acc1).mintWL(1, 3, 3, 3, signature1, {
+      await GangsterArenaContract.connect(acc1).mintWL(1, 3, 3, timestamp, 3, signature1, {
         from: acc1.address,
         value: nftPrice * 3n,
       });
@@ -262,26 +267,30 @@ describe('Gangster Arena', function () {
         deployStakingFixture
       );
       const GAAddress = await GangsterArenaContract.getAddress();
+      let tgoon = await GangsterArenaContract.tgoon();
+      let timestamp = Math.floor(Date.now() / 1000);
 
       let message = ethers.solidityPackedKeccak256(
         // Array of types: declares the data types in the message.
-        ['address', 'uint256', 'uint256', 'uint256'],
+        ['address', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'string'],
         // Array of values: actual values of the parameters to be hashed.
-        [acc1.address, 1, 1005n * BASE_18, 111]
+        [acc1.address, 1, 1005n * BASE_18, tgoon, timestamp, 111, 'buyGoon']
       );
       let signature = await owner.signMessage(ethers.toBeArray(message));
       await token.connect(acc1).approve(GAAddress, 1005000n * BASE_18);
-      await GangsterArenaContract.connect(acc1).buyGoon(1, 1005n * BASE_18, 111, signature);
+      await GangsterArenaContract.connect(acc1).buyGoon(1, 1005n * BASE_18, tgoon, timestamp, 111, signature);
 
+      tgoon = await GangsterArenaContract.tgoon();
+      timestamp = Math.floor(Date.now() / 1000);
       message = ethers.solidityPackedKeccak256(
         // Array of types: declares the data types in the message.
-        ['address', 'uint256', 'uint256', 'uint256'],
+        ['address', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'string'],
         // Array of values: actual values of the parameters to be hashed.
-        [acc1.address, 1, 10005n * BASE_18, 123456]
+        [acc1.address, 1, 10005n * BASE_18, tgoon, timestamp, 123456, 'buyGoon']
       );
       signature = await owner.signMessage(ethers.toBeArray(message));
 
-      await GangsterArenaContract.connect(acc1).buyGoon(1, 10005n * BASE_18, 123456, signature);
+      await GangsterArenaContract.connect(acc1).buyGoon(1, 10005n * BASE_18, tgoon, timestamp, 123456, signature);
     });
   });
 });

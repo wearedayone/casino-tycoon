@@ -32,7 +32,14 @@ interface IGangsterArena {
    * public mint when user buy gangster NFT
    *
    */
-  function mint(uint256 tokenId, uint256 amount, uint256 bonus, uint256 nonce, bytes memory sig) external payable;
+  function mint(
+    uint256 tokenId,
+    uint256 amount,
+    uint256 bonus,
+    uint256 time,
+    uint256 nonce,
+    bytes memory sig
+  ) external payable;
 
   /**
    * public referral mint when user buy gangster NFT
@@ -41,15 +48,23 @@ interface IGangsterArena {
     uint256 tokenId,
     uint256 amount,
     uint256 bonus,
-    uint256 nonce,
     address referral,
+    uint256 time,
+    uint256 nonce,
     bytes memory sig
   ) external payable;
 
   /**
    * Whitelist mint when user buy gangster NFT
    */
-  function mintWL(uint256 tokenId, uint256 amount, uint256 bonus, uint256 nonce, bytes memory sig) external payable;
+  function mintWL(
+    uint256 tokenId,
+    uint256 amount,
+    uint256 bonus,
+    uint256 time,
+    uint256 nonce,
+    bytes memory sig
+  ) external payable;
 
   /**
    * user deposit gangster NFTs
@@ -69,5 +84,5 @@ interface IGangsterArena {
   /**
    * user retire game
    */
-  function retired(uint256 reward, uint256 nonce, bytes memory sig) external;
+  function retired(uint256 reward, uint256 nGangster, uint256 nonce, bytes memory sig) external;
 }

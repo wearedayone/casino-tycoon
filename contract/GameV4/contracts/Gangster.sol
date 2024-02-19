@@ -9,6 +9,8 @@ import './ERC2981Base.sol';
 import './libs/SafeMath.sol';
 import './libs/SignedSafeMath.sol';
 
+import 'hardhat/console.sol';
+
 contract Gangster is ERC1155, AccessControl, ERC1155Burnable, ERC1155Supply, ERC2981Base {
   using SafeMath for uint256;
   using SignedSafeMath for int256;
@@ -28,6 +30,9 @@ contract Gangster is ERC1155, AccessControl, ERC1155Burnable, ERC1155Supply, ERC
   mapping(address => bool) public mintedAddess;
   // Wallet whitelist minted
   mapping(address => uint256) public mintedAddessWL;
+
+  // NFT when user deposit
+  mapping(address => uint256) public gangster; // address -> number of gangster
 
   constructor(address defaultAdmin, address minter) ERC1155('') {
     _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
@@ -103,9 +108,58 @@ contract Gangster is ERC1155, AccessControl, ERC1155Burnable, ERC1155Supply, ERC
     require(amount <= MAX_PER_BATCH, 'Max per batch reached');
     require(totalSupply(tokenId) + amount <= tokenMaxSupply[tokenId], 'Max supply reached');
 
-    _mint(msg.sender, tokenId, amount, '');
+    _mint(address(this), tokenId, amount, '');
+    gangster[sender] += amount;
 
     if (!mintedAddess[sender]) mintedAddess[sender] = true;
+  }
+
+  /**
+   * @notice depositNFT
+   */
+  function depositNFT(address addr, uint256 tokenId, uint256 amount) public onlyRole(MINTER_ROLE) {
+    safeTransferFrom(addr, address(this), tokenId, amount, '');
+    gangster[addr] += amount;
+  }
+
+  /**
+   * @notice withdrawNFT
+   */
+  function withdrawNFT(address addr, address to, uint256 tokenId, uint256 amount) public onlyRole(MINTER_ROLE) {
+    require(gangster[addr] >= amount, 'Insufficient balance');
+    console.log('check', address(this));
+    console.log('check', to);
+    safeTransferFrom(address(this), to, tokenId, amount, '');
+    gangster[addr] -= amount;
+  }
+
+  function retired(address addr, uint256 _nGangster) public onlyRole(MINTER_ROLE) {
+    require(gangster[addr] >= _nGangster, 'Insufficient balance');
+    burn(address(this), 1, gangster[addr]);
+    gangster[addr] = 0;
+  }
+
+  /**
+   * @notice Burn NFT for gangwar
+   */
+  function burnNFT(
+    address[] memory to,
+    uint256[] memory tokenId,
+    uint256[] memory amount
+  ) public onlyRole(MINTER_ROLE) {
+    require(to.length == tokenId.length && tokenId.length == amount.length, 'Input array is not match');
+    // bytes32 message = prefixed(keccak256(abi.encodePacked(to, tokenId, amount)));
+    // require(verifyAddressSigner(message, sig), 'Invalid signature');
+
+    for (uint256 i = 0; i < to.length; i++) {
+      require(gangster[to[i]] >= amount[i], 'Invalid amount to burn');
+    }
+
+    uint256 total = reduce(amount);
+    burn(address(this), tokenId[0], total);
+    for (uint256 i = 0; i < to.length; i++) {
+      gangster[to[i]] -= amount[i];
+    }
   }
 
   // The following functions are overrides required by Solidity.
@@ -138,5 +192,28 @@ contract Gangster is ERC1155, AccessControl, ERC1155Burnable, ERC1155Supply, ERC
     bytes4 interfaceId
   ) public view virtual override(ERC1155, AccessControl, ERC2981Base) returns (bool) {
     return super.supportsInterface(interfaceId);
+  }
+
+  /**
+   * @notice ERC1155 receiver
+   */
+  function onERC1155Received(
+    address operator,
+    address from,
+    uint256 id,
+    uint256 value,
+    bytes calldata data
+  ) external returns (bytes4) {
+    return bytes4(keccak256('onERC1155Received(address,address,uint256,uint256,bytes)'));
+  }
+
+  /**
+   * @notice sum of array
+   */
+  function reduce(uint256[] memory arr) internal pure returns (uint256 result) {
+    for (uint256 i = 0; i < arr.length; i++) {
+      result += arr[i];
+    }
+    return result;
   }
 }
