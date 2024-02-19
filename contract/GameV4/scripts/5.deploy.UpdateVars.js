@@ -9,8 +9,8 @@ const {
   referral,
 } = gameConfigs;
 
-const _nftAddress = '0xC854C9d4A2f9E9FCf862b2e2FD338f23d28DEC9a';
-const _gaAddress = '0x2495f495254Cd893E0Ad620cEa31f8b192fb8236';
+const _nftAddress = '0xF4629A9846090212195E00953bf3990f6F056DBB';
+const _gaAddress = '0x9B0547dbA904100dDfaDf8aF28834209a762A54f';
 
 async function main() {
   const GangsterNFT = await ethers.getContractAt('Gangster', _nftAddress);
@@ -43,7 +43,7 @@ async function main() {
 
   if (machine.basePrice) {
     console.log('update basePrice');
-    const res = await GangsterArena.BASE_PRICE();
+    const res = await GangsterArena.bPrice_();
     const currentBasePrice = Number(formatEther(res));
     if (machine.basePrice !== currentBasePrice) {
       console.log(
@@ -57,7 +57,7 @@ async function main() {
 
   if (machine.whitelistPrice) {
     console.log('update basePriceWL');
-    const res = await GangsterArena.BASE_PRICE_WL();
+    const res = await GangsterArena.bpwl_();
     const currentBasePriceWL = Number(formatEther(res));
     if (machine.whitelistPrice !== currentBasePriceWL) {
       console.log(
@@ -117,7 +117,7 @@ async function main() {
     console.log('update referral');
     if (referral.referralBonus) {
       console.log('update referral bonus');
-      const res = await GangsterArena.BASE_REFERRAL();
+      const res = await GangsterArena.refReward_();
       const currentReferralBonus = Number(res.toString());
       if (referral.referralBonus * 10000 !== currentReferralBonus) {
         console.log(
@@ -132,7 +132,7 @@ async function main() {
 
     if (referral.referralDiscount) {
       console.log('update referral discount');
-      const res = await GangsterArena.BASE_REFERRAL_DISCOUNT();
+      const res = await GangsterArena.refDiscount_();
       const currentReferralDiscount = Number(res.toString());
       if ((1 - referral.referralDiscount) * 10000 !== currentReferralDiscount) {
         console.log(

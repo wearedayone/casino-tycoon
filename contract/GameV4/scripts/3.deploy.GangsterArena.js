@@ -11,8 +11,8 @@ const routerArtifact = require('@uniswap/v2-periphery/build/UniswapV2Router02.js
 const pairArtifact = require('@uniswap/v2-periphery/build/IUniswapV2Pair.json');
 const WETH9 = require('../WETH9.json');
 
-const _nftAddress = '0xC854C9d4A2f9E9FCf862b2e2FD338f23d28DEC9a';
-const _fiatAddress = '0x5d65b9C3f33999979b440c31e2694890dD571791';
+const _nftAddress = '0xF4629A9846090212195E00953bf3990f6F056DBB';
+const _fiatAddress = '0xee98C96A1DA54D2d86fda0B3BD03D0F57D524212';
 
 async function main() {
   // const _defaultAdmin = '0xd97612bD2272eDc1F66BbA99666C6a0fAa6046F4';
