@@ -528,6 +528,13 @@ const Game = () => {
         });
         gameRef.current.events.emit('update-deposit-code', profile.code);
       });
+      gameRef.current?.events.on('simulator-request-deposit-code', () => {
+        checkUserCode().catch((err) => {
+          console.error(err);
+          Sentry.captureException(err);
+        });
+        gameRef.current.events.emit('simulator-update-deposit-code', profile.code);
+      });
       gameRef.current?.events.on('request-eth-balance', async () => {
         try {
           const newBalance = await getETHBalance(address);
@@ -1267,6 +1274,7 @@ const Game = () => {
   useEffect(() => {
     if (profile?.code) {
       gameRef.current.events.emit('update-deposit-code', profile?.code);
+      gameRef.current.events.emit('simulator-update-deposit-code', profile?.code);
     }
   }, [profile?.code]);
 
