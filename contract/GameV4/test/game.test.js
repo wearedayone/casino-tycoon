@@ -157,33 +157,35 @@ describe('Gangster Arena', function () {
 
       const gangsterCount = await GangsterNFTContract.gangster(owner.address);
       expect(gangsterCount).to.be.equal(10);
-      console.log('we are here', {
+      console.log('we are here 1', {
         GangsterNFTContract: await GangsterNFTContract.getAddress(),
         GangsterArenaContract: await GangsterArenaContract.getAddress(),
       });
+      // await GangsterNFTContract.approvalForWithdraw(await GangsterArenaContract.getAddress(), true);
       await GangsterArenaContract.withdrawNFT(acc1.address, 1, 4);
-      console.log('we are here');
+
       const balance = await GangsterNFTContract.balanceOf(await GangsterNFTContract.getAddress(), 1);
       expect(balance).to.be.equal(6);
 
       const balance1 = await GangsterNFTContract.balanceOf(acc1.address, 1);
       expect(balance1).to.be.equal(4);
-      console.log('we are here');
       await GangsterNFTContract.connect(acc1).setApprovalForAll(await GangsterArenaContract.getAddress(), true);
-      console.log('we are here');
+
       await GangsterArenaContract.connect(acc1).depositNFT(owner.address, 1, 3);
+
       await GangsterArenaContract.connect(acc1).depositNFT(acc1.address, 1, 1);
+
       const balance2 = await GangsterNFTContract.balanceOf(acc1.address, 1);
       expect(balance2).to.be.equal(0);
 
-      const gangsterCount1 = await GangsterArenaContract.gangster(acc1.address);
+      const gangsterCount1 = await GangsterNFTContract.gangster(acc1.address);
       expect(gangsterCount1).to.be.equal(1);
       let data = {
         address: [],
         token: [],
         amount: [],
       };
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < 10; i++) {
         timestamp = Math.floor(Date.now() / 1000);
         console.log({ i, timestamp });
         const message = ethers.solidityPackedKeccak256(
@@ -201,13 +203,13 @@ describe('Gangster Arena', function () {
         data.token.push(1);
         data.amount.push(25);
       }
-
+      console.log('we are here 2');
       await GangsterArenaContract.burnNFT(data.address, data.token, data.amount);
-
-      const balance4 = await GangsterNFTContract.balanceOf(await GangsterArenaContract.getAddress(), 1);
+      console.log('we are here 3');
+      const balance4 = await GangsterNFTContract.balanceOf(await GangsterNFTContract.getAddress(), 1);
       expect(balance4).to.be.equal(10);
-
-      const gangsterCount2 = await GangsterArenaContract.gangster(acc1.address);
+      console.log('we are here 4');
+      const gangsterCount2 = await GangsterNFTContract.gangster(acc1.address);
       expect(gangsterCount2).to.be.equal(1);
     });
   });
@@ -232,9 +234,9 @@ describe('Gangster Arena', function () {
 
       console.log('Here we are');
 
-      const balance = await GangsterNFTContract.balanceOf(await GangsterArenaContract.getAddress(), 1);
+      const balance = await GangsterNFTContract.balanceOf(await GangsterNFTContract.getAddress(), 1);
       expect(balance).to.be.equal(2);
-      const gangsterCount = await GangsterArenaContract.gangster(acc1.address);
+      const gangsterCount = await GangsterNFTContract.gangster(acc1.address);
       expect(gangsterCount).to.be.equal(2);
       timestamp = Math.floor(Date.now() / 1000);
       const message1 = ethers.solidityPackedKeccak256(

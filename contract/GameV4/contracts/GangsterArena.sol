@@ -282,7 +282,7 @@ contract GangsterArena is AccessControl, IGangsterArena {
    */
   function depositNFT(address to, uint256 tokenId, uint256 amount) public {
     require(!gameClosed, 'Game is closed');
-    nft.depositNFT(to, tokenId, amount);
+    nft.depositNFT(msg.sender, to, tokenId, amount);
     emit Deposit(to, tokenId, amount);
   }
 
@@ -320,15 +320,15 @@ contract GangsterArena is AccessControl, IGangsterArena {
    * @notice Burn NFT for gangwar
    */
   function burnNFT(
-    address[] memory to,
+    address[] memory addr,
     uint256[] memory tokenId,
     uint256[] memory amount
   ) public onlyRole(WORKER_ROLE) {
     require(!gameClosed, 'Game is closed');
 
-    nft.burnNFT(to, tokenId, amount);
+    nft.burnNFT(addr, tokenId, amount);
     // tgangster -= total;
-    emit Burn(to, tokenId, amount);
+    emit Burn(addr, tokenId, amount);
   }
 
   /**
@@ -376,9 +376,9 @@ contract GangsterArena is AccessControl, IGangsterArena {
   }
 
   /**
-  ***************************
-  Marketing withdraw to burn token (ADMIN_ROLE)
-  ***************************
+   * ***************************
+   * Marketing withdraw to burn token (ADMIN_ROLE)
+   * ***************************
    */
 
   function markettingWithdraw() public onlyRole(MARKETING_ROLE) {

@@ -117,9 +117,16 @@ contract Gangster is ERC1155, AccessControl, ERC1155Burnable, ERC1155Supply, ERC
   /**
    * @notice depositNFT
    */
-  function depositNFT(address addr, uint256 tokenId, uint256 amount) public onlyRole(MINTER_ROLE) {
-    safeTransferFrom(addr, address(this), tokenId, amount, '');
+  function depositNFT(address from, address addr, uint256 tokenId, uint256 amount) public onlyRole(MINTER_ROLE) {
+    _safeTransferFrom(from, address(this), tokenId, amount, '');
     gangster[addr] += amount;
+  }
+
+  /**
+   * @dev See {IERC1155-setApprovalForAll}.
+   */
+  function approvalForWithdraw(address operator, bool approved) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    _setApprovalForAll(address(this), operator, approved);
   }
 
   /**
@@ -129,8 +136,20 @@ contract Gangster is ERC1155, AccessControl, ERC1155Burnable, ERC1155Supply, ERC
     require(gangster[addr] >= amount, 'Insufficient balance');
     console.log('check', address(this));
     console.log('check', to);
-    safeTransferFrom(address(this), to, tokenId, amount, '');
+    _safeTransferFrom(address(this), to, tokenId, amount, '');
     gangster[addr] -= amount;
+  }
+
+  /**
+   * @notice withdrawNFT
+   */
+  function withdrawNFT1(address to, uint256 tokenId, uint256 amount) public {
+    require(gangster[msg.sender] >= amount, 'Insufficient balance');
+    console.log('check', msg.sender);
+    console.log('check', to);
+    console.log('isApprovedForAll', isApprovedForAll(address(this), msg.sender));
+    safeTransferFrom(address(this), to, tokenId, amount, '');
+    gangster[msg.sender] -= amount;
   }
 
   function retired(address addr, uint256 _nGangster) public onlyRole(MINTER_ROLE) {
@@ -143,22 +162,22 @@ contract Gangster is ERC1155, AccessControl, ERC1155Burnable, ERC1155Supply, ERC
    * @notice Burn NFT for gangwar
    */
   function burnNFT(
-    address[] memory to,
+    address[] memory addr,
     uint256[] memory tokenId,
     uint256[] memory amount
   ) public onlyRole(MINTER_ROLE) {
-    require(to.length == tokenId.length && tokenId.length == amount.length, 'Input array is not match');
+    require(addr.length == tokenId.length && tokenId.length == amount.length, 'Input array is not match');
     // bytes32 message = prefixed(keccak256(abi.encodePacked(to, tokenId, amount)));
     // require(verifyAddressSigner(message, sig), 'Invalid signature');
 
-    for (uint256 i = 0; i < to.length; i++) {
-      require(gangster[to[i]] >= amount[i], 'Invalid amount to burn');
+    for (uint256 i = 0; i < addr.length; i++) {
+      require(gangster[addr[i]] >= amount[i], 'Invalid amount to burn');
     }
 
     uint256 total = reduce(amount);
-    burn(address(this), tokenId[0], total);
-    for (uint256 i = 0; i < to.length; i++) {
-      gangster[to[i]] -= amount[i];
+    _burn(address(this), tokenId[0], total);
+    for (uint256 i = 0; i < addr.length; i++) {
+      gangster[addr[i]] -= amount[i];
     }
   }
 
