@@ -42,8 +42,6 @@ const takeSeasonLeaderboardSnapshot = async () => {
 
     // freeze season state
     const seasonRef = firestore.collection('season').doc(activeSeasonId);
-    await seasonRef.update({ status: 'closed' });
-    await setGameClosed(true);
 
     const { rankPrizePool, reputationPrizePool } = await getActiveSeason();
 
@@ -69,14 +67,16 @@ const takeSeasonLeaderboardSnapshot = async () => {
         };
       });
 
+    const winners = winnerAllocations.map(({ address }) => address);
+    const points = winnerAllocations.map(({ prizeShare }) => Math.round(prizeShare * Math.pow(10, 6))); // eliminate decimals
+    const totalPoints = points.reduce((sum, point) => sum + point, 0);
     // save snapshot to firestore
     // TODO: use event listener to update for accurate prizeValue
     logger.info(`winnerAllocations: ${JSON.stringify(winnerAllocations)}`);
-    await seasonRef.update({ winnerSnapshot: winnerAllocations });
+    await seasonRef.update({ status: 'closed', winnerSnapshot: winnerAllocations });
+    await setGameClosed(true, totalPoints);
 
     // call on-chain `setWinner` method
-    const winners = winnerAllocations.map(({ address }) => address);
-    const points = winnerAllocations.map(({ prizeShare }) => Math.round(prizeShare * Math.pow(10, 6))); // eliminate decimals
     await setWinner({ winners, points });
   } catch (ex) {
     logger.error(ex);

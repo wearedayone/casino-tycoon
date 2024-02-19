@@ -239,7 +239,7 @@ export const burnGoon = async ({ addresses, amounts }) => {
   }
 };
 
-export const setGameClosed = async (isGameClosed) => {
+export const setGameClosed = async (isGameClosed, totalPoints) => {
   let txnHash = '';
   try {
     logger.info('start setGameClosed');
@@ -247,7 +247,7 @@ export const setGameClosed = async (isGameClosed) => {
     const workerWallet = await getWorkerWallet();
     const gameContract = await getGameContract(workerWallet);
     logger.info('start Transaction:');
-    const tx = await gameContract.setGameClosed(Boolean(isGameClosed));
+    const tx = await gameContract.setGameClosed(Boolean(isGameClosed), totalPoints);
     logger.info('Transaction:' + tx.hash);
     txnHash = tx.hash;
     const receipt = await tx.wait();
