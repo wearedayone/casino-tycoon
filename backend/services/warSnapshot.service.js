@@ -1,5 +1,6 @@
 import moment from 'moment';
 import { parseEther } from '@ethersproject/units';
+import chunk from 'lodash.chunk';
 
 import admin, { firestore } from '../configs/firebase.config.js';
 import { getActiveSeasonId, getActiveSeason } from './season.service.js';
@@ -149,17 +150,26 @@ export const generateDailyWarSnapshot = async () => {
       .get();
 
     const attackers = {};
-    const gamePlays = gamePlaySnapshot.docs.map((doc) => {
-      const attackUserId = doc.data().warDeployment.attackUserId;
+    const gamePlays = [];
+    for (const doc of gamePlaySnapshot.docs) {
+      const thisUserId = doc.data().userId;
+      const warDeploymentSnapshot = await firestore
+        .collection('warDeployment')
+        .where('seasonId', '==', seasonId)
+        .where('userId', '==', thisUserId)
+        .limit(1)
+        .get();
+      const warDeployment = warDeploymentSnapshot.docs[0]?.data() || {};
+      const attackUserId = warDeployment.attackUserId;
       if (attackUserId) {
         attackers[attackUserId] = [
           ...(attackers[attackUserId] || []),
-          { userId: doc.data().userId, attackUnits: doc.data().warDeployment.numberOfMachinesToAttack },
+          { userId: doc.data().userId, attackUnits: warDeployment.numberOfMachinesToAttack },
         ];
       }
 
-      return { id: doc.id, ...doc.data() };
-    });
+      gamePlays.push({ id: doc.id, ...doc.data(), warDeployment });
+    }
 
     // create warSnapshot
     const todayDateString = moment().format('YYYYMMDD-HHmmss');
@@ -177,10 +187,11 @@ export const generateDailyWarSnapshot = async () => {
     } = warConfig;
 
     const users = gamePlays.reduce((result, gamePlay) => {
+      // console.log(gamePlay, gamePlay.userId, gamePlay.warDeployment);
+
       const earnUnits =
         getAccurate(workerBonusMultiple * gamePlay.numberOfWorkers) + gamePlay.warDeployment.numberOfMachinesToEarn;
 
-      console.log(gamePlay.userId);
       if (!gamePlay.userId.startsWith('did:privy:')) return result;
 
       return {
@@ -313,7 +324,12 @@ export const generateDailyWarSnapshot = async () => {
 
     // fs.writeFileSync('../test.json', JSON.stringify({ users, bonusUsers, penaltyUsers }), { encoding: 'utf-8' });
 
-    await burnMachinesLost(penaltyUsers);
+    // chunk to burn NFT
+    // burn nft 20 users per time
+    const chunkedPenaltyUsers = chunk(penaltyUsers, 20);
+    // console.log({ chunkedPenaltyUsers });
+    const burnMachineLostPromises = chunkedPenaltyUsers.map((pUsers) => burnMachinesLost(pUsers));
+    await Promise.all(burnMachineLostPromises);
     await claimWarReward(bonusUsers);
 
     logger.info('\n---------finish taking daily war snapshot--------\n\n');

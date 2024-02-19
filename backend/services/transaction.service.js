@@ -391,9 +391,17 @@ const updateUserGamePlay = async (userId, transactionId) => {
     .where('seasonId', '==', activeSeason.id)
     .limit(1)
     .get();
+  const warDeploymentSnapshot = await firestore
+    .collection('warDeployment')
+    .where('seasonId', '==', activeSeason.id)
+    .where('userId', '==', userId)
+    .limit(1)
+    .get();
+
   const userGamePlay = gamePlaySnapshot.docs[0];
+  const warDeployment = warDeploymentSnapshot.docs[0]?.data() || {};
   logger.debug(`userGamePlay before update: ${JSON.stringify(userGamePlay.data())}`);
-  const { numberOfWorkers, numberOfMachines, numberOfBuildings, warDeployment } = userGamePlay.data();
+  const { numberOfWorkers, numberOfMachines, numberOfBuildings } = userGamePlay.data();
   const assets = {
     numberOfBuildings,
     numberOfMachines,
