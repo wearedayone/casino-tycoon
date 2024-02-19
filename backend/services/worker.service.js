@@ -329,32 +329,32 @@ export const signMessage = async (message) => {
   return signature;
 };
 
-export const signMessageBuyGoon = async ({ address, amount, value, nonce }) => {
+export const signMessageBuyGoon = async ({ address, amount, value, totalAmount, time, nonce, mintFunction }) => {
   const signerWallet = await getSignerWallet();
   console.log({ address, amount, value: value.toString(), nonce });
   let message = ethers.solidityPackedKeccak256(
     // Array of types: declares the data types in the message.
-    ['address', 'uint256', 'uint256', 'uint256'],
+    ['address', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'string'],
     // Array of values: actual values of the parameters to be hashed.
-    [address, amount, value.toString(), nonce]
+    [address, amount, value.toString(), totalAmount, time, nonce, mintFunction]
   );
 
   const signature = await signerWallet.signMessage(ethers.toBeArray(message));
   return signature;
 };
 
-export const signMessageBuyGangster = async ({ address, amount, nonce, bonus, referral }) => {
+export const signMessageBuyGangster = async ({ address, amount, bonus, referral, time, nonce, mintFunction }) => {
   const signerWallet = await getSignerWallet();
   console.log({ address, amount, nonce, referral });
 
   // Array of types: declares the data types in the message.
-  const types = ['address', 'uint256', 'uint256', 'uint256', 'uint256'];
+  const types = ['address', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'string'];
   // Array of values: actual values of the parameters to be hashed.
-  const values = [address, 1, amount, BigInt(parseEther(bonus.toString()).toString()), nonce];
+  const values = [address, 1, amount, BigInt(parseEther(bonus.toString()).toString()), time, nonce, mintFunction];
 
   if (referral) {
-    types.push('address');
-    values.push(referral);
+    types.splice(4, 0, 'address');
+    values.splice(4, 0, referral);
   }
 
   let message = ethers.solidityPackedKeccak256(types, values);

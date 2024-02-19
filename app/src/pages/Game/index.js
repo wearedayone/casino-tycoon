@@ -320,8 +320,8 @@ const Game = () => {
     try {
       const res = await create({ type: 'buy-building', amount: quantity });
       console.log(res);
-      const { amount, value, nonce, signature, currentSold } = res.data;
-      const receipt = await buySafeHouse({ amount, value, totalSafehouse: currentSold, nonce, signature });
+      const { amount, value, time, nonce, signature, currentSold } = res.data;
+      const receipt = await buySafeHouse({ amount, value, totalSafehouse: currentSold, time, nonce, signature });
 
       if (receipt.status !== 1) {
         throw new Error('Transaction failed');
@@ -336,8 +336,8 @@ const Game = () => {
   const buyWorker = async (quantity) => {
     try {
       const res = await create({ type: 'buy-worker', amount: quantity });
-      const { amount, value, nonce, signature, currentSold } = res.data;
-      const receipt = await buyGoon({ amount, value, totalGoon: currentSold, nonce, signature });
+      const { amount, value, time, nonce, signature, currentSold } = res.data;
+      const receipt = await buyGoon({ amount, value, totalGoon: currentSold, time, nonce, signature });
       if (receipt.status !== 1) {
         throw new Error('Transaction failed');
       }
@@ -350,9 +350,18 @@ const Game = () => {
 
   const buyGangster = async (quantity, mintFunction) => {
     try {
-      const res = await create({ type: 'buy-machine', amount: quantity });
-      const { id, amount, value, nonce, bonusAmount, signature, referrerAddress } = res.data;
-      const receipt = await buyMachine({ amount, value, nonce, bonusAmount, signature, referrerAddress, mintFunction });
+      const res = await create({ type: 'buy-machine', amount: quantity, mintFunction });
+      const { id, amount, value, bonusAmount, signature, referrerAddress, time, nonce } = res.data;
+      const receipt = await buyMachine({
+        amount,
+        value,
+        time,
+        nonce,
+        bonusAmount,
+        signature,
+        referrerAddress,
+        mintFunction,
+      });
       if (receipt.status === 1) {
         await validate({ transactionId: id, txnHash: receipt.transactionHash });
         return receipt.transactionHash;

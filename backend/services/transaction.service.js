@@ -197,14 +197,20 @@ export const initTransaction = async ({ userId, type, ...data }) => {
     console.log('init txn', txnData);
     const userData = await firestore.collection('user').doc(userId).get();
     if (userData.exists) {
+      const time = Math.floor(Date.now() / 1000);
+      const mintFunction = type === 'buy-worker' ? 'buyGoon' : 'buySafeHouse';
+
       const { address } = userData.data();
       const signature = await signMessageBuyGoon({
         address: address,
         amount: txnData.amount,
         value: parseEther(txnData.value + ''),
-        nonce: nonce,
+        totalAmount: txnData.currentSold,
+        time,
+        nonce,
+        mintFunction,
       });
-      return { id: newTransaction.id, ...transaction, signature };
+      return { id: newTransaction.id, ...transaction, time, signature };
     }
   }
 
@@ -212,15 +218,18 @@ export const initTransaction = async ({ userId, type, ...data }) => {
     const userData = await firestore.collection('user').doc(userId).get();
     if (userData.exists) {
       const { address } = userData.data();
+      const time = Math.floor(Date.now() / 1000);
       const signedData = {
         address,
         amount: txnData.amount,
         bonus: txnData.bonusAmount,
+        time,
         nonce,
+        mintFunction: data.mintFunction,
       };
       if (txnData.referrerAddress) signedData.referral = txnData.referrerAddress;
       const signature = await signMessageBuyGangster(signedData);
-      return { id: newTransaction.id, ...transaction, signature };
+      return { id: newTransaction.id, ...transaction, time, signature };
     }
   }
   if (type === 'retire') {

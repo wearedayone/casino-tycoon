@@ -89,7 +89,7 @@ const useSmartContract = () => {
     }
   };
 
-  const buyMachine = async ({ amount, value, nonce, bonusAmount, referrerAddress, signature, mintFunction }) => {
+  const buyMachine = async ({ amount, value, time, nonce, bonusAmount, referrerAddress, signature, mintFunction }) => {
     console.log('Start buyMachine');
     if (!loadedAssets) return;
     const privyProvider = await embeddedWallet.getEthereumProvider();
@@ -97,7 +97,6 @@ const useSmartContract = () => {
 
     // eslint-disable-next-line no-undef
     const bonusBigint = BigInt(parseEther(bonusAmount.toString()).toString());
-    const time = Math.floor(Date.now() / 1000);
     let params = [1, amount, bonusBigint, time, nonce, signature];
     if (mintFunction === 'mintReferral') {
       if (!referrerAddress) mintFunction = 'mint';
@@ -126,7 +125,7 @@ const useSmartContract = () => {
     return receipt;
   };
 
-  const buyGoon = async ({ amount, value, totalGoon, nonce, signature }) => {
+  const buyGoon = async ({ amount, value, totalGoon, time, nonce, signature }) => {
     if (!loadedAssets) return;
     const privyProvider = await embeddedWallet.getEthereumProvider();
     const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
@@ -152,7 +151,6 @@ const useSmartContract = () => {
 
     // eslint-disable-next-line no-undef
     const valueBigint = BigInt(parseEther(value + '').toString());
-    const time = Math.floor(Date.now() / 1000);
     const data = gameContract.interface.encodeFunctionData('buyGoon', [
       amount,
       valueBigint,
@@ -174,7 +172,7 @@ const useSmartContract = () => {
     return receipt;
   };
 
-  const buySafeHouse = async ({ amount, value, totalSafehouse, nonce, signature }) => {
+  const buySafeHouse = async ({ amount, value, totalSafehouse, time, nonce, signature }) => {
     if (!loadedAssets) return;
     const privyProvider = await embeddedWallet.getEthereumProvider();
     const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
@@ -200,7 +198,6 @@ const useSmartContract = () => {
 
     // eslint-disable-next-line no-undef
     const valueBigint = BigInt(parseEther(value + '').toString());
-    const time = Math.floor(Date.now() / 1000);
     const data = gameContract.interface.encodeFunctionData('buySafeHouse', [
       amount,
       valueBigint,

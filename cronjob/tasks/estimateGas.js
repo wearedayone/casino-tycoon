@@ -18,29 +18,54 @@ const estimateGasPrice = async () => {
     const systemData = await firestore.collection('system').doc('data').get();
     const { nonce } = systemData.data();
 
-    const { machine } = await getActiveSeason();
+    const { machine, workerSold, buildingSold } = await getActiveSeason();
 
     // amount = 0 since worker wallet has no fiat balance -> contract throws err if amount > 0
     const fiatBuyValue = parseEther('0');
 
+    const time = Math.floor(Date.now() / 1000);
+
     const machineSignature = await signMessageBuyGangster({
       address: SYSTEM_ADDRESS,
       amount: 1,
+      time,
       nonce,
       bonus: 0,
     });
-    const workerOrBuildingSignature = await signMessageBuyGoon({
+    const workerSignature = await signMessageBuyGoon({
       address: SYSTEM_ADDRESS,
       amount: 0,
       value: fiatBuyValue,
+      totalAmount: workerSold,
+      time,
       nonce,
+      mintFunction: 'buyGoon',
     });
-    const buyWorkerOrBuildingParams = [0, BigInt(fiatBuyValue.toString()), nonce, workerOrBuildingSignature];
+    const buildingSignature = await signMessageBuyGoon({
+      address: SYSTEM_ADDRESS,
+      amount: 0,
+      value: fiatBuyValue,
+      totalAmount: buildingSold,
+      time,
+      nonce,
+      mintFunction: 'buySafeHouse',
+    });
 
     const [mint, buyGoon, buySafeHouse] = await Promise.all([
-      estimateTxnFee({ functionName: 'mint', params: [1, 1, 0, nonce, machineSignature], value: machine.basePrice }),
-      estimateTxnFee({ functionName: 'buyGoon', params: buyWorkerOrBuildingParams }),
-      estimateTxnFee({ functionName: 'buySafeHouse', params: buyWorkerOrBuildingParams }),
+      // UPDATE all deez function
+      estimateTxnFee({
+        functionName: 'mint',
+        params: [1, 1, 0, time, nonce, machineSignature],
+        value: machine.basePrice,
+      }),
+      estimateTxnFee({
+        functionName: 'buyGoon',
+        params: [0, BigInt(fiatBuyValue.toString()), workerSold, time, nonce, workerSignature],
+      }),
+      estimateTxnFee({
+        functionName: 'buySafeHouse',
+        params: [0, BigInt(fiatBuyValue.toString()), buildingSold, time, nonce, buildingSignature],
+      }),
     ]);
 
     const updatedGas = {};
@@ -116,34 +141,34 @@ const estimateTxnFee = async ({ functionName, params, value }) => {
 
     return transactionFee;
   } catch (error) {
-    console.log(`Err in estimateTxnFee: ${error.error}`);
+    console.log(`Err in estimateTxnFee: ${error.error || error.message}`);
   }
 };
 
-const signMessageBuyGoon = async ({ address, amount, value, nonce }) => {
+export const signMessageBuyGoon = async ({ address, amount, value, totalAmount, time, nonce, mintFunction }) => {
   const signerWallet = await getSignerWallet();
   let message = ethers.solidityPackedKeccak256(
     // Array of types: declares the data types in the message.
-    ['address', 'uint256', 'uint256', 'uint256'],
+    ['address', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'string'],
     // Array of values: actual values of the parameters to be hashed.
-    [address, amount, value.toString(), nonce]
+    [address, amount, value.toString(), totalAmount, time, nonce, mintFunction]
   );
 
   const signature = await signerWallet.signMessage(ethers.toBeArray(message));
   return signature;
 };
 
-const signMessageBuyGangster = async ({ address, amount, nonce, bonus, referral }) => {
+export const signMessageBuyGangster = async ({ address, amount, bonus, referral, time, nonce }) => {
   const signerWallet = await getSignerWallet();
 
   // Array of types: declares the data types in the message.
-  const types = ['address', 'uint256', 'uint256', 'uint256', 'uint256'];
+  const types = ['address', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'string'];
   // Array of values: actual values of the parameters to be hashed.
-  const values = [address, 1, amount, BigInt(parseEther(bonus.toString()).toString()), nonce];
+  const values = [address, 1, amount, BigInt(parseEther(bonus.toString()).toString()), time, nonce, 'mint'];
 
   if (referral) {
-    types.push('address');
-    values.push(referral);
+    types.splice(4, 0, 'address');
+    values.splice(4, 0, referral);
   }
 
   let message = ethers.solidityPackedKeccak256(types, values);
