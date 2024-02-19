@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { ethers } = require('hardhat');
 const { parseEther, formatEther } = require('ethers');
 
@@ -9,8 +10,8 @@ const {
   referral,
 } = gameConfigs;
 
-const _nftAddress = '0xF4629A9846090212195E00953bf3990f6F056DBB';
-const _gaAddress = '0x9B0547dbA904100dDfaDf8aF28834209a762A54f';
+const _nftAddress = process.env.NFT;
+const _gaAddress = process.env.GAME;
 
 async function main() {
   const GangsterNFT = await ethers.getContractAt('Gangster', _nftAddress);

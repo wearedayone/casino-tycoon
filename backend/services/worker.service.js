@@ -323,6 +323,14 @@ export const isMinted = async (address) => {
   return minted;
 };
 
+export const getTotalSold = async (type) => {
+  const workerWallet = await getWorkerWallet();
+  const gameContract = await getGameContract(workerWallet);
+
+  const totalSold = type == 'buy-worker' ? await gameContract.tgoon() : await gameContract.tshouse();
+  return totalSold.toNumber();
+};
+
 export const signMessage = async (message) => {
   const signerWallet = await getSignerWallet();
   const signature = await signerWallet.signMessage(ethers.toBeArray(message));

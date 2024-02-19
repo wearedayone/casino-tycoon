@@ -9,7 +9,7 @@ import './ERC2981Base.sol';
 import './libs/SafeMath.sol';
 import './libs/SignedSafeMath.sol';
 
-import 'hardhat/console.sol';
+// import 'hardhat/console.sol';
 
 contract Gangster is ERC1155, AccessControl, ERC1155Burnable, ERC1155Supply, ERC2981Base {
   using SafeMath for uint256;
@@ -20,10 +20,10 @@ contract Gangster is ERC1155, AccessControl, ERC1155Burnable, ERC1155Supply, ERC
   RoyaltyInfo private _royalties;
 
   // Max NFT minting perbatch
-  uint256 public MAX_PER_BATCH = 25;
+  uint256 public MAX_PER_BATCH = 100;
 
   // Max NFT when whitelist mint per wallet
-  uint256 public MAX_PER_WL = 20;
+  uint256 public MAX_PER_WL = 10;
 
   // Max supply of NFT
   mapping(uint256 => uint256) public tokenMaxSupply;
@@ -34,6 +34,7 @@ contract Gangster is ERC1155, AccessControl, ERC1155Burnable, ERC1155Supply, ERC
   // NFT when user deposit
   mapping(address => uint256) public gangster; // address -> number of gangster
 
+  uint256 public nPlayer; // number of player
   bool public lockNFT;
 
   constructor(address defaultAdmin, address minter) ERC1155('') {
@@ -113,7 +114,10 @@ contract Gangster is ERC1155, AccessControl, ERC1155Burnable, ERC1155Supply, ERC
     _mint(address(this), tokenId, amount, '');
     gangster[sender] += amount;
 
-    if (!mintedAddess[sender]) mintedAddess[sender] = true;
+    if (!mintedAddess[sender]) {
+      mintedAddess[sender] = true;
+      nPlayer++;
+    }
   }
 
   /**
@@ -137,28 +141,16 @@ contract Gangster is ERC1155, AccessControl, ERC1155Burnable, ERC1155Supply, ERC
   function withdrawNFT(address addr, address to, uint256 tokenId, uint256 amount) public onlyRole(MINTER_ROLE) {
     require(!lockNFT, 'NFT is locked');
     require(gangster[addr] >= amount, 'Insufficient balance');
-    console.log('check', address(this));
-    console.log('check', to);
     _safeTransferFrom(address(this), to, tokenId, amount, '');
     gangster[addr] -= amount;
   }
 
-  /**
-   * @notice withdrawNFT
-   */
-  function withdrawNFT1(address to, uint256 tokenId, uint256 amount) public {
-    require(gangster[msg.sender] >= amount, 'Insufficient balance');
-    console.log('check', msg.sender);
-    console.log('check', to);
-    console.log('isApprovedForAll', isApprovedForAll(address(this), msg.sender));
-    safeTransferFrom(address(this), to, tokenId, amount, '');
-    gangster[msg.sender] -= amount;
-  }
-
-  function retired(address addr, uint256 _nGangster) public onlyRole(MINTER_ROLE) {
-    require(gangster[addr] >= _nGangster, 'Insufficient balance');
-    burn(address(this), 1, gangster[addr]);
+  function retired(address addr) public onlyRole(MINTER_ROLE) {
+    require(mintedAddess[addr], 'user is not activated');
+    _burn(address(this), 1, gangster[addr]);
     gangster[addr] = 0;
+    mintedAddess[addr] = false;
+    nPlayer--;
   }
 
   /**

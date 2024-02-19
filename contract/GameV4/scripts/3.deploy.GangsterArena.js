@@ -4,6 +4,7 @@
 // You can also run a script with `npx hardhat run <script>`. If you do that, Hardhat
 // will compile your contracts, add the Hardhat Runtime Environment's members to the
 // global scope, and execute the script.
+require('dotenv').config();
 const fs = require('fs');
 const { ethers } = require('hardhat');
 const factoryArtifact = require('@uniswap/v2-core/build/UniswapV2Factory.json');
@@ -11,8 +12,8 @@ const routerArtifact = require('@uniswap/v2-periphery/build/UniswapV2Router02.js
 const pairArtifact = require('@uniswap/v2-periphery/build/IUniswapV2Pair.json');
 const WETH9 = require('../WETH9.json');
 
-const _nftAddress = '0xF4629A9846090212195E00953bf3990f6F056DBB';
-const _fiatAddress = '0xee98C96A1DA54D2d86fda0B3BD03D0F57D524212';
+const _fiatAddress = process.env.FIAT;
+const _nftAddress = process.env.NFT;
 
 async function main() {
   // const _defaultAdmin = '0xd97612bD2272eDc1F66BbA99666C6a0fAa6046F4';
@@ -20,10 +21,10 @@ async function main() {
   // const _workerAddress = '0x9EC95637ff4fA040a54CbDCDD0312e46F7a204CF';
   // const _signerAddress = '0x9EC95637ff4fA040a54CbDCDD0312e46F7a204CF';
 
-  const _defaultAdmin = '0x890611302Ee344d5bD94DA9811C18e2De5588077';
-  const _adminAddress = '0x890611302Ee344d5bD94DA9811C18e2De5588077';
-  const _workerAddress = '0xd0A8dBf15F547604Ff836be3176206DbDc3bcadF';
-  const _signerAddress = '0x9e3B61bb59493aD1d4E5deA89eE02bF6CEfC8fA8';
+  const _defaultAdmin = process.env.DefaultAdmin;
+  const _adminAddress = process.env.DefaultAdmin;
+  const _workerAddress = process.env.WorkerAddress;
+  const _signerAddress = process.env.SignerAddress;
 
   const GangsterArena = await ethers.getContractFactory('GangsterArena');
   const GangsterArenaContract = await GangsterArena.deploy(

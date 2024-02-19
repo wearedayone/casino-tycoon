@@ -1,4 +1,5 @@
 const fs = require('fs');
+require('dotenv').config();
 const { ethers } = require('hardhat');
 const { ContractFactory, Contract, parseUnits, parseEther, formatEther } = require('ethers');
 
@@ -7,13 +8,13 @@ const routerArtifact = require('@uniswap/v2-periphery/build/UniswapV2Router02.js
 const pairArtifact = require('@uniswap/v2-periphery/build/IUniswapV2Pair.json');
 const WETH9 = require('../WETH9.json');
 
-const _fiatAddress = '0xee98C96A1DA54D2d86fda0B3BD03D0F57D524212';
-const _factoryAddress = '0xD7b9d88D97d1A542fB57fB276D6532145cb8fF3f';
-const _wethAddress = '0x19c6b88868343c38538C6a1709b4cBc9cb8011aa';
-const _routerAddress = '0x1255050930Be7b365Ee93e091ff9C2c633471c02';
+const _fiatAddress = process.env.FIAT;
+const _factoryAddress = process.env.FACTORY;
+const _wethAddress = process.env.WETH;
+const _routerAddress = process.env.ROUTER;
 
 async function main() {
-  const _defaultAdmin = '0x890611302Ee344d5bD94DA9811C18e2De5588077';
+  const _defaultAdmin = process.env.DefaultAdmin;
 
   const FIAT = await ethers.getContractFactory('FIAT');
   const fiatToken = FIAT.attach(_fiatAddress);

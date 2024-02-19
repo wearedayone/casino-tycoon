@@ -84,5 +84,5 @@ interface IGangsterArena {
   /**
    * user retire game
    */
-  function retired(uint256 reward, uint256 nGangster, uint256 nonce, bytes memory sig) external;
+  function retired(uint256 nonce) external;
 }

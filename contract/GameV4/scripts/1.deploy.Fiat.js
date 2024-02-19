@@ -4,6 +4,7 @@
 // You can also run a script with `npx hardhat run <script>`. If you do that, Hardhat
 // will compile your contracts, add the Hardhat Runtime Environment's members to the
 // global scope, and execute the script.
+require('dotenv').config();
 const fs = require('fs');
 const { ethers } = require('hardhat');
 const factoryArtifact = require('@uniswap/v2-core/build/UniswapV2Factory.json');
@@ -19,8 +20,8 @@ async function main() {
   // const _nftAddress = '0x8aD26e8B97B7F06D86cd05bE609718E50aD274E1';
   // const _fiatAddress = '0xDB34eb205A2f0389a6B1DeEADc0da1a71307D119';
 
-  const _defaultAdmin = '0x890611302Ee344d5bD94DA9811C18e2De5588077';
-  const _workerAddress = '0xd0A8dBf15F547604Ff836be3176206DbDc3bcadF';
+  const _defaultAdmin = process.env.DefaultAdmin;
+  const _workerAddress = process.env.WorkerAddress;
 
   const FIAT = await ethers.getContractFactory('FIAT');
   const FIATToken = await FIAT.deploy(_defaultAdmin, _workerAddress);

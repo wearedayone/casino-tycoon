@@ -269,14 +269,15 @@ const useSmartContract = () => {
   };
 
   const retire = async ({ value, nonce, numberOfGangsters, signature }) => {
-    console.log('Start retire');
+    console.log('Start retire', { value, nonce, numberOfGangsters, signature });
     if (!loadedAssets) return;
     const privyProvider = await embeddedWallet.getEthereumProvider();
     const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
 
     // eslint-disable-next-line
     const valueBigInt = BigInt(parseEther(value + '').toString());
-    const params = [valueBigInt, numberOfGangsters, nonce, signature];
+    // const params = [valueBigInt, numberOfGangsters, nonce, signature];
+    const params = [nonce];
     const data = gameContract.interface.encodeFunctionData('retired', params);
 
     const unsignedTx = {

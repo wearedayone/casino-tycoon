@@ -13,6 +13,7 @@ import {
   signMessageBuyGoon,
   signMessageBuyGangster,
   signMessageRetire,
+  getTotalSold,
 } from './worker.service.js';
 import {
   calculateNextBuildingBuyPriceBatch,
@@ -201,11 +202,12 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       const mintFunction = type === 'buy-worker' ? 'buyGoon' : 'buySafeHouse';
 
       const { address } = userData.data();
+      const totalSold = await getTotalSold(type);
       const signature = await signMessageBuyGoon({
         address: address,
         amount: txnData.amount,
         value: parseEther(txnData.value + ''),
-        totalAmount: txnData.currentSold,
+        totalAmount: totalSold,
         time,
         nonce,
         mintFunction,

@@ -1,6 +1,6 @@
 import { Contract } from '@ethersproject/contracts';
 import { formatEther } from '@ethersproject/units';
-import tokenABI from '../assets/abis/FIAT.json' assert { type: 'json' };
+import tokenABI from '../assets/abis/Token.json' assert { type: 'json' };
 import admin, { firestore } from '../configs/firebase.config.js';
 import alchemy from '../configs/alchemy.config.js';
 import environments from '../utils/environments.js';

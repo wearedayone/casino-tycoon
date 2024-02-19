@@ -1,6 +1,7 @@
 import { Contract } from '@ethersproject/contracts';
 import { formatEther } from '@ethersproject/units';
-import GangsterArenaABI from '../assets/abis/GangsterArena.json' assert { type: 'json' };
+import GangsterArenaABI from '../assets/abis/GameContract.json' assert { type: 'json' };
+import GangsterABI from '../assets/abis/NFT.json' assert { type: 'json' };
 import admin, { firestore } from '../configs/firebase.config.js';
 import alchemy from '../configs/alchemy.config.js';
 import environments from '../utils/environments.js';
@@ -12,31 +13,32 @@ const { NETWORK_ID } = environments;
 
 const gangsterArenaListener = async () => {
   const activeSeason = await getActiveSeason();
-  const { gameAddress: GAME_CONTRACT_ADDRESS } = activeSeason || {};
+  const { gameAddress: GAME_CONTRACT_ADDRESS, nftAddress: NFT_ADDRESS } = activeSeason || {};
   logger.info(`Start listen contract ${GAME_CONTRACT_ADDRESS} on Network ${NETWORK_ID}`);
   const ethersProvider = await alchemy.config.getWebSocketProvider();
   const contract = new Contract(GAME_CONTRACT_ADDRESS, GangsterArenaABI.abi, ethersProvider);
+  const nftContract = new Contract(NFT_ADDRESS, GangsterABI.abi, ethersProvider);
 
   contract.on(GangsterEvent.Mint, async (to, tokenId, amount, nonce, event) => {
     console.log({ to, tokenId, amount, nonce, event });
     await firestore.collection('web3Listener').doc(NETWORK_ID).update({ lastBlock: event.blockNumber });
-    await processMintEvent({ to, tokenId, amount, nonce, event, contract });
+    await processMintEvent({ to, tokenId, amount, nonce, event, contract, nftContract });
   });
 
   contract.on(GangsterEvent.Deposit, async (from, to, amount, event) => {
     await firestore.collection('web3Listener').doc(NETWORK_ID).update({ lastBlock: event.blockNumber });
-    await processDepositEvent({ from, to, amount, event, contract });
+    await processDepositEvent({ from, to, amount, event, contract, nftContract });
   });
 
   contract.on(GangsterEvent.Withdraw, async (from, to, amount, event) => {
     await firestore.collection('web3Listener').doc(NETWORK_ID).update({ lastBlock: event.blockNumber });
-    await processWithdrawEvent({ from, to, amount, event, contract });
+    await processWithdrawEvent({ from, to, amount, event, contract, nftContract });
   });
 
   contract.on(GangsterEvent.Burn, async (from, to, amount, event) => {
     await firestore.collection('web3Listener').doc(NETWORK_ID).update({ lastBlock: event.blockNumber });
     for (let i = 0; i < from.length; i++) {
-      await processBurnEvent({ from: from[i], to: to[i], amount: amount[i], event, contract });
+      await processBurnEvent({ from: from[i], to: to[i], amount: amount[i], event, contract, nftContract });
     }
   });
 
@@ -61,13 +63,13 @@ const gangsterArenaListener = async () => {
 //   }
 // };
 
-const processMintEvent = async ({ to, tokenId, amount, nonce, event, contract }) => {
+const processMintEvent = async ({ to, tokenId, amount, nonce, event, contract, nftContract }) => {
   try {
     logger.info('NFT minted');
     logger.info({ to, tokenId, amount, nonce, event });
     const { transactionHash } = event;
 
-    const gangsterNumber = await contract.gangster(to);
+    const gangsterNumber = await nftContract.gangster(to);
     const newBalance = gangsterNumber.toString();
     await updateNumberOfGangster({
       address: to.toLowerCase(),
@@ -86,7 +88,7 @@ const processMintEvent = async ({ to, tokenId, amount, nonce, event, contract })
   }
 };
 
-const processDepositEvent = async ({ from, to, amount, event, contract }) => {
+const processDepositEvent = async ({ from, to, amount, event, contract, nftContract }) => {
   try {
     logger.info('process deposit event');
     logger.info({ from, to, amount, event });
@@ -102,7 +104,7 @@ const processDepositEvent = async ({ from, to, amount, event, contract }) => {
       value: 0,
     });
 
-    const gangsterNumber = await contract.gangster(from);
+    const gangsterNumber = await nftContract.gangster(from);
     const newBalance = gangsterNumber.toString();
     await updateNumberOfGangster({
       address: from.toLowerCase(),
@@ -113,7 +115,7 @@ const processDepositEvent = async ({ from, to, amount, event, contract }) => {
   }
 };
 
-const processWithdrawEvent = async ({ from, to, amount, event, contract }) => {
+const processWithdrawEvent = async ({ from, to, amount, event, contract, nftContract }) => {
   try {
     logger.info('process withdraw event');
     logger.info({ from, to, amount, event });
@@ -129,7 +131,7 @@ const processWithdrawEvent = async ({ from, to, amount, event, contract }) => {
       value: 0,
     });
 
-    const gangsterNumber = await contract.gangster(from);
+    const gangsterNumber = await nftContract.gangster(from);
     const newBalance = gangsterNumber.toString();
     await updateNumberOfGangster({
       address: from.toLowerCase(),
@@ -140,7 +142,7 @@ const processWithdrawEvent = async ({ from, to, amount, event, contract }) => {
   }
 };
 
-const processBurnEvent = async ({ from, to, amount, event, contract }) => {
+const processBurnEvent = async ({ from, to, amount, event, contract, nftContract }) => {
   try {
     logger.info('process event');
     logger.info({ from, to, amount, event });

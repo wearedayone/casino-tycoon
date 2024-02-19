@@ -211,6 +211,8 @@ describe('Gangster Arena', function () {
       console.log('we are here 4');
       const gangsterCount2 = await GangsterNFTContract.gangster(acc1.address);
       expect(gangsterCount2).to.be.equal(1);
+
+      await GangsterArenaContract.retired(123457);
     });
   });
   describe('Test WL mint', function () {

@@ -32,10 +32,10 @@ const main = async () => {
     .set({
       game: { mint: 0, buyGoon: 0, buySafeHouse: 0 },
     });
-  await firestore
-    .collection('system')
-    .doc('data')
-    .set({ nonce: admin.firestore.FieldValue.increment(1) });
+  // await firestore
+  //   .collection('system')
+  //   .doc('data')
+  //   .set({ nonce: admin.firestore.FieldValue.increment(1) });
   console.log('created system configs');
 
   console.log('create season');
