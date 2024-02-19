@@ -34,6 +34,8 @@ contract Gangster is ERC1155, AccessControl, ERC1155Burnable, ERC1155Supply, ERC
   // NFT when user deposit
   mapping(address => uint256) public gangster; // address -> number of gangster
 
+  bool public lockNFT;
+
   constructor(address defaultAdmin, address minter) ERC1155('') {
     _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
     _grantRole(URI_SETTER_ROLE, defaultAdmin);
@@ -133,6 +135,7 @@ contract Gangster is ERC1155, AccessControl, ERC1155Burnable, ERC1155Supply, ERC
    * @notice withdrawNFT
    */
   function withdrawNFT(address addr, address to, uint256 tokenId, uint256 amount) public onlyRole(MINTER_ROLE) {
+    require(!lockNFT, 'NFT is locked');
     require(gangster[addr] >= amount, 'Insufficient balance');
     console.log('check', address(this));
     console.log('check', to);
@@ -179,6 +182,13 @@ contract Gangster is ERC1155, AccessControl, ERC1155Burnable, ERC1155Supply, ERC
     for (uint256 i = 0; i < addr.length; i++) {
       gangster[addr[i]] -= amount[i];
     }
+  }
+
+  /**
+   * @notice set NFT Lock flag - use to prevent withdraw nft when calculate gangwar result
+   */
+  function setLockNFT(bool value) public onlyRole(MINTER_ROLE) {
+    lockNFT = value;
   }
 
   // The following functions are overrides required by Solidity.

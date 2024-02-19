@@ -66,7 +66,6 @@ contract GangsterArena is AccessControl, IGangsterArena {
 
   // Flag toggle when game close
   bool public gameClosed;
-  bool public lockNFT;
 
   // mapping(address => uint256) public goon; // address -> number of goon
   // mapping(address => uint256) public safehouse; // address -> number of safehouse
@@ -290,7 +289,6 @@ contract GangsterArena is AccessControl, IGangsterArena {
    * @notice withdrawNFT
    */
   function withdrawNFT(address to, uint256 tokenId, uint256 amount) public {
-    require(!lockNFT, 'NFT is locked');
     console.log('withdrawNFT', msg.sender);
     console.log('withdrawNFT', to);
 
@@ -353,13 +351,6 @@ contract GangsterArena is AccessControl, IGangsterArena {
     gameClosed = value;
     tPBalance = getPrizeBalance() + getRetireBalance();
     totalPoint = _totalPoint;
-  }
-
-  /**
-   * @notice set NFT Lock flag - use to prevent withdraw nft when calculate gangwar result
-   */
-  function setLockNFT(bool value) public onlyRole(WORKER_ROLE) {
-    lockNFT = value;
   }
 
   /**
