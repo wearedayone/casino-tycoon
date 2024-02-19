@@ -11,3 +11,5 @@ export const getTotalVoters = () => api.get('/api/v1/gamePlays/voters');
 export const updateUserWarMachines = (data) => api.put('/api/v1/gamePlays/war-machines', data);
 
 export const updateUserWarAttack = (data) => api.put('/api/v1/gamePlays/war-attack', data);
+
+export const getUserWarDeployment = () => api.get('/api/v1/gamePlays/war-deployment');

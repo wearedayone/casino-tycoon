@@ -13,7 +13,8 @@ export const getLastestWarSnapshot = async (req, res) => {
   } catch (err) {
     console.error(err);
     logger.error(err.message);
-    return res.status(400).send(err.message);
+    const message = err.message.startsWith('API error') ? err.message : 'Something is wrong';
+    return res.status(400).send(message);
   }
 };
 
@@ -25,7 +26,8 @@ export const getUserListToAttack = async (req, res) => {
   } catch (err) {
     console.error(err);
     logger.error(err.message);
-    return res.status(400).send(err.message);
+    const message = err.message.startsWith('API error') ? err.message : 'Something is wrong';
+    return res.status(400).send(message);
   }
 };
 
@@ -37,7 +39,8 @@ export const getUserAttackDetail = async (req, res) => {
   } catch (err) {
     console.error(err);
     logger.error(err.message);
-    return res.status(400).send(err.message);
+    const message = err.message.startsWith('API error') ? err.message : 'Something is wrong';
+    return res.status(400).send(message);
   }
 };
 
@@ -48,6 +51,7 @@ export const getUserWarHistoryLatest = async (req, res) => {
   } catch (err) {
     console.error(err);
     logger.error(err.message);
-    return res.status(400).send(err.message);
+    const message = err.message.startsWith('API error') ? err.message : 'Something is wrong';
+    return res.status(400).send(message);
   }
 };

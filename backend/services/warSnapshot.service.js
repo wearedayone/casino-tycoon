@@ -489,7 +489,7 @@ export const getUsersToAttack = async ({ page, limit, search }) => {
 
 export const getUserToAttackDetail = async (userId) => {
   const userGamePlay = await getUserGamePlay(userId);
-  if (!userGamePlay) throw new Error('Bad request: cannot find game play');
+  if (!userGamePlay) throw new Error('API error: Bad request - cannot find game play');
 
   const { numberOfMachines, numberOfWorkers, numberOfBuildings } = userGamePlay;
 

@@ -223,9 +223,20 @@ const updateNumberOfGangster = async ({ address, newBalance, active = false }) =
       .get();
     if (!gamePlaySnapshot.empty) {
       const gamePlay = gamePlaySnapshot.docs[0];
-      const { numberOfMachines, warDeployment } = gamePlay.data();
+      const { numberOfMachines } = gamePlay.data();
       const now = Date.now();
       const generatedReward = await calculateGeneratedReward(user.docs[0].id);
+
+      const warDeploymentSnapshot = await admin
+        .firestore()
+        .collection('warDeployment')
+        .where('userId', '==', user.docs[0].id)
+        .where('seasonId', '==', activeSeasonId)
+        .limit(1)
+        .get();
+      if (warDeploymentSnapshot.empty) return;
+
+      const warDeployment = warDeploymentSnapshot.docs[0].data();
 
       const newNumberOfMachines = Number(newBalance);
       let numberOfMachinesToEarn = warDeployment.numberOfMachinesToEarn;
@@ -257,16 +268,26 @@ const updateNumberOfGangster = async ({ address, newBalance, active = false }) =
         .doc(gamePlay.id)
         .update({
           numberOfMachines: newNumberOfMachines,
-          warDeployment: {
-            ...warDeployment,
-            numberOfMachinesToEarn,
-            numberOfMachinesToAttack,
-            numberOfMachinesToDefend,
-          },
           startRewardCountingTime: admin.firestore.Timestamp.fromMillis(now),
           pendingReward: admin.firestore.FieldValue.increment(generatedReward),
           active: !!active || gamePlay.data().active,
         });
+
+      const snapshot = await admin
+        .firestore()
+        .collection('warDeployment')
+        .where('userId', '==', user.docs[0].id)
+        .where('seasonId', '==', activeSeasonId)
+        .limit(1)
+        .get();
+
+      if (!snapshot.empty) {
+        await snapshot.docs[0].ref.update({
+          numberOfMachinesToEarn,
+          numberOfMachinesToAttack,
+          numberOfMachinesToDefend,
+        });
+      }
     }
   }
 };
@@ -369,7 +390,7 @@ const calculateGeneratedReward = async (userId) => {
   const { activeSeasonId } = system.data();
   const activeSeasonSnapshot = await firestore.collection('season').doc(activeSeasonId).get();
   const activeSeason = { id: activeSeasonId, ...activeSeasonSnapshot.data() };
-  if (activeSeason.status !== 'open') throw new Error('Season ended');
+  // if (activeSeason.status !== 'open') throw new Error('Season ended');
 
   const { machine, worker } = activeSeason;
 

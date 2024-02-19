@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { onSnapshot, query, where, collection, getDoc, doc } from 'firebase/firestore';
+import { onSnapshot, query, where, collection, getDoc, getDocs, doc } from 'firebase/firestore';
+import * as Sentry from '@sentry/react';
 
 import { firestore } from '../configs/firebase.config';
 import useSystemStore from '../stores/system.store';
 import useUserStore from '../stores/user.store';
+import { getUserWarDeployment } from '../services/gamePlay.service';
 
 const useUserGamePlay = () => {
   const [usernames, setUsernames] = useState({});
@@ -21,29 +23,35 @@ const useUserGamePlay = () => {
         where('userId', '==', userId)
       );
       unsubscribe = onSnapshot(q, async (snapshot) => {
-        if (!snapshot.empty) {
-          const warDeployment = snapshot.docs[0].data().warDeployment;
-          if (warDeployment?.attackUserId) {
-            if (usernames[warDeployment.attackUserId]) {
-              warDeployment.attackUser = {
-                id: warDeployment.attackUserId,
-                username: usernames[warDeployment.attackUserId],
-              };
-            } else {
-              const attackUserDoc = doc(firestore, 'user', warDeployment.attackUserId);
-              const attackUserSnapshot = await getDoc(attackUserDoc);
-              if (attackUserSnapshot.exists()) {
-                setUsernames({ ...usernames, [warDeployment.attackUserId]: attackUserSnapshot.data().username });
+        try {
+          if (!snapshot.empty) {
+            const res = await getUserWarDeployment();
+            const warDeployment = res.data;
+            if (warDeployment?.attackUserId) {
+              if (usernames[warDeployment.attackUserId]) {
                 warDeployment.attackUser = {
                   id: warDeployment.attackUserId,
-                  username: attackUserSnapshot.data().username,
+                  username: usernames[warDeployment.attackUserId],
                 };
+              } else {
+                const attackUserDoc = doc(firestore, 'user', warDeployment.attackUserId);
+                const attackUserSnapshot = await getDoc(attackUserDoc);
+                if (attackUserSnapshot.exists()) {
+                  setUsernames({ ...usernames, [warDeployment.attackUserId]: attackUserSnapshot.data().username });
+                  warDeployment.attackUser = {
+                    id: warDeployment.attackUserId,
+                    username: attackUserSnapshot.data().username,
+                  };
+                }
               }
             }
+            setGamePlay({ id: snapshot.docs[0].id, ...snapshot.docs[0].data(), warDeployment });
+          } else {
+            setGamePlay(null);
           }
-          setGamePlay({ id: snapshot.docs[0].id, ...snapshot.docs[0].data(), warDeployment });
-        } else {
-          setGamePlay(null);
+        } catch (err) {
+          console.error(err);
+          Sentry.captureException(err);
         }
       });
     } else {

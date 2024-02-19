@@ -8,6 +8,7 @@ import {
   getTotalVoters,
   updateUserWarMachines,
   updateUserWarAttack,
+  getWarDeployment,
 } from '../controllers/gamePlay.controller.js';
 
 const router = Router();
@@ -18,5 +19,6 @@ router.put('/last-time-seen-war-result', auth, updateLastTimeSeenGangWarResult);
 router.get('/voters', getTotalVoters);
 router.put('/war-machines', auth, updateUserWarMachines);
 router.put('/war-attack', auth, updateUserWarAttack);
+router.get('/war-deployment', auth, getWarDeployment);
 
 export default router;

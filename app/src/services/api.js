@@ -32,7 +32,9 @@ api.interceptors.response.use(
   },
   (err) => {
     console.log({ err });
-    throw new Error((err.response && err.response.data) || err.message);
+    const error = (err.response && err.response.data) || err.message;
+    const message = error.startsWith('API error') ? error.replace('API error: ', '') : error;
+    throw new Error(message);
   }
 );
 

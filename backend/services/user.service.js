@@ -37,12 +37,15 @@ const createGamePlayIfNotExist = async (userId, isWhitelisted) => {
       active: false,
       isWhitelisted,
       whitelistAmountMinted: 0,
-      warDeployment: {
-        numberOfMachinesToEarn: 0,
-        numberOfMachinesToAttack: 0,
-        numberOfMachinesToDefend: 0,
-        attackUserId: null,
-      },
+    });
+
+    await firestore.collection('warDeployment').add({
+      userId,
+      seasonId: season.id,
+      numberOfMachinesToEarn: 0,
+      numberOfMachinesToAttack: 0,
+      numberOfMachinesToDefend: 0,
+      attackUserId: null,
     });
   }
 };
@@ -167,13 +170,13 @@ export const updateLastOnlineTime = async (userId) => {
 export const applyInviteCode = async (userId, code) => {
   const appliedCode = code.trim().toLowerCase();
   const referrerSnapshot = await firestore.collection('user').where('referralCode', '==', appliedCode).get();
-  if (!referrerSnapshot.size) throw new Error('Invalid invite code');
+  if (!referrerSnapshot.size) throw new Error('API error: Invalid invite code');
 
   const userRef = firestore.collection('user').doc(userId);
   const user = await userRef.get();
   const { referralCode, inviteCode } = user.data();
-  if (referralCode === appliedCode) throw new Error('Cannot apply your own invite code');
-  if (inviteCode) throw new Error('Cannot apply more than one invite code');
+  if (referralCode === appliedCode) throw new Error('API error: Cannot apply your own invite code');
+  if (inviteCode) throw new Error('API error: Cannot apply more than one invite code');
 
   await userRef.update({ inviteCode: appliedCode });
 };

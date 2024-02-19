@@ -30,7 +30,20 @@ export const initTransaction = async ({ userId, type, ...data }) => {
   logger.info(`init transaction user:${userId} - type:${type}`);
   const activeSeason = await getActiveSeason();
 
-  if (type !== 'withdraw' && data.token !== 'NFT' && activeSeason.status !== 'open') throw new Error('Season ended');
+  if (type !== 'withdraw' && data.token !== 'NFT' && activeSeason.status !== 'open')
+    throw new Error('API error: Season ended');
+
+  if (type === 'buy-machine') {
+    if (data.amount > activeSeason.machine.maxPerBatch) throw new Error('API error: Bad request - over max per batch');
+  }
+
+  if (type === 'buy-worker') {
+    if (data.amount > activeSeason.worker.maxPerBatch) throw new Error('API error: Bad request - over max per batch');
+  }
+
+  if (type === 'buy-building') {
+    if (data.amount > activeSeason.building.maxPerBatch) throw new Error('API error: Bad request - over max per batch');
+  }
 
   const {
     machine,
@@ -235,7 +248,7 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
     // - has the same token as the transaction doc in firestore - OK
     // - has the same value as the transaction doc in firestore - OK
     const txnSnapshot = await firestore.collection('transaction').where('txnHash', '==', txnHash).limit(1).get();
-    if (!txnSnapshot.empty) throw new Error('Existed txnHash');
+    if (!txnSnapshot.empty) throw new Error('API error: Existed txnHash');
 
     const tx = await alchemy.core.getTransaction(txnHash);
     console.log({ userId, transactionId, txnHash, tx });
@@ -244,13 +257,13 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
     // console.log(`transaction ${txnHash}`, tx, 'receipt', receipt);
     const { from, to, status, logs } = receipt;
 
-    if (status !== 1) throw new Error('Invalid txn status');
+    if (status !== 1) throw new Error('API error: Invalid txn status');
 
     const userSnapshot = await firestore.collection('user').doc(userId).get();
     const { address } = userSnapshot.data();
 
     if (address?.toLowerCase() !== from.toLowerCase() && SYSTEM_ADDRESS?.toLowerCase() !== from.toLowerCase())
-      throw new Error(`Bad request: invalid sender, txn: ${JSON.stringify(receipt)}`);
+      throw new Error(`API error: Bad request - invalid sender, txn: ${JSON.stringify(receipt)}`);
 
     const snapshot = await firestore.collection('transaction').doc(transactionId).get();
     const { type, value, token } = snapshot.data();
@@ -264,23 +277,27 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
 
     if (type === 'withdraw') {
       if (token === 'FIAT' && to.toLowerCase() !== TOKEN_ADDRESS.toLowerCase())
-        throw new Error(`Bad request: invalid receiver for ${type}, txn: ${JSON.stringify(receipt)}`);
+        throw new Error(`API error: Bad request - invalid receiver for ${type}, txn: ${JSON.stringify(receipt)}`);
 
-      // if (!bnValue.eq(transactionValue))
-      //   throw new Error(`Bad request: Value doesnt match, ${JSON.stringify({ transactionValue, bnValue })}`);
+      if (!bnValue.eq(transactionValue))
+        throw new Error(
+          `API error: Bad request - Value doesnt match, ${JSON.stringify({ transactionValue, bnValue })}`
+        );
     }
 
     if (['buy-worker', 'buy-building'].includes(type)) {
       if (to.toLowerCase() !== TOKEN_ADDRESS.toLowerCase())
-        throw new Error(`Bad request: invalid receiver for ${type}, txn: ${JSON.stringify(receipt)}`);
+        throw new Error(`API error: Bad request - invalid receiver for ${type}, txn: ${JSON.stringify(receipt)}`);
 
       const decodedData = await decodeTokenTxnLogs('Transfer', logs[0]);
       if (decodedData.to.toLowerCase() !== SYSTEM_ADDRESS.toLowerCase())
-        throw new Error(`Bad request: invalid token receiver for ${type}, txn: ${JSON.stringify(receipt)}`);
+        throw new Error(`API error: Bad request - invalid token receiver for ${type}, txn: ${JSON.stringify(receipt)}`);
       console.log({ value, bnValue, transactionValue });
       console.log(bnValue.eq(transactionValue));
       if (!bnValue.eq(transactionValue))
-        throw new Error(`Bad request: Value doesnt match, ${JSON.stringify({ transactionValue, bnValue })}`);
+        throw new Error(
+          `API error: Bad request - Value doesnt match, ${JSON.stringify({ transactionValue, bnValue })}`
+        );
     }
 
     return true;
@@ -384,6 +401,7 @@ const updateUserGamePlay = async (userId, transactionId) => {
   };
 
   let gamePlayData = {};
+  let warDeploymentData = {};
   switch (type) {
     case 'buy-machine':
       // gamePlayData = { numberOfMachines: admin.firestore.FieldValue.increment(amount) };
@@ -429,10 +447,9 @@ const updateUserGamePlay = async (userId, transactionId) => {
 
       gamePlayData = {
         numberOfMachines: admin.firestore.FieldValue.increment(-machinesDeadCount),
-        warDeployment: {
-          ...warDeployment,
-          numberOfMachinesToAttack: warDeployment.numberOfMachinesToAttack - machinesDeadCount,
-        },
+      };
+      warDeploymentData = {
+        numberOfMachinesToAttack: warDeployment.numberOfMachinesToAttack - machinesDeadCount,
       };
       break;
     case 'retire':
@@ -441,12 +458,12 @@ const updateUserGamePlay = async (userId, transactionId) => {
       assets.numberOfWorkers = 0;
       gamePlayData = {
         ...assets,
-        warDeployment: {
-          numberOfMachinesToEarn: 0,
-          numberOfMachinesToAttack: 0,
-          numberOfMachinesToDefend: 0,
-          attackUserId: null,
-        },
+      };
+      warDeploymentData = {
+        numberOfMachinesToEarn: 0,
+        numberOfMachinesToAttack: 0,
+        numberOfMachinesToDefend: 0,
+        attackUserId: null,
       };
       break;
     default:
@@ -462,6 +479,21 @@ const updateUserGamePlay = async (userId, transactionId) => {
 
   const isGamePlayChanged = Object.keys(gamePlayData).length > 0;
   if (isGamePlayChanged) await userGamePlay.ref.update({ ...gamePlayData });
+
+  const isWarDeploymentChanged = Object.keys(warDeploymentData).length > 0;
+  if (isWarDeploymentChanged) {
+    const warDeploymentSnapshot = await admin
+      .firestore()
+      .collection('warDeployment')
+      .where('userId', '==', userId)
+      .where('seasonId', '==', activeSeason.id)
+      .limit(1)
+      .get();
+
+    if (!warDeploymentSnapshot.empty) {
+      await warDeploymentSnapshot.docs[0].ref.update({ ...warDeploymentData });
+    }
+  }
 };
 
 const sendUserBonus = async (userId, transactionId) => {
@@ -502,7 +534,7 @@ const sendUserBonus = async (userId, transactionId) => {
 
 export const validateTxnHash = async ({ userId, transactionId, txnHash }) => {
   const valid = await validateBlockchainTxn({ userId, transactionId, txnHash });
-  if (!valid) throw new Error('Bad request: Invalid txn');
+  if (!valid) throw new Error('API error: Bad request - Invalid txn');
 
   // update txnHash and status for transaction doc in firestore
   await firestore.collection('transaction').doc(transactionId).update({
@@ -535,12 +567,12 @@ export const claimToken = async ({ userId }) => {
   console.log('Claim token');
   const userSnapshot = await firestore.collection('user').doc(userId).get();
   const activeSeason = await getActiveSeason();
-  if (activeSeason.status !== 'open') throw new Error('Season ended');
+  if (activeSeason.status !== 'open') throw new Error('API error: Season ended');
 
   if (userSnapshot.exists) {
     const { address, tokenBalance } = userSnapshot.data();
     const minted = await isMinted(address);
-    if (!minted) throw new Error('You need to buy a Gangster before claiming');
+    if (!minted) throw new Error('API error: You need to buy a Gangster before claiming');
 
     const gamePlaySnapshot = await firestore
       .collection('gamePlay')
@@ -555,7 +587,7 @@ export const claimToken = async ({ userId }) => {
       const { claimGapInSeconds } = activeSeason;
       const now = Date.now();
       const diffInSeconds = (now - lastClaimTime.toDate().getTime()) / 1000;
-      if (diffInSeconds < claimGapInSeconds) throw new Error('429: Too much claim request');
+      if (diffInSeconds < claimGapInSeconds) throw new Error('API error: 429 - Too much claim request');
 
       const generatedReward = await calculateGeneratedReward(userId);
 
@@ -610,7 +642,7 @@ export const finishClaimToken = async ({ address, claimedAmount, transactionId }
 // utils
 export const calculateGeneratedReward = async (userId, { start, end, numberOfMachines, numberOfWorkers } = {}) => {
   const activeSeason = await getActiveSeason();
-  if (activeSeason.status !== 'open') throw new Error('Season ended');
+  if (activeSeason.status !== 'open') throw new Error('API error: Season ended');
 
   const { machine, worker } = activeSeason;
 

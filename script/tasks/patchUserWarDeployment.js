@@ -42,16 +42,16 @@ const updateUserWarDeployment = async () => {
   const gamePlaySnapshot = await firestore.collection('gamePlay').where('seasonId', '==', activeSeasonId).get();
   const promises = [];
   for (const gamePlay of gamePlaySnapshot.docs) {
-    const { warDeployment, numberOfMachines } = gamePlay.data();
+    const { warDeployment, numberOfMachines, userId } = gamePlay.data();
     if (!warDeployment) {
       promises.push(
-        gamePlay.ref.update({
-          warDeployment: {
-            numberOfMachinesToEarn: numberOfMachines,
-            numberOfMachinesToAttack: 0,
-            numberOfMachinesToDefend: 0,
-            attackUserId: null,
-          },
+        firestore.collection('warDeployment').add({
+          userId,
+          seasonId: activeSeasonId,
+          numberOfMachinesToEarn: numberOfMachines,
+          numberOfMachinesToAttack: 0,
+          numberOfMachinesToDefend: 0,
+          attackUserId: null,
         })
       );
     }
@@ -61,7 +61,9 @@ const updateUserWarDeployment = async () => {
 
 const main = async () => {
   await updateWarConfig();
-  await updateUserWarDeployment();
+
+  // !! NOTE: this function only runs once
+  // await updateUserWarDeployment();
 };
 
 main()
