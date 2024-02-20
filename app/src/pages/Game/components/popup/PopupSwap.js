@@ -217,6 +217,17 @@ class PopupSwap extends Popup {
       () => {
         const balance = this.tokenSwap === 'eth' ? this.ethBalance : this.tokenBalance;
         this.token1AmountInput.updateValue(balance.toString(), true, true);
+        this.setLoading(true);
+        this.timeout = setTimeout(
+          () =>
+            scene.game.events.emit(
+              this.tokenSwap === 'eth' ? 'convert-eth-input-to-token' : 'convert-token-input-to-eth',
+              {
+                amount: balance,
+              }
+            ),
+          500
+        );
       },
       'Max',
       { fontSize: '46px', sound: 'button-1' }
