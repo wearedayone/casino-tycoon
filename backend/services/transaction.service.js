@@ -14,6 +14,7 @@ import {
   signMessageBuyGangster,
   signMessageRetire,
   getTotalSold,
+  getTokenBalance,
 } from './worker.service.js';
 import {
   calculateNextBuildingBuyPriceBatch,
@@ -655,6 +656,38 @@ export const finishClaimToken = async ({ address, claimedAmount, transactionId }
       txnHash,
       status,
     });
+  } else {
+    // rollback claim when transaction fail:
+    const transaction = await firestore.collection('transaction').doc(transactionId).get();
+    const { seasonId, status, userId } = transaction.data();
+
+    if (status !== 'Success') {
+      const user = await firestore.collection('user').doc(userId).get();
+      if (user.exists) {
+        const { address } = user.data();
+        const balance = await getTokenBalance(address);
+        await firestore.collection('user').doc(userId).update({
+          tokenBalance: balance.toNumber(),
+        });
+        const gamePlay = await firestore
+          .collection('gamePlay')
+          .where('userId', '==', userId)
+          .where('seasonId', '==', seasonId)
+          .limit(1)
+          .get();
+
+        if (!gamePlay.empty) {
+          const { pendingReward } = gamePlay[0].data();
+          await firestore
+            .collection('gamePlay')
+            .doc(gamePlay[0].id)
+            .update({
+              lastClaimTime: admin.firestore.Timestamp.fromMillis(1708451011000),
+              pendingReward: pendingReward + claimedAmount,
+            });
+        }
+      }
+    }
   }
 };
 

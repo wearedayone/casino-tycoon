@@ -385,3 +385,12 @@ export const signMessageRetire = async ({ address, reward, nonce }) => {
   const signature = await signerWallet.signMessage(ethers.toBeArray(message));
   return signature;
 };
+
+export const getTokenBalance = async ({ address }) => {
+  const ethersProvider = await alchemy.config.getProvider();
+  const activeSeason = await getActiveSeason();
+  const { tokenAddress: TOKEN_ADDRESS } = activeSeason || {};
+  const contract = new Contract(TOKEN_ADDRESS, tokenABI.abi, ethersProvider);
+  const value = await contract.balanceOf(address);
+  return value;
+};

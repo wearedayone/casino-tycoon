@@ -6,7 +6,7 @@ import { Contract } from '@ethersproject/contracts';
 import environments from '../utils/environments';
 import { toHexString } from '../utils/strings';
 import useEthereumProvider from './useEthereumProvider';
-import DepositLayerL1 from '../assets/abis/DepositLayerL1.json';
+import DepositLayerL1 from '../assets/abis/l1standardbridge.json';
 
 const { ethereum } = window || {};
 const { LAYER_1_NETWORK_ID, DEPOSIT_LAYER_1_ADDRESS } = environments;
@@ -98,7 +98,7 @@ const useEthereum = () => {
     const depositContract = getDepositContract();
     if (!depositContract) return;
 
-    const txn = await depositContract.submitDepositProposal(address, { value: parseEther(amount) });
+    const txn = await depositContract.bridgeETHTo(address, 100000, '0x', { value: parseEther(amount) });
     const receipt = await txn.wait();
 
     return receipt;
