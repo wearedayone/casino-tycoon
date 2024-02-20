@@ -24,7 +24,19 @@ class PopupDepositETH extends Popup {
     const instructionY = startingY + 400;
     const depositCodeY = instructionY + 340;
 
-    const instruction = scene.add.image(width / 2, instructionY, 'deposit-instruction');
+    const instruction = scene.add
+      .text(
+        width / 2,
+        instructionY,
+        `Visit ${window.location.host}/deposit\nin your phone or computer's browser\nand use this code:`,
+        {
+          fontSize: fontSizes.medium,
+          color: colors.black,
+          fontFamily: fontFamilies.bold,
+          align: 'center',
+        }
+      )
+      .setOrigin(0.5, 0.5);
     const textContainer = scene.add.image(width / 2, depositCodeY, 'text-container');
     const depositCode = scene.add
       .text(width / 2, depositCodeY, '- - -  - - -', {
