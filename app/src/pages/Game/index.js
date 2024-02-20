@@ -308,7 +308,6 @@ const Game = () => {
       if (receipt.status === 1) {
         gameRef.current?.events.emit('deposit-nft-completed', { amount, txnHash: receipt.transactionHash });
       }
-      enqueueSnackbar(`Staked gangster successfully`, { variant: 'success' });
     } catch (err) {
       err.message && enqueueSnackbar(err.message, { variant: 'error' });
       console.error(err);
