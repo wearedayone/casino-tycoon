@@ -187,7 +187,7 @@ class PopupWarHistoryDetail extends Popup {
       .setOrigin(0, 0.5);
 
     const attackers = (defendResults || [])
-      .sort((user1, user2) => (user2.attackUnits = user1.attackUnits))
+      .sort((user1, user2) => user2.attackUnits - user1.attackUnits)
       .slice(0, NUMBER_OF_TOP_ATTACKERS)
       .map((user) => ({ username: user.userUsername, attackUnits: user.attackUnits }));
     y += 131;
