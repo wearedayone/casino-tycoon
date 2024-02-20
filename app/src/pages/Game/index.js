@@ -326,6 +326,7 @@ const Game = () => {
       if (receipt.status !== 1) {
         throw new Error('Transaction failed');
       }
+      return receipt.transactionHash;
     } catch (err) {
       console.error(err);
       Sentry.captureException(err);
@@ -341,6 +342,7 @@ const Game = () => {
       if (receipt.status !== 1) {
         throw new Error('Transaction failed');
       }
+      return receipt.transactionHash;
     } catch (err) {
       console.error(err);
       Sentry.captureException(err);
@@ -759,8 +761,8 @@ const Game = () => {
 
       gameRef.current?.events.on('upgrade-safehouse', async ({ quantity }) => {
         try {
-          await buyBuilding(quantity);
-          gameRef.current?.events.emit('upgrade-safehouse-completed');
+          const txnHash = await buyBuilding(quantity);
+          gameRef.current?.events.emit('upgrade-safehouse-completed', { txnHash, amount: quantity });
         } catch (err) {
           let message = err.message;
           let errorCode = err.code?.toString();
@@ -800,8 +802,8 @@ const Game = () => {
 
       gameRef.current?.events.on('buy-goon', async ({ quantity }) => {
         try {
-          await buyWorker(quantity);
-          gameRef.current?.events.emit('buy-goon-completed');
+          const txnHash = await buyWorker(quantity);
+          gameRef.current?.events.emit('buy-goon-completed', { txnHash, amount: quantity });
         } catch (err) {
           let message = err.message;
           let errorCode = err.code?.toString();

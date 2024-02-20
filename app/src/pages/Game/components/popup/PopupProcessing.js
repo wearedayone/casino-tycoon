@@ -104,6 +104,8 @@ class PopupProcessing extends Popup {
         const hasTxnHashEvents = [
           ...simulatorBuyEvents,
           'buy-gangster-completed',
+          'buy-goon-completed',
+          'upgrade-safehouse-completed',
           'deposit-nft-completed',
           'withdraw-token-completed',
           'withdraw-eth-completed',
