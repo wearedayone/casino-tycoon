@@ -323,11 +323,11 @@ export const isMinted = async (address) => {
   return minted;
 };
 
-export const getTotalSold = async (type) => {
+export const getTotalSold = async (type, address) => {
   const workerWallet = await getWorkerWallet();
   const gameContract = await getGameContract(workerWallet);
 
-  const totalSold = type == 'buy-worker' ? await gameContract.tgoon() : await gameContract.tshouse();
+  const totalSold = type == 'buy-worker' ? await gameContract.goon(address) : await gameContract.safehouse(address);
   return totalSold.toNumber();
 };
 

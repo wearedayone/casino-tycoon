@@ -203,7 +203,7 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       const mintFunction = type === 'buy-worker' ? 'buyGoon' : 'buySafeHouse';
 
       const { address } = userData.data();
-      const totalSold = await getTotalSold(type);
+      const totalSold = await getTotalSold(type, address);
       const signature = await signMessageBuyGoon({
         address: address,
         amount: txnData.amount,
@@ -213,7 +213,7 @@ export const initTransaction = async ({ userId, type, ...data }) => {
         nonce,
         mintFunction,
       });
-      return { id: newTransaction.id, ...transaction, time, signature };
+      return { id: newTransaction.id, ...transaction, totalSold, time, signature };
     }
   }
 
