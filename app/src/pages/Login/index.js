@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import { usePrivy } from '@privy-io/react-auth';
+import * as Sentry from '@sentry/react';
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const Login = () => {
@@ -23,14 +24,19 @@ const Login = () => {
   const onClickLoginBtn = async () => {
     if (loading) return;
     setLoading(true);
-    addCssForPrivyDialog();
-    login();
-    await delay(200);
-    const privyDialog = document.querySelector('#privy-dialog');
-    console.log({ privyDialog });
-    const buttons = [...privyDialog.querySelectorAll('button')];
-    const twitterLoginButton = buttons.at(-1);
-    twitterLoginButton?.click();
+    try {
+      addCssForPrivyDialog();
+      login();
+      await delay(200);
+      const privyDialog = document.querySelector('#privy-dialog');
+      console.log({ privyDialog });
+      const buttons = [...privyDialog.querySelectorAll('button')];
+      const twitterLoginButton = buttons.at(-1);
+      twitterLoginButton?.click();
+    } catch (err) {
+      console.error(err);
+      Sentry.captureException(err);
+    }
     setLoading(false);
   };
 
