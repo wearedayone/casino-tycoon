@@ -60,7 +60,7 @@ export const initTransaction = async ({ userId, type, ...data }) => {
   } = activeSeason;
   const txnData = {};
   const now = Date.now();
-  const oneWeekAgo = now - 7 * 24 * 60 * 60 * 1000;
+  const oneDayAgo = now - 24 * 60 * 60 * 1000;
   switch (type) {
     case 'withdraw':
       txnData.value = data.value;
@@ -118,7 +118,7 @@ export const initTransaction = async ({ userId, type, ...data }) => {
         .where('seasonId', '==', activeSeason.id)
         .where('type', '==', 'buy-worker')
         .where('status', '==', 'Success')
-        .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(oneWeekAgo))
+        .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(oneDayAgo))
         .get();
       const workerSalesLastPeriod = workerTxns.docs.reduce((total, doc) => total + doc.data().amount, 0);
       const workerPrices = calculateNextWorkerBuyPriceBatch(
@@ -140,7 +140,7 @@ export const initTransaction = async ({ userId, type, ...data }) => {
         .where('seasonId', '==', activeSeason.id)
         .where('type', '==', 'buy-building')
         .where('status', '==', 'Success')
-        .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(oneWeekAgo))
+        .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(oneDayAgo))
         .get();
       const buildingSalesLastPeriod = buildingTxns.docs.reduce((total, doc) => total + doc.data().amount, 0);
       const buildingPrices = calculateNextBuildingBuyPriceBatch(
