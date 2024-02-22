@@ -665,7 +665,7 @@ export const finishClaimToken = async ({ address, claimedAmount, transactionId }
       const user = await firestore.collection('user').doc(userId).get();
       if (user.exists) {
         const { address } = user.data();
-        const balance = await getTokenBalance(address);
+        const balance = await getTokenBalance({ address });
         await firestore.collection('user').doc(userId).update({
           tokenBalance: balance.toNumber(),
         });
