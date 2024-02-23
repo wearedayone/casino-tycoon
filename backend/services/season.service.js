@@ -1,4 +1,5 @@
 import schedule from 'node-schedule';
+import chunk from 'lodash.chunk';
 
 import { getAllActiveGamePlay, getLeaderboard } from './gamePlay.service.js';
 import { firestore } from '../configs/firebase.config.js';
@@ -77,7 +78,16 @@ const takeSeasonLeaderboardSnapshot = async () => {
     await setGameClosed(true, totalPoints);
 
     // call on-chain `setWinner` method
-    await setWinner({ winners, points });
+    // chunk to set winner, max 20 users per time
+    const maxPerTime = 20;
+    const chunkedWinners = chunk(winners, maxPerTime);
+    const chunkedPoints = chunk(points, maxPerTime);
+
+    for (const i in chunkedWinners) {
+      const winnerArray = chunkedWinners[i];
+      const pointArray = chunkedPoints[i];
+      await setWinner({ winners: winnerArray, points: pointArray });
+    }
   } catch (ex) {
     logger.error(ex);
   }
