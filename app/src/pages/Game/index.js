@@ -750,6 +750,10 @@ const Game = () => {
         gameRef.current.events.emit('update-gas-mint', { gas: estimatedGas?.game?.mint });
       });
 
+      gameRef.current?.events.on('request-gas-swap-eth-fiat', () => {
+        gameRef.current.events.emit('update-gas-swap-eth-fiat', { gas: estimatedGas?.swap?.swapEthToToken });
+      });
+
       gameRef.current?.events.on('request-gas-buy-goon', () => {
         gameRef.current.events.emit('update-gas-buy-goon', { gas: estimatedGas?.game?.buyGoon });
       });
