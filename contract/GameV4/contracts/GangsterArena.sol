@@ -53,7 +53,7 @@ contract GangsterArena is AccessControl, IGangsterArena {
   // Retire pool value percentage - over 10000
   uint256 public RETIRE_PERCENT = 5000;
 
-  uint256 public vtd = 1000; // valid timestamp different
+  uint256 public vtd = 60; // valid timestamp different
 
   // Value dev spent - use to calculate
   int256 public devDebt;
@@ -235,7 +235,7 @@ contract GangsterArena is AccessControl, IGangsterArena {
     bytes memory sig
   ) public {
     require(!gameClosed, 'Game is closed');
-    // require(totalGoon == tgoon, 'Invalid total Goon');
+    require(goon[msg.sender] == totalGoon, 'Invalid total Goon');
     require(block.timestamp < time + vtd, 'Invalid timestamp');
     require(!usedNonces[nonce], 'Nonce is used');
     bytes32 message = prefixed(
@@ -261,7 +261,7 @@ contract GangsterArena is AccessControl, IGangsterArena {
     bytes memory sig
   ) public {
     require(!gameClosed, 'Game is closed');
-    // require(totalSafehouse == tshouse, 'Invalid total Safehouse');
+    require(safehouse[msg.sender] == totalSafehouse, 'Invalid total Safehouse');
     require(block.timestamp < time + vtd, 'Invalid timestamp');
     require(!usedNonces[nonce], 'Nonce is used');
 
