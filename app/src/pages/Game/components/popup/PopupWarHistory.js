@@ -109,7 +109,7 @@ class PopupWarHistory extends Popup {
           this.scene.popupWarHistoryDetail?.open();
         },
         'View',
-        { fontSize: '36px' }
+        { fontSize: '36px', sound: 'open' }
       );
 
       this.items.push(dateText, totalTokenRewardText, totalTokenRewardIcon, viewBtn);

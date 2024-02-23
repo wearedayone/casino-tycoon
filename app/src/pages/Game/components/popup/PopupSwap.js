@@ -203,7 +203,7 @@ class PopupSwap extends Popup {
         };
         scene.game.events.emit('swap', data);
       },
-      { disabledImage: 'button-approve-disabled' }
+      { sound: 'button-1', disabledImage: 'button-approve-disabled' }
     );
     this.add(buttonBack);
     this.add(this.buttonApprove);

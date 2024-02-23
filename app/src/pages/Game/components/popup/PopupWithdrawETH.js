@@ -120,7 +120,7 @@ class PopupWithdrawETH extends Popup {
         parentModal.open();
       },
       'Back',
-      { fontSize: '82px' }
+      { fontSize: '82px', sound: 'close' }
     );
     this.buttonConfirm = new Button(
       scene,
