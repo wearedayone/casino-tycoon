@@ -3,6 +3,7 @@ import { Wallet } from '@ethersproject/wallet';
 import { parseEther } from '@ethersproject/units';
 import { ethers } from 'ethers';
 import { Utils } from 'alchemy-sdk';
+import RouterABI from '@uniswap/v2-periphery/build/IUniswapV2Router02.json' assert { type: 'json' };
 
 import gameContractABI from '../assets/abis/GameContract.json' assert { type: 'json' };
 import { firestore } from '../configs/admin.config.js';
@@ -18,12 +19,13 @@ const estimateGasPrice = async () => {
     const systemData = await firestore.collection('system').doc('data').get();
     const { nonce } = systemData.data();
 
-    const { machine, workerSold, buildingSold } = await getActiveSeason();
+    const { machine, workerSold, buildingSold, tokenAddress, wethAddress } = await getActiveSeason();
 
     // amount = 0 since worker wallet has no fiat balance -> contract throws err if amount > 0
     const fiatBuyValue = parseEther('0');
 
     const time = Math.floor(Date.now() / 1000);
+    const deadline = time + 10 * 60;
 
     const machineSignature = await signMessageBuyGangster({
       address: SYSTEM_ADDRESS,
@@ -51,7 +53,7 @@ const estimateGasPrice = async () => {
       mintFunction: 'buySafeHouse',
     });
 
-    const [mint, buyGoon, buySafeHouse] = await Promise.all([
+    const [mint, buyGoon, buySafeHouse, swapEthToFiat] = await Promise.all([
       // UPDATE all deez function
       estimateTxnFee({
         functionName: 'mint',
@@ -66,15 +68,23 @@ const estimateGasPrice = async () => {
         functionName: 'buySafeHouse',
         params: [0, BigInt(fiatBuyValue.toString()), buildingSold, time, nonce, buildingSignature],
       }),
+      estimateTxnFee({
+        functionName: 'swapExactETHForTokensSupportingFeeOnTransferTokens',
+        params: [0, [wethAddress, tokenAddress], SYSTEM_ADDRESS, deadline],
+        value: 0.01, // small amount to get gas only
+        getContractFnc: getRouterContract,
+      }),
     ]);
 
-    const updatedGas = {};
+    const updatedGameGas = {};
+    const updatedSwapGas = {};
 
-    if (!isNaN(mint)) updatedGas.mint = mint;
-    if (!isNaN(buyGoon)) updatedGas.buyGoon = buyGoon;
-    if (!isNaN(buySafeHouse)) updatedGas.buySafeHouse = buySafeHouse;
+    if (!isNaN(mint)) updatedGameGas.mint = mint;
+    if (!isNaN(buyGoon)) updatedGameGas.buyGoon = buyGoon;
+    if (!isNaN(buySafeHouse)) updatedGameGas.buySafeHouse = buySafeHouse;
+    if (!isNaN(swapEthToFiat)) updatedSwapGas.swapEthToToken = swapEthToFiat;
 
-    const { game } = (await estimatedGasRef.get()).data();
+    const { game, swap } = (await estimatedGasRef.get()).data();
 
     await firestore
       .collection('system')
@@ -82,7 +92,11 @@ const estimateGasPrice = async () => {
       .update({
         game: {
           ...game,
-          ...updatedGas,
+          ...updatedGameGas,
+        },
+        swap: {
+          ...swap,
+          ...updatedSwapGas,
         },
       });
     console.log(`\n**************** End job estimateGasPrice ****************\n\n`);
@@ -110,6 +124,15 @@ const getGameContract = async (signer) => {
   return contract;
 };
 
+const getRouterContract = async (signer) => {
+  const activeSeason = await getActiveSeason();
+
+  const { routerAddress } = activeSeason || {};
+  const routerContract = new Contract(routerAddress, RouterABI.abi, signer);
+
+  return routerContract;
+};
+
 const getWorkerWallet = async () => {
   const ethersProvider = await alchemy.config.getProvider();
   const workerWallet = new Wallet(WORKER_WALLET_PRIVATE_KEY, ethersProvider);
@@ -122,10 +145,10 @@ const getSignerWallet = async () => {
   return workerWallet;
 };
 
-const estimateTxnFee = async ({ functionName, params, value }) => {
+const estimateTxnFee = async ({ functionName, params, value, getContractFnc = getGameContract }) => {
   try {
     const workerWallet = await getWorkerWallet();
-    const contract = await getGameContract(workerWallet);
+    const contract = await getContractFnc(workerWallet);
     const ethersProvider = await alchemy.config.getProvider();
     const feeData = await ethersProvider.getFeeData();
     const lastBaseFeePerGas = Number(Utils.formatUnits(feeData.lastBaseFeePerGas, 'ether'));
@@ -137,7 +160,7 @@ const estimateTxnFee = async ({ functionName, params, value }) => {
     const transactionFee = gasPrice * gasLimit;
 
     // console.log({ gasPrice, gasLimit, transactionFee });
-    console.log(`The gas cost estimation for the tx calling ${functionName} is: ${transactionFee} ether`);
+    console.log(`The gas cost estimation for the tx calling ${functionName} is: ${transactionFee} ether\n`);
 
     return transactionFee;
   } catch (error) {

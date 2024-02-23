@@ -21,6 +21,7 @@ class PopupSwap extends Popup {
   error = false;
   ethBalance = 0;
   tokenBalance = 0;
+  gas = 0;
   tokenSwap = 'eth';
   timeout = null;
   loading = false;
@@ -215,8 +216,9 @@ class PopupSwap extends Popup {
       'button-blue-mini',
       'button-blue-mini-pressed',
       () => {
-        const balance = this.tokenSwap === 'eth' ? this.ethBalance : this.tokenBalance;
-        this.token1AmountInput.updateValue(balance.toString(), true, true);
+        const fee = this.tokenSwap === 'eth' ? Math.min(this.ethBalance, this.gas) : Math.min(this.tokenBalance, 1);
+        const balance = this.tokenSwap === 'eth' ? this.ethBalance : Math.floor(this.tokenBalance);
+        this.token1AmountInput.updateValue((balance - fee).toString(), true, true);
         this.setLoading(true);
         this.timeout = setTimeout(
           () =>
@@ -234,6 +236,10 @@ class PopupSwap extends Popup {
     );
     this.add(this.maxBtn);
 
+    scene.game.events.on('update-gas-swap-eth-fiat', ({ gas }) => {
+      if (isNaN(gas)) return;
+      this.gas = gas;
+    });
     scene.game.events.on('update-balances', ({ ETHBalance, tokenBalance }) =>
       this.updateBalance({ ETHBalance, tokenBalance })
     );
@@ -281,6 +287,7 @@ class PopupSwap extends Popup {
     });
     this.scene.game.events.emit('request-balances');
     this.scene.game.events.emit('request-fee-percent');
+    this.scene.game.events.emit('request-gas-swap-eth-fiat');
   }
 
   switch() {
