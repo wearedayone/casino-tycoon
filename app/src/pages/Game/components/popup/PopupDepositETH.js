@@ -51,7 +51,8 @@ class PopupDepositETH extends Popup {
       depositCodeY,
       'button-copy',
       'button-copy-pressed',
-      () => navigator.clipboard.writeText(this.code)
+      () => navigator.clipboard.writeText(this.code),
+      { sound: 'button-2' }
     );
 
     this.add(instruction);

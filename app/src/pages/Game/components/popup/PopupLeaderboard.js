@@ -243,7 +243,7 @@ class PopupLeaderboard extends Popup {
         scene.popupRetire.open();
       },
       'Retire',
-      { fontSize: '82px' }
+      { fontSize: '82px', sound: 'open' }
     ).setVisible(false);
     this.add(this.buttonRetire);
 
