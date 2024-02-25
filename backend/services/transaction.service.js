@@ -666,9 +666,12 @@ export const finishClaimToken = async ({ address, claimedAmount, transactionId }
       if (user.exists) {
         const { address } = user.data();
         const balance = await getTokenBalance({ address });
-        await firestore.collection('user').doc(userId).update({
-          tokenBalance: balance.toNumber(),
-        });
+        await firestore
+          .collection('user')
+          .doc(userId)
+          .update({
+            tokenBalance: Number(formatEther(balance)),
+          });
         const gamePlay = await firestore
           .collection('gamePlay')
           .where('userId', '==', userId)
@@ -677,10 +680,10 @@ export const finishClaimToken = async ({ address, claimedAmount, transactionId }
           .get();
 
         if (!gamePlay.empty) {
-          const { pendingReward } = gamePlay[0].data();
+          const { pendingReward } = gamePlay.docs[0].data();
           await firestore
             .collection('gamePlay')
-            .doc(gamePlay[0].id)
+            .doc(gamePlay.docs[0].id)
             .update({
               lastClaimTime: admin.firestore.Timestamp.fromMillis(1708451011000),
               pendingReward: pendingReward + claimedAmount,
