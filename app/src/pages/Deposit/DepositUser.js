@@ -6,7 +6,15 @@ import { useSnackbar } from 'notistack';
 import { getByCode } from '../../services/user.service';
 import { formatter } from '../../utils/numbers';
 import useEthereum from '../../hooks/useEthereum';
+import environments from '../../utils/environments';
 import ProviderSelector from './components/ProviderSelector';
+
+const { LAYER_1_NETWORK_ID } = environments;
+
+const networkIds = {
+  11155111: 'Ethereum Sepolia',
+  1: 'Ethereum Mainnet',
+};
 
 const formatAddress = (address) => `${address.slice(0, 6)}...${address.slice(-6)}`;
 
@@ -196,7 +204,7 @@ const DepositUser = () => {
                     fontWeight={700}
                     fontFamily="WixMadeforDisplayBold"
                     color="#29000B">
-                    {invalidChain ? 'Invalid chain' : 'From Ethereum Mainnet'}
+                    {invalidChain ? 'Invalid chain' : networkIds[LAYER_1_NETWORK_ID]}
                   </Typography>
                   <Typography
                     fontSize={{ xs: 16, sm: 24, md: 32 }}
