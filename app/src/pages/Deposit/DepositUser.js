@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Box, Button, Typography } from '@mui/material';
 import { useSnackbar } from 'notistack';
@@ -26,8 +26,12 @@ const DepositUser = () => {
 
   const code = searchParams.get('code');
 
+  const loaded = useRef();
   useEffect(() => {
-    getUser();
+    if (!loaded.current) {
+      loaded.current = true;
+      getUser();
+    }
   }, [code]);
 
   const getUser = async (noLoading) => {
