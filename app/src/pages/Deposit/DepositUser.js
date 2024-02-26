@@ -14,7 +14,8 @@ const numberValueRegex = /[\d]+(\.\d+)?/;
 
 const DepositUser = () => {
   const { enqueueSnackbar } = useSnackbar();
-  const { account, balance, isAuthenticating, connectWallet, deposit, isDepositing, setIsDepositing } = useEthereum();
+  const { account, balance, isAuthenticating, invalidChain, connectWallet, deposit, isDepositing, setIsDepositing } =
+    useEthereum();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [mouseDown, setMouseDown] = useState(false);
@@ -33,9 +34,17 @@ const DepositUser = () => {
     !noLoading && setLoading(true);
     try {
       const res = await getByCode(code);
-      setUser(res.data);
+      if (res.data) {
+        setUser(res.data);
+      } else {
+        throw new Error('Invalid code');
+      }
     } catch (err) {
       console.error(err);
+      if (err.message === 'Invalid code') {
+        enqueueSnackbar(err.message, { variant: 'error' });
+        navigate('/deposit');
+      }
     }
     !noLoading && setLoading(false);
   };
@@ -183,7 +192,7 @@ const DepositUser = () => {
                     fontWeight={700}
                     fontFamily="WixMadeforDisplayBold"
                     color="#29000B">
-                    From Ethereum Mainnet
+                    {invalidChain ? 'Invalid chain' : 'From Ethereum Mainnet'}
                   </Typography>
                   <Typography
                     fontSize={{ xs: 16, sm: 24, md: 32 }}
