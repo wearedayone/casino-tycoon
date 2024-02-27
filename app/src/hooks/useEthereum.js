@@ -17,6 +17,7 @@ const useEthereum = () => {
   const [isDepositing, setIsDepositing] = useState(false);
   const [wallet, setWallet] = useState('');
   const [balance, setBalance] = useState(0);
+  const [invalidChain, setInvalidChain] = useState(false);
   const { browserProvider } = useEthereumProvider();
 
   const connectWallet = async ({ providerName } = {}) => {
@@ -72,6 +73,18 @@ const useEthereum = () => {
     setIsAuthenticating(false);
   };
 
+  const checkNetwork = async () => {
+    const provider = getProvider(wallet);
+    if (!provider) return;
+
+    if (provider.chainId !== LAYER_1_NETWORK_ID) {
+      await provider.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: toHexString(LAYER_1_NETWORK_ID) }],
+      });
+    }
+  };
+
   const getProvider = (name) => {
     if (!browserProvider) return null;
     console.log('useEthereum > getProvider: ', { name, browserProvider });
@@ -95,6 +108,8 @@ const useEthereum = () => {
   };
 
   const deposit = async ({ address, amount }) => {
+    await checkNetwork();
+
     const depositContract = getDepositContract();
     if (!depositContract) return;
 
@@ -115,7 +130,10 @@ const useEthereum = () => {
       }
     };
 
-    const onWeb3ChainChanged = (networkId) => console.log({ networkId });
+    const onWeb3ChainChanged = (networkId) => {
+      const provider = getProvider(wallet);
+      setInvalidChain(provider.chainId !== toHexString(LAYER_1_NETWORK_ID));
+    };
 
     if (!ethereum) return;
 
@@ -154,6 +172,7 @@ const useEthereum = () => {
 
   return {
     isAuthenticating,
+    invalidChain,
     account,
     balance,
     connectWallet,

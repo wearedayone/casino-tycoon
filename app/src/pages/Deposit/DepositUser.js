@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Box, Button, Typography } from '@mui/material';
 import { useSnackbar } from 'notistack';
@@ -6,7 +6,15 @@ import { useSnackbar } from 'notistack';
 import { getByCode } from '../../services/user.service';
 import { formatter } from '../../utils/numbers';
 import useEthereum from '../../hooks/useEthereum';
+import environments from '../../utils/environments';
 import ProviderSelector from './components/ProviderSelector';
+
+const { LAYER_1_NETWORK_ID } = environments;
+
+const networkIds = {
+  11155111: 'Ethereum Sepolia',
+  1: 'Ethereum Mainnet',
+};
 
 const formatAddress = (address) => `${address.slice(0, 6)}...${address.slice(-6)}`;
 
@@ -14,7 +22,8 @@ const numberValueRegex = /[\d]+(\.\d+)?/;
 
 const DepositUser = () => {
   const { enqueueSnackbar } = useSnackbar();
-  const { account, balance, isAuthenticating, connectWallet, deposit, isDepositing, setIsDepositing } = useEthereum();
+  const { account, balance, isAuthenticating, invalidChain, connectWallet, deposit, isDepositing, setIsDepositing } =
+    useEthereum();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [mouseDown, setMouseDown] = useState(false);
@@ -25,17 +34,29 @@ const DepositUser = () => {
 
   const code = searchParams.get('code');
 
+  const loaded = useRef();
   useEffect(() => {
-    getUser();
+    if (!loaded.current) {
+      loaded.current = true;
+      getUser();
+    }
   }, [code]);
 
   const getUser = async (noLoading) => {
     !noLoading && setLoading(true);
     try {
       const res = await getByCode(code);
-      setUser(res.data);
+      if (res.data) {
+        setUser(res.data);
+      } else {
+        throw new Error('Invalid code');
+      }
     } catch (err) {
       console.error(err);
+      if (err.message === 'Invalid code') {
+        enqueueSnackbar(err.message, { variant: 'error' });
+        navigate('/deposit');
+      }
     }
     !noLoading && setLoading(false);
   };
@@ -183,7 +204,7 @@ const DepositUser = () => {
                     fontWeight={700}
                     fontFamily="WixMadeforDisplayBold"
                     color="#29000B">
-                    From Ethereum Mainnet
+                    {invalidChain ? 'Invalid chain' : networkIds[LAYER_1_NETWORK_ID]}
                   </Typography>
                   <Typography
                     fontSize={{ xs: 16, sm: 24, md: 32 }}
