@@ -24,6 +24,9 @@
       "hosting": {
         "app-prd": [
           "gangster-arena-prd"
+        ],
+        "app-prd-test": [
+          "playtest-0"
         ]
       }
     },
