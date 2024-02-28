@@ -20,6 +20,7 @@ const main = async () => {
       ...gameConfigs.assets,
       activeSeasonId,
       appVersion: '0.9.9',
+      disabledUrls: ['gangsterarena.com'],
     });
   await firestore.collection('system').doc('market').set({
     ethPriceInUsd: '2471.94',

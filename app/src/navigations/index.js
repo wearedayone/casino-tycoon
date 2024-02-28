@@ -7,6 +7,7 @@ import useSystem from '../hooks/useSystem';
 import useUserProfile from '../hooks/useUserProfile';
 import useUserGamePlay from '../hooks/useUserGamePlay';
 import useLastOnlineTime from '../hooks/useLastOnlineTime';
+import useSystemStore from '../stores/system.store';
 
 const Navigations = () => {
   const { ready, authenticated, user } = usePrivy();
@@ -16,7 +17,11 @@ const Navigations = () => {
   useUserGamePlay();
   useLastOnlineTime();
 
-  if (!ready) return <Loading />;
+  const configs = useSystemStore((state) => state.configs);
+
+  const isLoading = !ready || !configs || configs?.disabledUrls?.includes(window.location.host);
+
+  if (isLoading) return <Loading />;
 
   if (!authenticated) return <AuthRoutes />;
 
