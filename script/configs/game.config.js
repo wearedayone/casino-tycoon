@@ -63,7 +63,7 @@ const configs = {
     { networthStart: 5000, level: 15 },
   ],
   claimGapInSeconds: 120,
-  timeStepInHours: 0.25, // time increase when every nft is purchased
+  timeStepInMinutes: 1, // time increase when every nft is purchased
 };
 
 export default configs;

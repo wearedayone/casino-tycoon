@@ -515,10 +515,10 @@ const Game = () => {
       });
       gameRef.current?.events.on('open-leaderboard-modal', () => {
         setLeaderboardModalOpen(true);
-        const { name, timeStepInHours, rankPrizePool, reputationPrizePool } = activeSeason || {};
+        const { name, timeStepInMinutes, rankPrizePool, reputationPrizePool } = activeSeason || {};
         gameRef.current.events.emit('update-season', {
           name,
-          timeStepInHours,
+          timeStepInMinutes,
           prizePool: rankPrizePool + reputationPrizePool,
           isEnded,
         });
@@ -1241,10 +1241,10 @@ const Game = () => {
 
   useEffect(() => {
     if (isLeaderboardModalOpen) {
-      const { name, timeStepInHours, rankPrizePool, reputationPrizePool } = activeSeason || {};
+      const { name, timeStepInMinutes, rankPrizePool, reputationPrizePool } = activeSeason || {};
       gameRef.current?.events.emit('update-season', {
         name,
-        timeStepInHours,
+        timeStepInMinutes,
         prizePool: rankPrizePool + reputationPrizePool,
         isEnded,
       });
@@ -1252,7 +1252,7 @@ const Game = () => {
   }, [
     isLeaderboardModalOpen,
     activeSeason?.name,
-    activeSeason?.timeStepInHours,
+    activeSeason?.timeStepInMinutes,
     activeSeason?.rankPrizePool,
     activeSeason?.reputationPrizePool,
     machine.networth,
