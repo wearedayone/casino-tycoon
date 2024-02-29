@@ -18,6 +18,7 @@ const main = async () => {
     .doc('default')
     .set({
       ...gameConfigs.assets,
+      openseaNftCollection: 'gangster-arena', // mainnet only
       activeSeasonId,
       appVersion: '0.9.2.10',
       disabledUrls: ['gangsterarena.com'],
