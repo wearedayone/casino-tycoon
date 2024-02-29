@@ -114,6 +114,12 @@ class PopupWarAttack extends Popup {
       this.table.setMouseWheelScrollerEnable(true);
     }
     this.scene.game.events.emit('request-next-war-time');
+    if (this.uid) {
+      this.page = 0;
+      this.search = '';
+      this.searchInput?.updateValue('');
+      this.reloadData();
+    }
   }
 
   cleanup() {
