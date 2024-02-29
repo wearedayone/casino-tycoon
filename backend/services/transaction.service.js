@@ -478,6 +478,7 @@ const updateUserGamePlay = async (userId, transactionId) => {
       assets.numberOfWorkers = 0;
       gamePlayData = {
         ...assets,
+        active: false,
       };
       warDeploymentData = {
         numberOfMachinesToEarn: 0,
