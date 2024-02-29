@@ -67,6 +67,7 @@ const Game = () => {
   const estimatedGas = useSystemStore((state) => state.estimatedGas);
   const sound = useSettingStore((state) => state.sound);
   const toggleSound = useSettingStore((state) => state.toggleSound);
+  const setOnlineListener = useSettingStore((state) => state.setOnlineListener);
   const {
     getNFTBalance,
     getETHBalance,
@@ -499,9 +500,11 @@ const Game = () => {
             startTime = profile.lastOnlineTime.toDate().getTime();
           }
 
-          const diffInDays = (Date.now() - startTime) / MILISECONDS_IN_A_DAY;
-          const claimableReward = diffInDays * dailyMoney;
+          const now = Date.now();
+          const diffInDays = (now - startTime) / MILISECONDS_IN_A_DAY;
+          const claimableReward = Math.abs(diffInDays * dailyMoney);
           gameRef.current?.events.emit('update-user-away-reward', { showWarPopup, claimableReward });
+          setOnlineListener(true);
         } catch (err) {
           console.error(err);
           Sentry.captureException(err);
