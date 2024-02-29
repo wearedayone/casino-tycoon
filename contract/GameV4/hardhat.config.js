@@ -68,17 +68,17 @@ module.exports = {
         },
       },
     },
-    // base_mainnet: {
-    //   url: secrets.base_mainnet_url || ``,
-    //   accounts: [secrets.base_mainnet_key],
-    //   gasPrice: 1000000000,
-    //   verify: {
-    //     etherscan: {
-    //       apiUrl: 'https://api.basescan.org',
-    //       apiKey: process.env.BASE_ETHERSCAN_API_KEY ?? 'ETHERSCAN_API_KEY',
-    //     },
-    //   },
-    // },
+    base_mainnet: {
+      url: secrets.base_mainnet_url || ``,
+      accounts: [secrets.base_mainnet_key],
+      gasPrice: 1000000000,
+      verify: {
+        etherscan: {
+          apiUrl: 'https://api.basescan.org',
+          apiKey: process.env.BASE_ETHERSCAN_API_KEY ?? 'ETHERSCAN_API_KEY',
+        },
+      },
+    },
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,

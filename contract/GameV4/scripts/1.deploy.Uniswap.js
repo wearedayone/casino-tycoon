@@ -7,10 +7,10 @@ const routerArtifact = require('@uniswap/v2-periphery/build/UniswapV2Router02.js
 const pairArtifact = require('@uniswap/v2-periphery/build/IUniswapV2Pair.json');
 const WETH9 = require('../WETH9.json');
 
-const _fiatAddress = '0x211C64Dd7b260cd52d8cf90Ba5F711C99922794c';
+const _fiatAddress = '0x3d25913A2ebd862B7de771D09750Ad858ca340C5';
 
 async function main() {
-  const _defaultAdmin = '0x890611302Ee344d5bD94DA9811C18e2De5588077';
+  const _defaultAdmin = '0xe772548F3BB8011da131182844D425F8893c97b6';
 
   const FIAT = await ethers.getContractFactory('FIAT');
   const fiatToken = FIAT.attach(_fiatAddress);
@@ -46,11 +46,11 @@ async function main() {
     _fiatAddress,
     parseEther('100000'),
     0,
-    parseEther('0.1'),
+    parseEther('0.005'),
     _defaultAdmin,
     deadline,
     {
-      value: parseEther('0.1'),
+      value: parseEther('0.005'),
     }
   );
   await addLiquidityTxn.wait();

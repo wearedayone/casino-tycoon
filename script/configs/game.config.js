@@ -1,8 +1,8 @@
 const configs = {
   assets: {
     machine: {
-      basePrice: 0.002,
-      whitelistPrice: 0.001,
+      basePrice: 0.001,
+      whitelistPrice: 0.0005,
       maxWhitelistAmount: 10,
       dailyReward: 1000,
       networth: 10,
@@ -12,7 +12,7 @@ const configs = {
       basePrice: 250,
       targetDailyPurchase: 100,
       targetPrice: 2000,
-      dailyReward: 200,
+      dailyReward: 400,
       networth: 2,
       maxPerBatch: 100,
     },
@@ -31,7 +31,7 @@ const configs = {
     rewardScalingRatio: 1.25,
     // rank leaderboard
     higherRanksCutoffPercent: 0.1,
-    lowerRanksCutoffPercent: 0.5,
+    lowerRanksCutoffPercent: 0.2,
     minRewardHigherRanks: 0.01, // in ETH
     minRewardLowerRanks: 0.005, // in ETH
     // reputation leaderboard
@@ -39,7 +39,7 @@ const configs = {
   },
   war: {
     buildingBonusMultiple: 0.1,
-    workerBonusMultiple: 0.2,
+    workerBonusMultiple: 0.1,
     earningStealPercent: 0.7,
     tokenRewardPerEarner: 1000,
     machinePercentLost: 0.05,

@@ -21,3 +21,4 @@ backend/logs/
 */serviceAccounts/*.json
 
 test.json
+contract/GameV4/.env.prd
