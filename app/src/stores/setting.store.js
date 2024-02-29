@@ -7,6 +7,8 @@ const useSettingStore = create((set, get) => ({
     localStorage.setItem('sound', sound);
     set({ sound });
   },
+  onlineListener: false,
+  setOnlineListener: (newOnlineListener) => set({ onlineListener: newOnlineListener }),
 }));
 
 export default useSettingStore;
