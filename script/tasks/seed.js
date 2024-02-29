@@ -18,7 +18,7 @@ const main = async () => {
     .doc('default')
     .set({
       ...gameConfigs.assets,
-      openseaNftCollection: 'gangster-arena', // mainnet only
+      openseaNftCollection: gameConfigs.openseaNftCollection,
       activeSeasonId,
       appVersion: '0.9.2.10',
       disabledUrls: ['gangsterarena.com'],
@@ -67,6 +67,7 @@ const main = async () => {
       ...gameConfigs.assets,
       status: 'open',
       houseLevels: gameConfigs.houseLevels,
+      openseaNftCollection: gameConfigs.openseaNftCollection,
       tokenAddress: TOKEN_ADDRESS,
       nftAddress: NFT_ADDRESS,
       gameAddress: GAME_CONTRACT_ADDRESS,
@@ -99,6 +100,7 @@ const main = async () => {
         machineSold: 0,
         workerSold: 0,
         buildingSold: 0,
+        openseaNftCollection: gameConfigs.openseaNftCollection,
         prizePoolConfig: gameConfigs.prizePool,
         warConfig: gameConfigs.war,
         referralConfig: gameConfigs.referral,
