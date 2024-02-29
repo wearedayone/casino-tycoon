@@ -326,7 +326,7 @@ const updateSeasonState = async (transactionId) => {
 
   console.log('\n\nupdateSeasonState', { type, value, amount });
   const activeSeason = await getActiveSeason();
-  const { estimatedEndTime, timeStepInHours } = activeSeason;
+  const { estimatedEndTime, timeStepInMinutes } = activeSeason;
   const estimatedEndTimeUnix = estimatedEndTime.toDate().getTime();
 
   let newData;
@@ -334,7 +334,7 @@ const updateSeasonState = async (transactionId) => {
     case 'buy-machine':
       newData = {
         estimatedEndTime: admin.firestore.Timestamp.fromMillis(
-          calculateNewEstimatedEndTimeUnix(estimatedEndTimeUnix, amount, timeStepInHours)
+          calculateNewEstimatedEndTimeUnix(estimatedEndTimeUnix, amount, timeStepInMinutes)
         ),
         machineSold: admin.firestore.FieldValue.increment(1),
       };

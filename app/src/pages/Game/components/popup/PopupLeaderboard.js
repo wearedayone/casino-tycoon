@@ -283,13 +283,15 @@ class PopupLeaderboard extends Popup {
   }
 
   updateValues(season) {
-    const { name, timeStepInHours, prizePool, isEnded } = season;
+    const { name, timeStepInMinutes, prizePool, isEnded } = season;
 
     this.isEnded = isEnded;
     this.updateEndedState();
     const title = this.isEnded ? `${name} Ended` : `${name} Leaderboard`;
     this.setTitle(title);
-    this.endTimeExtension.text = `Every Gangster purchased increases time by ${timeStepInHours} hour`;
+    this.endTimeExtension.text = `Every Gangster purchased increases time by ${timeStepInMinutes} minute${
+      timeStepInMinutes > 1 ? 's' : ''
+    }`;
     this.prizePool.text = formatter.format(prizePool);
   }
 
