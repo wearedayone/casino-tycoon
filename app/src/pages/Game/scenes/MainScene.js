@@ -65,6 +65,7 @@ class MainScene extends Phaser.Scene {
   isGameEnded = false;
   isUserActive = false;
   isFromTutorial = false;
+  timeout = null;
 
   constructor() {
     super('MainScene');
@@ -73,6 +74,16 @@ class MainScene extends Phaser.Scene {
   init(data) {
     const { isFromTutorial } = data;
     this.isFromTutorial = isFromTutorial;
+  }
+
+  requestClaimableReward() {
+    if (this.timeout) {
+      clearTimeout(this.timeout);
+    }
+
+    this.timeout = setTimeout(() => {
+      this.game.events.emit('request-claimable-reward');
+    }, 200);
   }
 
   preload() {
@@ -245,9 +256,10 @@ class MainScene extends Phaser.Scene {
       const { y } = this.animationLayer.gangsterFront;
       if (y >= gangsterAnimation.front.end.y) {
         this.game.events.emit('animation-gangster-back');
-        this.game.events.emit('request-claimable-reward');
+        // this.game.events.emit('request-claimable-reward');
         this.game.events.emit('check-game-ended');
         this.game.events.emit('request-buy-bonus');
+        this.requestClaimableReward();
       } else {
         const newY = Math.min(
           this.animationLayer.gangsterFront.y + gangsterFrontAnimationSpeed.y * delta,
@@ -298,6 +310,7 @@ class MainScene extends Phaser.Scene {
         // only update claimable when gangsters return to safehouse
         // -> uncomment if gangster & goon's running are no longer synchronized
         // this.game.events.emit('request-claimable-reward');
+        this.requestClaimableReward();
       } else {
         const newY = Math.min(
           this.animationLayer.goonFront.y + goonFrontAnimationSpeed.y * delta,
