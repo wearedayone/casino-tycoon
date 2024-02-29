@@ -54,8 +54,12 @@ export const createUserIfNotExist = async (userId) => {
   console.log({ function: 'createUserIfNotExist', userId });
   const snapshot = await firestore.collection('user').doc(userId).get();
   const user = await privy.getUser(userId);
+
+  const whitelistSnapshot = await firestore.collection('whitelisted').get();
+  const whitelistedUsernames = whitelistSnapshot.docs.map((doc) => doc.data().username);
+
   // console.log({ user });
-  let isWhitelisted = false;
+  const isWhitelisted = whitelistedUsernames.includes(user?.twitter?.username);
 
   if (!snapshot.exists) {
     const { wallet, twitter } = user;
@@ -86,7 +90,7 @@ export const createUserIfNotExist = async (userId) => {
         avatarURL,
         tokenBalance: 0,
         ETHBalance: 0,
-        isWhitelisted: false,
+        isWhitelisted,
         walletPasswordAsked: false,
         referralCode,
         referralTotalReward: 0,
@@ -95,8 +99,6 @@ export const createUserIfNotExist = async (userId) => {
         completedTutorial: false,
       });
   } else {
-    isWhitelisted = Boolean(snapshot.data().isWhitelisted);
-
     const { wallet } = user;
     if (wallet) {
       const ethersProvider = await alchemy.config.getProvider();
