@@ -1,6 +1,7 @@
 import { Contract } from '@ethersproject/contracts';
 import { usePrivy } from '@privy-io/react-auth';
 import { parseEther, formatEther } from '@ethersproject/units';
+import { defaultAbiCoder } from '@ethersproject/abi';
 import RouterABI from '@uniswap/v2-periphery/build/IUniswapV2Router02.json';
 import PairABI from '@uniswap/v2-core/build/IUniswapV2Pair.json';
 
@@ -437,10 +438,7 @@ const useSmartContract = () => {
 
   const swapEthToToken = async (amount) => {
     if (!loadedAssets) return false;
-
     const { tokenAddress, wethAddress, routerAddress, routerContract } = await getSwapContractInfo();
-
-    const { amount: tokenAmount } = await convertEthInputToToken(amount);
 
     const paths = [wethAddress, tokenAddress];
     const deadline = Math.floor(Date.now() / 1000 + 10 * 60);
@@ -458,8 +456,17 @@ const useSmartContract = () => {
       value: BigInt(parseEther(`${amount}`).toString()),
     };
     const receipt = await sendTransaction(unsignedTx);
+    const logs = receipt.logs;
+    const tokenTransferLog = logs.find(
+      (log) =>
+        log.topics.length === 3 && defaultAbiCoder.decode(['address'], log.topics[2]).includes(embeddedWallet.address)
+    );
+    const receiveAmountHex = tokenTransferLog.data;
+    const receiveAmountDec = parseInt(
+      formatEther(parseInt(receiveAmountHex).toLocaleString('fullwide', { useGrouping: false }))
+    );
 
-    return { receipt, receiveAmount: tokenAmount };
+    return { receipt, receiveAmount: receiveAmountDec };
   };
 
   const swapTokenToEth = async (amount) => {
@@ -468,7 +475,6 @@ const useSmartContract = () => {
     const { tokenAddress, wethAddress, routerAddress, routerContract, tokenContract } = await getSwapContractInfo();
 
     const amountIn = parseEther(`${amount}`);
-    const { amount: ethAmount } = await convertTokenInputToEth(amount);
 
     const res = await tokenContract.allowance(embeddedWallet.address, routerAddress);
     const approvedAmountInWei = res.toString();
@@ -502,7 +508,12 @@ const useSmartContract = () => {
       data,
     };
     const receipt = await sendTransaction(unsignedTx);
-    return { receipt, receiveAmount: ethAmount };
+    const logs = receipt.logs;
+    const ethWithdrawLog = logs[logs.length - 1];
+    const receiveAmountHex = ethWithdrawLog.data;
+    const receiveAmountDec = formatEther(parseInt(receiveAmountHex).toString());
+
+    return { receipt, receiveAmount: receiveAmountDec };
   };
 
   const getTotalFees = async () => {
