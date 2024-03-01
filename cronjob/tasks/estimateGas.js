@@ -10,7 +10,7 @@ import { firestore } from '../configs/admin.config.js';
 import alchemy from '../configs/alchemy.config.js';
 import environments from '../utils/environments.js';
 
-const { SYSTEM_ADDRESS, WORKER_WALLET_PRIVATE_KEY, SIGNER_WALLET_PRIVATE_KEY } = environments;
+const { SIGNER_ADDRESS, SIGNER_WALLET_PRIVATE_KEY } = environments;
 
 const estimateGasPrice = async () => {
   try {
@@ -28,14 +28,14 @@ const estimateGasPrice = async () => {
     const deadline = time + 10 * 60;
 
     const machineSignature = await signMessageBuyGangster({
-      address: SYSTEM_ADDRESS,
+      address: SIGNER_ADDRESS,
       amount: 1,
       time,
       nonce,
       bonus: 0,
     });
     const workerSignature = await signMessageBuyGoon({
-      address: SYSTEM_ADDRESS,
+      address: SIGNER_ADDRESS,
       amount: 0,
       value: fiatBuyValue,
       totalAmount: workerSold,
@@ -44,7 +44,7 @@ const estimateGasPrice = async () => {
       mintFunction: 'buyGoon',
     });
     const buildingSignature = await signMessageBuyGoon({
-      address: SYSTEM_ADDRESS,
+      address: SIGNER_ADDRESS,
       amount: 0,
       value: fiatBuyValue,
       totalAmount: buildingSold,
@@ -70,7 +70,7 @@ const estimateGasPrice = async () => {
       }),
       estimateTxnFee({
         functionName: 'swapExactETHForTokensSupportingFeeOnTransferTokens',
-        params: [0, [wethAddress, tokenAddress], SYSTEM_ADDRESS, deadline],
+        params: [0, [wethAddress, tokenAddress], SIGNER_ADDRESS, deadline],
         value: 0.01, // small amount to get gas only
         getContractFnc: getRouterContract,
       }),
@@ -133,22 +133,16 @@ const getRouterContract = async (signer) => {
   return routerContract;
 };
 
-const getWorkerWallet = async () => {
-  const ethersProvider = await alchemy.config.getProvider();
-  const workerWallet = new Wallet(WORKER_WALLET_PRIVATE_KEY, ethersProvider);
-  return workerWallet;
-};
-
 const getSignerWallet = async () => {
   const ethersProvider = await alchemy.config.getProvider();
-  const workerWallet = new Wallet(SIGNER_WALLET_PRIVATE_KEY, ethersProvider);
-  return workerWallet;
+  const signerWallet = new Wallet(SIGNER_WALLET_PRIVATE_KEY, ethersProvider);
+  return signerWallet;
 };
 
 const estimateTxnFee = async ({ functionName, params, value, getContractFnc = getGameContract }) => {
   try {
-    const workerWallet = await getWorkerWallet();
-    const contract = await getContractFnc(workerWallet);
+    const signerWallet = await getSignerWallet();
+    const contract = await getContractFnc(signerWallet);
     const ethersProvider = await alchemy.config.getProvider();
     const feeData = await ethersProvider.getFeeData();
     const lastBaseFeePerGas = Number(Utils.formatUnits(feeData.lastBaseFeePerGas, 'ether'));
