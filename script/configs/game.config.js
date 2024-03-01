@@ -62,6 +62,7 @@ const configs = {
     { networthStart: 2000, networthEnd: 4999, level: 14 },
     { networthStart: 5000, level: 15 },
   ],
+  initGameDurationInDays: 14,
   claimGapInSeconds: 120,
   timeStepInMinutes: 1, // time increase when every nft is purchased
   openseaNftCollection: 'gangster-arena', // mainnet only

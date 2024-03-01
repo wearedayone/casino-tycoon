@@ -42,7 +42,7 @@ const main = async () => {
 
   console.log('create season');
   const now = Date.now();
-  const endTimeUnix = Date.now() + 14 * 24 * 60 * 60 * 1000;
+  const endTimeUnix = Date.now() + gameConfigs.initGameDurationInDays * 24 * 60 * 60 * 1000;
   const startTime = admin.firestore.Timestamp.fromMillis(now);
   const estimatedEndTime = admin.firestore.Timestamp.fromMillis(endTimeUnix);
   await firestore

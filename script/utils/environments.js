@@ -15,6 +15,7 @@ const environments = {
   PAIR_ADDRESS: process.env.PAIR_ADDRESS,
   PRIVY_APP_ID: process.env.PRIVY_APP_ID,
   PRIVY_APP_SECRET: process.env.PRIVY_APP_SECRET,
+  GAME_CONFIG_SPREADSHEET_ID: process.env.GAME_CONFIG_SPREADSHEET_ID,
 };
 
 export default environments;
