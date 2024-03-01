@@ -1,0 +1,30 @@
+{
+  "defaultAdmin": "",
+  "admin": "",
+  "worker": "",
+  "signer": "",
+
+  "uniWeth": "",
+  "uniFactory": "",
+  "uniRouter": "",
+  "pair": "",
+
+  "wethDeployed": false,
+  "factoryDeployed": false,
+  "routerDeployed": false,
+  "pairDeployed": false,
+  "liquidityAdded": false,
+
+  "tokenAmountToLiquidity": 0,
+  "ethAmountToLiquidity": 0,
+
+  "token": "",
+  "nft": "",
+  "game": "",
+
+  "tokenDeployed": false,
+  "nftDeployed": false,
+  "gameDeployed": false,
+
+  "contractCompleted": false
+}
