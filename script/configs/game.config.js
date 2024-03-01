@@ -64,6 +64,7 @@ const configs = {
   ],
   claimGapInSeconds: 120,
   timeStepInMinutes: 1, // time increase when every nft is purchased
+  openseaNftCollection: 'gangster-arena', // mainnet only
 };
 
 export default configs;

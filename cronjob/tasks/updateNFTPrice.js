@@ -5,10 +5,13 @@ import environments from '../utils/environments.js';
 
 const { OPENSEA_API_KEY } = environments;
 
-const NFT_ENDPOINT = 'https://api.opensea.io/api/v2/collections/gangster-arena/stats';
 const updateNFTPrice = async () => {
   try {
-    const res = await axios.get(NFT_ENDPOINT, {
+    const configs = await firestore.collection('system').doc('default').get();
+    const { activeSeasonId } = configs.data();
+    const snapshot = await firestore.collection('season').doc(activeSeasonId).get();
+    const { openseaNftCollection = 'gangster-arena' } = snapshot.data();
+    const res = await axios.get(`https://api.opensea.io/api/v2/collections/${openseaNftCollection}/stats`, {
       headers: { Accept: 'application/json', 'x-api-key': OPENSEA_API_KEY },
     });
 
