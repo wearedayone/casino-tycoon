@@ -66,15 +66,15 @@ const deployUniswapContract = async () => {
 
 const deployPair = async () => {
   console.log('deploying liquidity pair');
-  const { weth, factory, token } = readConfigs();
+  const { uniWeth, uniFactory, token } = readConfigs();
 
   const Factory = await ethers.getContractFactory(factoryArtifact.abi, factoryArtifact.bytecode);
-  const factoryContract = Factory.attach(factory);
+  const factoryContract = Factory.attach(uniFactory);
 
-  const tx = await factoryContract.createPair(token, weth);
+  const tx = await factoryContract.createPair(token, uniWeth);
   await tx.wait();
 
-  const pairAddress = await factoryContract.getPair(token, weth);
+  const pairAddress = await factoryContract.getPair(token, uniWeth);
   updateConfigs({ pair: pairAddress, pairDeployed: true });
 
   const { pair } = readConfigs();
