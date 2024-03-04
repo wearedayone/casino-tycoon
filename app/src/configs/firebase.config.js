@@ -2,6 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
+import { getAnalytics, logEvent } from 'firebase/analytics';
 
 import environments from '../utils/environments';
 
@@ -22,3 +23,5 @@ export default firebaseApp;
 export const auth = getAuth(firebaseApp);
 export const firestore = getFirestore(firebaseApp);
 export const storage = getStorage(firebaseApp);
+const analytics = getAnalytics(firebaseApp);
+export const logAnalyticsEvent = (eventName, data) => logEvent(analytics, eventName, data);

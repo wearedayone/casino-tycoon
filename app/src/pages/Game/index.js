@@ -46,6 +46,7 @@ import useUserWallet from '../../hooks/useUserWallet';
 import useSeasonCountdown from '../../hooks/useSeasonCountdown';
 import useSimulatorGameListener from '../../hooks/useSimulatorGameListener';
 import useSalesLast24h from '../../hooks/useSalesLast24h';
+import { logAnalyticsEvent } from '../../configs/firebase.config';
 
 const { width, height } = gameConfigs;
 const MILISECONDS_IN_A_DAY = 86400 * 1000;
@@ -485,7 +486,10 @@ const Game = () => {
       const game = new Phaser.Game(config);
       game.sound.setMute(sound !== 'on');
 
-      game.events.on('hide-bg', () => setShowBg(false));
+      game.events.on('hide-bg', () => {
+        logAnalyticsEvent('game_load', { loading_duration: (Date.now() - startLoadingTime) / 1000 });
+        setShowBg(false);
+      });
 
       gameRef.current = game;
     }
@@ -1561,7 +1565,12 @@ const Game = () => {
                     sx={{ cursor: 'pointer', userSelect: 'none' }}
                     onMouseDown={() => setMouseDown(true)}
                     onMouseUp={() => setMouseDown(false)}
-                    onClick={() => window.location.reload()}>
+                    onClick={() => {
+                      logAnalyticsEvent('user_reload', {
+                        loading_duration: (Date.now() - startLoadingTime) / 1000,
+                      });
+                      window.location.reload();
+                    }}>
                     <Box width="120px" sx={{ '& img': { width: '100%' } }}>
                       <img
                         draggable={false}
