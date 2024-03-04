@@ -1,7 +1,7 @@
 const { ethers } = require('hardhat');
 
 const { readConfigs, updateConfigs, verifyContract } = require('./_utils');
-const gameConfigs = require('../configs/game.config');
+const gameConfigs = require('../configs/game.config.json');
 const { formatEther, parseEther } = require('ethers');
 
 const {

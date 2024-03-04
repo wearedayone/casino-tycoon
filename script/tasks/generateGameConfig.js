@@ -16,6 +16,7 @@ const getDecimalFromPercentString = (percentString) => {
 
 // configs
 const JSON_PATH = path.join(process.cwd(), `configs/game.config.json`);
+const JSON_PATH_CONTRACT = path.join(process.cwd(), '../contract/GameV4/configs/game.config.json');
 const columnIndex = {
   production: getColIndexFromColumn('F'),
   staging: getColIndexFromColumn('D'),
@@ -135,9 +136,10 @@ const main = async () => {
   console.log('generatedConfig:', generatedConfig);
 
   fs.writeFileSync(JSON_PATH, JSON.stringify(generatedConfig, null, 2), 'utf8', () => {});
+  fs.writeFileSync(JSON_PATH_CONTRACT, JSON.stringify(generatedConfig, null, 2), 'utf8', () => {});
 };
 
 main()
-  .then(() => console.log(`done writing game config to ${JSON_PATH}`))
+  .then(() => console.log(`done writing game config to ${JSON_PATH} and ${JSON_PATH_CONTRACT}`))
   .then(process.exit)
   .catch((err) => console.error(err));
