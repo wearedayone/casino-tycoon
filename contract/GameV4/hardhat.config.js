@@ -32,31 +32,31 @@ module.exports = {
     hardhat: {
       allowUnlimitedContractSize: true,
     },
-    eth_goerli: {
-      url: secrets.eth_goerli_url,
-      accounts: [
-        secrets.eth_goerli_key_owner,
-        secrets.eth_goerli_key_team,
-        secrets.eth_goerli_key_rev_share,
-        secrets.eth_goerli_key_user,
-      ],
-      gasPrice: 15000000000,
-    },
-    // eth_sepolia: {
-    //   url: secrets.sepolia_url || ``,
-    //   accounts: [secrets.sepolia_key],
+    // eth_goerli: {
+    //   url: secrets.eth_goerli_url,
+    //   accounts: [
+    //     secrets.eth_goerli_key_owner,
+    //     secrets.eth_goerli_key_team,
+    //     secrets.eth_goerli_key_rev_share,
+    //     secrets.eth_goerli_key_user,
+    //   ],
+    //   gasPrice: 15000000000,
     // },
-    base_goerli: {
-      url: secrets.base_goerli_url || ``,
-      accounts: [secrets.base_goerli_key],
-      gasPrice: 1000000000,
-      verify: {
-        etherscan: {
-          apiUrl: 'https://api-goerli.basescan.org',
-          apiKey: process.env.ETHERSCAN_API_KEY ?? 'ETHERSCAN_API_KEY',
-        },
-      },
-    },
+    // // eth_sepolia: {
+    // //   url: secrets.sepolia_url || ``,
+    // //   accounts: [secrets.sepolia_key],
+    // // },
+    // base_goerli: {
+    //   url: secrets.base_goerli_url || ``,
+    //   accounts: [secrets.base_goerli_key],
+    //   gasPrice: 1000000000,
+    //   verify: {
+    //     etherscan: {
+    //       apiUrl: 'https://api-goerli.basescan.org',
+    //       apiKey: process.env.ETHERSCAN_API_KEY ?? 'ETHERSCAN_API_KEY',
+    //     },
+    //   },
+    // },
     base_sepolia: {
       url: secrets.base_sepolia_url || ``,
       accounts: [secrets.base_sepolia_key],

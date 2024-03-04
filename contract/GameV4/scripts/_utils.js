@@ -17,6 +17,11 @@ const readProductionConfigs = () => {
   return JSON.parse(configs);
 };
 
+const readStagingConfigs = () => {
+  const configs = fs.readFileSync(`${__dirname}/_configs.uniswap.staging.json`, { encoding: 'utf-8' });
+  return JSON.parse(configs);
+};
+
 const verifyContract = async ({ address, constructorArguments }) => {
   try {
     await run('verify:verify', {
@@ -32,5 +37,6 @@ module.exports = {
   readConfigs,
   updateConfigs,
   readProductionConfigs,
+  readStagingConfigs,
   verifyContract,
 };

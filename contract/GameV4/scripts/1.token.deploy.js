@@ -4,9 +4,8 @@ const { parseEther } = require('ethers');
 
 const factoryArtifact = require('@uniswap/v2-core/build/UniswapV2Factory.json');
 const routerArtifact = require('@uniswap/v2-periphery/build/UniswapV2Router02.json');
-const WETH9 = require('../WETH9.json');
 
-const { readConfigs, updateConfigs, readProductionConfigs, verifyContract } = require('./_utils');
+const { readConfigs, updateConfigs, readProductionConfigs, verifyContract, readStagingConfigs } = require('./_utils');
 
 const deployToken = async () => {
   console.log('deploying token...');
@@ -41,27 +40,18 @@ const deployUniswapContract = async () => {
       routerDeployed: true,
     });
   } else {
-    console.log('Staging environment, deploy our own Uniswap contracts');
-    const configs = readConfigs();
-    const { defaultAdmin } = configs;
+    console.log('Staging environment, use Uniswap contracts from _configs.uniswap.staging.json');
+    const stagingConfigs = readStagingConfigs();
+    const { uniWeth, uniFactory, uniRouter } = stagingConfigs;
 
-    const Weth = await ethers.getContractFactory(WETH9.abi, WETH9.bytecode);
-    const weth = await Weth.deploy();
-    const wethAddress = await weth.getAddress();
-    await verifyContract({ address: wethAddress, constructorArguments: [] });
-    updateConfigs({ uniWeth: wethAddress, wethDeployed: true });
-
-    const Factory = await ethers.getContractFactory(factoryArtifact.abi, factoryArtifact.bytecode);
-    const factory = await Factory.deploy(defaultAdmin);
-    const factoryAddress = await factory.getAddress();
-    await verifyContract({ address: factoryAddress, constructorArguments: [defaultAdmin] });
-    updateConfigs({ uniFactory: factoryAddress, factoryDeployed: true });
-
-    const Router = await ethers.getContractFactory(routerArtifact.abi, routerArtifact.bytecode);
-    const router = await Router.deploy(factoryAddress, wethAddress);
-    const routerAddress = await router.getAddress();
-    await verifyContract({ address: routerAddress, constructorArguments: [factoryAddress, wethAddress] });
-    updateConfigs({ uniRouter: routerAddress, routerDeployed: true });
+    updateConfigs({
+      uniWeth,
+      uniFactory,
+      uniRouter,
+      wethDeployed: true,
+      factoryDeployed: true,
+      routerDeployed: true,
+    });
   }
 
   const configs = readConfigs();

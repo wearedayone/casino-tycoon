@@ -4,6 +4,7 @@ DEPLOY GUIDE
 
 0. Prepare
 
+- input??
 - Send ETH to defaultAdmin wallet to deployment && add liquidity
 - Send ETH to worker wallet
 
@@ -16,7 +17,9 @@ DEPLOY GUIDE
 2. Fill in secret keys in secrets.json for your network
 
 - ensure that the secret key belongs to defaultAdmin wallet
+- key???
 - ensure that defaultAdmin wallet has enough eth for liquidity and gas fees
+- estimate?? (0.3eth)
 
 3. Override \_configs.reset.json into \_configs.json
 
@@ -28,9 +31,11 @@ DEPLOY GUIDE
 - signer
 - tokenAmountToLiquidity
 - ethAmountToLiquidity
+- input???
 
 5. Double check ENVIRONMENT variable in contract/GameV4/.env file to ensure we are deploying to correct environment
 
+- use deployeed sc
 - if ENVIRONMENT === staging, we will dpeloy our own swap contracts
 - if ENVIRONMENT === production, we will use uniswap contracts
 
@@ -46,7 +51,7 @@ DEPLOY GUIDE
 - factoryDeployed: from `false` --> `true`
 - routerDeployed: from `false` --> `true`
 - pair: from '' --> pair address
-- pairdeployed: from `false` --> `true`
+- pairDeployed: from `false` --> `true`
 - liquidityAdded: from `false` --> `true`
 
 7. Run `npx hardhat run scripts/2.nft.deploy.js --network [your_network]`
@@ -56,6 +61,8 @@ DEPLOY GUIDE
 - nftDeployed: from `false` --> `true`
 
 8. Set up NFT collection on Opensea
+
+- detailed
 
 9. Run `npx hardhat run scripts/3.game.deploy.js --network [your_network]`
    If everything works well, the \_configs.json will change these fields
@@ -67,7 +74,7 @@ DEPLOY GUIDE
 10. Double check
 
 - every contract address in \_configs.json should be verified on your network
-- every configs for token, nft, game contract should be applied correctly
+- every configs for token, nft, game contract should be applied correctly (detailed fields)
 
 11. Run `node scripts/4.exportAddress.js`
     --> copy file contracts.txt and paste to script/.env.your_env to generate seed data
@@ -82,3 +89,6 @@ DEPLOY GUIDE
 - pull code
 - update .env.your_env files if needed
 - restart app, backend, listener, cronjob (need to restart listener every time start a new season)
+
+- disabledUrls
+- whitelitsted
