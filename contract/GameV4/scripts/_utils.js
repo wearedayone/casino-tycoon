@@ -9,7 +9,7 @@ const readConfigs = () => {
 const updateConfigs = (additionalConfigs) => {
   const configs = readConfigs();
   const newConfigs = { ...configs, ...additionalConfigs };
-  fs.writeFileSync(`${__dirname}/_configs.json`, JSON.stringify(newConfigs), { encoding: 'utf-8' });
+  fs.writeFileSync(`${__dirname}/_configs.json`, JSON.stringify(newConfigs, null, 2), { encoding: 'utf-8' });
 };
 
 const readProductionConfigs = () => {
