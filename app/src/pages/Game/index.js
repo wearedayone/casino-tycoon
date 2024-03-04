@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Box, alpha } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import Phaser from 'phaser';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSnackbar } from 'notistack';
@@ -90,6 +90,9 @@ const Game = () => {
   } = useSmartContract();
   const { ready, authenticated, user, exportWallet: exportWalletPrivy, logout } = usePrivy();
   const [isLeaderboardModalOpen, setLeaderboardModalOpen] = useState(false);
+  const [userCanReload, setUserCanReload] = useState(false);
+  const [mouseDown, setMouseDown] = useState(false);
+  const [startLoadingTime, setStartLoadingTime] = useState(Date.now());
   const { isEnded, countdownString } = useSeasonCountdown({ open: isLeaderboardModalOpen });
   const [showBg, setShowBg] = useState(true);
   const { workerSoldLast24h, buildingSoldLast24h, updateNow } = useSalesLast24h();
@@ -114,7 +117,7 @@ const Game = () => {
   //   }
   // }, [embeddedWallet]);
 
-  const { appVersion } = configs || {};
+  const { appVersion, appReloadThresholdInSeconds } = configs || {};
   const { ethPriceInUsd, tokenPrice, nftPrice } = market || {};
 
   // Check that your user is authenticated
@@ -216,6 +219,26 @@ const Game = () => {
   };
 
   const dailyMoney = numberOfMachines * machine.dailyReward + numberOfWorkers * worker.dailyReward;
+
+  useEffect(() => {
+    setStartLoadingTime(Date.now());
+  }, []);
+
+  useEffect(() => {
+    if (!appReloadThresholdInSeconds || userCanReload) return;
+    const elapsedTime = Date.now() - startLoadingTime;
+    const remainingTime = appReloadThresholdInSeconds * 1000 - elapsedTime;
+
+    if (remainingTime <= 0) {
+      setUserCanReload(true);
+    } else {
+      const timer = setTimeout(() => {
+        setUserCanReload(true);
+      }, remainingTime);
+
+      return () => clearTimeout(timer);
+    }
+  }, [userCanReload, startLoadingTime, appReloadThresholdInSeconds]);
 
   const exportWallet = async () => {
     if (!isAuthenticated || !hasEmbeddedWallet) return;
@@ -1500,12 +1523,13 @@ const Game = () => {
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 '& canvas': { position: 'absolute' },
+                '&::after': { content: '""', backgroundColor: 'rgba(0, 0, 0, 0.4)', width: '100%', height: '100%' },
               }
             : {}
         }>
         {showBg && (
           <>
-            <Box position="absolute" top={0} left={0} width="100%" height="100%" bgcolor={alpha('#000', 0.4)}>
+            <Box position="absolute" top={0} left={0} width="100%" height="100%" zIndex={10}>
               <Box p={2} width="100%" display="flex" flexDirection="column" alignItems="center" gap={2}>
                 <Box
                   mx="auto"
@@ -1518,6 +1542,7 @@ const Game = () => {
                 </Box>
                 <Box
                   width="100px"
+                  mb="15vh"
                   sx={{
                     '& img': {
                       width: '100%',
@@ -1529,6 +1554,33 @@ const Game = () => {
                   }}>
                   <img src="/images/icons/loading.png" />
                 </Box>
+                {userCanReload && (
+                  <Box
+                    alignSelf="center"
+                    position="relative"
+                    sx={{ cursor: 'pointer', userSelect: 'none' }}
+                    onMouseDown={() => setMouseDown(true)}
+                    onMouseUp={() => setMouseDown(false)}
+                    onClick={() => window.location.reload()}>
+                    <Box width="120px" sx={{ '& img': { width: '100%' } }}>
+                      <img
+                        draggable={false}
+                        src={mouseDown ? '/images/button-blue-pressed.png' : '/images/button-blue.png'}
+                        alt="button"
+                      />
+                    </Box>
+                    <Box position="absolute" top="45%" left="50%" sx={{ transform: 'translate(-50%, -50%)' }}>
+                      <Typography
+                        fontSize={20}
+                        fontWeight={700}
+                        color="white"
+                        fontFamily="WixMadeforDisplayBold"
+                        sx={{ userSelect: 'none' }}>
+                        Retry
+                      </Typography>
+                    </Box>
+                  </Box>
+                )}
               </Box>
             </Box>
           </>
