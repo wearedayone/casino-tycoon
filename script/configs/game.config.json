@@ -38,8 +38,8 @@
     "lowerRanksCutoffPercent": 0.2,
     "minRewardHigherRanks": 0.01,
     "minRewardLowerRanks": 0.005,
-    "devFee": 0,
-    "marketingFee": 0.02
+    "devFee": 0.05,
+    "marketingFee": 0.05
   },
   "war": {
     "buildingBonusMultiple": 0.1,

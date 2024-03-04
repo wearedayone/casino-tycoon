@@ -4,11 +4,9 @@ import path from 'path';
 import environments from '../utils/environments.js';
 import { sheets } from '../configs/google.config.js';
 
-const { ENVIRONMENT, GAME_CONFIG_SPREADSHEET_ID } = environments;
+const { GAME_CONFIG_SPREADSHEET_ID, GAME_CONFIG_SPREADSHEET_COLUMN: col } = environments;
 
 // helpers
-const getColIndexFromColumn = (string) => string.charCodeAt(0) - 65;
-
 const getDecimalFromPercentString = (percentString) => {
   if (percentString.includes('%')) return Number(percentString.replace('%', '')) / 100;
   else return Number(percentString); // if it's already decimal string like '0.001'
@@ -17,11 +15,7 @@ const getDecimalFromPercentString = (percentString) => {
 // configs
 const JSON_PATH = path.join(process.cwd(), `configs/game.config.json`);
 const JSON_PATH_CONTRACT = path.join(process.cwd(), '../contract/GameV4/configs/game.config.json');
-const columnIndex = {
-  production: getColIndexFromColumn('F'),
-  staging: getColIndexFromColumn('D'),
-  dev: getColIndexFromColumn('C'),
-};
+const columnIndex = col.toUpperCase().charCodeAt(0) - 65;
 
 const houseLevels = [
   { networthStart: 0, networthEnd: 24, level: 1 },
@@ -117,7 +111,10 @@ const main = async () => {
 
   const getRowValue = ({ row, formatter }) => {
     const index = row - 1;
-    const value = rows[index][columnIndex[ENVIRONMENT]] || rows[index][columnIndex.production];
+    const value = rows[index][columnIndex];
+    if (!value) throw new Error(`No data for ${rows[index][0]}! Empty cell found at cell ${col}${row}`);
+
+    if (formatter && isNaN(formatter(value))) throw new Error(`Invalid value at cell ${col}${row}: Must be a number`);
 
     return formatter ? formatter(value) : value;
   };
@@ -135,11 +132,25 @@ const main = async () => {
   const generatedConfig = { ...generateConfigFromObject(ROW_STRUCTURE), houseLevels };
   console.log('generatedConfig:', generatedConfig);
 
+  // check sum of prize pool distribution
+  const { rankRewardsPercent, reputationRewardsPercent, devFee, marketingFee } = generatedConfig.prizePool;
+  if (rankRewardsPercent + reputationRewardsPercent + devFee + marketingFee !== 1) {
+    const {
+      rankRewardsPercent: rankPercentConfig,
+      reputationRewardsPercent: reputationPercentConfig,
+      devFee: devPercentConfig,
+      marketingFee: marketingPercentConfig,
+    } = ROW_STRUCTURE.prizePool;
+    throw new Error(
+      `Invalid config! Sum of rewards distribution must be 100%. Check cells: ${col}${rankPercentConfig.row}, ${col}${reputationPercentConfig.row}, ${col}${devPercentConfig.row}, ${col}${marketingPercentConfig.row}`
+    );
+  }
+
   fs.writeFileSync(JSON_PATH, JSON.stringify(generatedConfig, null, 2), 'utf8', () => {});
   fs.writeFileSync(JSON_PATH_CONTRACT, JSON.stringify(generatedConfig, null, 2), 'utf8', () => {});
 };
 
 main()
-  .then(() => console.log(`done writing game config to ${JSON_PATH} and ${JSON_PATH_CONTRACT}`))
+  .then(() => console.log(`\nDone writing game config to:\n${JSON_PATH} \nand \n${JSON_PATH_CONTRACT}`))
   .then(process.exit)
   .catch((err) => console.error(err));
