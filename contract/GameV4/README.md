@@ -1,6 +1,11 @@
 DEPLOY GUIDE
 
+---PRE_DEPLOYMENT---
+
 0. Prepare
+
+- Send ETH to defaultAdmin wallet to deployment && add liquidity
+- Send ETH to worker wallet
 
 - Double check to ensure all .env.your_env files are ready
 - Double check all game config variables on gg sheet
@@ -66,6 +71,8 @@ DEPLOY GUIDE
 
 11. Run `node scripts/4.exportAddress.js`
     --> copy file contracts.txt and paste to script/.env.your_env to generate seed data
+
+---DEPLOYMENT---
 
 12. Run seed script to create new season
 
