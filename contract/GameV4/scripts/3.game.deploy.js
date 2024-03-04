@@ -38,14 +38,14 @@ const deployGame = async () => {
 const configGame = async () => {
   try {
     console.log('Configs game...');
-    const { token, nft, game, pair, router } = readConfigs();
+    const { token, nft, game, pair, uniRouter } = readConfigs();
 
     const FIAT = await ethers.getContractFactory('FIAT');
     const fiatToken = FIAT.attach(token);
     const minterRole = await fiatToken.MINTER_ROLE();
     await fiatToken.grantRole(minterRole, game);
 
-    await fiatToken.updateUniswapAddresses(pair, router);
+    await fiatToken.updateUniswapAddresses(pair, uniRouter);
     await fiatToken.updateGangsterArenaAddress(game);
 
     const NFT = await ethers.getContractFactory('Gangster');
