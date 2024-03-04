@@ -1,5 +1,10 @@
 DEPLOY GUIDE
 
+0. Prepare
+
+- Double check to ensure all .env.your_env files are ready
+- Run script/tasks/generateGameConfig.js to get 2 game.config.json files in contract folder && script folder
+
 1. Double check hardhat.config.js to ensure includes your network
 
 2. Fill in secret keys in secrets.json for your network
@@ -58,4 +63,9 @@ DEPLOY GUIDE
 
 11. Run seed script to create new season
 
-12. Pull code and restart app, backend, listener, cronjob
+12. Deploy app
+
+- ssh to vps
+- pull code
+- update .env.your_env files if needed
+- restart app, backend, listener, cronjob (need to restart listener every time start a new season)
