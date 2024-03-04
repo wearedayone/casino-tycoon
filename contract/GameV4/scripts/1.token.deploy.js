@@ -84,7 +84,7 @@ const deployPair = async () => {
 const addLiquidity = async () => {
   console.log('adding liquidity');
 
-  const { defaultAdmin, token, router, tokenAmountToLiquidity, ethAmountToLiquidity } = readConfigs();
+  const { defaultAdmin, token, uniRouter, tokenAmountToLiquidity, ethAmountToLiquidity } = readConfigs();
   const FIAT = await ethers.getContractFactory('FIAT');
   const fiatToken = FIAT.attach(token);
   const minterRole = await fiatToken.MINTER_ROLE();
@@ -92,8 +92,8 @@ const addLiquidity = async () => {
   await fiatToken.mint(defaultAdmin, parseEther(`${tokenAmountToLiquidity}`));
 
   const Router = await ethers.getContractFactory(routerArtifact.abi, routerArtifact.bytecode);
-  const routerContract = Router.attach(router);
-  const tx = await fiatToken.approve(router, parseEther(`${tokenAmountToLiquidity}`));
+  const routerContract = Router.attach(uniRouter);
+  const tx = await fiatToken.approve(uniRouter, parseEther(`${tokenAmountToLiquidity}`));
   await tx.wait();
 
   const deadline = Math.floor(Date.now() / 1000 + 10 * 60);
