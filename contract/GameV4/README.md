@@ -3,6 +3,7 @@ DEPLOY GUIDE
 0. Prepare
 
 - Double check to ensure all .env.your_env files are ready
+- Double check all game config variables on gg sheet
 - Run script/tasks/generateGameConfig.js to get 2 game.config.json files in contract folder && script folder
 
 1. Double check hardhat.config.js to ensure includes your network
@@ -23,7 +24,12 @@ DEPLOY GUIDE
 - tokenAmountToLiquidity
 - ethAmountToLiquidity
 
-5. Run `npx hardhat run scripts/1.token.deploy.js --network [your_network]`
+5. Double check ENVIRONMENT variable in contract/GameV4/.env file to ensure we are deploying to correct environment
+
+- if ENVIRONMENT === staging, we will dpeloy our own swap contracts
+- if ENVIRONMENT === production, we will use uniswap contracts
+
+6. Run `npx hardhat run scripts/1.token.deploy.js --network [your_network]`
    If everything works well, the \_configs.json will change these fields
 
 - token: from '' --> token address
@@ -38,32 +44,32 @@ DEPLOY GUIDE
 - pairdeployed: from `false` --> `true`
 - liquidityAdded: from `false` --> `true`
 
-6. Run `npx hardhat run scripts/2.nft.deploy.js --network [your_network]`
+7. Run `npx hardhat run scripts/2.nft.deploy.js --network [your_network]`
    If everything works well, the \_configs.json will change these fields
 
 - nft: from '' --> nft address
 - nftDeployed: from `false` --> `true`
 
-7. Set up NFT collection on Opensea
+8. Set up NFT collection on Opensea
 
-8. Run `npx hardhat run scripts/3.game.deploy.js --network [your_network]`
+9. Run `npx hardhat run scripts/3.game.deploy.js --network [your_network]`
    If everything works well, the \_configs.json will change these fields
 
 - game: from '' --> game address
 - gameDeployed: from `false` --> `true`
 - contractCompleted: from `false` --> `true`
 
-9. Double check
+10. Double check
 
 - every contract address in \_configs.json should be verified on your network
 - every configs for token, nft, game contract should be applied correctly
 
-10. Run `node scripts/4.exportAddress.js`
+11. Run `node scripts/4.exportAddress.js`
     --> copy file contracts.txt and paste to script/.env.your_env to generate seed data
 
-11. Run seed script to create new season
+12. Run seed script to create new season
 
-12. Deploy app
+13. Deploy app
 
 - ssh to vps
 - pull code
