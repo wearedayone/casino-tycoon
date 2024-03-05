@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Box, alpha } from '@mui/material';
 import Phaser from 'phaser';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSnackbar } from 'notistack';
 import { usePrivy } from '@privy-io/react-auth';
 import * as Sentry from '@sentry/react';
@@ -53,6 +53,7 @@ const MILISECONDS_IN_A_DAY = 86400 * 1000;
 const Game = () => {
   const { enqueueSnackbar } = useSnackbar();
   const embeddedWallet = useUserWallet();
+  const queryClient = useQueryClient();
   const [userHasInteractive, setUserHasInteracted] = useState(false);
   const gameRef = useRef();
   const gameLoaded = useRef();
@@ -1398,6 +1399,7 @@ const Game = () => {
   ]);
 
   useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: [QueryKeys.Leaderboard] });
     gameRef.current?.events.emit('update-networth', {
       networth,
       level: calculateHouseLevel(houseLevels, networth),

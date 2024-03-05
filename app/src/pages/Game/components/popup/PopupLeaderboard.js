@@ -176,7 +176,9 @@ class PopupLeaderboard extends Popup {
     this.usernames = scene.add
       .text(this.popup.width * 0.25, 0, '', { ...smallBlackBold, align: 'center' })
       .setOrigin(0.5, 0);
-    this.networths = scene.add.text(this.popup.width * 0.45, 0, '', { ...smallBlackBold, align: 'right' });
+    this.networths = scene.add
+      .text(this.popup.width * 0.47, 0, '', { ...smallBlackBold, align: 'right' })
+      .setOrigin(0.5, 0);
     this.ethRewards = scene.add
       .text(this.popup.width * 0.7, 0, '', { ...smallBlackBold, align: 'center' })
       .setOrigin(0.5, 0);
@@ -203,10 +205,10 @@ class PopupLeaderboard extends Popup {
       .text(paddedX + this.popup.width * 0.25, playerRankY, 'YOU', { ...smallBrownExtraBold, align: 'center' })
       .setOrigin(0.5, playerOriginY);
     this.playerNetworth = scene.add
-      .text(paddedX + this.popup.width * 0.45, playerRankY, '', { ...smallBrownExtraBold, align: 'right' })
-      .setOrigin(0, playerOriginY);
+      .text(paddedX + this.popup.width * 0.47, playerRankY, '', { ...smallBrownExtraBold, align: 'right' })
+      .setOrigin(0.5, playerOriginY);
     this.playerStar = scene.add
-      .image(paddedX + this.popup.width * 0.52, playerRankY, 'icon-star')
+      .image(paddedX + this.popup.width * 0.47, playerRankY, 'icon-star')
       .setOrigin(0, playerOriginY);
     this.playerReward = scene.add
       .text(paddedX + this.popup.width * 0.7, playerRankY, '', { ...smallBrownExtraBold, align: 'center' })
@@ -366,7 +368,6 @@ class PopupLeaderboard extends Popup {
     this.ethRewards.text = isRankingMode ? this.rankingRewardsString : this.reputationRewardsString;
 
     const userRecord = leaderboard.find(({ isUser }) => isUser);
-    console.log('userRecord', userRecord);
     this.isUserActive = userRecord.active;
     this.updateEndedState();
 
@@ -374,6 +375,7 @@ class PopupLeaderboard extends Popup {
     this.userReputationReward = userRecord.reputationReward;
     this.playerRank.text = userRecord.rank.toLocaleString();
     this.playerNetworth.text = userRecord.networth;
+    this.playerStar.x = this.playerNetworth.x + this.playerNetworth.width / 2 + 10;
     this.playerReward.text = `~${formatter.format(isRankingMode ? this.userRankingReward : this.userReputationReward)}`;
     this.finishedAt.text = `${userRecord.rank.toLocaleString()}${getOrdinalSuffix(userRecord.rank)} place`;
     this.finishedReward.text = formatter.format(userRecord.rankReward);
@@ -398,7 +400,9 @@ class PopupLeaderboard extends Popup {
     this.stars = [];
     for (let i = 0; i < activeLeaderboard.length; i++) {
       const y = i * rowHeight;
-      const star = this.scene.add.image(this.popup.width * 0.52, y, 'icon-star').setOrigin(0, 0);
+      const star = this.scene.add
+        .image(this.networths.x + this.networths.width / 2 + 10, y, 'icon-star')
+        .setOrigin(0, 0);
       this.stars.push(star);
     }
     this.contentContainer.add(this.stars);
