@@ -36,6 +36,9 @@ const configs = {
     minRewardLowerRanks: 0.005, // in ETH
     // reputation leaderboard
     earlyRetirementTax: 0.2,
+    // game contract
+    devFee: 0,
+    marketingFee: 0.1,
   },
   war: {
     buildingBonusMultiple: 0.1,
@@ -62,9 +65,17 @@ const configs = {
     { networthStart: 2000, networthEnd: 4999, level: 14 },
     { networthStart: 5000, level: 15 },
   ],
+  initGameDurationInDays: 14,
   claimGapInSeconds: 120,
   timeStepInMinutes: 1, // time increase when every nft is purchased
   openseaNftCollection: 'gangster-arena', // mainnet only
+  tokenContract: {
+    revShareFee: 0.02,
+    liquidityFee: 0.01,
+    teamFee: 0.02,
+    burnFee: 0,
+    swapAmount: 1000,
+  },
 };
 
 export default configs;

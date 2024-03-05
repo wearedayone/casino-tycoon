@@ -1,7 +1,7 @@
 import moment from 'moment';
 
 import admin, { firestore } from '../configs/admin.config.js';
-import gameConfigs from '../configs/game.config.js';
+import gameConfigs from '../configs/game.config.json' assert { type: 'json' };
 import environments from '../utils/environments.js';
 
 const { TOKEN_ADDRESS, NFT_ADDRESS, GAME_CONTRACT_ADDRESS, ROUTER_ADDRESS, WETH_ADDRESS, PAIR_ADDRESS } = environments;
@@ -42,7 +42,7 @@ const main = async () => {
 
   console.log('create season');
   const now = Date.now();
-  const endTimeUnix = Date.now() + 14 * 24 * 60 * 60 * 1000;
+  const endTimeUnix = Date.now() + gameConfigs.initGameDurationInDays * 24 * 60 * 60 * 1000;
   const startTime = admin.firestore.Timestamp.fromMillis(now);
   const estimatedEndTime = admin.firestore.Timestamp.fromMillis(endTimeUnix);
   await firestore
