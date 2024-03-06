@@ -20,12 +20,12 @@ const main = async () => {
       ...gameConfigs.assets,
       openseaNftCollection: gameConfigs.openseaNftCollection,
       activeSeasonId,
-      appVersion: '0.9.2.10',
-      disabledUrls: ['gangsterarena.com'],
+      appVersion: '0.9.3.0',
+      disabledUrls: ['gangsterarena.com', 'demo.gangsterarena.com'],
     });
   await firestore.collection('system').doc('market').set({
-    ethPriceInUsd: '2471.94',
-    nftPrice: '0.001',
+    ethPriceInUsd: '3000',
+    nftPrice: '0.005',
     tokenPrice: '0.00001',
   });
   await firestore
@@ -41,9 +41,9 @@ const main = async () => {
   console.log('created system configs');
 
   console.log('create season');
-  const now = Date.now();
-  const endTimeUnix = Date.now() + gameConfigs.initGameDurationInDays * 24 * 60 * 60 * 1000;
-  const startTime = admin.firestore.Timestamp.fromMillis(now);
+  const startTimeUnix = 1709683200000;
+  const endTimeUnix = startTimeUnix + gameConfigs.initGameDurationInDays * 24 * 60 * 60 * 1000;
+  const startTime = admin.firestore.Timestamp.fromMillis(startTimeUnix);
   const estimatedEndTime = admin.firestore.Timestamp.fromMillis(endTimeUnix);
   await firestore
     .collection('season')
@@ -80,34 +80,6 @@ const main = async () => {
     });
   console.log('created season');
 
-  console.log('create season log');
-  await firestore
-    .collection('season')
-    .doc(activeSeasonId)
-    .collection('log')
-    .add({
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      type: 'start-season',
-      text: `Season has started at ${moment(new Date(now)).format('DD/MM/YYYY HH:mm')}`,
-      metadata: {
-        startTime,
-        estimatedEndTime,
-        rankPrizePool: 0,
-        reputationPrizePool: 0,
-        burnValue: 0,
-        devFee: 0,
-        reservePool: 0,
-        machineSold: 0,
-        workerSold: 0,
-        buildingSold: 0,
-        openseaNftCollection: gameConfigs.openseaNftCollection,
-        prizePoolConfig: gameConfigs.prizePool,
-        warConfig: gameConfigs.war,
-        referralConfig: gameConfigs.referral,
-        ...gameConfigs.assets,
-      },
-    });
-  console.log('created season log');
   const userSnapshot = await firestore.collection('user').get();
   for (let user of userSnapshot.docs) {
     await firestore.collection('user').doc(user.id).update({

@@ -34,9 +34,9 @@ contract GangsterArena is AccessControl, IGangsterArena {
   // Marketing role - withdraw marketing fee
   bytes32 public constant MARKETING_ROLE = keccak256('MARKETING_ROLE');
   // NFT base price
-  uint256 public bPrice_ = 0.002 ether; // base price
+  uint256 public bPrice_ = 0.01 ether; // base price
 
-  uint256 public bpwl_ = 0.001 ether; // NFT price for whitelisted
+  uint256 public bpwl_ = 0.01 ether; // NFT price for whitelisted
 
   // Referral reward
   uint256 public refReward_ = 1000;
@@ -45,13 +45,13 @@ contract GangsterArena is AccessControl, IGangsterArena {
   uint256 public refDiscount_ = 9000;
 
   // Dev fee - over 10000
-  uint256 public DEV_PERCENT = 500;
+  uint256 public DEV_PERCENT = 0;
   // Marketing fee - over 10000
-  uint256 public MARKETING_PERCENT = 500;
+  uint256 public MARKETING_PERCENT = 1000;
   // Prize Pool value percentage - over 10000
-  uint256 public PRIZE_PERCENT = 4000;
+  uint256 public PRIZE_PERCENT = 5000;
   // Retire pool value percentage - over 10000
-  uint256 public RETIRE_PERCENT = 5000;
+  uint256 public RETIRE_PERCENT = 4000;
 
   uint256 public vtd = 60; // valid timestamp different
 

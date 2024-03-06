@@ -26,7 +26,6 @@ const deployGame = async () => {
 
   updateConfigs({ game: gameAddress, gameDeployed: true });
   console.log(`Game is deployed to ${gameAddress}`);
-  Z;
 };
 
 const configGame = async () => {

@@ -32,10 +32,10 @@ contract FIAT is ERC20, AccessControl, ERC20Burnable, ERC20Permit, ReentrancyGua
   uint256 public swapTokensAtAmount = 1000 * 1e18;
 
   uint256 public totalFees = 50; // Value is in basis points so 1000 = 100% , 10 = 1% etc
-  uint256 public revShareFee = 20;
+  uint256 public revShareFee = 0;
   uint256 public liquidityFee = 10;
   uint256 public teamFee = 20;
-  uint256 public burnFee = 0;
+  uint256 public burnFee = 20;
 
   uint256 public tokensForRevShare = 0;
   uint256 public tokensForLiquidity = 0;

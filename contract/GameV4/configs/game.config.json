@@ -1,27 +1,27 @@
 {
   "assets": {
     "machine": {
-      "basePrice": 0.001,
-      "whitelistPrice": 0.0005,
+      "basePrice": 0.01,
+      "whitelistPrice": 0.01,
       "maxPerBatch": 100,
       "maxWhitelistAmount": 10,
       "dailyReward": 1000,
       "networth": 10
     },
     "worker": {
-      "basePrice": 250,
+      "basePrice": 200,
       "dailyReward": 400,
       "networth": 2,
-      "targetDailyPurchase": 100,
-      "targetPrice": 2000,
+      "targetDailyPurchase": 200,
+      "targetPrice": 1000,
       "maxPerBatch": 100
     },
     "building": {
       "basePrice": 500,
       "dailyReward": 0,
       "networth": 8,
-      "targetDailyPurchase": 100,
-      "targetPrice": 2000,
+      "targetDailyPurchase": 200,
+      "targetPrice": 1000,
       "maxPerBatch": 100
     }
   },
@@ -31,32 +31,32 @@
   },
   "prizePool": {
     "earlyRetirementTax": 0.2,
-    "rankRewardsPercent": 0.4,
-    "reputationRewardsPercent": 0.5,
-    "rewardScalingRatio": 1.25,
+    "rankRewardsPercent": 0.5,
+    "reputationRewardsPercent": 0.4,
+    "rewardScalingRatio": 1.28,
     "higherRanksCutoffPercent": 0.1,
     "lowerRanksCutoffPercent": 0.2,
-    "minRewardHigherRanks": 0.01,
-    "minRewardLowerRanks": 0.005,
-    "devFee": 0.05,
-    "marketingFee": 0.05
+    "minRewardHigherRanks": 0.04,
+    "minRewardLowerRanks": 0,
+    "devFee": 0,
+    "marketingFee": 0.1
   },
   "war": {
     "buildingBonusMultiple": 0.1,
     "workerBonusMultiple": 0.1,
-    "earningStealPercent": 0.7,
+    "earningStealPercent": 0.8,
     "tokenRewardPerEarner": 1000,
     "machinePercentLost": 0.05
   },
-  "initGameDurationInDays": 14,
-  "timeStepInMinutes": 1,
-  "claimGapInSeconds": 120,
+  "initGameDurationInDays": 4,
+  "timeStepInMinutes": 0,
+  "claimGapInSeconds": 3600,
   "openseaNftCollection": "gangster-arena",
   "tokenContract": {
     "liquidityFee": 0.01,
     "teamFee": 0.02,
-    "burnFee": 0,
-    "revShareFee": 0.02,
+    "burnFee": 0.02,
+    "revShareFee": 0,
     "swapAmount": 1000
   },
   "houseLevels": [
