@@ -526,10 +526,10 @@
   resolved "https://registry.yarnpkg.com/@noble/hashes/-/hashes-1.3.2.tgz#6f26dbc8fbc7205873ce3cee2f690eba0d421b39"
   integrity sha512-MVC8EAQp7MvEcm30KWENFjgR+Mkmf+D189XJTkFIlwohU5hcBbn1ZkKq7KVTi2Hme3PMGF390DaL52beVrIihQ==
 
-"@privy-io/server-auth@^1.5.3":
-  version "1.5.3"
-  resolved "https://registry.yarnpkg.com/@privy-io/server-auth/-/server-auth-1.5.3.tgz#3aeff29a84e65b9ed7d08c4641d9ade9f2fd11a8"
-  integrity sha512-bK+ywX36Mrf9Q8CR6+Ld0sQ7mMQyquG3FbNGLbeYAlF2Y58P1WhcoFnKBPabuK9gZoNb5woydMJjrjIsx0sgCw==
+"@privy-io/server-auth@^1.7.1":
+  version "1.7.1"
+  resolved "https://registry.yarnpkg.com/@privy-io/server-auth/-/server-auth-1.7.1.tgz#13b4365482cf84e7656306b040c052c3c06a2956"
+  integrity sha512-rjuji6Xxr0ILlQXiufGHKYSXi0e+7UWVXhmkXcAm15Ai8T61KlotEoiZHWXuLJx456AHNfbOkL2li4mdozEmUA==
   dependencies:
     dotenv "^16.0.3"
     jose "^4.10.4"
@@ -1518,9 +1518,9 @@ fn.name@1.x.x:
   integrity sha512-GRnmB5gPyJpAhTQdSZTSp9uaPSvl09KoYcMQtsB9rQoOmzs9dH6ffeccH+Z+cv6P68Hu5bC6JjRh4Ah/mHSNRw==
 
 follow-redirects@^1.15.4:
-  version "1.15.5"
-  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.15.5.tgz#54d4d6d062c0fa7d9d17feb008461550e3ba8020"
-  integrity sha512-vSFWUON1B+yAw1VN4xMfxgn5fTUiaOzAJCKBwIIgT/+7CuGy9+r+5gITvP62j3RmaD5Ph65UaERdOSRGUzZtgw==
+  version "1.15.4"
+  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.15.4.tgz#cdc7d308bf6493126b17ea2191ea0ccf3e535adf"
+  integrity sha512-Cr4D/5wlrb0z9dgERpUL3LrmPKVDsETIJhaCMeDfuFYcqa5bldGV6wBsAN6X/vxlXQtFBMrXdXxdL8CbDTGniw==
 
 form-data@^4.0.0:
   version "4.0.0"
