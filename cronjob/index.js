@@ -5,6 +5,7 @@ import updateNFTPrice from './tasks/updateNFTPrice.js';
 import calculateAvgPrice from './tasks/calculateAvgPrice.js';
 import estimateGasPrice from './tasks/estimateGas.js';
 import getEthPrice from './tasks/getEthPrice.js';
+import burnFiat from './tasks/burnFIAT.js';
 import environments from './utils/environments.js';
 
 const {
@@ -13,6 +14,7 @@ const {
   CRON_UPDATE_NFT_PRICE,
   CRON_ESTIMATE_GAS_PRICE,
   CRON_GET_ETH_PRICE,
+  CRON_BURN_FIAT,
 } = environments;
 
 cron.schedule(CRON_UPDATE_FIAT_PRICE, function () {
@@ -37,4 +39,8 @@ cron.schedule(CRON_ESTIMATE_GAS_PRICE, function () {
 
 cron.schedule(CRON_GET_ETH_PRICE, function () {
   getEthPrice();
+});
+
+cron.schedule(CRON_BURN_FIAT, function () {
+  burnFiat();
 });
