@@ -17,23 +17,31 @@ class PopupPrizePool extends Popup {
     const leftMargin = this.popup.x - this.popup.width / 2;
     const paddedX = leftMargin + this.popup.width * 0.1;
     const startingY = this.popup.y - this.popup.height / 2;
-    const firstParagraphY = startingY + 260;
-    const secondParagraphY = firstParagraphY + 400;
+    const firstParagraphY = startingY + 200;
+    const secondParagraphY = firstParagraphY + 300;
+    const thirdParagraphY = secondParagraphY + 300;
 
     this.rankPrizePool = scene.add.text(
       paddedX,
       firstParagraphY,
-      '--$ of ETH from buying\n$Gangsters goes into Prize Pool',
+      '--$ of ETH from player spend\ngoes to the top --% players\nbased on rank.',
       largeBlackBold
     );
     this.reputationPrizePool = scene.add.text(
       paddedX,
       secondParagraphY,
-      'Top --% of players get paid when\ngame ends.',
+      '--% of ETH from player spend\ngoes to all players based on\nreputation.',
+      largeBlackBold
+    );
+    this.marketingFee = scene.add.text(
+      paddedX,
+      thirdParagraphY,
+      '--% is used to buy and burn\n$FIAT tokens.',
       largeBlackBold
     );
     this.add(this.rankPrizePool);
     this.add(this.reputationPrizePool);
+    this.add(this.marketingFee);
 
     this.buttonBack = new TextButton(
       scene,
@@ -54,15 +62,14 @@ class PopupPrizePool extends Popup {
     this.add(this.buttonBack);
 
     scene.game.events.on(events.updateRankingRewards, ({ prizePoolConfig }) => {
-      const { rankRewardsPercent, reputationRewardsPercent, lowerRanksCutoffPercent } = prizePoolConfig;
-      this.rankPrizePool.text = `${
-        rankRewardsPercent * 100
-      }% of ETH from buying Gangsters\ngoes into ranking pool that is\ndistributed to the Top ${
+      const { rankRewardsPercent, reputationRewardsPercent, lowerRanksCutoffPercent, marketingFee } = prizePoolConfig;
+      this.rankPrizePool.text = `${rankRewardsPercent * 100}% of ETH from player spend\ngoes to the top ${
         lowerRanksCutoffPercent * 100
-      }% players.`;
+      }% players\nbased on rank.`;
       this.reputationPrizePool.text = `${
         reputationRewardsPercent * 100
-      }% of ETH from buying Gangsters\ngoes into reputation pool that is\ndistributed amongst all players.`;
+      }% of ETH from player spend\ngoes to all players based on\nreputation.`;
+      this.marketingFee.text = `${marketingFee * 100}% is used to buy and burn\n$FIAT tokens.`;
     });
     scene.game.events.emit(events.requestRankingRewards);
   }
