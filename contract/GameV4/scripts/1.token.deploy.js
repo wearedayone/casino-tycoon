@@ -87,9 +87,9 @@ const addLiquidity = async () => {
   const { defaultAdmin, token, uniRouter, tokenAmountToLiquidity, ethAmountToLiquidity } = readConfigs();
   const FIAT = await ethers.getContractFactory('FIAT');
   const fiatToken = FIAT.attach(token);
-  // const minterRole = await fiatToken.MINTER_ROLE();
-  // await fiatToken.grantRole(minterRole, defaultAdmin);
-  // await fiatToken.mint(defaultAdmin, parseEther(`${tokenAmountToLiquidity}`));
+  const minterRole = await fiatToken.MINTER_ROLE();
+  await fiatToken.grantRole(minterRole, defaultAdmin);
+  await fiatToken.mint(defaultAdmin, parseEther(`${tokenAmountToLiquidity}`));
 
   const Router = await ethers.getContractFactory(routerArtifact.abi, routerArtifact.bytecode);
   const routerContract = Router.attach(uniRouter);
@@ -120,9 +120,9 @@ const addLiquidity = async () => {
 
 const main = async () => {
   try {
-    // await deployToken();
-    // await deployUniswapContract();
-    // await deployPair();
+    await deployToken();
+    await deployUniswapContract();
+    await deployPair();
     await addLiquidity();
   } catch (err) {
     console.error(err);
