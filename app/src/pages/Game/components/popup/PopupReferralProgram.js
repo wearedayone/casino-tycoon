@@ -25,6 +25,7 @@ class PopupReferralProgram extends Popup {
   loading = false;
   balance = 0;
   code = '';
+  referralDiscount = 0;
 
   constructor(scene, data) {
     super(scene, 'popup-referral', { title: 'Referral Program' });
@@ -51,7 +52,7 @@ class PopupReferralProgram extends Popup {
     this.add(this.walletContainer);
 
     this.referralText = scene.add
-      .text(width / 2, refCodeContainerY, '', {
+      .text(leftMargin + this.popup.width * 0.4, refCodeContainerY, '', {
         fontSize: fontSizes.extraLarge,
         color: colors.black,
         fontFamily: fontFamilies.extraBold,
@@ -60,7 +61,7 @@ class PopupReferralProgram extends Popup {
     this.add(this.referralText);
     this.buttonCopy = new Button(
       scene,
-      leftMargin + this.popup.width * 0.85,
+      leftMargin + this.popup.width * 0.72,
       refCodeContainerY,
       'button-copy',
       'button-copy-pressed',
@@ -68,6 +69,22 @@ class PopupReferralProgram extends Popup {
       { sound: 'button-2' }
     );
     this.add(this.buttonCopy);
+    this.buttonTwitter = new Button(
+      scene,
+      leftMargin + this.popup.width * 0.85,
+      refCodeContainerY,
+      'button-twitter',
+      'button-twitter-pressed',
+      () => {
+        const text = `I'm playing @GangsterArena, a seasonal idle degen game where players compete for $FIAT and ETH rewards.\n\nUse my code to get ${
+          this.referralDiscount * 100
+        }% off Gangster NFTs:\n${this.referralCode}`;
+        const intentUrl = getTwitterIntentUrl({ text });
+        window.open(intentUrl);
+      },
+      { sound: 'button-2' }
+    );
+    this.add(this.buttonTwitter);
 
     this.earnedEthIcon = scene.add.image(width / 2, earnedTextY, 'eth-coin').setOrigin(0, 0.15);
     this.earnedText = scene.add.text(width / 2, earnedTextY, `ETH earned: 0 ETH`, earnedTextStyle);
@@ -153,6 +170,8 @@ class PopupReferralProgram extends Popup {
       }
     });
     scene.game.events.on('update-referral-config', ({ referralBonus, referralDiscount }) => {
+      this.referralDiscount = referralDiscount;
+
       this.referralDescription.text = `Use code to get ${referralDiscount * 100}% discount off every \ngangster NFT.`;
       this.referTitle.text = `Give ${referralDiscount * 100}%, Earn ${referralBonus * 100}%`;
       this.referSubtitle.text = `Earn ${referralBonus * 100}% of all ETH your referral spends. \nYour referrals get ${
@@ -198,3 +217,11 @@ class PopupReferralProgram extends Popup {
 }
 
 export default PopupReferralProgram;
+
+const getTwitterIntentUrl = ({ text }) => {
+  const intentUrl = new URL('https://twitter.com/intent/tweet');
+
+  intentUrl.searchParams.append('text', text);
+
+  return intentUrl;
+};
