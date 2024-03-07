@@ -26,6 +26,7 @@ class PopupReferralProgram extends Popup {
   balance = 0;
   code = '';
   referralDiscount = 0;
+  tweetTemplate = '';
 
   constructor(scene, data) {
     super(scene, 'popup-referral', { title: 'Referral Program' });
@@ -76,9 +77,9 @@ class PopupReferralProgram extends Popup {
       'button-twitter',
       'button-twitter-pressed',
       () => {
-        const text = `I'm playing @GangsterArena, a seasonal idle degen game where players compete for $FIAT and ETH rewards.\n\nUse my code to get ${
-          this.referralDiscount * 100
-        }% off Gangster NFTs:\n${this.referralCode}`;
+        const text = this.tweetTemplate
+          .replace('{referralDiscount}', this.referralDiscount * 100)
+          .replace('{referralCode}', this.referralCode);
         const intentUrl = getTwitterIntentUrl({ text });
         window.open(intentUrl);
       },
@@ -182,15 +183,22 @@ class PopupReferralProgram extends Popup {
       this.referralCode = referralCode;
       this.referralText.text = referralCode?.toUpperCase();
     });
-    scene.game.events.on('update-referral-data', ({ referralTotalReward, referralTotalDiscount, ethPriceInUsd }) => {
-      const earnedInUsd = customFormat(referralTotalReward * ethPriceInUsd, 2);
-      const savedInUsd = customFormat(referralTotalDiscount * ethPriceInUsd, 2);
+    scene.game.events.on(
+      'update-referral-data',
+      ({ referralTotalReward, referralTotalDiscount, ethPriceInUsd, tweetTemplate }) => {
+        this.tweetTemplate = tweetTemplate;
+        const earnedInUsd = customFormat(referralTotalReward * ethPriceInUsd, 2);
+        const savedInUsd = customFormat(referralTotalDiscount * ethPriceInUsd, 2);
 
-      this.earnedText.text = `ETH earned: ${customFormat(referralTotalReward, 4)} ETH             (~$ ${earnedInUsd})`;
-      this.savedText.text = `ETH saved: ${customFormat(referralTotalDiscount, 4)} ETH             (~$ ${savedInUsd})`;
-      this.earnedEthIcon.x = (width + this.earnedText.width - earnedInUsd.length * 60) / 2 - 190;
-      this.savedEthIcon.x = (width + this.savedText.width - savedInUsd.length * 60) / 2 - 190;
-    });
+        this.earnedText.text = `ETH earned: ${customFormat(
+          referralTotalReward,
+          4
+        )} ETH             (~$ ${earnedInUsd})`;
+        this.savedText.text = `ETH saved: ${customFormat(referralTotalDiscount, 4)} ETH             (~$ ${savedInUsd})`;
+        this.earnedEthIcon.x = (width + this.earnedText.width - earnedInUsd.length * 60) / 2 - 190;
+        this.savedEthIcon.x = (width + this.savedText.width - savedInUsd.length * 60) / 2 - 190;
+      }
+    );
     scene.game.events.emit('request-referral-config');
     scene.game.events.emit('request-invite-code');
     scene.game.events.emit('request-referral-data');

@@ -10,6 +10,7 @@ const useSystem = () => {
   const setConfigs = useSystemStore((state) => state.setConfigs);
   const setActiveSeason = useSystemStore((state) => state.setActiveSeason);
   const setMarket = useSystemStore((state) => state.setMarket);
+  const setTemplates = useSystemStore((state) => state.setTemplates);
   const setEstimatedGas = useSystemStore((state) => state.setEstimatedGas);
   const setOpenUpdate = useModalStore((state) => state.setOpenUpdate);
 
@@ -19,6 +20,17 @@ const useSystem = () => {
         setConfigs(snapshot.data());
       } else {
         setConfigs(null);
+      }
+    });
+
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(doc(firestore, 'template', 'twitterShareReferralCode'), (snapshot) => {
+      if (snapshot.exists()) {
+        console.log('snapshot.data()', snapshot.data());
+        setTemplates({ twitterShareReferralCode: snapshot.data().text });
       }
     });
 
