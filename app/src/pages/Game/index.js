@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Box, alpha } from '@mui/material';
 import Phaser from 'phaser';
+import CircleMaskImagePlugin from 'phaser3-rex-plugins/plugins/circlemaskimage-plugin.js';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSnackbar } from 'notistack';
 import { usePrivy } from '@privy-io/react-auth';
@@ -456,6 +457,15 @@ const Game = () => {
         debug: false,
         audio: {
           mute: sound !== 'on',
+        },
+        plugins: {
+          global: [
+            {
+              key: 'rexCircleMaskImagePlugin',
+              plugin: CircleMaskImagePlugin,
+              start: true,
+            },
+          ],
         },
       };
 
