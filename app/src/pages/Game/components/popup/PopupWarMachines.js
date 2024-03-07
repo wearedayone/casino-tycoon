@@ -683,13 +683,14 @@ class PopupWarMachines extends Popup {
     this.numberOfMachinesText.text = `Unallocated Gangsters: ${
       this.numberOfMachines - this.earnUnits - this.attackUnits - this.defendUnits
     }`;
-    this.attackUserText.text = `Raid Player: ${this.attackUser ? `@${this.attackUser.username}` : 'nil'}`;
     this.workerBonusTokenText.text = `Goon Bonus: ${formatter.format(this.workerBonusToken)} $FIAT`;
     this.buildingBonusText.text = `Safehouse Bonus: ${formatter.format(this.buildingBonus)}`;
 
     this.raidBtn.setDisabledState(!this.scene?.isUserActive);
     const isRaid = Boolean(this.attackUnits);
     this.raidBtn.updateText(isRaid ? 'Go Raid' : 'Confirm');
+    const username = this.attackUser ? `@${this.attackUser.username}` : 'nil';
+    this.attackUserText.text = `Raid Player: ${isRaid ? username : 'nil'}`;
   }
 }
 

@@ -122,11 +122,17 @@ export const updateUserWarDeployment = async ({
     .get();
   if (snapshot.empty) throw new Error('API error: War deployment doesnt exist');
 
-  await snapshot.docs[0].ref.update({
+  const updateData = {
     numberOfMachinesToEarn,
     numberOfMachinesToAttack,
     numberOfMachinesToDefend,
-  });
+  };
+
+  if (!numberOfMachinesToAttack) {
+    updateData.attackUserId = null;
+  }
+
+  await snapshot.docs[0].ref.update(updateData);
 };
 
 export const updateUserWarAttackUser = async ({ userId, attackUserId }) => {
