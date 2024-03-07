@@ -66,7 +66,7 @@ class PopupReferralProgram extends Popup {
       refCodeContainerY,
       'button-copy',
       'button-copy-pressed',
-      () => navigator.clipboard.writeText(this.referralCode),
+      () => navigator.clipboard.writeText(this.referralCode.toUpperCase()),
       { sound: 'button-2' }
     );
     this.add(this.buttonCopy);
@@ -79,7 +79,7 @@ class PopupReferralProgram extends Popup {
       () => {
         const text = this.tweetTemplate
           .replace('{referralDiscount}', this.referralDiscount * 100)
-          .replace('{referralCode}', this.referralCode);
+          .replace('{referralCode}', this.referralCode.toUpperCase());
         const intentUrl = getTwitterIntentUrl({ text });
         window.open(intentUrl);
       },
