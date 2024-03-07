@@ -82,7 +82,7 @@ class PopupBuyGoon extends Popup {
     );
     this.add(this.upgradeBtn);
 
-    this.numberOfWorkersText = scene.add.text(this.popup.x + 320, this.popup.y - this.popup.height / 2 + 170, '0', {
+    this.numberOfWorkersText = scene.add.text(this.popup.x + 40, this.popup.y - this.popup.height / 2 + 170, '0', {
       fontSize: '76px',
       color: colors.black,
       fontFamily: fontFamilies.extraBold,
