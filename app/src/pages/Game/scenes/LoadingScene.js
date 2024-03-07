@@ -10,7 +10,7 @@ const logoHeight = logoWidth / logoRatio;
 const loadingIconWidth = 100;
 const loadingIconHeight = loadingIconWidth / loadingIconRatio;
 
-const windowLoadingTextY = 0.2 * window.innerHeight + logoHeight + 16 + loadingIconHeight + 32;
+export const windowLoadingTextY = 0.2 * window.innerHeight + logoHeight + 16 + loadingIconHeight + 32;
 
 class LoadingScene extends Phaser.Scene {
   assetLoaded = false;
