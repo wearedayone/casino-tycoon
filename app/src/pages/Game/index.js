@@ -152,7 +152,7 @@ const Game = () => {
   const { data: leaderboardData } = useQuery({
     queryKey: [QueryKeys.Leaderboard],
     queryFn: getLeaderboard,
-    refetchInterval: 30 * 1000,
+    // refetchInterval: 30 * 1000,
     retry: 3,
     onError: (err) => {
       Sentry.captureException(err);
@@ -163,6 +163,7 @@ const Game = () => {
     username,
     address,
     avatarURL,
+    avatarURL_Small,
     tokenBalance,
     ETHBalance,
     inviteCode,
@@ -174,7 +175,7 @@ const Game = () => {
     ETHBalance: 0,
   };
 
-  const { setupSimulatorGameListener } = useSimulatorGameListener({ leaderboardData });
+  const { setupSimulatorGameListener } = useSimulatorGameListener();
   const {
     numberOfMachines,
     numberOfWorkers,
@@ -571,10 +572,11 @@ const Game = () => {
         gameRef.current.events.emit('update-app-version', appVersion);
       });
       gameRef.current?.events.on('request-profile', () => {
-        gameRef.current.events.emit('update-profile', { username, address, avatarURL });
+        gameRef.current.events.emit('update-profile', { username, address, avatarURL: avatarURL_Small ?? avatarURL });
       });
       gameRef.current?.events.on('open-leaderboard-modal', () => {
         setLeaderboardModalOpen(true);
+        queryClient.invalidateQueries({ queryKey: [QueryKeys.Leaderboard] });
         const { name, timeStepInMinutes, rankPrizePool, reputationPrizePool } = activeSeason || {};
         gameRef.current.events.emit('update-season', {
           name,
@@ -1319,7 +1321,7 @@ const Game = () => {
   }, [numberOfMachines, ETHBalance, tokenBalance]);
 
   useEffect(() => {
-    gameRef.current?.events.emit('update-profile', { username, address, avatarURL });
+    gameRef.current?.events.emit('update-profile', { username, address, avatarURL: avatarURL_Small ?? avatarURL });
   }, [username, address, avatarURL]);
 
   useEffect(() => {
@@ -1627,7 +1629,8 @@ const Game = () => {
                       logAnalyticsEvent('user_reload', {
                         loading_duration: (Date.now() - startLoadingTime) / 1000,
                       });
-                      window.location.reload();
+                      logout();
+                      // window.location.reload();
                     }}>
                     <Box width="120px" sx={{ '& img': { width: '100%' } }}>
                       <img

@@ -58,6 +58,58 @@ export const getLeaderboard = async (userId) => {
   });
 };
 
+export const getRank = async (userId) => {
+  const { id, rankPrizePool, reputationPrizePool, rankingRewards } = await getActiveSeason();
+  const totalSnapshot = await firestore
+    .collection('gamePlay')
+    .where('seasonId', '==', id)
+    .where('active', '==', true)
+    .count()
+    .get();
+  const totalPlayers = totalSnapshot.data().count;
+
+  const userGamePlay = await firestore
+    .collection('gamePlay')
+    .where('seasonId', '==', id)
+    .where('userId', '==', userId)
+    .where('active', '==', true)
+    .limit(1)
+    .get();
+  if (userGamePlay.empty)
+    return {
+      rank: '-',
+      rankReward: 0,
+      reputationReward: 0,
+      totalPlayers: totalPlayers,
+    };
+  const { networth } = userGamePlay.docs[0].data();
+
+  const rankSnapshot = await firestore
+    .collection('gamePlay')
+    .where('seasonId', '==', id)
+    .where('networth', '>=', networth)
+    .count()
+    .get();
+
+  const snapshot = await firestore.collection('gamePlay').where('seasonId', '==', id).where('active', '==', true).get();
+  let totalActiveReputation = 0;
+  for (let doc of snapshot.docs) {
+    const { networth } = doc.data();
+    totalActiveReputation += networth;
+  }
+  let reputationReward = 0;
+  if (totalActiveReputation !== 0) {
+    reputationReward = (networth / totalActiveReputation) * reputationPrizePool;
+  }
+
+  const rank = rankSnapshot.data().count;
+  const rankReward = calculateReward(rankPrizePool, rankingRewards, rank - 1);
+
+  // Rank, rank reward, reputationReward totalPlayers
+
+  return { rank, rankReward, reputationReward, totalPlayers };
+};
+
 export const getNextWarSnapshotUnixTime = async () => {
   const dayNow = moment().format('DD/MM/YYYY');
   const warSnapshotToday = moment(`${dayNow} 01:00:00`, 'DD/MM/YYYY HH:mm:ss'); // TODO: update war snapshot time

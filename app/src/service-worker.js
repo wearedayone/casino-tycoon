@@ -64,7 +64,7 @@ registerRoute(
     plugins: [
       // Ensure that once this runtime cache reaches a maximum size the
       // least-recently used images are removed.
-      new ExpirationPlugin({ maxEntries: 50 }),
+      new ExpirationPlugin({ maxEntries: 500 }),
     ],
   })
 );
@@ -76,5 +76,24 @@ self.addEventListener('message', (event) => {
     self.skipWaiting();
   }
 });
+
+// this.addEventListener('install', (event) => {
+//   event.waitUntil(caches.open('v1').then((cache) => cache.addAll(['/images/animation/gangster_back-3.png'])));
+// });
+
+// self.addEventListener('fetch', (event) => {
+//   if (event.request.destination === 'image') {
+//     event.respondWith(
+//       caches.match(event.request).then(function (response) {
+//         if (response) {
+//           return response;
+//         }
+//       })
+//     );
+//   }
+
+//   // If you don't call event.respondWith() for some requests,
+//   // the normal loading behavior will be used by default.
+// });
 
 // Any other custom service worker logic can go here.

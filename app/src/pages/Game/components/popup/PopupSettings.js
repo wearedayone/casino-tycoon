@@ -54,7 +54,7 @@ class PopupSettings extends Popup {
       .setPosition(avatarX, walletContainerY)
       .fillCircle(0, 0, avatarSize * Math.PI * 2);
     this.avatar = scene.add.image(avatarX, walletContainerY, 'avatar').setDisplaySize(avatarSize, avatarSize);
-
+    this.avatar.setScale(4);
     this.iconSettings = scene.add.image(paddedX + this.popup.width * 0.12, walletContainerY + 90, 'icon-settings');
     this.myWallet = scene.add.text(paddedX + 300, walletContainerY - 80, 'My Wallet:', {
       fontSize: '60px',

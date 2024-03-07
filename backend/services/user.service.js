@@ -6,7 +6,7 @@ import admin, { firestore } from '../configs/firebase.config.js';
 import privy from '../configs/privy.config.js';
 import alchemy from '../configs/alchemy.config.js';
 import { getActiveSeason } from './season.service.js';
-import { getLeaderboard } from './gamePlay.service.js';
+import { getLeaderboard, getRank } from './gamePlay.service.js';
 import { generateCode } from '../utils/formulas.js';
 
 const CODE_LENGTH = 10;
@@ -57,12 +57,16 @@ export const createUserIfNotExist = async (userId) => {
 
   const isWhitelisted = whitelistedUsernames.includes(user?.twitter?.username);
   const { wallet, twitter } = user;
-
+  // console.log({ twitter });
   if (!snapshot.exists) {
     // create user
     const username = twitter ? twitter.username : faker.internet.userName();
-    const avatarURL =
-      twitter.profilePictureUrl || `https://placehold.co/400x400/1e90ff/FFF?text=${username[0].toUpperCase()}`;
+
+    let avatarURL_Small = `https://placehold.co/400x400/1e90ff/FFF?text=${username[0].toUpperCase()}`;
+    if (twitter.profilePictureUrl) {
+      avatarURL_Small = twitter.profilePictureUrl;
+    }
+
     let validReferralCode = false;
     let referralCode = generateCode(CODE_LENGTH);
     while (!validReferralCode) {
@@ -84,7 +88,8 @@ export const createUserIfNotExist = async (userId) => {
         address: wallet?.address?.toLocaleLowerCase() || '',
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
         username,
-        avatarURL,
+        avatarURL: `https://placehold.co/400x400/1e90ff/FFF?text=${username[0].toUpperCase()}`,
+        avatarURL_Small,
         tokenBalance: 0,
         ETHBalance: 0,
         isWhitelisted,
@@ -96,12 +101,13 @@ export const createUserIfNotExist = async (userId) => {
         completedTutorial: false,
       });
   } else {
-    const { ETHBalance, avatarURL } = snapshot.data();
+    const { ETHBalance, avatarURL, avatarURL_Small } = snapshot.data();
     // check if user has twitter avatar now
-    if (avatarURL.startsWith('https://placehold.co') && twitter.profilePictureUrl)
+    if (twitter.profilePictureUrl && avatarURL_Small !== twitter.profilePictureUrl) {
       await firestore.collection('user').doc(userId).update({
-        avatarURL: twitter.profilePictureUrl,
+        avatarURL_Small: twitter.profilePictureUrl,
       });
+    }
 
     if (wallet) {
       const ethersProvider = await alchemy.config.getProvider();
@@ -163,6 +169,10 @@ export const getUserRankAndReward = async (userId) => {
   }
 
   return null;
+};
+export const getUserRankAndRewardV2 = async (userId) => {
+  const rank = await getRank(userId);
+  return rank;
 };
 
 export const updateLastOnlineTime = async (userId) => {

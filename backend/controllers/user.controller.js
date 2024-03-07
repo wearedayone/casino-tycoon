@@ -8,6 +8,7 @@ import {
   updateViewedTutorial,
   getUserByCode,
   checkCodeDuplicate,
+  getUserRankAndRewardV2,
 } from '../services/user.service.js';
 import { getWarHistory, getWarHistoryDetail } from '../services/warSnapshot.service.js';
 import logger from '../utils/logger.js';
@@ -87,7 +88,7 @@ export const updateBalance = async (req, res) => {
 
 export const getRank = async (req, res) => {
   try {
-    const data = await getUserRankAndReward(req.userId);
+    const data = await getUserRankAndRewardV2(req.userId);
     return res.status(200).send(data);
   } catch (err) {
     console.error(err);
