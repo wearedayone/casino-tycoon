@@ -1,116 +1,95 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Box, Dialog, Typography } from '@mui/material';
+import { Box, Typography, Button, alpha } from '@mui/material';
 
 import { getPWADisplayMode, getUserOS } from '../utils/pwa';
 
-const guideMap = {
-  Android: {
-    image: '/images/guides/android.png',
-    step1Text: 'Tap ellipse button',
-    step2Text: 'Install App',
-  },
-  iOS: { image: '/images/guides/ios.png', step1Text: 'Tap on Share', step2Text: 'Add to Home Screen' },
-};
-
 const InstallGuideModal = () => {
   const { pathname } = useLocation();
-  const [modalStatus, setModalStatus] = useState({
-    open: false,
+  const [deviceInfo, setDeviceInfo] = useState({
+    displayMode: null,
     os: null,
   });
 
   useEffect(() => {
     const displayMode = getPWADisplayMode();
-    if (displayMode === 'browser') {
-      const os = getUserOS();
-      if (['iOS', 'Android'].includes(os) && pathname !== '/deposit') {
-        setModalStatus({ open: true, os });
-      }
-    }
+    const os = getUserOS();
+
+    setDeviceInfo({ os, displayMode });
   }, []);
 
-  const guide = guideMap[modalStatus?.os] || {};
+  const open =
+    pathname !== '/deposit' &&
+    ((deviceInfo.os === 'iOS' && deviceInfo.displayMode === 'browser') ||
+      (deviceInfo.os === 'Android' && deviceInfo.displayMode === 'browser'));
 
-  return (
-    <Dialog
-      maxWidth="sm"
-      fullWidth
-      open={modalStatus.open}
-      onClose={() => {}}
-      PaperProps={{
-        sx: {
-          borderRadius: 4,
-          position: 'relative',
-          bgcolor: 'transparent',
-          backgroundImage: 'url(/images/popup.png)',
-          backgroundRepeat: 'no-repeat',
-          backgroundSize: '100% 100%',
-          overflow: 'visible',
-        },
-      }}>
-      <Box position="absolute" width="75%" sx={{ top: -24, left: '50%', transform: 'translateX(-50%)' }}>
-        <img src="/images/popup-title.png" width="100%" alt="" />
-        <img
-          src="/images/texts/add-to-home-page.png"
-          width="100%"
-          alt="Add to home page"
-          style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}
-        />
-      </Box>
+  if (!open) return null;
+
+  if (deviceInfo.os === 'iOS')
+    return (
       <Box
-        p={3}
-        pt={{
-          xs: 8,
-          sm: 12,
-        }}
-        pb={4}>
-        <Box display="flex" flexDirection="column" gap={3}>
-          <Typography color="#29000b" fontWeight={700} align="center">
-            To start playing, you need to add this website to your home screen.
-          </Typography>
-          <Box display="flex" gap={2} sx={{ '& .MuiTypography-root': { fontWeight: 800, fontSize: '1.2rem' } }}>
-            <Box flex={1} display="flex" justifyContent="center" gap={0.75}>
-              <Typography color="#29000b">Step </Typography>
-              <Box bgcolor="#bf5837" borderRadius="50%" width="1.7rem" height="1.7rem">
-                <Typography color="white" textAlign="center">
-                  1
-                </Typography>
-              </Box>
-            </Box>
-            <Box flex={1} display="flex" justifyContent="center" gap={0.75}>
-              <Typography color="#29000b">Step </Typography>
-              <Box bgcolor="#bf5837" borderRadius="50%" width="1.7rem" height="1.7rem">
-                <Typography color="white" textAlign="center">
-                  2
-                </Typography>
-              </Box>
-            </Box>
-          </Box>
-          <img src={guide.image} width="100%" alt="Tap on Share & Add to Home Screen" />
-          <Box
-            display="flex"
-            gap={2}
-            sx={{
-              '& .MuiTypography-root': {
-                fontWeight: 700,
-                fontSize: '1.2rem',
-                textAlign: 'center',
-                color: '#29000b',
-                lineHeight: '1.2em',
-              },
-            }}>
-            <Box flex={1}>
-              <Typography>{guide.step1Text}</Typography>
-            </Box>
-            <Box flex={1}>
-              <Typography>{guide.step2Text}</Typography>
-            </Box>
+        position="fixed"
+        top={0}
+        left={0}
+        width="100vw"
+        height="100vh"
+        bgcolor={alpha('#000', 0.5)}
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        sx={{ '& img': { maxWidth: '80vw', maxHeight: '80vh' } }}>
+        <img src="/images/add-to-homepage-ios.png" alt="add-to-home-page" />
+      </Box>
+    );
+
+  if (deviceInfo.os === 'Android')
+    return (
+      <Box
+        position="fixed"
+        top={0}
+        left={0}
+        width="100vw"
+        height="100vh"
+        bgcolor={alpha('#000', 0.5)}
+        display="flex"
+        justifyContent="center"
+        alignItems="center">
+        <Box position="relative" sx={{ '& img': { maxWidth: '80vw', maxHeight: '80vh' } }}>
+          <img src="/images/add-to-homepage-android.png" alt="add-to-home-page" />
+          <Box position="absolute" left={0} bottom={0} width="100%" px="10%" sx={{ transform: 'translateY(30%)' }}>
+            <Button
+              fullWidth
+              variant="contained"
+              onClick={() => setDeviceInfo({ os: null, displayMode: null })}
+              sx={{
+                borderRadius: '4%/24%',
+                backgroundColor: 'black',
+                backgroundImage: 'url(/images/button-blue-normal.png)',
+                backgroundSize: '100% 100%',
+                backgroundRepeat: 'no-repeat',
+                aspectRatio: 5.62 / 1,
+                boxShadow: 'none',
+                '&:hover': {
+                  boxShadow: 'none',
+                  backgroundColor: 'black',
+                  backgroundImage: 'url(/images/button-blue-normal-pressed.png)',
+                },
+              }}>
+              <Typography
+                color="white"
+                fontFamily="WixMadeforDisplayBold"
+                fontSize={{ xs: 16, sm: 16, md: 24 }}
+                // sx={{ WebkitTextStroke: '4px #0004A0', textStroke: '4px #0004A0' }}
+              >
+                Skip: Play on Browser
+              </Typography>
+            </Button>
           </Box>
         </Box>
       </Box>
-    </Dialog>
-  );
+    );
+
+  return null;
 };
 
 export default InstallGuideModal;
