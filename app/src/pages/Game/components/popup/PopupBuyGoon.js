@@ -44,9 +44,8 @@ class PopupBuyGoon extends Popup {
       gameEnded: isSimulator ? 'simulator-game-ended' : 'game-ended',
       updateWorkers: isSimulator ? 'simulator-update-workers' : 'update-workers',
       requestWorkers: isSimulator ? 'simulator-request-workers' : 'request-workers',
-      updatePriceWorkerBuilding: isSimulator
-        ? 'simulator-update-price-worker-building'
-        : 'update-price-worker-building',
+      enableSalesTracking: isSimulator ? 'simulator-enable-worker-sales-tracking' : 'enable-worker-sales-tracking',
+      disableSalesTracking: isSimulator ? 'simulator-disable-worker-sales-tracking' : 'disable-worker-sales-tracking',
     };
     this.events = events;
     this.onCompleted = onCompleted;
@@ -307,11 +306,13 @@ class PopupBuyGoon extends Popup {
   }
 
   onOpen() {
-    this.scene.game.events.emit(this.events.updatePriceWorkerBuilding);
+    this.scene.game.events.emit(this.events.enableSalesTracking);
   }
 
   cleanup() {
     this.onCompleted?.();
+    console.log('popup buy goon cleanup');
+    this.scene.game.events.emit(this.events.disableSalesTracking);
   }
 
   updateValues() {
