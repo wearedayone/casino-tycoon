@@ -49,7 +49,7 @@ const Login = () => {
         sx={{
           zIndex: -1,
           top: 0,
-          backgroundImage: 'url(/images/bg-login.png)',
+          backgroundImage: 'url(https://res.cloudinary.com/divb64juk/image/upload/v1709800611/gangster-arena/bg-login.png)',
           backgroundSize: 'cover',
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'center',

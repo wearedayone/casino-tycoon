@@ -31,7 +31,11 @@ const DepositSuccess = () => {
           maxWidth: '100vw',
         },
       }}>
-      <img className="eth-img" src="/images/eth_deposit_success.png" alt="deposit" />
+      <img
+        className="eth-img"
+        src="https://res.cloudinary.com/divb64juk/image/upload/v1709800611/gangster-arena/eth_deposit_success.png"
+        alt="deposit"
+      />
       <Box py={5} width="70vw" display="flex" flexDirection="column" gap={1}>
         <Typography
           fontSize={{ sx: '32px', md: '48px', lg: '60px', xl: '72px' }}

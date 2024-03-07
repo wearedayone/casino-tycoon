@@ -1561,7 +1561,7 @@ const Game = () => {
         sx={
           showBg
             ? {
-                backgroundImage: 'url(/images/bg-login.png)',
+                backgroundImage: 'url(https://res.cloudinary.com/divb64juk/image/upload/v1709800611/gangster-arena/bg-login.png)',
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 '& canvas': { position: 'absolute' },
