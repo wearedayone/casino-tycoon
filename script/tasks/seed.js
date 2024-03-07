@@ -20,6 +20,7 @@ const main = async () => {
       ...gameConfigs.assets,
       openseaNftCollection: gameConfigs.openseaNftCollection,
       activeSeasonId,
+      appReloadThresholdInSeconds: 10,
       appVersion: '0.9.3.0',
       disabledUrls: ['gangsterarena.com', 'demo.gangsterarena.com'],
     });
