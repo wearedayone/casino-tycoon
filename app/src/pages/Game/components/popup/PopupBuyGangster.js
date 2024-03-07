@@ -88,7 +88,7 @@ class PopupBuyGangster extends Popup {
     );
     this.add(this.upgradeBtn);
 
-    this.numberOfMachinesText = scene.add.text(this.popup.x + 370, this.popup.y - this.popup.height / 2 + 170, '0', {
+    this.numberOfMachinesText = scene.add.text(this.popup.x + 150, this.popup.y - this.popup.height / 2 + 170, '0', {
       fontSize: fontSizes.extraLarge,
       color: colors.black,
       fontFamily: fontFamilies.extraBold,
@@ -324,6 +324,7 @@ class PopupBuyGangster extends Popup {
           this.mintFunction === 'mintWL' ? this.whitelistPrice : this.basePrice * (1 - this.referralDiscount);
 
         this.numberOfMachinesText.text = numberOfMachines.toLocaleString();
+
         this.networthText.text = `${networth.toLocaleString()}`;
         this.rateText.text = `${formatter.format(numberOfMachines * dailyReward)}`;
         this.estimatedMaxPurchase = balance && this.unitPrice ? Math.floor((balance - this.gas) / this.unitPrice) : 0;
