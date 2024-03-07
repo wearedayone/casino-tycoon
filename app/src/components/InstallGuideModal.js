@@ -64,7 +64,7 @@ const InstallGuideModal = () => {
               onClick={() => setDeviceInfo({ os: null, displayMode: null })}
               sx={{
                 borderRadius: '4%/24%',
-                backgroundColor: 'black',
+                backgroundColor: 'blue',
                 backgroundImage: 'url(/images/button-blue-normal.png)',
                 backgroundSize: '100% 100%',
                 backgroundRepeat: 'no-repeat',
@@ -80,6 +80,7 @@ const InstallGuideModal = () => {
                 color="white"
                 fontFamily="WixMadeforDisplayBold"
                 fontSize={{ xs: 16, sm: 16, md: 24 }}
+                sx={{ textTransform: 'none' }}
                 // sx={{ WebkitTextStroke: '4px #0004A0', textStroke: '4px #0004A0' }}
               >
                 Skip: Play on Browser
