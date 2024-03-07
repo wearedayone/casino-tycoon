@@ -5,13 +5,10 @@ import chunk from 'lodash.chunk';
 import admin, { firestore } from '../configs/firebase.config.js';
 import privy from '../configs/privy.config.js';
 import alchemy from '../configs/alchemy.config.js';
-import { getActiveSeason, getActiveSeasonId } from './season.service.js';
-import { initTransaction, validateNonWeb3Transaction } from './transaction.service.js';
-import environments from '../utils/environments.js';
-import { calculateReward, generateCode } from '../utils/formulas.js';
+import { getActiveSeason } from './season.service.js';
 import { getLeaderboard } from './gamePlay.service.js';
+import { generateCode } from '../utils/formulas.js';
 
-const { NETWORK_ID } = environments;
 const CODE_LENGTH = 10;
 
 const createGamePlayIfNotExist = async (userId, isWhitelisted) => {
@@ -58,14 +55,14 @@ export const createUserIfNotExist = async (userId) => {
   const whitelistSnapshot = await firestore.collection('whitelisted').get();
   const whitelistedUsernames = whitelistSnapshot.docs.map((doc) => doc.data().username);
 
-  // console.log({ user });
   const isWhitelisted = whitelistedUsernames.includes(user?.twitter?.username);
+  const { wallet, twitter } = user;
 
   if (!snapshot.exists) {
-    const { wallet, twitter } = user;
     // create user
     const username = twitter ? twitter.username : faker.internet.userName();
-    const avatarURL = `https://placehold.co/400x400/1e90ff/FFF?text=${username[0].toUpperCase()}`;
+    const avatarURL =
+      twitter.profilePictureUrl || `https://placehold.co/400x400/1e90ff/FFF?text=${username[0].toUpperCase()}`;
     let validReferralCode = false;
     let referralCode = generateCode(CODE_LENGTH);
     while (!validReferralCode) {
@@ -99,12 +96,17 @@ export const createUserIfNotExist = async (userId) => {
         completedTutorial: false,
       });
   } else {
-    const { wallet } = user;
+    const { ETHBalance, avatarURL } = snapshot.data();
+    // check if user has twitter avatar now
+    if (avatarURL.startsWith('https://placehold.co') && twitter.profilePictureUrl)
+      await firestore.collection('user').doc(userId).update({
+        avatarURL: twitter.profilePictureUrl,
+      });
+
     if (wallet) {
       const ethersProvider = await alchemy.config.getProvider();
       const value = await ethersProvider.getBalance(user.wallet.address);
       console.log(formatEther(value));
-      const { ETHBalance } = snapshot.data();
       if (ETHBalance !== Number(formatEther(value))) {
         await firestore
           .collection('user')

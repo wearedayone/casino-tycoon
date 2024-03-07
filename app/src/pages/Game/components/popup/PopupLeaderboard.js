@@ -10,7 +10,8 @@ import { formatter } from '../../../../utils/numbers';
 import { getOrdinalSuffix } from '../../../../utils/strings';
 
 const { width, height } = configs;
-const rowHeight = 82;
+const rowHeight = 84;
+const tablePad = 10;
 const largeBlackExtraBold = { fontSize: fontSizes.large, color: colors.black, fontFamily: fontFamilies.extraBold };
 const largeBlackBold = { fontSize: fontSizes.large, color: colors.black, fontFamily: fontFamilies.bold };
 const mediumBlackBoldRight = {
@@ -28,6 +29,7 @@ class PopupLeaderboard extends Popup {
   isUserActive = false;
   numberOfRows = 0;
   stars = [];
+  avatars = {};
 
   constructor(scene, { isSimulator, onClose, onClickRank, onClickReputation } = {}) {
     super(scene, 'popup-extra-large', { title: 'Season Leaderboard', noCloseBtn: true });
@@ -145,17 +147,15 @@ class PopupLeaderboard extends Popup {
     const rank = scene.add.text(paddedX, leaderboardHeaderY, 'Rank', smallBrownBold);
     const name = scene.add.text(leftMargin + this.popup.width * 0.3, leaderboardHeaderY, 'Name', smallBrownBold);
     const reputation = scene.add.text(
-      leftMargin + this.popup.width * 0.5,
+      leftMargin + this.popup.width * 0.55,
       leaderboardHeaderY,
       'Reputation',
       smallBrownBold
     );
-    const ethRewards = scene.add.text(
-      leftMargin + this.popup.width * 0.7,
-      leaderboardHeaderY,
-      'ETH Rewards',
-      smallBrownBold
-    );
+    const ethRewards = scene.add.text(leftMargin + this.popup.width * 0.77, leaderboardHeaderY - 30, 'ETH\nRewards', {
+      ...smallBrownBold,
+      align: 'center',
+    });
     this.add(rank);
     this.add(name);
     this.add(reputation);
@@ -164,23 +164,24 @@ class PopupLeaderboard extends Popup {
     this.leaderboardContainer = scene.add.image(width / 2, this.leaderboardY, 'container-large').setOrigin(0.5, 0);
     this.add(this.leaderboardContainer);
 
-    this.crownGold = scene.add.image(0, 0, 'icon-crown-gold').setOrigin(0, 0).setVisible(false);
-    this.crownSilver = scene.add.image(0, rowHeight, 'icon-crown-silver').setOrigin(0, 0).setVisible(false);
+    this.crownGold = scene.add.image(0, tablePad, 'icon-crown-gold').setOrigin(0, 0).setVisible(false);
+    this.crownSilver = scene.add
+      .image(0, rowHeight + tablePad, 'icon-crown-silver')
+      .setOrigin(0, 0)
+      .setVisible(false);
     this.crownCopper = scene.add
-      .image(0, rowHeight * 2, 'icon-crown-copper')
+      .image(0, rowHeight * 2 + tablePad, 'icon-crown-copper')
       .setOrigin(0, 0)
       .setVisible(false);
     this.rankNumbers = scene.add
-      .text(this.popup.width * 0.06, 0, '', { ...smallBlackBold, align: 'center' })
+      .text(this.popup.width * 0.06, tablePad, '', { ...smallBlackBold, align: 'center' })
       .setOrigin(0.5, 0);
-    this.usernames = scene.add
-      .text(this.popup.width * 0.25, 0, '', { ...smallBlackBold, align: 'center' })
-      .setOrigin(0.5, 0);
+    this.usernames = scene.add.text(this.popup.width * 0.18, tablePad, '', smallBlackBold);
     this.networths = scene.add
-      .text(this.popup.width * 0.47, 0, '', { ...smallBlackBold, align: 'right' })
+      .text(this.popup.width * 0.52, tablePad, '', { ...smallBlackBold, align: 'right' })
       .setOrigin(0.5, 0);
     this.ethRewards = scene.add
-      .text(this.popup.width * 0.7, 0, '', { ...smallBlackBold, align: 'center' })
+      .text(this.popup.width * 0.73, tablePad, '', { ...smallBlackBold, align: 'center' })
       .setOrigin(0.5, 0);
     this.contentContainer = scene.add
       .container()
@@ -199,19 +200,17 @@ class PopupLeaderboard extends Popup {
     const playerOriginY = 2;
     this.playerRankContainer = scene.add.image(width / 2, playerRankY, 'player-rank-container').setOrigin(0.52, 1.2);
     this.playerRank = scene.add
-      .text(paddedX + this.popup.width * 0.06, playerRankY, '', { ...smallBrownExtraBold, align: 'center' })
+      .text(paddedX + this.rankNumbers.x, playerRankY, '', { ...smallBrownExtraBold, align: 'center' })
       .setOrigin(0.5, playerOriginY);
     this.playerUsername = scene.add
-      .text(paddedX + this.popup.width * 0.25, playerRankY, 'YOU', { ...smallBrownExtraBold, align: 'center' })
-      .setOrigin(0.5, playerOriginY);
-    this.playerNetworth = scene.add
-      .text(paddedX + this.popup.width * 0.47, playerRankY, '', { ...smallBrownExtraBold, align: 'right' })
-      .setOrigin(0.5, playerOriginY);
-    this.playerStar = scene.add
-      .image(paddedX + this.popup.width * 0.47, playerRankY, 'icon-star')
+      .text(paddedX + this.usernames.x, playerRankY, 'YOU', smallBrownExtraBold)
       .setOrigin(0, playerOriginY);
+    this.playerNetworth = scene.add
+      .text(paddedX + this.networths.x, playerRankY, '', { ...smallBrownExtraBold, align: 'right' })
+      .setOrigin(0.5, playerOriginY);
+    this.playerStar = scene.add.image(paddedX + this.networths.x, playerRankY, 'icon-star').setOrigin(0, playerOriginY);
     this.playerReward = scene.add
-      .text(paddedX + this.popup.width * 0.7, playerRankY, '', { ...smallBrownExtraBold, align: 'center' })
+      .text(paddedX + this.ethRewards.x, playerRankY, '', { ...smallBrownExtraBold, align: 'center' })
       .setOrigin(0.5, playerOriginY);
     this.add(this.playerRankContainer);
     this.add(this.playerRank);
@@ -366,6 +365,40 @@ class PopupLeaderboard extends Popup {
       .join('\n\n');
     const isRankingMode = this.modeSwitch.mode === 'Ranking';
     this.ethRewards.text = isRankingMode ? this.rankingRewardsString : this.reputationRewardsString;
+    // load avatar
+    if (Object.keys(this.avatars).length) {
+      for (let username in this.avatars) {
+        const avatar = this.avatars[username];
+        avatar.destroy();
+        this.remove(avatar);
+      }
+    }
+    const avatarSize = 0.18;
+    this.avatars = {};
+    for (let i = 0; i < activeLeaderboard.length; i++) {
+      const username = activeLeaderboard[i].username;
+      const y = i * rowHeight;
+
+      const avatar = this.scene.add
+        .rexCircleMaskImage(this.usernames.x - 90, y, 'avatar')
+        .setOrigin(0, 0)
+        .setDisplaySize(avatarSize, avatarSize);
+
+      this.avatars[username] = avatar;
+      this.contentContainer.add(avatar);
+    }
+    let loader = new Phaser.Loader.LoaderPlugin(this.scene);
+    activeLeaderboard.forEach(({ username, avatarURL }) => {
+      // ask the LoaderPlugin to load the texture
+      loader.image(`${username}-avatar`, avatarURL);
+    });
+    loader.once(Phaser.Loader.Events.COMPLETE, () =>
+      Object.keys(this.avatars).forEach((username) => {
+        const avatar = this.avatars[username];
+        avatar.setTexture(`${username}-avatar`);
+      })
+    );
+    loader.start();
 
     const userRecord = leaderboard.find(({ isUser }) => isUser);
     this.isUserActive = userRecord.active;
@@ -399,7 +432,7 @@ class PopupLeaderboard extends Popup {
 
     this.stars = [];
     for (let i = 0; i < activeLeaderboard.length; i++) {
-      const y = i * rowHeight;
+      const y = tablePad + i * rowHeight;
       const star = this.scene.add
         .image(this.networths.x + this.networths.width / 2 + 10, y, 'icon-star')
         .setOrigin(0, 0);

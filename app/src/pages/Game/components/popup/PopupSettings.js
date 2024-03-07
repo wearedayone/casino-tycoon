@@ -21,8 +21,8 @@ class PopupSettings extends Popup {
     const longBtnX = width / 2;
     const medBtnX = width / 2 - this.popup.width * 0.23;
     const secondMedBtnX = width / 2 + this.popup.width * 0.23;
-    const avatarSize = this.popup.width * 0.08;
-    const avatarPadding = this.popup.width * 0.02;
+    const avatarSize = 16;
+    const avatarPadding = this.popup.width * 0.06;
     const avatarX = paddedX + avatarPadding + avatarSize / 2;
     const startingY = this.popup.y - this.popup.height / 2;
     const usernameY = startingY + 150;
@@ -49,8 +49,11 @@ class PopupSettings extends Popup {
       fontFamily: 'WixMadeforDisplayExtraBold',
     });
     this.walletContainer = scene.add.image(width / 2, walletContainerY, 'settings-wallet-container');
-    this.circle = scene.add.graphics().setPosition(avatarX, walletContainerY).fillCircle(0, 0, avatarSize);
-    this.avatar = scene.add.image(avatarX, walletContainerY, 'avatar').setSize(avatarSize, avatarSize);
+    this.circle = scene.add
+      .graphics()
+      .setPosition(avatarX, walletContainerY)
+      .fillCircle(0, 0, avatarSize * Math.PI * 2);
+    this.avatar = scene.add.image(avatarX, walletContainerY, 'avatar').setDisplaySize(avatarSize, avatarSize);
 
     this.iconSettings = scene.add.image(paddedX + this.popup.width * 0.12, walletContainerY + 90, 'icon-settings');
     this.myWallet = scene.add.text(paddedX + 300, walletContainerY - 80, 'My Wallet:', {
