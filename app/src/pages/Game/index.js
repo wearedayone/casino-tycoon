@@ -92,7 +92,7 @@ const Game = () => {
   const [isLeaderboardModalOpen, setLeaderboardModalOpen] = useState(false);
   const { isEnded, countdownString } = useSeasonCountdown({ open: isLeaderboardModalOpen });
   const [showBg, setShowBg] = useState(true);
-  const { workerSoldLast24h, buildingSoldLast24h, updateNow } = useSalesLast24h();
+  const { workerSoldLast24h, buildingSoldLast24h, enableSalesTracking, disableSalesTracking } = useSalesLast24h();
 
   const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -1158,7 +1158,14 @@ const Game = () => {
           });
       });
 
-      gameRef.current?.events.on('update-price-worker-building', updateNow);
+      gameRef.current?.events.on('update-price-worker-building', () => {
+        console.log('enable-sales-tracking');
+        enableSalesTracking();
+      });
+      gameRef.current?.events.on('disable-sales-tracking', () => {
+        console.log('disable-sales-tracking');
+        disableSalesTracking();
+      });
 
       gameRef.current?.events.on('request-goon-price', () => {
         getWorkerPrices()

@@ -47,6 +47,7 @@ class PopupBuyGoon extends Popup {
       updatePriceWorkerBuilding: isSimulator
         ? 'simulator-update-price-worker-building'
         : 'update-price-worker-building',
+      disableSalesTracking: isSimulator ? 'simulator-disable-sales-tracking' : 'disable-sales-tracking',
     };
     this.events = events;
     this.onCompleted = onCompleted;
@@ -312,6 +313,8 @@ class PopupBuyGoon extends Popup {
 
   cleanup() {
     this.onCompleted?.();
+    console.log('popup buy goon cleanup');
+    this.scene.game.events.emit(this.events.disableSalesTracking);
   }
 
   updateValues() {

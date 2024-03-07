@@ -22,7 +22,7 @@ class PopupBuy extends Phaser.GameObjects.Container {
       'button-buy-safehouse-pressed',
       () => {
         if (this.houseDisabled) return;
-        scene.popupSafeHouseUpgrade.setVisible(true);
+        scene.popupSafeHouseUpgrade.open();
         this.onClick?.();
       },
       { sound: 'open' }
@@ -35,7 +35,7 @@ class PopupBuy extends Phaser.GameObjects.Container {
       'button-buy-gangster-pressed',
       () => {
         if (this.gangsterDisabled) return;
-        scene.popupBuyGangster.setVisible(true);
+        scene.popupBuyGangster.open();
         this.onClick?.();
       },
       { sound: 'open' }
@@ -48,7 +48,7 @@ class PopupBuy extends Phaser.GameObjects.Container {
       'button-buy-goon-pressed',
       () => {
         if (this.goonDisabled) return;
-        scene.popupBuyGoon.setVisible(true);
+        scene.popupBuyGoon?.open();
         this.onClick?.();
       },
       { sound: 'open' }

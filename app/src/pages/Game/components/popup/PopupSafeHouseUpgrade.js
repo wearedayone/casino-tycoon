@@ -43,6 +43,7 @@ class PopupSafeHouseUpgrade extends Popup {
       updatePriceWorkerBuilding: isSimulator
         ? 'simulator-update-price-worker-building'
         : 'update-price-worker-building',
+      disableSalesTracking: isSimulator ? 'simulator-disable-sales-tracking' : 'disable-sales-tracking',
     };
     this.events = events;
     this.onCompleted = onCompleted;
@@ -293,6 +294,7 @@ class PopupSafeHouseUpgrade extends Popup {
 
   cleanup() {
     this.onCompleted?.();
+    this.scene.game.events.emit(this.events.disableSalesTracking);
   }
 
   updateValues() {
