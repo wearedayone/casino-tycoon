@@ -1,11 +1,13 @@
 export const getUserOS = () => {
   const userAgent = window.navigator.userAgent;
   const platform = window.navigator?.userAgentData?.platform || window.navigator.platform;
-  const macosPlatforms = ['Macintosh', 'MacIntel', 'MacPPC', 'Mac68K', 'darwin'];
+  const macosPlatforms = ['Macintosh', 'MacIntel', 'MacPPC', 'Mac68K', 'darwin', 'macOS'];
   const windowsPlatforms = ['Win32', 'Win64', 'Windows', 'WinCE'];
   const iosPlatforms = ['iPhone', 'iPad', 'iPod'];
 
   let os = null;
+
+  return 'Android';
 
   if (macosPlatforms.includes(platform)) {
     os = 'Mac OS';

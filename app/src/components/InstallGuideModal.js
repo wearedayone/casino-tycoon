@@ -12,22 +12,28 @@ const InstallGuideModal = () => {
   });
 
   useEffect(() => {
-    const displayMode = getPWADisplayMode();
-    const os = getUserOS();
+    const browserPlayable = localStorage.getItem('BROWSER_PLAYABLE');
+    if (!browserPlayable) {
+      const displayMode = getPWADisplayMode();
+      const os = getUserOS();
 
-    setDeviceInfo({ os, displayMode });
+      setDeviceInfo({ os, displayMode });
+    }
   }, []);
 
-  const open =
-    pathname !== '/deposit' &&
-    ((deviceInfo.os === 'iOS' && deviceInfo.displayMode === 'browser') ||
-      (deviceInfo.os === 'Android' && deviceInfo.displayMode === 'browser'));
+  const open = pathname !== '/deposit' && deviceInfo.displayMode === 'browser';
+
+  const skip = () => {
+    setDeviceInfo({ os: null, displayMode: null });
+    localStorage.setItem('BROWSER_PLAYABLE', true);
+  };
 
   if (!open) return null;
 
   if (deviceInfo.os === 'iOS')
     return (
       <Box
+        zIndex={9999}
         position="fixed"
         top={0}
         left={0}
@@ -45,6 +51,7 @@ const InstallGuideModal = () => {
   if (deviceInfo.os === 'Android')
     return (
       <Box
+        zIndex={9999}
         position="fixed"
         top={0}
         left={0}
@@ -61,7 +68,7 @@ const InstallGuideModal = () => {
             <Button
               fullWidth
               variant="contained"
-              onClick={() => setDeviceInfo({ os: null, displayMode: null })}
+              onClick={skip}
               sx={{
                 borderRadius: '4%/24%',
                 backgroundColor: 'blue',
