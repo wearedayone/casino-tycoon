@@ -92,7 +92,14 @@ const Game = () => {
   const [isLeaderboardModalOpen, setLeaderboardModalOpen] = useState(false);
   const { isEnded, countdownString } = useSeasonCountdown({ open: isLeaderboardModalOpen });
   const [showBg, setShowBg] = useState(true);
-  const { workerSoldLast24h, buildingSoldLast24h, enableSalesTracking, disableSalesTracking } = useSalesLast24h();
+  const {
+    workerSoldLast24h,
+    buildingSoldLast24h,
+    enableWorkerSalesTracking,
+    disableWorkerSalesTracking,
+    enableBuildingSalesTracking,
+    disableBuildingSalesTracking,
+  } = useSalesLast24h();
 
   const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -1158,13 +1165,20 @@ const Game = () => {
           });
       });
 
-      gameRef.current?.events.on('update-price-worker-building', () => {
-        console.log('enable-sales-tracking');
-        enableSalesTracking();
+      gameRef.current?.events.on('enable-worker-sales-tracking', () => {
+        enableWorkerSalesTracking();
       });
-      gameRef.current?.events.on('disable-sales-tracking', () => {
-        console.log('disable-sales-tracking');
-        disableSalesTracking();
+
+      gameRef.current?.events.on('enable-building-sales-tracking', () => {
+        enableBuildingSalesTracking();
+      });
+
+      gameRef.current?.events.on('disable-worker-sales-tracking', () => {
+        disableWorkerSalesTracking();
+      });
+
+      gameRef.current?.events.on('disable-building-sales-tracking', () => {
+        disableBuildingSalesTracking();
       });
 
       gameRef.current?.events.on('request-goon-price', () => {

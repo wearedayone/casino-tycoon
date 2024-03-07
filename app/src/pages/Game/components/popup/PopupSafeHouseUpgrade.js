@@ -40,10 +40,10 @@ class PopupSafeHouseUpgrade extends Popup {
       gameEnded: isSimulator ? 'simulator-game-ended' : 'game-ended',
       updateBuildings: isSimulator ? 'simulator-update-buildings' : 'update-buildings',
       requestBuildings: isSimulator ? 'simulator-request-buildings' : 'request-buildings',
-      updatePriceWorkerBuilding: isSimulator
-        ? 'simulator-update-price-worker-building'
-        : 'update-price-worker-building',
-      disableSalesTracking: isSimulator ? 'simulator-disable-sales-tracking' : 'disable-sales-tracking',
+      enableSalesTracking: isSimulator ? 'simulator-enable-building-sales-tracking' : 'enable-building-sales-tracking',
+      disableSalesTracking: isSimulator
+        ? 'simulator-disable-building-sales-tracking'
+        : 'disable-building-sales-tracking',
     };
     this.events = events;
     this.onCompleted = onCompleted;
@@ -289,7 +289,7 @@ class PopupSafeHouseUpgrade extends Popup {
   }
 
   onOpen() {
-    this.scene.game.events.emit(this.events.updatePriceWorkerBuilding);
+    this.scene.game.events.emit(this.events.enableSalesTracking);
   }
 
   cleanup() {
