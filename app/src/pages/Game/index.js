@@ -67,6 +67,7 @@ const Game = () => {
   const activeSeason = useSystemStore((state) => state.activeSeason);
   const configs = useSystemStore((state) => state.configs);
   const market = useSystemStore((state) => state.market);
+  const templates = useSystemStore((state) => state.templates);
   const estimatedGas = useSystemStore((state) => state.estimatedGas);
   const sound = useSettingStore((state) => state.sound);
   const toggleSound = useSettingStore((state) => state.toggleSound);
@@ -705,6 +706,7 @@ const Game = () => {
           referralTotalReward,
           referralTotalDiscount,
           ethPriceInUsd,
+          tweetTemplate: templates.twitterShareReferralCode || '',
         });
       });
 
@@ -1465,8 +1467,13 @@ const Game = () => {
   }, [networth, houseLevels]);
 
   useEffect(() => {
-    gameRef.current?.events.emit('update-referral-data', { referralTotalReward, referralTotalDiscount, ethPriceInUsd });
-  }, [referralTotalReward, referralTotalDiscount, ethPriceInUsd]);
+    gameRef.current?.events.emit('update-referral-data', {
+      referralTotalReward,
+      referralTotalDiscount,
+      ethPriceInUsd,
+      tweetTemplate: templates.twitterShareReferralCode || '',
+    });
+  }, [referralTotalReward, referralTotalDiscount, ethPriceInUsd, templates.twitterShareReferralCode]);
 
   useEffect(() => {
     gameRef.current?.events.emit('update-workers-machines', { numberOfWorkers, numberOfMachines });

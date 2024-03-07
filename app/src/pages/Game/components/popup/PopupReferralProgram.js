@@ -25,6 +25,8 @@ class PopupReferralProgram extends Popup {
   loading = false;
   balance = 0;
   code = '';
+  referralDiscount = 0;
+  tweetTemplate = '';
 
   constructor(scene, data) {
     super(scene, 'popup-referral', { title: 'Referral Program' });
@@ -51,7 +53,7 @@ class PopupReferralProgram extends Popup {
     this.add(this.walletContainer);
 
     this.referralText = scene.add
-      .text(width / 2, refCodeContainerY, '', {
+      .text(leftMargin + this.popup.width * 0.4, refCodeContainerY, '', {
         fontSize: fontSizes.extraLarge,
         color: colors.black,
         fontFamily: fontFamilies.extraBold,
@@ -60,7 +62,7 @@ class PopupReferralProgram extends Popup {
     this.add(this.referralText);
     this.buttonCopy = new Button(
       scene,
-      leftMargin + this.popup.width * 0.85,
+      leftMargin + this.popup.width * 0.72,
       refCodeContainerY,
       'button-copy',
       'button-copy-pressed',
@@ -68,6 +70,22 @@ class PopupReferralProgram extends Popup {
       { sound: 'button-2' }
     );
     this.add(this.buttonCopy);
+    this.buttonTwitter = new Button(
+      scene,
+      leftMargin + this.popup.width * 0.85,
+      refCodeContainerY,
+      'button-twitter',
+      'button-twitter-pressed',
+      () => {
+        const text = this.tweetTemplate
+          .replace('{referralDiscount}', this.referralDiscount * 100)
+          .replace('{referralCode}', this.referralCode);
+        const intentUrl = getTwitterIntentUrl({ text });
+        window.open(intentUrl);
+      },
+      { sound: 'button-2' }
+    );
+    this.add(this.buttonTwitter);
 
     this.earnedEthIcon = scene.add.image(width / 2, earnedTextY, 'eth-coin').setOrigin(0, 0.15);
     this.earnedText = scene.add.text(width / 2, earnedTextY, `ETH earned: 0 ETH`, earnedTextStyle);
@@ -153,6 +171,8 @@ class PopupReferralProgram extends Popup {
       }
     });
     scene.game.events.on('update-referral-config', ({ referralBonus, referralDiscount }) => {
+      this.referralDiscount = referralDiscount;
+
       this.referralDescription.text = `Use code to get ${referralDiscount * 100}% discount off every \ngangster NFT.`;
       this.referTitle.text = `Give ${referralDiscount * 100}%, Earn ${referralBonus * 100}%`;
       this.referSubtitle.text = `Earn ${referralBonus * 100}% of all ETH your referral spends. \nYour referrals get ${
@@ -163,15 +183,22 @@ class PopupReferralProgram extends Popup {
       this.referralCode = referralCode;
       this.referralText.text = referralCode?.toUpperCase();
     });
-    scene.game.events.on('update-referral-data', ({ referralTotalReward, referralTotalDiscount, ethPriceInUsd }) => {
-      const earnedInUsd = customFormat(referralTotalReward * ethPriceInUsd, 2);
-      const savedInUsd = customFormat(referralTotalDiscount * ethPriceInUsd, 2);
+    scene.game.events.on(
+      'update-referral-data',
+      ({ referralTotalReward, referralTotalDiscount, ethPriceInUsd, tweetTemplate }) => {
+        this.tweetTemplate = tweetTemplate;
+        const earnedInUsd = customFormat(referralTotalReward * ethPriceInUsd, 2);
+        const savedInUsd = customFormat(referralTotalDiscount * ethPriceInUsd, 2);
 
-      this.earnedText.text = `ETH earned: ${customFormat(referralTotalReward, 4)} ETH             (~$ ${earnedInUsd})`;
-      this.savedText.text = `ETH saved: ${customFormat(referralTotalDiscount, 4)} ETH             (~$ ${savedInUsd})`;
-      this.earnedEthIcon.x = (width + this.earnedText.width - earnedInUsd.length * 60) / 2 - 190;
-      this.savedEthIcon.x = (width + this.savedText.width - savedInUsd.length * 60) / 2 - 190;
-    });
+        this.earnedText.text = `ETH earned: ${customFormat(
+          referralTotalReward,
+          4
+        )} ETH             (~$ ${earnedInUsd})`;
+        this.savedText.text = `ETH saved: ${customFormat(referralTotalDiscount, 4)} ETH             (~$ ${savedInUsd})`;
+        this.earnedEthIcon.x = (width + this.earnedText.width - earnedInUsd.length * 60) / 2 - 190;
+        this.savedEthIcon.x = (width + this.savedText.width - savedInUsd.length * 60) / 2 - 190;
+      }
+    );
     scene.game.events.emit('request-referral-config');
     scene.game.events.emit('request-invite-code');
     scene.game.events.emit('request-referral-data');
@@ -198,3 +225,11 @@ class PopupReferralProgram extends Popup {
 }
 
 export default PopupReferralProgram;
+
+const getTwitterIntentUrl = ({ text }) => {
+  const intentUrl = new URL('https://twitter.com/intent/tweet');
+
+  intentUrl.searchParams.append('text', text);
+
+  return intentUrl;
+};

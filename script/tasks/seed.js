@@ -2,6 +2,7 @@ import moment from 'moment';
 
 import admin, { firestore } from '../configs/admin.config.js';
 import gameConfigs from '../configs/game.config.json' assert { type: 'json' };
+import templates from '../assets/jsons/templates.json' assert { type: 'json' };
 import environments from '../utils/environments.js';
 
 const { TOKEN_ADDRESS, NFT_ADDRESS, GAME_CONTRACT_ADDRESS, ROUTER_ADDRESS, WETH_ADDRESS, PAIR_ADDRESS } = environments;
@@ -40,6 +41,12 @@ const main = async () => {
   //   .doc('data')
   //   .set({ nonce: admin.firestore.FieldValue.increment(1) });
   console.log('created system configs');
+  console.log('create templates');
+  const templatePromises = Object.keys(templates).map((key) =>
+    firestore.collection('template').doc(key).set({ text: templates[key] })
+  );
+  await Promise.all(templatePromises);
+  console.log('created templates');
 
   console.log('create season');
   const startTimeUnix = Date.now();
