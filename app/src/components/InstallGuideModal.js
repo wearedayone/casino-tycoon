@@ -52,11 +52,12 @@ const InstallGuideModal = () => {
         height="100vh"
         bgcolor={alpha('#000', 0.5)}
         display="flex"
+        flexDirection="column"
         justifyContent="center"
         alignItems="center">
         <Box position="relative" sx={{ '& img': { maxWidth: '80vw', maxHeight: '80vh' } }}>
           <img src="/images/add-to-homepage-android.png" alt="add-to-home-page" />
-          <Box position="absolute" left={0} bottom={0} width="100%" px="10%" sx={{ transform: 'translateY(30%)' }}>
+          <Box position="absolute" left={0} bottom={0} width="100%" px="10%" sx={{ transform: 'translateY(30px)' }}>
             <Button
               fullWidth
               variant="contained"
@@ -85,6 +86,11 @@ const InstallGuideModal = () => {
               </Typography>
             </Button>
           </Box>
+        </Box>
+        <Box mt="40px" width="700px" maxWidth="70vw">
+          <Typography color="white" fontWeight={700} align="center" fontSize={{ xs: 16, sm: 16, md: 24 }}>
+            Due to X APIs some Android devices may fail to authenticate. If this happens play via browser.
+          </Typography>
         </Box>
       </Box>
     );

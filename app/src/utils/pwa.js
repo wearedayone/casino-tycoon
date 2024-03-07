@@ -7,6 +7,8 @@ export const getUserOS = () => {
 
   let os = null;
 
+  return 'Android';
+
   if (macosPlatforms.includes(platform)) {
     os = 'Mac OS';
   } else if (iosPlatforms.includes(platform)) {
