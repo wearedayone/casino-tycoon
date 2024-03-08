@@ -88,6 +88,4 @@ const extractUser = async () => {
   }
 };
 
-extractUser();
-
 export default extractUser;

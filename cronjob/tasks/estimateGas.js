@@ -31,25 +31,25 @@ const estimateGasPrice = async () => {
       address: SIGNER_ADDRESS,
       amount: 1,
       time,
-      nonce,
+      nonce: nonce + 1,
       bonus: 0,
     });
     const workerSignature = await signMessageBuyGoon({
       address: SIGNER_ADDRESS,
       amount: 0,
       value: fiatBuyValue,
-      totalAmount: workerSold,
+      totalAmount: 0,
       time,
-      nonce,
+      nonce: nonce + 1,
       mintFunction: 'buyGoon',
     });
     const buildingSignature = await signMessageBuyGoon({
       address: SIGNER_ADDRESS,
       amount: 0,
       value: fiatBuyValue,
-      totalAmount: buildingSold,
+      totalAmount: 0,
       time,
-      nonce,
+      nonce: nonce + 1,
       mintFunction: 'buySafeHouse',
     });
 
@@ -57,16 +57,16 @@ const estimateGasPrice = async () => {
       // UPDATE all deez function
       estimateTxnFee({
         functionName: 'mint',
-        params: [1, 1, 0, time, nonce, machineSignature],
+        params: [1, 1, 0, time, nonce + 1, machineSignature],
         value: machine.basePrice,
       }),
       estimateTxnFee({
         functionName: 'buyGoon',
-        params: [0, BigInt(fiatBuyValue.toString()), workerSold, time, nonce, workerSignature],
+        params: [0, BigInt(fiatBuyValue.toString()), 0, time, nonce + 1, workerSignature],
       }),
       estimateTxnFee({
         functionName: 'buySafeHouse',
-        params: [0, BigInt(fiatBuyValue.toString()), buildingSold, time, nonce, buildingSignature],
+        params: [0, BigInt(fiatBuyValue.toString()), 0, time, nonce + 1, buildingSignature],
       }),
       estimateTxnFee({
         functionName: 'swapExactETHForTokensSupportingFeeOnTransferTokens',
