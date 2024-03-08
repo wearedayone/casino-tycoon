@@ -21,7 +21,7 @@ const InstallGuideModal = () => {
     }
   }, []);
 
-  const open = pathname !== '/deposit' && deviceInfo.displayMode === 'browser';
+  const open = !pathname.startsWith('/deposit') && deviceInfo.displayMode === 'browser';
 
   const skip = () => {
     setDeviceInfo({ os: null, displayMode: null });
