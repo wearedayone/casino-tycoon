@@ -25,7 +25,8 @@ export const getUserGamePlay = async (userId) => {
 
 export const getLeaderboard = async (userId) => {
   const random = Math.random();
-  console.log('start getLeaderboard: ' + random, Date.now());
+  const stime = Date.now();
+  console.log('start getLeaderboard: ' + userId, random);
   const { id, rankPrizePool, reputationPrizePool, rankingRewards } = await getActiveSeason();
 
   const snapshot = await firestore
@@ -59,7 +60,7 @@ export const getLeaderboard = async (userId) => {
     };
   });
 
-  console.log('Finish getLeaderboard: ' + random, Date.now());
+  console.log('Finish getLeaderboard: ' + userId, random, Date.now() - stime);
   return results;
 };
 
