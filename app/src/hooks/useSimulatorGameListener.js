@@ -321,7 +321,7 @@ const useSimulatorGameListener = () => {
         level: calculateHouseLevel(activeSeason?.houseLevels || [], assets.networth),
       });
     }
-  }, [assets?.networth, activeSeason?.houseLevels]);
+  }, [assets?.networth]);
 
   useEffect(() => {
     if (gameRef) {

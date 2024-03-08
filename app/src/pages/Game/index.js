@@ -576,6 +576,7 @@ const Game = () => {
       });
       gameRef.current?.events.on('open-leaderboard-modal', () => {
         setLeaderboardModalOpen(true);
+        console.log('open-leaderboard-modal', 'invalidateQueries-QueryKeys.Leaderboard');
         queryClient.invalidateQueries({ queryKey: [QueryKeys.Leaderboard] });
         const { name, timeStepInMinutes, rankPrizePool, reputationPrizePool } = activeSeason || {};
         gameRef.current.events.emit('update-season', {
@@ -1480,12 +1481,13 @@ const Game = () => {
   ]);
 
   useEffect(() => {
+    console.log('UseEffect', 'invalidateQueries-QueryKeys.Leaderboard', { houseLevels, networth });
     queryClient.invalidateQueries({ queryKey: [QueryKeys.Leaderboard] });
     gameRef.current?.events.emit('update-networth', {
       networth,
       level: calculateHouseLevel(houseLevels, networth),
     });
-  }, [networth, houseLevels]);
+  }, [networth]);
 
   useEffect(() => {
     gameRef.current?.events.emit('update-referral-data', {
