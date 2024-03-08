@@ -13,6 +13,9 @@ const CODE_LENGTH = 10;
 
 const createGamePlayIfNotExist = async (userId, isWhitelisted) => {
   const season = await getActiveSeason();
+  const user = await firestore.collection('user').doc(userId).get();
+  const userData = user.data();
+
   const snapshot = await firestore
     .collection('gamePlay')
     .where('userId', '==', userId)
@@ -34,6 +37,9 @@ const createGamePlayIfNotExist = async (userId, isWhitelisted) => {
       active: false,
       isWhitelisted,
       whitelistAmountMinted: 0,
+      avatarURL: userData.avatarURL ?? '',
+      avatarURL_Small: userData.avatarURL_Small ?? '',
+      username: userData.username ?? '',
     });
 
     await firestore.collection('warDeployment').add({
