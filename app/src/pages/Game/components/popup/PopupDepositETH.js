@@ -76,6 +76,7 @@ class PopupDepositETH extends Popup {
     this.add(buttonBack);
 
     scene.game.events.on(this.events.updateDepositCode, (code) => {
+      if (!code || code.length < 6) return;
       this.code = code;
       depositCode.text = `${code[0]} ${code[1]} ${code[2]}  ${code[3]} ${code[4]} ${code[5]}`;
     });
