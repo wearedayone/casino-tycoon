@@ -24,6 +24,8 @@ export const getUserGamePlay = async (userId) => {
 };
 
 export const getLeaderboard = async (userId) => {
+  const random = Math.random();
+  console.log('start getLeaderboard: ' + random, Date.now());
   const { id, rankPrizePool, reputationPrizePool, rankingRewards } = await getActiveSeason();
 
   const snapshot = await firestore
@@ -40,7 +42,7 @@ export const getLeaderboard = async (userId) => {
 
   // implement logic calculate reward
   let rank = 0;
-  return docs.map((doc, index) => {
+  const results = docs.map((doc, index) => {
     if (doc.active) {
       rank++;
     }
@@ -56,6 +58,9 @@ export const getLeaderboard = async (userId) => {
       reputationReward: doc.active ? (doc.networth / totalActiveReputation) * reputationPrizePool : 0,
     };
   });
+
+  console.log('Finish getLeaderboard: ' + random, Date.now());
+  return results;
 };
 
 export const getRank = async (userId) => {

@@ -48,7 +48,7 @@ const createGamePlayIfNotExist = async (userId, isWhitelisted) => {
 };
 
 export const createUserIfNotExist = async (userId) => {
-  console.log({ function: 'createUserIfNotExist', userId });
+  // console.log({ function: 'createUserIfNotExist', userId });
   const snapshot = await firestore.collection('user').doc(userId).get();
   const user = await privy.getUser(userId);
 
