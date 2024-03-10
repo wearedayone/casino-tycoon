@@ -1,4 +1,5 @@
 import moment from 'moment';
+// import fs from 'fs';
 
 import admin, { firestore } from '../configs/admin.config.js';
 
@@ -28,6 +29,7 @@ const extractUser = async () => {
     const snapshot = await firestore.collection('user').get();
     const users = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
+    // const result = [];
     for (const user of users) {
       const { id, username, address } = user;
       console.log(`Extracting user ${id} - ${username}`);
@@ -37,8 +39,8 @@ const extractUser = async () => {
           .where('userId', '==', id)
           .where('seasonId', '==', seasonId)
           .where('status', '==', 'Success')
-          .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startTimestamp))
-          .where('createdAt', '<=', admin.firestore.Timestamp.fromMillis(endTimestamp))
+          .where('createdAt', '>=', startTimestamp)
+          .where('createdAt', '<=', endTimestamp)
           .get();
         const numberOfTransactions = txnSnapshot.size;
         const todayTxns = txnSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
@@ -51,6 +53,17 @@ const extractUser = async () => {
 
         const bonusAmount = buyGangsterTxns.reduce((total, txn) => total + txn.bonusAmount, 0);
         const fiatGeneration = todayClaimedToken + bonusAmount;
+
+        // result.push({
+        //   startTime: new Date(startTime).toLocaleString(),
+        //   endTime: new Date(endTime).toLocaleString(),
+        //   userId: id,
+        //   username,
+        //   address,
+        //   numberOfTransactions,
+        //   ethSpend,
+        //   fiatGeneration,
+        // });
 
         const existedSnapshot = await firestore
           .collection('monitor')
@@ -69,12 +82,16 @@ const extractUser = async () => {
             numberOfTransactions,
             ethSpend,
             fiatGeneration,
+            startTime: startTimestamp,
+            endTime: endTimestamp,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
           });
         } else {
           await existedSnapshot.docs[0].ref.update({
             numberOfTransactions,
             ethSpend,
             fiatGeneration,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
           });
         }
         console.log(`Done extracting user ${id} - ${username}`);
@@ -82,6 +99,8 @@ const extractUser = async () => {
         console.log(`Error in extracting user ${id} - ${username}`, err);
         continue;
       }
+
+      // fs.writeFileSync('./data.json', JSON.stringify(result), { encoding: 'utf-8' });
     }
   } catch (err) {
     console.error(err);
