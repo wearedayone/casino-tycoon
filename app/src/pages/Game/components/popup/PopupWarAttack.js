@@ -4,6 +4,7 @@ import Popup from './Popup';
 import TextButton from '../button/TextButton';
 import TextInput from '../inputs/TextInput';
 import { formatter } from '../../../../utils/numbers';
+import { formatUsername } from '../../../../utils/strings';
 import configs from '../../configs/configs';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
 
@@ -20,12 +21,6 @@ const smallBlackBoldCenter = {
 };
 
 const MAX_USERNAME_LENGTH = 10;
-const formatUsername = ({ username }) => {
-  const displayedUsername = username.slice(0, MAX_USERNAME_LENGTH);
-  const ellipses = username.length > MAX_USERNAME_LENGTH ? '...' : '';
-
-  return `@${displayedUsername}${ellipses}`;
-};
 
 class PopupWarAttack extends Popup {
   uid = null;
@@ -174,7 +169,12 @@ class PopupWarAttack extends Popup {
         .text(this.popup.width * 0.05, y + rowHeight / 2, `${rank}`, smallBlackBoldCenter)
         .setOrigin(0.5, 0.5);
       const usernameText = this.scene.add
-        .text(this.popup.width * 0.2, y + rowHeight / 2, formatUsername({ username }), smallBlackBoldCenter)
+        .text(
+          this.popup.width * 0.2,
+          y + rowHeight / 2,
+          formatUsername({ username, MAX_USERNAME_LENGTH }),
+          smallBlackBoldCenter
+        )
         .setOrigin(0.5, 0.5);
       const lastDayTokenRewardText = this.scene.add
         .text(this.popup.width * 0.42, y + rowHeight / 2, formatter.format(lastDayTokenReward), smallBlackBoldCenter)

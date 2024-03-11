@@ -7,7 +7,7 @@ import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
 import { formatter } from '../../../../utils/numbers';
-import { getOrdinalSuffix } from '../../../../utils/strings';
+import { getOrdinalSuffix, formatUsername } from '../../../../utils/strings';
 
 const { width, height } = configs;
 const rowHeight = 84;
@@ -374,7 +374,12 @@ class PopupLeaderboard extends Popup {
         .setOrigin(0.5, 0.5);
 
       const usernameText = this.scene.add
-        .text(this.popup.width * 0.18, y + rowHeight / 2, formatUsername({ username }), smallBlackBold)
+        .text(
+          this.popup.width * 0.18,
+          y + rowHeight / 2,
+          formatUsername({ username, MAX_USERNAME_LENGTH }),
+          smallBlackBold
+        )
         .setOrigin(0, 0.5);
       const avatar = this.scene.add
         .rexCircleMaskImage(usernameText.x - 90, y + rowHeight / 2, 'avatar')
@@ -489,12 +494,6 @@ class PopupLeaderboard extends Popup {
 }
 
 const MAX_USERNAME_LENGTH = 12;
-const formatUsername = ({ username }) => {
-  const displayedUsername = username.slice(0, MAX_USERNAME_LENGTH);
-  const ellipses = username.length > MAX_USERNAME_LENGTH ? '...' : '';
-
-  return `@${displayedUsername}${ellipses}`;
-};
 
 class ModeSwitch extends Phaser.GameObjects.Container {
   mode = '';

@@ -5,7 +5,7 @@ import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
 import { formatter } from '../../../../utils/numbers';
-import { capitalize } from '../../../../utils/strings';
+import { capitalize, formatUsername } from '../../../../utils/strings';
 
 const { width, height } = configs;
 
@@ -20,12 +20,6 @@ const smallBlackBoldCenter = {
 };
 
 const MAX_USERNAME_LENGTH = 7;
-const formatUsername = ({ username }) => {
-  const displayedUsername = username.slice(0, MAX_USERNAME_LENGTH);
-  const ellipses = username.length > MAX_USERNAME_LENGTH ? '...' : '';
-
-  return `@${displayedUsername}${ellipses}`;
-};
 
 class PopupWarAttackDetail extends Popup {
   loading = false;
@@ -271,7 +265,7 @@ class PopupWarAttackDetail extends Popup {
         .text(
           this.popup.width * 0.75,
           y + rowHeight / 2,
-          topAttacker ? `${formatUsername({ username: topAttacker })}` : '-',
+          topAttacker ? `${formatUsername({ username: topAttacker, MAX_USERNAME_LENGTH })}` : '-',
           smallBlackBoldCenter
         )
         .setOrigin(0.5, 0.5);
