@@ -52,6 +52,82 @@ import { logAnalyticsEvent } from '../../configs/firebase.config';
 const { width, height } = gameConfigs;
 const MILISECONDS_IN_A_DAY = 86400 * 1000;
 
+const lineBreakMessage = (message) => {
+  const MAX_WORD_LENGTH = 20;
+  if (message.length <= MAX_WORD_LENGTH) return message;
+
+  const words = message.trim().split(' ');
+  const brokenWords = [words[0]];
+  for (let i = 1; i < words.length; i++) {
+    const newWord = words[i];
+    const lastWord = brokenWords.at(-1);
+    if (lastWord.length + newWord.length + 1 <= MAX_WORD_LENGTH) {
+      brokenWords[brokenWords.length - 1] = brokenWords.at(-1) + ` ${newWord}`;
+    } else {
+      brokenWords.push(newWord);
+    }
+  }
+
+  return brokenWords.join('\n');
+};
+
+const handleError = (err) => {
+  if (err.message === 'The user rejected the request') {
+    return { code: '4001', message: 'The user rejected\nthe request' };
+  } else {
+    console.error(err);
+
+    const message = err.message;
+    const code = err.code?.toString();
+
+    console.log({ message, code, reason: err.reason, error: err.error.reason });
+
+    if (message === 'Network Error') {
+      return { code: '12002', message: 'Network Error' };
+    }
+
+    if (message.includes('replacement fee too low')) return { code: '4001', message: 'Replacement fee\ntoo low' };
+
+    if (message.includes('Transaction reverted without a reason string'))
+      return { code: '4001', message: 'Transaction reverted' };
+
+    if (message.includes('Request failed with status code 422')) return { code: '4001', message: 'Request failed' };
+
+    if (message.includes('invalid address or ENS name')) return { code: '4001', message: 'Invalid address\nor ENS' };
+
+    if (message.includes('User exited before wallet could be connected'))
+      return { code: '4001', message: 'User exited' };
+
+    if (message.includes('transaction failed')) return { code: '4001', message: 'Transaction failed' };
+
+    if (message.includes('missing response')) return { code: '4001', message: 'Missing response' };
+
+    if (message.includes('Cannot redefine property: ethereum'))
+      return { code: '4001', message: 'Cannot redefine\nethereum' };
+
+    if (message.includes('insufficient funds for intrinsic transaction cost'))
+      return { code: 'INSUFFICIENT_FUNDS', message: 'Insufficient ETH' };
+
+    if (code === 'UNPREDICTABLE_GAS_LIMIT' || code === '-32603') {
+      if (err.error.reason) {
+        const error = err.error.reason.replace('execution reverted: ', '');
+        return { code: 'UNPREDICTABLE_GAS_LIMIT', message: error ? lineBreakMessage(error) : 'INSUFFICIENT GAS' };
+      }
+
+      return { code: 'UNPREDICTABLE_GAS_LIMIT', message: 'INSUFFICIENT GAS' };
+    }
+
+    if (code === 'INSUFFICIENT_FUNDS') return { code: 'INSUFFICIENT_FUNDS', message: 'INSUFFICIENT ETH' };
+
+    if (code === 'INVALID_ARGUMENT') return { code: 'INVALID_ARGUMENT', message: 'INVALID ARGUMENT' };
+
+    if (code === 'NETWORK_ERROR') return { code: 'NETWORK_ERROR', message: 'Network Error' };
+
+    Sentry.captureException(err);
+    return { code: '4001', message: 'Unknown Error' };
+  }
+};
+
 const Game = () => {
   const { enqueueSnackbar } = useSnackbar();
   const embeddedWallet = useUserWallet();
@@ -310,43 +386,14 @@ const Game = () => {
         }
       }
     } catch (err) {
-      if (err.message === 'The user rejected the request') {
-        gameRef.current?.events.emit(txnCompletedEvent, {
-          code: '4001',
-          amount,
-          txnHash: '',
-          status: 'failed',
-          message: 'The user rejected\nthe request',
-        });
-      } else {
-        console.error(err);
-
-        let message = err.message;
-        let errorCode = err.code?.toString();
-        if (!errorCode && message === 'Network Error') {
-          errorCode = '12002';
-        }
-        switch (errorCode) {
-          case 'UNPREDICTABLE_GAS_LIMIT':
-          case '-32603':
-            message = 'INSUFFICIENT GAS';
-            break;
-          case 'INSUFFICIENT_FUNDS':
-            message = 'INSUFFICIENT ETH';
-            break;
-          default:
-            Sentry.captureException(err);
-        }
-
-        if (!errorCode && message === 'Network Error') {
-          errorCode = '12002';
-        }
-        gameRef.current?.events.emit(txnCompletedEvent, {
-          status: 'failed',
-          message: message,
-          code: errorCode,
-        });
-      }
+      const { message, code } = handleError(err);
+      gameRef.current?.events.emit(txnCompletedEvent, {
+        status: 'failed',
+        code,
+        message,
+        amount,
+        txnHash: '',
+      });
     }
   };
 
@@ -774,28 +821,11 @@ const Game = () => {
             reloadBalance();
           }
         } catch (err) {
-          console.error(err);
-          console.log({ err });
-          let message = err.message;
-          let errorCode = err.code?.toString();
-          if (!errorCode && message === 'Network Error') {
-            errorCode = '12002';
-          }
-          switch (errorCode) {
-            case 'UNPREDICTABLE_GAS_LIMIT':
-            case '-32603':
-              message = 'INSUFFICIENT GAS';
-              break;
-            case 'INSUFFICIENT_FUNDS':
-              message = 'INSUFFICIENT ETH';
-              break;
-            default:
-              Sentry.captureException(err);
-          }
+          const { message, code } = handleError(err);
           gameRef.current?.events.emit('swap-completed', {
             status: 'failed',
-            message: message,
-            code: errorCode || '4001',
+            code,
+            message,
           });
         }
       });
@@ -833,26 +863,11 @@ const Game = () => {
           const txnHash = await buyBuilding(quantity);
           gameRef.current?.events.emit('upgrade-safehouse-completed', { txnHash, amount: quantity });
         } catch (err) {
-          let message = err.message;
-          let errorCode = err.code?.toString();
-          if (!errorCode && message === 'Network Error') {
-            errorCode = '12002';
-          }
-          switch (errorCode) {
-            case 'UNPREDICTABLE_GAS_LIMIT':
-            case '-32603':
-              message = 'INSUFFICIENT GAS';
-              break;
-            case 'INSUFFICIENT_FUNDS':
-              message = 'INSUFFICIENT ETH';
-              break;
-            default:
-              Sentry.captureException(err);
-          }
+          const { message, code } = handleError(err);
           gameRef.current?.events.emit('upgrade-safehouse-completed', {
             status: 'failed',
-            message: message,
-            code: errorCode,
+            code,
+            message,
           });
         }
       });
@@ -876,23 +891,12 @@ const Game = () => {
           const txnHash = await buyWorker(quantity);
           gameRef.current?.events.emit('buy-goon-completed', { txnHash, amount: quantity });
         } catch (err) {
-          let message = err.message;
-          let errorCode = err.code?.toString();
-          if (!errorCode && message === 'Network Error') {
-            errorCode = '12002';
-          }
-          switch (errorCode) {
-            case 'UNPREDICTABLE_GAS_LIMIT':
-            case '-32603':
-              message = 'INSUFFICIENT GAS';
-              break;
-            case 'INSUFFICIENT_FUNDS':
-              message = 'INSUFFICIENT ETH';
-              break;
-            default:
-              Sentry.captureException(err);
-          }
-          gameRef.current?.events.emit('buy-goon-completed', { status: 'failed', message: message, code: errorCode });
+          const { message, code } = handleError(err);
+          gameRef.current?.events.emit('buy-goon-completed', {
+            status: 'failed',
+            code,
+            message,
+          });
         }
       });
 
@@ -901,27 +905,11 @@ const Game = () => {
           const txnHash = await buyGangster(quantity, mintFunction);
           gameRef.current?.events.emit('buy-gangster-completed', { txnHash, amount: quantity });
         } catch (err) {
-          console.log({ err });
-          let message = err.message;
-          let errorCode = err.code?.toString();
-          if (!errorCode && message === 'Network Error') {
-            errorCode = '12002';
-          }
-          switch (errorCode) {
-            case 'UNPREDICTABLE_GAS_LIMIT':
-            case '-32603':
-              message = 'INSUFFICIENT GAS';
-              break;
-            case 'INSUFFICIENT_FUNDS':
-              message = 'INSUFFICIENT ETH';
-              break;
-            default:
-              Sentry.captureException(err);
-          }
+          const { message, code } = handleError(err);
           gameRef.current?.events.emit('buy-gangster-completed', {
             status: 'failed',
-            message: message,
-            code: errorCode,
+            code,
+            message,
           });
         }
       });
@@ -931,27 +919,11 @@ const Game = () => {
           const txnHash = await startRetirement();
           gameRef.current?.events.emit('retire-completed', { txnHash });
         } catch (err) {
-          console.log({ err });
-          let message = err.message;
-          let errorCode = err.code?.toString();
-          if (!errorCode && message === 'Network Error') {
-            errorCode = '12002';
-          }
-          switch (errorCode) {
-            case 'UNPREDICTABLE_GAS_LIMIT':
-            case '-32603':
-              message = 'INSUFFICIENT GAS';
-              break;
-            case 'INSUFFICIENT_FUNDS':
-              message = 'INSUFFICIENT ETH';
-              break;
-            default:
-              Sentry.captureException(err);
-          }
+          const { message, code } = handleError(err);
           gameRef.current?.events.emit('retire-completed', {
             status: 'failed',
-            message: message,
-            code: errorCode,
+            code,
+            message,
           });
         }
       });
