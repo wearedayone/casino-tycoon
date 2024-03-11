@@ -413,10 +413,13 @@ class PopupLeaderboard extends Popup {
       // ask the LoaderPlugin to load the texture
       if (!textureManager.exists(`${username}-avatar`)) loader.image(`${username}-avatar`, avatarURL_small || avatarURL);
     });
+
+    const avatarSize = 72;
     loader.once(Phaser.Loader.Events.COMPLETE, () =>
       Object.keys(this.avatars).forEach((username) => {
         const avatar = this.avatars[username];
         avatar.setTexture(`${username}-avatar`);
+        avatar.setDisplaySize(avatarSize, avatarSize);
       })
     );
     loader.start();
