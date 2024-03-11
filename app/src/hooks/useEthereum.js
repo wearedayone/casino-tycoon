@@ -54,7 +54,10 @@ const useEthereum = () => {
             } catch (err) {
               console.log('Error when process wallet_addEthereumChain');
               console.log(err);
+              setInvalidChain(true);
             }
+          } else {
+            setInvalidChain(true);
           }
         }
       }
@@ -74,14 +77,20 @@ const useEthereum = () => {
   };
 
   const checkNetwork = async () => {
-    const provider = getProvider(wallet);
-    if (!provider) return;
+    try {
+      const provider = getProvider(wallet);
+      if (!provider) return;
 
-    if (provider.chainId !== LAYER_1_NETWORK_ID) {
-      await provider.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: toHexString(LAYER_1_NETWORK_ID) }],
-      });
+      if (provider.chainId !== toHexString(LAYER_1_NETWORK_ID)) {
+        await provider.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: toHexString(LAYER_1_NETWORK_ID) }],
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      setInvalidChain(true);
+      throw new Error('Error when process wallet_switchEthereumChain');
     }
   };
 
@@ -158,13 +167,17 @@ const useEthereum = () => {
 
   useEffect(() => {
     if (account && wallet) {
-      const provider = getProvider(wallet);
-      const etherProvider = new Web3Provider(provider);
-      etherProvider
-        .getBalance(account)
-        .then((res) => {
-          console.log('balance', res);
-          setBalance(formatEther(res));
+      checkNetwork()
+        .then(() => {
+          const provider = getProvider(wallet);
+          const etherProvider = new Web3Provider(provider);
+          etherProvider
+            .getBalance(account)
+            .then((res) => {
+              console.log('balance', res);
+              setBalance(formatEther(res));
+            })
+            .catch((err) => console.error(err));
         })
         .catch((err) => console.error(err));
     }
