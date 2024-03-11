@@ -36,7 +36,7 @@ export const updateSeasonSnapshotSchedule = async () => {
   else schedule.scheduleJob(TAKE_SEASON_SNAPSHOT, date, takeSeasonLeaderboardSnapshot);
 };
 
-const takeSeasonLeaderboardSnapshot = async () => {
+export const takeSeasonLeaderboardSnapshot = async () => {
   try {
     const activeSeasonId = await getActiveSeasonId();
     logger.info(`Taking snapshot for season ${activeSeasonId}`);
