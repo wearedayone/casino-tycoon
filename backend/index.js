@@ -43,6 +43,10 @@ const main = () => {
 main();
 
 // everyday every 1AM
-cron.schedule('0 1 * * *', function () {
-  generateDailyWarSnapshot();
-});
+cron.schedule(
+  '0 1 * * *',
+  function () {
+    generateDailyWarSnapshot();
+  },
+  { timezone: 'Etc/UTC' }
+);
