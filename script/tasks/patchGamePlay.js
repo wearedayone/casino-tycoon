@@ -34,6 +34,8 @@ const patchGamePlay = async () => {
           .collection('gamePlay')
           .doc(gamePlay.docs[0].id)
           .update({
+            username: user.username,
+            avatarURL: user.avatarURL,
             avatarURL_small: user.avatarURL_Small,
             avatarURL_big: user.avatarURL_Small.replace('_normal', '_bigger'),
             // avatarURL_Small: admin.firestore.FieldValue.delete(),
