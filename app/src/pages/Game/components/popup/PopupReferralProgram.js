@@ -229,7 +229,8 @@ export default PopupReferralProgram;
 const getTwitterIntentUrl = ({ text }) => {
   const intentUrl = new URL('https://twitter.com/intent/tweet');
 
-  intentUrl.searchParams.append('text', text);
+  const encodedText = text.replace(/(\\n)/g, '\n'); // parse stringified \n into newline character
+  intentUrl.searchParams.append('text', encodedText);
 
   return intentUrl;
 };
