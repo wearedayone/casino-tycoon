@@ -95,13 +95,13 @@ class PopupSwap extends Popup {
         fontFamily: fontFamilies.bold,
       })
       .setOrigin(1, 0);
-    const available = scene.add
+    this.available = scene.add
       .text(width - textX - 200, token1AmountInputY + 15, 'Balance', mediumBrownBold)
       .setOrigin(1, 0);
     this.add(youPay);
     this.add(this.token1AmountInput);
     this.add(this.balanceText);
-    this.add(available);
+    this.add(this.available);
 
     const youReceive = scene.add
       .text(textX, youReceiveY, 'You receive:', {
@@ -224,9 +224,7 @@ class PopupSwap extends Popup {
           () =>
             scene.game.events.emit(
               this.tokenSwap === 'eth' ? 'convert-eth-input-to-token' : 'convert-token-input-to-eth',
-              {
-                amount: balance,
-              }
+              { amount: balance }
             ),
           500
         );
@@ -309,6 +307,7 @@ class PopupSwap extends Popup {
       this.balanceText.text = `${formatter.format(this.ethBalance)}`;
       this.popupProcessing.updateCompletedIcon('swap-eth-token');
     }
+    this.available.x = this.balanceText.x - this.balanceText.width - 20;
   }
 
   onOpen() {
@@ -349,6 +348,7 @@ class PopupSwap extends Popup {
     this.ethBalance = ETHBalance;
     this.tokenBalance = tokenBalance;
     this.balanceText.text = `${formatter.format(this.tokenSwap === 'eth' ? ETHBalance : tokenBalance)}`;
+    this.available.x = this.balanceText.x - this.balanceText.width - 20;
   }
 }
 
