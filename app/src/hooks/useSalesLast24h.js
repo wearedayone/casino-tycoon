@@ -4,7 +4,7 @@ import { onSnapshot, collection, where, query, Timestamp } from 'firebase/firest
 import { firestore } from '../configs/firebase.config';
 import useSystemStore from '../stores/system.store';
 
-const MILISECONDS_IN_A_DAY = 24 * 60 * 60 * 1000;
+const SALE_PERIOD = 12 * 60 * 60 * 1000;
 
 const useSalesLast24h = () => {
   const [listeningWorker, setListeningWorker] = useState(false);
@@ -17,7 +17,7 @@ const useSalesLast24h = () => {
     let unsubscribe;
     if (listeningWorker) {
       const now = Date.now();
-      const startTime = now - MILISECONDS_IN_A_DAY;
+      const startTime = now - SALE_PERIOD;
       const workerQuery = query(
         collection(firestore, 'transaction'),
         where('seasonId', '==', configs?.activeSeasonId || null),
@@ -46,7 +46,7 @@ const useSalesLast24h = () => {
     let unsubscribe;
     if (listeningBuilding) {
       const now = Date.now();
-      const startTime = now - MILISECONDS_IN_A_DAY;
+      const startTime = now - SALE_PERIOD;
 
       const buildingQuery = query(
         collection(firestore, 'transaction'),

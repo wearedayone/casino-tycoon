@@ -95,6 +95,10 @@ const ROW_STRUCTURE = {
     revShareFee: { row: 55, formatter: getDecimalFromPercentString },
     swapAmount: { row: 57, formatter: Number },
   },
+  initPurchased: {
+    worker: { row: 64, formatter: Number },
+    building: { row: 65, formatter: Number },
+  },
 };
 
 const main = async () => {

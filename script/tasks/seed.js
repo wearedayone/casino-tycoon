@@ -1,9 +1,8 @@
-import moment from 'moment';
-
 import admin, { firestore } from '../configs/admin.config.js';
 import gameConfigs from '../configs/game.config.json' assert { type: 'json' };
 import templates from '../assets/jsons/templates.json' assert { type: 'json' };
 import environments from '../utils/environments.js';
+import { calculateNextBuildingBuyPriceBatch, calculateNextWorkerBuyPriceBatch } from '../utils/formulas.js';
 
 const { TOKEN_ADDRESS, NFT_ADDRESS, GAME_CONTRACT_ADDRESS, ROUTER_ADDRESS, WETH_ADDRESS, PAIR_ADDRESS } = environments;
 
@@ -88,6 +87,83 @@ const main = async () => {
     });
   console.log('created season');
 
+  // init system txn for worker and building
+  const initStartTimeTxn = startTimeUnix - 12 * 60 * 60 * 1000;
+  const txnTimes = [
+    initStartTimeTxn,
+    ...Array.from({ length: 11 }, (_, index) => startTimeUnix + index * 60 * 60 * 1000),
+  ];
+  const initWorkerPurchased = Array(12).fill(gameConfigs.initPurchased.worker);
+  const initBuildingPurchased = Array(12).fill(gameConfigs.initPurchased.building);
+  const { worker, building } = gameConfigs.assets;
+
+  console.log('create worker purchased txns');
+  const workerTxnsData = initWorkerPurchased.map((quantity, index) => {
+    const salesLastPeriod = initWorkerPurchased.slice(0, index).reduce((total, item) => total + item, 0);
+    const { total, prices } = calculateNextWorkerBuyPriceBatch(
+      salesLastPeriod,
+      worker.targetDailyPurchase,
+      worker.targetPrice,
+      worker.basePrice,
+      quantity
+    );
+
+    return { salesLastPeriod, total, prices, amount: quantity, time: txnTimes[index] };
+  });
+  const initWorkerTxnPromises = workerTxnsData.map((item) =>
+    firestore.collection('transaction').add({
+      createdAt: admin.firestore.Timestamp.fromMillis(item.time),
+      seasonId: activeSeasonId,
+      userId: 'admin',
+      type: 'buy-worker',
+      nonce: 0,
+      txnHash: '',
+      status: 'Success',
+      amount: item.amount,
+      token: 'FIAT',
+      currentSold: item.salesLastPeriod,
+      value: item.total,
+      prices: item.prices,
+      isInitPurchased: true,
+    })
+  );
+  await Promise.all(initWorkerTxnPromises);
+  console.log('created worker purchased txns');
+
+  console.log('create building purchased txns');
+  const buildingTxnsData = initBuildingPurchased.map((quantity, index) => {
+    const salesLastPeriod = initBuildingPurchased.slice(0, index).reduce((total, item) => total + item, 0);
+    const { total, prices } = calculateNextBuildingBuyPriceBatch(
+      salesLastPeriod,
+      building.targetDailyPurchase,
+      building.targetPrice,
+      building.basePrice,
+      quantity
+    );
+
+    return { salesLastPeriod, total, prices, amount: quantity, time: txnTimes[index] };
+  });
+  const initBuildingTxnPromises = buildingTxnsData.map((item) =>
+    firestore.collection('transaction').add({
+      createdAt: admin.firestore.Timestamp.fromMillis(item.time),
+      seasonId: activeSeasonId,
+      userId: 'admin',
+      type: 'buy-building',
+      nonce: 0,
+      txnHash: '',
+      status: 'Success',
+      amount: item.amount,
+      token: 'FIAT',
+      currentSold: item.salesLastPeriod,
+      value: item.total,
+      prices: item.prices,
+      isInitPurchased: true,
+    })
+  );
+  await Promise.all(initBuildingTxnPromises);
+  console.log('created building purchased txns');
+
+  // reset user token balance
   const userSnapshot = await firestore.collection('user').get();
   for (let user of userSnapshot.docs) {
     await firestore.collection('user').doc(user.id).update({
