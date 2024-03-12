@@ -9,6 +9,9 @@ import { calculateHouseLevel } from '../utils/formulas';
 import { completeTutorial } from '../services/user.service';
 import { getNextWarSnapshotUnixTime } from '../services/gamePlay.service';
 
+const mockLeaderboardSize = 20;
+const rankPrizePool = Math.random();
+const reputationPrizePool = Math.random();
 const useSimulatorGameListener = () => {
   const user = useUserStore((state) => state.profile);
   const activeSeason = useSystemStore((state) => state.activeSeason);
@@ -52,7 +55,7 @@ const useSimulatorGameListener = () => {
 
     const rankingRewards = generateRankingRewards({
       totalPlayers: allUsers.length,
-      rankPrizePool: activeSeason.rankPrizePool,
+      rankPrizePool,
       prizePoolConfig: activeSeason?.prizePoolConfig,
     });
 
@@ -61,17 +64,11 @@ const useSimulatorGameListener = () => {
       return {
         ...user,
         rank: index + 1,
-        rankReward: calculateRankReward(activeSeason.rankPrizePool, rankingRewards, index),
-        reputationReward: (user.networth / totalReputation) * activeSeason.reputationPrizePool,
+        rankReward: calculateRankReward(rankPrizePool, rankingRewards, index),
+        reputationReward: (user.networth / totalReputation) * reputationPrizePool,
       };
     });
-  }, [
-    user,
-    activeSeason?.rankPrizePool,
-    activeSeason?.reputationPrizePool,
-    assets?.networth,
-    activeSeason?.prizePoolConfig,
-  ]);
+  }, [user, assets?.networth, activeSeason?.prizePoolConfig]);
 
   const setupSimulatorGameListener = (game) => {
     setGameRef(game);
@@ -218,7 +215,7 @@ const useSimulatorGameListener = () => {
 
     game.events.on('simulator-open-leaderboard-modal', () => {
       setLeaderboardModalOpen(true);
-      const { name, timeStepInMinutes, rankPrizePool, reputationPrizePool } = activeSeason || {};
+      const { name, timeStepInMinutes } = activeSeason || {};
       game.events.emit('simulator-update-season', {
         name,
         timeStepInMinutes,
@@ -299,19 +296,6 @@ const useSimulatorGameListener = () => {
 
   useEffect(() => {
     if (gameRef) {
-      const index = leaderboardData.findIndex((item) => item.isUser);
-      if (index > -1) {
-        const thisUser = leaderboardData[index];
-        gameRef.events.emit('simulator-update-rank', {
-          rank: index + 1,
-          reward: thisUser.rankReward + thisUser.reputationReward,
-        });
-      }
-    }
-  }, [leaderboardData]);
-
-  useEffect(() => {
-    if (gameRef) {
       gameRef.events.emit('simulator-update-balances', balances);
     }
   }, [balances]);
@@ -389,7 +373,7 @@ const useSimulatorGameListener = () => {
 
   useEffect(() => {
     if (isLeaderboardModalOpen) {
-      const { name, timeStepInMinutes, rankPrizePool, reputationPrizePool } = activeSeason || {};
+      const { name, timeStepInMinutes } = activeSeason || {};
       gameRef &&
         gameRef.events.emit('simulator-update-season', {
           name,
@@ -402,8 +386,6 @@ const useSimulatorGameListener = () => {
     isLeaderboardModalOpen,
     activeSeason?.name,
     activeSeason?.timeStepInMinutes,
-    activeSeason?.rankPrizePool,
-    activeSeason?.reputationPrizePool,
     activeSeason?.machine?.networth,
     isEnded,
   ]);
@@ -456,10 +438,10 @@ const calculateRankReward = (rankrizePool, rankingRewards, rankIndex) => {
   return rankrizePool * rankingReward.share;
 };
 
-const mockUsers = Array.from({ length: 20 }, () => ({
+const mockUsers = Array.from({ length: mockLeaderboardSize }, () => ({
   avatarURL: faker.internet.avatar(),
   id: faker.string.uuid(),
-  networth: faker.number.int({ min: 0, max: 1000 }),
+  networth: faker.number.int({ min: 50, max: 1000 }),
   userId: faker.string.uuid(),
   username: faker.internet.userName(),
   active: true,
