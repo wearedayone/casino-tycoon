@@ -11,7 +11,7 @@ import { clientsClaim } from 'workbox-core';
 import { ExpirationPlugin } from 'workbox-expiration';
 import { precacheAndRoute, createHandlerBoundToURL } from 'workbox-precaching';
 import { registerRoute } from 'workbox-routing';
-import { StaleWhileRevalidate, NetworkFirst } from 'workbox-strategies';
+import { StaleWhileRevalidate, NetworkFirst, CacheFirst } from 'workbox-strategies';
 
 clientsClaim();
 
@@ -54,17 +54,38 @@ registerRoute(({ url }) => url.pathname.includes('index.html'), new NetworkFirst
 //   createHandlerBoundToURL(process.env.PUBLIC_URL + '/index.html')
 // );
 
+const imgExtensionRegexp = new RegExp('.(gif|jpe?g|tiff?|png|webp|bmp)$');
 // An example runtime caching route for requests that aren't handled by the
 // precache, in this case same-origin .png requests like those from in public/
 registerRoute(
   // Add in any other file extensions or routing criteria as needed.
-  ({ url }) => url.origin === self.location.origin && url.pathname.endsWith('.png'), // Customize this strategy as needed, e.g., by changing to CacheFirst.
-  new StaleWhileRevalidate({
+  ({ url }) => {
+    if (url.pathname.match(imgExtensionRegexp)) {
+      return true;
+    }
+    return false;
+  }, // Customize this strategy as needed, e.g., by changing to CacheFirst.
+  new CacheFirst({
     cacheName: 'images',
+    // fetchOptions:
     plugins: [
       // Ensure that once this runtime cache reaches a maximum size the
       // least-recently used images are removed.
-      new ExpirationPlugin({ maxEntries: 500 }),
+      new ExpirationPlugin({ maxEntries: 1000 }),
+    ],
+  })
+);
+
+registerRoute(
+  // Add in any other file extensions or routing criteria as needed.
+  ({ url }) => url.origin === self.location.origin && (url.pathname.endsWith('.wav') || url.pathname.endsWith('.mp3')), // Customize this strategy as needed, e.g., by changing to CacheFirst.
+  new CacheFirst({
+    cacheName: 'audios',
+    // fetchOptions:
+    plugins: [
+      // Ensure that once this runtime cache reaches a maximum size the
+      // least-recently used images are removed.
+      new ExpirationPlugin({ maxEntries: 100 }),
     ],
   })
 );

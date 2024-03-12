@@ -10,7 +10,7 @@ const Loading = () => {
         sx={{
           zIndex: -1,
           top: 0,
-          backgroundImage: 'url(https://res.cloudinary.com/divb64juk/image/upload/v1709800611/gangster-arena/bg-login.png)',
+          backgroundImage: 'url(images/bg-login.png)',
           backgroundSize: 'cover',
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'center',

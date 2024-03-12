@@ -1453,7 +1453,6 @@ const Game = () => {
   ]);
 
   useEffect(() => {
-    console.log('UseEffect', 'invalidateQueries-QueryKeys.Leaderboard', { houseLevels, networth });
     queryClient.invalidateQueries({ queryKey: [QueryKeys.Leaderboard] });
     gameRef.current?.events.emit('update-networth', {
       networth,
@@ -1556,8 +1555,7 @@ const Game = () => {
         sx={
           showBg
             ? {
-                backgroundImage:
-                  'url(https://res.cloudinary.com/divb64juk/image/upload/v1709800611/gangster-arena/bg-login.png)',
+                backgroundImage: 'url(/images/bg-login.png)',
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 '& canvas': { position: 'absolute' },

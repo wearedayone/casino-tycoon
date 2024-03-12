@@ -13,6 +13,8 @@ const UpdateDetectedModal = () => {
 
   const update = () => {
     localStorage.setItem('appVersion', appVersion);
+    caches.delete('images');
+    caches.delete('audios');
     window.location.reload();
   };
 
@@ -24,8 +26,7 @@ const UpdateDetectedModal = () => {
       onClose={() => {}}
       PaperProps={{
         sx: { borderRadius: 4 },
-      }}
-    >
+      }}>
       <Box p={2}>
         <Box display="flex" justifyContent="flex-end">
           <IconButton onClick={() => setOpenUpdate(false)}>
@@ -41,19 +42,14 @@ const UpdateDetectedModal = () => {
               App version: {appVersion}
             </Typography>
             <Typography fontSize={14} align="center">
-              Current app version:{' '}
-              {localStorage.getItem('appVersion') || 'unknown'}
+              Current app version: {localStorage.getItem('appVersion') || 'unknown'}
             </Typography>
           </Box>
           <Box display="flex" flexDirection="column" gap={1}>
             <Button variant="contained" onClick={update}>
               Update
             </Button>
-            <Button
-              variant="outlined"
-              color="error"
-              onClick={() => setOpenUpdate(false)}
-            >
+            <Button variant="outlined" color="error" onClick={() => setOpenUpdate(false)}>
               Cancel
             </Button>
           </Box>

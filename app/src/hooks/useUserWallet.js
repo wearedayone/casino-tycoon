@@ -21,7 +21,6 @@ const useUserWallet = () => {
       clearTimeout(timeout.current);
       timeout.current = null;
     }
-
     const userEmbeddedWallet = wallets.find((wallet) => wallet.walletClientType === 'privy');
 
     if (authReady && authenticated && (!walletReady || !userEmbeddedWallet)) {

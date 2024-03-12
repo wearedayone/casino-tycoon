@@ -104,43 +104,22 @@ class LoadingScene extends Phaser.Scene {
     this.load.audio('toggle-1', '/audios/toggle-1.wav');
     this.load.audio('toggle-2', '/audios/toggle-2.wav');
 
-    this.load.image('bg', 'https://res.cloudinary.com/divb64juk/image/upload/v1709800611/gangster-arena/bg_full.png');
+    this.load.image('bg', '/images/bg_full.png');
     this.load.image('gangster-house-1', '/images/gangster-house-1.png');
     this.load.image('gangster-house-2', '/images/gangster-house-2.png');
-    this.load.image(
-      'gangster-house-3',
-      'https://res.cloudinary.com/divb64juk/image/upload/v1709800611/gangster-arena/gangster-house-3.png'
-    );
+    this.load.image('gangster-house-3', '/images/gangster-house-3.png');
     this.load.image('gangster-house-4', '/images/gangster-house-4.png');
     this.load.image('gangster-house-5', '/images/gangster-house-5.png');
-    this.load.image(
-      'gangster-house-6',
-      'https://res.cloudinary.com/divb64juk/image/upload/v1709800611/gangster-arena/gangster-house-6.png'
-    );
+    this.load.image('gangster-house-6', '/images/gangster-house-6.png');
     this.load.image('gangster-house-7', '/images/gangster-house-7.png');
     this.load.image('gangster-house-8', '/images/gangster-house-8.png');
-    this.load.image(
-      'gangster-house-9',
-      'https://res.cloudinary.com/divb64juk/image/upload/v1709800611/gangster-arena/gangster-house-9.png'
-    );
+    this.load.image('gangster-house-9', '/images/gangster-house-9.png');
     this.load.image('gangster-house-10', '/images/gangster-house-10.png');
     this.load.image('gangster-house-11', '/images/gangster-house-11.png');
-    this.load.image(
-      'gangster-house-12',
-      'https://res.cloudinary.com/divb64juk/image/upload/v1709800611/gangster-arena/gangster-house-12.png'
-    );
-    this.load.image(
-      'gangster-house-13',
-      'https://res.cloudinary.com/divb64juk/image/upload/v1709800611/gangster-arena/gangster-house-13.png'
-    );
-    this.load.image(
-      'gangster-house-14',
-      'https://res.cloudinary.com/divb64juk/image/upload/v1709800611/gangster-arena/gangster-house-14.png'
-    );
-    this.load.image(
-      'gangster-house-15',
-      'https://res.cloudinary.com/divb64juk/image/upload/v1709800611/gangster-arena/gangster-house-15.png'
-    );
+    this.load.image('gangster-house-12', '/images/gangster-house-12.png');
+    this.load.image('gangster-house-13', '/images/gangster-house-13.png');
+    this.load.image('gangster-house-14', '/images/gangster-house-14.png');
+    this.load.image('gangster-house-15', '/images/gangster-house-15.png');
     this.load.image('gangster-house-sign', '/images/gangster-house-sign.png');
 
     this.load.image('daily-money', '/images/daily-money.png');
@@ -158,10 +137,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('popup-welcome-nowar', '/images/popup-welcome-nowar.png');
     this.load.image('popup-buy', '/images/popup-buy.png');
     this.load.image('popup-war', '/images/popup-war.png');
-    this.load.image(
-      'popup-daily-gang-war',
-      'https://res.cloudinary.com/divb64juk/image/upload/v1709800611/gangster-arena/popup-daily-gang-war.png'
-    );
+    this.load.image('popup-daily-gang-war', '/images/popup-daily-gang-war.png');
     this.load.image('popup-safehouse-upgrade', '/images/popup-safehouse-upgrade.png');
     this.load.image('popup-buy-goon', '/images/popup-buy-goon.png');
     this.load.image('popup-buy-gangster', '/images/popup-buy-gangster.png');
@@ -187,7 +163,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('ribbon-referral', '/images/ribbon-referral.png');
     this.load.image('ribbon-gang-war-explain', '/images/ribbon-gang-war-explain.png');
 
-    this.load.image('glow', 'https://res.cloudinary.com/divb64juk/image/upload/v1709800611/gangster-arena/glow.png');
+    this.load.image('glow', '/images/glow.png');
     this.load.image('coin', '/images/coin.png');
     this.load.image('coin2', '/images/coin-2.png');
     this.load.image('coin3', '/images/coin-3.png');
@@ -371,50 +347,20 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('tutorial-arrow-left', '/images/tutorial-arrow-left.png');
     this.load.image('tutorial-arrow-right', '/images/tutorial-arrow-right.png');
     this.load.image('tutorial-claim-inactive-btn', '/images/tutorial-claim-inactive-btn.png');
-    this.load.image(
-      'tutorial-1',
-      'https://res.cloudinary.com/divb64juk/image/upload/v1709800611/gangster-arena/tutorial-1.png'
-    );
-    this.load.image(
-      'tutorial-2',
-      'https://res.cloudinary.com/divb64juk/image/upload/v1709800611/gangster-arena/tutorial-2.png'
-    );
-    this.load.image(
-      'tutorial-4',
-      'https://res.cloudinary.com/divb64juk/image/upload/v1709800611/gangster-arena/tutorial-4.png'
-    );
+    this.load.image('tutorial-1', '/images/tutorial-1.png');
+    this.load.image('tutorial-2', '/images/tutorial-2.png');
+    this.load.image('tutorial-4', '/images/tutorial-4.png');
     this.load.image('tutorial-4-gangster', '/images/tutorial-4-gangster.png');
     this.load.image('tutorial-4-claim-btn', '/images/tutorial-4-claim-btn.png');
     this.load.image('tutorial-4-claim-btn-light', '/images/tutorial-4-claim-btn-light.png');
-    this.load.image(
-      'tutorial-5',
-      'https://res.cloudinary.com/divb64juk/image/upload/v1709800611/gangster-arena/tutorial-5.png'
-    );
-    this.load.image(
-      'tutorial-7',
-      'https://res.cloudinary.com/divb64juk/image/upload/v1709800611/gangster-arena/tutorial-7.png'
-    );
-    this.load.image(
-      'tutorial-9',
-      'https://res.cloudinary.com/divb64juk/image/upload/v1709800611/gangster-arena/tutorial-9.png'
-    );
-    this.load.image(
-      'tutorial-11',
-      'https://res.cloudinary.com/divb64juk/image/upload/v1709800611/gangster-arena/tutorial-11.png'
-    );
-    this.load.image(
-      'tutorial-13',
-      'https://res.cloudinary.com/divb64juk/image/upload/v1709800611/gangster-arena/tutorial-13.png'
-    );
-    this.load.image(
-      'tutorial-15',
-      'https://res.cloudinary.com/divb64juk/image/upload/v1709800611/gangster-arena/tutorial-15.png'
-    );
+    this.load.image('tutorial-5', '/images/tutorial-5.png');
+    this.load.image('tutorial-7', '/images/tutorial-7.png');
+    this.load.image('tutorial-9', '/images/tutorial-9.png');
+    this.load.image('tutorial-11', '/images/tutorial-11.png');
+    this.load.image('tutorial-13', '/images/tutorial-13.png');
+    this.load.image('tutorial-15', '/images/tutorial-15.png');
     this.load.image('tutorial-15-goon', '/images/tutorial-15-goon.png');
-    this.load.image(
-      'tutorial-16',
-      'https://res.cloudinary.com/divb64juk/image/upload/v1709800611/gangster-arena/tutorial-16.png'
-    );
+    this.load.image('tutorial-16', '/images/tutorial-16.png');
 
     this.load.path = '/images/animation/';
     this.load.multiatlas('gangster-front', 'gangster_front.json');
