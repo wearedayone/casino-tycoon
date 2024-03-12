@@ -109,7 +109,7 @@ const handleError = (err) => {
       return { code: 'INSUFFICIENT_FUNDS', message: 'Insufficient ETH' };
 
     if (code === 'UNPREDICTABLE_GAS_LIMIT' || code === '-32603') {
-      if (err.error.reason) {
+      if (err.error.reason && err.error.reason.includes('execution reverted:')) {
         const error = err.error.reason.replace('execution reverted: ', '');
         return { code: 'UNPREDICTABLE_GAS_LIMIT', message: error ? lineBreakMessage(error) : 'INSUFFICIENT GAS' };
       }
