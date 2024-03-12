@@ -120,9 +120,9 @@ const addLiquidity = async () => {
 
 const main = async () => {
   try {
-    // await deployToken();
-    // await deployUniswapContract();
-    // await deployPair();
+    await deployToken();
+    await deployUniswapContract();
+    await deployPair();
     await addLiquidity();
   } catch (err) {
     console.error(err);
