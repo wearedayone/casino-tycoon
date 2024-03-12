@@ -23,7 +23,7 @@ const chains = {
     blockExplorerUrls: ['https://etherscan.io'],
   },
   '0xaa36a7': {
-    rpcUrls: ['https://eth-sepolia.public.blastapi.io	'],
+    rpcUrls: ['https://eth-sepolia.public.blastapi.io'],
     chainName: 'Sepolia',
     nativeCurrency: {
       name: 'ETH',
