@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { Box, Typography, Button, alpha } from '@mui/material';
 
 import { getPWADisplayMode, getUserOS } from '../utils/pwa';
@@ -7,25 +7,25 @@ import { getPWADisplayMode, getUserOS } from '../utils/pwa';
 const InstallGuideModal = () => {
   const { pathname } = useLocation();
   const [deviceInfo, setDeviceInfo] = useState({
-    displayMode: null,
-    os: null,
+    displayMode: getPWADisplayMode(),
+    os: getUserOS(),
   });
+  const [open, setOpen] = useState(false);
+  const [searchParams] = useSearchParams();
+  const privyOathCode = searchParams.get('privy_oauth_code');
 
   useEffect(() => {
-    const browserPlayable = localStorage.getItem('BROWSER_PLAYABLE');
-    if (!browserPlayable) {
-      const displayMode = getPWADisplayMode();
-      const os = getUserOS();
-
-      setDeviceInfo({ os, displayMode });
+    if (['Android', 'iOS'].includes(deviceInfo.os) && deviceInfo.displayMode === 'browser') {
+      if (!pathname.startsWith('/deposit')) {
+        if (!privyOathCode) {
+          setOpen(true);
+        }
+      }
     }
-  }, []);
-
-  const open = !pathname.startsWith('/deposit') && deviceInfo.displayMode === 'browser';
+  }, [deviceInfo]);
 
   const skip = () => {
-    setDeviceInfo({ os: null, displayMode: null });
-    localStorage.setItem('BROWSER_PLAYABLE', true);
+    setOpen(false);
   };
 
   if (!open) return null;
@@ -64,7 +64,7 @@ const InstallGuideModal = () => {
         alignItems="center">
         <Box position="relative" sx={{ '& img': { maxWidth: '80vw', maxHeight: '80vh' } }}>
           <img src="/images/add-to-homepage-android.png" alt="add-to-home-page" />
-          <Box position="absolute" left={0} bottom={0} width="100%" px="10%" sx={{ transform: 'translateY(30px)' }}>
+          <Box position="absolute" left={0} bottom={0} width="100%" px="10%" sx={{ transform: 'translateY(40%)' }}>
             <Button
               fullWidth
               variant="contained"
@@ -97,7 +97,7 @@ const InstallGuideModal = () => {
         </Box>
         <Box mt="40px" width="700px" maxWidth="70vw">
           <Typography color="white" fontWeight={700} align="center" fontSize={{ xs: 16, sm: 16, md: 24 }}>
-            Due to X APIs some Android devices may fail to authenticate. If this happens play via browser.
+            Due to X APIs some Android devices may fail to authenticate. If this happens play via Firefox browser.
           </Typography>
         </Box>
       </Box>

@@ -3,10 +3,18 @@ import { Box, Typography, Button } from '@mui/material';
 import { usePrivy } from '@privy-io/react-auth';
 import * as Sentry from '@sentry/react';
 
+import { getPWADisplayMode, getUserOS } from '../../utils/pwa';
+
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const Login = () => {
   const { login } = usePrivy();
   const [loading, setLoading] = useState(false);
+  const [deviceInfo, setDeviceInfo] = useState({
+    os: getUserOS(),
+    displayMode: getPWADisplayMode(),
+  });
+
+  const isAndroid = deviceInfo.os === 'Android';
 
   const addCssForPrivyDialog = () => {
     const existedTag = document.querySelector('#privy-css');
@@ -49,7 +57,8 @@ const Login = () => {
         sx={{
           zIndex: -1,
           top: 0,
-          backgroundImage: 'url(https://res.cloudinary.com/divb64juk/image/upload/v1709800611/gangster-arena/bg-login.png)',
+          backgroundImage:
+            'url(https://res.cloudinary.com/divb64juk/image/upload/v1709800611/gangster-arena/bg-login.png)',
           backgroundSize: 'cover',
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'center',
@@ -139,8 +148,16 @@ const Login = () => {
                   textDecoration: 'underline',
                 },
               }}>
-              Login Tips: Have X logged in and open in the background. <br />
-              Close and restart if needed.
+              {isAndroid ? (
+                <>
+                  Due to X APIs some Android devices may fail to authenticate. If this happens play via Firefox browser.
+                </>
+              ) : (
+                <>
+                  Login Tips: Have X logged in and open in the background. <br />
+                  Close and restart if needed.
+                </>
+              )}
               <br />
               <br />
               <a target="_" href="https://wiki.gangsterarena.com" style={{ color: '#FFF' }}>
