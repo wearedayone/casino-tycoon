@@ -378,8 +378,7 @@ class PopupLeaderboard extends Popup {
         .setOrigin(0, 0.5);
       const avatar = this.scene.add
         .rexCircleMaskImage(usernameText.x - 90, y + rowHeight / 2, 'avatar')
-        .setOrigin(0, 0.5)
-        .setDisplaySize(avatarSize, avatarSize);
+        .setOrigin(0, 0.5);
       const networthText =
         i === 0
           ? firstNetworthText

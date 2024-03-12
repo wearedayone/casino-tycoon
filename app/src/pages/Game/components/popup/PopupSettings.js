@@ -9,6 +9,7 @@ import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
 
 const { width, height } = configs;
+const avatarSize = 200;
 
 class PopupSettings extends Popup {
   address = '';
@@ -21,8 +22,7 @@ class PopupSettings extends Popup {
     const longBtnX = width / 2;
     const medBtnX = width / 2 - this.popup.width * 0.23;
     const secondMedBtnX = width / 2 + this.popup.width * 0.23;
-    const avatarSize = 100;
-    const avatarPadding = this.popup.width * 0.06;
+    const avatarPadding = this.popup.width * 0.065;
     const avatarX = paddedX + avatarPadding;
     const startingY = this.popup.y - this.popup.height / 2;
     const usernameY = startingY + 150;
@@ -49,15 +49,15 @@ class PopupSettings extends Popup {
       fontFamily: 'WixMadeforDisplayExtraBold',
     });
     this.walletContainer = scene.add.image(width / 2, walletContainerY, 'settings-wallet-container');
-    this.circle = scene.add.graphics().setPosition(avatarX, walletContainerY).fillCircle(0, 0, avatarSize);
-    this.avatar = scene.add.image(avatarX, walletContainerY, 'avatar').setDisplaySize(avatarSize, avatarSize);
+    this.avatar = scene.add.rexCircleMaskImage(avatarX, walletContainerY, 'avatar').setOrigin(0.5, 0.5);
     this.iconSettings = scene.add.image(paddedX + this.popup.width * 0.12, walletContainerY + 90, 'icon-settings');
-    this.myWallet = scene.add.text(paddedX + 300, walletContainerY - 80, 'My Wallet:', {
+    const walletTextX = avatarX + avatarSize / 2 + 50;
+    this.myWallet = scene.add.text(walletTextX, walletContainerY - 80, 'My Wallet:', {
       fontSize: '60px',
       color: '#29000b',
       fontFamily: 'WixMadeforDisplayBold',
     });
-    this.addressText = scene.add.text(paddedX + 300, walletContainerY, 'address', {
+    this.addressText = scene.add.text(walletTextX, walletContainerY, 'address', {
       fontSize: '60px',
       color: '#7d2e00',
       fontFamily: 'WixMadeforDisplayBold',
@@ -95,7 +95,6 @@ class PopupSettings extends Popup {
     this.add(this.username);
     this.add(this.walletContainer);
     this.add(this.avatar);
-    this.avatar.setMask(this.circle.createGeometryMask());
     this.add(this.iconSettings);
     this.add(this.myWallet);
     this.add(this.addressText);
@@ -236,7 +235,9 @@ class PopupSettings extends Popup {
     let loader = new Phaser.Loader.LoaderPlugin(this.scene);
     // ask the LoaderPlugin to load the texture
     loader.image('avatarURL', avatarURL);
-    loader.once(Phaser.Loader.Events.COMPLETE, () => this.avatar.setTexture('avatarURL'));
+    loader.once(Phaser.Loader.Events.COMPLETE, () =>
+      this.avatar.setTexture('avatarURL').setDisplaySize(avatarSize, avatarSize)
+    );
     loader.start();
   }
 
