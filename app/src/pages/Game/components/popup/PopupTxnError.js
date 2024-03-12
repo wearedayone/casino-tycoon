@@ -20,31 +20,28 @@ class PopupTxnError extends Popup {
     const viewTxnHashY = actionY + 200;
     let icon = 'icon-error-unknown';
 
-    let customDescription = 'Unknown Error';
     switch (code) {
       case 'UNPREDICTABLE_GAS_LIMIT':
       case '-32603':
         icon = 'icon-error-insufficient';
-        customDescription = 'Insufficient ETH\nfor Gas';
         action = 'Deposit more ETH';
         break;
 
       case 'INSUFFICIENT_FUNDS':
         icon = 'icon-error-insufficient';
-        customDescription = 'Insufficient ETH\nfor NFT';
         action = 'Deposit more ETH';
         break;
 
-      case '4001':
-        icon = 'icon-error-unknown';
-        customDescription = 'The user rejected\nthe request';
-        action = 'Retry again';
+      case '12002':
+      case 'NETWORK_ERROR':
+        icon = 'icon-error-network';
+        action = 'Check your network';
         break;
 
-      case '12002':
-        icon = 'icon-error-network';
-        customDescription = 'Network Error';
-        action = 'Check your network';
+      case '4001':
+      case 'INVALID_ARGUMENT':
+        icon = 'icon-error-unknown';
+        action = 'Retry again';
         break;
       default:
     }
@@ -60,7 +57,7 @@ class PopupTxnError extends Popup {
       .setOrigin(0.5, 0);
 
     this.description = scene.add
-      .text(width / 2, descriptionY, customDescription, {
+      .text(width / 2, descriptionY, description || 'Unknown error', {
         fontSize: '100px',
         color: '#000000',
         fontFamily: 'WixMadeforDisplayBold',

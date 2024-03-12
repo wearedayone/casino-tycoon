@@ -21,3 +21,11 @@ export const capitalize = (str) => {
 };
 
 export const toHexString = (decimalString) => `0x${(+decimalString).toString(16)}`;
+
+export const formatUsername = ({ username, MAX_USERNAME_LENGTH }) => {
+  if (!username) return '';
+  const displayedUsername = username.slice(0, MAX_USERNAME_LENGTH);
+  const ellipses = username.length > MAX_USERNAME_LENGTH ? '...' : '';
+
+  return `@${displayedUsername}${ellipses}`;
+};

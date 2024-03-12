@@ -5,18 +5,13 @@ import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
 import { colors, fontSizes, fontFamilies } from '../../../../utils/styles';
 import { formatter, customFormat } from '../../../../utils/numbers';
+import { formatUsername } from '../../../../utils/strings';
 
 const { width, height } = configs;
 
 const NUMBER_OF_TOP_ATTACKERS = 5;
 
 const MAX_USERNAME_LENGTH = 12;
-const formatUsername = ({ username }) => {
-  const displayedUsername = username.slice(0, MAX_USERNAME_LENGTH);
-  const ellipses = username.length > MAX_USERNAME_LENGTH ? '...' : '';
-
-  return `@${displayedUsername}${ellipses}`;
-};
 
 class PopupWarHistoryDetail extends Popup {
   data = null;
@@ -211,11 +206,16 @@ class PopupWarHistoryDetail extends Popup {
         .setOrigin(0, 0.5);
 
       const attackerUsernameText = this.scene.add
-        .text(this.popup.width * 0.12 + 50, y, `${formatUsername({ username: attacker.username })}`, {
-          fontSize: '50px',
-          color: colors.black,
-          fontFamily: fontFamilies.bold,
-        })
+        .text(
+          this.popup.width * 0.12 + 50,
+          y,
+          `${formatUsername({ username: attacker.username, MAX_USERNAME_LENGTH })}`,
+          {
+            fontSize: '50px',
+            color: colors.black,
+            fontFamily: fontFamilies.bold,
+          }
+        )
         .setOrigin(0, 0.5);
 
       const attackerAttackUnitsIcon = this.scene.add
@@ -296,7 +296,7 @@ class PopupWarHistoryDetail extends Popup {
       .text(
         this.popup.width * 0.13 + attackTargetItemIcon.width / 2 + 30,
         y,
-        `${formatUsername({ username: attackResults?.[0]?.userUsername || '' })}`,
+        `${formatUsername({ username: attackResults?.[0]?.userUsername || '', MAX_USERNAME_LENGTH })}`,
         {
           fontSize: '50px',
           color: colors.black,
