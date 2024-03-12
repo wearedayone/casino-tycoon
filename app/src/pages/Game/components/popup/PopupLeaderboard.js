@@ -411,7 +411,8 @@ class PopupLeaderboard extends Popup {
     this.playerStar.x = this.playerNetworth.x + this.playerNetworth.width / 2 + 10;
     this.playerReward.text = `~${formatter.format(isRankingMode ? this.userRankingReward : this.userReputationReward)}`;
     this.finishedAt.text = `${userRecord.rank.toLocaleString()}${getOrdinalSuffix(userRecord.rank)} place`;
-    this.finishedReward.text = formatter.format(userRecord.rankReward);
+    this.finishedReward.text = formatter.format(userRecord.rankReward + userRecord.reputationReward);
+    this.ethIcon.setX(this.finishedReward.x + this.finishedReward.width + 10);
 
     if (this.numberOfRows === activeLeaderboard.length) return;
     this.numberOfRows = activeLeaderboard.length;
