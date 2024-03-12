@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { faker } from '@faker-js/faker';
 import * as Sentry from '@sentry/react';
 
@@ -20,6 +20,7 @@ const useSimulatorGameListener = () => {
 
   // })
   const market = useSystemStore((state) => state.market);
+  const simulatorEventsListened = useRef();
   const [gameRef, setGameRef] = useState(null);
   const [balances, setBalances] = useState({ dailyMoney: 10000, ETHBalance: 100000, tokenBalance: 100000 });
   const [assets, setAssets] = useState({
@@ -72,6 +73,8 @@ const useSimulatorGameListener = () => {
 
   const setupSimulatorGameListener = (game) => {
     setGameRef(game);
+    if (simulatorEventsListened.current) return;
+    simulatorEventsListened.current = true;
 
     game.events.on('simulator-end', () => {
       console.log('simulator-end');
