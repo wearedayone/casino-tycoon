@@ -364,6 +364,8 @@ class PopupLeaderboard extends Popup {
         align: 'right',
       })
       .setOrigin(0.5, 0.5);
+    const avatarSize = 72;
+
     for (let i = 0; i < this.users.length; i++) {
       const y = i * rowHeight;
       const { rank, username, networth } = this.users[i];
@@ -411,10 +413,10 @@ class PopupLeaderboard extends Popup {
     let textureManager = new Phaser.Textures.TextureManager(this.scene.game);
     activeLeaderboard.forEach(({ username, avatarURL_small, avatarURL }) => {
       // ask the LoaderPlugin to load the texture
-      if (!textureManager.exists(`${username}-avatar`)) loader.image(`${username}-avatar`, avatarURL_small || avatarURL);
+      if (!textureManager.exists(`${username}-avatar`))
+        loader.image(`${username}-avatar`, avatarURL_small || avatarURL);
     });
 
-    const avatarSize = 72;
     loader.once(Phaser.Loader.Events.COMPLETE, () =>
       Object.keys(this.avatars).forEach((username) => {
         const avatar = this.avatars[username];
