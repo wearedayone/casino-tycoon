@@ -163,7 +163,7 @@ const Game = () => {
     username,
     address,
     avatarURL,
-    avatarURL_Small,
+    avatarURL_big,
     tokenBalance,
     ETHBalance,
     inviteCode,
@@ -572,7 +572,7 @@ const Game = () => {
         gameRef.current.events.emit('update-app-version', appVersion);
       });
       gameRef.current?.events.on('request-profile', () => {
-        gameRef.current.events.emit('update-profile', { username, address, avatarURL: avatarURL_Small ?? avatarURL });
+        gameRef.current.events.emit('update-profile', { username, address, avatarURL: avatarURL_big ?? avatarURL });
       });
       gameRef.current?.events.on('open-leaderboard-modal', () => {
         setLeaderboardModalOpen(true);
@@ -1322,8 +1322,8 @@ const Game = () => {
   }, [numberOfMachines, ETHBalance, tokenBalance]);
 
   useEffect(() => {
-    gameRef.current?.events.emit('update-profile', { username, address, avatarURL: avatarURL_Small ?? avatarURL });
-  }, [username, address, avatarURL]);
+    gameRef.current?.events.emit('update-profile', { username, address, avatarURL: avatarURL_big ?? avatarURL });
+  }, [username, address, avatarURL, avatarURL_big]);
 
   useEffect(() => {
     if (isLeaderboardModalOpen) {

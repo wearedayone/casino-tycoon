@@ -1,4 +1,4 @@
-import { firestore } from '../configs/admin.config.js';
+import admin, { firestore } from '../configs/admin.config.js';
 
 const patchGamePlay = async () => {
   const userSnapshot = await firestore.collection('user').get();
@@ -13,7 +13,7 @@ const patchGamePlay = async () => {
 
   for (const user of users) {
     try {
-      const { username } = user;
+      console.log('update user', user.userId);
       const gamePlay = await firestore
         .collection('gamePlay')
         .where('userId', '==', user.userId)
@@ -21,11 +21,25 @@ const patchGamePlay = async () => {
         .limit(1)
         .get();
 
+      await firestore
+        .collection('user')
+        .doc(user.userId)
+        .update({
+          avatarURL_small: user.avatarURL_Small,
+          avatarURL_big: user.avatarURL_Small.replace('_normal', '_bigger'),
+        });
       if (!gamePlay.empty) {
+        console.log('update gamePlay', gamePlay.docs[0].id);
         await firestore
           .collection('gamePlay')
           .doc(gamePlay.docs[0].id)
-          .update({ username, avatarURL: user.avatarURL, avatarURL_Small: user.avatarURL_Small });
+          .update({
+            username: user.username,
+            avatarURL: user.avatarURL,
+            avatarURL_small: user.avatarURL_Small,
+            avatarURL_big: user.avatarURL_Small.replace('_normal', '_bigger'),
+            // avatarURL_Small: admin.firestore.FieldValue.delete(),
+          });
       }
     } catch (err) {
       console.error(`Error while update for ${user.username}`, err.message);

@@ -38,7 +38,7 @@ const createGamePlayIfNotExist = async (userId, isWhitelisted) => {
       isWhitelisted,
       whitelistAmountMinted: 0,
       avatarURL: userData.avatarURL ?? '',
-      avatarURL_Small: userData.avatarURL_Small ?? '',
+      avatarURL_small: userData.avatarURL_small ?? '',
       username: userData.username ?? '',
     });
 
@@ -68,9 +68,12 @@ export const createUserIfNotExist = async (userId) => {
     // create user
     const username = twitter ? twitter.username : faker.internet.userName();
 
-    let avatarURL_Small = `https://placehold.co/400x400/1e90ff/FFF?text=${username[0].toUpperCase()}`;
+    const defaultAvatar = `https://placehold.co/400x400/1e90ff/FFF?text=${username[0].toUpperCase()}`;
+    let avatarURL_small = defaultAvatar;
+    let avatarURL_big = defaultAvatar;
     if (twitter.profilePictureUrl) {
-      avatarURL_Small = twitter.profilePictureUrl;
+      avatarURL_small = twitter.profilePictureUrl;
+      avatarURL_big = twitter.profilePictureUrl.replace('_normal', '_bigger');
     }
 
     let validReferralCode = false;
@@ -94,8 +97,9 @@ export const createUserIfNotExist = async (userId) => {
         address: wallet?.address?.toLocaleLowerCase() || '',
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
         username,
-        avatarURL: `https://placehold.co/400x400/1e90ff/FFF?text=${username[0].toUpperCase()}`,
-        avatarURL_Small,
+        avatarURL: defaultAvatar,
+        avatarURL_small,
+        avatarURL_big,
         tokenBalance: 0,
         ETHBalance: 0,
         isWhitelisted,
@@ -107,12 +111,16 @@ export const createUserIfNotExist = async (userId) => {
         completedTutorial: false,
       });
   } else {
-    const { ETHBalance, avatarURL, avatarURL_Small } = snapshot.data();
+    const { ETHBalance, avatarURL_small } = snapshot.data();
     // check if user has twitter avatar now
-    if (twitter.profilePictureUrl && avatarURL_Small !== twitter.profilePictureUrl) {
-      await firestore.collection('user').doc(userId).update({
-        avatarURL_Small: twitter.profilePictureUrl,
-      });
+    if (twitter.profilePictureUrl && avatarURL_small !== twitter.profilePictureUrl) {
+      await firestore
+        .collection('user')
+        .doc(userId)
+        .update({
+          avatarURL_small: twitter.profilePictureUrl,
+          avatarURL_big: twitter.profilePictureUrl.replace('_normal', '_bigger'),
+        });
     }
 
     if (wallet) {
