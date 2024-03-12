@@ -87,14 +87,13 @@ const useSimulatorGameListener = () => {
       setGameRef(null);
     });
 
+    game.events.on('simulator-check-is-replay', () => {
+      const isReplay = user.completedTutorial;
+      game.events.emit('simulator-update-is-replay', { isReplay });
+    });
     game.events.on('simulator-request-ranking-rewards', () => {
       game.events.emit('simulator-update-ranking-rewards', { prizePoolConfig: activeSeason?.prizePoolConfig });
     });
-
-    // game.events.on('simulator-request-buy-bonus', () => {
-    //   game.events.emit('simulator-update-buy-bonus', {});
-    // });
-
     game.events.on('simulator-request-balances', () => {
       game.events.emit('simulator-update-balances', balances);
     });
@@ -160,6 +159,10 @@ const useSimulatorGameListener = () => {
           acttackUser: null,
         },
       });
+    });
+
+    game.events.on('simulator-reset-balances', () => {
+      setBalances({ dailyMoney: 10000, ETHBalance: 100000, tokenBalance: 100000 });
     });
 
     game.events.on('simulator-claim-completed', async ({ amount }) => {

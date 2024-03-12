@@ -14,7 +14,7 @@ const NUMBER_OF_TOP_ATTACKERS = 5;
 const MAX_USERNAME_LENGTH = 12;
 
 class PopupWarHistoryDetail extends Popup {
-  data = null;
+  priceData = null;
   warSnapshotId = null;
   warResultId = null;
   items = [];
@@ -53,7 +53,7 @@ class PopupWarHistoryDetail extends Popup {
     this.contentContainer = scene.add.container().setSize(this.popup.width * 0.8, 0);
 
     scene.game.events.on('update-war-history-detail', (data) => {
-      this.data = data;
+      this.priceData = data;
       this.updateContent();
     });
   }
@@ -65,7 +65,7 @@ class PopupWarHistoryDetail extends Popup {
   }
 
   updateContent() {
-    if (!this.data) return;
+    if (!this.priceData) return;
 
     this.items.map((item) => {
       this.contentContainer.remove(item);
@@ -83,7 +83,7 @@ class PopupWarHistoryDetail extends Popup {
       tokenEarnFromAttacking,
       tokenEarnFromEarning,
       machinesLost,
-    } = this.data;
+    } = this.priceData;
 
     let y = 80;
     const earnIcon = this.scene.add.image(this.popup.width * 0.2, y, 'coin2').setOrigin(0, 0.5);

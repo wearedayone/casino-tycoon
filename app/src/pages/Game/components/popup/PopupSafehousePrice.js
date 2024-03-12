@@ -15,7 +15,7 @@ const smallBlackBoldCenter = {
   align: 'center',
 };
 class PopupSafehousePrice extends Popup {
-  data = [];
+  priceData = [];
   listY = height / 2 - 190;
   items = [];
 
@@ -43,7 +43,7 @@ class PopupSafehousePrice extends Popup {
     this.contentContainer = scene.add.container().setSize(this.popup.width * 0.8, 0);
 
     scene.game.events.on('update-house-price', (data) => {
-      this.data = data;
+      this.priceData = data;
       if (this.visible) {
         this.updateList();
       }
@@ -53,8 +53,8 @@ class PopupSafehousePrice extends Popup {
   }
 
   updateList() {
-    console.log('updatelist house', this.data);
-    if (!this.data.length) return;
+    console.log('updatelist house', this.priceData);
+    if (!this.priceData.length) return;
 
     this.items.map((item) => {
       this.contentContainer.remove(item);
@@ -62,9 +62,9 @@ class PopupSafehousePrice extends Popup {
     });
 
     this.items = [];
-    for (let i = 0; i < this.data.length; i++) {
+    for (let i = 0; i < this.priceData.length; i++) {
       const y = i * rowHeight;
-      const { date, value } = this.data[i];
+      const { date, value } = this.priceData[i];
       const dateText = this.scene.add
         .text(this.popup.width * 0.07, y + rowHeight / 2, date, smallBlackBoldCenter)
         .setOrigin(0.5, 0.5);
@@ -90,7 +90,7 @@ class PopupSafehousePrice extends Popup {
     }
     this.contentContainer.add(this.items);
 
-    const contentContainerHeight = this.data.length * rowHeight;
+    const contentContainerHeight = this.priceData.length * rowHeight;
     this.contentContainer.setSize(0, contentContainerHeight);
     if (this.table) {
       this.remove(this.table);
@@ -120,7 +120,7 @@ class PopupSafehousePrice extends Popup {
       mouseWheelScroller: { focus: true, speed: 0.3 },
       space: { left: 20, right: 20, top: 20, bottom: 20, panel: 20, header: 10, footer: 10 },
     }).layout();
-    if (this.data.length <= 7 || !this.visible) {
+    if (this.priceData.length <= 7 || !this.visible) {
       this.table.setMouseWheelScrollerEnable(false);
     } else {
       this.table.setMouseWheelScrollerEnable(true);

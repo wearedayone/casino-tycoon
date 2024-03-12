@@ -15,7 +15,7 @@ const smallBlackBoldCenter = {
   align: 'center',
 };
 class PopupWarHistory extends Popup {
-  data = [];
+  priceData = [];
   listY = height / 2 - 660;
   items = [];
 
@@ -57,7 +57,7 @@ class PopupWarHistory extends Popup {
     });
 
     scene.game.events.on('update-war-history', (data) => {
-      this.data = data;
+      this.priceData = data;
       this.updateList();
     });
 
@@ -66,7 +66,7 @@ class PopupWarHistory extends Popup {
   }
 
   updateList() {
-    if (!this.data.length) return;
+    if (!this.priceData.length) return;
 
     this.items.map((item) => {
       this.contentContainer.remove(item);
@@ -74,13 +74,13 @@ class PopupWarHistory extends Popup {
     });
 
     this.items = [];
-    for (let i = 0; i < this.data.length; i++) {
+    for (let i = 0; i < this.priceData.length; i++) {
       const y = i * rowHeight;
       if (i % 2 === 1) {
         const bg = this.scene.add.image(this.popup.width / 2 - 90, y, 'row-container').setOrigin(0.5, 0);
         this.items.push(bg);
       }
-      const { id, warSnapshotId, date, totalTokenReward, machinesLost } = this.data[i];
+      const { id, warSnapshotId, date, totalTokenReward, machinesLost } = this.priceData[i];
       const dateText = this.scene.add
         .text(this.popup.width * 0.07, y + rowHeight / 2, date, smallBlackBoldCenter)
         .setOrigin(0.5, 0.5);
@@ -135,7 +135,7 @@ class PopupWarHistory extends Popup {
     }
     this.contentContainer.add(this.items);
 
-    const contentContainerHeight = this.data.length * rowHeight;
+    const contentContainerHeight = this.priceData.length * rowHeight;
     this.contentContainer.setSize(0, contentContainerHeight);
     if (this.table) {
       this.remove(this.table);
@@ -165,7 +165,7 @@ class PopupWarHistory extends Popup {
       mouseWheelScroller: { focus: true, speed: 0.3 },
       space: { left: 20, right: 20, top: 20, bottom: 20, panel: 20, header: 10, footer: 10 },
     }).layout();
-    if (this.data.length <= 9 || !this.visible) {
+    if (this.priceData.length <= 9 || !this.visible) {
       this.table.setMouseWheelScrollerEnable(false);
       this.table.setScrollerEnable(false);
     } else {

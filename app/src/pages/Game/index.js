@@ -583,11 +583,13 @@ const Game = () => {
     if (loaded && !gameEventListened.current) {
       gameEventListened.current = true;
 
-      setupSimulatorGameListener(gameRef.current);
-
       gameRef.current?.events.on('check-user-completed-tutorial', () => {
         const completed = profile.completedTutorial;
+        if (!completed) setupSimulatorGameListener(gameRef.current);
         gameRef.current?.events.emit('update-user-completed-tutorial', { completed });
+      });
+      gameRef.current?.events.on('replay-tutorial', () => {
+        setupSimulatorGameListener(gameRef.current);
       });
 
       gameRef.current?.events.on('export-wallet', exportWallet);

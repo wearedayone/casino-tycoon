@@ -135,15 +135,30 @@ class PopupSettings extends Popup {
     );
     this.buttonStaking = new TextButton(
       scene,
-      longBtnX,
+      medBtnX,
       stakingBtnY,
-      'button-blue-long',
-      'button-blue-long-pressed',
+      'button-blue-med',
+      'button-blue-med-pressed',
       () => {
         this.close();
         popupStaking.open();
       },
       'Staking',
+      { sound: 'open' }
+    );
+    this.buttonTutorial = new TextButton(
+      scene,
+      secondMedBtnX,
+      stakingBtnY,
+      'button-blue-med',
+      'button-blue-med-pressed',
+      () => {
+        scene.game.events.emit('replay-tutorial');
+        scene.scene.pause('MainScene');
+        scene.scene.run('TutorialScene', { isReplay: true });
+        scene.scene.moveUp('TutorialScene');
+      },
+      'Tutorial',
       { sound: 'open' }
     );
     this.buttonSwap = new TextButton(
@@ -164,6 +179,7 @@ class PopupSettings extends Popup {
     this.add(this.buttonWithdraw);
     this.add(this.buttonDeposit);
     this.add(this.buttonStaking);
+    this.add(this.buttonTutorial);
     this.add(this.buttonSwap);
 
     // others

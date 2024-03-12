@@ -49,6 +49,7 @@ const goonFrontAnimationSpeed = {
 
 class TutorialScene extends Phaser.Scene {
   isGameEnded = false;
+  isUserReplay = false;
 
   constructor() {
     super('TutorialScene');
@@ -66,21 +67,16 @@ class TutorialScene extends Phaser.Scene {
     const gangsterHouse = new GangsterHouse(this, 2200, { isSimulator: true }); // done
     this.add.existing(gangsterHouse);
 
-    const endTutorial = () => {
-      this.game.events.emit('simulator-end');
-      this.scene.stop();
-      this.scene.start('MainScene', { isFromTutorial: true });
-    };
     this.popupDeposit = new PopupDeposit(this, null, {
       isSimulator: true,
       onOpen: () => {
         this.tutorial.step16.setVisible(false);
       },
-      onClose: endTutorial,
+      onClose: this.endTutorial,
     }); // done
     this.add.existing(this.popupDeposit);
 
-    this.popupDepositETH = new PopupDepositETH(this, { isSimulator: true, onClose: endTutorial });
+    this.popupDepositETH = new PopupDepositETH(this, { isSimulator: true, onClose: this.endTutorial });
     this.add.existing(this.popupDepositETH);
 
     this.popupBuy = new PopupBuy(this, width - 335, 1600); // done
@@ -92,20 +88,43 @@ class TutorialScene extends Phaser.Scene {
     this.popupWar = new PopupWar(this, 35, 1850); // done
     this.add.existing(this.popupWar);
 
-    this.game.events.on('music-on', () => {
-      this.bgMusic.play();
+    this.popupBuyGangster = new PopupBuyGangster(this, {
+      isSimulator: true,
+      onCompleted: () => {
+        this.tutorial.step3.setVisible(false);
+        this.tutorial.setVisible(false);
+        setTimeout(() => {
+          this.tutorial.setVisible(true);
+          this.tutorial.step4.setVisible(true);
+        }, 300);
+      },
     });
-
-    this.game.events.on('music-off', () => {
-      this.bgMusic.stop();
+    this.add.existing(this.popupBuyGangster);
+    this.popupBuyGoon = new PopupBuyGoon(this, {
+      isSimulator: true,
+      onCompleted: () => {
+        this.tutorial.step8.setVisible(false);
+        this.tutorial.setVisible(false);
+        setTimeout(() => {
+          this.tutorial.setVisible(true);
+          this.tutorial.step7.setVisible(true);
+        }, 300);
+      },
     });
-
-    this.game.events.on('simulator-update-workers-machines', ({ numberOfWorkers, numberOfMachines }) => {
-      this.game.events.emit('simulator-update-gangster-animation', { numberOfMachines });
-      this.game.events.emit('simulator-update-goon-animation', { numberOfWorkers });
+    this.add.existing(this.popupBuyGoon);
+    this.popupSafeHouseUpgrade = new PopupSafeHouseUpgrade(this, {
+      isSimulator: true,
+      onCompleted: () => {
+        this.tutorial.step10.setVisible(false);
+        this.tutorial.setVisible(false);
+        setTimeout(() => {
+          this.tutorial.setVisible(true);
+          this.tutorial.step9.setVisible(true);
+        }, 300);
+      },
     });
+    this.add.existing(this.popupSafeHouseUpgrade);
 
-    this.game.events.emit('simulator-request-workers-machines');
     if (this.game.sound.mute) {
       this.bgMusic.stop();
     } else {
@@ -118,45 +137,6 @@ class TutorialScene extends Phaser.Scene {
       sceneKey: 'rexUI',
     });
     pluginLoader.once(Phaser.Loader.Events.COMPLETE, () => {
-      this.popupSafeHouseUpgrade = new PopupSafeHouseUpgrade(this, {
-        isSimulator: true,
-        onCompleted: () => {
-          this.tutorial.step10.setVisible(false);
-          this.tutorial.setVisible(false);
-          setTimeout(() => {
-            this.tutorial.setVisible(true);
-            this.tutorial.step9.setVisible(true);
-          }, 300);
-        },
-      }); // done
-      this.add.existing(this.popupSafeHouseUpgrade);
-
-      this.popupBuyGoon = new PopupBuyGoon(this, {
-        isSimulator: true,
-        onCompleted: () => {
-          this.tutorial.step8.setVisible(false);
-          this.tutorial.setVisible(false);
-          setTimeout(() => {
-            this.tutorial.setVisible(true);
-            this.tutorial.step7.setVisible(true);
-          }, 300);
-        },
-      }); // done
-      this.add.existing(this.popupBuyGoon);
-
-      this.popupBuyGangster = new PopupBuyGangster(this, {
-        isSimulator: true,
-        onCompleted: () => {
-          this.tutorial.step3.setVisible(false);
-          this.tutorial.setVisible(false);
-          setTimeout(() => {
-            this.tutorial.setVisible(true);
-            this.tutorial.step4.setVisible(true);
-          }, 300);
-        },
-      }); // done
-      this.add.existing(this.popupBuyGangster);
-
       this.popupLeaderboard = new PopupLeaderboard(this, {
         isSimulator: true,
         onClose: () => {
@@ -201,18 +181,46 @@ class TutorialScene extends Phaser.Scene {
         },
       });
       this.add.existing(this.popupWarExplain);
-
-      const footer = new Footer(this, 2600, { isSimulator: true }); // done
-      footer.setDepth(1);
-      this.add.existing(footer);
     });
 
-    const infoButtons = new InfoButtons(this, 550, { isSimulator: true }); // done
+    const footer = new Footer(this, 2600, { isSimulator: true });
+    footer.setDepth(1);
+    this.add.existing(footer);
+
+    const infoButtons = new InfoButtons(this, 550, { isSimulator: true });
     this.add.existing(infoButtons);
 
     this.tutorial = new Tutorial(this);
     this.add.existing(this.tutorial);
     this.tutorial.setDepth(2);
+
+    this.game.events.on('music-on', () => {
+      this.bgMusic.play();
+    });
+
+    this.game.events.on('music-off', () => {
+      this.bgMusic.stop();
+    });
+
+    this.game.events.on('simulator-update-workers-machines', ({ numberOfWorkers, numberOfMachines }) => {
+      this.game.events.emit('simulator-update-gangster-animation', { numberOfMachines });
+      this.game.events.emit('simulator-update-goon-animation', { numberOfWorkers });
+    });
+
+    this.game.events.on('simulator-update-is-replay', ({ isReplay }) => {
+      this.isUserReplay = isReplay;
+      console.log('this.isUserReplay simulator-update-is-replay', this.isUserReplay);
+      if (isReplay) this.startTutorial();
+    });
+
+    this.game.events.emit('simulator-request-workers-machines');
+    this.game.events.emit('simulator-check-is-replay');
+
+    this.events.on(Phaser.Scenes.Events.WAKE, (_, { isReplay }) => {
+      console.log('this.isUserReplay wake', this.isUserReplay);
+      this.isUserReplay = isReplay;
+      if (isReplay) this.startTutorial();
+    });
   }
 
   create() {}
@@ -315,6 +323,31 @@ class TutorialScene extends Phaser.Scene {
 
   update(_time, delta) {
     this.updateAnimationPositions(delta);
+  }
+
+  startTutorial() {
+    this.game.events.emit('simulator-reset-assets');
+    this.game.events.emit('simulator-reset-balances');
+
+    // reset tutorial
+    if (this.tutorial) {
+      this.tutorial.destroy();
+      this.tutorial = new Tutorial(this);
+      this.add.existing(this.tutorial);
+      this.tutorial.setDepth(2);
+    }
+  }
+
+  endTutorial() {
+    console.log('this.isUserReplay', this.isUserReplay);
+    if (this.isUserReplay) {
+      this.scene.sleep('TutorialScene');
+      this.scene.run('MainScene');
+    } else {
+      this.game.events.emit('simulator-end');
+      this.scene.stop();
+      this.scene.start('MainScene', { isFromTutorial: true });
+    }
   }
 }
 
