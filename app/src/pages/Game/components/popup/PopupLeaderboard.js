@@ -376,8 +376,7 @@ class PopupLeaderboard extends Popup {
         .setOrigin(0, 0.5);
       const avatar = this.scene.add
         .rexCircleMaskImage(usernameText.x - 90, y + rowHeight / 2, 'avatar')
-        .setOrigin(0, 0.5)
-        .setDisplaySize(avatarSize, avatarSize);
+        .setOrigin(0, 0.5);
       const networthText =
         i === 0
           ? firstNetworthText
@@ -411,7 +410,8 @@ class PopupLeaderboard extends Popup {
     let textureManager = new Phaser.Textures.TextureManager(this.scene.game);
     activeLeaderboard.forEach(({ username, avatarURL_small, avatarURL }) => {
       // ask the LoaderPlugin to load the texture
-      if (!textureManager.exists(`${username}-avatar`)) loader.image(`${username}-avatar`, avatarURL_small || avatarURL);
+      if (!textureManager.exists(`${username}-avatar`))
+        loader.image(`${username}-avatar`, avatarURL_small || avatarURL);
     });
 
     const avatarSize = 72;
