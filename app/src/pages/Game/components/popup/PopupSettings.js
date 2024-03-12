@@ -51,12 +51,13 @@ class PopupSettings extends Popup {
     this.walletContainer = scene.add.image(width / 2, walletContainerY, 'settings-wallet-container');
     this.avatar = scene.add.rexCircleMaskImage(avatarX, walletContainerY, 'avatar').setOrigin(0.5, 0.5);
     this.iconSettings = scene.add.image(paddedX + this.popup.width * 0.12, walletContainerY + 90, 'icon-settings');
-    this.myWallet = scene.add.text(paddedX + 300, walletContainerY - 80, 'My Wallet:', {
+    const walletTextX = avatarX + avatarSize / 2 + 50;
+    this.myWallet = scene.add.text(walletTextX, walletContainerY - 80, 'My Wallet:', {
       fontSize: '60px',
       color: '#29000b',
       fontFamily: 'WixMadeforDisplayBold',
     });
-    this.addressText = scene.add.text(paddedX + 300, walletContainerY, 'address', {
+    this.addressText = scene.add.text(walletTextX, walletContainerY, 'address', {
       fontSize: '60px',
       color: '#7d2e00',
       fontFamily: 'WixMadeforDisplayBold',
