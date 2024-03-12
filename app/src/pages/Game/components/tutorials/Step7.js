@@ -11,6 +11,7 @@ const buttonWidth = 288;
 const y = 2600;
 
 class Step7 extends Phaser.GameObjects.Container {
+  clicked = false;
   constructor(scene, onNext) {
     super(scene, 0, 0);
 
@@ -34,6 +35,9 @@ class Step7 extends Phaser.GameObjects.Container {
       'button-buy',
       'button-buy-pressed',
       () => {
+        if (this.clicked) return;
+        this.clicked = true;
+
         this.character.y -= 400;
         this.arrow.setVisible(true);
         this.arrow1.setVisible(false);
