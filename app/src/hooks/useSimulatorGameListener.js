@@ -12,7 +12,7 @@ import { getNextWarSnapshotUnixTime } from '../services/gamePlay.service';
 const mockLeaderboardSize = 20;
 const rankPrizePool = Math.random();
 const reputationPrizePool = Math.random();
-const useSimulatorGameListener = () => {
+const useSimulatorGameListener = ({ setCurrentScene }) => {
   const user = useUserStore((state) => state.profile);
   const activeSeason = useSystemStore((state) => state.activeSeason);
   // console.log(activeSeason);
@@ -78,12 +78,14 @@ const useSimulatorGameListener = () => {
 
     game.events.on('simulator-end', () => {
       console.log('simulator-end');
-      completeTutorial()
-        .then(() => console.log('completed tutorial'))
-        .catch((err) => {
-          console.error(err);
-          Sentry.captureException(err);
-        });
+      !user.completedTutorial &&
+        completeTutorial()
+          .then(() => console.log('completed tutorial'))
+          .catch((err) => {
+            console.error(err);
+            Sentry.captureException(err);
+          });
+      setCurrentScene('MainScene');
       setGameRef(null);
     });
 

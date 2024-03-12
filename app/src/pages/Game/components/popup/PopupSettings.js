@@ -154,9 +154,9 @@ class PopupSettings extends Popup {
       'button-blue-med-pressed',
       () => {
         scene.game.events.emit('replay-tutorial');
-        scene.scene.pause('MainScene');
+        // same as calling scene.scene.switch('TutorialScene') but do this to add params (`isReplay`)
+        scene.scene.sleep('MainScene');
         scene.scene.run('TutorialScene', { isReplay: true });
-        scene.scene.moveUp('TutorialScene');
       },
       'Tutorial',
       { sound: 'open' }

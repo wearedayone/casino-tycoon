@@ -138,6 +138,7 @@ const Game = () => {
   const gameLoaded = useRef();
   const gameEventListened = useRef();
   const [loaded, setLoaded] = useState(false);
+  const [currentScene, setCurrentScene] = useState('LoadingScene');
   const profile = useUserStore((state) => state.profile);
   const gamePlay = useUserStore((state) => state.gamePlay);
   const reloadWarDeployment = useUserStore((state) => state.reloadWarDeployment);
@@ -217,6 +218,7 @@ const Game = () => {
 
   // Check that your user is authenticated
   const isAuthenticated = useMemo(() => ready && authenticated, [ready, authenticated]);
+  const isInMainScene = useMemo(() => currentScene === 'MainScene', [currentScene]);
 
   // Check that your user has an embedded wallet
   const hasEmbeddedWallet = useMemo(
@@ -260,7 +262,7 @@ const Game = () => {
     ETHBalance: 0,
   };
 
-  const { setupSimulatorGameListener } = useSimulatorGameListener();
+  const { setupSimulatorGameListener } = useSimulatorGameListener({ setCurrentScene });
   const {
     numberOfMachines,
     numberOfWorkers,
@@ -532,7 +534,7 @@ const Game = () => {
   useEffect(() => {
     if (rankData && rankData.data) {
       const { rank } = rankData.data;
-      gameRef.current?.events.emit('update-rank', { rank });
+      isInMainScene && gameRef.current?.events.emit('update-rank', { rank });
     }
   }, [rankData]);
 
@@ -586,10 +588,12 @@ const Game = () => {
       gameRef.current?.events.on('check-user-completed-tutorial', () => {
         const completed = profile.completedTutorial;
         if (!completed) setupSimulatorGameListener(gameRef.current);
+        setCurrentScene(completed ? 'MainScene' : 'TutorialScene');
         gameRef.current?.events.emit('update-user-completed-tutorial', { completed });
       });
       gameRef.current?.events.on('replay-tutorial', () => {
         setupSimulatorGameListener(gameRef.current);
+        setCurrentScene('TutorialScene');
       });
 
       gameRef.current?.events.on('export-wallet', exportWallet);
@@ -1269,54 +1273,58 @@ const Game = () => {
   }, [loaded]);
 
   useEffect(() => {
-    gameRef.current?.events.emit('update-app-version', appVersion);
+    isInMainScene && gameRef.current?.events.emit('update-app-version', appVersion);
   }, [appVersion]);
 
   useEffect(() => {
-    if (isEnded) gameRef.current?.events.emit('game-ended');
+    if (isEnded) isInMainScene && gameRef.current?.events.emit('game-ended');
   }, [isEnded]);
 
   useEffect(() => {
-    gameRef.current?.events.emit('update-eth-balance', { address, ETHBalance });
+    isInMainScene && gameRef.current?.events.emit('update-eth-balance', { address, ETHBalance });
   }, [address, ETHBalance]);
 
   useEffect(() => {
-    gameRef.current?.events.emit('update-gas-mint', { gas: estimatedGas?.game?.mint });
+    isInMainScene && gameRef.current?.events.emit('update-gas-mint', { gas: estimatedGas?.game?.mint });
   }, [estimatedGas?.game?.mint]);
 
   useEffect(() => {
-    gameRef.current?.events.emit('update-gas-buy-goon', { gas: estimatedGas?.game?.buyGoon });
+    isInMainScene && gameRef.current?.events.emit('update-gas-buy-goon', { gas: estimatedGas?.game?.buyGoon });
   }, [estimatedGas?.game?.buyGoon]);
 
   useEffect(() => {
-    gameRef.current?.events.emit('update-gas-upgrade-safehouse', { gas: estimatedGas?.game?.buySafeHouse });
+    isInMainScene &&
+      gameRef.current?.events.emit('update-gas-upgrade-safehouse', { gas: estimatedGas?.game?.buySafeHouse });
   }, [estimatedGas?.game?.buySafeHouse]);
 
   useEffect(() => {
-    gameRef.current?.events.emit('update-balances', { dailyMoney, ETHBalance, tokenBalance });
+    isInMainScene && gameRef.current?.events.emit('update-balances', { dailyMoney, ETHBalance, tokenBalance });
   }, [tokenBalance, ETHBalance, dailyMoney]);
 
   useEffect(() => {
-    gameRef.current?.events.emit('update-balances-for-withdraw', {
-      NFTBalance: numberOfMachines,
-      ETHBalance,
-      tokenBalance,
-    });
+    isInMainScene &&
+      gameRef.current?.events.emit('update-balances-for-withdraw', {
+        NFTBalance: numberOfMachines,
+        ETHBalance,
+        tokenBalance,
+      });
   }, [numberOfMachines, ETHBalance, tokenBalance]);
 
   useEffect(() => {
-    gameRef.current?.events.emit('update-profile', { username, address, avatarURL: avatarURL_big ?? avatarURL });
+    isInMainScene &&
+      gameRef.current?.events.emit('update-profile', { username, address, avatarURL: avatarURL_big ?? avatarURL });
   }, [username, address, avatarURL, avatarURL_big]);
 
   useEffect(() => {
     if (isLeaderboardModalOpen) {
       const { name, timeStepInMinutes, rankPrizePool, reputationPrizePool } = activeSeason || {};
-      gameRef.current?.events.emit('update-season', {
-        name,
-        timeStepInMinutes,
-        prizePool: rankPrizePool + reputationPrizePool,
-        isEnded,
-      });
+      isInMainScene &&
+        gameRef.current?.events.emit('update-season', {
+          name,
+          timeStepInMinutes,
+          prizePool: rankPrizePool + reputationPrizePool,
+          isEnded,
+        });
     }
   }, [
     isLeaderboardModalOpen,
@@ -1333,37 +1341,38 @@ const Game = () => {
   }, [isLeaderboardModalOpen, leaderboardData?.data]);
 
   useEffect(() => {
-    gameRef.current?.events.emit('update-ranking-rewards', { prizePoolConfig });
+    isInMainScene && gameRef.current?.events.emit('update-ranking-rewards', { prizePoolConfig });
   }, [prizePoolConfig]);
 
   useEffect(() => {
-    gameRef.current?.events.emit('update-retire-data', {
-      earlyRetirementTax: prizePoolConfig.earlyRetirementTax,
-    });
+    isInMainScene &&
+      gameRef.current?.events.emit('update-retire-data', {
+        earlyRetirementTax: prizePoolConfig.earlyRetirementTax,
+      });
   }, [prizePoolConfig.earlyRetirementTax]);
 
   useEffect(() => {
-    gameRef.current?.events.emit('update-season-countdown', countdownString);
+    isInMainScene && gameRef.current?.events.emit('update-season-countdown', countdownString);
   }, [countdownString]);
 
   useEffect(() => {
-    gameRef.current?.events.emit('update-active-status', { active: gamePlay?.active });
+    isInMainScene && gameRef.current?.events.emit('update-active-status', { active: gamePlay?.active });
   }, [gamePlay?.active]);
 
   useEffect(() => {
-    gameRef.current?.events.emit('game-sound-changed', { sound });
+    isInMainScene && gameRef.current?.events.emit('game-sound-changed', { sound });
   }, [sound]);
 
   useEffect(() => {
     if (profile?.code) {
-      gameRef.current.events.emit('update-deposit-code', profile?.code);
+      isInMainScene && gameRef.current.events.emit('update-deposit-code', profile?.code);
       gameRef.current.events.emit('simulator-update-deposit-code', profile?.code);
     }
   }, [profile?.code]);
 
   useEffect(() => {
     if (activeSeasonEstimatedEndTime && activeSeason?.claimGapInSeconds && gamePlay?.lastClaimTime) {
-      gameRef.current?.events.emit('update-claim-time', {
+     isInMainScene && gameRef.current?.events.emit('update-claim-time', {
         claimGapInSeconds: activeSeason?.claimGapInSeconds,
         lastClaimTime: gamePlay?.lastClaimTime?.toDate().getTime(),
         active: gamePlay.active,
@@ -1373,7 +1382,7 @@ const Game = () => {
       const nextClaimTime = gamePlay?.lastClaimTime.toDate().getTime() + activeSeason.claimGapInSeconds * 1000;
       const now = Date.now();
       const claimable = now > nextClaimTime && now < endUnixTime;
-      gameRef.current?.events.emit('update-claimable-status', { claimable, active: gamePlay.active });
+      isInMainScene && gameRef.current?.events.emit('update-claimable-status', { claimable, active: gamePlay.active });
     }
   }, [activeSeasonEstimatedEndTime, activeSeason?.claimGapInSeconds, gamePlay?.lastClaimTime]);
 
@@ -1381,20 +1390,20 @@ const Game = () => {
     if (gamePlay?.startRewardCountingTime && gamePlay?.pendingReward) {
       const diffInDays = (Date.now() - gamePlay?.startRewardCountingTime.toDate().getTime()) / MILISECONDS_IN_A_DAY;
       const claimableReward = gamePlay?.pendingReward + diffInDays * dailyMoney;
-      gameRef.current?.events.emit('update-claimable-reward', { reward: claimableReward });
+      isInMainScene && gameRef.current?.events.emit('update-claimable-reward', { reward: claimableReward });
     }
   }, [gamePlay?.startRewardCountingTime, gamePlay?.pendingreward, dailyMoney]);
 
   useEffect(() => {
     if (gamePlay) {
-      gameRef.current?.events.emit('update-war-status', { war: gamePlay.war });
+      isInMainScene && gameRef.current?.events.emit('update-war-status', { war: gamePlay.war });
     }
   }, [gamePlay?.war]);
 
   useEffect(() => {
     getNFTBalance(address)
       .then((balance) => {
-        gameRef.current?.events.emit('update-wallet-nft-balance', { balance, numberOfMachines });
+        isInMainScene && gameRef.current?.events.emit('update-wallet-nft-balance', { balance, numberOfMachines });
       })
       .catch((err) => {
         console.error(err);
@@ -1403,52 +1412,55 @@ const Game = () => {
   }, [address, numberOfMachines]);
 
   useEffect(() => {
-    gameRef.current?.events.emit('update-buildings', {
-      numberOfBuildings,
-      networth,
-      balance: tokenBalance,
-      basePrice: building.basePrice,
-      maxPerBatch: building.maxPerBatch,
-      targetDailyPurchase: building.targetDailyPurchase,
-      targetPrice: building.targetPrice,
-      salesLastPeriod: buildingSoldLast24h,
-      networthIncrease: building.networth,
-    });
+    isInMainScene &&
+      gameRef.current?.events.emit('update-buildings', {
+        numberOfBuildings,
+        networth,
+        balance: tokenBalance,
+        basePrice: building.basePrice,
+        maxPerBatch: building.maxPerBatch,
+        targetDailyPurchase: building.targetDailyPurchase,
+        targetPrice: building.targetPrice,
+        salesLastPeriod: buildingSoldLast24h,
+        networthIncrease: building.networth,
+      });
   }, [numberOfBuildings, networth, tokenBalance, building, buildingSoldLast24h]);
 
   useEffect(() => {
-    gameRef.current?.events.emit('update-workers', {
-      numberOfWorkers,
-      networth,
-      balance: tokenBalance,
-      basePrice: worker.basePrice,
-      targetDailyPurchase: worker.targetDailyPurchase,
-      targetPrice: worker.targetPrice,
-      maxPerBatch: worker.maxPerBatch,
-      salesLastPeriod: workerSoldLast24h,
-      dailyReward: worker.dailyReward,
-      networthIncrease: worker.networth,
-    });
+    isInMainScene &&
+      gameRef.current?.events.emit('update-workers', {
+        numberOfWorkers,
+        networth,
+        balance: tokenBalance,
+        basePrice: worker.basePrice,
+        targetDailyPurchase: worker.targetDailyPurchase,
+        targetPrice: worker.targetPrice,
+        maxPerBatch: worker.maxPerBatch,
+        salesLastPeriod: workerSoldLast24h,
+        dailyReward: worker.dailyReward,
+        networthIncrease: worker.networth,
+      });
   }, [numberOfWorkers, networth, tokenBalance, worker, workerSoldLast24h]);
 
   useEffect(() => {
-    gameRef.current?.events.emit('update-machines', {
-      numberOfMachines,
-      networth,
-      balance: ETHBalance,
-      basePrice: machine.basePrice,
-      whitelistPrice: machine.whitelistPrice,
-      maxPerBatch: machine.maxPerBatch,
-      dailyReward: machine.dailyReward,
-      reservePool,
-      reservePoolReward,
-      networthIncrease: machine.networth,
-      tokenPrice,
-      isWhitelisted: Boolean(isWhitelisted),
-      whitelistAmountLeft: Number(machine.maxWhitelistAmount - whitelistAmountMinted),
-      hasInviteCode: Boolean(inviteCode),
-      referralDiscount: inviteCode ? Number(activeSeason?.referralConfig?.referralDiscount) : 0,
-    });
+    isInMainScene &&
+      gameRef.current?.events.emit('update-machines', {
+        numberOfMachines,
+        networth,
+        balance: ETHBalance,
+        basePrice: machine.basePrice,
+        whitelistPrice: machine.whitelistPrice,
+        maxPerBatch: machine.maxPerBatch,
+        dailyReward: machine.dailyReward,
+        reservePool,
+        reservePoolReward,
+        networthIncrease: machine.networth,
+        tokenPrice,
+        isWhitelisted: Boolean(isWhitelisted),
+        whitelistAmountLeft: Number(machine.maxWhitelistAmount - whitelistAmountMinted),
+        hasInviteCode: Boolean(inviteCode),
+        referralDiscount: inviteCode ? Number(activeSeason?.referralConfig?.referralDiscount) : 0,
+      });
   }, [
     numberOfMachines,
     networth,
@@ -1465,23 +1477,25 @@ const Game = () => {
 
   useEffect(() => {
     queryClient.invalidateQueries({ queryKey: [QueryKeys.Leaderboard] });
-    gameRef.current?.events.emit('update-networth', {
-      networth,
-      level: calculateHouseLevel(houseLevels, networth),
-    });
+    isInMainScene &&
+      gameRef.current?.events.emit('update-networth', {
+        networth,
+        level: calculateHouseLevel(houseLevels, networth),
+      });
   }, [networth]);
 
   useEffect(() => {
-    gameRef.current?.events.emit('update-referral-data', {
-      referralTotalReward,
-      referralTotalDiscount,
-      ethPriceInUsd,
-      tweetTemplate: templates.twitterShareReferralCode || '',
-    });
+    isInMainScene &&
+      gameRef.current?.events.emit('update-referral-data', {
+        referralTotalReward,
+        referralTotalDiscount,
+        ethPriceInUsd,
+        tweetTemplate: templates.twitterShareReferralCode || '',
+      });
   }, [referralTotalReward, referralTotalDiscount, ethPriceInUsd, templates.twitterShareReferralCode]);
 
   useEffect(() => {
-    gameRef.current?.events.emit('update-workers-machines', { numberOfWorkers, numberOfMachines });
+    isInMainScene && gameRef.current?.events.emit('update-workers-machines', { numberOfWorkers, numberOfMachines });
   }, [numberOfWorkers, numberOfMachines]);
 
   useEffect(() => {
@@ -1491,31 +1505,33 @@ const Game = () => {
       const tokenValue = tokenBalance * parseFloat(tokenPrice);
       const machineValue = numberOfMachines * parseFloat(nftPrice);
       const totalBalance = parseFloat(ETHBalance) + tokenValue + machineValue + rankReward + reputationReward;
-      gameRef.current?.events.emit('update-portfolio', {
-        address,
-        totalBalance,
-        ETHBalance,
-        tokenBalance,
-        tokenValue,
-        numberOfMachines,
-        machineValue,
-        rankReward,
-        reputationReward,
-      });
+      isInMainScene &&
+        gameRef.current?.events.emit('update-portfolio', {
+          address,
+          totalBalance,
+          ETHBalance,
+          tokenBalance,
+          tokenValue,
+          numberOfMachines,
+          machineValue,
+          rankReward,
+          reputationReward,
+        });
     }
   }, [rankData, address, tokenBalance, numberOfMachines, ETHBalance]);
 
   useEffect(() => {
     if (rankData?.data) {
       const { rank, totalPlayers } = rankData.data;
-      gameRef.current?.events.emit('update-statistic', {
-        rank,
-        totalPlayers,
-        networth,
-        numberOfWorkers,
-        numberOfMachines,
-        numberOfBuildings,
-      });
+      isInMainScene &&
+        gameRef.current?.events.emit('update-statistic', {
+          rank,
+          totalPlayers,
+          networth,
+          numberOfWorkers,
+          numberOfMachines,
+          numberOfBuildings,
+        });
     }
   }, [rankData, networth, numberOfWorkers, numberOfMachines, numberOfBuildings]);
 
@@ -1526,19 +1542,20 @@ const Game = () => {
   }, [userHasInteractive]);
 
   useEffect(() => {
-    gameRef.current?.events.emit('update-game-play', {
-      numberOfMachines,
-      numberOfWorkers,
-      numberOfBuildings,
-      ...warDeployment,
-      ...warConfig,
-    });
+   isInMainScene &&
+     gameRef.current?.events.emit('update-game-play', {
+       numberOfMachines,
+       numberOfWorkers,
+       numberOfBuildings,
+       ...warDeployment,
+       ...warConfig,
+     });
   }, [numberOfMachines, numberOfWorkers, numberOfBuildings, warDeployment, warConfig]);
 
   useEffect(() => {
     if (warConfig) {
       const { tokenRewardPerEarner, earningStealPercent, machinePercentLost } = warConfig;
-      gameRef.current?.events.emit('update-war-config', {
+    isInMainScene && gameRef.current?.events.emit('update-war-config', {
         tokenRewardPerEarner,
         earningStealPercent,
         machinePercentLost,

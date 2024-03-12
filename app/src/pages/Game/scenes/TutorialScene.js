@@ -339,12 +339,10 @@ class TutorialScene extends Phaser.Scene {
   }
 
   endTutorial() {
-    console.log('this.isUserReplay', this.isUserReplay);
+    this.game.events.emit('simulator-end');
     if (this.isUserReplay) {
-      this.scene.sleep('TutorialScene');
-      this.scene.run('MainScene');
+      this.scene.switch('MainScene');
     } else {
-      this.game.events.emit('simulator-end');
       this.scene.stop();
       this.scene.start('MainScene', { isFromTutorial: true });
     }
