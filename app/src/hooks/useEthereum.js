@@ -11,6 +11,29 @@ import DepositLayerL1 from '../assets/abis/l1standardbridge.json';
 const { ethereum } = window || {};
 const { LAYER_1_NETWORK_ID, DEPOSIT_LAYER_1_ADDRESS } = environments;
 
+const chains = {
+  '0x1': {
+    rpcUrls: ['https://mainnet.infura.io/v3/'],
+    chainName: 'Ethereum Mainnet',
+    nativeCurrency: {
+      name: 'ETH',
+      symbol: 'ETH',
+      decimals: 18,
+    },
+    blockExplorerUrls: ['https://etherscan.io'],
+  },
+  '0xaa36a7': {
+    rpcUrls: ['https://eth-sepolia.public.blastapi.io	'],
+    chainName: 'Sepolia',
+    nativeCurrency: {
+      name: 'ETH',
+      symbol: 'SepoliaETH',
+      decimals: 18,
+    },
+    blockExplorerUrls: ['https://sepolia.etherscan.io'],
+  },
+};
+
 const useEthereum = () => {
   const [account, setAccount] = useState(null);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
@@ -36,6 +59,12 @@ const useEthereum = () => {
         console.log(provider.chainId, toHexString(LAYER_1_NETWORK_ID));
 
         try {
+          console.log('start wallet_addEthereumChain');
+          await provider.request({
+            method: 'wallet_addEthereumChain',
+            params: [{ chainId: toHexString(LAYER_1_NETWORK_ID), ...chains[toHexString(LAYER_1_NETWORK_ID)] }],
+          });
+
           console.log('start wallet_switchEthereumChain');
           await provider.request({
             method: 'wallet_switchEthereumChain',
@@ -44,21 +73,8 @@ const useEthereum = () => {
           console.log('finish wallet_switchEthereumChain');
         } catch (err) {
           console.log('Error when process wallet_switchEthereumChain');
-          console.log(err);
-          if (err.code != 4001) {
-            try {
-              await provider.request({
-                method: 'wallet_switchEthereumChain',
-                params: [{ chainId: toHexString(LAYER_1_NETWORK_ID) }],
-              });
-            } catch (err) {
-              console.log('Error when process wallet_addEthereumChain');
-              console.log(err);
-              setInvalidChain(true);
-            }
-          } else {
-            setInvalidChain(true);
-          }
+          console.error(err);
+          setInvalidChain(true);
         }
       }
 
