@@ -334,7 +334,6 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('deposit-more-eth', '/images/deposit-more-eth.png');
 
     this.load.image('tutorial-overlay', '/images/tutorial-overlay.png');
-    this.load.image('tutorial-next', '/images/tutorial-next.png');
     this.load.image('tutorial-arrow-up', '/images/tutorial-arrow-up.png');
     this.load.image('tutorial-arrow-down', '/images/tutorial-arrow-down.png');
     this.load.image('tutorial-arrow-left', '/images/tutorial-arrow-left.png');
