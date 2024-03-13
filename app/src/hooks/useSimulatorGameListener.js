@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { faker } from '@faker-js/faker';
 import * as Sentry from '@sentry/react';
+import moment from 'moment';
 
 import useSystemStore from '../stores/system.store';
 import useUserStore from '../stores/user.store';
-import useSeasonCountdown from './useSeasonCountdown';
 import { calculateHouseLevel } from '../utils/formulas';
 import { completeTutorial } from '../services/user.service';
 import { getNextWarSnapshotUnixTime } from '../services/gamePlay.service';
@@ -15,10 +15,6 @@ const reputationPrizePool = Math.random();
 const useSimulatorGameListener = ({ setCurrentScene }) => {
   const user = useUserStore((state) => state.profile);
   const activeSeason = useSystemStore((state) => state.activeSeason);
-  // console.log(activeSeason);
-  // const [activeSeason, setActiveSeason] = useState({
-
-  // })
   const market = useSystemStore((state) => state.market);
   const simulatorEventsListened = useRef();
   const [gameRef, setGameRef] = useState(null);
@@ -37,8 +33,13 @@ const useSimulatorGameListener = ({ setCurrentScene }) => {
     },
   });
   const [isLeaderboardModalOpen, setLeaderboardModalOpen] = useState(false);
-  const { isEnded, countdownString } = useSeasonCountdown({ open: isLeaderboardModalOpen });
-
+  const [seasonEndTime, setSeasonEndTime] = useState(new Date());
+  const [timer, setTimer] = useState(null);
+  const seasonTimerInterval = useRef();
+  const countdownString = useMemo(
+    () => (timer ? `${timer.days}d ${timer.hours}h ${timer.minutes}m ${timer.seconds}s` : '--d --h --m --s'),
+    [timer]
+  );
   const leaderboardData = useMemo(() => {
     if (!user || !activeSeason?.prizePoolConfig) return [];
 
@@ -71,8 +72,40 @@ const useSimulatorGameListener = ({ setCurrentScene }) => {
     });
   }, [user, assets?.networth, activeSeason?.prizePoolConfig]);
 
+  useEffect(() => {
+    if (!isLeaderboardModalOpen) {
+      if (seasonTimerInterval.current) {
+        clearInterval(seasonTimerInterval.current);
+        seasonTimerInterval.current = null;
+      }
+    } else {
+      const calculateEnd = () => {
+        const now = moment(new Date());
+        const endTime = moment(seasonEndTime);
+        const diff = moment.duration(endTime.diff(now));
+        setTimer({
+          days: Math.floor(diff.asDays()),
+          hours: diff.hours(),
+          minutes: diff.minutes(),
+          seconds: diff.seconds(),
+        });
+      };
+      seasonTimerInterval.current = setInterval(calculateEnd, 1000);
+    }
+
+    return () => {
+      if (seasonTimerInterval.current) {
+        clearInterval(seasonTimerInterval.current);
+        seasonTimerInterval.current = null;
+      }
+    };
+  }, [isLeaderboardModalOpen, seasonEndTime]);
+
   const setupSimulatorGameListener = (game) => {
     setGameRef(game);
+    const endTime = new Date();
+    endTime.setDate(endTime.getDate() + 7);
+    setSeasonEndTime(endTime);
     if (simulatorEventsListened.current) return;
     simulatorEventsListened.current = true;
 
@@ -225,7 +258,7 @@ const useSimulatorGameListener = ({ setCurrentScene }) => {
         name,
         timeStepInMinutes,
         prizePool: rankPrizePool + reputationPrizePool,
-        isEnded,
+        isEnded: false,
       });
     });
 
@@ -384,16 +417,10 @@ const useSimulatorGameListener = ({ setCurrentScene }) => {
           name,
           timeStepInMinutes,
           prizePool: rankPrizePool + reputationPrizePool,
-          isEnded,
+          isEnded: false,
         });
     }
-  }, [
-    isLeaderboardModalOpen,
-    activeSeason?.name,
-    activeSeason?.timeStepInMinutes,
-    activeSeason?.machine?.networth,
-    isEnded,
-  ]);
+  }, [isLeaderboardModalOpen, activeSeason?.name, activeSeason?.timeStepInMinutes]);
 
   useEffect(() => {
     if (gameRef) {
