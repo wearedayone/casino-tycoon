@@ -9,8 +9,8 @@
       "networth": 10
     },
     "worker": {
-      "basePrice": 200,
-      "dailyReward": 400,
+      "basePrice": 1000,
+      "dailyReward": 800,
       "networth": 2,
       "targetDailyPurchase": 200,
       "targetPrice": 1000,
@@ -36,8 +36,8 @@
     "rewardScalingRatio": 1.28,
     "higherRanksCutoffPercent": 0.1,
     "lowerRanksCutoffPercent": 0.2,
-    "minRewardHigherRanks": 0.04,
-    "minRewardLowerRanks": 0,
+    "minRewardHigherRanks": 0.05,
+    "minRewardLowerRanks": 0.02,
     "devFee": 0,
     "marketingFee": 0.1
   },
@@ -48,8 +48,8 @@
     "tokenRewardPerEarner": 1000,
     "machinePercentLost": 0.05
   },
-  "initGameDurationInDays": 4,
-  "timeStepInMinutes": 0,
+  "initGameDurationInDays": 7,
+  "timeStepInMinutes": 1,
   "claimGapInSeconds": 3600,
   "openseaNftCollection": "gangster-arena",
   "tokenContract": {

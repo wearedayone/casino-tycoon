@@ -274,7 +274,7 @@ class PopupLeaderboard extends Popup {
     }
     this.scene.game.events.emit(this.events?.closeLeaderboardModal || '');
     clearTimeout(this.timeoutId);
-    this.table.scrollToTop();
+    this.table?.scrollToTop();
   }
 
   updateValues(season) {
@@ -343,8 +343,8 @@ class PopupLeaderboard extends Popup {
   }
 
   updateLeaderboard(leaderboard) {
-    if (!leaderboard.length) return;
     const activeLeaderboard = leaderboard.filter((item) => item.active);
+    if (!activeLeaderboard.length) return;
     this.users = leaderboard.filter((item) => item.active).slice(0, 3);
     // this.users = activeLeaderboard;
     this.rankRewards = activeLeaderboard.map(({ rankReward }) => `~${formatter.format(rankReward)}`);
