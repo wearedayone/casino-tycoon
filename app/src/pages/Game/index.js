@@ -143,12 +143,12 @@ const Game = () => {
   const gamePlay = useUserStore((state) => state.gamePlay);
   const reloadWarDeployment = useUserStore((state) => state.reloadWarDeployment);
   const activeSeason = useSystemStore((state) => state.activeSeason);
-  const activeSeasonId = useSystemStore(useShallow((state) => state.activeSeason.id));
+  const activeSeasonId = useSystemStore(useShallow((state) => state.activeSeason?.id));
   const activeSeasonEstimatedEndTime = useSystemStore(
-    useShallow((state) => state.activeSeason.estimatedEndTime.seconds)
+    useShallow((state) => state.activeSeason?.estimatedEndTime?.seconds)
   );
   const warConfig = useSystemStore(
-    useShallow((state) => state.activeSeason.warConfig),
+    useShallow((state) => state.activeSeason?.warConfig),
     (a, b) => JSON.stringify(a) === JSON.stringify(b)
   );
   const configs = useSystemStore((state) => state.configs);
@@ -1372,11 +1372,12 @@ const Game = () => {
 
   useEffect(() => {
     if (activeSeasonEstimatedEndTime && activeSeason?.claimGapInSeconds && gamePlay?.lastClaimTime) {
-     isInMainScene && gameRef.current?.events.emit('update-claim-time', {
-        claimGapInSeconds: activeSeason?.claimGapInSeconds,
-        lastClaimTime: gamePlay?.lastClaimTime?.toDate().getTime(),
-        active: gamePlay.active,
-      });
+      isInMainScene &&
+        gameRef.current?.events.emit('update-claim-time', {
+          claimGapInSeconds: activeSeason?.claimGapInSeconds,
+          lastClaimTime: gamePlay?.lastClaimTime?.toDate().getTime(),
+          active: gamePlay.active,
+        });
 
       const endUnixTime = activeSeason.estimatedEndTime.toDate().getTime();
       const nextClaimTime = gamePlay?.lastClaimTime.toDate().getTime() + activeSeason.claimGapInSeconds * 1000;
@@ -1542,24 +1543,25 @@ const Game = () => {
   }, [userHasInteractive]);
 
   useEffect(() => {
-   isInMainScene &&
-     gameRef.current?.events.emit('update-game-play', {
-       numberOfMachines,
-       numberOfWorkers,
-       numberOfBuildings,
-       ...warDeployment,
-       ...warConfig,
-     });
+    isInMainScene &&
+      gameRef.current?.events.emit('update-game-play', {
+        numberOfMachines,
+        numberOfWorkers,
+        numberOfBuildings,
+        ...warDeployment,
+        ...warConfig,
+      });
   }, [numberOfMachines, numberOfWorkers, numberOfBuildings, warDeployment, warConfig]);
 
   useEffect(() => {
     if (warConfig) {
       const { tokenRewardPerEarner, earningStealPercent, machinePercentLost } = warConfig;
-    isInMainScene && gameRef.current?.events.emit('update-war-config', {
-        tokenRewardPerEarner,
-        earningStealPercent,
-        machinePercentLost,
-      });
+      isInMainScene &&
+        gameRef.current?.events.emit('update-war-config', {
+          tokenRewardPerEarner,
+          earningStealPercent,
+          machinePercentLost,
+        });
     }
   }, [warConfig]);
 
