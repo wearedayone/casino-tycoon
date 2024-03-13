@@ -17,7 +17,6 @@ export const getActiveSeasonId = async () => {
 export const getActiveSeason = async () => {
   const activeSeasonId = await getActiveSeasonId();
   const snapshot = await firestore.collection('season').doc(activeSeasonId).get();
-  const { prizePoolConfig, rankPrizePool, ...rest } = snapshot.data();
 
   return { id: snapshot.id, ...snapshot.data() };
 };
