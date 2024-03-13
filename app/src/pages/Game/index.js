@@ -48,6 +48,7 @@ import useSeasonCountdown from '../../hooks/useSeasonCountdown';
 import useSimulatorGameListener from '../../hooks/useSimulatorGameListener';
 import useSalesLast24h from '../../hooks/useSalesLast24h';
 import { logAnalyticsEvent } from '../../configs/firebase.config';
+import { useShallow } from 'zustand/react/shallow';
 
 const { width, height } = gameConfigs;
 const MILISECONDS_IN_A_DAY = 86400 * 1000;
@@ -141,6 +142,14 @@ const Game = () => {
   const gamePlay = useUserStore((state) => state.gamePlay);
   const reloadWarDeployment = useUserStore((state) => state.reloadWarDeployment);
   const activeSeason = useSystemStore((state) => state.activeSeason);
+  const activeSeasonId = useSystemStore(useShallow((state) => state.activeSeason.id));
+  const activeSeasonEstimatedEndTime = useSystemStore(
+    useShallow((state) => state.activeSeason.estimatedEndTime.seconds)
+  );
+  const warConfig = useSystemStore(
+    useShallow((state) => state.activeSeason.warConfig),
+    (a, b) => JSON.stringify(a) === JSON.stringify(b)
+  );
   const configs = useSystemStore((state) => state.configs);
   const market = useSystemStore((state) => state.market);
   const templates = useSystemStore((state) => state.templates);
@@ -515,10 +524,10 @@ const Game = () => {
   };
 
   useEffect(() => {
-    if (profile && gamePlay && activeSeason && !loaded && !!embeddedWallet) {
+    if (profile && gamePlay && activeSeasonId && !loaded && !!embeddedWallet) {
       setLoaded(true);
     }
-  }, [loaded, profile, gamePlay, activeSeason, embeddedWallet]);
+  }, [loaded, profile, gamePlay, activeSeasonId, embeddedWallet]);
 
   useEffect(() => {
     if (rankData && rankData.data) {
@@ -1351,7 +1360,7 @@ const Game = () => {
   }, [profile?.code]);
 
   useEffect(() => {
-    if (activeSeason?.estimatedEndTime && activeSeason?.claimGapInSeconds && gamePlay?.lastClaimTime) {
+    if (activeSeasonEstimatedEndTime && activeSeason?.claimGapInSeconds && gamePlay?.lastClaimTime) {
       gameRef.current?.events.emit('update-claim-time', {
         claimGapInSeconds: activeSeason?.claimGapInSeconds,
         lastClaimTime: gamePlay?.lastClaimTime?.toDate().getTime(),
@@ -1364,7 +1373,7 @@ const Game = () => {
       const claimable = now > nextClaimTime && now < endUnixTime;
       gameRef.current?.events.emit('update-claimable-status', { claimable, active: gamePlay.active });
     }
-  }, [activeSeason?.estimatedEndTime, activeSeason?.claimGapInSeconds, gamePlay?.lastClaimTime]);
+  }, [activeSeasonEstimatedEndTime, activeSeason?.claimGapInSeconds, gamePlay?.lastClaimTime]);
 
   useEffect(() => {
     if (gamePlay?.startRewardCountingTime && gamePlay?.pendingReward) {
@@ -1520,20 +1529,20 @@ const Game = () => {
       numberOfWorkers,
       numberOfBuildings,
       ...warDeployment,
-      ...activeSeason?.warConfig,
+      ...warConfig,
     });
-  }, [numberOfMachines, numberOfWorkers, numberOfBuildings, warDeployment, activeSeason?.warConfig]);
+  }, [numberOfMachines, numberOfWorkers, numberOfBuildings, warDeployment, warConfig]);
 
   useEffect(() => {
-    if (activeSeason?.warConfig) {
-      const { tokenRewardPerEarner, earningStealPercent, machinePercentLost } = activeSeason.warConfig;
+    if (warConfig) {
+      const { tokenRewardPerEarner, earningStealPercent, machinePercentLost } = warConfig;
       gameRef.current?.events.emit('update-war-config', {
         tokenRewardPerEarner,
         earningStealPercent,
         machinePercentLost,
       });
     }
-  }, [activeSeason?.warConfig]);
+  }, [warConfig]);
 
   return (
     <Box

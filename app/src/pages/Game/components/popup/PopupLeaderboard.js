@@ -273,6 +273,8 @@ class PopupLeaderboard extends Popup {
       this.leaderboardThumb?.setVisible(false);
     }
     this.scene.game.events.emit(this.events?.closeLeaderboardModal || '');
+    clearTimeout(this.timeoutId);
+    this.table.scrollToTop();
   }
 
   updateValues(season) {
@@ -343,7 +345,8 @@ class PopupLeaderboard extends Popup {
   updateLeaderboard(leaderboard) {
     if (!leaderboard.length) return;
     const activeLeaderboard = leaderboard.filter((item) => item.active);
-    this.users = activeLeaderboard;
+    this.users = leaderboard.filter((item) => item.active).slice(0, 3);
+    // this.users = activeLeaderboard;
     this.rankRewards = activeLeaderboard.map(({ rankReward }) => `~${formatter.format(rankReward)}`);
     this.reputationRewards = activeLeaderboard.map(({ reputationReward }) => `~${formatter.format(reputationReward)}`);
     this.crownGold.setVisible(activeLeaderboard.length >= 1);
@@ -354,6 +357,7 @@ class PopupLeaderboard extends Popup {
       item.destroy();
     });
 
+    const avatarSize = 72;
     this.items = [];
     this.rewardTexts = [];
     this.avatars = {};
@@ -364,7 +368,6 @@ class PopupLeaderboard extends Popup {
         align: 'right',
       })
       .setOrigin(0.5, 0.5);
-    const avatarSize = 72;
 
     for (let i = 0; i < this.users.length; i++) {
       const y = i * rowHeight;
@@ -429,6 +432,7 @@ class PopupLeaderboard extends Popup {
       })
     );
     loader.start();
+    this.renderLeaderBoard(activeLeaderboard, 3, 50, firstNetworthText.width);
 
     const userRecord = leaderboard.find(({ isUser }) => isUser);
     this.isUserActive = userRecord.active;
@@ -448,7 +452,7 @@ class PopupLeaderboard extends Popup {
     this.numberOfRows = activeLeaderboard.length;
 
     // redraw table if numberOfRows changed
-    const contentContainerHeight = this.users.length * rowHeight;
+    const contentContainerHeight = activeLeaderboard.length * rowHeight;
     this.contentContainer.setSize(200, contentContainerHeight);
     if (this.table) {
       this.remove(this.table);
@@ -478,7 +482,7 @@ class PopupLeaderboard extends Popup {
       mouseWheelScroller: { focus: true, speed: 0.3 },
       space: { left: 50, right: 40, top: 40, bottom: 40, panel: 20, header: 10, footer: 10 },
     }).layout();
-    if (activeLeaderboard.length <= 10) {
+    if (leaderboard.length <= 10) {
       this.table.setMouseWheelScrollerEnable(false);
     } else {
       this.table.setMouseWheelScrollerEnable(true);
@@ -490,6 +494,99 @@ class PopupLeaderboard extends Popup {
       if (this.leaderboardThumb.visible) return;
       this.leaderboardThumb.setVisible(true);
     });
+  }
+
+  renderLeaderBoard(activeLeaderboard, startRows, packCount, firstNetworthWidth) {
+    const currentPackLeaderboard = activeLeaderboard
+      .filter((item) => item.active)
+      .slice(startRows, startRows + packCount);
+    let users = currentPackLeaderboard;
+    let rankRewards = currentPackLeaderboard.map(({ rankReward }) => `~${formatter.format(rankReward)}`);
+    let reputationRewards = currentPackLeaderboard.map(
+      ({ reputationReward }) => `~${formatter.format(reputationReward)}`
+    );
+
+    const avatarSize = 72;
+    let items = [];
+    let avatars = {};
+    const isRankingMode = this.modeSwitch.mode === 'Ranking';
+
+    for (let i = 0; i < users.length; i++) {
+      const y = (i + startRows) * rowHeight;
+      const { rank, username, networth } = users[i];
+      const rankText = this.scene.add
+        .text(this.popup.width * 0.06, y + rowHeight / 2, `${rank}`, { ...smallBlackBold, align: 'center' })
+        .setOrigin(0.5, 0.5);
+
+      const usernameText = this.scene.add
+        .text(this.popup.width * 0.18, y + rowHeight / 2, formatUsername({ username }), smallBlackBold)
+        .setOrigin(0, 0.5);
+      const avatar = this.scene.add
+        .rexCircleMaskImage(usernameText.x - 90, y + rowHeight / 2, 'avatar')
+        .setOrigin(0, 0.5)
+        .setDisplaySize(avatarSize, avatarSize);
+      const networthText =
+        i === 0 && startRows === 0
+          ? this.scene.add
+              .text(this.popup.width * 0.52, rowHeight / 2, activeLeaderboard[0].networth.toLocaleString(), {
+                ...smallBlackBold,
+                align: 'right',
+              })
+              .setOrigin(0.5, 0.5)
+          : this.scene.add
+              .text(this.popup.width * 0.52 + firstNetworthWidth / 2, y + rowHeight / 2, networth.toLocaleString(), {
+                ...smallBlackBold,
+                align: 'right',
+              })
+              .setOrigin(1, 0.5);
+      const star = this.scene.add
+        .image(this.popup.width * 0.52 + firstNetworthWidth / 2 + 10, y + rowHeight / 2, 'icon-star')
+        .setOrigin(0, 0.5);
+
+      const rewardText = this.scene.add
+        .text(this.popup.width * 0.73, y + rowHeight / 2, isRankingMode ? rankRewards[i] : reputationRewards[i], {
+          ...smallBlackBold,
+          align: 'center',
+        })
+        .setOrigin(0.5, 0.5);
+
+      this.rewardTexts.push(rewardText);
+      avatars[username] = avatar;
+      this.items.push(avatar, rankText, usernameText, networthText, star, rewardText);
+      items.push(avatar, rankText, usernameText, networthText, star, rewardText);
+      // this.items.push(rankText, usernameText);
+    }
+    this.contentContainer.add(items);
+
+    // load avatar
+    let loader = new Phaser.Loader.LoaderPlugin(this.scene);
+    let textureManager = new Phaser.Textures.TextureManager(this.scene.game);
+    currentPackLeaderboard.forEach(({ username, avatarURL_small, avatarURL }) => {
+      // ask the LoaderPlugin to load the texture
+      if (!textureManager.exists(`${username}-avatar`))
+        loader.image(`${username}-avatar`, avatarURL_small || avatarURL);
+    });
+
+    loader.once(Phaser.Loader.Events.COMPLETE, () =>
+      Object.keys(avatars).forEach((username) => {
+        const avatar = avatars[username];
+        avatar.setTexture(`${username}-avatar`);
+        avatar.setDisplaySize(avatarSize, avatarSize);
+      })
+    );
+
+    loader.start();
+
+    if (activeLeaderboard.length > startRows + packCount) {
+      this.timeoutId = setTimeout(() => {
+        this.renderLeaderBoard(
+          activeLeaderboard,
+          startRows + packCount,
+          Math.min(packCount * 2, activeLeaderboard.length - startRows - packCount),
+          firstNetworthWidth
+        );
+      }, 2000);
+    }
   }
 }
 

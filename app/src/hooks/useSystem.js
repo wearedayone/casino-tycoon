@@ -29,7 +29,6 @@ const useSystem = () => {
   useEffect(() => {
     const unsubscribe = onSnapshot(doc(firestore, 'template', 'twitterShareReferralCode'), (snapshot) => {
       if (snapshot.exists()) {
-        console.log('snapshot.data()', snapshot.data());
         setTemplates({ twitterShareReferralCode: snapshot.data().text });
       }
     });
