@@ -13,8 +13,9 @@ const UpdateDetectedModal = () => {
 
   const update = () => {
     localStorage.setItem('appVersion', appVersion);
-    caches.delete('images');
-    caches.delete('audios');
+    caches?.delete('images');
+    caches?.delete('audios');
+    caches?.delete('js');
     window.location.reload();
   };
 
@@ -22,10 +23,12 @@ const UpdateDetectedModal = () => {
     <Dialog
       maxWidth="sm"
       fullWidth
-      open={(openUpdate && !(userAgent.os === 'Android' && !userAgent.isFirefox)) ?? false}
+      // open={(openUpdate && !(userAgent.os === 'Android' && !userAgent.isFirefox)) ?? false}
+      open={openUpdate ?? false}
       onClose={() => {}}
+      style={{ zIndex: 9999 }}
       PaperProps={{
-        sx: { borderRadius: 4 },
+        sx: { borderRadius: 4, zIndex: 9999 },
       }}>
       <Box p={2}>
         <Box display="flex" justifyContent="flex-end">

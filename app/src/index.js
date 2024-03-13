@@ -83,8 +83,8 @@ root.render(
               }}>
               <ThemeProvider theme={theme}>
                 <App />
-                <InstallGuideModal />
                 <UpdateDetectedModal />
+                <InstallGuideModal />
                 <SetWalletPasswordModal />
                 <GameVersion />
               </ThemeProvider>

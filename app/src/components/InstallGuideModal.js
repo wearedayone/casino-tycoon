@@ -35,7 +35,7 @@ const InstallGuideModal = () => {
   if (userAgent.os === 'Android')
     return (
       <Box
-        zIndex={9999}
+        zIndex={9998}
         position="fixed"
         top={0}
         left={0}
