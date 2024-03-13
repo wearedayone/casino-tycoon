@@ -4,7 +4,7 @@ import HighlightOffRoundedIcon from '@mui/icons-material/HighlightOffRounded';
 import useModalStore from '../stores/modal.store';
 import useSystemStore from '../stores/system.store';
 
-import { isChrome } from 'react-device-detect';
+import { isFirefox } from 'react-device-detect';
 
 import { getUserOS } from '../utils/pwa';
 import { useState } from 'react';
@@ -27,7 +27,7 @@ const UpdateDetectedModal = () => {
     <Dialog
       maxWidth="sm"
       fullWidth
-      open={(openUpdate && !(os === 'Android' && isChrome)) ?? false}
+      open={(openUpdate && !(os === 'Android' && !isFirefox)) ?? false}
       onClose={() => {}}
       PaperProps={{
         sx: { borderRadius: 4 },
