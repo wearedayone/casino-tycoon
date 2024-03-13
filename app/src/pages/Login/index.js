@@ -3,19 +3,14 @@ import { Box, Typography, Button } from '@mui/material';
 import { usePrivy } from '@privy-io/react-auth';
 import * as Sentry from '@sentry/react';
 
-import { getPWADisplayMode, getUserOS } from '../../utils/pwa';
-import { isFirefox } from 'react-device-detect';
+import userAgent from '../../utils/userAgent';
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const Login = () => {
   const { login } = usePrivy();
   const [loading, setLoading] = useState(false);
-  const [deviceInfo, setDeviceInfo] = useState({
-    os: getUserOS(),
-    displayMode: getPWADisplayMode(),
-  });
 
-  const isAndroid = deviceInfo.os === 'Android';
+  const isAndroid = userAgent.os === 'Android';
 
   const addCssForPrivyDialog = () => {
     const existedTag = document.querySelector('#privy-css');
@@ -65,7 +60,7 @@ const Login = () => {
         }}
       />
       <Box
-        visibility={!isFirefox && isAndroid ? 'hidden' : 'visible'}
+        visibility={!userAgent.isFirefox && isAndroid ? 'hidden' : 'visible'}
         minHeight="100vh"
         p={2}
         display="flex"

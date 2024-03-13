@@ -1,26 +1,20 @@
-import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Box, Typography, alpha, useMediaQuery } from '@mui/material';
-import { isFirefox } from 'react-device-detect';
 
-import { getPWADisplayMode, getUserOS } from '../utils/pwa';
+import userAgent from '../utils/userAgent';
 
 const InstallGuideModal = () => {
   const superXs = useMediaQuery('(max-width: 400px)');
   const { pathname } = useLocation();
-  const [deviceInfo, setDeviceInfo] = useState({
-    displayMode: getPWADisplayMode(),
-    os: getUserOS(),
-  });
 
   const open =
     !pathname.startsWith('/deposit') &&
-    deviceInfo.displayMode === 'browser' &&
-    (deviceInfo.os === 'iOS' || (deviceInfo.os === 'Android' && !isFirefox));
+    userAgent.displayMode === 'browser' &&
+    (userAgent.os === 'iOS' || (userAgent.os === 'Android' && !userAgent.isFirefox));
 
   if (!open) return null;
 
-  if (deviceInfo.os === 'iOS')
+  if (userAgent.os === 'iOS')
     return (
       <Box
         zIndex={9999}
@@ -38,7 +32,7 @@ const InstallGuideModal = () => {
       </Box>
     );
 
-  if (deviceInfo.os === 'Android')
+  if (userAgent.os === 'Android')
     return (
       <Box
         zIndex={9999}

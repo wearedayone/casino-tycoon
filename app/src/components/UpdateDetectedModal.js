@@ -3,17 +3,12 @@ import HighlightOffRoundedIcon from '@mui/icons-material/HighlightOffRounded';
 
 import useModalStore from '../stores/modal.store';
 import useSystemStore from '../stores/system.store';
-
-import { isFirefox } from 'react-device-detect';
-
-import { getUserOS } from '../utils/pwa';
-import { useState } from 'react';
+import userAgent from '../utils/userAgent';
 
 const UpdateDetectedModal = () => {
   const openUpdate = useModalStore((state) => state.openUpdate);
   const setOpenUpdate = useModalStore((state) => state.setOpenUpdate);
   const configs = useSystemStore((state) => state.configs);
-  const [os, setOS] = useState(getUserOS());
   const { appVersion } = configs || {};
 
   const update = () => {
@@ -27,7 +22,7 @@ const UpdateDetectedModal = () => {
     <Dialog
       maxWidth="sm"
       fullWidth
-      open={(openUpdate && !(os === 'Android' && !isFirefox)) ?? false}
+      open={(openUpdate && !(userAgent.os === 'Android' && !userAgent.isFirefox)) ?? false}
       onClose={() => {}}
       PaperProps={{
         sx: { borderRadius: 4 },
