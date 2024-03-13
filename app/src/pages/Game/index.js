@@ -532,13 +532,6 @@ const Game = () => {
   }, [loaded, profile, gamePlay, activeSeasonId, embeddedWallet]);
 
   useEffect(() => {
-    if (rankData && rankData.data) {
-      const { rank } = rankData.data;
-      isInMainScene && gameRef.current?.events.emit('update-rank', { rank });
-    }
-  }, [rankData]);
-
-  useEffect(() => {
     if (!gameLoaded.current) {
       gameLoaded.current = true;
 
@@ -1273,33 +1266,37 @@ const Game = () => {
   }, [loaded]);
 
   useEffect(() => {
+    if (isInMainScene) reloadUserWarDeployment();
+  }, [isInMainScene]);
+
+  useEffect(() => {
     isInMainScene && gameRef.current?.events.emit('update-app-version', appVersion);
-  }, [appVersion]);
+  }, [isInMainScene, appVersion]);
 
   useEffect(() => {
     if (isEnded) isInMainScene && gameRef.current?.events.emit('game-ended');
-  }, [isEnded]);
+  }, [isInMainScene, isEnded]);
 
   useEffect(() => {
     isInMainScene && gameRef.current?.events.emit('update-eth-balance', { address, ETHBalance });
-  }, [address, ETHBalance]);
+  }, [isInMainScene, address, ETHBalance]);
 
   useEffect(() => {
     isInMainScene && gameRef.current?.events.emit('update-gas-mint', { gas: estimatedGas?.game?.mint });
-  }, [estimatedGas?.game?.mint]);
+  }, [isInMainScene, estimatedGas?.game?.mint]);
 
   useEffect(() => {
     isInMainScene && gameRef.current?.events.emit('update-gas-buy-goon', { gas: estimatedGas?.game?.buyGoon });
-  }, [estimatedGas?.game?.buyGoon]);
+  }, [isInMainScene, estimatedGas?.game?.buyGoon]);
 
   useEffect(() => {
     isInMainScene &&
       gameRef.current?.events.emit('update-gas-upgrade-safehouse', { gas: estimatedGas?.game?.buySafeHouse });
-  }, [estimatedGas?.game?.buySafeHouse]);
+  }, [isInMainScene, estimatedGas?.game?.buySafeHouse]);
 
   useEffect(() => {
     isInMainScene && gameRef.current?.events.emit('update-balances', { dailyMoney, ETHBalance, tokenBalance });
-  }, [tokenBalance, ETHBalance, dailyMoney]);
+  }, [isInMainScene, tokenBalance, ETHBalance, dailyMoney]);
 
   useEffect(() => {
     isInMainScene &&
@@ -1308,12 +1305,19 @@ const Game = () => {
         ETHBalance,
         tokenBalance,
       });
-  }, [numberOfMachines, ETHBalance, tokenBalance]);
+  }, [isInMainScene, numberOfMachines, ETHBalance, tokenBalance]);
 
   useEffect(() => {
     isInMainScene &&
       gameRef.current?.events.emit('update-profile', { username, address, avatarURL: avatarURL_big ?? avatarURL });
-  }, [username, address, avatarURL, avatarURL_big]);
+  }, [isInMainScene, username, address, avatarURL, avatarURL_big]);
+
+  useEffect(() => {
+    if (rankData && rankData.data) {
+      const { rank } = rankData.data;
+      isInMainScene && gameRef.current?.events.emit('update-rank', { rank });
+    }
+  }, [isInMainScene, rankData]);
 
   useEffect(() => {
     if (isLeaderboardModalOpen) {
@@ -1327,41 +1331,41 @@ const Game = () => {
         });
     }
   }, [
+    isInMainScene,
     isLeaderboardModalOpen,
     activeSeason?.name,
     activeSeason?.timeStepInMinutes,
     activeSeason?.rankPrizePool,
     activeSeason?.reputationPrizePool,
-    machine.networth,
     isEnded,
   ]);
 
   useEffect(() => {
     if (isLeaderboardModalOpen) gameRef.current?.events.emit('update-leaderboard', leaderboardData?.data || []);
-  }, [isLeaderboardModalOpen, leaderboardData?.data]);
+  }, [isInMainScene, isLeaderboardModalOpen, leaderboardData?.data]);
 
   useEffect(() => {
     isInMainScene && gameRef.current?.events.emit('update-ranking-rewards', { prizePoolConfig });
-  }, [prizePoolConfig]);
+  }, [isInMainScene, prizePoolConfig]);
 
   useEffect(() => {
     isInMainScene &&
       gameRef.current?.events.emit('update-retire-data', {
         earlyRetirementTax: prizePoolConfig.earlyRetirementTax,
       });
-  }, [prizePoolConfig.earlyRetirementTax]);
+  }, [isInMainScene, prizePoolConfig.earlyRetirementTax]);
 
   useEffect(() => {
     isInMainScene && gameRef.current?.events.emit('update-season-countdown', countdownString);
-  }, [countdownString]);
+  }, [isInMainScene, countdownString]);
 
   useEffect(() => {
     isInMainScene && gameRef.current?.events.emit('update-active-status', { active: gamePlay?.active });
-  }, [gamePlay?.active]);
+  }, [isInMainScene, gamePlay?.active]);
 
   useEffect(() => {
     isInMainScene && gameRef.current?.events.emit('game-sound-changed', { sound });
-  }, [sound]);
+  }, [isInMainScene, sound]);
 
   useEffect(() => {
     if (profile?.code) {
@@ -1385,7 +1389,7 @@ const Game = () => {
       const claimable = now > nextClaimTime && now < endUnixTime;
       isInMainScene && gameRef.current?.events.emit('update-claimable-status', { claimable, active: gamePlay.active });
     }
-  }, [activeSeasonEstimatedEndTime, activeSeason?.claimGapInSeconds, gamePlay?.lastClaimTime]);
+  }, [isInMainScene, activeSeasonEstimatedEndTime, activeSeason?.claimGapInSeconds, gamePlay?.lastClaimTime]);
 
   useEffect(() => {
     if (gamePlay?.startRewardCountingTime && gamePlay?.pendingReward) {
@@ -1393,13 +1397,13 @@ const Game = () => {
       const claimableReward = gamePlay?.pendingReward + diffInDays * dailyMoney;
       isInMainScene && gameRef.current?.events.emit('update-claimable-reward', { reward: claimableReward });
     }
-  }, [gamePlay?.startRewardCountingTime, gamePlay?.pendingreward, dailyMoney]);
+  }, [isInMainScene, gamePlay?.startRewardCountingTime, gamePlay?.pendingreward, dailyMoney]);
 
   useEffect(() => {
     if (gamePlay) {
       isInMainScene && gameRef.current?.events.emit('update-war-status', { war: gamePlay.war });
     }
-  }, [gamePlay?.war]);
+  }, [isInMainScene, gamePlay?.war]);
 
   useEffect(() => {
     getNFTBalance(address)
@@ -1410,7 +1414,7 @@ const Game = () => {
         console.error(err);
         Sentry.captureException(err);
       });
-  }, [address, numberOfMachines]);
+  }, [isInMainScene, address, numberOfMachines]);
 
   useEffect(() => {
     isInMainScene &&
@@ -1425,7 +1429,7 @@ const Game = () => {
         salesLastPeriod: buildingSoldLast24h,
         networthIncrease: building.networth,
       });
-  }, [numberOfBuildings, networth, tokenBalance, building, buildingSoldLast24h]);
+  }, [isInMainScene, numberOfBuildings, networth, tokenBalance, building, buildingSoldLast24h]);
 
   useEffect(() => {
     isInMainScene &&
@@ -1441,7 +1445,7 @@ const Game = () => {
         dailyReward: worker.dailyReward,
         networthIncrease: worker.networth,
       });
-  }, [numberOfWorkers, networth, tokenBalance, worker, workerSoldLast24h]);
+  }, [isInMainScene, numberOfWorkers, networth, tokenBalance, worker, workerSoldLast24h]);
 
   useEffect(() => {
     isInMainScene &&
@@ -1463,6 +1467,7 @@ const Game = () => {
         referralDiscount: inviteCode ? Number(activeSeason?.referralConfig?.referralDiscount) : 0,
       });
   }, [
+    isInMainScene,
     numberOfMachines,
     networth,
     ETHBalance,
@@ -1483,7 +1488,7 @@ const Game = () => {
         networth,
         level: calculateHouseLevel(houseLevels, networth),
       });
-  }, [networth]);
+  }, [isInMainScene, networth]);
 
   useEffect(() => {
     isInMainScene &&
@@ -1493,11 +1498,11 @@ const Game = () => {
         ethPriceInUsd,
         tweetTemplate: templates.twitterShareReferralCode || '',
       });
-  }, [referralTotalReward, referralTotalDiscount, ethPriceInUsd, templates.twitterShareReferralCode]);
+  }, [isInMainScene, referralTotalReward, referralTotalDiscount, ethPriceInUsd, templates.twitterShareReferralCode]);
 
   useEffect(() => {
     isInMainScene && gameRef.current?.events.emit('update-workers-machines', { numberOfWorkers, numberOfMachines });
-  }, [numberOfWorkers, numberOfMachines]);
+  }, [isInMainScene, numberOfWorkers, numberOfMachines]);
 
   useEffect(() => {
     if (rankData?.data) {
@@ -1519,7 +1524,7 @@ const Game = () => {
           reputationReward,
         });
     }
-  }, [rankData, address, tokenBalance, numberOfMachines, ETHBalance]);
+  }, [isInMainScene, rankData, address, tokenBalance, numberOfMachines, ETHBalance]);
 
   useEffect(() => {
     if (rankData?.data) {
@@ -1534,7 +1539,7 @@ const Game = () => {
           numberOfBuildings,
         });
     }
-  }, [rankData, networth, numberOfWorkers, numberOfMachines, numberOfBuildings]);
+  }, [isInMainScene, rankData, networth, numberOfWorkers, numberOfMachines, numberOfBuildings]);
 
   useEffect(() => {
     if (userHasInteractive) {
@@ -1551,7 +1556,7 @@ const Game = () => {
         ...warDeployment,
         ...warConfig,
       });
-  }, [numberOfMachines, numberOfWorkers, numberOfBuildings, warDeployment, warConfig]);
+  }, [isInMainScene, numberOfMachines, numberOfWorkers, numberOfBuildings, warDeployment, warConfig]);
 
   useEffect(() => {
     if (warConfig) {
@@ -1563,7 +1568,7 @@ const Game = () => {
           machinePercentLost,
         });
     }
-  }, [warConfig]);
+  }, [isInMainScene, warConfig]);
 
   return (
     <Box
