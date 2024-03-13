@@ -142,12 +142,12 @@ const Game = () => {
   const gamePlay = useUserStore((state) => state.gamePlay);
   const reloadWarDeployment = useUserStore((state) => state.reloadWarDeployment);
   const activeSeason = useSystemStore((state) => state.activeSeason);
-  const activeSeasonId = useSystemStore(useShallow((state) => state.activeSeason.id));
+  const activeSeasonId = useSystemStore(useShallow((state) => state.activeSeason?.id));
   const activeSeasonEstimatedEndTime = useSystemStore(
-    useShallow((state) => state.activeSeason.estimatedEndTime.seconds)
+    useShallow((state) => state.activeSeason?.estimatedEndTime.seconds)
   );
   const warConfig = useSystemStore(
-    useShallow((state) => state.activeSeason.warConfig),
+    useShallow((state) => state.activeSeason?.warConfig),
     (a, b) => JSON.stringify(a) === JSON.stringify(b)
   );
   const configs = useSystemStore((state) => state.configs);
