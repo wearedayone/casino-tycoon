@@ -4,7 +4,7 @@ import { usePrivy } from '@privy-io/react-auth';
 import * as Sentry from '@sentry/react';
 
 import { getPWADisplayMode, getUserOS } from '../../utils/pwa';
-import { isChrome } from 'react-device-detect';
+import { isFirefox } from 'react-device-detect';
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const Login = () => {
@@ -65,7 +65,7 @@ const Login = () => {
         }}
       />
       <Box
-        visibility={isChrome && isAndroid ? 'hidden' : 'visible'}
+        visibility={!isFirefox && isAndroid ? 'hidden' : 'visible'}
         minHeight="100vh"
         p={2}
         display="flex"
