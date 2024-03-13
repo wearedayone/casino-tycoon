@@ -2,7 +2,6 @@ import {
   getLeaderboard,
   getNextWarSnapshotUnixTime,
   updateLastTimeSeenWarResult,
-  getAllActiveGamePlay,
   updateUserWarDeployment,
   updateUserWarAttackUser,
   getUserWarDeployment,
@@ -37,18 +36,6 @@ export const updateLastTimeSeenGangWarResult = async (req, res) => {
   try {
     await updateLastTimeSeenWarResult(req.userId);
     return res.sendStatus(200);
-  } catch (err) {
-    console.error(err);
-    logger.error(err.message);
-    const message = err.message.startsWith('API error') ? err.message : 'Something is wrong';
-    return res.status(400).send(message);
-  }
-};
-
-export const getTotalVoters = async (req, res) => {
-  try {
-    const data = await getAllActiveGamePlay();
-    return res.status(200).send({ count: data });
   } catch (err) {
     console.error(err);
     logger.error(err.message);

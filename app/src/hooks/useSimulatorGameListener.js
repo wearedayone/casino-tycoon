@@ -264,10 +264,6 @@ const useSimulatorGameListener = () => {
       game.events.emit('simulator-update-war-die-chance', { dieChance: activeSeason?.warConfig?.dieChance });
     });
 
-    game.events.on('simulator-request-total-voters', () => {
-      game.events.emit('simulator-update-total-voters', { count: leaderboardData.length });
-    });
-
     game.events.on('simulator-request-war-status', () => {
       game.events.emit('simulator-update-war-status', { war: false });
     });
