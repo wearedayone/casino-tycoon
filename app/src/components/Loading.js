@@ -10,7 +10,7 @@ const Loading = () => {
         sx={{
           zIndex: -1,
           top: 0,
-          backgroundImage: 'url(images/bg-login.png)',
+          backgroundImage: 'url(images/bg-login.webp)',
           backgroundSize: 'cover',
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'center',
