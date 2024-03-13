@@ -42,9 +42,9 @@ const main = () => {
 
 main();
 
-// everyday every 1AM
+// everyday at 1AM and 1PM
 cron.schedule(
-  '0 1 * * *',
+  '0 1,13 * * *',
   function () {
     generateDailyWarSnapshot();
   },
