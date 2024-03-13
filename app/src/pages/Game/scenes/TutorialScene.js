@@ -72,11 +72,11 @@ class TutorialScene extends Phaser.Scene {
       onOpen: () => {
         this.tutorial.step16.setVisible(false);
       },
-      onClose: this.endTutorial,
+      onClose: () => this.endTutorial(),
     }); // done
     this.add.existing(this.popupDeposit);
 
-    this.popupDepositETH = new PopupDepositETH(this, { isSimulator: true, onClose: this.endTutorial });
+    this.popupDepositETH = new PopupDepositETH(this, { isSimulator: true, onClose: () => this.endTutorial() });
     this.add.existing(this.popupDepositETH);
 
     this.popupBuy = new PopupBuy(this, width - 335, 1600); // done

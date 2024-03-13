@@ -13,9 +13,8 @@ class PopupDeposit extends Popup {
   isSimulator;
 
   constructor(scene, parentModal, { isSimulator, onOpen, onClose } = {}) {
-    super(scene, 'popup-small', { title: 'Deposit' });
+    super(scene, 'popup-small', { title: 'Deposit', noCloseBtn: isSimulator });
     this.onOpenCallback = onOpen;
-    this.cleanup = onClose;
     this.isSimulator = isSimulator;
 
     const events = {
@@ -145,6 +144,7 @@ class PopupDeposit extends Popup {
       () => {
         this.close();
         parentModal?.open();
+        onClose?.();
       },
       'Back',
       { fontSize: '82px', sound: 'close' }

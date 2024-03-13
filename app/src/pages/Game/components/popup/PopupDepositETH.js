@@ -11,7 +11,7 @@ class PopupDepositETH extends Popup {
 
   constructor(scene, { isSimulator, onClose } = {}) {
     super(scene, 'popup-small', { title: 'Deposit ETH' });
-    this.cleanup = onClose;
+    this.onClose = onClose;
     this.isSimulator = isSimulator;
 
     this.events = {
@@ -68,7 +68,7 @@ class PopupDepositETH extends Popup {
       'button-blue-pressed',
       () => {
         this.close();
-        scene.popupDeposit.open();
+        if (!isSimulator) scene.popupDeposit.open();
       },
       'Back',
       { fontSize: '82px', sound: 'close' }
