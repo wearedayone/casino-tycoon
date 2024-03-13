@@ -30,9 +30,10 @@ export const getAllActiveGamePlay = async () => {
     .collection('gamePlay')
     .where('seasonId', '==', activeSeasonId)
     .where('active', '==', true)
+    .count()
     .get();
 
-  return snapshot.size;
+  return snapshot.data().count;
 };
 
 export const generateRankingRewards = ({ totalPlayers, rankPrizePool, prizePoolConfig }) => {
