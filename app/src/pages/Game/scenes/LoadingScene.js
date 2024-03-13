@@ -80,13 +80,6 @@ class LoadingScene extends Phaser.Scene {
       this.assetLoaded = true;
     });
 
-    this.load.scenePlugin(
-      'rexuiplugin',
-      'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js',
-      'rexUI',
-      'rexUI'
-    );
-
     // sounds
     this.load.audio('bg', '/audios/bg.mp3');
     this.load.audio('button-1', '/audios/button-1.wav');
