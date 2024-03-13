@@ -22,3 +22,4 @@ backend/logs/
 
 test.json
 contract/GameV4/.env.prd
+contract/GameV4/.env.stg

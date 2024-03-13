@@ -60,8 +60,8 @@
     "swapAmount": 1000
   },
   "initPurchased": {
-    "worker": 10,
-    "building": 10
+    "worker": 0,
+    "building": 0
   },
   "houseLevels": [
     {

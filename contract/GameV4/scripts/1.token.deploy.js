@@ -122,8 +122,8 @@ const main = async () => {
   try {
     await deployToken();
     await deployUniswapContract();
-    await deployPair();
-    await addLiquidity();
+    // await deployPair();
+    // await addLiquidity();
   } catch (err) {
     console.error(err);
   }
