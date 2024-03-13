@@ -104,9 +104,15 @@ registerRoute(
   })
 );
 
+const jsExtensionRegexp = new RegExp('.*main.*.js$');
 registerRoute(
   // Add in any other file extensions or routing criteria as needed.
-  ({ url }) => url.pathname.endsWith('.js'), // Customize this strategy as needed, e.g., by changing to CacheFirst.
+  ({ url }) => {
+    if (url.pathname.match(jsExtensionRegexp)) {
+      return true;
+    }
+    return false;
+  }, // Customize this strategy as needed, e.g., by changing to CacheFirst.
   new CacheFirst({
     cacheName: 'js',
     // fetchOptions:

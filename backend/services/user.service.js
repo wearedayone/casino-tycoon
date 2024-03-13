@@ -190,10 +190,15 @@ export const getUserRankAndRewardV2 = async (userId) => {
 };
 
 export const updateLastOnlineTime = async (userId) => {
-  await firestore
-    .collection('user')
-    .doc(userId)
-    .update({ lastOnlineTime: admin.firestore.FieldValue.serverTimestamp() });
+  try {
+    await firestore
+      .collection('user')
+      .doc(userId)
+      .update({ lastOnlineTime: admin.firestore.FieldValue.serverTimestamp() });
+  } catch (err) {
+    console.log({ err });
+    console.error(err);
+  }
 };
 
 export const applyInviteCode = async (userId, code) => {

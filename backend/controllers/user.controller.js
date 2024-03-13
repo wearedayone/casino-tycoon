@@ -100,7 +100,7 @@ export const getRank = async (req, res) => {
 
 export const setLastOnlineTime = async (req, res) => {
   try {
-    await updateLastOnlineTime(req.userId);
+    updateLastOnlineTime(req.userId);
     return res.sendStatus(200);
   } catch (err) {
     console.error(err);

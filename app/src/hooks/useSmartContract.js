@@ -299,7 +299,7 @@ const useSmartContract = () => {
   };
 
   const getNFTBalance = async (address) => {
-    if (!loadedAssets) return 0;
+    if (!loadedAssets || !address) return 0;
     const privyProvider = await embeddedWallet.getEthereumProvider();
     const nftContract = new Contract(NFT_ADDRESS, nftAbi.abi, privyProvider.provider);
 
@@ -308,14 +308,14 @@ const useSmartContract = () => {
   };
 
   const getETHBalance = async (address) => {
-    if (!loadedAssets) return 0;
+    if (!loadedAssets || !address) return 0;
     const privyProvider = await embeddedWallet.getEthereumProvider();
     const res = await privyProvider.provider.getBalance(address);
     return Number(formatEther(res.toString()));
   };
 
   const getStakedNFTBalance = async (address) => {
-    if (!loadedAssets) return 0;
+    if (!loadedAssets || !address) return 0;
     const privyProvider = await embeddedWallet.getEthereumProvider();
     const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
 
