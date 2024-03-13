@@ -49,7 +49,7 @@ contract FIAT is ERC20, AccessControl, ERC20Burnable, ERC20Permit, ReentrancyGua
 
   event SwapAndLiquify(uint256 tokensSwapped, uint256 ethReceived, uint256 tokensIntoLiquidity);
 
-  constructor(address defaultAdmin, address minter) ERC20('FIAT0', '$FIAT0') ERC20Permit('FIAT0') {
+  constructor(address defaultAdmin, address minter) ERC20('FIAT', '$FIAT') ERC20Permit('FIAT') {
     _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
     _grantRole(MINTER_ROLE, minter);
     _defaultAdmin = defaultAdmin;
