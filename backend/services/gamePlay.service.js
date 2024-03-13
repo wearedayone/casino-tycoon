@@ -1,7 +1,7 @@
 import moment from 'moment';
 
 import admin, { firestore } from '../configs/firebase.config.js';
-import { getActiveSeason, getActiveSeasonId } from './season.service.js';
+import { getActiveSeason, getActiveSeasonId, getActiveSeasonWithRank } from './season.service.js';
 import { getUserDisplayInfos } from './user.service.js';
 import { calculateReward } from '../utils/formulas.js';
 
@@ -27,7 +27,7 @@ export const getLeaderboard = async (userId) => {
   const random = Math.random();
   const stime = Date.now();
   console.log('start getLeaderboard: ' + userId, random);
-  const { id, rankPrizePool, reputationPrizePool, rankingRewards } = await getActiveSeason();
+  const { id, rankPrizePool, reputationPrizePool, rankingRewards } = await getActiveSeasonWithRank();
 
   const snapshot = await firestore
     .collection('gamePlay')
@@ -68,7 +68,7 @@ export const getLeaderboard = async (userId) => {
 };
 
 export const getRank = async (userId) => {
-  const { id, rankPrizePool, reputationPrizePool, rankingRewards } = await getActiveSeason();
+  const { id, rankPrizePool, reputationPrizePool, rankingRewards } = await getActiveSeasonWithRank();
   const totalSnapshot = await firestore
     .collection('gamePlay')
     .where('seasonId', '==', id)

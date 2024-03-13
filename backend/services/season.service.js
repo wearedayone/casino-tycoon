@@ -19,6 +19,14 @@ export const getActiveSeason = async () => {
   const snapshot = await firestore.collection('season').doc(activeSeasonId).get();
   const { prizePoolConfig, rankPrizePool, ...rest } = snapshot.data();
 
+  return { id: snapshot.id, ...snapshot.data() };
+};
+
+export const getActiveSeasonWithRank = async () => {
+  const activeSeasonId = await getActiveSeasonId();
+  const snapshot = await firestore.collection('season').doc(activeSeasonId).get();
+  const { prizePoolConfig, rankPrizePool, ...rest } = snapshot.data();
+
   const totalPlayers = await getAllActiveGamePlay();
   const rankingRewards = generateRankingRewards({ totalPlayers, rankPrizePool, prizePoolConfig });
   return { id: snapshot.id, ...rest, rankPrizePool, rankingRewards, prizePoolConfig };
