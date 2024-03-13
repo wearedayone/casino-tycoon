@@ -561,17 +561,19 @@ class PopupLeaderboard extends Popup {
     // load avatar
     let loader = new Phaser.Loader.LoaderPlugin(this.scene);
     let textureManager = new Phaser.Textures.TextureManager(this.scene.game);
-    currentPackLeaderboard.forEach(({ username, avatarURL_small, avatarURL }) => {
-      // ask the LoaderPlugin to load the texture
-      if (!textureManager.exists(`${username}-avatar`))
-        loader.image(`${username}-avatar`, avatarURL_small || avatarURL);
-    });
+    // currentPackLeaderboard.forEach(({ username, avatarURL_small, avatarURL }) => {
+    //   // ask the LoaderPlugin to load the texture
+    //   if (!textureManager.exists(`${username}-avatar`))
+    //     loader.image(`${username}-avatar`, avatarURL_small || avatarURL);
+    // });
 
     loader.once(Phaser.Loader.Events.COMPLETE, () =>
       Object.keys(avatars).forEach((username) => {
-        const avatar = avatars[username];
-        avatar.setTexture(`${username}-avatar`);
-        avatar.setDisplaySize(avatarSize, avatarSize);
+        if (!textureManager.exists(`${username}-avatar`)) {
+          const avatar = avatars[username];
+          avatar.setTexture(`${username}-avatar`);
+          avatar.setDisplaySize(avatarSize, avatarSize);
+        }
       })
     );
 

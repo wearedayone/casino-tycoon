@@ -280,7 +280,13 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('slider-thumb', '/images/slider-thumb.png');
     this.load.image('swap-eth-token', '/images/swap-eth-token.png');
     this.load.image('swap-token-eth', '/images/swap-token-eth.png');
-
+    let path = this.load.path;
+    this.load.path = '/images/animation/';
+    this.load.multiatlas('gangster-front', 'gangster_front.json');
+    this.load.multiatlas('gangster-back', 'gangster_back.json');
+    this.load.multiatlas('goon-front', 'goon_front.json');
+    this.load.multiatlas('goon-back', 'goon_back.json');
+    this.load.path = path;
     // settings
     this.load.image('settings-wallet-container', '/images/settings-wallet-container.png');
     this.load.image('view-transaction', '/images/texts/view-transaction.png');
@@ -353,12 +359,6 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('tutorial-15', '/images/tutorial-15.png');
     this.load.image('tutorial-15-goon', '/images/tutorial-15-goon.png');
     this.load.image('tutorial-16', '/images/tutorial-16.png');
-
-    this.load.path = '/images/animation/';
-    this.load.multiatlas('gangster-front', 'gangster_front.json');
-    this.load.multiatlas('gangster-back', 'gangster_back.json');
-    this.load.multiatlas('goon-front', 'goon_front.json');
-    this.load.multiatlas('goon-back', 'goon_back.json');
   }
 
   create() {}
