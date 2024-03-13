@@ -1,4 +1,4 @@
-import { getActiveSeason } from '../utils/utils.js';
+import { getActiveSeason, getActiveSeasonWithRank } from '../utils/utils.js';
 import admin, { firestore } from '../configs/admin.config.js';
 import alchemy from '../configs/alchemy.config.js';
 import environments from '../utils/environments.js';
@@ -27,7 +27,7 @@ const calculateReward = (rankPrizePool, rankingRewards, rankIndex) => {
 };
 
 export const getLeaderboard = async (userId) => {
-  const { id, rankPrizePool, reputationPrizePool, rankingRewards } = await getActiveSeason();
+  const { id, rankPrizePool, reputationPrizePool, rankingRewards } = await getActiveSeasonWithRank();
 
   const snapshot = await firestore
     .collection('gamePlay')
