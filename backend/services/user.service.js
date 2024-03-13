@@ -13,8 +13,6 @@ const CODE_LENGTH = 10;
 
 const createGamePlayIfNotExist = async (userId, isWhitelisted) => {
   const season = await getActiveSeason();
-  const user = await firestore.collection('user').doc(userId).get();
-  const userData = user.data();
 
   const snapshot = await firestore
     .collection('gamePlay')
@@ -22,34 +20,38 @@ const createGamePlayIfNotExist = async (userId, isWhitelisted) => {
     .where('seasonId', '==', season.id)
     .get();
   if (snapshot.empty) {
-    await firestore.collection('gamePlay').add({
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      userId,
-      seasonId: season.id,
-      networth: season.worker.networth,
-      numberOfMachines: 0,
-      numberOfWorkers: 1,
-      numberOfBuildings: 0,
-      lastClaimTime: admin.firestore.FieldValue.serverTimestamp(),
-      point: 0,
-      pendingReward: 0,
-      startRewardCountingTime: admin.firestore.FieldValue.serverTimestamp(),
-      active: false,
-      isWhitelisted,
-      whitelistAmountMinted: 0,
-      avatarURL: userData.avatarURL ?? '',
-      avatarURL_small: userData.avatarURL_small ?? '',
-      username: userData.username ?? '',
-    });
+    const user = await firestore.collection('user').doc(userId).get();
+    const userData = user.data();
 
-    await firestore.collection('warDeployment').add({
-      userId,
-      seasonId: season.id,
-      numberOfMachinesToEarn: 0,
-      numberOfMachinesToAttack: 0,
-      numberOfMachinesToDefend: 0,
-      attackUserId: null,
-    });
+    await Promise.all([
+      firestore.collection('gamePlay').add({
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        userId,
+        seasonId: season.id,
+        networth: season.worker.networth,
+        numberOfMachines: 0,
+        numberOfWorkers: 1,
+        numberOfBuildings: 0,
+        lastClaimTime: admin.firestore.FieldValue.serverTimestamp(),
+        point: 0,
+        pendingReward: 0,
+        startRewardCountingTime: admin.firestore.FieldValue.serverTimestamp(),
+        active: false,
+        isWhitelisted,
+        whitelistAmountMinted: 0,
+        avatarURL: userData.avatarURL ?? '',
+        avatarURL_small: userData.avatarURL_small ?? '',
+        username: userData.username ?? '',
+      }),
+      firestore.collection('warDeployment').add({
+        userId,
+        seasonId: season.id,
+        numberOfMachinesToEarn: 0,
+        numberOfMachinesToAttack: 0,
+        numberOfMachinesToDefend: 0,
+        attackUserId: null,
+      }),
+    ]);
   }
 };
 
@@ -63,7 +65,7 @@ export const createUserIfNotExist = async (userId) => {
 
   const isWhitelisted = whitelistedUsernames.includes(user?.twitter?.username);
   const { wallet, twitter } = user;
-  // console.log({ twitter });
+
   if (!snapshot.exists) {
     // create user
     const username = twitter ? twitter.username : faker.internet.userName();
@@ -114,7 +116,7 @@ export const createUserIfNotExist = async (userId) => {
     const { ETHBalance, avatarURL_small } = snapshot.data();
     // check if user has twitter avatar now
     if (twitter.profilePictureUrl && avatarURL_small !== twitter.profilePictureUrl) {
-      await firestore
+      firestore
         .collection('user')
         .doc(userId)
         .update({
@@ -124,22 +126,30 @@ export const createUserIfNotExist = async (userId) => {
     }
 
     if (wallet) {
-      const ethersProvider = await alchemy.config.getProvider();
-      const value = await ethersProvider.getBalance(user.wallet.address);
-      console.log(formatEther(value));
-      if (ETHBalance !== Number(formatEther(value))) {
-        await firestore
-          .collection('user')
-          .doc(userId)
-          .update({
-            address: wallet?.address?.toLocaleLowerCase() || '',
-            ETHBalance: Number(formatEther(value)),
-          });
-      }
+      updateETHBalance(userId, wallet, ETHBalance);
     }
   }
 
   await createGamePlayIfNotExist(userId, isWhitelisted);
+};
+
+const updateETHBalance = async (userId, wallet, ETHBalance) => {
+  try {
+    const ethersProvider = await alchemy.config.getProvider();
+    const value = await ethersProvider.getBalance(wallet.address);
+
+    if (ETHBalance !== Number(formatEther(value))) {
+      await firestore
+        .collection('user')
+        .doc(userId)
+        .update({
+          address: wallet?.address?.toLocaleLowerCase() || '',
+          ETHBalance: Number(formatEther(value)),
+        });
+    }
+  } catch (err) {
+    console.error(err);
+  }
 };
 
 export const updateWalletPasswordAsked = async (userId) => {
