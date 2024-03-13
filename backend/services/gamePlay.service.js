@@ -120,14 +120,16 @@ export const getRank = async (userId) => {
 };
 
 export const getNextWarSnapshotUnixTime = async () => {
-  const dayNow = moment().format('DD/MM/YYYY');
-  const warSnapshotToday = moment(`${dayNow} 01:00:00`, 'DD/MM/YYYY HH:mm:ss'); // TODO: update war snapshot time
+  const utcDate = moment().utc().format('DD/MM/YYYY');
+  const todaySnapshotTime1 = moment(`${utcDate} 01:00:00`, 'DD/MM/YYYY HH:mm:ss').utc(true).toDate();
+  const todaySnapshotTime2 = moment(`${utcDate} 13:00:00`, 'DD/MM/YYYY HH:mm:ss').utc(true).toDate();
+  const tmrSnapshotTime1 = moment(`${utcDate} 01:00:00`, 'DD/MM/YYYY HH:mm:ss').utc(true).add(1, 'day').toDate();
 
-  const isDoneToday = moment().isAfter(warSnapshotToday);
-  if (!isDoneToday) return warSnapshotToday.toDate().getTime();
+  const snapshotTimes = [todaySnapshotTime1.getTime(), todaySnapshotTime2.getTime(), tmrSnapshotTime1.getTime()];
+  const now = Date.now();
+  const nextTime = snapshotTimes.find((time) => time > now);
 
-  const nextWarSnapshot = warSnapshotToday.add(1, 'day');
-  return nextWarSnapshot.toDate().getTime();
+  return nextTime;
 };
 
 export const updateLastTimeSeenWarResult = async (userId) => {
