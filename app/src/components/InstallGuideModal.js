@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
-import { useLocation, useSearchParams } from 'react-router-dom';
-import { Box, Typography, Button, alpha } from '@mui/material';
+import { useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import { Box, alpha } from '@mui/material';
+import { isChrome } from 'react-device-detect';
 
 import { getPWADisplayMode, getUserOS } from '../utils/pwa';
 
@@ -10,23 +11,11 @@ const InstallGuideModal = () => {
     displayMode: getPWADisplayMode(),
     os: getUserOS(),
   });
-  const [open, setOpen] = useState(false);
-  const [searchParams] = useSearchParams();
-  const privyOathCode = searchParams.get('privy_oauth_code');
 
-  useEffect(() => {
-    if (['Android', 'iOS'].includes(deviceInfo.os) && deviceInfo.displayMode === 'browser') {
-      if (!pathname.startsWith('/deposit')) {
-        if (!privyOathCode) {
-          setOpen(true);
-        }
-      }
-    }
-  }, [deviceInfo]);
-
-  const skip = () => {
-    setOpen(false);
-  };
+  const open =
+    !pathname.startsWith('/deposit') &&
+    deviceInfo.displayMode === 'browser' &&
+    (deviceInfo.os === 'iOS' || (deviceInfo.os === 'Android' && isChrome));
 
   if (!open) return null;
 
@@ -59,47 +48,10 @@ const InstallGuideModal = () => {
         height="100vh"
         bgcolor={alpha('#000', 0.5)}
         display="flex"
-        flexDirection="column"
+        alignItems="center"
         justifyContent="center"
-        alignItems="center">
-        <Box position="relative" sx={{ '& img': { maxWidth: '80vw', maxHeight: '80vh' } }}>
-          <img src="/images/add-to-homepage-android.png" alt="add-to-home-page" />
-          <Box position="absolute" left={0} bottom={0} width="100%" px="10%" sx={{ transform: 'translateY(40%)' }}>
-            <Button
-              fullWidth
-              variant="contained"
-              onClick={skip}
-              sx={{
-                borderRadius: '4%/24%',
-                backgroundColor: 'blue',
-                backgroundImage: 'url(/images/button-blue-normal.png)',
-                backgroundSize: '100% 100%',
-                backgroundRepeat: 'no-repeat',
-                aspectRatio: 5.62 / 1,
-                boxShadow: 'none',
-                '&:hover': {
-                  boxShadow: 'none',
-                  backgroundColor: 'black',
-                  backgroundImage: 'url(/images/button-blue-normal-pressed.png)',
-                },
-              }}>
-              <Typography
-                color="white"
-                fontFamily="WixMadeforDisplayBold"
-                fontSize={{ xs: 16, sm: 16, md: 24 }}
-                sx={{ textTransform: 'none' }}
-                // sx={{ WebkitTextStroke: '4px #0004A0', textStroke: '4px #0004A0' }}
-              >
-                Skip: Play on Browser
-              </Typography>
-            </Button>
-          </Box>
-        </Box>
-        <Box mt="40px" width="700px" maxWidth="70vw">
-          <Typography color="white" fontWeight={700} align="center" fontSize={{ xs: 16, sm: 16, md: 24 }}>
-            Due to X APIs some Android devices may fail to authenticate. If this happens play via Firefox browser.
-          </Typography>
-        </Box>
+        sx={{ '& img': { maxWidth: '80vw', maxHeight: '80vh' } }}>
+        <img src="/images/unsupported-browser-android.png" alt="unsupported-browser-android" />
       </Box>
     );
 
