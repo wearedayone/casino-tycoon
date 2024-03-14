@@ -32,7 +32,7 @@ class PopupSafeHouseUpgrade extends Popup {
   isSimulator = false;
 
   constructor(scene, { isSimulator, onCompleted } = {}) {
-    super(scene, 'popup-safehouse-upgrade', { ribbon: 'ribbon-safehouse-upgrade', noCloseBtn: !!isSimulator });
+    super(scene, 'popup-safehouse-upgrade', { title: 'Upgrade Safehouse', noCloseBtn: !!isSimulator });
     this.scene = scene;
     const events = {
       completed: isSimulator ? 'simulator-upgrade-safehouse-completed' : 'upgrade-safehouse-completed',

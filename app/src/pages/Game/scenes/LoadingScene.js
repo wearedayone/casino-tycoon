@@ -128,7 +128,6 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('popup-title-large', '/images/popup-title-large.png');
     this.load.image('popup-welcome-war', '/images/popup-welcome-war.png');
     this.load.image('popup-welcome-nowar', '/images/popup-welcome-nowar.png');
-    this.load.image('popup-buy', '/images/popup-buy.png');
     this.load.image('popup-war', '/images/popup-war.png');
     this.load.image('popup-safehouse-upgrade', '/images/popup-safehouse-upgrade.png');
     this.load.image('popup-buy-goon', '/images/popup-buy-goon.png');
@@ -146,14 +145,6 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('popup-goon-price', '/images/popup-goon-price.png');
 
     this.load.image('ribbon-welcome', '/images/ribbon-welcome.png');
-    this.load.image('ribbon-daily-gang-war', '/images/ribbon-daily-gang-war.png');
-    this.load.image('ribbon-safehouse-upgrade', '/images/ribbon-safehouse-upgrade.png');
-    this.load.image('ribbon-buy-goon', '/images/ribbon-buy-goon.png');
-    this.load.image('ribbon-buy-gangster', '/images/ribbon-buy-gangster.png');
-    this.load.image('ribbon-portfolio', '/images/ribbon-portfolio.png');
-    this.load.image('ribbon-statistic', '/images/ribbon-statistic.png');
-    this.load.image('ribbon-referral', '/images/ribbon-referral.png');
-    this.load.image('ribbon-gang-war-explain', '/images/ribbon-gang-war-explain.png');
 
     this.load.image('glow', '/images/glow.png');
     this.load.image('coin', '/images/coin.png');
