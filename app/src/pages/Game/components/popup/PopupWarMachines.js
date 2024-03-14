@@ -92,7 +92,7 @@ class PopupWarMachines extends Popup {
     this.add(this.raidBtn);
 
     this.infoBtn = scene.add
-      .image(width / 2 + this.popup.width / 2 - 100, height / 2 - this.popup.height / 2 + 200, 'icon-info-blue')
+      .image(width / 2 + this.popup.width / 2 - 100, height / 2 - this.popup.height / 2 + 220, 'button-info')
       .setOrigin(0.5, 0.5);
     this.infoBtn.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
       this.close();

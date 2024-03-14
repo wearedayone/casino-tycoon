@@ -183,12 +183,12 @@ class PopupSwap extends Popup {
       'Back',
       { fontSize: '82px', sound: 'close' }
     );
-    this.buttonApprove = new Button(
+    this.buttonApprove = new TextButton(
       scene,
       width / 2 + this.popup.width * 0.23,
       height / 2 + this.popup.height / 2 - 20,
-      'button-approve',
-      'button-approve-pressed',
+      'button-green',
+      'button-green-pressed',
       () => {
         console.log('approve');
         if (this.loading) return;
@@ -204,7 +204,8 @@ class PopupSwap extends Popup {
         };
         scene.game.events.emit('swap', data);
       },
-      { sound: 'button-1', disabledImage: 'button-approve-disabled' }
+      'Approve',
+      { sound: 'button-1', disabledImage: 'button-disabled' }
     );
     this.add(buttonBack);
     this.add(this.buttonApprove);

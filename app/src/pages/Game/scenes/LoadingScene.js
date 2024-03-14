@@ -162,9 +162,6 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('safehouse-mini', '/images/safehouse-mini.png');
     this.load.image('swap-arrow', '/images/swap-arrow.png');
 
-    this.load.image('button-approve', '/images/button-approve.png');
-    this.load.image('button-approve-pressed', '/images/button-approve-pressed.png');
-    this.load.image('button-approve-disabled', '/images/button-approve-disabled.png');
     this.load.image('button-blue', '/images/button-blue.png');
     this.load.image('button-blue-pressed', '/images/button-blue-pressed.png');
     this.load.image('button-disabled', '/images/button-disabled.png');
@@ -186,9 +183,6 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-check-pressed', '/images/button-check-pressed.png');
     this.load.image('button-close', '/images/button-close.png');
     this.load.image('button-close-pressed', '/images/button-close-pressed.png');
-    this.load.image('button-confirm', '/images/button-confirm.png');
-    this.load.image('button-confirm-pressed', '/images/button-confirm-pressed.png');
-    this.load.image('button-confirm-disabled', '/images/button-confirm-disabled.png');
     this.load.image('button-copy', '/images/button-copy.png');
     this.load.image('button-copy-pressed', '/images/button-copy-pressed.png');
     this.load.image('button-deposit', '/images/button-deposit.png');
@@ -216,9 +210,6 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-refresh-pressed', '/images/button-refresh-pressed.png');
     this.load.image('button-setting', '/images/button-setting.png');
     this.load.image('button-setting-pressed', '/images/button-setting-pressed.png');
-    this.load.image('button-stake', '/images/button-stake.png');
-    this.load.image('button-stake-pressed', '/images/button-stake-pressed.png');
-    this.load.image('button-stake-disabled', '/images/button-stake-disabled.png');
     this.load.image('button-twitter', '/images/button-twitter.png');
     this.load.image('button-twitter-pressed', '/images/button-twitter-pressed.png');
     this.load.image('button-add', '/images/button-add.png');
@@ -230,8 +221,6 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-square', '/images/button-square.png');
     this.load.image('button-square-pressed', '/images/button-square-pressed.png');
     this.load.image('button-square-disabled', '/images/button-square-disabled.png');
-    this.load.image('button-yes', '/images/button-yes.png');
-    this.load.image('button-yes-pressed', '/images/button-yes-pressed.png');
     this.load.image('button-green', '/images/button-green.png');
     this.load.image('button-green-pressed', '/images/button-green-pressed.png');
     this.load.image('button-blue-small', '/images/button-blue-small.png');
@@ -309,7 +298,6 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-goon-buy-done', '/images/icons/goon-buy-done.png');
     this.load.image('icon-goon-buy-fail', '/images/icons/goon-buy-fail.png');
     this.load.image('icon-info', '/images/icons/info.png');
-    this.load.image('icon-info-blue', '/images/icon-info.png');
     this.load.image('icon-loading', '/images/icons/loading.png');
     this.load.image('icon-logout', '/images/icons/logout.png');
     this.load.image('icon-nft-done', '/images/icons/nft-done.png');

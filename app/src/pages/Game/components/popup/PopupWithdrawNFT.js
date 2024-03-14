@@ -109,12 +109,12 @@ class PopupWithdrawNFT extends Popup {
       'Back',
       { fontSize: '82px', sound: 'close' }
     );
-    this.buttonConfirm = new Button(
+    this.buttonConfirm = new TextButton(
       scene,
       width / 2 + this.popup.width * 0.23,
       height / 2 + this.popup.height / 2 - 20,
-      'button-confirm',
-      'button-confirm-pressed',
+      'button-green',
+      'button-green-pressed',
       () => {
         // TODO: show validation to user
         const isValid = this.validate();
@@ -128,7 +128,8 @@ class PopupWithdrawNFT extends Popup {
           address: this.addressInput.value,
         });
       },
-      { disabledImage: 'button-confirm-disabled' }
+      'Confirm',
+      { sound: 'button-1', disabledImage: 'button-disabled' }
     );
     this.add(buttonBack);
     this.add(this.buttonConfirm);
