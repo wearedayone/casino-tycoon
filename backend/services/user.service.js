@@ -8,6 +8,7 @@ import alchemy from '../configs/alchemy.config.js';
 import { getActiveSeason } from './season.service.js';
 import { getLeaderboard, getRank } from './gamePlay.service.js';
 import { generateCode } from '../utils/formulas.js';
+import { getTokenBalance } from './worker.service.js';
 
 const CODE_LENGTH = 10;
 
@@ -91,18 +92,26 @@ export const createUserIfNotExist = async (userId) => {
 
     const numberOfUserSnapshot = await firestore.collection('user').count().get();
     const numberOfUsers = numberOfUserSnapshot.data().count;
+    let tokenBalance = 0;
+    let address = wallet?.address?.toLocaleLowerCase() || '';
+    try {
+      const tba = await getTokenBalance({ address });
+      tokenBalance = Number(formatEther(tba));
+    } catch (ex) {
+      console.log(ex);
+    }
 
     await firestore
       .collection('user')
       .doc(userId)
       .set({
-        address: wallet?.address?.toLocaleLowerCase() || '',
+        address: address,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
         username,
         avatarURL: defaultAvatar,
         avatarURL_small,
         avatarURL_big,
-        tokenBalance: 0,
+        tokenBalance: tokenBalance,
         ETHBalance: 0,
         isWhitelisted,
         walletPasswordAsked: false,
