@@ -232,15 +232,10 @@ export const generateDailyWarSnapshot = async () => {
       const attackedUser = users[attackUserId];
 
       const totalAttackUnits = attackers[attackedUser.userId].reduce((total, item) => total + item.attackUnits, 0);
-      const attackContribution = !!totalAttackUnits ? Number((attackUnits / totalAttackUnits).toFixed(2)) : 0;
+      const attackContribution = !!totalAttackUnits ? Number((attackUnits / totalAttackUnits).toFixed(5)) : 0;
+      const winningRatio = attackUnits / totalAttackUnits;
 
-      if (attackUnits > attackedUser.defendUnits) {
-        const winningAttackers = attackers[attackedUser.userId].filter(
-          (user) => user.attackUnits > attackedUser.defendUnits
-        );
-        const totalAttackUnits = winningAttackers.reduce((total, item) => total + item.attackUnits, 0);
-        const winningRatio = attackUnits / totalAttackUnits;
-
+      if (totalAttackUnits > attackedUser.defendUnits) {
         const stolenToken = Math.floor(winningRatio * earningStealPercent * attackedUser.tokenEarnFromEarning);
         user.tokenEarnFromAttacking = stolenToken;
         user.totalTokenReward += stolenToken;
@@ -264,7 +259,7 @@ export const generateDailyWarSnapshot = async () => {
         });
       }
 
-      if (attackUnits < attackedUser.defendUnits) {
+      if (totalAttackUnits < attackedUser.defendUnits) {
         const machinesLost = attackUnits > 0 ? getDeadCount(attackUnits, machinePercentLost) : 0;
         user.machinesLost = machinesLost;
         user.attackResults.push({
@@ -285,7 +280,7 @@ export const generateDailyWarSnapshot = async () => {
         });
       }
 
-      if (attackUnits === attackedUser.defendUnits) {
+      if (totalAttackUnits === attackedUser.defendUnits) {
         user.attackResults.push({
           userId: attackedUser.userId,
           result: 'draw',
