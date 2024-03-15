@@ -135,7 +135,7 @@ export const createUserIfNotExist = async (userId) => {
     }
 
     if (wallet) {
-      updateETHBalance(userId, wallet, ETHBalance);
+      updateETHBalance(userId, wallet, ETHBalance).catch((err) => console.error(err));
     }
   }
 
