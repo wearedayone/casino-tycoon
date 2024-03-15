@@ -59,47 +59,12 @@ export const claimToken = async ({ address, amount }) => {
   try {
     logger.info('start claimToken');
     logger.info({ address, amount });
+    const ethersProvider = await alchemy.config.getProvider();
+    const gasPrice = await ethersProvider.getGasPrice();
     const workerWallet = await getWorkerWallet();
     const tokenContract = await getTokenContract(workerWallet);
     logger.info('start Transaction:');
-    const tx = await tokenContract.mint(address, amount);
-    logger.info('Transaction:' + tx.hash);
-    txnHash = tx.hash;
-    const receipt = await tx.wait();
-
-    if (receipt.status !== 1) {
-      logger.info(`error: ${JSON.stringify(receipt)}`);
-      logger.error(`error: ${JSON.stringify(receipt)}`);
-      throw new Error(`API error: Txn failed`);
-    }
-
-    return { txnHash, status: 'Success' };
-  } catch (err) {
-    const newError = getParsedEthersError(err);
-    const regex = /(execution reverted: )([A-Za-z\s])*/;
-    if (newError.context) {
-      const message = newError.context.match(regex);
-      if (message) {
-        const error = new Error(message[0]);
-        logger.error(error.message);
-      }
-    } else {
-      logger.error(err.message);
-    }
-
-    return { txnHash: txnHash || '', status: 'Failed' };
-  }
-};
-
-export const claimTokenBonus = async ({ address, amount }) => {
-  let txnHash = '';
-  try {
-    logger.info('start claimToken bonus');
-    logger.info({ address, amount });
-    const workerWallet = await getWorkerWallet();
-    const tokenContract = await getTokenContract(workerWallet);
-    logger.info('start Transaction:');
-    const tx = await tokenContract.transfer(address, amount, { gasLimit: 200000 });
+    const tx = await tokenContract.mint(address, amount, { gasPrice });
     logger.info('Transaction:' + tx.hash);
     txnHash = tx.hash;
     const receipt = await tx.wait();
@@ -133,10 +98,12 @@ export const claimTokenBatch = async ({ addresses, amounts }) => {
   try {
     logger.info('start claimTokenBatch');
     logger.info({ addresses, amounts });
+    const ethersProvider = await alchemy.config.getProvider();
+    const gasPrice = await ethersProvider.getGasPrice();
     const workerWallet = await getWorkerWallet();
     const tokenContract = await getTokenContract(workerWallet);
     logger.info('start Transaction:');
-    const tx = await tokenContract.batchMint(addresses, amounts);
+    const tx = await tokenContract.batchMint(addresses, amounts, { gasPrice });
     txnHash = tx.hash;
     logger.info('Transaction:' + tx.hash);
     const receipt = await tx.wait();
@@ -170,10 +137,12 @@ export const burnNFT = async ({ addresses, ids, amounts }) => {
   try {
     logger.info('start burnNFT');
     logger.info({ addresses, ids, amounts });
+    const ethersProvider = await alchemy.config.getProvider();
+    const gasPrice = await ethersProvider.getGasPrice();
     const workerWallet = await getWorkerWallet();
     const gameContract = await getGameContract(workerWallet);
     logger.info('start Transaction:');
-    const tx = await gameContract.burnNFT(addresses, ids, amounts);
+    const tx = await gameContract.burnNFT(addresses, ids, amounts, { gasPrice });
     txnHash = tx.hash;
     logger.info('Transaction:' + tx.hash);
     const receipt = await tx.wait();
@@ -281,10 +250,12 @@ export const setWinner = async ({ winners, points }) => {
   try {
     logger.info('start setWinner');
     logger.info({ winners, points });
+    const ethersProvider = await alchemy.config.getProvider();
+    const gasPrice = await ethersProvider.getGasPrice();
     const workerWallet = await getWorkerWallet();
     const gameContract = await getGameContract(workerWallet);
     logger.info('start Transaction:');
-    const tx = await gameContract.setWinner(winners, points);
+    const tx = await gameContract.setWinner(winners, points, { gasPrice });
     logger.info('Transaction:' + tx.hash);
     txnHash = tx.hash;
     const receipt = await tx.wait();

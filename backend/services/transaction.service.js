@@ -7,7 +7,6 @@ import { getActiveSeason, updateSeasonSnapshotSchedule } from './season.service.
 import { getLeaderboard } from './gamePlay.service.js';
 import {
   claimToken as claimTokenTask,
-  claimTokenBonus,
   decodeTokenTxnLogs,
   isMinted,
   signMessageBuyGoon,
@@ -514,42 +513,6 @@ const updateUserGamePlay = async (userId, transactionId) => {
     if (!warDeploymentSnapshot.empty) {
       await warDeploymentSnapshot.docs[0].ref.update({ ...warDeploymentData });
     }
-  }
-};
-
-const sendUserBonus = async (userId, transactionId) => {
-  const userSnapshot = await firestore.collection('user').doc(userId).get();
-  const { address } = userSnapshot.data();
-  const snapshot = await firestore.collection('transaction').doc(transactionId).get();
-  const { type, amount } = snapshot.data();
-
-  if (type === 'buy-machine') {
-    const activeSeason = await getActiveSeason();
-    const { reservePool, reservePoolReward } = activeSeason;
-    const bonus = calculateReservePoolBonus(reservePool, reservePoolReward, amount);
-
-    const newTransaction = await firestore.collection('transaction').add({
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      userId,
-      seasonId: activeSeason.id,
-      type: 'bonus-token',
-      txnHash: '',
-      token: 'FIAT',
-      value: bonus,
-      status: 'Pending',
-    });
-
-    const { txnHash, status } = await claimTokenBonus({
-      address,
-      amount: BigInt(parseEther(bonus.toString()).toString()),
-    });
-
-    console.log('claimed bonus', { txnHash, status });
-
-    await firestore.collection('transaction').doc(newTransaction.id).update({
-      txnHash,
-      status,
-    });
   }
 };
 

@@ -47,22 +47,18 @@ const getTokenContract = async (signer) => {
   return contract;
 };
 
-const getMarketingWallet = async () => {
-  const ethersProvider = await alchemy.config.getProvider();
-  const wallet = new Wallet(MARKETING_WALLET_PRIVATE_KEY, ethersProvider);
-  return wallet;
-};
-
 const burnFiat = async () => {
   try {
-    const marketingWallet = await getMarketingWallet();
+    const ethersProvider = await alchemy.config.getProvider();
+    const gasPrice = await ethersProvider.getGasPrice();
+    const marketingWallet = new Wallet(MARKETING_WALLET_PRIVATE_KEY, ethersProvider);
     const gameContract = await getGameContract(marketingWallet);
-
     // withdraw marketing
     console.log('1. start marketing withdraw');
     const res = await gameContract.getMarketingBalance();
     const marketingBalance = formatEther(res.toString());
-    const tx1 = await gameContract.markettingWithdraw();
+    if (Number(marketingBalance) == 0) return;
+    const tx1 = await gameContract.markettingWithdraw({ gasPrice: gasPrice });
     const receipt1 = await tx1.wait();
     console.log(`1. done marketing withdraw ${marketingBalance}eth. Txn hash ${receipt1.transactionHash}`);
 
@@ -81,6 +77,7 @@ const burnFiat = async () => {
       to: routerAddress,
       data,
       value: parseEther(marketingBalance),
+      gasPrice: gasPrice,
     });
     const receipt2 = await tx2.wait();
     console.log(`2. done swapping to FIAT. Txn hash ${receipt2.transactionHash}`);
@@ -92,7 +89,7 @@ const burnFiat = async () => {
     console.log({ balanceRes });
     const balance = formatEther(balanceRes.toString());
     console.log('burn', balance);
-    const tx3 = await tokenContract.burn(parseEther(balance));
+    const tx3 = await tokenContract.burn(parseEther(balance), { gasPrice: gasPrice });
     const receipt3 = await tx3.wait();
     console.log(`3. done burning ${balance} FIAT. Txn hash ${receipt3.transactionHash}`);
   } catch (err) {
