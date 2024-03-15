@@ -13,6 +13,7 @@
     "serve": "npx serve -s build",
     "build:stg": "env-cmd -f .env.stg react-scripts build && yarn sentry:sourcemaps-stg",
     "build:demo": "env-cmd -f .env.demo react-scripts build",
+    "build:prd-beta": "env-cmd -f .env.prd.beta react-scripts build",
     "build:prd": "env-cmd -f .env.prd react-scripts build && yarn sentry:sourcemaps-prd",
     "sentry:sourcemaps-stg": "sentry-cli sourcemaps inject --org uncharted-49 --project gangster-arena-stg ../firebase/build/stg/app && sentry-cli sourcemaps upload --org uncharted-49 --project gangster-arena-stg ../firebase/build/stg/app",
     "sentry:sourcemaps-prd": "sentry-cli sourcemaps inject --org uncharted-49 --project gangster-arena-prd ../firebase/build/prd/app && sentry-cli sourcemaps upload --org uncharted-49 --project gangster-arena-prd ../firebase/build/prd/app"
