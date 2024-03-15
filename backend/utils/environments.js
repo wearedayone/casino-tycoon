@@ -12,6 +12,7 @@ const environments = {
   WORKER_WALLET_PRIVATE_KEY: process.env.WORKER_WALLET_PRIVATE_KEY,
   SIGNER_WALLET_PRIVATE_KEY: process.env.SIGNER_WALLET_PRIVATE_KEY,
   SYSTEM_ADDRESS: process.env.SYSTEM_ADDRESS,
+  CRON_GANG_WAR: process.env.CRON_GANG_WAR,
 };
 
 export default environments;
