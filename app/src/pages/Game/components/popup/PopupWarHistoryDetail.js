@@ -324,16 +324,25 @@ class PopupWarHistoryDetail extends Popup {
       .setOrigin(0, 0.5);
     y += 165;
 
+    const totalAttackContributionUnits = attackResults[0]
+      ? Math.round((attackResults[0]?.attackUnits || 0) / (attackResults[0]?.attackContribution || 1))
+      : 0;
+
     const attackUnitsItemContainer = this.scene.add
       .image(this.popup.width / 2 - 90, y, 'container-border')
       .setOrigin(0.5, 0.5);
     const attackUnitsItemIcon = this.scene.add.image(this.popup.width * 0.13, y, 'gun').setOrigin(0.5, 0.5);
     const attackUnitsItemText = this.scene.add
-      .text(this.popup.width * 0.13 + attackUnitsItemIcon.width / 2 + 30, y, `Total attack: ${attackUnits || 0}`, {
-        fontSize: '50px',
-        color: colors.black,
-        fontFamily: fontFamilies.bold,
-      })
+      .text(
+        this.popup.width * 0.13 + attackUnitsItemIcon.width / 2 + 30,
+        y,
+        `Total Attack: ${totalAttackContributionUnits}`,
+        {
+          fontSize: '50px',
+          color: colors.black,
+          fontFamily: fontFamilies.bold,
+        }
+      )
       .setOrigin(0, 0.5);
     y += 165;
 

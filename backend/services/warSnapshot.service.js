@@ -232,11 +232,10 @@ export const generateDailyWarSnapshot = async () => {
       const attackedUser = users[attackUserId];
 
       const totalAttackUnits = attackers[attackedUser.userId].reduce((total, item) => total + item.attackUnits, 0);
-      const attackContribution = !!totalAttackUnits ? Number((attackUnits / totalAttackUnits).toFixed(5)) : 0;
-      const winningRatio = attackUnits / totalAttackUnits;
+      const attackContribution = !!totalAttackUnits ? attackUnits / totalAttackUnits : 0;
 
       if (totalAttackUnits > attackedUser.defendUnits) {
-        const stolenToken = Math.floor(winningRatio * earningStealPercent * attackedUser.tokenEarnFromEarning);
+        const stolenToken = Math.floor(attackContribution * earningStealPercent * attackedUser.tokenEarnFromEarning);
         user.tokenEarnFromAttacking = stolenToken;
         user.totalTokenReward += stolenToken;
         user.attackResults.push({
@@ -244,7 +243,6 @@ export const generateDailyWarSnapshot = async () => {
           result: 'win',
           attackUnits,
           defendUnits: attackedUser.defendUnits,
-          winningRatio,
           attackContribution,
         });
 
@@ -267,7 +265,6 @@ export const generateDailyWarSnapshot = async () => {
           result: 'lose',
           attackUnits,
           defendUnits: attackedUser.defendUnits,
-          winningRatio: 0,
           attackContribution,
         });
 
@@ -286,7 +283,6 @@ export const generateDailyWarSnapshot = async () => {
           result: 'draw',
           attackUnits,
           defendUnits: attackedUser.defendUnits,
-          winningRatio: 0,
           attackContribution,
         });
 
