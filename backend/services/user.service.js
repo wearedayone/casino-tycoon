@@ -62,10 +62,10 @@ export const createUserIfNotExist = async (userId) => {
   const user = await privy.getUser(userId);
 
   const whitelistSnapshot = await firestore.collection('whitelisted').get();
-  const whitelistedUsernames = whitelistSnapshot.docs.map((doc) => doc.data().username);
+  const whitelistedUsernames = whitelistSnapshot.docs.map((doc) => doc.data().username.toLowerCase());
 
-  const isWhitelisted = whitelistedUsernames.includes(user?.twitter?.username);
   const { wallet, twitter } = user;
+  const isWhitelisted = twitter?.username && whitelistedUsernames.includes(twitter.username.toLowerCase());
 
   if (!snapshot.exists) {
     // create user
