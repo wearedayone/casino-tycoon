@@ -267,6 +267,7 @@ class PopupLeaderboard extends Popup {
   }
 
   cleanup() {
+    this.table?.scrollToTop();
     this.onCloseCallback?.();
     if (this.table) {
       this.table.setMouseWheelScrollerEnable(false);
@@ -274,7 +275,6 @@ class PopupLeaderboard extends Popup {
     }
     this.scene.game.events.emit(this.events?.closeLeaderboardModal || '');
     clearTimeout(this.timeoutId);
-    this.table?.scrollToTop();
   }
 
   updateValues(season) {
@@ -418,7 +418,7 @@ class PopupLeaderboard extends Popup {
     // load avatar
     let loader = new Phaser.Loader.LoaderPlugin(this.scene);
     let textureManager = new Phaser.Textures.TextureManager(this.scene.game);
-    activeLeaderboard.forEach(({ username, avatarURL_small, avatarURL }) => {
+    this.users.forEach(({ username, avatarURL_small, avatarURL }) => {
       // ask the LoaderPlugin to load the texture
       if (!textureManager.exists(`${username}-avatar`))
         loader.image(`${username}-avatar`, avatarURL_small || avatarURL);
@@ -432,7 +432,7 @@ class PopupLeaderboard extends Popup {
       })
     );
     loader.start();
-    this.renderLeaderBoard(activeLeaderboard, 3, 50, firstNetworthText.width);
+    this.renderLeaderBoard(activeLeaderboard, 3, 20, firstNetworthText.width);
 
     const userRecord = leaderboard.find(({ isUser }) => isUser);
     this.isUserActive = userRecord.active;
@@ -497,6 +497,17 @@ class PopupLeaderboard extends Popup {
   }
 
   renderLeaderBoard(activeLeaderboard, startRows, packCount, firstNetworthWidth) {
+    if (activeLeaderboard.length > startRows + packCount) {
+      this.timeoutId = setTimeout(() => {
+        this.renderLeaderBoard(
+          activeLeaderboard,
+          startRows + packCount,
+          Math.min(packCount, activeLeaderboard.length - startRows),
+          firstNetworthWidth
+        );
+      }, 500);
+    }
+
     const currentPackLeaderboard = activeLeaderboard
       .filter((item) => item.active)
       .slice(startRows, startRows + packCount);
@@ -561,11 +572,11 @@ class PopupLeaderboard extends Popup {
     // load avatar
     let loader = new Phaser.Loader.LoaderPlugin(this.scene);
     let textureManager = new Phaser.Textures.TextureManager(this.scene.game);
-    // currentPackLeaderboard.forEach(({ username, avatarURL_small, avatarURL }) => {
-    //   // ask the LoaderPlugin to load the texture
-    //   if (!textureManager.exists(`${username}-avatar`))
-    //     loader.image(`${username}-avatar`, avatarURL_small || avatarURL);
-    // });
+    currentPackLeaderboard.forEach(({ username, avatarURL_small, avatarURL }) => {
+      // ask the LoaderPlugin to load the texture
+      if (!textureManager.exists(`${username}-avatar`))
+        loader.image(`${username}-avatar`, avatarURL_small || avatarURL);
+    });
 
     loader.once(Phaser.Loader.Events.COMPLETE, () =>
       Object.keys(avatars).forEach((username) => {
@@ -576,19 +587,7 @@ class PopupLeaderboard extends Popup {
         }
       })
     );
-
     loader.start();
-
-    if (activeLeaderboard.length > startRows + packCount) {
-      this.timeoutId = setTimeout(() => {
-        this.renderLeaderBoard(
-          activeLeaderboard,
-          startRows + packCount,
-          Math.min(packCount * 2, activeLeaderboard.length - startRows - packCount),
-          firstNetworthWidth
-        );
-      }, 2000);
-    }
   }
 }
 
