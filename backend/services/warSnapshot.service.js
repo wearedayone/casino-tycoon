@@ -1,3 +1,4 @@
+// import fs from 'fs';
 import moment from 'moment';
 import { parseEther } from '@ethersproject/units';
 import chunk from 'lodash.chunk';
@@ -264,7 +265,7 @@ export const generateDailyWarSnapshot = async () => {
       }
 
       if (attackUnits < attackedUser.defendUnits) {
-        const machinesLost = attackUnits > 0 ? Math.max(Math.floor(attackUnits * machinePercentLost), 1) : 0;
+        const machinesLost = attackUnits > 0 ? getDeadCount(attackUnits, machinePercentLost) : 0;
         user.machinesLost = machinesLost;
         user.attackResults.push({
           userId: attackedUser.userId,
