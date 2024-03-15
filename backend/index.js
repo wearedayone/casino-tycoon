@@ -9,7 +9,7 @@ import { updateSeasonSnapshotSchedule } from './services/season.service.js';
 import Sentry from '@sentry/node';
 import { ProfilingIntegration } from '@sentry/profiling-node';
 
-const { PORT } = environments;
+const { PORT, CRON_GANG_WAR } = environments;
 
 const main = () => {
   const app = express();
@@ -76,7 +76,7 @@ main();
 
 // everyday at 1AM and 1PM
 cron.schedule(
-  '0 1,13 * * *',
+  CRON_GANG_WAR,
   function () {
     generateDailyWarSnapshot();
   },
