@@ -2,10 +2,11 @@ import { Contract } from '@ethersproject/contracts';
 import { formatEther } from '@ethersproject/units';
 
 import gameContractABI from '../assets/abis/GameContract.json' assert { type: 'json' };
+import oldContractSnapshot from '../assets/jsons/oldGameContract.json' assert { type: 'json' };
 import { firestore } from '../configs/admin.config.js';
 import alchemy from '../configs/alchemy.config.js';
 
-const gameContractNewAddress = '0xD30B6dDDF7d6Ae935DDC2248647B1A971227EF50'; // change this to new contract address
+const gameContractNewAddress = '0xc01fDDe00463e2EF7F8ceDD4416f287c0b6f3AbC'; // change this to new contract address
 const main = async () => {
   try {
     const { id, gameAddress } = await getActiveSeason();
@@ -15,10 +16,12 @@ const main = async () => {
 
     const compare = async (fncName, { formatter = (a) => a, params = [] } = {}) => {
       process.stdout.write(`\tChecking ${fncName}, params: ${JSON.stringify(params)}`);
-      const oldRes = await oldContract[fncName](...params);
+      // const oldRes = await oldContract[fncName](...params);
+      const oldRes = oldContractSnapshot[fncName] || formatter(await oldContract[fncName](...params));
       const newRes = await newContract[fncName](...params);
 
-      const isEqual = formatter(oldRes) === formatter(newRes);
+      const isEqual = oldRes === formatter(newRes);
+      // const isEqual = formatter(oldRes) === formatter(newRes);
       process.stdout.write('\r\x1b[K'); // delete status line
 
       if (isEqual) console.log('\t\x1b[32m', '✓ ', `Same ${fncName}, params: ${JSON.stringify(params)}`);
@@ -26,13 +29,13 @@ const main = async () => {
         console.log(
           '\t\x1b[31m', // log color red
           'x ',
-          `Different ${fncName}. Old contract: ${formatter(oldRes)}, new contract: ${formatter(newRes)}`
+          `Different ${fncName}. Old contract: ${oldRes}, new contract: ${formatter(newRes)}`
         );
 
       process.stdout.write('\x1b[0m'); // reset log color
     };
     // 1. check contract configs
-    console.log('--------1. check contract configs\n');
+    console.log('\n\n--------1. check contract configs\n');
     console.log('Check assets address');
     await compare('nft');
     await compare('fiat');
@@ -72,7 +75,7 @@ const main = async () => {
     await compare('getMarketingBalance', { formatter: formatEther });
     await compare('getPrizeBalance', { formatter: formatEther });
     await compare('getRetireBalance', { formatter: formatEther });
-    // const oldDevFee = await oldContract.DEV_PERCENT();
+
     console.log('Check total goons & safehouse');
     await compare('tgoon', { formatter: (a) => a.toString() });
     await compare('tshouse', { formatter: (a) => a.toString() });
