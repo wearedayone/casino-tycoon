@@ -100,7 +100,7 @@ class PopupRetire extends Popup {
         this.popupBuyProcessing.initLoading(`Your payout will take\na few minutes to process`);
         this.close();
 
-        scene.game.events.emit('init-retire');
+        // scene.game.events.emit('init-retire');
       },
       { sound: 'button-1' }
     );

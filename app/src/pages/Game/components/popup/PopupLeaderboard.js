@@ -254,7 +254,8 @@ class PopupLeaderboard extends Popup {
     scene.game.events.on(events.updateLeaderboard, (data) => this.updateLeaderboard(data));
     scene.game.events.on(events.updateSeasonCountdown, (string) => (this.gameEndTime.text = string));
     scene.game.events.on('update-active-status', ({ active }) => {
-      this.buttonRetire.setDisabledState(!active || isSimulator);
+      // this.buttonRetire.setDisabledState(!active || isSimulator);
+      this.buttonRetire.setDisabledState(true);
     });
     scene.game.events.emit('request-active-status');
   }

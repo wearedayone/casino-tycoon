@@ -11,4 +11,13 @@ const settings = {
 };
 const alchemy = new Alchemy(settings);
 
+export const getCustomAlchemy = (ALCHEMY_API_KEY) => {
+  const settings = {
+    apiKey: ALCHEMY_API_KEY,
+    network,
+  };
+  const alchemy = new Alchemy(settings);
+  return alchemy;
+};
+
 export default alchemy;
