@@ -20,8 +20,9 @@ const Navigations = () => {
   const configs = useSystemStore((state) => state.configs);
 
   const isLoading = !ready || !configs || configs?.disabledUrls?.includes(window.location.host);
+  const isBlocked = configs?.disabledUrls?.includes(window.location.host);
 
-  if (isLoading) return <Loading />;
+  if (isLoading) return <Loading isBlocked={isBlocked} />;
 
   if (!authenticated) return <AuthRoutes />;
 

@@ -1,6 +1,6 @@
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 
-const Loading = () => {
+const Loading = ({ isBlocked }) => {
   return (
     <>
       <Box
@@ -34,6 +34,11 @@ const Loading = () => {
             sx={{ maxWidth: '600px', '& img': { width: '100%' } }}>
             <img src="/images/logo.svg" />
           </Box>
+          {isBlocked && (
+            <Typography align="center" color="white" fontSize={24} fontFamily="WixMadeforDisplayExtraBold">
+              Game is under temporary maintenance
+            </Typography>
+          )}
         </Box>
       </Box>
     </>
