@@ -1,0 +1,92 @@
+{
+  "ETHBalance": "1.548825840398525521",
+  "fiat": "0x0aE8D640BcB8Fe72B409218AFe67B708218028FF",
+  "nft": "0xeCdd11d67E769b0e395dd39a0642f59dd8Ec0528",
+  "basePrice": "0.01",
+  "basePriceWL": "0.01",
+  "devDebt": {
+    "type": "BigNumber",
+    "hex": "-0x455ea5fce5244b"
+  },
+  "marketingDebt": {
+    "type": "BigNumber",
+    "hex": "0x00"
+  },
+  "retireDebt": {
+    "type": "BigNumber",
+    "hex": "0x00"
+  },
+  "prizeDebt": {
+    "type": "BigNumber",
+    "hex": "-0x06"
+  },
+  "gameClosed": false,
+  "refReward_": "0.000000000000001",
+  "refDiscount_": "0.000000000000009",
+  "DEV_PERCENT": "0.0",
+  "MARKETING_PERCENT": "0.000000000000001",
+  "PRIZE_PERCENT": "0.000000000000005",
+  "RETIRE_PERCENT": "0.000000000000004",
+  "vtd": "0.00000000000000006",
+  "tgoon": "0.000000000000000137",
+  "tshouse": "0.000000000000000027",
+  "tPBalance": "0.0",
+  "totalPoint": "0.0",
+  "totalBalance": "1.548825840398525521",
+  "DevBalance": "0.019525840398525515",
+  "MarketingBalance": "0.15293",
+  "RetireBalance": "0.61172",
+  "PrizeBalance": "0.764650000000000006",
+  "tgoonNew": "0.000000000000000115",
+  "tshouseNew": "0.000000000000000018",
+  "users": [
+    {
+      "userId": "did:privy:clo1oucjl0esgk10f4ca9d0k7",
+      "address": "0x83f8a79cb323368e868425a07c0522319bf0ca14",
+      "dbGoon": 1,
+      "dbSafehouse": 3,
+      "goon": "0.0",
+      "safehouse": "0.000000000000000003"
+    },
+    {
+      "userId": "did:privy:clo3mbr6w0b01jk0fq7i2pnto",
+      "address": "0xd32814b1255e4e1d5ed397c59655ac6e42fb9be9",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
+      "goon": "0.0",
+      "safehouse": "0.0"
+    },
+    {
+      "userId": "did:privy:clofgk7y90168jz0fkttecnl5",
+      "address": "0xd88a3d28c2a04b39a6c6521f8d8037c3c3b5e96c",
+      "dbGoon": 11,
+      "dbSafehouse": 5,
+      "goon": "0.00000000000000001",
+      "safehouse": "0.000000000000000005"
+    },
+    {
+      "userId": "did:privy:clrec2rkm00zbl90f1n197gy8",
+      "address": "0x85ce6e6a39cb7400169e1627080c80456fd36785",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
+      "goon": "0.0",
+      "safehouse": "0.0"
+    },
+    {
+      "userId": "did:privy:clrg3m3ih03ntju0f6y9f8ngf",
+      "address": "0xaaa842b512d3f796f726f45bec1e2b51a25734fc",
+      "dbGoon": 106,
+      "dbSafehouse": 10,
+      "goon": "0.000000000000000105",
+      "safehouse": "0.00000000000000001"
+    },
+    {
+      "userId": "did:privy:clssd9djg07ei2ofd4jolez1k",
+      "address": "0x05793ed4b4acb59cbdd0e96b59e2483fa226f6b7",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
+      "goon": "0.0",
+      "safehouse": "0.0"
+    }
+  ]
+}

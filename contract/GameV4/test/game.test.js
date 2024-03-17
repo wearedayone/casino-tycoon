@@ -9,7 +9,8 @@ require('chai').use(require('chai-as-promised')).should();
 // const { getBigNumber } = require('./utils');
 const TOKEN_PER_ACCOUNT = 1000000000n;
 const BASE_18 = 1000000000000000000n;
-const nftPrice = 1000000000000000n;
+const nftPrice = 10000000000000000n;
+const nftPriceWL = 5000000000000000n;
 
 const MINTER_ROLE = '0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6';
 
@@ -113,7 +114,7 @@ describe('Gangster Arena', function () {
       const { GangsterNFTContract, GangsterArenaContract, token, owner, acc1 } = await loadFixture(
         deployStakingFixture
       );
-      const nftPrice = 69000000000000000n;
+      const nftPrice = 10000000000000000n;
       await token.mint(owner.address, nftPrice);
       const timestamp = Math.floor(Date.now() / 1000);
 
@@ -140,7 +141,7 @@ describe('Gangster Arena', function () {
       const { GangsterNFTContract, GangsterArenaContract, token, owner, acc1 } = await loadFixture(
         deployStakingFixture
       );
-      const nftPrice = 2000000000000000n;
+      const nftPrice = 10000000000000000n;
       let timestamp = Math.floor(Date.now() / 1000);
       const message1 = ethers.solidityPackedKeccak256(
         // Array of types: declares the data types in the message.

@@ -39,7 +39,7 @@ export const getLeaderboard = async (userId) => {
   const docs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
   // const userPromises = docs.map((doc) => getUserDisplayInfos(doc.userId)).filter(Boolean);
   // const userDatas = await Promise.all(userPromises);
-  const totalActiveReputation = docs.filter(({ active }) => !!active).reduce((sum, doc) => sum + doc.networth, 0);
+  const totalActiveReputation = docs.filter(({ active }) => !!active).reduce((sum, doc) => sum + doc.networth - 2, 0);
 
   // implement logic calculate reward
   let rank = 0;

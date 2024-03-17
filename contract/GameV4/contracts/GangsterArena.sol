@@ -307,6 +307,10 @@ contract GangsterArena is AccessControl, IGangsterArena {
     address payable receiver = payable(msg.sender);
     receiver.transfer(reward);
     retireDebt += int256(reward);
+    tgoon -= goon[msg.sender];
+    tshouse -= safehouse[msg.sender];
+    goon[msg.sender] = 0;
+    safehouse[msg.sender] = 0;
     emit Retire(msg.sender, reward, nonce);
   }
 
@@ -395,35 +399,17 @@ contract GangsterArena is AccessControl, IGangsterArena {
   /**
    * @notice set Base Price Gangster
    */
-  function setBasePrice(uint256 _basePrice) public onlyRole(ADMIN_ROLE) {
+  function setBasePrice(
+    uint256 _basePrice,
+    uint256 _basePriceWL,
+    uint256 _refferral,
+    uint256 refferral_discount,
+    uint256 _vtd
+  ) public onlyRole(ADMIN_ROLE) {
     bPrice_ = _basePrice;
-  }
-
-  /**
-   * @notice set Base Price of Gangster for Whitelisted
-   */
-  function setBasePriceWL(uint256 _basePrice) public onlyRole(ADMIN_ROLE) {
-    bpwl_ = _basePrice;
-  }
-
-  /**
-   * @notice set Base Referral /10000
-   */
-  function setBaseReferral(uint256 _refferral) public onlyRole(ADMIN_ROLE) {
+    bpwl_ = _basePriceWL;
     refReward_ = _refferral;
-  }
-
-  /**
-   * @notice set Base Referral Discount /10000
-   */
-  function setBaseReferralDiscount(uint256 refferral_discount) public onlyRole(ADMIN_ROLE) {
     refDiscount_ = refferral_discount;
-  }
-
-  /**
-   * @notice set vtd (seconds)
-   */
-  function setVTD(uint256 _vtd) public onlyRole(ADMIN_ROLE) {
     vtd = _vtd;
   }
 
@@ -452,6 +438,34 @@ contract GangsterArena is AccessControl, IGangsterArena {
     require(address(this).balance > 0, 'Nothing to withdraw');
     address payable receiver = payable(msg.sender);
     receiver.transfer(address(this).balance);
+  }
+
+  function migrateData(
+    int256 _devDebt,
+    int256 _marketingDebt,
+    int256 _retireDebt,
+    int256 _prizeDebt,
+    uint256 _tgoon,
+    uint256 _tshouse
+  ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    devDebt = _devDebt;
+    marketingDebt = _marketingDebt;
+    retireDebt = _retireDebt;
+    prizeDebt = _prizeDebt;
+    tgoon = _tgoon;
+    tshouse = _tshouse;
+  }
+
+  function migrateGoon(
+    address[] memory _addrs,
+    uint256[] memory values,
+    uint256 _type
+  ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(_addrs.length == values.length, 'input donot match');
+    for (uint256 i = 0; i < _addrs.length; i++) {
+      if (_type == 1) goon[_addrs[i]] = values[i];
+      else safehouse[_addrs[i]] = values[i];
+    }
   }
 
   /**

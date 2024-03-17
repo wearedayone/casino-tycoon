@@ -3,22 +3,28 @@
   "admin": "0x7866Ac3933dCA99b2e9a80F8948344a387a7BF62",
   "worker": "0x81A05B26cBFAEc5e786736C451535E18A717bbb9",
   "signer": "0xEc6D0c755C255f2eCB400F716a557270cEAd7D8F",
+
   "uniWeth": "",
   "uniFactory": "",
   "uniRouter": "",
   "pair": "",
+
   "wethDeployed": false,
   "factoryDeployed": false,
   "routerDeployed": false,
   "pairDeployed": false,
   "liquidityAdded": false,
+
   "tokenAmountToLiquidity": 0,
   "ethAmountToLiquidity": 0,
-  "token": "0x0aE8D640BcB8Fe72B409218AFe67B708218028FF",
+
+  "token": "",
   "nft": "0xeCdd11d67E769b0e395dd39a0642f59dd8Ec0528",
-  "game": "0x1BD4b8cc71d90878b404B6DAd70abD814eC49622",
+  "game": "0x0aE8D640BcB8Fe72B409218AFe67B708218028FF",
+
   "tokenDeployed": false,
   "nftDeployed": false,
-  "gameDeployed": true,
+  "gameDeployed": false,
+
   "contractCompleted": false
 }

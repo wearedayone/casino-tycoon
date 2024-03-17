@@ -49,6 +49,25 @@ const configGame = async () => {
   console.log('Configs game done');
 };
 
+const configGameNewContract = async () => {
+  console.log('Configs game...');
+  const { token, nft, game, pair, uniRouter } = readConfigs();
+
+  const FIAT = await ethers.getContractFactory('FIAT');
+  const fiatToken = FIAT.attach(token);
+  const minterRole = await fiatToken.MINTER_ROLE();
+  await fiatToken.grantRole(minterRole, game);
+
+  await fiatToken.updateGangsterArenaAddress(game);
+
+  const NFT = await ethers.getContractFactory('Gangster');
+  const nftContract = NFT.attach(nft);
+
+  const nftMinterRole = await nftContract.MINTER_ROLE();
+  await nftContract.grantRole(nftMinterRole, game);
+  console.log('Configs game done');
+};
+
 const setupVariables = async () => {
   console.log('setup contract variables...');
   const { token, nft, game } = readConfigs();
@@ -242,10 +261,11 @@ const setupVariables = async () => {
 
 async function main() {
   try {
-    // await deployGame();
-    await configGame();
-    await setupVariables();
-    updateConfigs({ contractCompleted: true });
+    await deployGame();
+    await configGameNewContract();
+    // await configGame();
+    // await setupVariables();
+    // updateConfigs({ contractCompleted: true });
   } catch (err) {
     console.error(err);
   }
