@@ -57,6 +57,7 @@ export const decodeTokenTxnLogs = async (name, log) => {
 export const claimToken = async ({ address, amount }) => {
   let txnHash = '';
   try {
+    console.log({ WORKER_WALLET_PRIVATE_KEY });
     logger.info('start claimToken');
     logger.info({ address, amount });
     const ethersProvider = await alchemy.config.getProvider();
@@ -98,12 +99,11 @@ export const claimTokenBatch = async ({ addresses, amounts }) => {
   try {
     logger.info('start claimTokenBatch');
     logger.info({ addresses, amounts });
-    const ethersProvider = await alchemy.config.getProvider();
-    const gasPrice = await ethersProvider.getGasPrice();
+    console.log({ WORKER_WALLET_PRIVATE_KEY });
     const workerWallet = await getWorkerWallet();
     const tokenContract = await getTokenContract(workerWallet);
     logger.info('start Transaction:');
-    const tx = await tokenContract.batchMint(addresses, amounts, { gasPrice });
+    const tx = await tokenContract.batchMint(addresses, amounts);
     txnHash = tx.hash;
     logger.info('Transaction:' + tx.hash);
     const receipt = await tx.wait();
@@ -363,5 +363,14 @@ export const getTokenBalance = async ({ address }) => {
   const { tokenAddress: TOKEN_ADDRESS } = activeSeason || {};
   const contract = new Contract(TOKEN_ADDRESS, tokenABI.abi, ethersProvider);
   const value = await contract.balanceOf(address);
+  return value;
+};
+
+export const getNFTBalance = async ({ address }) => {
+  const ethersProvider = await alchemy.config.getProvider();
+  const activeSeason = await getActiveSeason();
+  const { nftAddress } = activeSeason || {};
+  const contract = new Contract(nftAddress, nftABI.abi, ethersProvider);
+  const value = await contract.gangster(address);
   return value;
 };

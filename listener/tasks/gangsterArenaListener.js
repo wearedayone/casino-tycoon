@@ -50,6 +50,11 @@ const gangsterArenaListener = async () => {
     await firestore.collection('web3Listener').doc(NETWORK_ID).update({ lastBlock: event.blockNumber });
     await processBuySafeHouseEvent({ to, amount, nonce, event, contract });
   });
+
+  contract.on(GangsterEvent.Retire, async (to, amount, nonce, event) => {
+    await firestore.collection('web3Listener').doc(NETWORK_ID).update({ lastBlock: event.blockNumber });
+    await processRetireEvent({ to, amount, nonce, event, contract });
+  });
 };
 
 // export const queryEvent = async (fromBlock) => {
@@ -77,6 +82,27 @@ const processMintEvent = async ({ to, tokenId, amount, nonce, event, contract, n
       active: true,
     });
 
+    // TODO: update separate fields: rankPrizePool, reputationPrizePool, burnValue, devFee
+    const prizePool = await contract.getPrizeBalance();
+    await updatePrizePool(parseFloat(formatEther(prizePool)).toFixed(6));
+
+    const retirePool = await contract.getRetireBalance();
+    await updateReputationPool(parseFloat(formatEther(retirePool)).toFixed(6));
+  } catch (err) {
+    logger.error(err);
+  }
+};
+
+const processRetireEvent = async ({ to, amount, nonce, event, contract }) => {
+  try {
+    logger.info('NFT minted');
+    logger.info({ to, amount, nonce, event });
+
+    await updateNumberOfGangster({
+      address: to.toLowerCase(),
+      newBalance: 0,
+      active: false,
+    });
     // TODO: update separate fields: rankPrizePool, reputationPrizePool, burnValue, devFee
     const prizePool = await contract.getPrizeBalance();
     await updatePrizePool(parseFloat(formatEther(prizePool)).toFixed(6));

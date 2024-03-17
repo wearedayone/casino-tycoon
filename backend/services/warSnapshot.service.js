@@ -6,7 +6,7 @@ import chunk from 'lodash.chunk';
 import admin, { firestore } from '../configs/firebase.config.js';
 import { getActiveSeasonId, getActiveSeason } from './season.service.js';
 import { initTransaction, validateNonWeb3Transaction } from './transaction.service.js';
-import { claimTokenBatch, burnNFT as burnNFTTask } from './worker.service.js';
+import { claimTokenBatch, burnNFT as burnNFTTask, getNFTBalance } from './worker.service.js';
 import { getUserUsernames } from './user.service.js';
 import { getUserGamePlay } from './gamePlay.service.js';
 import logger from '../utils/logger.js';
@@ -390,17 +390,21 @@ export const burnMachinesLost = async (penaltyUsers) => {
     const snapshot = userSnapshots[index];
     if (!snapshot.exists) continue;
 
+    const nft = await getNFTBalance({ address: snapshot.data().address });
+    const nftBalance = nft.toNumber();
+    console.log({ nftBalance });
+
     const txn = await initTransaction({
       userId: snapshot.id,
       type: 'war-penalty',
-      machinesDeadCount: penaltyUsers[index].amount,
+      machinesDeadCount: nftBalance > penaltyUsers[index].amount ? penaltyUsers[index].amount : nftBalance,
     });
 
     users.push({
       userId: snapshot.id,
       txnId: txn.id,
       address: snapshot.data().address,
-      amount: penaltyUsers[index].amount,
+      amount: nftBalance > penaltyUsers[index].amount ? penaltyUsers[index].amount : nftBalance,
     });
   }
 

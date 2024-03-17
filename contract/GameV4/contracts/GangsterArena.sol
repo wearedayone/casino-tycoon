@@ -36,7 +36,7 @@ contract GangsterArena is AccessControl, IGangsterArena {
   // NFT base price
   uint256 public bPrice_ = 0.01 ether; // base price
 
-  uint256 public bpwl_ = 0.01 ether; // NFT price for whitelisted
+  uint256 public bpwl_ = 0.005 ether; // NFT price for whitelisted
 
   // Referral reward
   uint256 public refReward_ = 1000;

@@ -18,12 +18,6 @@
     "dbSafehouse": 5
   },
   {
-    "userId": "did:privy:clps5o6a602kql30fm4xknzqh",
-    "address": "0x72560bf96f4a8f28e21530d19f7e28d6a379fd1f",
-    "dbGoon": 0,
-    "dbSafehouse": 0
-  },
-  {
     "userId": "did:privy:clrec2rkm00zbl90f1n197gy8",
     "address": "0x85ce6e6a39cb7400169e1627080c80456fd36785",
     "dbGoon": 1,

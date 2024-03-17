@@ -37,1402 +37,1870 @@
   "MarketingBalance": "0.03541",
   "RetireBalance": "45.907254378743834717",
   "PrizeBalance": "63.228800000000000175",
+  "tgoonNew": "0.000000000000002968",
+  "tshouseNew": "0.000000000000002801",
   "users": [
     {
       "userId": "did:privy:clptw1gs10077l90ff4ie9ghg",
       "address": "0x0b01626d504be4809b6bbb317d38db9cab69ef52",
-      "goon": "0.000000000000000003",
-      "safehouse": "0.0"
+      "dbGoon": 0,
+      "dbSafehouse": 0,
+      "goon": "0",
+      "safehouse": "0"
     },
     {
       "userId": "did:privy:clpulzo770174lc0fxh5tr4hy",
       "address": "0x4cabf6e76a17e9450bae94f68c81ca177c3906c9",
+      "dbGoon": 8,
+      "dbSafehouse": 1,
       "goon": "0.000000000000000007",
       "safehouse": "0.000000000000000001"
     },
     {
       "userId": "did:privy:clpunkada001dlb0g7vwzmpkv",
       "address": "0xb5fa003ec8d0c95ad652203e7ac17244a9398b1b",
+      "dbGoon": 7,
+      "dbSafehouse": 1,
       "goon": "0.000000000000000006",
       "safehouse": "0.000000000000000001"
     },
     {
       "userId": "did:privy:clpuswxvq00a0lb0fu0bgh0e1",
       "address": "0x0f8c7920dda1ed39858a41c6df4673d4430a5e6e",
+      "dbGoon": 1,
+      "dbSafehouse": 3,
       "goon": "0.000000000000000001",
-      "safehouse": "0.000000000000000005"
+      "safehouse": "0.000000000000000003"
     },
     {
       "userId": "did:privy:clpuu0dtj008ji50fthy2wf76",
       "address": "0x07be0027a8515584cb19ad5aff0ef267167f1c8e",
+      "dbGoon": 5,
+      "dbSafehouse": 18,
       "goon": "0.000000000000000004",
       "safehouse": "0.000000000000000018"
     },
     {
       "userId": "did:privy:clpuuear40071jj0fkcj914bj",
       "address": "0x05f4125ccbbdebde1be6cf2ac5d5c6679ff9e700",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:clpuunydg0015ju0fd6i67uv0",
       "address": "0x70155e866778db0988b2e385ba0c34556be29f0f",
+      "dbGoon": 20,
+      "dbSafehouse": 163,
       "goon": "0.000000000000000019",
       "safehouse": "0.000000000000000163"
     },
     {
       "userId": "did:privy:clpuuqaud00djl90fv28r5aeb",
       "address": "0x1f9403bdee023a3dec36cb424b0a80af20b125b8",
+      "dbGoon": 2,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000001",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:clpuvyos60073jw0f8ervhsr1",
       "address": "0xa013fa329e3e09d2e339142ac5b1979848d0f317",
+      "dbGoon": 4,
+      "dbSafehouse": 3,
       "goon": "0.000000000000000003",
       "safehouse": "0.000000000000000003"
     },
     {
       "userId": "did:privy:clpvem03r00gbl70f6vjl6yms",
       "address": "0x9a9f5b47e02ff0f0b4e083346de84cd0e182c199",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:clrb63w5o027njv0fibdz8atu",
       "address": "0x89f46fc292d02f7c4f1e58b9766d8f8d124f5f09",
+      "dbGoon": 10,
+      "dbSafehouse": 1,
       "goon": "0.000000000000000009",
       "safehouse": "0.000000000000000001"
     },
     {
       "userId": "did:privy:cltf7h61304v95i2474f88zwf",
       "address": "0x7fab3d2a7f507fac63f5f391fe26426632a39678",
+      "dbGoon": 12,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000011",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltf7kfdi004d12dve4m4c26r",
       "address": "0xc7ad18e220a83b14d094aef8751c7d79e0f7beaa",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltf7ny1n001rk10zd5izwlom",
       "address": "0x6f1c2bed63dcb36c1370ad99b4a1161d358ac533",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltf7q3qy01dnufyo2az64kp0",
       "address": "0x30482bd97d5f424346f8f6a5db8abf3cac1c1761",
+      "dbGoon": 3,
+      "dbSafehouse": 1,
       "goon": "0.000000000000000002",
       "safehouse": "0.000000000000000001"
     },
     {
       "userId": "did:privy:cltf7ycoq039ofwsojfzzx7ok",
       "address": "0x501fb5b8ba8e0f2301f50c68aa3c6abfa602433b",
+      "dbGoon": 7,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000006",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltf8767a03y98qui6c4sp4rf",
       "address": "0xc0a8724449ba3f6e68ccfafb48cbcab0b7277e63",
+      "dbGoon": 221,
+      "dbSafehouse": 173,
       "goon": "0.00000000000000022",
       "safehouse": "0.000000000000000173"
     },
     {
       "userId": "did:privy:cltf89jem054140101gvj768p",
       "address": "0xbaf7eb49bdc351e8c2bbde0ef63a9155b4a582ac",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltf8ei1g04ph8qb6le4flf2m",
       "address": "0x977001e99300c9ff08e085b0962c1a6034027512",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltfa6qld04f6q318tbxhwj03",
       "address": "0x46dd2c0065b0b1a2e7d2b2477d6f85accb006704",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltfa9gis0pfcsfuxsgxesx9f",
       "address": "0x3a1033818f22091560358d26bdce20d221f94c91",
+      "dbGoon": 7,
+      "dbSafehouse": 3,
       "goon": "0.000000000000000006",
       "safehouse": "0.000000000000000003"
     },
     {
       "userId": "did:privy:cltfaaamj07w0r4t9ykij06w2",
       "address": "0xdac629c1cbb26e53d299b004be9d05a8aae02fbf",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltfbcr8d07e5ihh9liq8q43o",
       "address": "0xb7ac54ca444286335e2f7fd7a18d245082bcac6f",
+      "dbGoon": 2,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000001",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltfd45vr054zef01vha7hafv",
       "address": "0x7130f7ede48366f1ef4583548e15d6f5bab4f0be",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltffh5lf0eyqkvvsxveiszod",
       "address": "0x06a6e94e263af04d435e5646539171fe202d5c7b",
+      "dbGoon": 1,
+      "dbSafehouse": 526,
       "goon": "0.0",
       "safehouse": "0.000000000000000526"
     },
     {
       "userId": "did:privy:cltfg2onq0kplapgkfy7q5jk8",
       "address": "0x0ac9651c9a79a9281b555c01cc047c5e3c3614a8",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltfghq3v093712q7okn3wcrh",
       "address": "0x7c166ac57d064001a7edfe1c70ff46684aef8d26",
+      "dbGoon": 5,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000004",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltfgzl0f02a5bhhny5ewn2zz",
       "address": "0x1d5d734d4c66ea8937b7b7902af9f777cb0046ad",
+      "dbGoon": 4,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000003",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltfi52o906m7q20avyslgol8",
       "address": "0x9174afc43b61ff984c56cc36ce0ed02a5da16a0a",
+      "dbGoon": 20,
+      "dbSafehouse": 22,
       "goon": "0.000000000000000019",
       "safehouse": "0.000000000000000022"
     },
     {
       "userId": "did:privy:cltfmh15200a5zbjvgltsd5lw",
       "address": "0x83c94d090a5aacbc23fa78bf3f45d33f4d617f02",
+      "dbGoon": 3,
+      "dbSafehouse": 2,
       "goon": "0.000000000000000002",
       "safehouse": "0.000000000000000002"
     },
     {
       "userId": "did:privy:cltfp74h40br8p6a2uzczyurt",
       "address": "0x6dcb5f387e422e89eda18c473c0aea5569e4741c",
+      "dbGoon": 19,
+      "dbSafehouse": 9,
       "goon": "0.000000000000000018",
       "safehouse": "0.000000000000000009"
     },
     {
       "userId": "did:privy:cltfqwp8603xh10o6mrukcm4y",
       "address": "0xba4f626acbb4919ba92cb44996feb9f2a2814ae6",
+      "dbGoon": 1,
+      "dbSafehouse": 1,
       "goon": "0.0",
       "safehouse": "0.000000000000000001"
     },
     {
       "userId": "did:privy:cltfsf1uw0bauat8ajg8bpp17",
       "address": "0xe8cd8b4df91ee48c85019a27d2c36a0d79153ba1",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltfufdx500736gjpvu86wiyn",
       "address": "0xf8cca4b6f806e427efc112d38eb424ec5c5dfd22",
+      "dbGoon": 2,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000001",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltfwdb6g0a8pzul447eed6cf",
       "address": "0x4e7d38773163564b62540b5bc591395bfd0ecebc",
+      "dbGoon": 6,
+      "dbSafehouse": 4,
       "goon": "0.000000000000000005",
       "safehouse": "0.000000000000000004"
     },
     {
       "userId": "did:privy:cltfy5whr0k0wvbvqatqwuqvm",
       "address": "0x22e6f1f9936ddf166f0af277c8073c51331e4aca",
+      "dbGoon": 6,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000005",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltg23ohi00btrjra24xl1jhe",
       "address": "0x38b321247b0aeb1b52206ed4e8556b52f25cb6c6",
+      "dbGoon": 1,
+      "dbSafehouse": 30,
       "goon": "0.0",
       "safehouse": "0.00000000000000003"
     },
     {
       "userId": "did:privy:cltg25nnz09o6kipqfbotzbkf",
       "address": "0x5fa124eb4b43dd1b00ca1760980afda0999ba53a",
+      "dbGoon": 2,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000001",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltg3q01k07suq08uwnughlz8",
       "address": "0xeb75b9cf7422ba079bb437ef35c52a5bd5e7887d",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltg3sbn9070yue1pi5jg4c80",
       "address": "0x2ddaccc92f25da44b6edc053f019000fb3038cac",
+      "dbGoon": 1,
+      "dbSafehouse": 8,
       "goon": "0.0",
       "safehouse": "0.000000000000000008"
     },
     {
       "userId": "did:privy:cltgs8oj20l56xyke89wg9x8k",
       "address": "0x8b38999de05d2c9a4c0129136a962f266356e618",
+      "dbGoon": 1,
+      "dbSafehouse": 1,
       "goon": "0.0",
       "safehouse": "0.000000000000000001"
     },
     {
       "userId": "did:privy:cltgt7vr504yhjih3hc8wyif2",
       "address": "0xc5098ebde93016c27c00a8cd5133206512c65911",
+      "dbGoon": 8,
+      "dbSafehouse": 5,
       "goon": "0.000000000000000007",
       "safehouse": "0.000000000000000005"
     },
     {
       "userId": "did:privy:cltgtv45c0957r56qw5w9try0",
       "address": "0xea83770389a5496676d6d22af863bba753478199",
+      "dbGoon": 1,
+      "dbSafehouse": 1,
       "goon": "0.0",
       "safehouse": "0.000000000000000001"
     },
     {
       "userId": "did:privy:cltgw60r803n311pypakk0m95",
       "address": "0xa5ab5ca45c2682ba1d0f3edf8a51bba45309f614",
+      "dbGoon": 1,
+      "dbSafehouse": 2,
       "goon": "0.0",
       "safehouse": "0.000000000000000002"
     },
     {
       "userId": "did:privy:cltgwt2c3027dheo9rsulht7f",
       "address": "0xdadf1b7959a0d15679865b989e337de4b67e0d8a",
+      "dbGoon": 5,
+      "dbSafehouse": 3,
       "goon": "0.000000000000000004",
       "safehouse": "0.000000000000000003"
     },
     {
       "userId": "did:privy:cltgz6m0906grlnpyqe6hvlet",
       "address": "0x9a8eee8dbfc4bf771fae2073197027a4a756bcd8",
+      "dbGoon": 1,
+      "dbSafehouse": 2,
       "goon": "0.0",
       "safehouse": "0.000000000000000002"
     },
     {
       "userId": "did:privy:clth1nmkj07j14b96jiyit8n3",
       "address": "0x9829009fc515d1c05df746bf5176c4cdd5d6b417",
+      "dbGoon": 2,
+      "dbSafehouse": 6,
       "goon": "0.000000000000000001",
       "safehouse": "0.000000000000000006"
     },
     {
       "userId": "did:privy:clth3mgaf0palq2q34dounqie",
       "address": "0x8a4860ec5bd6e41f24620b0880956601fb9d0d1e",
+      "dbGoon": 12,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000011",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:clth8xcrz0s6fnb39n2gvb0q1",
       "address": "0x1dd3f5145da2b8e7fd275145b1d5f4da408582c6",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:clthhacrf0hprdypjq9iqs4gx",
       "address": "0x1e22596f1af6cc83f0762c8ffeff12497f25a17a",
+      "dbGoon": 3,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000002",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:clthkv7yk0pmhadi4kojylplr",
       "address": "0xf3303e8eb62cd25fd7022b9bbde7882271cc1bb0",
+      "dbGoon": 1,
+      "dbSafehouse": 1,
       "goon": "0.0",
       "safehouse": "0.000000000000000001"
     },
     {
       "userId": "did:privy:clthoq11f06vekwg3a6kx01gn",
       "address": "0xd4a562fb2a0d36f1b5a338b9ec3509aba78c4ede",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:clthxsze2077130qnugfq77vu",
       "address": "0x365f9e4e49e1d2a0ba921796bf080684b6ec79f0",
+      "dbGoon": 60,
+      "dbSafehouse": 60,
       "goon": "0.000000000000000059",
       "safehouse": "0.00000000000000006"
     },
     {
       "userId": "did:privy:clthy6dm206e113zm47ii08eg",
       "address": "0x51acfd7d1395d1d4547e5a1e7c9fee40cadaabe9",
+      "dbGoon": 4,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000003",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:clti84nzc0li3n6bwcfl1ngq0",
       "address": "0x55d87c535887cfe3335823bc63c89261d557be41",
+      "dbGoon": 3,
+      "dbSafehouse": 1,
       "goon": "0.000000000000000002",
       "safehouse": "0.000000000000000001"
     },
     {
       "userId": "did:privy:cltiitl3q01hv7a7xczek7of0",
       "address": "0x9154e3ba7fc372721db2fd93cd4ecf3defb233f8",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltj6fdx70akpyiye65o70tyh",
       "address": "0xf33eb4cc2a92d1a04b3296b7cc0461b53ad9b2ea",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltjlubwj0qhh136ajhmm3446",
       "address": "0x9968160c8655db5de5faaca75fac76838f2ee5f2",
+      "dbGoon": 4,
+      "dbSafehouse": 3,
       "goon": "0.000000000000000003",
       "safehouse": "0.000000000000000003"
     },
     {
       "userId": "did:privy:cltk52bcl0l5tvrdoq01k9s63",
       "address": "0x691bc3f4027a9d11b246cfa293da36466fe8afad",
+      "dbGoon": 9,
+      "dbSafehouse": 11,
       "goon": "0.000000000000000008",
       "safehouse": "0.000000000000000011"
     },
     {
       "userId": "did:privy:cltkn0cxm08p83yej63nn8ilj",
       "address": "0x88e378990e1373dfd3e5766f20b1cbdd24f870fd",
+      "dbGoon": 3,
+      "dbSafehouse": 6,
       "goon": "0.000000000000000002",
       "safehouse": "0.000000000000000006"
     },
     {
       "userId": "did:privy:cltl64lpj07ovqjcdajvn1uxa",
       "address": "0xa0bf26f194ccd2fd51dc45bfb91ad90e920f528c",
+      "dbGoon": 21,
+      "dbSafehouse": 21,
       "goon": "0.00000000000000002",
       "safehouse": "0.000000000000000021"
     },
     {
       "userId": "did:privy:cltnlovn00179eio6vj6erc1j",
       "address": "0x22860dd416c6317151d1528e8043f37370974ff7",
+      "dbGoon": 3,
+      "dbSafehouse": 2,
       "goon": "0.000000000000000002",
       "safehouse": "0.000000000000000002"
     },
     {
       "userId": "did:privy:cltnt1si509in10t7fz5vc0rz",
       "address": "0x049707e4642e834120b4d12e4c354b3b519937c7",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltp7mjm302mflskdrqdm0me0",
       "address": "0xa6723b36dda4ec22fbc66010a886a021a49153ef",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltqnqifs04attq33qkp8fzyo",
       "address": "0xd42e07afc7e37d37de7790f6b015cdf5cdc22034",
+      "dbGoon": 12,
+      "dbSafehouse": 18,
       "goon": "0.000000000000000011",
       "safehouse": "0.000000000000000018"
     },
     {
       "userId": "did:privy:cltqnrqo502bfk71uk5xx0t2q",
       "address": "0x071e6b4af48c6ac690fc36dafa07a773bfdc6027",
+      "dbGoon": 53,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000052",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltqozyeq0cmtegczvua689wq",
       "address": "0x35cda06b88bf173464b0a5f524e9c5a7037c35e2",
+      "dbGoon": 134,
+      "dbSafehouse": 222,
       "goon": "0.000000000000000107",
       "safehouse": "0.000000000000000208"
     },
     {
       "userId": "did:privy:cltqq54a900m9jq13u1i2ls2p",
       "address": "0xb311205151e8a3a7e4871052dab88cea27a4b1bf",
+      "dbGoon": 13,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000012",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltqqbysf0hwjpwwnq2pq28fo",
       "address": "0xf725a4de6c9fbe5d1194855edbbd37bfa0fc92dd",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltqranjc08e1ohw7tu3208be",
       "address": "0x8f3fd3fa58ee81ba9de73796c518a59b66fe1584",
+      "dbGoon": 2,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000001",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltqrefh700hnlnt7uc2rlx10",
       "address": "0xb5efd7c166dd414fa90d296f2da3e0be35cd8a1d",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltqrzuav02mzyxa9gxauzrjq",
       "address": "0x743db0a7207b5efeb7224c4eb7f31e76ee71eef3",
+      "dbGoon": 37,
+      "dbSafehouse": 21,
       "goon": "0.000000000000000036",
       "safehouse": "0.000000000000000021"
     },
     {
       "userId": "did:privy:cltqs30qk033lwgfa9l4jwk4u",
       "address": "0xc48fc255c11ad2a66049d1b4815b9653f4a77d2d",
+      "dbGoon": 2,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000001",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltqs98mn0inx3pztftr5s670",
       "address": "0x41e393f2855a7c52415608d5ae1d7c7be8c506ac",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltqsu6ah06whrpxreivz0pm9",
       "address": "0x8ab504c5a2288b950ff49d66c09389d42dd9066b",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltqusodt0i31blatmwf02m7h",
       "address": "0x573ab831ce38c647c0d165a667789108b522508e",
+      "dbGoon": 54,
+      "dbSafehouse": 7,
       "goon": "0.000000000000000053",
       "safehouse": "0.000000000000000007"
     },
     {
       "userId": "did:privy:cltqv9hi20l77puy4h10hkkqb",
       "address": "0x01c973fce3c51583b777bd37ea663a1ec5e3090e",
+      "dbGoon": 1,
+      "dbSafehouse": 1,
       "goon": "0.0",
       "safehouse": "0.000000000000000001"
     },
     {
       "userId": "did:privy:cltqwac2100l3100w2z94ipsc",
       "address": "0x022dd25c73fa1b4ae216861156e67820b57b8c77",
+      "dbGoon": 6,
+      "dbSafehouse": 4,
       "goon": "0.000000000000000005",
       "safehouse": "0.000000000000000004"
     },
     {
       "userId": "did:privy:cltqwpvop02dz10og723hv9qs",
       "address": "0xb3d4436d0c5e547cee3405253df8b5d73c59a66a",
+      "dbGoon": 12,
+      "dbSafehouse": 3,
       "goon": "0.000000000000000011",
       "safehouse": "0.000000000000000003"
     },
     {
       "userId": "did:privy:cltqx0wxv0683100wajoxtrj6",
       "address": "0xba07ceb76377009b3b9fda2032a1a3db330d81ad",
+      "dbGoon": 11,
+      "dbSafehouse": 17,
       "goon": "0.00000000000000001",
       "safehouse": "0.000000000000000017"
     },
     {
       "userId": "did:privy:cltqzecbz05s5136ihrrpo2w4",
       "address": "0xeb7bb6e9bfd87878117205be8cf5bf4684700643",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltqzhy8m095jrds2rkvhulef",
       "address": "0x9fa83abe09244121e6cc6f9b57315d8056fa1453",
+      "dbGoon": 5,
+      "dbSafehouse": 5,
       "goon": "0.000000000000000004",
       "safehouse": "0.000000000000000005"
     },
     {
       "userId": "did:privy:cltqzj6bn08m110qvmux3d0bb",
       "address": "0xd8261bd8a08e4771e7d3f115fd3ae5f085c914f9",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltr1229v00g3kv1ylb99bmkl",
       "address": "0xb983ed7fc7c4e5f71b4dfe9cedfba0713c9f5492",
+      "dbGoon": 22,
+      "dbSafehouse": 17,
       "goon": "0.000000000000000021",
       "safehouse": "0.000000000000000017"
     },
     {
       "userId": "did:privy:cltr15ub701o742hlrx649z0r",
       "address": "0x682ae53532303523934f06f1ecd8401ef64cb7fc",
+      "dbGoon": 5,
+      "dbSafehouse": 2,
       "goon": "0.000000000000000004",
       "safehouse": "0.000000000000000002"
     },
     {
       "userId": "did:privy:cltr2mpfu0i5t2ekltge94hmw",
       "address": "0x541ce102654eefe5f98798adb01955e5aa499170",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltr36qmm0pjryz4mzao74yh1",
       "address": "0xeb4a5ccda8dbf3c330680669a9cce9b6c675fb20",
+      "dbGoon": 1,
+      "dbSafehouse": 1,
       "goon": "0.0",
       "safehouse": "0.000000000000000001"
     },
     {
       "userId": "did:privy:cltr3fsp400x3ciq99jbbcw5t",
       "address": "0x91305b8a4a4016e60b76e316318dd6b06dd4273d",
+      "dbGoon": 15,
+      "dbSafehouse": 12,
       "goon": "0.000000000000000014",
       "safehouse": "0.000000000000000012"
     },
     {
       "userId": "did:privy:cltr3gj520019raiqfcwnm2sg",
       "address": "0x4b1c884847af987ba5bb0d81dfbb995b9385db36",
+      "dbGoon": 3,
+      "dbSafehouse": 3,
       "goon": "0.000000000000000002",
       "safehouse": "0.000000000000000003"
     },
     {
       "userId": "did:privy:cltr4diat05bxokzc73gd2ad7",
       "address": "0x270760cb1c96fb47ef7d2546747cea657bf297a1",
+      "dbGoon": 12,
+      "dbSafehouse": 15,
       "goon": "0.000000000000000011",
       "safehouse": "0.000000000000000015"
     },
     {
       "userId": "did:privy:cltr52h7m097h123q2naqfhy7",
       "address": "0xa5774d1417b5a615281d952d1c98d716f6d4c961",
+      "dbGoon": 2,
+      "dbSafehouse": 2,
       "goon": "0.000000000000000001",
       "safehouse": "0.000000000000000002"
     },
     {
       "userId": "did:privy:cltr55rfh008r495ntoai1k2t",
       "address": "0x88872b0e03ba89bec5b2c3c21a33e3f9bbc2ba53",
+      "dbGoon": 1,
+      "dbSafehouse": 3,
       "goon": "0.0",
       "safehouse": "0.000000000000000003"
     },
     {
       "userId": "did:privy:cltr56nyf00hrzjqvuemagvw1",
       "address": "0x8ec213196e9e7be83cc58ed109bdbdf714c7763f",
+      "dbGoon": 3,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000002",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltr5b7t3015p7snoeing91gv",
       "address": "0x7f497dab5e1f1c1baeff4cd686c9ff17fe56afd6",
+      "dbGoon": 2,
+      "dbSafehouse": 1,
       "goon": "0.000000000000000001",
       "safehouse": "0.000000000000000001"
     },
     {
       "userId": "did:privy:cltr5fc8901t35uehg67n217m",
       "address": "0x981052694b91b7aa37d7f873eb34e7b08f57ae5e",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltr6aiee05wn10stgcoyfepx",
       "address": "0x916a34caf03cd670b13ba115f3deebdb60607dbd",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltr6w5wx0iftokzctpmh6zp2",
       "address": "0x538705d9a4680274b92b4e3d8d314cbeae7d6bac",
+      "dbGoon": 2,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000001",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltr6x4xf057h5955wqz2trf9",
       "address": "0x66439f4f6a8e9d1538638980f4be1dfeeb366f94",
+      "dbGoon": 21,
+      "dbSafehouse": 21,
       "goon": "0.00000000000000002",
       "safehouse": "0.000000000000000021"
     },
     {
       "userId": "did:privy:cltr7awm201ez11mb8bqteka3",
       "address": "0xaea2c653fb90e3ca0da78bc55bcd39b6314ea8d4",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltr7b55v0edpbcekribl73op",
       "address": "0xeb9b138abe882162d6c8963b898fbd0c6f1ce6f6",
+      "dbGoon": 9,
+      "dbSafehouse": 1,
       "goon": "0.000000000000000008",
       "safehouse": "0.000000000000000001"
     },
     {
       "userId": "did:privy:cltr7hlsq0981r67azsq3u5mz",
       "address": "0x05851210534aa4a4597c4e951411b5acf3a3deec",
+      "dbGoon": 7,
+      "dbSafehouse": 5,
       "goon": "0.000000000000000006",
       "safehouse": "0.000000000000000005"
     },
     {
       "userId": "did:privy:cltr826330put139vbnf4mise",
       "address": "0x6ed64cf37e47c2bbd0768fed773373bcf7aadaa4",
+      "dbGoon": 71,
+      "dbSafehouse": 65,
       "goon": "0.00000000000000007",
       "safehouse": "0.000000000000000065"
     },
     {
       "userId": "did:privy:cltr8way30qep10m1csl2ay60",
       "address": "0x48918d595abf58ef1a4b0fe3e8fef9b29c7d9b14",
+      "dbGoon": 3,
+      "dbSafehouse": 4,
       "goon": "0.000000000000000002",
       "safehouse": "0.000000000000000003"
     },
     {
       "userId": "did:privy:cltr92muj0nb211li8ce2okq8",
       "address": "0xfdf4addee0bc7dc2fbcc718c7e2e611aa5dbb3d6",
+      "dbGoon": 7,
+      "dbSafehouse": 4,
       "goon": "0.000000000000000006",
       "safehouse": "0.000000000000000004"
     },
     {
       "userId": "did:privy:cltr934u301tlufc10gyy7b3j",
       "address": "0x707d2b096f34e2c602619c6f026515fc4f237034",
+      "dbGoon": 33,
+      "dbSafehouse": 9,
       "goon": "0.000000000000000032",
       "safehouse": "0.000000000000000009"
     },
     {
       "userId": "did:privy:cltr9bn8k011512zoe05gje3k",
       "address": "0x637fbf9b6455b26136d4e4f7e163a327bbd36864",
+      "dbGoon": 2,
+      "dbSafehouse": 1,
       "goon": "0.000000000000000001",
       "safehouse": "0.000000000000000001"
     },
     {
       "userId": "did:privy:cltr9efhb05yo2a11db9d9laj",
       "address": "0xc49a9350634fb2c4e692c19b57e147556852a247",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltr9mlfd01ufpd86hfj2tm52",
       "address": "0x27c1ffbab1f7b1766974af03931ecd161a16b290",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltr9nim40ph3ez8og5993us8",
       "address": "0x2618046b032928c978d8f93327f04cff6e5a78ab",
+      "dbGoon": 4,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000003",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltr9x7dv00r5q0oc48ojfzfs",
       "address": "0x4a5fa4f6405345f54f8ea638a29bf2e28a09e6e7",
+      "dbGoon": 2,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000001",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltr9xo2b001p1rts9s8qo125",
       "address": "0xe21da307839fcdf8271582771e8ddb8dd3251181",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltra149t00on515bc44y4wx9",
       "address": "0xf86adc6ac5fb85729c3d6369e1c80c302291407d",
+      "dbGoon": 5,
+      "dbSafehouse": 1,
       "goon": "0.000000000000000004",
       "safehouse": "0.000000000000000001"
     },
     {
       "userId": "did:privy:cltraecxs01jdlauwajmlkibe",
       "address": "0xa452e7b018f188a1be74287e949253f8f196b674",
+      "dbGoon": 5,
+      "dbSafehouse": 2,
       "goon": "0.000000000000000004",
       "safehouse": "0.000000000000000002"
     },
     {
       "userId": "did:privy:cltrap7a000r7dfu2r3tpvv3g",
       "address": "0xe3f302a9add11f62feaae6b863435b426744c42a",
+      "dbGoon": 5,
+      "dbSafehouse": 1,
       "goon": "0.000000000000000004",
       "safehouse": "0.000000000000000001"
     },
     {
       "userId": "did:privy:cltrb0prh0437fwy243ntqdii",
       "address": "0xabc581211e7a357c932903c8023346b5985edc8a",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrb9tbb080f50t2gnyti9ot",
       "address": "0x8b2c651f368283c0f098844b0a912c029de68b53",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrbcksj01kjnfllrdjvhebp",
       "address": "0xc4cef8fe9f251549a68213751a229bf3a083a983",
+      "dbGoon": 4,
+      "dbSafehouse": 1,
       "goon": "0.000000000000000003",
       "safehouse": "0.000000000000000001"
     },
     {
       "userId": "did:privy:cltrbgbnh0dkdpcvy8kxtryy5",
       "address": "0x19d5fc51e76a69d62cbb08788df20366c8c80043",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrbwifi00jtgtp9yne64kqr",
       "address": "0x35125c814d64282978857d91daf6f5db3c0f75dc",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrbwnks00t14xnaaxs4a2xm",
       "address": "0xa30f0b2cf6a3fa1f47d36d4d0b88997292276d73",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrc0w4w00p3i9bkitoh77sl",
       "address": "0x5b572e489614c77788a2348799e3f33af0311697",
+      "dbGoon": 53,
+      "dbSafehouse": 100,
       "goon": "0.000000000000000052",
       "safehouse": "0.0000000000000001"
     },
     {
       "userId": "did:privy:cltrccoz802tj11igm0yo8ha5",
       "address": "0xdd30dade229845869c50d8c08570ccd68adb608e",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrcn2po012rma8nz24vg3hs",
       "address": "0xa1d50e107110b293ac0ce32d648a6bf5ac3f3612",
+      "dbGoon": 109,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000108",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrctdio01ytdpt3qxxi17ds",
       "address": "0x8c2a6e289a91866ea7d19c0c549466e2cadf56ca",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrd9oet0027s2krcs0jipyf",
       "address": "0x4f00e86a8562923cfe7f9e016d86a7a4b5d5a793",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrdwt6701czv4sk8lfd5kg0",
       "address": "0xf9841c6dd06ae6ad04e4c809764179841e2a798e",
+      "dbGoon": 5,
+      "dbSafehouse": 8,
       "goon": "0.000000000000000004",
       "safehouse": "0.000000000000000008"
     },
     {
       "userId": "did:privy:cltrdyqh203glcux5tu4keowp",
       "address": "0x226dfd75fb2fd1f82dcfd0b30ed1e0970cd1b611",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrejlpk0c8x7fuh0qe35v95",
       "address": "0xb80223bf1bdfc38e056ea0799bef77320f140ada",
+      "dbGoon": 176,
+      "dbSafehouse": 237,
       "goon": "0.000000000000000175",
       "safehouse": "0.000000000000000237"
     },
     {
       "userId": "did:privy:cltrep2zd016t109gxnjeqv8h",
       "address": "0x71eb64461c548d11b50204944c3ea55b3904f1af",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrevjqz04ypc6vnnu0u7f9f",
       "address": "0xcaf1fb618c0079e5fc23da420005d0971cd5694c",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrf4u3x00p5gcmc3phq8drp",
       "address": "0xdef0445bf4c62b0923f4dbeb815016b841dd3519",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrfic8506onauiatzjv1ut0",
       "address": "0x5ffbbfc5285137a7d9bef687eea6f258b049505f",
+      "dbGoon": 6,
+      "dbSafehouse": 2,
       "goon": "0.000000000000000005",
       "safehouse": "0.000000000000000002"
     },
     {
       "userId": "did:privy:cltrgbtmm0gnai9bkij83ja7e",
       "address": "0x5852c19dba6671a86ed041be267eec13a2b5ebdf",
+      "dbGoon": 27,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000026",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrgfsok08uj8fsdvsjb0z6j",
       "address": "0xa85e58075fd7a42efb6352e44eee62ba0c969471",
+      "dbGoon": 2,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000001",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrgxu0400it92xtfpuoxmre",
       "address": "0x32acba3a8354e13fe79e30b336739e8e51f82484",
+      "dbGoon": 2,
+      "dbSafehouse": 45,
       "goon": "0.000000000000000001",
       "safehouse": "0.000000000000000045"
     },
     {
       "userId": "did:privy:cltrh0fou08g0x5ck6segaogk",
       "address": "0xe1a2042d88fdd2f90f7e96e2b2c14d5eed889779",
+      "dbGoon": 20,
+      "dbSafehouse": 21,
       "goon": "0.000000000000000019",
       "safehouse": "0.000000000000000021"
     },
     {
       "userId": "did:privy:cltrh3mb40genzzyah3btx3c6",
       "address": "0x218d18bbe11f773ecf423ba153e75376613fdb02",
+      "dbGoon": 13,
+      "dbSafehouse": 24,
       "goon": "0.000000000000000012",
       "safehouse": "0.000000000000000024"
     },
     {
       "userId": "did:privy:cltrhbrra0azbva9zj0sudq1i",
       "address": "0xa8c88222037c6f199ebb99ca8269049390c61d39",
+      "dbGoon": 3,
+      "dbSafehouse": 2,
       "goon": "0.000000000000000002",
       "safehouse": "0.000000000000000002"
     },
     {
       "userId": "did:privy:cltrhrzo102y3f5x5z4s2visx",
       "address": "0xab3b78736f12c74721a4df95b4f4ad8ffdbc4813",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltridqba05dfe2ok32ldswlm",
       "address": "0x493a74c2d831b1ffd080866d959c794c8678700a",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltriyzyu07llavlfrdvljilx",
       "address": "0xb5ba3d3def098a0ca19bb8354b78c4cc36116d0c",
+      "dbGoon": 13,
+      "dbSafehouse": 1,
       "goon": "0.000000000000000012",
       "safehouse": "0.000000000000000001"
     },
     {
       "userId": "did:privy:cltrj0r3e0bopf5x5uj9qbxlr",
       "address": "0x7a07ceafc1807ca2ea32f531cef58677954bb0a8",
+      "dbGoon": 3,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000002",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrjad2a004brnzokj0pv3k1",
       "address": "0xe4252e76c1e1cfeb7857d753565796050626226c",
+      "dbGoon": 2,
+      "dbSafehouse": 1,
       "goon": "0.000000000000000001",
       "safehouse": "0.000000000000000001"
     },
     {
       "userId": "did:privy:cltrjpo1p0eh3109fhu049w17",
       "address": "0x4e8e9567e0f7b80ce4c37404343436e45c00c1f3",
+      "dbGoon": 16,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000015",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrjqoun0ept109fozbi0a09",
       "address": "0x676bf9682aa06c029da7300bc165e6d08b46b568",
+      "dbGoon": 8,
+      "dbSafehouse": 3,
       "goon": "0.000000000000000007",
       "safehouse": "0.000000000000000003"
     },
     {
       "userId": "did:privy:cltrjwuug0esdmjhj8qubfihr",
       "address": "0x4ad9deb5f761933fb075f12b87211f2298375504",
+      "dbGoon": 29,
+      "dbSafehouse": 17,
       "goon": "0.000000000000000028",
       "safehouse": "0.000000000000000017"
     },
     {
       "userId": "did:privy:cltrjz6w00ed5122yn50652tz",
       "address": "0x0f4818ee02abfe72f3274d7d12b1299519c4cf41",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrk8rjr01abb424cqgjd25q",
       "address": "0x8f32d4f41cfc8b699c258c892cadab9903933b2f",
+      "dbGoon": 2,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000001",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrkcsns0k4fgfupj6tg56nb",
       "address": "0xd77f998f1b70148c10f899c9823f4ba1366290ff",
+      "dbGoon": 19,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000018",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrkcwjb0icv109fm1k7h90q",
       "address": "0x0921961194572e07f174450a215be0967d76b4ea",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrkh0qd05ehc3h402fn0gsl",
       "address": "0x4c86097c6d2eddbe824e6c9caa9626125144d00e",
+      "dbGoon": 3,
+      "dbSafehouse": 2,
       "goon": "0.000000000000000002",
       "safehouse": "0.000000000000000002"
     },
     {
       "userId": "did:privy:cltrkhyjs02btf7av2p31wyjc",
       "address": "0x6183bad1619b52302f9ef3ab62095e79064fdcd3",
+      "dbGoon": 4,
+      "dbSafehouse": 14,
       "goon": "0.000000000000000003",
       "safehouse": "0.000000000000000014"
     },
     {
       "userId": "did:privy:cltrkwfrj00ej5u59i5p0sve4",
       "address": "0x53c4972bd03bc1ee4274b1b54802b78d64c0ffaa",
+      "dbGoon": 3,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000002",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrl3aoc0ot5gfup58rhgn10",
       "address": "0x2e6207533cb11112623df941453040840da01b74",
+      "dbGoon": 2,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000001",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrl5mj40pebgfuparxvxqvu",
       "address": "0x42ffa3e740ea087715fe04cf6a46edc77360e4ad",
+      "dbGoon": 7,
+      "dbSafehouse": 4,
       "goon": "0.000000000000000006",
       "safehouse": "0.000000000000000004"
     },
     {
       "userId": "did:privy:cltrll4eh020d33tsoaqtk6xe",
       "address": "0x6a2ed08245e1d5d0f01bd07d5a3a2a3d2ae5d875",
+      "dbGoon": 4,
+      "dbSafehouse": 11,
       "goon": "0.000000000000000003",
       "safehouse": "0.000000000000000011"
     },
     {
       "userId": "did:privy:cltrowqkb00hv125v19ll7u6k",
       "address": "0x8b3542912f20e226bd51eaa58d6278cd97c967cf",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrpjfxa03ivh3pj69evxkbv",
       "address": "0x79fd4d0a0ed1d54c95775c22dfe42ad5d9998b37",
+      "dbGoon": 11,
+      "dbSafehouse": 0,
       "goon": "0.00000000000000001",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrpjhcf00cf11gkclsy655h",
       "address": "0x4f8c544ebeeac8d48224dbe5cc6589f56037cf3c",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrq9uel024pwfjokpehqxg6",
       "address": "0x1c55acfddbe51b6a006571b4b2baa1bd2a340213",
+      "dbGoon": 78,
+      "dbSafehouse": 25,
       "goon": "0.000000000000000077",
       "safehouse": "0.000000000000000025"
     },
     {
       "userId": "did:privy:cltrqdl8h05r9sw6m9igr1ghs",
       "address": "0x3e64ccf04b8a029f9091493c6215c5a0a3256acd",
+      "dbGoon": 14,
+      "dbSafehouse": 96,
       "goon": "0.000000000000000013",
       "safehouse": "0.000000000000000096"
     },
     {
       "userId": "did:privy:cltrqgekb021t3342l58h20i6",
       "address": "0x327130394627f7e836fd210c77b14272f1433262",
+      "dbGoon": 34,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000033",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrqilpu0nt9hsxcicbiup9h",
       "address": "0x94d041db7626fb4737100126c3f4deaa19fca2e5",
+      "dbGoon": 5,
+      "dbSafehouse": 2,
       "goon": "0.000000000000000004",
       "safehouse": "0.000000000000000002"
     },
     {
       "userId": "did:privy:cltrqkrbb01ubztzjim4xrsvu",
       "address": "0xcddfb1b162c5a9c99ece3e901eac49a7b7b81eb0",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrqll3f01kbuyubbqguahvq",
       "address": "0xaf60592e28c3262a5ad950e288842f321a26cd8c",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrqmnlr09pa47019bweww09",
       "address": "0x325d98cb57019aae66ae4b4ab704ea1de67b5198",
+      "dbGoon": 21,
+      "dbSafehouse": 0,
       "goon": "0.00000000000000002",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrqsa7q084p5iujgv5t493a",
       "address": "0x2f7f1c00146f01e2f5d92758c0e6cd47141c914d",
+      "dbGoon": 1,
+      "dbSafehouse": 11,
       "goon": "0.0",
       "safehouse": "0.000000000000000011"
     },
     {
       "userId": "did:privy:cltrqto69049zupszdr4bzr3t",
       "address": "0x8fec19077ad6000d8acda940a816f007c3369820",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrqu6hy03914m5j62ww5nya",
       "address": "0x925f7fa43303d16e6c0f204b21f4f4ff21606027",
+      "dbGoon": 2,
+      "dbSafehouse": 2,
       "goon": "0.000000000000000001",
       "safehouse": "0.000000000000000002"
     },
     {
       "userId": "did:privy:cltrqvu01049z3342kj1im5s0",
       "address": "0xa93a1d8802817f9bc06279f8c7dfc649a90816e9",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrqvu4004glij93pk1ynx8g",
       "address": "0x5473a6e37fde8727dc51d5b2b7deeb30567a681b",
+      "dbGoon": 44,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000043",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrqw4hv088tsw6mzbsixb50",
       "address": "0xb14ba12be59a231cbe51b120baf326c0df62876a",
+      "dbGoon": 37,
+      "dbSafehouse": 30,
       "goon": "0.000000000000000036",
       "safehouse": "0.00000000000000003"
     },
     {
       "userId": "did:privy:cltrqzpx8027974of1elw8bqg",
       "address": "0xc7e532cb5cd17435e08a8bdba9f8d12e20767668",
+      "dbGoon": 34,
+      "dbSafehouse": 5,
       "goon": "0.000000000000000033",
       "safehouse": "0.000000000000000005"
     },
     {
       "userId": "did:privy:cltrqzvl6028v74ofrqkd26fs",
       "address": "0x8c27135fc5b48872dc785379c8497c9632a73919",
+      "dbGoon": 2,
+      "dbSafehouse": 1,
       "goon": "0.000000000000000001",
       "safehouse": "0.000000000000000001"
     },
     {
       "userId": "did:privy:cltrr2zjh05e7701a5dv0a42a",
       "address": "0x2ebe79ea80d03c8ace8e0ee54ae72230855de737",
+      "dbGoon": 277,
+      "dbSafehouse": 102,
       "goon": "0.000000000000000276",
       "safehouse": "0.000000000000000102"
     },
     {
       "userId": "did:privy:cltrr4i9h009pjpsff5fmqhm3",
       "address": "0x58be7defe0cca3a0d10a30a44eb648b24a46f2d1",
+      "dbGoon": 4,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000003",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrr7gws0dt5ujta5pjuh6r6",
       "address": "0xebf5ebe62c026c250e804a5a9196f5715a1dffad",
+      "dbGoon": 100,
+      "dbSafehouse": 50,
       "goon": "0.000000000000000099",
       "safehouse": "0.00000000000000005"
     },
     {
       "userId": "did:privy:cltrr7owm00kz8xm09c3ns8ao",
       "address": "0xeea2e00cf32fa85926ba20fab8ac08abb054b467",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrr820r02hhhhdyb3ozxv7i",
       "address": "0xe5056d94405ec8bb099041e0f8599f6336c18367",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrradev048nl2dhde10s5g6",
       "address": "0x06f5a996a737bce7ddeac459b2aad77dd85e3a20",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrrclnb07t77cqxg27fxguc",
       "address": "0xac4985b44af6fcd1352aa6287d6e31d6988cf0f7",
+      "dbGoon": 23,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000022",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrrfrw50bsb5iujrmv3h0rm",
       "address": "0x487b1e78a35da4cc8ac7eee2ae03951fd5c18b3a",
+      "dbGoon": 15,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000014",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrrjb3x09kseb68k2wfpg2j",
       "address": "0x0f5d24f84d0cd8cf1ed9b1bb12d72997771c953a",
+      "dbGoon": 50,
+      "dbSafehouse": 1,
       "goon": "0.000000000000000049",
       "safehouse": "0.000000000000000001"
     },
     {
       "userId": "did:privy:cltrrsn8n0b3yeb68q68llaz6",
       "address": "0xb5a141da3a6769fde5e9bb6a2045ad8f89a996e4",
+      "dbGoon": 8,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000007",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrrsrat06ohxryc8egz6ymi",
       "address": "0xba435e9efce233e4038cf5b614fa015b18e2e141",
+      "dbGoon": 1,
+      "dbSafehouse": 1,
       "goon": "0.0",
       "safehouse": "0.000000000000000001"
     },
     {
       "userId": "did:privy:cltrrsrvj09n1qj8tav78824u",
       "address": "0x2baa4ffcff032a431229213b03e2286db36ccf14",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrrw7mh08ejij937epxj88z",
       "address": "0x1a881cd83d386ecfc59bddaa4f78465f59c5a8d3",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrrxx5h0dyjsw6mubqo8rlw",
       "address": "0x307fed57ed27b7e015717d2f132948f6fa0724b9",
+      "dbGoon": 3,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000002",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrs3m990b8vtdfmfgycmp3i",
       "address": "0x74115a840dee4dfa6c5d5e2e97258911c27d91a7",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrs4pgu0brlwfjo3efrdpxb",
       "address": "0x1f2045c4c4801aabbdfdca1379c38a2e2dbe3f65",
+      "dbGoon": 16,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000015",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrsal2w07pnl2dhrwbh3fli",
       "address": "0x8ad564fefdc21007150c466d33610190bfaec104",
+      "dbGoon": 6,
+      "dbSafehouse": 1,
       "goon": "0.000000000000000005",
       "safehouse": "0.000000000000000001"
     },
     {
       "userId": "did:privy:cltrsix9c0chbij93f02eyvvk",
       "address": "0x906781404762c62542b3700c312ff9bd621381a8",
+      "dbGoon": 1,
+      "dbSafehouse": 2,
       "goon": "0.0",
       "safehouse": "0.000000000000000002"
     },
     {
       "userId": "did:privy:cltrsp00x0drj7cqxg5yiy33k",
       "address": "0x3e7f81d4ec08478f2ede92a2b08ea04a7169abfe",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrt41zv0791k4rpras3ye2o",
       "address": "0x95edfeaf54f1a929d3ac9a73c7f9181faa632f3b",
+      "dbGoon": 3,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000002",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrt6pmz00uhpb8g21jefrc3",
       "address": "0xa4a0fa5cc2ae307a7c69b56514a3148539e216de",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrt90os05n77go2l4kgfq7z",
       "address": "0x6a26cb31598a3045653d5f3c803323c61e308fbd",
+      "dbGoon": 141,
+      "dbSafehouse": 20,
       "goon": "0.00000000000000014",
       "safehouse": "0.00000000000000002"
     },
     {
       "userId": "did:privy:cltrtevtk0gm2njkozrzpfkp7",
       "address": "0x1f2e322d7071258db488d723731f4ac80d04ce70",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrtjpcl00zzmsukt6ttz5i8",
       "address": "0x7bb93bd591bb8200d49de7c0694ca9fdfc985605",
+      "dbGoon": 5,
+      "dbSafehouse": 10,
       "goon": "0.000000000000000004",
       "safehouse": "0.00000000000000001"
     },
     {
       "userId": "did:privy:cltrtqa5g0ew1jpsf1gkpeso1",
       "address": "0xfebd7f146e65a139ac1f5b7e355b7c411b7f3483",
+      "dbGoon": 81,
+      "dbSafehouse": 6,
       "goon": "0.00000000000000008",
       "safehouse": "0.000000000000000006"
     },
     {
       "userId": "did:privy:cltru4n7g0cui1236qzgufgm8",
       "address": "0xf99e46dc736272458ce79f7051ddf03039a1bca1",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltru8qq5009fo5307u5ctp6k",
       "address": "0x5fc8277a80b6a7709f2075ede451148bba8786fb",
+      "dbGoon": 5,
+      "dbSafehouse": 1,
       "goon": "0.000000000000000004",
       "safehouse": "0.000000000000000001"
     },
     {
       "userId": "did:privy:cltrunupx0lax701a6t8qt727",
       "address": "0xe16f4d78f55f343c2079708f4b9b2537d0e1398b",
+      "dbGoon": 4,
+      "dbSafehouse": 1,
       "goon": "0.000000000000000003",
       "safehouse": "0.000000000000000001"
     },
     {
       "userId": "did:privy:cltruq01v0lq7701ag0xh83kx",
       "address": "0xb3850ffa200717f1dc19121c6d8fc3c4ee32ec89",
+      "dbGoon": 4,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000003",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltruq70i02ohip0urdyt99lv",
       "address": "0x8b43435c530ab85403e3f6a5941e15a42135702f",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltruqmrx001hybal8x42akx6",
       "address": "0x070e6727c8a40174e647ad115a96fdaac712c008",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltruu7mv028r13tcurn771h1",
       "address": "0xc79d15ec031bc97bc4dc636469ed5417e21f7dd6",
+      "dbGoon": 3,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000002",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltruyn4d02wlgo0y4zsi9epu",
       "address": "0xd09ee66d1d5e9f6f99e497f7271f194796eae5e6",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltruz20h036r13tcbd41ohy6",
       "address": "0xc0c60c7253f506faa002f8e58de4ab5b6ef73a80",
+      "dbGoon": 1,
+      "dbSafehouse": 1,
       "goon": "0.0",
       "safehouse": "0.000000000000000001"
     },
     {
       "userId": "did:privy:cltrvy0wm07r313tcm9vxgq1e",
       "address": "0xe7cc24b7ce67279f6e638d3cdbc73175da781212",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltrx9ag800tjq68j8chgno4e",
       "address": "0x0810aec217f3ceec26181c3888f3e8a7844f3593",
+      "dbGoon": 10,
+      "dbSafehouse": 4,
       "goon": "0.000000000000000009",
       "safehouse": "0.000000000000000004"
     },
     {
       "userId": "did:privy:cltrxkutr011n12l8wkkdeknn",
       "address": "0x017213f3e46ccc20cf41d4edfbb8ebddadd48026",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltryb7dv0a1cwamvmgh1omua",
       "address": "0xe9f60099c75dc39b9126c1f060a9ee2d6007e6e9",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:clts2oy940dsjlkqim1k6m0dp",
       "address": "0x89ccdf8ccbb8d8f544003abeb5d53e213f09c90f",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:clts3ifhx01mfpwwbfoa6qjyf",
       "address": "0x2d729eb2ccaf083923242ff5f81167d0427bd1c9",
+      "dbGoon": 30,
+      "dbSafehouse": 43,
       "goon": "0.000000000000000029",
       "safehouse": "0.000000000000000043"
     },
     {
       "userId": "did:privy:clts63m5c0adn11zwmq1wul00",
       "address": "0x06da622636d1ba43581362c8e75852fdec0c7f7b",
+      "dbGoon": 2,
+      "dbSafehouse": 3,
       "goon": "0.000000000000000001",
       "safehouse": "0.000000000000000003"
     },
     {
       "userId": "did:privy:clts855pn02773zscuvu7lip6",
       "address": "0x3c34853b00151ebd526a80ca971a073d2f1bf212",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:clts9gsij0gs5fsq4yudb02n9",
       "address": "0xe5b232639cca880155558ac7f569410f4aed67ee",
+      "dbGoon": 11,
+      "dbSafehouse": 4,
       "goon": "0.00000000000000001",
       "safehouse": "0.000000000000000004"
     },
     {
       "userId": "did:privy:cltsbv3k503xxzz6vff9zu1r6",
       "address": "0x6a6de0091b3193555b07d8fb4db00b70e988fa49",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltscg0lt027t1131qzbf44qc",
       "address": "0x0d61dbdefc84b770eb155c3e13685bc48b214127",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltse93ht0iizewtu3r15dcxo",
       "address": "0x4e56754f1dc73f86223e9872f5c760b5395f3d9b",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltsf5ps002phvbyg27pobtns",
       "address": "0x9238e7297c25fda3bfd6ace36a2a0cafeb38c1da",
+      "dbGoon": 2,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000001",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltsgxnxg06uvugwsfyo1qxok",
       "address": "0xaded6ed5735af9c247bb7cae57c52914745e7525",
+      "dbGoon": 2,
+      "dbSafehouse": 2,
       "goon": "0.000000000000000001",
       "safehouse": "0.000000000000000002"
     },
     {
       "userId": "did:privy:cltslup4f02qjr3ogd3fw1qfq",
       "address": "0xbd6974ecaedcf83c013a00e208230926af3214db",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltslwd8k02khx2q856e9zz0x",
       "address": "0x6c7732a54bf1a113c7e77a6c670a2a9b4bf4b181",
+      "dbGoon": 26,
+      "dbSafehouse": 72,
       "goon": "0.000000000000000025",
       "safehouse": "0.000000000000000072"
     },
     {
       "userId": "did:privy:cltsm6m3m04cbmsi91zq12al1",
       "address": "0x148b5a5a4d83d3bbdbd8891991b8363780546fcb",
+      "dbGoon": 1,
+      "dbSafehouse": 0,
       "goon": "0.0",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltsrsbeq09yjdg5r78yjzmaw",
       "address": "0xaf5b3874109b16d0f68ea51ca0c94658ee40a907",
+      "dbGoon": 73,
+      "dbSafehouse": 6,
       "goon": "0.000000000000000072",
       "safehouse": "0.000000000000000006"
     },
     {
       "userId": "did:privy:cltsukgp700u3e36ixyu7vmvt",
       "address": "0x6e2a55e7589c3d01adb2b96766c307806d0b1db2",
+      "dbGoon": 18,
+      "dbSafehouse": 1,
       "goon": "0.000000000000000017",
       "safehouse": "0.000000000000000001"
     },
     {
       "userId": "did:privy:cltsyugen06mojpqzkh0x7bdx",
       "address": "0xbf3f7937307a2ee0f1993b2a3e0f1d3969b8451f",
+      "dbGoon": 21,
+      "dbSafehouse": 31,
       "goon": "0.00000000000000002",
       "safehouse": "0.000000000000000031"
     },
     {
       "userId": "did:privy:cltt1n0yv0khn771p1w3exg8q",
       "address": "0xf4f73daf69ab1e78191ac983716c0b10d9d8342f",
+      "dbGoon": 240,
+      "dbSafehouse": 230,
       "goon": "0.000000000000000239",
       "safehouse": "0.00000000000000023"
     },
     {
       "userId": "did:privy:cltt5gozt02jjt9kyci66ch3d",
       "address": "0xbb19e583777911f88811174ce753addcf757daf9",
+      "dbGoon": 22,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000021",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltt7fokr05c5jhw2rdoi5rjf",
       "address": "0xb06731e74716ecf9603a0fdf3ac3de7d5fc847c2",
+      "dbGoon": 4,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000003",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltu3txn50431jjeqwkc0p8g3",
       "address": "0x5937e318eda32e56121d90cdff8bba7946eace26",
+      "dbGoon": 11,
+      "dbSafehouse": 0,
       "goon": "0.00000000000000001",
       "safehouse": "0.0"
     },
     {
       "userId": "did:privy:cltujp3ie01qtz7iw9whvih47",
       "address": "0xa91c42a0db41cdb0030f533397500c4c7c977e69",
+      "dbGoon": 3,
+      "dbSafehouse": 0,
       "goon": "0.000000000000000002",
       "safehouse": "0.0"
     }

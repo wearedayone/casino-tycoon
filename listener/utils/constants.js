@@ -6,4 +6,5 @@ export const GangsterEvent = {
   Deposit: 'Deposit',
   Withdraw: 'Withdraw',
   Burn: 'Burn',
+  Retire: 'Retire',
 };

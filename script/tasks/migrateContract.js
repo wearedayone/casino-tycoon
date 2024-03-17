@@ -117,18 +117,46 @@ const exportGameData = async (addr, input, output) => {
   let users = [];
   let tGoon = parseEther('0');
   let tSafeHouse = parseEther('0');
-  const listRetired = ['0x72560bf96f4a8f28e21530d19f7e28d6a379fd1f'];
+  // const listRetired = ['0x72560bf96f4a8f28e21530d19f7e28d6a379fd1f'];
+  const listRetired = [
+    '0x0b01626d504be4809b6bbb317d38db9cab69ef52',
+    '0x0f8c7920dda1ed39858a41c6df4673d4430a5e6e',
+    '0x2979643926f8d5234ccccf79c9c8cebff76fe3e5',
+    '0x323820f9544425211e8068fb442981c1b39ad805',
+    '0xe1fe515675b748786775b93f63c5cc7187c6aa20',
+    '0xa91fe55af6a7cc5a81a56438af782a7ec34b5d47',
+    '0x7048d66d4e53ded9f6ac8e70626828a468823363',
+    '0x09b2434acf77f5fc06f386d0ddb7f87c7ba78eda',
+    '0x3623be9ff04cd9042cae292d186c0e15d6c8a539',
+    '0xbe25e4623307da732e4e446ee631175023213736',
+    '0x296249680665fc2ba6e2c91e8531801138ce6d3a',
+    '0xd93057e7339f627928d3d4b5aea96fdbd1aa1b9a',
+    '0x3ccf6766a194396fe8945d58907250317f62465b',
+    '0xb160c300b463b44a717476436795d96cc2b29e62',
+    '0x4c38c432534aa86955db51838474600c8495f76f',
+    '0xf7a76854869d11c80075453097383cd04df0f25d',
+    '0x4da919d7c7b18847d3d71dbea9ac44c9cf5be97c',
+    '0x31f1a74b4da2d189a18b27914f9f77716ee670cd',
+    '0xef7d67ee67f5c9414867029872c3f89de1a4d761',
+  ];
+
+  console.log('Start extract user data from contract');
+  let i = 0;
   for (const user of listUsers) {
+    console.log(`${++i}/${listUsers.length}`);
     const address = user?.address;
     if (!address) continue;
-    if (listRetired.includes(address)) continue;
-    user.goon = formatEther(await gaContract.goon(address));
-    user.safehouse = formatEther(await gaContract.safehouse(address));
-    tGoon = tGoon.add(parseEther(user.goon));
-    tSafeHouse = tSafeHouse.add(parseEther(user.safehouse));
+    if (listRetired.includes(address)) {
+      user.goon = 0;
+      user.safehouse = 0;
+    } else {
+      user.goon = formatEther(await gaContract.goon(address));
+      user.safehouse = formatEther(await gaContract.safehouse(address));
+      tGoon = tGoon.add(parseEther(user.goon));
+      tSafeHouse = tSafeHouse.add(parseEther(user.safehouse));
+    }
 
     users.push(user);
-    // console.log({ users });
   }
   oldData.tgoonNew = formatEther(tGoon);
   oldData.tshouseNew = formatEther(tSafeHouse);
@@ -154,18 +182,19 @@ const importNewGameData = async (addr, filename) => {
 
   const currentETHBalance = await ethersProvider.getBalance(addr);
   const oldBETHBalance = parseEther(gameData.ETHBalance);
-  if (currentETHBalance != oldBETHBalance) {
-    const diff = oldBETHBalance.sub(currentETHBalance);
-    if (diff > 0) {
-      console.log('send eth', formatEther(diff));
-      await adminWallet.sendTransaction({
-        from: adminWalletAddr,
-        to: addr,
-        data: '0x',
-        value: diff,
-      });
-    } else console.log('dont need to send eth');
-  }
+  // TODO: check to do step manual
+  // if (currentETHBalance != oldBETHBalance) {
+  //   const diff = oldBETHBalance.sub(currentETHBalance);
+  //   if (diff > 0) {
+  //     console.log('send eth', formatEther(diff));
+  //     await adminWallet.sendTransaction({
+  //       from: adminWalletAddr,
+  //       to: addr,
+  //       data: '0x',
+  //       value: diff,
+  //     });
+  //   } else console.log('dont need to send eth');
+  // }
   console.log('Start update game data');
   const _devDebt = gameData.devDebt.hex.startsWith('-')
     ? BigInt(gameData.devDebt.hex.substring(1)) * BigInt(-1)
@@ -200,35 +229,36 @@ const importNewGameData = async (addr, filename) => {
   let i = 0;
   let batch = 10;
   while (i < users.length) {
-    const currentBatch = users.slice(i, batch);
+    const currentBatch = users.slice(i, batch + i);
+    console.log(currentBatch[0]);
     const addresses = currentBatch.map((u) => u.address);
     const goons = currentBatch.map((u) => parseEther(u.goon));
     const safehouses = currentBatch.map((u) => parseEther(u.safehouse));
     gasPrice = await ethersProvider.getGasPrice();
     await gaContract.migrateGoon(addresses, goons, 1, { gasPrice });
+
+    gasPrice = await ethersProvider.getGasPrice();
     await gaContract.migrateGoon(addresses, safehouses, 2, { gasPrice });
     i += batch;
   }
 };
 
 const main = async () => {
-  const oldGame = '0x9880ac162e4108364b5076a426D0fa1f681ED0BD';
-  const newGame = '0x1BD4b8cc71d90878b404B6DAd70abD814eC49622';
-  const seasonId = 'TXwJnlfpLlPhhQN2OIOh';
+  // const oldGame = '0x9880ac162e4108364b5076a426D0fa1f681ED0BD';
+  // const newGame = '0x9Db3541cdce8610a25D4E032BA8D477eCa6E2D6d';
+  // const seasonId = 'TXwJnlfpLlPhhQN2OIOh';
+  // await exportUserAddress(seasonId, '_listUsers_STG.json');
+  // await exportGameData(oldGame, '_listUsers_STG.json', '_oldData_STG.json');
+  // await importNewGameData(newGame, '_oldData_STG.json');
+  // await exportGameData(newGame, '_listUsers_STG.json', '_newData_STG.json');
 
-  await exportUserAddress(seasonId, '_listUsers_STG.json');
-  await exportGameData(oldGame, '_listUsers_STG.json', '_oldData_STG.json');
-  await importNewGameData(newGame, '_oldData_STG.json');
-  await exportGameData(newGame, '_listUsers_STG.json', '_newData_STG.json');
-
-  //   const oldGame = '0x5e62Dd7D4008fD8A9dA051B845d254C3e34E0503';
-  //   //   const newGame = '0x5F74D054B07a6c3f9A4f39bA15FA193550e370fd';
-  //   const seasonId = 'ZteHVCoKgpnMvg1tHTfj';
-
-  //   await exportUserAddress(seasonId, '_listUsers_PRD.json');
-  //   await exportGameData(oldGame, '_listUsers_PRD.json', '_oldData_PRD.json');
-  //   //   await importNewGameData(newGame, '_oldData_STG.json');
-  //   //   await exportGameData(newGame, '_listUsers_STG.json', '_newData_STG.json');
+  const oldGame = '0x5e62Dd7D4008fD8A9dA051B845d254C3e34E0503';
+  const newGame = '0x5120BF472C260966F01B6B9729A4EF6be7347233';
+  const seasonId = 'ZteHVCoKgpnMvg1tHTfj';
+  // await exportUserAddress(seasonId, '_listUsers_PRD.json');
+  // await exportGameData(oldGame, '_listUsers_PRD.json', '_oldData_PRD.json');
+  await importNewGameData(newGame, '_oldData_PRD1.json');
+  // await exportGameData(newGame, '_listUsers_PRD.json', '_newData_PRD.json');
 };
 
 main()
