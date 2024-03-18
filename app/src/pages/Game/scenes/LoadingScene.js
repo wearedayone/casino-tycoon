@@ -264,6 +264,8 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('pagination', '/images/pagination.png');
     this.load.image('pagination-active', '/images/pagination-active.png');
     this.load.image('pagination-disabled', '/images/pagination-disabled.png');
+    this.load.image('deploy-now', '/images/deploy-now.png');
+    this.load.image('tooltip-next-war', '/images/tooltip-next-war.png');
 
     this.load.image('text-container', '/images/text-container.png');
     this.load.image('text-container-outlined', '/images/text-container-outlined.png');
