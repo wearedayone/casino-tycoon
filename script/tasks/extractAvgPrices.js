@@ -2,7 +2,31 @@ import fs from 'fs';
 
 import admin, { firestore } from '../configs/admin.config.js';
 import { calculateNextBuildingBuyPriceBatch, calculateNextWorkerBuyPriceBatch } from '../utils/formulas.js';
-import { getActiveSeason } from '../utils/utils.js';
+import { getActiveSeason, getActiveSeasonId } from '../utils/utils.js';
+
+const countTxns = async () => {
+  const activeSeasonId = await getActiveSeasonId();
+  const now = Date.now();
+  const startTimeUnix = now - 1 * 24 * 60 * 60 * 1000;
+  const workerTxns = await firestore
+    .collection('transaction')
+    .where('seasonId', '==', activeSeasonId)
+    .where('type', '==', 'buy-worker')
+    .where('status', '==', 'Success')
+    .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startTimeUnix))
+    .count()
+    .get();
+  const buildingTxns = await firestore
+    .collection('transaction')
+    .where('seasonId', '==', activeSeasonId)
+    .where('type', '==', 'buy-building')
+    .where('status', '==', 'Success')
+    .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startTimeUnix))
+    .count()
+    .get();
+
+  console.log({ workerTxns: workerTxns.data().count, buildingTxns: buildingTxns.data().count });
+};
 
 const getWorkerAvgPrices = async ({ timeMode, blockMode }) => {
   if (!['1d', '5d'].includes(timeMode)) throw new Error('API error: Invalid time mode');
@@ -140,7 +164,103 @@ const getBuildingAvgPrices = async ({ timeMode, blockMode }) => {
   return avgPrices;
 };
 
-const timeMode = '5d';
+const getAllBuildingTxns = async ({ timeMode }) => {
+  if (!['1d', '5d'].includes(timeMode)) throw new Error('API error: Invalid time mode');
+
+  const activeSeasonId = await getActiveSeasonId();
+  const now = Date.now();
+  const numberOfDays = timeMode === '1d' ? 1 : 5;
+  const startTimeUnix = now - numberOfDays * 24 * 60 * 60 * 1000;
+
+  const potentialTxnSnapshot = await firestore
+    .collection('transaction')
+    .where('seasonId', '==', activeSeasonId)
+    .where('type', '==', 'buy-building')
+    .where('status', '==', 'Success')
+    .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startTimeUnix))
+    .orderBy('createdAt', 'asc')
+    .get();
+
+  const txns = potentialTxnSnapshot.docs.map((doc) => ({
+    value: doc.data().prices[0],
+    createdAt: doc.data().createdAt.toDate().getTime(),
+  }));
+
+  return txns;
+};
+
+const getAllWorkerTxns = async ({ timeMode }) => {
+  if (!['1d', '5d'].includes(timeMode)) throw new Error('API error: Invalid time mode');
+
+  const activeSeasonId = await getActiveSeasonId();
+  const now = Date.now();
+  const numberOfDays = timeMode === '1d' ? 1 : 5;
+  const startTimeUnix = now - numberOfDays * 24 * 60 * 60 * 1000;
+
+  const potentialTxnSnapshot = await firestore
+    .collection('transaction')
+    .where('seasonId', '==', activeSeasonId)
+    .where('type', '==', 'buy-worker')
+    .where('status', '==', 'Success')
+    .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startTimeUnix))
+    .orderBy('createdAt', 'asc')
+    .get();
+
+  const txns = potentialTxnSnapshot.docs.map((doc) => ({
+    value: doc.data().prices[0],
+    createdAt: doc.data().createdAt.toDate().getTime(),
+  }));
+
+  return txns;
+};
+
+const getWorkerTxnsInFirst5Days = async () => {
+  const activeSeason = await getActiveSeason();
+  const startTimeUnix = activeSeason.startTime.toDate().getTime();
+  const endTimeUnix = startTimeUnix + 5 * 24 * 60 * 60 * 1000;
+
+  const potentialTxnSnapshot = await firestore
+    .collection('transaction')
+    .where('seasonId', '==', activeSeason.id)
+    .where('type', '==', 'buy-worker')
+    .where('status', '==', 'Success')
+    .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startTimeUnix))
+    .where('createdAt', '<', admin.firestore.Timestamp.fromMillis(endTimeUnix))
+    .orderBy('createdAt', 'asc')
+    .get();
+
+  const txns = potentialTxnSnapshot.docs.map((doc) => ({
+    value: doc.data().prices[0],
+    createdAt: doc.data().createdAt.toDate().getTime(),
+  }));
+
+  return txns;
+};
+
+const getBuildingTxnsInFirst5Days = async () => {
+  const activeSeason = await getActiveSeason();
+  const startTimeUnix = activeSeason.startTime.toDate().getTime();
+  const endTimeUnix = startTimeUnix + 5 * 24 * 60 * 60 * 1000;
+
+  const potentialTxnSnapshot = await firestore
+    .collection('transaction')
+    .where('seasonId', '==', activeSeason.id)
+    .where('type', '==', 'buy-building')
+    .where('status', '==', 'Success')
+    .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startTimeUnix))
+    .where('createdAt', '<', admin.firestore.Timestamp.fromMillis(endTimeUnix))
+    .orderBy('createdAt', 'asc')
+    .get();
+
+  const txns = potentialTxnSnapshot.docs.map((doc) => ({
+    value: doc.data().prices[0],
+    createdAt: doc.data().createdAt.toDate().getTime(),
+  }));
+
+  return txns;
+};
+
+const timeMode = '1d';
 const blockMode = '1h';
 const gaps = {
   '5m': 5 * 60 * 1000,
@@ -154,6 +274,9 @@ const gaps = {
 };
 
 const main = async () => {
+  console.log('counting last 24h txns...');
+  await countTxns();
+
   console.log('extract goon price...');
   const goonAvgPrices = await getWorkerAvgPrices({ timeMode, blockMode });
   fs.writeFileSync('./goon-avg-prices.json', JSON.stringify(goonAvgPrices, null, 2), { encoding: 'utf-8' });
@@ -163,6 +286,30 @@ const main = async () => {
   const safehouseAvgPrices = await getBuildingAvgPrices({ timeMode, blockMode });
   fs.writeFileSync('./safehouse-avg-prices.json', JSON.stringify(safehouseAvgPrices, null, 2), { encoding: 'utf-8' });
   console.log('extracted safehouse price');
+
+  console.log('get all building txns following time mode...');
+  const buildingTxns = await getAllBuildingTxns({ timeMode });
+  fs.writeFileSync('./safehouse-all-txns-prices.json', JSON.stringify(buildingTxns, null, 2), { encoding: 'utf-8' });
+  console.log('get all building txns following time mode done');
+
+  console.log('get all worker txns following time mode...');
+  const workerTxns = await getAllWorkerTxns({ timeMode });
+  fs.writeFileSync('./goon-all-txns-prices.json', JSON.stringify(workerTxns, null, 2), { encoding: 'utf-8' });
+  console.log('get all worker txns following time mode done');
+
+  console.log('get all building txns first 5 days...');
+  const first5DaysBuildingTxns = await getBuildingTxnsInFirst5Days();
+  fs.writeFileSync('./safehouse-first-5-days-all-txns-prices.json', JSON.stringify(first5DaysBuildingTxns, null, 2), {
+    encoding: 'utf-8',
+  });
+  console.log('get all building txns first 5 days done');
+
+  console.log('get all worker txns first 5 days...');
+  const first5DaysWorkerTxns = await getWorkerTxnsInFirst5Days();
+  fs.writeFileSync('./goon-first-5-days-all-txns-prices.json', JSON.stringify(first5DaysWorkerTxns, null, 2), {
+    encoding: 'utf-8',
+  });
+  console.log('get all worker txns first 5 days done');
 };
 
 main()

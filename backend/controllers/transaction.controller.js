@@ -3,8 +3,8 @@ import {
   validateTxnHash,
   claimToken as claimTokenService,
   finishClaimToken,
-  getWorkerAvgPrices,
-  getBuildingAvgPrices,
+  getWorkerPriceChart,
+  getBuildingPriceChart,
 } from '../services/transaction.service.js';
 import logger from '../utils/logger.js';
 
@@ -48,10 +48,10 @@ export const claimToken = async (req, res) => {
   }
 };
 
-export const getWorkerAveragePrices = async (req, res) => {
+export const getWorkerPrices = async (req, res) => {
   try {
-    const { timeMode, blockMode } = req.query;
-    const result = await getWorkerAvgPrices({ timeMode, blockMode });
+    const { timeMode } = req.query;
+    const result = await getWorkerPriceChart({ timeMode });
     return res.status(200).send(result);
   } catch (err) {
     console.error(err);
@@ -61,10 +61,10 @@ export const getWorkerAveragePrices = async (req, res) => {
   }
 };
 
-export const getBuildingAveragePrices = async (req, res) => {
+export const getBuildingPrices = async (req, res) => {
   try {
-    const { timeMode, blockMode } = req.query;
-    const result = await getBuildingAvgPrices({ timeMode, blockMode });
+    const { timeMode } = req.query;
+    const result = await getBuildingPriceChart({ timeMode });
     return res.status(200).send(result);
   } catch (err) {
     console.error(err);

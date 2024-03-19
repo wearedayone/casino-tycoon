@@ -658,140 +658,190 @@ export const finishClaimToken = async ({ address, claimedAmount, transactionId }
   }
 };
 
-export const getWorkerAvgPrices = async ({ timeMode, blockMode }) => {
-  if (!['1d', '5d'].includes(timeMode)) throw new Error('API error: Invalid time mode');
-  if (!['5m', '10m', '15m', '30m', '1h', '2h', '4h', '6h'].includes(blockMode))
-    throw new Error('API error: Invalid block mode');
+// export const getWorkerPriceChart = async ({ timeMode, blockMode }) => {
+//   if (!['1d', '5d'].includes(timeMode)) throw new Error('API error: Invalid time mode');
+//   if (!['5m', '10m', '15m', '30m', '1h', '2h', '4h', '6h'].includes(blockMode))
+//     throw new Error('API error: Invalid block mode');
 
-  const activeSeason = await getActiveSeason();
+//   const activeSeason = await getActiveSeason();
+//   const now = Date.now();
+//   const numberOfDays = timeMode === '1d' ? 1 : 5;
+//   const startTimeUnix = now - numberOfDays * 24 * 60 * 60 * 1000;
+
+//   const potentialTxnSnapshot = await firestore
+//     .collection('transaction')
+//     .where('seasonId', '==', activeSeason.id)
+//     .where('type', '==', 'buy-worker')
+//     .where('status', '==', 'Success')
+//     .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startTimeUnix - 12 * 60 * 60 * 1000))
+//     .orderBy('createdAt', 'asc')
+//     .get();
+
+//   const potentialTxns = potentialTxnSnapshot.docs.map((doc) => ({
+//     id: doc.id,
+//     ...doc.data(),
+//     createdAt: doc.data().createdAt.toDate().getTime(),
+//   }));
+//   const txns = potentialTxns.filter((txn) => txn.createdAt >= startTimeUnix);
+
+//   const gap = gaps[blockMode];
+//   const startBlockTimes = [startTimeUnix];
+//   let nextStartTime = startTimeUnix + gap;
+//   while (nextStartTime < now) {
+//     startBlockTimes.push(nextStartTime);
+//     nextStartTime += gap;
+//   }
+
+//   const avgPrices = [];
+//   for (let i = 0; i < startBlockTimes.length; i++) {
+//     const startTime = startBlockTimes[i];
+//     const nextStartTime = startBlockTimes[i + 1];
+//     const firstTxn = txns.find(
+//       (item) => item.createdAt > startTime && (!nextStartTime || item.createdAt < nextStartTime)
+//     );
+
+//     if (firstTxn) {
+//       avgPrices.push({ startAt: startTime, value: firstTxn.prices[0] });
+//     } else {
+//       const { worker } = activeSeason;
+
+//       const startSalePeriod = startTime - 12 * 60 * 60 * 1000;
+//       const workerTxns = potentialTxns.filter(
+//         (txn) => txn.createdAt >= startSalePeriod && (!nextStartTime || txn.createdAt < nextStartTime)
+//       );
+
+//       const workerSalesLastPeriod = workerTxns.reduce((total, doc) => total + doc.amount, 0);
+//       const workerPrices = calculateNextWorkerBuyPriceBatch(
+//         workerSalesLastPeriod,
+//         worker.targetDailyPurchase,
+//         worker.targetPrice,
+//         worker.basePrice,
+//         1
+//       );
+
+//       avgPrices.push({ startAt: startTime, value: workerPrices.prices[0] });
+//     }
+//   }
+
+//   return avgPrices;
+// };
+
+// export const getBuildingPriceChart = async ({ timeMode, blockMode }) => {
+//   if (!['1d', '5d'].includes(timeMode)) throw new Error('API error: Invalid time mode');
+//   if (!['5m', '10m', '15m', '30m', '1h', '2h', '4h', '6h'].includes(blockMode))
+//     throw new Error('API error: Invalid block mode');
+
+//   const activeSeason = await getActiveSeason();
+//   const now = Date.now();
+//   const numberOfDays = timeMode === '1d' ? 1 : 5;
+//   const startTimeUnix = now - numberOfDays * 24 * 60 * 60 * 1000;
+
+//   const potentialTxnSnapshot = await firestore
+//     .collection('transaction')
+//     .where('seasonId', '==', activeSeason.id)
+//     .where('type', '==', 'buy-building')
+//     .where('status', '==', 'Success')
+//     .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startTimeUnix - 12 * 60 * 60 * 1000))
+//     .orderBy('createdAt', 'asc')
+//     .get();
+
+//   const potentialTxns = potentialTxnSnapshot.docs.map((doc) => ({
+//     id: doc.id,
+//     ...doc.data(),
+//     createdAt: doc.data().createdAt.toDate().getTime(),
+//   }));
+//   const txns = potentialTxns.filter((txn) => txn.createdAt >= startTimeUnix);
+
+//   const gap = gaps[blockMode];
+//   const startBlockTimes = [startTimeUnix];
+//   let nextStartTime = startTimeUnix + gap;
+//   while (nextStartTime < now) {
+//     startBlockTimes.push(nextStartTime);
+//     nextStartTime += gap;
+//   }
+
+//   const avgPrices = [];
+//   for (let i = 0; i < startBlockTimes.length; i++) {
+//     const startTime = startBlockTimes[i];
+//     const nextStartTime = startBlockTimes[i + 1];
+//     const firstTxn = txns.find(
+//       (item) => item.createdAt > startTime && (!nextStartTime || item.createdAt < nextStartTime)
+//     );
+
+//     if (firstTxn) {
+//       avgPrices.push({ startAt: startTime, value: firstTxn.prices[0] });
+//     } else {
+//       const { building } = activeSeason;
+
+//       const startSalePeriod = startTime - 12 * 60 * 60 * 1000;
+//       const buildingTxns = potentialTxns.filter(
+//         (txn) => txn.createdAt >= startSalePeriod && (!nextStartTime || txn.createdAt < nextStartTime)
+//       );
+
+//       const buildingSalesLastPeriod = buildingTxns.reduce((total, doc) => total + doc.amount, 0);
+//       const buildingPrices = calculateNextBuildingBuyPriceBatch(
+//         buildingSalesLastPeriod,
+//         building.targetDailyPurchase,
+//         building.targetPrice,
+//         building.basePrice,
+//         1
+//       );
+
+//       avgPrices.push({ startAt: startTime, value: buildingPrices.prices[0] });
+//     }
+//   }
+
+//   return avgPrices;
+// };
+
+export const getBuildingPriceChart = async ({ timeMode }) => {
+  if (!['1d', '5d'].includes(timeMode)) throw new Error('API error: Invalid time mode');
+
+  const activeSeasonId = await getActiveSeasonId();
   const now = Date.now();
   const numberOfDays = timeMode === '1d' ? 1 : 5;
   const startTimeUnix = now - numberOfDays * 24 * 60 * 60 * 1000;
 
   const potentialTxnSnapshot = await firestore
     .collection('transaction')
-    .where('seasonId', '==', activeSeason.id)
-    .where('type', '==', 'buy-worker')
-    .where('status', '==', 'Success')
-    .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startTimeUnix - 12 * 60 * 60 * 1000))
-    .orderBy('createdAt', 'asc')
-    .get();
-
-  const potentialTxns = potentialTxnSnapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-    createdAt: doc.data().createdAt.toDate().getTime(),
-  }));
-  const txns = potentialTxns.filter((txn) => txn.createdAt >= startTimeUnix);
-
-  const gap = gaps[blockMode];
-  const startBlockTimes = [startTimeUnix];
-  let nextStartTime = startTimeUnix + gap;
-  while (nextStartTime < now) {
-    startBlockTimes.push(nextStartTime);
-    nextStartTime += gap;
-  }
-
-  const avgPrices = [];
-  for (let i = 0; i < startBlockTimes.length; i++) {
-    const startTime = startBlockTimes[i];
-    const nextStartTime = startBlockTimes[i + 1];
-    const firstTxn = txns.find(
-      (item) => item.createdAt > startTime && (!nextStartTime || item.createdAt < nextStartTime)
-    );
-
-    if (firstTxn) {
-      avgPrices.push({ startAt: startTime, value: firstTxn.prices[0] });
-    } else {
-      const { worker } = activeSeason;
-
-      const startSalePeriod = startTime - 12 * 60 * 60 * 1000;
-      const workerTxns = potentialTxns.filter(
-        (txn) => txn.createdAt >= startSalePeriod && (!nextStartTime || txn.createdAt < nextStartTime)
-      );
-
-      const workerSalesLastPeriod = workerTxns.reduce((total, doc) => total + doc.amount, 0);
-      const workerPrices = calculateNextWorkerBuyPriceBatch(
-        workerSalesLastPeriod,
-        worker.targetDailyPurchase,
-        worker.targetPrice,
-        worker.basePrice,
-        1
-      );
-
-      avgPrices.push({ startAt: startTime, value: workerPrices.prices[0] });
-    }
-  }
-
-  return avgPrices;
-};
-
-export const getBuildingAvgPrices = async ({ timeMode, blockMode }) => {
-  if (!['1d', '5d'].includes(timeMode)) throw new Error('API error: Invalid time mode');
-  if (!['5m', '10m', '15m', '30m', '1h', '2h', '4h', '6h'].includes(blockMode))
-    throw new Error('API error: Invalid block mode');
-
-  const activeSeason = await getActiveSeason();
-  const now = Date.now();
-  const numberOfDays = timeMode === '1d' ? 1 : 5;
-  const startTimeUnix = now - numberOfDays * 24 * 60 * 60 * 1000;
-
-  const potentialTxnSnapshot = await firestore
-    .collection('transaction')
-    .where('seasonId', '==', activeSeason.id)
+    .where('seasonId', '==', activeSeasonId)
     .where('type', '==', 'buy-building')
     .where('status', '==', 'Success')
-    .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startTimeUnix - 12 * 60 * 60 * 1000))
+    .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startTimeUnix))
     .orderBy('createdAt', 'asc')
     .get();
 
-  const potentialTxns = potentialTxnSnapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
+  const txns = potentialTxnSnapshot.docs.map((doc) => ({
+    value: doc.data().prices[0],
     createdAt: doc.data().createdAt.toDate().getTime(),
   }));
-  const txns = potentialTxns.filter((txn) => txn.createdAt >= startTimeUnix);
 
-  const gap = gaps[blockMode];
-  const startBlockTimes = [startTimeUnix];
-  let nextStartTime = startTimeUnix + gap;
-  while (nextStartTime < now) {
-    startBlockTimes.push(nextStartTime);
-    nextStartTime += gap;
-  }
+  return txns;
+};
 
-  const avgPrices = [];
-  for (let i = 0; i < startBlockTimes.length; i++) {
-    const startTime = startBlockTimes[i];
-    const nextStartTime = startBlockTimes[i + 1];
-    const firstTxn = txns.find(
-      (item) => item.createdAt > startTime && (!nextStartTime || item.createdAt < nextStartTime)
-    );
+export const getWorkerPriceChart = async ({ timeMode }) => {
+  if (!['1d', '5d'].includes(timeMode)) throw new Error('API error: Invalid time mode');
 
-    if (firstTxn) {
-      avgPrices.push({ startAt: startTime, value: firstTxn.prices[0] });
-    } else {
-      const { building } = activeSeason;
+  const activeSeasonId = await getActiveSeasonId();
+  const now = Date.now();
+  const numberOfDays = timeMode === '1d' ? 1 : 5;
+  const startTimeUnix = now - numberOfDays * 24 * 60 * 60 * 1000;
 
-      const startSalePeriod = startTime - 12 * 60 * 60 * 1000;
-      const buildingTxns = potentialTxns.filter(
-        (txn) => txn.createdAt >= startSalePeriod && (!nextStartTime || txn.createdAt < nextStartTime)
-      );
+  const potentialTxnSnapshot = await firestore
+    .collection('transaction')
+    .where('seasonId', '==', activeSeasonId)
+    .where('type', '==', 'buy-worker')
+    .where('status', '==', 'Success')
+    .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startTimeUnix))
+    .orderBy('createdAt', 'asc')
+    .get();
 
-      const buildingSalesLastPeriod = buildingTxns.reduce((total, doc) => total + doc.amount, 0);
-      const buildingPrices = calculateNextBuildingBuyPriceBatch(
-        buildingSalesLastPeriod,
-        building.targetDailyPurchase,
-        building.targetPrice,
-        building.basePrice,
-        1
-      );
+  const txns = potentialTxnSnapshot.docs.map((doc) => ({
+    value: doc.data().prices[0],
+    createdAt: doc.data().createdAt.toDate().getTime(),
+  }));
 
-      avgPrices.push({ startAt: startTime, value: buildingPrices.prices[0] });
-    }
-  }
-
-  return avgPrices;
+  return txns;
 };
 
 // utils
