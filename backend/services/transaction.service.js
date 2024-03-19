@@ -3,7 +3,7 @@ import { formatEther, parseEther } from '@ethersproject/units';
 
 import admin, { firestore } from '../configs/firebase.config.js';
 import alchemy from '../configs/alchemy.config.js';
-import { getActiveSeason, updateSeasonSnapshotSchedule } from './season.service.js';
+import { getActiveSeason, getActiveSeasonId, updateSeasonSnapshotSchedule } from './season.service.js';
 import { getLeaderboard } from './gamePlay.service.js';
 import {
   claimToken as claimTokenTask,
@@ -658,6 +658,152 @@ export const finishClaimToken = async ({ address, claimedAmount, transactionId }
   }
 };
 
+export const getWorkerAvgPrices = async ({ timeMode, blockMode }) => {
+  if (!['1d', '5d'].includes(timeMode)) throw new Error('API error: Invalid time mode');
+  if (!['5m', '10m', '15m', '30m', '1h', '2h', '4h', '6h'].includes(blockMode))
+    throw new Error('API error: Invalid block mode');
+
+  const activeSeason = await getActiveSeason();
+  const now = Date.now();
+  const numberOfDays = timeMode === '1d' ? 1 : 5;
+  const startTimeUnix = now - numberOfDays * 24 * 60 * 60 * 1000;
+  const txnSnapshot = await firestore
+    .collection('transaction')
+    .where('seasonId', '==', activeSeason.id)
+    .where('type', '==', 'buy-worker')
+    .where('status', '==', 'Success')
+    .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startTimeUnix))
+    .orderBy('createdAt', 'asc')
+    .get();
+  const txns = txnSnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+    createdAt: doc.data().createdAt.toDate().getTime(),
+  }));
+
+  const gap = gaps[blockMode];
+  const startBlockTimes = [startTimeUnix];
+  let nextStartTime = startTimeUnix + gap;
+  while (nextStartTime < now) {
+    startBlockTimes.push(nextStartTime);
+    nextStartTime += gap;
+  }
+
+  const avgPrices = [];
+  for (let i = 0; i < startBlockTimes.length; i++) {
+    const startTime = startBlockTimes[i];
+    const nextStartTime = startBlockTimes[i + 1];
+    const firstTxn = txns.find(
+      (item) => item.createdAt > startTime && (!nextStartTime || item.createdAt < nextStartTime)
+    );
+
+    if (firstTxn) {
+      avgPrices.push({ startAt: startTime, value: firstTxn.prices[0] });
+    } else {
+      const { worker } = activeSeason;
+
+      const startSalePeriod = startTime - 12 * 60 * 60 * 1000;
+      let query = firestore
+        .collection('transaction')
+        .where('seasonId', '==', activeSeason.id)
+        .where('type', '==', 'buy-worker')
+        .where('status', '==', 'Success')
+        .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startSalePeriod));
+
+      if (nextStartTime) {
+        query = query.where('createdAt', '<', admin.firestore.Timestamp.fromMillis(nextStartTime));
+      }
+      const workerTxns = await query.get();
+
+      const workerSalesLastPeriod = workerTxns.docs.reduce((total, doc) => total + doc.data().amount, 0);
+      const workerPrices = calculateNextWorkerBuyPriceBatch(
+        workerSalesLastPeriod,
+        worker.targetDailyPurchase,
+        worker.targetPrice,
+        worker.basePrice,
+        1
+      );
+
+      avgPrices.push({ startAt: startTime, value: workerPrices.prices[0] });
+    }
+  }
+
+  return avgPrices;
+};
+
+export const getBuildingAvgPrices = async ({ timeMode, blockMode }) => {
+  if (!['1d', '5d'].includes(timeMode)) throw new Error('API error: Invalid time mode');
+  if (!['5m', '10m', '15m', '30m', '1h', '2h', '4h', '6h'].includes(blockMode))
+    throw new Error('API error: Invalid block mode');
+
+  const activeSeason = await getActiveSeason();
+  const now = Date.now();
+  const numberOfDays = timeMode === '1d' ? 1 : 5;
+  const startTimeUnix = now - numberOfDays * 24 * 60 * 60 * 1000;
+  const txnSnapshot = await firestore
+    .collection('transaction')
+    .where('seasonId', '==', activeSeason.id)
+    .where('type', '==', 'buy-building')
+    .where('status', '==', 'Success')
+    .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startTimeUnix))
+    .orderBy('createdAt', 'asc')
+    .get();
+  const txns = txnSnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+    createdAt: doc.data().createdAt.toDate().getTime(),
+  }));
+
+  const gap = gaps[blockMode];
+  const startBlockTimes = [startTimeUnix];
+  let nextStartTime = startTimeUnix + gap;
+  while (nextStartTime < now) {
+    startBlockTimes.push(nextStartTime);
+    nextStartTime += gap;
+  }
+
+  const avgPrices = [];
+  for (let i = 0; i < startBlockTimes.length; i++) {
+    const startTime = startBlockTimes[i];
+    const nextStartTime = startBlockTimes[i + 1];
+    const firstTxn = txns.find(
+      (item) => item.createdAt > startTime && (!nextStartTime || item.createdAt < nextStartTime)
+    );
+
+    if (firstTxn) {
+      avgPrices.push({ startAt: startTime, value: firstTxn.prices[0] });
+    } else {
+      const { building } = activeSeason;
+
+      const startSalePeriod = startTime - 12 * 60 * 60 * 1000;
+      let query = firestore
+        .collection('transaction')
+        .where('seasonId', '==', activeSeason.id)
+        .where('type', '==', 'buy-building')
+        .where('status', '==', 'Success')
+        .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startSalePeriod));
+
+      if (nextStartTime) {
+        query = query.where('createdAt', '<', admin.firestore.Timestamp.fromMillis(nextStartTime));
+      }
+      const buildingTxns = await query.get();
+
+      const buildingSalesLastPeriod = buildingTxns.docs.reduce((total, doc) => total + doc.data().amount, 0);
+      const buildingPrices = calculateNextBuildingBuyPriceBatch(
+        buildingSalesLastPeriod,
+        building.targetDailyPurchase,
+        building.targetPrice,
+        building.basePrice,
+        1
+      );
+
+      avgPrices.push({ startAt: startTime, value: buildingPrices.prices[0] });
+    }
+  }
+
+  return avgPrices;
+};
+
 // utils
 export const calculateGeneratedReward = async (userId, { start, end, numberOfMachines, numberOfWorkers } = {}) => {
   const activeSeason = await getActiveSeason();
@@ -696,3 +842,14 @@ export const calculateGeneratedReward = async (userId, { start, end, numberOfMac
 const userTokenGenerationRateChangedTypes = ['buy-machine', 'buy-worker', 'war-penalty', 'retire'];
 const userNetworthChangedTypes = userTokenGenerationRateChangedTypes.concat('buy-building');
 export const userPendingRewardChangedTypes = userTokenGenerationRateChangedTypes.concat('claim-token');
+
+const gaps = {
+  '5m': 5 * 60 * 1000,
+  '10m': 10 * 60 * 1000,
+  '15m': 15 * 60 * 1000,
+  '30m': 30 * 60 * 1000,
+  '1h': 1 * 60 * 60 * 1000,
+  '2h': 2 * 60 * 60 * 1000,
+  '4h': 4 * 60 * 60 * 1000,
+  '6h': 6 * 60 * 60 * 1000,
+};
