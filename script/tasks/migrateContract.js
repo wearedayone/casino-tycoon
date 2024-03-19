@@ -251,13 +251,12 @@ const main = async () => {
   // await exportGameData(oldGame, '_listUsers_STG.json', '_oldData_STG.json');
   // await importNewGameData(newGame, '_oldData_STG.json');
   // await exportGameData(newGame, '_listUsers_STG.json', '_newData_STG.json');
-
-  const oldGame = '0x5e62Dd7D4008fD8A9dA051B845d254C3e34E0503';
-  const newGame = '0x5120BF472C260966F01B6B9729A4EF6be7347233';
-  const seasonId = 'ZteHVCoKgpnMvg1tHTfj';
+  // const oldGame = '';
+  // const newGame = '';
+  // const seasonId = 'ZteHVCoKgpnMvg1tHTfj';
   // await exportUserAddress(seasonId, '_listUsers_PRD.json');
   // await exportGameData(oldGame, '_listUsers_PRD.json', '_oldData_PRD.json');
-  await importNewGameData(newGame, '_oldData_PRD1.json');
+  // await importNewGameData(newGame, '_oldData_PRD1.json');
   // await exportGameData(newGame, '_listUsers_PRD.json', '_newData_PRD.json');
 };
 

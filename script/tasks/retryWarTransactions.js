@@ -5,10 +5,12 @@ import { getParsedEthersError } from '@enzoferey/ethers-error-parser';
 
 import gameContractABI from '../assets/abis/GameContract.json' assert { type: 'json' };
 import tokenABI from '../assets/abis/Token.json' assert { type: 'json' };
+import nftABI from '../assets/abis/NFT.json' assert { type: 'json' };
 import admin, { firestore } from '../configs/admin.config.js';
 import alchemy from '../configs/alchemy.config.js';
 import environments from '../utils/environments.js';
 import { getAccurate } from '../utils/math.js';
+import moment from 'moment';
 
 const { WALLET_PRIVATE_KEY } = environments;
 
@@ -25,12 +27,16 @@ const main = async () => {
   const seasonId = await getActiveSeasonId();
   const failedWar = await firestore.collection('warSnapshot').doc(warId).get();
   const time = failedWar.data().createdAt;
+  console.log({ time });
+  const nextElevenHours = moment(time.toDate()).add(11, 'hour');
+  const timestamp = admin.firestore.Timestamp.fromMillis(nextElevenHours);
 
   const txnSnapshot = await firestore
     .collection('transaction')
     .where('type', 'in', ['war-bonus', 'war-penalty'])
     .where('seasonId', '==', seasonId)
     .where('createdAt', '>=', time)
+    .where('createdAt', '<', timestamp)
     .get();
 
   const txns = txnSnapshot.docs
@@ -44,7 +50,7 @@ const main = async () => {
   console.log('\twar-penalty: ', penaltyTxns.length);
 
   // await claimWarReward(bonusTxns);
-  // await burnMachinesLost(penaltyTxns);
+  await burnMachinesLost(penaltyTxns);
 };
 
 main();
@@ -150,17 +156,22 @@ export const burnMachinesLost = async (penaltyTxns) => {
     const snapshot = userSnapshots[index];
     if (!snapshot.exists) continue;
 
+    const nft = await getNFTBalance({ address: snapshot.data().address });
+    const nftBalance = nft.toNumber();
+    console.log({ nftBalance });
+    const burnNumer = Math.min(nftBalance, penaltyTxns[index].machinesDeadCount);
+    if (burnNumer == 0) continue;
     const txn = await initTransaction({
       userId: snapshot.id,
       type: 'war-penalty',
-      machinesDeadCount: penaltyTxns[index].machinesDeadCount,
+      machinesDeadCount: burnNumer,
     });
 
     users.push({
       userId: snapshot.id,
       txnId: txn.id,
       address: snapshot.data().address,
-      amount: penaltyTxns[index].machinesDeadCount,
+      amount: burnNumer,
     });
   }
 
@@ -206,6 +217,15 @@ const getTokenContract = async (signer) => {
   const { tokenAddress: TOKEN_ADDRESS } = activeSeason || {};
   const contract = new Contract(TOKEN_ADDRESS, tokenABI.abi, signer);
   return contract;
+};
+
+const getNFTBalance = async ({ address }) => {
+  const ethersProvider = await alchemy.config.getProvider();
+  const activeSeason = await getActiveSeason();
+  const { nftAddress } = activeSeason || {};
+  const contract = new Contract(nftAddress, nftABI.abi, ethersProvider);
+  const value = await contract.gangster(address);
+  return value;
 };
 
 export const claimTokenBatch = async ({ addresses, amounts }) => {
