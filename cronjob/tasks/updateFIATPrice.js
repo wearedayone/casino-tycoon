@@ -64,29 +64,34 @@ export const updateFIATPriceUniswapV3 = async () => {
 };
 
 export const updateFIATPriceUniswapV2 = async () => {
-  let tokenAmount = 1;
-  const { tokenAddress, wethAddress, routerContract, swapReceivePercent } = await getSwapContractInfo();
+  try {
+    let tokenAmount = 1;
+    const { tokenAddress, wethAddress, routerContract, swapReceivePercent } = await getSwapContractInfo();
 
-  const tokenAmountFeesIncluded = tokenAmount * swapReceivePercent;
-  const amountIn = parseEther(`${tokenAmountFeesIncluded}`);
-  console.log(amountIn, [tokenAddress, wethAddress]);
-  const res = await routerContract.getAmountsOut(amountIn, [tokenAddress, wethAddress]);
-  const amount = formatEther(res[1]);
-  const uniswapPrice = parseFloat(amount).toFixed(12);
+    const tokenAmountFeesIncluded = tokenAmount * swapReceivePercent;
+    const amountIn = parseEther(`${tokenAmountFeesIncluded}`);
+    console.log(amountIn, [tokenAddress, wethAddress]);
+    const res = await routerContract.getAmountsOut(amountIn, [tokenAddress, wethAddress]);
+    const amount = formatEther(res[1]);
+    const uniswapPrice = parseFloat(amount).toFixed(12);
 
-  const market = await firestore.collection('system').doc('market').get();
-  if (market.exists) {
-    const { tokenPrice } = market.data();
-    console.log({ uniswapPrice, tokenPrice });
-    if (tokenPrice !== uniswapPrice) {
-      await firestore.collection('system').doc('market').update({
+    const market = await firestore.collection('system').doc('market').get();
+    if (market.exists) {
+      const { tokenPrice } = market.data();
+      console.log({ uniswapPrice, tokenPrice });
+      if (tokenPrice !== uniswapPrice) {
+        await firestore.collection('system').doc('market').update({
+          tokenPrice: uniswapPrice,
+        });
+      }
+    } else {
+      await firestore.collection('system').doc('market').set({
         tokenPrice: uniswapPrice,
       });
     }
-  } else {
-    await firestore.collection('system').doc('market').set({
-      tokenPrice: uniswapPrice,
-    });
+  } catch (err) {
+    console.error(err);
+    console.log(err, new Date().toLocaleString());
   }
 };
 

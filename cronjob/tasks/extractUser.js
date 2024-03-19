@@ -32,7 +32,7 @@ const extractUser = async () => {
     // const result = [];
     for (const user of users) {
       const { id, username, address } = user;
-      console.log(`Extracting user ${id} - ${username}`);
+      // console.log(`Extracting user ${id} - ${username}`);
       try {
         const txnSnapshot = await firestore
           .collection('transaction')
@@ -94,7 +94,7 @@ const extractUser = async () => {
             updatedAt: admin.firestore.FieldValue.serverTimestamp(),
           });
         }
-        console.log(`Done extracting user ${id} - ${username}`);
+        // console.log(`Done extracting user ${id} - ${username}`);
       } catch (err) {
         console.log(`Error in extracting user ${id} - ${username}`, err);
         continue;
