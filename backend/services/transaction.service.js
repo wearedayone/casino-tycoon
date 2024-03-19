@@ -667,19 +667,22 @@ export const getWorkerAvgPrices = async ({ timeMode, blockMode }) => {
   const now = Date.now();
   const numberOfDays = timeMode === '1d' ? 1 : 5;
   const startTimeUnix = now - numberOfDays * 24 * 60 * 60 * 1000;
-  const txnSnapshot = await firestore
+
+  const potentialTxnSnapshot = await firestore
     .collection('transaction')
     .where('seasonId', '==', activeSeason.id)
     .where('type', '==', 'buy-worker')
     .where('status', '==', 'Success')
-    .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startTimeUnix))
+    .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startTimeUnix - 12 * 60 * 60 * 1000))
     .orderBy('createdAt', 'asc')
     .get();
-  const txns = txnSnapshot.docs.map((doc) => ({
+
+  const potentialTxns = potentialTxnSnapshot.docs.map((doc) => ({
     id: doc.id,
     ...doc.data(),
     createdAt: doc.data().createdAt.toDate().getTime(),
   }));
+  const txns = potentialTxns.filter((txn) => txn.createdAt >= startTimeUnix);
 
   const gap = gaps[blockMode];
   const startBlockTimes = [startTimeUnix];
@@ -703,19 +706,11 @@ export const getWorkerAvgPrices = async ({ timeMode, blockMode }) => {
       const { worker } = activeSeason;
 
       const startSalePeriod = startTime - 12 * 60 * 60 * 1000;
-      let query = firestore
-        .collection('transaction')
-        .where('seasonId', '==', activeSeason.id)
-        .where('type', '==', 'buy-worker')
-        .where('status', '==', 'Success')
-        .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startSalePeriod));
+      const workerTxns = potentialTxns.filter(
+        (txn) => txn.createdAt >= startSalePeriod && (!nextStartTime || txn.createdAt < nextStartTime)
+      );
 
-      if (nextStartTime) {
-        query = query.where('createdAt', '<', admin.firestore.Timestamp.fromMillis(nextStartTime));
-      }
-      const workerTxns = await query.get();
-
-      const workerSalesLastPeriod = workerTxns.docs.reduce((total, doc) => total + doc.data().amount, 0);
+      const workerSalesLastPeriod = workerTxns.reduce((total, doc) => total + doc.amount, 0);
       const workerPrices = calculateNextWorkerBuyPriceBatch(
         workerSalesLastPeriod,
         worker.targetDailyPurchase,
@@ -740,19 +735,22 @@ export const getBuildingAvgPrices = async ({ timeMode, blockMode }) => {
   const now = Date.now();
   const numberOfDays = timeMode === '1d' ? 1 : 5;
   const startTimeUnix = now - numberOfDays * 24 * 60 * 60 * 1000;
-  const txnSnapshot = await firestore
+
+  const potentialTxnSnapshot = await firestore
     .collection('transaction')
     .where('seasonId', '==', activeSeason.id)
     .where('type', '==', 'buy-building')
     .where('status', '==', 'Success')
-    .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startTimeUnix))
+    .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startTimeUnix - 12 * 60 * 60 * 1000))
     .orderBy('createdAt', 'asc')
     .get();
-  const txns = txnSnapshot.docs.map((doc) => ({
+
+  const potentialTxns = potentialTxnSnapshot.docs.map((doc) => ({
     id: doc.id,
     ...doc.data(),
     createdAt: doc.data().createdAt.toDate().getTime(),
   }));
+  const txns = potentialTxns.filter((txn) => txn.createdAt >= startTimeUnix);
 
   const gap = gaps[blockMode];
   const startBlockTimes = [startTimeUnix];
@@ -776,19 +774,11 @@ export const getBuildingAvgPrices = async ({ timeMode, blockMode }) => {
       const { building } = activeSeason;
 
       const startSalePeriod = startTime - 12 * 60 * 60 * 1000;
-      let query = firestore
-        .collection('transaction')
-        .where('seasonId', '==', activeSeason.id)
-        .where('type', '==', 'buy-building')
-        .where('status', '==', 'Success')
-        .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startSalePeriod));
+      const buildingTxns = potentialTxns.filter(
+        (txn) => txn.createdAt >= startSalePeriod && (!nextStartTime || txn.createdAt < nextStartTime)
+      );
 
-      if (nextStartTime) {
-        query = query.where('createdAt', '<', admin.firestore.Timestamp.fromMillis(nextStartTime));
-      }
-      const buildingTxns = await query.get();
-
-      const buildingSalesLastPeriod = buildingTxns.docs.reduce((total, doc) => total + doc.data().amount, 0);
+      const buildingSalesLastPeriod = buildingTxns.reduce((total, doc) => total + doc.amount, 0);
       const buildingPrices = calculateNextBuildingBuyPriceBatch(
         buildingSalesLastPeriod,
         building.targetDailyPurchase,
