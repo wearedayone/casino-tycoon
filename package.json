@@ -7,7 +7,12 @@
   "license": "MIT",
   "scripts": {
     "prepare": "husky install",
-    "precommit": "yarn --cwd app build"
+    "precommit": "yarn --cwd app build",
+    "deploy:prd": "yarn --cwd app build:prd && yarn --cwd firebase deploy:prd",
+    "deploy:prd-beta": "yarn --cwd app build:prd-beta && yarn --cwd firebase deploy:prd-beta",
+    "deploy:demo": "yarn --cwd app build:demo && yarn --cwd firebase deploy:demo",
+    "deploy:stg": "yarn --cwd app build:stg && yarn --cwd firebase deploy:stg",
+    "deploy:dev": "yarn --cwd app build:dev && yarn --cwd firebase deploy:dev"
   },
   "lint-staged": {
     "**/*.{js,ts,tsx,json,css,scss,md}": [

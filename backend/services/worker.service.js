@@ -61,11 +61,11 @@ export const claimToken = async ({ address, amount }) => {
     logger.info('start claimToken');
     logger.info({ address, amount });
     const ethersProvider = await alchemy.config.getProvider();
-    const gasPrice = await ethersProvider.getGasPrice();
+    // const gasPrice = await ethersProvider.getGasPrice();
     const workerWallet = await getWorkerWallet();
     const tokenContract = await getTokenContract(workerWallet);
     logger.info('start Transaction:');
-    const tx = await tokenContract.mint(address, amount, { gasPrice });
+    const tx = await tokenContract.mint(address, amount);
     logger.info('Transaction:' + tx.hash);
     txnHash = tx.hash;
     const receipt = await tx.wait();

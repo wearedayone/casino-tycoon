@@ -146,7 +146,7 @@ class PopupSafehousePrice extends Popup {
   onOpen() {
     this.drawXAxis();
     // this.scene.game.events.emit('request-house-price', { timeMode: this.timeMode });
-    this.scene.game.events.emit('request-buildings');
+    // this.scene.game.events.emit('request-buildings');
   }
 
   updateChart() {
@@ -168,7 +168,7 @@ class PopupSafehousePrice extends Popup {
     this.add(this.chart);
     console.log('this.chart.chart.scales.y', this.chart.chart);
     const chartPaddingHorizontal = this.chart.chart.scales.y.width;
-    const borderRightWidth = 0.5;
+    const borderRightWidth = 1;
     this.chartWidth = this.chartContainerWidth - chartPaddingHorizontal + 2 + borderRightWidth * 2;
     this.listContainer.x = width / 2 - chartPaddingHorizontal / 2 + borderRightWidth;
     this.listContainer.setDisplaySize(this.chartWidth, this.chartHeight);

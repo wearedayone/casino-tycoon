@@ -49,9 +49,9 @@ cron.schedule(CRON_BURN_FIAT, function () {
   burnFiat();
 });
 
-cron.schedule(CRON_EXTRACT_USER, function () {
-  extractUser();
-});
+// cron.schedule(CRON_EXTRACT_USER, function () {
+//   extractUser();
+// });
 
 cron.schedule(CRON_CALCULATE_TXN_PRICE, function () {
   calculateTxnPrice();
