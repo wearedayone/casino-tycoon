@@ -17,6 +17,7 @@ class PopupGoonPrice extends Popup {
   chartContainerWidth = 0;
   chartContainerHeight = 0;
   chartWidth = 0;
+  ticks = [];
 
   constructor(scene) {
     super(scene, 'popup-medium', { title: 'Goon Price', titleIcon: 'icon-ribbon-chart' });
@@ -35,7 +36,8 @@ class PopupGoonPrice extends Popup {
       .image(width / 2 - this.chartWidth * 0.02, this.chartY - chartVerticalPadding / 2, 'price-chart-frame')
       .setDisplaySize(this.chartWidth, this.chartHeight);
     this.add(this.listContainer);
-    this.contentContainer = scene.add.container().setSize(this.popup.displayWidth * 0.8, 0);
+    this.xAxis = scene.add.container().setSize(this.chartWidth, 0);
+    this.add(this.xAxis);
     const config = getPriceChartConfig({
       data: this.priceData.map(({ value, createdAt }) => ({ x: createdAt, y: value })),
       timeMode: this.timeMode,
@@ -81,20 +83,23 @@ class PopupGoonPrice extends Popup {
     this.add(this.currentPrice);
     this.add(this.coin);
     this.add(this.goon);
+    this.drawXAxis();
 
     this.modeSwitch = new SimpleModeSwitch(scene, width / 2, modeSwitchY, {
       modeOne: {
         title: '1 day',
         onClick: () => {
           this.timeMode = '1d';
+          this.drawXAxis();
           scene.game.events.emit('request-goon-price', { timeMode: this.timeMode });
         },
       },
       modeTwo: {
         title: '5 days',
         onClick: () => {
-          // this.timeMode = '5d';
-          // scene.game.events.emit('request-goon-price', { timeMode: this.timeMode });
+          this.timeMode = '5d';
+          this.drawXAxis();
+          scene.game.events.emit('request-goon-price', { timeMode: this.timeMode });
         },
       },
     });
@@ -131,20 +136,18 @@ class PopupGoonPrice extends Popup {
     scene.game.events.on('update-goon-price', (data) => {
       console.log('updatelist goon', Date.now(), data);
       this.priceData = data;
-      if (this.visible) {
-        this.updateList();
-      }
+      this.updateChart();
     });
 
     scene.game.events.emit('request-goon-price', { timeMode: this.timeMode });
   }
 
   onOpen() {
-    this.scene.game.events.emit('request-goon-price', { timeMode: this.timeMode });
+    this.drawXAxis();
     this.scene.game.events.emit('request-workers');
   }
 
-  updateList() {
+  updateChart() {
     this.remove(this.chart);
     this.chart.destroy();
 
@@ -161,14 +164,70 @@ class PopupGoonPrice extends Popup {
       config
     );
     this.add(this.chart);
-    console.log('this.chart.chart.scales.y', this.chart.chart.scales.y);
+    console.log('this.chart.chart', this.chart.chart);
     const chartPaddingHorizontal = this.chart.chart.scales.y.width;
-    this.chartWidth = this.chartContainerWidth - chartPaddingHorizontal;
+    this.chartWidth = this.chartContainerWidth - chartPaddingHorizontal + 2;
     this.listContainer.x = width / 2 - chartPaddingHorizontal / 2;
     this.listContainer.setDisplaySize(this.chartWidth, this.chartHeight);
   }
+
+  drawXAxis() {
+    this.ticks.map((item) => {
+      this.xAxis.remove(item);
+      item.destroy();
+    });
+
+    this.ticks = [];
+    const labels =
+      this.timeMode === '1d'
+        ? ['00:00', '06:00', '12:00', '18:00']
+        : [...Array(5).keys()].map((i) =>
+            moment()
+              .subtract(4 - i, 'days')
+              .set('hour', 0)
+              .set('minute', 0)
+              .format('D/M')
+          );
+
+    const now = moment(); // 16h45
+    const sectionDuration = this.timeMode === '1d' ? 6 : 24;
+    const startTime = now.subtract(this.timeMode === '1d' ? 1 : 4, 'day');
+    const sectionLength = this.chartWidth / labels.length;
+    const displayedLabels = this.timeMode === '1d' ? getHourlyDisplayedLabels({ now, labels }) : labels;
+
+    const chartLeftMargin = width / 2 - this.chartWidth / 2;
+    const y = this.chartY + this.chartHeight / 2;
+
+    const firstTickMoment =
+      this.timeMode === '1d'
+        ? startTime
+            .set('hour', Number(displayedLabels[0].split(':')[0]))
+            .set('minute', Number(displayedLabels[0].split(':')[1]))
+        : startTime.set('hour', 0).set('minute', 0);
+    const timeDiffRatio =
+      (startTime.get('millisecond') - firstTickMoment.get('millisecond')) / (MILLIS_PER_HOUR * sectionDuration);
+    for (let [index, label] of displayedLabels.entries()) {
+      const x = sectionLength * index + timeDiffRatio * sectionLength;
+      const text = this.scene.add
+        .text(chartLeftMargin + x, y, label, {
+          fontSize: 40,
+          fontFamily: 'WixMadeforDisplayBold',
+          color: colors.brown,
+        })
+        .setOrigin(0.5, 0);
+      this.xAxis.add(text);
+      this.ticks.push(text);
+    }
+  }
 }
 
+export const getHourlyDisplayedLabels = ({ now, labels }) => {
+  const tickSliceIndex = Math.ceil(now.get('hour') / 6);
+  const displayedLabelsStart = labels.slice(tickSliceIndex);
+  const displayedLabelsEnd = labels.slice(0, tickSliceIndex);
+  const displayedLabels = [...displayedLabelsStart, ...displayedLabelsEnd];
+  return displayedLabels;
+};
 export class SimpleModeSwitch extends Phaser.GameObjects.Container {
   mode = '';
 
@@ -281,7 +340,7 @@ export const getPriceChartConfig = ({ data, timeMode, chartHeight }) => {
             autoSkip: true,
             maxTicksLimit: ticksCount,
             callback: (value) => {
-              return moment(value).format(timeMode === '1d' ? 'HH:mm' : 'D/M');
+              return '';
             },
           },
           grid: { display: false }, // no vertial lines inside chart
