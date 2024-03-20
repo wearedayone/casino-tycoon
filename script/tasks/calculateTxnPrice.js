@@ -55,15 +55,13 @@ const main = async () => {
     };
   });
 
-  const workerPromises = [...formattedWorkerTxns, ...workerPriceEvery30Mins].map((item) =>
-    firestore.collection('worker-txn-prices').add({
-      ...item,
-    })
-  );
+  let listTxns = [...formattedWorkerTxns, ...workerPriceEvery30Mins];
   let i = 0;
-  for (const workerPromise of workerPromises) {
-    console.log(`${++i}/${workerPromises.length}`);
-    await workerPromise;
+  for (const item of listTxns) {
+    console.log(`${++i}/${listTxns.length}`);
+    await firestore.collection('worker-txn-prices').add({
+      ...item,
+    });
   }
   console.log('calculate buy worker txns done');
 
@@ -105,16 +103,13 @@ const main = async () => {
     };
   });
 
-  const buildingPromises = [...formattedBuildingTxns, ...buildingPriceEvery30Mins].map((item) =>
-    firestore.collection('building-txn-prices').add({
-      ...item,
-    })
-  );
-
+  listTxns = [...formattedBuildingTxns, ...buildingPriceEvery30Mins];
   i = 0;
-  for (const buildingPromise of buildingPromises) {
-    console.log(`${++i}/${buildingPromises.length}`);
-    await buildingPromise;
+  for (const item of listTxns) {
+    console.log(`${++i}/${listTxns.length}`);
+    await firestore.collection('building-txn-prices').add({
+      ...item,
+    });
   }
   console.log('calculate buy building txns done');
 };
