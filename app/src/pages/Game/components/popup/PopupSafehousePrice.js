@@ -92,8 +92,8 @@ class PopupSafehousePrice extends Popup {
       modeTwo: {
         title: '5 days',
         onClick: () => {
-          this.timeMode = '5d';
-          scene.game.events.emit('request-house-price', { timeMode: this.timeMode });
+          // this.timeMode = '5d';
+          // scene.game.events.emit('request-house-price', { timeMode: this.timeMode });
         },
       },
     });
