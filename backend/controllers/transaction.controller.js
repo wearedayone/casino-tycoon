@@ -3,6 +3,8 @@ import {
   validateTxnHash,
   claimToken as claimTokenService,
   finishClaimToken,
+  getWorkerPriceChart,
+  getBuildingPriceChart,
 } from '../services/transaction.service.js';
 import logger from '../utils/logger.js';
 
@@ -38,6 +40,32 @@ export const claimToken = async (req, res) => {
     const { address, claimedAmount, transactionId } = await claimTokenService(data);
     finishClaimToken({ address, claimedAmount, transactionId });
     return res.status(200).send({ claimedAmount });
+  } catch (err) {
+    console.error(err);
+    logger.error(err.message);
+    const message = err.message.startsWith('API error') ? err.message : 'Something is wrong';
+    return res.status(400).send(message);
+  }
+};
+
+export const getWorkerPrices = async (req, res) => {
+  try {
+    const { timeMode } = req.query;
+    const result = await getWorkerPriceChart({ timeMode });
+    return res.status(200).send(result);
+  } catch (err) {
+    console.error(err);
+    logger.error(err.message);
+    const message = err.message.startsWith('API error') ? err.message : 'Something is wrong';
+    return res.status(400).send(message);
+  }
+};
+
+export const getBuildingPrices = async (req, res) => {
+  try {
+    const { timeMode } = req.query;
+    const result = await getBuildingPriceChart({ timeMode });
+    return res.status(200).send(result);
   } catch (err) {
     console.error(err);
     logger.error(err.message);
