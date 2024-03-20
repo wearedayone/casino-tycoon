@@ -812,7 +812,7 @@ export const getBuildingPriceChart = async ({ timeMode }) => {
     .get();
 
   const txns = potentialTxnSnapshot.docs.map((doc) => ({
-    value: doc.data().prices[0],
+    value: doc.data().value / doc.data().prices?.length,
     createdAt: doc.data().createdAt.toDate().getTime(),
   }));
 
@@ -837,7 +837,7 @@ export const getWorkerPriceChart = async ({ timeMode }) => {
     .get();
 
   const txns = potentialTxnSnapshot.docs.map((doc) => ({
-    value: doc.data().prices[0],
+    value: doc.data().value / doc.data().prices?.length,
     createdAt: doc.data().createdAt.toDate().getTime(),
   }));
 
@@ -882,14 +882,3 @@ export const calculateGeneratedReward = async (userId, { start, end, numberOfMac
 const userTokenGenerationRateChangedTypes = ['buy-machine', 'buy-worker', 'war-penalty', 'retire'];
 const userNetworthChangedTypes = userTokenGenerationRateChangedTypes.concat('buy-building');
 export const userPendingRewardChangedTypes = userTokenGenerationRateChangedTypes.concat('claim-token');
-
-const gaps = {
-  '5m': 5 * 60 * 1000,
-  '10m': 10 * 60 * 1000,
-  '15m': 15 * 60 * 1000,
-  '30m': 30 * 60 * 1000,
-  '1h': 1 * 60 * 60 * 1000,
-  '2h': 2 * 60 * 60 * 1000,
-  '4h': 4 * 60 * 60 * 1000,
-  '6h': 6 * 60 * 60 * 1000,
-};
