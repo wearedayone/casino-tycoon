@@ -140,7 +140,6 @@ class PopupGoonPrice extends Popup {
   }
 
   onOpen() {
-    this.updateList();
     this.scene.game.events.emit('request-goon-price', { timeMode: this.timeMode });
     this.scene.game.events.emit('request-workers');
   }

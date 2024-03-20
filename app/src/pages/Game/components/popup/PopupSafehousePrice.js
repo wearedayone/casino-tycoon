@@ -139,7 +139,6 @@ class PopupSafehousePrice extends Popup {
   }
 
   onOpen() {
-    this.updateList();
     this.scene.game.events.emit('request-house-price', { timeMode: this.timeMode });
     this.scene.game.events.emit('request-buildings');
   }
