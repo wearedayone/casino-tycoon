@@ -31,6 +31,7 @@ const main = async () => {
     txnId: txn.id,
     createdAt: txn.createdAt,
     avgPrice: txn.value / txn.prices.length,
+    seasonId: activeSeason.id,
   }));
   const workerPriceEvery30Mins = moment30Mins.map((time) => {
     const startSalePeriod = time - 12 * 60 * 60 * 1000;
@@ -46,7 +47,12 @@ const main = async () => {
       worker.basePrice
     );
 
-    return { txnId: null, createdAt: admin.firestore.Timestamp.fromMillis(time), avgPrice: price };
+    return {
+      txnId: null,
+      createdAt: admin.firestore.Timestamp.fromMillis(time),
+      avgPrice: price,
+      seasonId: activeSeason.id,
+    };
   });
 
   const workerPromises = [...formattedWorkerTxns, ...workerPriceEvery30Mins].map((item) =>
@@ -54,7 +60,11 @@ const main = async () => {
       ...item,
     })
   );
-  await Promise.all(workerPromises);
+  let i = 0;
+  for (const workerPromise of workerPromises) {
+    console.log(`${++i}/${workerPromises.length}`);
+    await workerPromise;
+  }
   console.log('calculate buy worker txns done');
 
   console.log('calculate buy building txns');
@@ -71,6 +81,7 @@ const main = async () => {
     txnId: txn.id,
     createdAt: txn.createdAt,
     avgPrice: txn.value / txn.prices.length,
+    seasonId: activeSeason.id,
   }));
   const buildingPriceEvery30Mins = moment30Mins.map((time) => {
     const startSalePeriod = time - 12 * 60 * 60 * 1000;
@@ -86,7 +97,12 @@ const main = async () => {
       building.basePrice
     );
 
-    return { txnId: null, createdAt: admin.firestore.Timestamp.fromMillis(time), avgPrice: price };
+    return {
+      txnId: null,
+      createdAt: admin.firestore.Timestamp.fromMillis(time),
+      avgPrice: price,
+      seasonId: activeSeason.id,
+    };
   });
 
   const buildingPromises = [...formattedBuildingTxns, ...buildingPriceEvery30Mins].map((item) =>
@@ -94,7 +110,12 @@ const main = async () => {
       ...item,
     })
   );
-  await Promise.all(buildingPromises);
+
+  i = 0;
+  for (const buildingPromise of buildingPromises) {
+    console.log(`${++i}/${buildingPromises.length}`);
+    await buildingPromise;
+  }
   console.log('calculate buy building txns done');
 };
 

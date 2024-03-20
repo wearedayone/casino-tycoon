@@ -7,6 +7,7 @@
     "stg": "env-cmd -f .env.stg react-scripts start",
     "demo": "env-cmd -f .env.demo react-scripts start",
     "start": "env-cmd -f .env.prd react-scripts start",
+    "beta": "env-cmd -f .env.prd.beta react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
