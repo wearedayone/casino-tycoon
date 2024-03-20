@@ -67,6 +67,8 @@ class Footer extends Phaser.GameObjects.Container {
       () => {
         if (isSimulator) return;
         scene.popupWar?.setVisible(false);
+        this.tooltipNextWar.setVisible(true);
+        this.timeText.setVisible(true);
         scene.popupBuy?.setVisible(!scene.popupBuy?.visible);
       },
       { sound: 'button-1' }

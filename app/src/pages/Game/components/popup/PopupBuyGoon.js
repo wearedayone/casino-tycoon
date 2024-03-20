@@ -307,6 +307,7 @@ class PopupBuyGoon extends Popup {
 
   onOpen() {
     this.scene.game.events.emit(this.events.enableSalesTracking);
+    this.scene.game.events.emit('request-goon-price', { timeMode: this.scene.popupGoonPrice.timeMode });
   }
 
   cleanup() {

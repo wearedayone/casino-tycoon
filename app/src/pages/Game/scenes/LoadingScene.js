@@ -270,6 +270,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('text-container', '/images/text-container.png');
     this.load.image('text-container-outlined', '/images/text-container-outlined.png');
     this.load.image('tabs-container', '/images/tabs-container.png');
+    this.load.image('tabs-container-simple', '/images/tabs-container-simple.png');
     this.load.image('container-large', '/images/container-large.png');
     this.load.image('container-large-2', '/images/container-large-2.png');
     this.load.image('container-large-3', '/images/container-large-3.png');
@@ -281,6 +282,8 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('container-border-bottom', '/images/container-border-bottom.png');
     this.load.image('container-price', '/images/container-price.png');
     this.load.image('player-rank-container', '/images/player-rank-container.png');
+    this.load.image('price-chart-title-container', '/images/price-chart-title-container.png');
+    this.load.image('price-chart-frame', '/images/price-chart-frame.png');
     this.load.image('slider-thumb', '/images/slider-thumb.png');
     this.load.image('swap-eth-token', '/images/swap-eth-token.png');
     this.load.image('swap-token-eth', '/images/swap-token-eth.png');
@@ -315,8 +318,6 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-goon-mini', '/images/icons/goon-mini.png');
     this.load.image('icon-goon-buy-done', '/images/icons/goon-buy-done.png');
     this.load.image('icon-goon-buy-fail', '/images/icons/goon-buy-fail.png');
-    // this.load.image('icon-gangster-mini', '/images/icon-gangster.png');
-
     this.load.image('icon-info', '/images/icons/info.png');
     this.load.image('icon-info-blue', '/images/icon-info.png');
     this.load.image('icon-loading', '/images/icons/loading.png');
@@ -325,6 +326,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-open-link', '/images/icons/open-link.png');
     this.load.image('icon-retire-done', '/images/icons/retire-done.png');
     this.load.image('icon-retire-fail', '/images/icons/retire-fail.png');
+    this.load.image('icon-ribbon-chart', '/images/icons/ribbon-chart.png');
     this.load.image('icon-safehouse-upgrade-done', '/images/icons/safehouse-upgrade-done.png');
     this.load.image('icon-safehouse-upgrade-fail', '/images/icons/safehouse-upgrade-fail.png');
     this.load.image('icon-settings', '/images/icons/settings.png');

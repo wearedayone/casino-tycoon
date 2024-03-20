@@ -18,8 +18,9 @@ import {
 import {
   calculateNextBuildingBuyPriceBatch,
   calculateNextWorkerBuyPriceBatch,
+  calculateNextBuildingBuyPrice,
+  calculateNextWorkerBuyPrice,
   calculateNewEstimatedEndTimeUnix,
-  calculateReservePoolBonus,
 } from '../utils/formulas.js';
 import { getAccurate } from '../utils/math.js';
 import logger from '../utils/logger.js';
@@ -797,51 +798,81 @@ export const finishClaimToken = async ({ address, claimedAmount, transactionId }
 export const getBuildingPriceChart = async ({ timeMode }) => {
   if (!['1d', '5d'].includes(timeMode)) throw new Error('API error: Invalid time mode');
 
-  const activeSeasonId = await getActiveSeasonId();
+  const activeSeason = await getActiveSeason();
   const now = Date.now();
   const numberOfDays = timeMode === '1d' ? 1 : 5;
   const startTimeUnix = now - numberOfDays * 24 * 60 * 60 * 1000;
 
-  const potentialTxnSnapshot = await firestore
-    .collection('transaction')
-    .where('seasonId', '==', activeSeasonId)
-    .where('type', '==', 'buy-building')
-    .where('status', '==', 'Success')
+  const snapshot = await firestore
+    .collection('building-txn-prices')
+    .where('seasonId', '==', activeSeason.id)
     .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startTimeUnix))
     .orderBy('createdAt', 'asc')
     .get();
 
-  const txns = potentialTxnSnapshot.docs.map((doc) => ({
-    value: doc.data().value / doc.data().prices?.length,
+  const txns = snapshot.docs.map((doc) => ({
     createdAt: doc.data().createdAt.toDate().getTime(),
+    value: doc.data().avgPrice,
   }));
 
-  return txns;
+  const { building } = activeSeason;
+  const last12hTxns = await firestore
+    .collection('transaction')
+    .where('seasonId', '==', activeSeason.id)
+    .where('type', '==', 'buy-building')
+    .where('status', '==', 'Success')
+    .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(now - 12 * 60 * 60 * 1000))
+    .get();
+
+  const buildingSalesLastPeriod = last12hTxns.docs.reduce((total, doc) => total + doc.data().amount, 0);
+  const currentPrice = calculateNextBuildingBuyPrice(
+    buildingSalesLastPeriod,
+    building.targetDailyPurchase,
+    building.targetPrice,
+    building.basePrice
+  );
+
+  return [...txns, { createdAt: now, value: currentPrice }];
 };
 
 export const getWorkerPriceChart = async ({ timeMode }) => {
   if (!['1d', '5d'].includes(timeMode)) throw new Error('API error: Invalid time mode');
 
-  const activeSeasonId = await getActiveSeasonId();
+  const activeSeason = await getActiveSeason();
   const now = Date.now();
   const numberOfDays = timeMode === '1d' ? 1 : 5;
   const startTimeUnix = now - numberOfDays * 24 * 60 * 60 * 1000;
 
-  const potentialTxnSnapshot = await firestore
-    .collection('transaction')
-    .where('seasonId', '==', activeSeasonId)
-    .where('type', '==', 'buy-worker')
-    .where('status', '==', 'Success')
+  const snapshot = await firestore
+    .collection('worker-txn-prices')
+    .where('seasonId', '==', activeSeason.id)
     .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startTimeUnix))
     .orderBy('createdAt', 'asc')
     .get();
 
-  const txns = potentialTxnSnapshot.docs.map((doc) => ({
-    value: doc.data().value / doc.data().prices?.length,
+  const txns = snapshot.docs.map((doc) => ({
     createdAt: doc.data().createdAt.toDate().getTime(),
+    value: doc.data().avgPrice,
   }));
 
-  return txns;
+  const { worker } = activeSeason;
+  const last12hTxns = await firestore
+    .collection('transaction')
+    .where('seasonId', '==', activeSeason.id)
+    .where('type', '==', 'buy-worker')
+    .where('status', '==', 'Success')
+    .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(now - 12 * 60 * 60 * 1000))
+    .get();
+
+  const workerSalesLastPeriod = last12hTxns.docs.reduce((total, doc) => total + doc.data().amount, 0);
+  const currentPrice = calculateNextWorkerBuyPrice(
+    workerSalesLastPeriod,
+    worker.targetDailyPurchase,
+    worker.targetPrice,
+    worker.basePrice
+  );
+
+  return [...txns, { createdAt: now, value: currentPrice }];
 };
 
 // utils
