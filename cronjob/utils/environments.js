@@ -19,6 +19,7 @@ const environments = {
   CRON_GET_ETH_PRICE: process.env.CRON_GET_ETH_PRICE,
   CRON_BURN_FIAT: process.env.CRON_BURN_FIAT,
   CRON_EXTRACT_USER: process.env.CRON_EXTRACT_USER,
+  CRON_CALCULATE_TXN_PRICE: process.env.CRON_CALCULATE_TXN_PRICE,
 };
 
 export default environments;
