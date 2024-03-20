@@ -1,6 +1,3 @@
-import Phaser from 'phaser';
-import moment from 'moment';
-
 import Popup from './Popup';
 import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
@@ -149,6 +146,7 @@ class PopupSafehousePrice extends Popup {
 
     const config = getPriceChartConfig({
       data: this.priceData.map(({ value, createdAt }) => ({ x: createdAt, y: value })),
+      timeMode: this.timeMode,
       chartHeight: this.chartHeight,
     });
     this.chart = this.scene.rexUI.add.chart(

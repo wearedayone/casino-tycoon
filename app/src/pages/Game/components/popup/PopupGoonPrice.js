@@ -150,6 +150,7 @@ class PopupGoonPrice extends Popup {
 
     const config = getPriceChartConfig({
       data: this.priceData.map(({ value, createdAt }) => ({ x: createdAt, y: value })),
+      timeMode: this.timeMode,
       chartHeight: this.chartHeight,
     });
     this.chart = this.scene.rexUI.add.chart(
