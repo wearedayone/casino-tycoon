@@ -87,6 +87,8 @@ class MainScene extends Phaser.Scene {
   }
 
   preload() {
+    this.load.script('chartjs', 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.8.0/chart.min.js');
+
     this.bgMusic = this.sound.add('bg', { loop: true, volume: 0.15 });
 
     this.background = new Background(this, 'bg');
@@ -137,12 +139,6 @@ class MainScene extends Phaser.Scene {
     this.popupWarHistoryDetail = new PopupWarHistoryDetail(this);
     this.add.existing(this.popupWarHistoryDetail);
 
-    this.popupGoonPrice = new PopupGoonPrice(this);
-    this.add.existing(this.popupGoonPrice);
-
-    this.popupSafehousePrice = new PopupSafehousePrice(this);
-    this.add.existing(this.popupSafehousePrice);
-
     this.game.events.on('music-on', () => {
       this.bgMusic.play();
     });
@@ -177,6 +173,12 @@ class MainScene extends Phaser.Scene {
 
       this.popupBuyGangster = new PopupBuyGangster(this);
       this.add.existing(this.popupBuyGangster);
+
+      this.popupGoonPrice = new PopupGoonPrice(this);
+      this.add.existing(this.popupGoonPrice);
+
+      this.popupSafehousePrice = new PopupSafehousePrice(this);
+      this.add.existing(this.popupSafehousePrice);
 
       this.popupLeaderboard = new PopupLeaderboard(this);
       this.add.existing(this.popupLeaderboard);

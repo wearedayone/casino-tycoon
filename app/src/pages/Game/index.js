@@ -18,8 +18,7 @@ import {
   updateBalance,
   checkUserCode,
 } from '../../services/user.service';
-import { getWorkerPrices, getBuildingPrices } from '../../services/season.service';
-import { claimToken } from '../../services/transaction.service';
+import { claimToken, getWorkerPrices, getBuildingPrices } from '../../services/transaction.service';
 import {
   getLeaderboard,
   getNextWarSnapshotUnixTime,
@@ -1211,8 +1210,9 @@ const Game = () => {
         disableBuildingSalesTracking();
       });
 
-      gameRef.current?.events.on('request-goon-price', () => {
-        getWorkerPrices()
+      gameRef.current?.events.on('request-goon-price', ({ timeMode }) => {
+        console.log('begin request goon price', timeMode, Date.now());
+        getWorkerPrices({ timeMode })
           .then((res) => gameRef.current?.events.emit('update-goon-price', res.data))
           .catch((err) => {
             console.error(err);
@@ -1220,8 +1220,9 @@ const Game = () => {
           });
       });
 
-      gameRef.current?.events.on('request-house-price', () => {
-        getBuildingPrices()
+      gameRef.current?.events.on('request-house-price', ({ timeMode }) => {
+        console.log('begin request house price', timeMode, Date.now());
+        getBuildingPrices({ timeMode })
           .then((res) => gameRef.current?.events.emit('update-house-price', res.data))
           .catch((err) => {
             console.error(err);
