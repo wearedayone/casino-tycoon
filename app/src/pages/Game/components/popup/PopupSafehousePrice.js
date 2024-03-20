@@ -158,9 +158,9 @@ class PopupSafehousePrice extends Popup {
     );
     this.add(this.chart);
     console.log('this.chart.chart.scales.y', this.chart.chart.scales.y);
-    const chartPaddingHorizontal = this.chart.chart.scales.y.width * 1.25;
+    const chartPaddingHorizontal = this.chart.chart.scales.y.width;
     this.chartWidth = this.chartContainerWidth - chartPaddingHorizontal;
-    this.listContainer.x = width / 2 - chartPaddingHorizontal * 0.2;
+    this.listContainer.x = width / 2 - chartPaddingHorizontal / 2;
     this.listContainer.setDisplaySize(this.chartWidth, this.chartHeight);
   }
 }
