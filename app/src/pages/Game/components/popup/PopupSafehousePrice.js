@@ -4,6 +4,7 @@ import configs from '../../configs/configs';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
 import { SimpleModeSwitch, getPriceChartConfig } from './PopupGoonPrice';
 import { calculateNextBuildingBuyPriceBatch } from '../../../../utils/formulas';
+import { formatter } from '../../../../utils/numbers';
 
 const { width, height } = configs;
 class PopupSafehousePrice extends Popup {
@@ -104,7 +105,7 @@ class PopupSafehousePrice extends Popup {
       'button-blue-pressed',
       () => {
         this.close();
-        scene.popupBuyGoon?.open();
+        scene.popupSafeHouseUpgrade?.open();
       },
       'Back',
       { fontSize: '82px', sound: 'close' }
@@ -120,7 +121,7 @@ class PopupSafehousePrice extends Popup {
         1
       ).total;
 
-      this.currentPrice.text = estimatedPrice.toLocaleString();
+      this.currentPrice.text = formatter.format(estimatedPrice);
       this.coin.x = this.currentPrice.x + this.currentPrice.width + 20;
     });
 

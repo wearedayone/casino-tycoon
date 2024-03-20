@@ -5,7 +5,7 @@ import Popup from './Popup';
 import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
-import { customFormat } from '../../../../utils/numbers';
+import { customFormat, formatter } from '../../../../utils/numbers';
 import { calculateNextWorkerBuyPriceBatch } from '../../../../utils/formulas';
 
 const { width, height } = configs;
@@ -124,7 +124,7 @@ class PopupGoonPrice extends Popup {
         1
       ).total;
 
-      this.currentPrice.text = estimatedPrice.toLocaleString();
+      this.currentPrice.text = formatter.format(estimatedPrice);
       this.coin.x = this.currentPrice.x + this.currentPrice.width + 20;
     });
 
