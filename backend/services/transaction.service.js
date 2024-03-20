@@ -803,18 +803,16 @@ export const getBuildingPriceChart = async ({ timeMode }) => {
   const numberOfDays = timeMode === '1d' ? 1 : 5;
   const startTimeUnix = now - numberOfDays * 24 * 60 * 60 * 1000;
 
-  const potentialTxnSnapshot = await firestore
-    .collection('transaction')
+  const snapshot = await firestore
+    .collection('building-txn-prices')
     .where('seasonId', '==', activeSeason.id)
-    .where('type', '==', 'buy-building')
-    .where('status', '==', 'Success')
     .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startTimeUnix))
     .orderBy('createdAt', 'asc')
     .get();
 
-  const txns = potentialTxnSnapshot.docs.map((doc) => ({
-    value: doc.data().value / doc.data().prices?.length,
+  const txns = snapshot.docs.map((doc) => ({
     createdAt: doc.data().createdAt.toDate().getTime(),
+    value: doc.data().avgPrice,
   }));
 
   const { building } = activeSeason;
@@ -834,7 +832,7 @@ export const getBuildingPriceChart = async ({ timeMode }) => {
     building.basePrice
   );
 
-  return [...txns, { startAt: now, value: currentPrice }];
+  return [...txns, { createdAt: now, value: currentPrice }];
 };
 
 export const getWorkerPriceChart = async ({ timeMode }) => {
@@ -845,18 +843,16 @@ export const getWorkerPriceChart = async ({ timeMode }) => {
   const numberOfDays = timeMode === '1d' ? 1 : 5;
   const startTimeUnix = now - numberOfDays * 24 * 60 * 60 * 1000;
 
-  const potentialTxnSnapshot = await firestore
-    .collection('transaction')
+  const snapshot = await firestore
+    .collection('worker-txn-prices')
     .where('seasonId', '==', activeSeason.id)
-    .where('type', '==', 'buy-worker')
-    .where('status', '==', 'Success')
     .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startTimeUnix))
     .orderBy('createdAt', 'asc')
     .get();
 
-  const txns = potentialTxnSnapshot.docs.map((doc) => ({
-    value: doc.data().value / doc.data().prices?.length,
+  const txns = snapshot.docs.map((doc) => ({
     createdAt: doc.data().createdAt.toDate().getTime(),
+    value: doc.data().avgPrice,
   }));
 
   const { worker } = activeSeason;
@@ -876,7 +872,7 @@ export const getWorkerPriceChart = async ({ timeMode }) => {
     worker.basePrice
   );
 
-  return [...txns, { startAt: now, value: currentPrice }];
+  return [...txns, { createdAt: now, value: currentPrice }];
 };
 
 // utils
