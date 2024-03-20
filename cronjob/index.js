@@ -7,6 +7,7 @@ import estimateGasPrice from './tasks/estimateGas.js';
 import getEthPrice from './tasks/getEthPrice.js';
 import burnFiat from './tasks/burnFIAT.js';
 import extractUser from './tasks/extractUser.js';
+import calculateTxnPrice from './tasks/calculateTxnPrice.js';
 import environments from './utils/environments.js';
 
 const {
@@ -17,6 +18,7 @@ const {
   CRON_GET_ETH_PRICE,
   CRON_BURN_FIAT,
   CRON_EXTRACT_USER,
+  CRON_CALCULATE_TXN_PRICE,
 } = environments;
 
 cron.schedule(CRON_UPDATE_FIAT_PRICE, function () {
@@ -49,4 +51,8 @@ cron.schedule(CRON_BURN_FIAT, function () {
 
 cron.schedule(CRON_EXTRACT_USER, function () {
   extractUser();
+});
+
+cron.schedule(CRON_CALCULATE_TXN_PRICE, function () {
+  calculateTxnPrice();
 });
