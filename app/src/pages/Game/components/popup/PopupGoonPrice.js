@@ -66,13 +66,13 @@ class PopupGoonPrice extends Popup {
       })
       .setOrigin(0, 0.5);
     this.currentPrice = scene.add
-      .text(this.current.x + this.current.width + 20, titleY, '2,341', {
+      .text(this.current.x + this.current.width + 20, titleY, '', {
         fontSize: fontSizes.extraLarge,
         color: colors.black,
         fontFamily: fontFamilies.extraBold,
       })
       .setOrigin(0, 0.5);
-    this.coin = scene.add.image(this.currentPrice.x + this.currentPrice.width + 20, titleY, 'coin2').setOrigin(0, 0.5);
+    this.coin = scene.add.image(width / 2 + this.titleContainer.width / 2 - 40, titleY, 'coin2').setOrigin(1, 0.5);
     this.goon = scene.add.image(
       leftMargin + this.popup.displayWidth * 0.175,
       titleY + this.popup.displayHeight * 0.07,
@@ -133,8 +133,7 @@ class PopupGoonPrice extends Popup {
         1
       ).total;
 
-      this.currentPrice.text = formatter.format(estimatedPrice);
-      this.coin.x = this.currentPrice.x + this.currentPrice.width + 20;
+      this.currentPrice.text = formatter.format(estimatedPrice.toPrecision(3));
     });
 
     scene.game.events.on('update-goon-price', (data) => {
