@@ -195,6 +195,17 @@ const processBuyGoonEvent = async ({ to, amount, nonce, event, contract }) => {
       await firestore.collection('transaction').doc(txnId).update({
         status: 'Success',
       });
+
+      const { prices, value, seasonId, createdAt } = txnData;
+      await firestore
+        .collection('worker-txn-prices')
+        .doc(txnId)
+        .add({
+          txnId,
+          createdAt: createdAt,
+          avgPrice: prices.length > 0 ? value / prices.length : 0,
+          seasonId: seasonId,
+        });
     }
   } catch (err) {
     logger.error(err);
@@ -216,6 +227,17 @@ const processBuySafeHouseEvent = async ({ to, amount, nonce, event, contract }) 
       await firestore.collection('transaction').doc(txnId).update({
         status: 'Success',
       });
+
+      const { prices, value, seasonId, createdAt } = txnData;
+      await firestore
+        .collection('building-txn-prices')
+        .doc(txnId)
+        .add({
+          txnId,
+          createdAt: createdAt,
+          avgPrice: prices.length > 0 ? value / prices.length : 0,
+          seasonId: seasonId,
+        });
     }
   } catch (err) {
     logger.error(err);
