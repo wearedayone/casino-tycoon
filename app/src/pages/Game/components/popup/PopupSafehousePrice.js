@@ -91,6 +91,8 @@ class PopupSafehousePrice extends Popup {
         onClick: () => {
           this.timeMode = '1d';
           this.drawXAxis();
+          this.remove(this.chart);
+          this.chart.destroy();
           scene.game.events.emit('request-house-price', { timeMode: this.timeMode });
         },
       },
@@ -99,6 +101,8 @@ class PopupSafehousePrice extends Popup {
         onClick: () => {
           this.timeMode = '5d';
           this.drawXAxis();
+          this.remove(this.chart);
+          this.chart.destroy();
           scene.game.events.emit('request-house-price', { timeMode: this.timeMode });
         },
       },
@@ -138,8 +142,6 @@ class PopupSafehousePrice extends Popup {
       this.priceData = data;
       this.updateChart();
     });
-
-    scene.game.events.emit('request-house-price', { timeMode: this.timeMode });
   }
 
   onOpen() {
