@@ -58,10 +58,20 @@ const main = async () => {
   let listTxns = [...formattedWorkerTxns, ...workerPriceEvery30Mins];
   let i = 0;
   for (const item of listTxns) {
-    console.log(`${++i}/${listTxns.length}`);
-    await firestore.collection('worker-txn-prices').add({
-      ...item,
-    });
+    if (item.txnId) {
+      console.log(`${++i}/${listTxns.length}: update`);
+      await firestore
+        .collection('worker-txn-prices')
+        .doc(item.txnId)
+        .set({
+          ...item,
+        });
+    } else {
+      console.log(`${++i}/${listTxns.length}: Add New`);
+      await firestore.collection('worker-txn-prices').add({
+        ...item,
+      });
+    }
   }
   console.log('calculate buy worker txns done');
 
@@ -106,10 +116,20 @@ const main = async () => {
   listTxns = [...formattedBuildingTxns, ...buildingPriceEvery30Mins];
   i = 0;
   for (const item of listTxns) {
-    console.log(`${++i}/${listTxns.length}`);
-    await firestore.collection('building-txn-prices').add({
-      ...item,
-    });
+    if (item.txnId) {
+      console.log(`${++i}/${listTxns.length}: update`);
+      await firestore
+        .collection('building-txn-prices')
+        .doc(item.txnId)
+        .set({
+          ...item,
+        });
+    } else {
+      console.log(`${++i}/${listTxns.length}: Add New`);
+      await firestore.collection('building-txn-prices').add({
+        ...item,
+      });
+    }
   }
   console.log('calculate buy building txns done');
 };

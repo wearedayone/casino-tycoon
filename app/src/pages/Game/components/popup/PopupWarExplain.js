@@ -52,7 +52,7 @@ class PopupWarExplain extends Popup {
     this.add(this.earningStealPercentText);
 
     this.machinePercentLostText = scene.add
-      .text(width / 2 + 280, height / 2 + 397, `${this.machinePercentLost * 100}%`, {
+      .text(width / 2 + 295, height / 2 + 397, `${this.machinePercentLost * 100}%`, {
         fontSize: '56px',
         color: colors.black,
         fontFamily: fontFamilies.bold,
