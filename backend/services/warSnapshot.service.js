@@ -35,7 +35,7 @@ export const getWarHistory = async (userId) => {
     .where('seasonId', '==', seasonId)
     .where('userId', '==', userId)
     .orderBy('createdAt', 'desc')
-    .limit(100)
+    .limit(60)
     .get();
 
   const warHistory = warHistorySnapshot.docs.map((doc) => {
@@ -512,7 +512,7 @@ export const getUserToAttackDetail = async (userId) => {
     .where('seasonId', '==', seasonId)
     .where('userId', '==', userId)
     .orderBy('createdAt', 'desc')
-    .limit(100)
+    .limit(60)
     .get();
 
   const userIds = [userId];
