@@ -512,6 +512,7 @@ export const getUserToAttackDetail = async (userId) => {
     .where('seasonId', '==', seasonId)
     .where('userId', '==', userId)
     .orderBy('createdAt', 'desc')
+    .limit(100)
     .get();
 
   const userIds = [userId];
