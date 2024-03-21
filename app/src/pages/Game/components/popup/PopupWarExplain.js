@@ -29,7 +29,7 @@ class PopupWarExplain extends Popup {
         scene.popupWarMachines?.open();
       },
       'Back',
-      { sound: 'close' }
+      { sound: 'close', fontSize: '82px' }
     );
     this.add(this.backBtn);
 
