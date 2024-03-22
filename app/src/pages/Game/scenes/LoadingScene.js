@@ -263,7 +263,6 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('player-rank-container', '/images/player-rank-container.png');
     this.load.image('price-chart-title-container', '/images/price-chart-title-container.png');
     this.load.image('price-chart-frame', '/images/price-chart-frame.png');
-    this.load.image('slider-thumb', '/images/slider-thumb.png');
     this.load.image('swap-eth-token', '/images/swap-eth-token.png');
     this.load.image('swap-token-eth', '/images/swap-token-eth.png');
     let path = this.load.path;
@@ -316,8 +315,6 @@ class LoadingScene extends Phaser.Scene {
 
     this.load.image('icon-history', '/images/icon-history.png');
     this.load.image('icon-war', '/images/icon-war.png');
-    this.load.image('icon-checked', '/images/icon-checked.png');
-    this.load.image('icon-unchecked', '/images/icon-unchecked.png');
     this.load.image('icon-error-network', '/images/icons/error-network.png');
     this.load.image('icon-error-unknown', '/images/icons/error-unknown.png');
     this.load.image('icon-error-insufficient', '/images/icons/error-insufficient.png');
