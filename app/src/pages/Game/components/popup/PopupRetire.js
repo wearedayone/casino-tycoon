@@ -103,7 +103,7 @@ class PopupRetire extends Popup {
         scene.game.events.emit('init-retire');
       },
       'Yes',
-      { sound: 'button-1' }
+      { sound: 'button-1', fontSize: '82px' }
     );
     this.add(this.buttonYes);
 

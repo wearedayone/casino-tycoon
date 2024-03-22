@@ -35,7 +35,7 @@ class PopupWarHistoryDetail extends Popup {
         scene.popupWarHistory?.open();
       },
       'Back',
-      { sound: 'close' }
+      { sound: 'close', fontSize: '82px' }
     );
     this.add(this.backBtn);
 

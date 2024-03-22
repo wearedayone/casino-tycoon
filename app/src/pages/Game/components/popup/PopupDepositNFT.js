@@ -96,7 +96,7 @@ class PopupDepositNFT extends Popup {
         scene.game.events.emit('deposit-nft', { amount: Number(this.amountInput.value) });
       },
       'Stake',
-      { sound: 'button-1', disabledImage: 'button-disabled' }
+      { sound: 'button-1', fontSize: '82px', disabledImage: 'button-disabled' }
     );
     this.add(buttonBack);
     this.add(this.buttonStake);

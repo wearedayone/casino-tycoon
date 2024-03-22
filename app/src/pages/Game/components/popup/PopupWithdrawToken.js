@@ -126,7 +126,7 @@ class PopupWithdrawToken extends Popup {
         });
       },
       'Confirm',
-      { sound: 'button-1', disabledImage: 'button-disabled' }
+      { sound: 'button-1', fontSize: '82px', disabledImage: 'button-disabled' }
     );
     this.add(buttonBack);
     this.add(this.buttonConfirm);
