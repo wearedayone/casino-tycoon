@@ -11,6 +11,9 @@ import { getUserUsernames } from './user.service.js';
 import { getUserGamePlay } from './gamePlay.service.js';
 import logger from '../utils/logger.js';
 import { getAccurate } from '../utils/math.js';
+import environments from '../utils/environments.js';
+
+const { ENVIRONMENT, GANG_WAR_MONITOR_URL } = environments;
 
 export const getLatestWar = async (userId) => {
   const snapshot = await firestore.collection('warSnapshot').orderBy('createdAt', 'desc').limit(1).get();
@@ -135,7 +138,7 @@ const getUserDailyIncome = async (userId) => {
 };
 
 export const generateDailyWarSnapshot = async () => {
-  if (GANG_WAR_MONITOR_URL) fetch(`${GANG_WAR_MONITOR_URL}?state=run`).catch(() => {});
+  if (GANG_WAR_MONITOR_URL) fetch(`${GANG_WAR_MONITOR_URL}?state=run&env=${ENVIRONMENT}`).catch(() => {});
   try {
     logger.info('\n\n---------taking daily war snapshot--------\n');
 
@@ -326,10 +329,10 @@ export const generateDailyWarSnapshot = async () => {
     await Promise.all(burnMachineLostPromises);
     await claimWarReward(bonusUsers);
 
-    if (GANG_WAR_MONITOR_URL) fetch(`${GANG_WAR_MONITOR_URL}?state=complete`).catch(() => {});
+    if (GANG_WAR_MONITOR_URL) fetch(`${GANG_WAR_MONITOR_URL}?state=complete&env=${ENVIRONMENT}`).catch(() => {});
     logger.info('\n---------finish taking daily war snapshot--------\n\n');
   } catch (err) {
-    if (GANG_WAR_MONITOR_URL) fetch(`${GANG_WAR_MONITOR_URL}?state=fail`).catch(() => {});
+    if (GANG_WAR_MONITOR_URL) fetch(`${GANG_WAR_MONITOR_URL}?state=fail&env=${ENVIRONMENT}`).catch(() => {});
     console.error(err);
     logger.error(err.message);
   }
