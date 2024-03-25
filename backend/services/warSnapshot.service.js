@@ -135,6 +135,7 @@ const getUserDailyIncome = async (userId) => {
 };
 
 export const generateDailyWarSnapshot = async () => {
+  if (GANG_WAR_MONITOR_URL) fetch(`${GANG_WAR_MONITOR_URL}?state=run`).catch(() => {});
   try {
     logger.info('\n\n---------taking daily war snapshot--------\n');
 
@@ -325,8 +326,10 @@ export const generateDailyWarSnapshot = async () => {
     await Promise.all(burnMachineLostPromises);
     await claimWarReward(bonusUsers);
 
+    if (GANG_WAR_MONITOR_URL) fetch(`${GANG_WAR_MONITOR_URL}?state=complete`).catch(() => {});
     logger.info('\n---------finish taking daily war snapshot--------\n\n');
   } catch (err) {
+    if (GANG_WAR_MONITOR_URL) fetch(`${GANG_WAR_MONITOR_URL}?state=fail`).catch(() => {});
     console.error(err);
     logger.error(err.message);
   }
