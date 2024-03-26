@@ -56,13 +56,13 @@ const useSimulatorGameListener = () => {
       prizePoolConfig: activeSeason?.prizePoolConfig,
     });
 
-    const totalReputation = allUsers.reduce((sum, user) => sum + user.networth, 0);
+    const totalSqrtReputation = allUsers.reduce((sum, user) => sum + Math.sqrt(user.networth), 0);
     return allUsers.map((user, index) => {
       return {
         ...user,
         rank: index + 1,
         rankReward: calculateRankReward(activeSeason.rankPrizePool, rankingRewards, index),
-        reputationReward: (user.networth / totalReputation) * activeSeason.reputationPrizePool,
+        reputationReward: (Math.sqrt(user.networth) / totalSqrtReputation) * activeSeason.reputationPrizePool,
       };
     });
   }, [
