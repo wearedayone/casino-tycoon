@@ -29,6 +29,15 @@ const main = async () => {
     nftPrice: '0.005',
     tokenPrice: '0.00001',
   });
+  const devTeam = ['brian@uncharted.gg', 'jack.nguyen@weareday.one', 'ally@weareday.one'];
+  await firestore
+    .collection('system')
+    .doc('alert')
+    .set({
+      minor: devTeam,
+      major: devTeam,
+      critical: [...devTeam, 'derek@uncharted.gg', 'jw@uncharted.gg'],
+    });
   await firestore
     .collection('system')
     .doc('estimated-gas')

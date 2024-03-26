@@ -9,11 +9,12 @@ import { initTransaction, validateNonWeb3Transaction } from './transaction.servi
 import { claimTokenBatch, burnNFT as burnNFTTask, getNFTBalance } from './worker.service.js';
 import { getUserUsernames } from './user.service.js';
 import { getUserGamePlay } from './gamePlay.service.js';
+import { sendEmailAlert } from './alert.service.js';
 import logger from '../utils/logger.js';
 import { getAccurate } from '../utils/math.js';
 import environments from '../utils/environments.js';
 
-const { ENVIRONMENT, GANG_WAR_MONITOR_URL } = environments;
+const { ENVIRONMENT, NETWORK_ID, GANG_WAR_MONITOR_URL } = environments;
 
 export const getLatestWar = async (userId) => {
   const snapshot = await firestore.collection('warSnapshot').orderBy('createdAt', 'desc').limit(1).get();
@@ -325,9 +326,9 @@ export const generateDailyWarSnapshot = async () => {
     // burn nft 20 users per time
     const chunkedPenaltyUsers = chunk(penaltyUsers, 20);
     // console.log({ chunkedPenaltyUsers });
-    const burnMachineLostPromises = chunkedPenaltyUsers.map((pUsers) => burnMachinesLost(pUsers));
+    const burnMachineLostPromises = chunkedPenaltyUsers.map((pUsers) => burnMachinesLost(pUsers, todayDateString));
     await Promise.all(burnMachineLostPromises);
-    await claimWarReward(bonusUsers);
+    await claimWarReward(bonusUsers, todayDateString);
 
     if (GANG_WAR_MONITOR_URL) fetch(`${GANG_WAR_MONITOR_URL}?state=complete&env=${ENVIRONMENT}`).catch(() => {});
     logger.info('\n---------finish taking daily war snapshot--------\n\n');
@@ -338,7 +339,7 @@ export const generateDailyWarSnapshot = async () => {
   }
 };
 
-export const claimWarReward = async (bonusUsers) => {
+export const claimWarReward = async (bonusUsers, todayDateString) => {
   if (!bonusUsers.length) return;
 
   const userIds = bonusUsers.map((item) => item.userId);
@@ -383,6 +384,20 @@ export const claimWarReward = async (bonusUsers) => {
       validateNonWeb3Transaction({ userId: item.userId, transactionId: item.txnId })
     );
     await Promise.all(updateUserGamePlayPromises);
+  } else {
+    const variables = {
+      players_count: bonusUsers.length,
+      txn_hash: txnHash,
+      type: 'war-bonus',
+      view_txn_url: `https://${BASESCAN_PREFIX[NETWORK_ID]}basescan.org/tx/${txnHash}`,
+      war_id: todayDateString,
+    };
+    await sendEmailAlert({
+      subject: `war-bonus txn failed | ${todayDateString}`,
+      template: 'ga-war-txn-failed',
+      variables,
+      level: 'major',
+    });
   }
 };
 
@@ -436,6 +451,20 @@ export const burnMachinesLost = async (penaltyUsers) => {
       validateNonWeb3Transaction({ userId: item.userId, transactionId: item.txnId })
     );
     await Promise.all(updateUserGamePlayPromises);
+  } else {
+    const variables = {
+      players_count: penaltyUsers.length,
+      txn_hash: txnHash,
+      type: 'war-penalty',
+      view_txn_url: `https://${BASESCAN_PREFIX[NETWORK_ID]}basescan.org/tx/${txnHash}`,
+      war_id: todayDateString,
+    };
+    await sendEmailAlert({
+      subject: `war-penalty txn failed | ${todayDateString}`,
+      template: 'ga-war-txn-failed',
+      variables,
+      level: 'major',
+    });
   }
 };
 
@@ -546,4 +575,10 @@ export const getUserToAttackDetail = async (userId) => {
     gamePlay: { numberOfMachines, numberOfWorkers, numberOfBuildings },
     warResults,
   };
+};
+
+const BASESCAN_PREFIX = {
+  8453: '',
+  84531: 'goerli.',
+  84532: 'sepolia.',
 };
