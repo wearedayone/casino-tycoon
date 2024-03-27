@@ -1,6 +1,5 @@
-import Phaser from 'phaser';
-
 import Popup from './Popup';
+import Button from '../button/Button';
 import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
 import { fontFamilies, colors } from '../../../../utils/styles';
@@ -91,15 +90,20 @@ class PopupWarMachines extends Popup {
     );
     this.add(this.raidBtn);
 
-    this.infoBtn = scene.add
-      .image(width / 2 + this.popup.width / 2 - 100, height / 2 - this.popup.height / 2 + 200, 'icon-info-blue')
-      .setOrigin(0.5, 0.5);
-    this.infoBtn.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
-      this.close();
-      scene.popupWarExplain?.open();
-      onClickInfoButton?.();
-    });
-    this.add(this.infoBtn);
+    const infoButton = new Button(
+      scene,
+      width / 2 + this.popup.width / 2 - 100,
+      height / 2 - this.popup.height / 2 + 220,
+      'button-info',
+      'button-info-pressed',
+      () => {
+        this.close();
+        scene.popupWarExplain?.open();
+        onClickInfoButton?.();
+      },
+      { sound: 'open' }
+    );
+    this.add(infoButton);
 
     const input1Y = this.popup.y - this.popup.height / 2 + 670;
     const input2Y = input1Y + 325;

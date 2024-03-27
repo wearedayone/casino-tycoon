@@ -90,19 +90,20 @@ class PopupRetire extends Popup {
       { fontSize: '82px', sound: 'close' }
     );
     this.add(this.buttonBack);
-    this.buttonYes = new Button(
+    this.buttonYes = new TextButton(
       scene,
       width / 2 + this.popup.width * 0.23,
       height / 2 + this.popup.height / 2 - 20,
-      'button-yes',
-      'button-yes-pressed',
+      'button-green',
+      'button-green-pressed',
       () => {
         this.popupBuyProcessing.initLoading(`Your payout will take\na few minutes to process`);
         this.close();
 
         scene.game.events.emit('init-retire');
       },
-      { sound: 'button-1' }
+      'Yes',
+      { sound: 'button-1', fontSize: '82px' }
     );
     this.add(this.buttonYes);
 

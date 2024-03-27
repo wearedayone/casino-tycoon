@@ -39,7 +39,7 @@ class PopupBuyGangster extends Popup {
   onCompleted;
 
   constructor(scene, { isSimulator, onCompleted } = {}) {
-    super(scene, 'popup-buy-gangster', { ribbon: 'ribbon-buy-gangster', noCloseBtn: !!isSimulator });
+    super(scene, 'popup-buy-gangster', { title: 'Buy Gangsters', noCloseBtn: !!isSimulator });
 
     const events = {
       completed: isSimulator ? 'simulator-buy-gangster-completed' : 'buy-gangster-completed',

@@ -31,7 +31,7 @@ class PopupWarHistory extends Popup {
       'button-blue-pressed',
       () => this.close(),
       'Back',
-      { sound: 'close' }
+      { sound: 'close', fontSize: '82px' }
     );
     this.add(this.backBtn);
 

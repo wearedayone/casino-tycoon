@@ -128,9 +128,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('popup-title-large', '/images/popup-title-large.png');
     this.load.image('popup-welcome-war', '/images/popup-welcome-war.png');
     this.load.image('popup-welcome-nowar', '/images/popup-welcome-nowar.png');
-    this.load.image('popup-buy', '/images/popup-buy.png');
     this.load.image('popup-war', '/images/popup-war.png');
-    this.load.image('popup-daily-gang-war', '/images/popup-daily-gang-war.png');
     this.load.image('popup-safehouse-upgrade', '/images/popup-safehouse-upgrade.png');
     this.load.image('popup-buy-goon', '/images/popup-buy-goon.png');
     this.load.image('popup-buy-gangster', '/images/popup-buy-gangster.png');
@@ -147,14 +145,6 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('popup-goon-price', '/images/popup-goon-price.png');
 
     this.load.image('ribbon-welcome', '/images/ribbon-welcome.png');
-    this.load.image('ribbon-daily-gang-war', '/images/ribbon-daily-gang-war.png');
-    this.load.image('ribbon-safehouse-upgrade', '/images/ribbon-safehouse-upgrade.png');
-    this.load.image('ribbon-buy-goon', '/images/ribbon-buy-goon.png');
-    this.load.image('ribbon-buy-gangster', '/images/ribbon-buy-gangster.png');
-    this.load.image('ribbon-portfolio', '/images/ribbon-portfolio.png');
-    this.load.image('ribbon-statistic', '/images/ribbon-statistic.png');
-    this.load.image('ribbon-referral', '/images/ribbon-referral.png');
-    this.load.image('ribbon-gang-war-explain', '/images/ribbon-gang-war-explain.png');
 
     this.load.image('glow', '/images/glow.png');
     this.load.image('coin', '/images/coin.png');
@@ -172,9 +162,6 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('safehouse-mini', '/images/safehouse-mini.png');
     this.load.image('swap-arrow', '/images/swap-arrow.png');
 
-    this.load.image('button-approve', '/images/button-approve.png');
-    this.load.image('button-approve-pressed', '/images/button-approve-pressed.png');
-    this.load.image('button-approve-disabled', '/images/button-approve-disabled.png');
     this.load.image('button-blue', '/images/button-blue.png');
     this.load.image('button-blue-pressed', '/images/button-blue-pressed.png');
     this.load.image('button-disabled', '/images/button-disabled.png');
@@ -196,9 +183,6 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-check-pressed', '/images/button-check-pressed.png');
     this.load.image('button-close', '/images/button-close.png');
     this.load.image('button-close-pressed', '/images/button-close-pressed.png');
-    this.load.image('button-confirm', '/images/button-confirm.png');
-    this.load.image('button-confirm-pressed', '/images/button-confirm-pressed.png');
-    this.load.image('button-confirm-disabled', '/images/button-confirm-disabled.png');
     this.load.image('button-copy', '/images/button-copy.png');
     this.load.image('button-copy-pressed', '/images/button-copy-pressed.png');
     this.load.image('button-deposit', '/images/button-deposit.png');
@@ -226,9 +210,6 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-refresh-pressed', '/images/button-refresh-pressed.png');
     this.load.image('button-setting', '/images/button-setting.png');
     this.load.image('button-setting-pressed', '/images/button-setting-pressed.png');
-    this.load.image('button-stake', '/images/button-stake.png');
-    this.load.image('button-stake-pressed', '/images/button-stake-pressed.png');
-    this.load.image('button-stake-disabled', '/images/button-stake-disabled.png');
     this.load.image('button-twitter', '/images/button-twitter.png');
     this.load.image('button-twitter-pressed', '/images/button-twitter-pressed.png');
     this.load.image('button-add', '/images/button-add.png');
@@ -240,8 +221,6 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-square', '/images/button-square.png');
     this.load.image('button-square-pressed', '/images/button-square-pressed.png');
     this.load.image('button-square-disabled', '/images/button-square-disabled.png');
-    this.load.image('button-yes', '/images/button-yes.png');
-    this.load.image('button-yes-pressed', '/images/button-yes-pressed.png');
     this.load.image('button-green', '/images/button-green.png');
     this.load.image('button-green-pressed', '/images/button-green-pressed.png');
     this.load.image('button-blue-small', '/images/button-blue-small.png');
@@ -284,7 +263,6 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('player-rank-container', '/images/player-rank-container.png');
     this.load.image('price-chart-title-container', '/images/price-chart-title-container.png');
     this.load.image('price-chart-frame', '/images/price-chart-frame.png');
-    this.load.image('slider-thumb', '/images/slider-thumb.png');
     this.load.image('swap-eth-token', '/images/swap-eth-token.png');
     this.load.image('swap-token-eth', '/images/swap-token-eth.png');
     let path = this.load.path;
@@ -319,7 +297,6 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-goon-buy-done', '/images/icons/goon-buy-done.png');
     this.load.image('icon-goon-buy-fail', '/images/icons/goon-buy-fail.png');
     this.load.image('icon-info', '/images/icons/info.png');
-    this.load.image('icon-info-blue', '/images/icon-info.png');
     this.load.image('icon-loading', '/images/icons/loading.png');
     this.load.image('icon-logout', '/images/icons/logout.png');
     this.load.image('icon-nft-done', '/images/icons/nft-done.png');
@@ -338,8 +315,6 @@ class LoadingScene extends Phaser.Scene {
 
     this.load.image('icon-history', '/images/icon-history.png');
     this.load.image('icon-war', '/images/icon-war.png');
-    this.load.image('icon-checked', '/images/icon-checked.png');
-    this.load.image('icon-unchecked', '/images/icon-unchecked.png');
     this.load.image('icon-error-network', '/images/icons/error-network.png');
     this.load.image('icon-error-unknown', '/images/icons/error-unknown.png');
     this.load.image('icon-error-insufficient', '/images/icons/error-insufficient.png');

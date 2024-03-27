@@ -9,7 +9,7 @@ const gap = 185;
 
 class PopupStatistic extends Popup {
   constructor(scene) {
-    super(scene, 'popup-statistic', { ribbon: 'ribbon-statistic' });
+    super(scene, 'popup-statistic', { title: 'My Statistics' });
 
     this.setVisible(false);
 

@@ -82,12 +82,12 @@ class PopupDepositNFT extends Popup {
       'Back',
       { fontSize: '82px', sound: 'close' }
     );
-    this.buttonStake = new Button(
+    this.buttonStake = new TextButton(
       scene,
       width / 2 + this.popup.width * 0.23,
       height / 2 + this.popup.height / 2 - 20,
-      'button-stake',
-      'button-stake-pressed',
+      'button-green',
+      'button-green-pressed',
       () => {
         // TODO: show validation to user
         const isValid = this.validate();
@@ -95,7 +95,8 @@ class PopupDepositNFT extends Popup {
 
         scene.game.events.emit('deposit-nft', { amount: Number(this.amountInput.value) });
       },
-      { disabledImage: 'button-stake-disabled' }
+      'Stake',
+      { sound: 'button-1', fontSize: '82px', disabledImage: 'button-disabled' }
     );
     this.add(buttonBack);
     this.add(this.buttonStake);
