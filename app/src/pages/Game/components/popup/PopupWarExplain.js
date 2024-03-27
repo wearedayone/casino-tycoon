@@ -29,12 +29,16 @@ class PopupWarExplain extends Popup {
         scene.popupWarMachines?.open();
       },
       'Back',
-      { sound: 'close' }
+      { sound: 'close', fontSize: '82px' }
     );
     this.add(this.backBtn);
 
+    const tokenRewardY = height / 2 - 400;
+    const earningStealPercentY = tokenRewardY + 412;
+    const machinePercentLostY = earningStealPercentY + 369;
+
     this.tokenRewardText = scene.add
-      .text(width / 2 + 250, height / 2 - 384, `${this.tokenRewardPerEarner.toLocaleString()}`, {
+      .text(width / 2 + 250, tokenRewardY, `${this.tokenRewardPerEarner.toLocaleString()}`, {
         fontSize: '56px',
         color: colors.black,
         fontFamily: fontFamilies.bold,
@@ -43,7 +47,7 @@ class PopupWarExplain extends Popup {
     this.add(this.tokenRewardText);
 
     this.earningStealPercentText = scene.add
-      .text(width / 2 + 290, height / 2 + 28, `${this.earningStealPercent.toLocaleString()}`, {
+      .text(width / 2 + 290, earningStealPercentY, `${this.earningStealPercent.toLocaleString()}`, {
         fontSize: '56px',
         color: colors.black,
         fontFamily: fontFamilies.bold,
@@ -52,7 +56,7 @@ class PopupWarExplain extends Popup {
     this.add(this.earningStealPercentText);
 
     this.machinePercentLostText = scene.add
-      .text(width / 2 + 295, height / 2 + 397, `${this.machinePercentLost * 100}%`, {
+      .text(width / 2 + 280, machinePercentLostY, `${this.machinePercentLost * 100}%`, {
         fontSize: '56px',
         color: colors.black,
         fontFamily: fontFamilies.bold,
