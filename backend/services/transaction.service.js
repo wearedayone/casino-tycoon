@@ -465,6 +465,7 @@ const updateUserGamePlay = async (userId, transactionId) => {
     case 'war-bonus':
       const { gainedReputation } = snapshot.data();
       gamePlayData = {
+        networth: admin.firestore.FieldValue.increment(gainedReputation),
         networthFromWar: admin.firestore.FieldValue.increment(gainedReputation),
       };
       break;

@@ -20,7 +20,8 @@ exports.onGamePlayUpdate = functions.firestore
         const newNetworth =
           building.networth * afterData.numberOfBuildings +
           machine.networth * afterData.numberOfMachines +
-          worker.networth * afterData.numberOfWorkers;
+          worker.networth * afterData.numberOfWorkers +
+          afterData.networthFromWar;
         if (newNetworth !== afterData.networth)
           await admin.firestore().collection('gamePlay').doc(gamePlayId).update({
             networth: newNetworth,
