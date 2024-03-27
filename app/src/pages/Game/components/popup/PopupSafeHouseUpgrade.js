@@ -290,7 +290,8 @@ class PopupSafeHouseUpgrade extends Popup {
 
   onOpen() {
     this.scene.game.events.emit(this.events.enableSalesTracking);
-    this.scene.game.events.emit('request-house-price', { timeMode: this.scene.popupSafehousePrice.timeMode });
+    if (!this.isSimulator)
+      this.scene.game.events.emit('request-house-price', { timeMode: this.scene.popupSafehousePrice.timeMode });
   }
 
   cleanup() {
