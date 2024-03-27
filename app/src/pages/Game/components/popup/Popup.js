@@ -117,7 +117,9 @@ class Popup extends Phaser.GameObjects.Container {
 
   open() {
     this.setVisible(true);
-    this.onOpen().catch((err) => console.error(err));
+    try {
+      this.onOpen().catch((err) => console.error(err));
+    } catch {}
   }
   close = () => {
     // cant close while loading
@@ -126,8 +128,9 @@ class Popup extends Phaser.GameObjects.Container {
     this.cleanup?.()?.catch((err) => console.error(err));
     if (this.destroyWhenClosed) this.destroy(true);
     else this.setVisible(false);
-
-    this.onClose?.()?.catch((err) => console.error(err));
+    try {
+      this.onClose?.()?.catch((err) => console.error(err));
+    } catch {}
   };
 
   setTitle(string) {
