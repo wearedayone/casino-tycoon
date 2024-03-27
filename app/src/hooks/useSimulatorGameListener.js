@@ -91,10 +91,6 @@ const useSimulatorGameListener = () => {
       game.events.emit('simulator-update-ranking-rewards', { prizePoolConfig: activeSeason?.prizePoolConfig });
     });
 
-    // game.events.on('simulator-request-buy-bonus', () => {
-    //   game.events.emit('simulator-update-buy-bonus', {});
-    // });
-
     game.events.on('simulator-request-balances', () => {
       game.events.emit('simulator-update-balances', balances);
     });
@@ -417,15 +413,6 @@ const useSimulatorGameListener = () => {
     if (isLeaderboardModalOpen && gameRef)
       gameRef.events.emit('simulator-update-ranking-rewards', { prizePoolConfig: activeSeason?.prizePoolConfig });
   }, [isLeaderboardModalOpen, activeSeason?.prizePoolConfig]);
-
-  useEffect(() => {
-    if (gameRef) {
-      gameRef.events.emit('simulator-update-buy-bonus', {
-        reservePool: activeSeason?.reservePool || 0,
-        reservePoolReward: activeSeason?.reservePoolReward || 0,
-      });
-    }
-  }, [activeSeason?.reservePool, activeSeason?.reservePoolReward]);
 
   return { setupSimulatorGameListener };
 };
