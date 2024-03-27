@@ -200,6 +200,7 @@ export const generateDailyWarSnapshot = async () => {
         ...result,
         [gamePlay.userId]: {
           seasonId,
+          networth: gamePlay.networth,
           userId: gamePlay.userId,
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
           numberOfMachines: gamePlay.numberOfMachines,
@@ -226,7 +227,7 @@ export const generateDailyWarSnapshot = async () => {
     }, {});
 
     for (const user of Object.values(users)) {
-      const { userId, attackUserId, attackUnits } = user;
+      const { userId, attackUserId, attackUnits, networth } = user;
 
       if (!attackUserId || !users[attackUserId]) continue;
 
@@ -236,6 +237,17 @@ export const generateDailyWarSnapshot = async () => {
       const attackContribution = !!totalAttackUnits ? attackUnits / totalAttackUnits : 0;
 
       if (totalAttackUnits > attackedUser.defendUnits) {
+        // winners gain reputation
+        let gainedReputationPercent = 0;
+        const reputationRatio = attackedUser.networth / networth;
+
+        if (reputationRatio > 10) gainedReputationPercent = 0.005;
+        else if (reputationRatio > 5) gainedReputationPercent = 0.004;
+        else if (reputationRatio > 3) gainedReputationPercent = 0.003;
+        else if (reputationRatio > 2) gainedReputationPercent = 0.002;
+        else if (reputationRatio > 1) gainedReputationPercent = 0.001;
+        user.gainedReputation = Math.round(attackedUser.networth * gainedReputationPercent);
+
         const stolenToken = Math.floor(attackContribution * earningStealPercent * attackedUser.tokenEarnFromEarning);
         user.tokenEarnFromAttacking = stolenToken;
         user.totalTokenReward += stolenToken;
@@ -310,7 +322,11 @@ export const generateDailyWarSnapshot = async () => {
     await Promise.all(promises);
 
     // send rewards and burn NFT
-    const bonusUsers = Object.values(users).map((item) => ({ userId: item.userId, amount: item.totalTokenReward }));
+    const bonusUsers = Object.values(users).map((item) => ({
+      userId: item.userId,
+      amount: item.totalTokenReward,
+      gainedReputation: item.gainedReputation,
+    }));
     const penaltyUsers = Object.values(users)
       .filter((item) => !!item.machinesLost)
       .map((item) => ({ userId: item.userId, amount: item.machinesLost }));
@@ -347,6 +363,7 @@ export const claimWarReward = async (bonusUsers) => {
       userId: snapshot.id,
       type: 'war-bonus',
       value: bonusUsers[index].amount,
+      gainedReputation: bonusUsers[index].gainedReputation,
     });
 
     users.push({
