@@ -21,7 +21,7 @@ const getActiveSeasonId = async () => {
   return configs.activeSeasonId;
 };
 
-const warId = '20240317-010005'; // prd failed war
+const warId = '20240325-010005'; // prd failed war
 // const warId = '20240317-010000'; // stg
 const main = async () => {
   const seasonId = await getActiveSeasonId();
@@ -108,15 +108,15 @@ export const claimWarReward = async (bonusTxns) => {
   const users = [];
   for (const [index, oldTxn] of bonusTxns.entries()) {
     const snapshot = userSnapshots[index];
-    const txn = await initTransaction({
-      userId: snapshot.id,
-      type: 'war-bonus',
-      value: oldTxn.value,
-    });
+    // const txn = await initTransaction({
+    //   userId: snapshot.id,
+    //   type: 'war-bonus',
+    //   value: oldTxn.value,
+    // });
 
     users.push({
       userId: snapshot.id,
-      txnId: txn.id,
+      txnId: oldTxn.id,
       address: snapshot.data().address,
       amount: oldTxn.value,
     });
@@ -124,25 +124,27 @@ export const claimWarReward = async (bonusTxns) => {
 
   const addresses = users.map((item) => item.address);
   const amounts = users.map((item) => parseEther(`${item.amount}`));
-  const { txnHash, status } = await claimTokenBatch({ addresses, amounts });
+  console.log({ users });
+  // const { txnHash, status } = await claimTokenBatch({ addresses, amounts });
+  // console.log({ txnHash, status });
+  // // console.log(`War bonus, ${JSON.stringify({ addresses, amounts })}`);
+  // // let txnHash = '0x23feaa28a35aeebea09e0d11795b1d053dfe88992485f3387a99403404a6add1';
+  // // let status = 'Success';
+  // const updateTxnPromises = users.map((item) => {
+  //   return firestore.collection('transaction').doc(item.txnId).update({
+  //     txnHash,
+  //     status,
+  //   });
+  // });
 
-  console.log(`War bonus, ${JSON.stringify({ addresses, amounts, txnHash, status })}`);
+  // await Promise.all(updateTxnPromises);
 
-  const updateTxnPromises = users.map((item) => {
-    return firestore.collection('transaction').doc(item.txnId).update({
-      txnHash,
-      status,
-    });
-  });
-
-  await Promise.all(updateTxnPromises);
-
-  if (status === 'Success') {
-    const updateUserGamePlayPromises = users.map((item) =>
-      validateNonWeb3Transaction({ userId: item.userId, transactionId: item.txnId })
-    );
-    await Promise.all(updateUserGamePlayPromises);
-  }
+  // if (status === 'Success') {
+  //   const updateUserGamePlayPromises = users.map((item) =>
+  //     validateNonWeb3Transaction({ userId: item.userId, transactionId: item.txnId })
+  //   );
+  //   await Promise.all(updateUserGamePlayPromises);
+  // }
 };
 
 export const burnMachinesLost = async (penaltyTxns) => {
@@ -161,15 +163,15 @@ export const burnMachinesLost = async (penaltyTxns) => {
     console.log({ nftBalance });
     const burnNumer = Math.min(nftBalance, penaltyTxns[index].machinesDeadCount);
     if (burnNumer == 0) continue;
-    const txn = await initTransaction({
-      userId: snapshot.id,
-      type: 'war-penalty',
-      machinesDeadCount: burnNumer,
-    });
+    // const txn = await initTransaction({
+    //   userId: snapshot.id,
+    //   type: 'war-penalty',
+    //   machinesDeadCount: burnNumer,
+    // });
 
     users.push({
       userId: snapshot.id,
-      txnId: txn.id,
+      txnId: penaltyTxns[index].id,
       address: snapshot.data().address,
       amount: burnNumer,
     });
@@ -178,8 +180,10 @@ export const burnMachinesLost = async (penaltyTxns) => {
   const addresses = users.map((item) => item.address);
   const ids = Array(users.length).fill(1);
   const amounts = users.map((item) => item.amount);
-  const { txnHash, status } = await burnNFT({ addresses, ids, amounts });
-
+  // const { txnHash, status } = await burnNFT({ addresses, ids, amounts });
+  // console.log({ txnHash, status });
+  let txnHash = '0xfd3dc7a5b7c99255104598f40a2b813ed2d6e5d7ab4eab1955a3f4d3ec71641d';
+  let status = 'Success';
   console.log(`Gangster penalties, ${JSON.stringify({ addresses, ids, amounts, txnHash, status })}`);
 
   const updateTxnPromises = users.map((item) => {
@@ -191,12 +195,12 @@ export const burnMachinesLost = async (penaltyTxns) => {
 
   await Promise.all(updateTxnPromises);
 
-  if (status === 'Success') {
-    const updateUserGamePlayPromises = users.map((item) =>
-      validateNonWeb3Transaction({ userId: item.userId, transactionId: item.txnId })
-    );
-    await Promise.all(updateUserGamePlayPromises);
-  }
+  // if (status === 'Success') {
+  //   const updateUserGamePlayPromises = users.map((item) =>
+  //     validateNonWeb3Transaction({ userId: item.userId, transactionId: item.txnId })
+  //   );
+  //   await Promise.all(updateUserGamePlayPromises);
+  // }
 };
 
 const getActiveSeason = async () => {
@@ -234,10 +238,11 @@ export const claimTokenBatch = async ({ addresses, amounts }) => {
     console.log('start claimTokenBatch');
     console.log({ addresses, amounts });
     const ethersProvider = await alchemy.config.getProvider();
-    const gasPrice = await ethersProvider.getGasPrice();
+
     const workerWallet = await getWorkerWallet();
     const tokenContract = await getTokenContract(workerWallet);
     console.log('start Transaction:');
+    const gasPrice = await ethersProvider.getGasPrice();
     const tx = await tokenContract.batchMint(addresses, amounts, { gasPrice });
     txnHash = tx.hash;
     console.log('Transaction:' + tx.hash);
