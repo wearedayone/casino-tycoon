@@ -195,12 +195,11 @@ const processBuyGoonEvent = async ({ to, amount, nonce, event, contract }) => {
       await firestore.collection('transaction').doc(txnId).update({
         status: 'Success',
       });
-
       const { prices, value, seasonId, createdAt } = txnData;
       await firestore
         .collection('worker-txn-prices')
         .doc(txnId)
-        .add({
+        .set({
           txnId,
           createdAt: createdAt,
           avgPrice: prices.length > 0 ? value / prices.length : 0,
@@ -232,7 +231,7 @@ const processBuySafeHouseEvent = async ({ to, amount, nonce, event, contract }) 
       await firestore
         .collection('building-txn-prices')
         .doc(txnId)
-        .add({
+        .set({
           txnId,
           createdAt: createdAt,
           avgPrice: prices.length > 0 ? value / prices.length : 0,
