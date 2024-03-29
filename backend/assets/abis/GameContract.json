@@ -518,9 +518,9 @@
           "type": "address[]"
         },
         {
-          "internalType": "uint256[]",
+          "internalType": "uint256",
           "name": "tokenId",
-          "type": "uint256[]"
+          "type": "uint256"
         },
         {
           "internalType": "uint256[]",
@@ -610,29 +610,6 @@
       "type": "function"
     },
     {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "to",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "tokenId",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "amount",
-          "type": "uint256"
-        }
-      ],
-      "name": "depositNFT",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
       "inputs": [],
       "name": "devDebt",
       "outputs": [
@@ -653,16 +630,36 @@
       "type": "function"
     },
     {
-      "inputs": [],
-      "name": "fiat",
-      "outputs": [
+      "inputs": [
         {
-          "internalType": "contract FIAT",
-          "name": "",
-          "type": "address"
+          "internalType": "address[]",
+          "name": "addr",
+          "type": "address[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "_lGang",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "_lGoon",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "_wRep",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "_wPoint",
+          "type": "uint256[]"
         }
       ],
-      "stateMutability": "view",
+      "name": "finalWarResult",
+      "outputs": [],
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -977,6 +974,19 @@
     },
     {
       "inputs": [],
+      "name": "pointToken",
+      "outputs": [
+        {
+          "internalType": "contract POINT",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
       "name": "prizeDebt",
       "outputs": [
         {
@@ -1101,48 +1111,29 @@
           "internalType": "uint256",
           "name": "_basePrice",
           "type": "uint256"
-        }
-      ],
-      "name": "setBasePrice",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
+        },
         {
           "internalType": "uint256",
-          "name": "_basePrice",
+          "name": "_basePriceWL",
           "type": "uint256"
-        }
-      ],
-      "name": "setBasePriceWL",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
+        },
         {
           "internalType": "uint256",
           "name": "_refferral",
           "type": "uint256"
-        }
-      ],
-      "name": "setBaseReferral",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
+        },
         {
           "internalType": "uint256",
           "name": "refferral_discount",
           "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_vtd",
+          "type": "uint256"
         }
       ],
-      "name": "setBaseReferralDiscount",
+      "name": "setBasePrice",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -1217,19 +1208,6 @@
         }
       ],
       "name": "setReputation",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "_vtd",
-          "type": "uint256"
-        }
-      ],
-      "name": "setVTD",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -1337,31 +1315,27 @@
       "type": "function"
     },
     {
-      "inputs": [],
-      "name": "withdraw",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
       "inputs": [
         {
           "internalType": "address",
-          "name": "to",
+          "name": "",
           "type": "address"
-        },
+        }
+      ],
+      "name": "warRep",
+      "outputs": [
         {
           "internalType": "uint256",
-          "name": "tokenId",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "amount",
+          "name": "",
           "type": "uint256"
         }
       ],
-      "name": "withdrawNFT",
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "withdraw",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
