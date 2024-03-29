@@ -217,6 +217,7 @@ export const generateDailyWarSnapshot = async () => {
           attackUserId: gamePlay.warDeployment.attackUserId,
           tokenEarnFromEarning: tokenRewardPerEarner * earnUnits,
           tokenEarnFromAttacking: 0, // havent been calculated at this time
+          gainedReputation: 0, // havent been calculated at this time
           tokenStolen: 0, // havent been calculated at this time
           totalTokenReward: tokenRewardPerEarner * earnUnits, // havent been fully calculated at this time
           machinesLost: 0, // havent been calculated at this time
