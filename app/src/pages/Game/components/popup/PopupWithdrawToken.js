@@ -20,7 +20,7 @@ class PopupWithdrawToken extends Popup {
   balance = 0;
 
   constructor(scene, parentModal) {
-    super(scene, 'popup-small', { title: 'Withdraw $FIAT' });
+    super(scene, 'popup-small', { title: 'Withdraw $GANG' });
 
     const startingY = this.popup.y - this.popup.height / 2;
     const subtitleY = startingY + 170;
@@ -28,7 +28,7 @@ class PopupWithdrawToken extends Popup {
     const balanceY = amountInputY + 130;
     const addressInputY = balanceY + 240;
 
-    const subtitle = scene.add.text(width / 2, subtitleY, 'Enter the amount of $FIAT \nto withdraw', {
+    const subtitle = scene.add.text(width / 2, subtitleY, 'Enter the amount of $GANG \nto withdraw', {
       fontSize: '60px',
       color: '#29000b',
       fontFamily: 'WixMadeforDisplayBold',
@@ -55,7 +55,7 @@ class PopupWithdrawToken extends Popup {
     this.add(this.amountInput);
     this.add(buttonMax);
 
-    this.balanceText = scene.add.text(width / 2, balanceY, `Balance: 0 $FIAT`, {
+    this.balanceText = scene.add.text(width / 2, balanceY, `Balance: 0 $GANG`, {
       fontSize: '50px',
       color: '#7c2828',
       fontFamily: 'WixMadeforDisplayBold',
@@ -150,7 +150,7 @@ class PopupWithdrawToken extends Popup {
 
     if (!amount || amount > this.balance) {
       isValid = false;
-      this.errMSG.text = 'Insufficient $FIAT ';
+      this.errMSG.text = 'Insufficient $GANG ';
     }
     if (!address || !isAddress(address)) {
       isValid = false;
@@ -174,7 +174,7 @@ class PopupWithdrawToken extends Popup {
 
   updateBalance(balance) {
     this.balance = balance;
-    this.balanceText.text = `Balance: ${balance.toLocaleString()} $FIAT`;
+    this.balanceText.text = `Balance: ${balance.toLocaleString()} $GANG`;
   }
 }
 

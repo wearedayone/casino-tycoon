@@ -210,7 +210,7 @@ class PopupBuyGoon extends Popup {
       .setVisible(!isSimulator);
     this.add(this.gasPrice);
     this.insufficientBalance = scene.add
-      .text(priceTextX, counterY + 48, 'Insufficient $FIAT', {
+      .text(priceTextX, counterY + 48, 'Insufficient $GANG', {
         fontSize: fontSizes.small,
         color: colors.black,
         fontFamily: fontFamilies.bold,
