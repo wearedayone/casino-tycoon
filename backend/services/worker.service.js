@@ -1,9 +1,7 @@
 import { Contract } from '@ethersproject/contracts';
 import { Wallet } from '@ethersproject/wallet';
-import { formatEther, parseEther as UnitPasteEther } from '@ethersproject/units';
 import { ethers, isError, parseEther } from 'ethers';
 import { getParsedEthersError } from '@enzoferey/ethers-error-parser';
-import { Utils } from 'alchemy-sdk';
 
 import tokenABI from '../assets/abis/Token.json' assert { type: 'json' };
 import nftABI from '../assets/abis/NFT.json' assert { type: 'json' };
@@ -130,95 +128,26 @@ export const claimToken = async ({ address, amount }) => {
   return { txnHash: txnHash || '', status: 'Failed' };
 };
 
-export const claimTokenBatch = async ({ addresses, amounts }) => {
+export const setWarResult = async ({ addresses, lostGangsters, lostGoons, wonReputations, wonTokens }) => {
   let txnHash = '';
   let isSuccess = false;
   let retry = 0;
   const ethersProvider = await alchemy.config.getProvider();
   while (!isSuccess && retry < 10) {
     try {
-      logger.info(`Start claimTokenBatch. Retry ${retry++} times`);
-      logger.info({ addresses, amounts });
-      const workerWallet = await getWorkerWallet();
-      const tokenContract = await getTokenContract(workerWallet);
-
-      const baseGasPrice = await ethersProvider.getGasPrice();
-      const gasPrice = (baseGasPrice.toBigInt() * BigInt(Math.round(Math.pow(1.2, retry) * 1000000))) / BigInt(1000000);
-      logger.info(`Start claimTokenBatch transaction with gasPrice: ${JSON.stringify(gasPrice)}`);
-      const tx = await tokenContract.batchMint(addresses, amounts, { gasPrice });
-      txnHash = tx.hash;
-      logger.info('ClaimTokenBatch Transaction:' + tx.hash);
-      const receipt = await tx.wait();
-
-      if (receipt.status !== 1) {
-        logger.error(`Unsuccessful txn: ${JSON.stringify(receipt)}`);
-        throw new Error(`API error: Txn failed`);
-      }
-      isSuccess = true;
-      logger.info(`Finished ClaimTokenBatch transaction with txnHash: ${txnHash}`);
-      return { txnHash, status: 'Success' };
-    } catch (err) {
-      try {
-        logger.info(`Error claimTokenBatch transaction with txnHash: ${txnHash}`);
-        if (isError(err, 'UNPREDICTABLE_GAS_LIMIT')) {
-          logger.info('UNPREDICTABLE_GAS_LIMIT');
-        } else if (isError(err, 'TRANSACTION_REPLACED')) {
-          logger.info('TRANSACTION_REPLACED');
-        } else if (isError(err, 'REPLACEMENT_UNDERPRICED')) {
-          logger.info('REPLACEMENT_UNDERPRICED');
-        } else if (isError(err, 'NONCE_EXPIRED')) {
-          logger.info('NONCE_EXPIRED');
-        } else if (isError(err, 'NETWORK_ERROR')) {
-          logger.info('NETWORK_ERROR');
-        } else if (isError(err, 'SERVER_ERROR')) {
-          logger.info('SERVER_ERROR');
-        } else if (isError(err, 'INSUFFICIENT_FUNDS')) {
-          logger.info('INSUFFICIENT_FUNDS');
-        } else if (isError(err, 'ACTION_REJECTED')) {
-          logger.info('ACTION_REJECTED');
-        } else {
-          logger.info('Other Error');
-        }
-
-        logger.info(`Unsuccessful txn: ${JSON.stringify(err)}`);
-        logger.error(`Unsuccessful txn: ${JSON.stringify(err)}`);
-
-        const newError = getParsedEthersError(err);
-        const regex = /(execution reverted: )([A-Za-z\s])*/;
-        if (newError.context) {
-          const message = newError.context.match(regex);
-          if (message) {
-            logger.error(message[0]);
-          }
-        } else {
-          logger.error(err.message);
-        }
-      } catch {
-        logger.info('Error happened at claimTokenBatch catch');
-      }
-    }
-  }
-  return { txnHash, status: 'Failed' };
-};
-
-export const burnNFT = async ({ addresses, ids, amounts }) => {
-  let txnHash = '';
-  let isSuccess = false;
-  let retry = 0;
-  const ethersProvider = await alchemy.config.getProvider();
-  while (!isSuccess && retry < 10) {
-    try {
-      logger.info(`Start burnNFT. Retry ${retry++} times`);
-      logger.info({ addresses, ids, amounts });
+      logger.info(`Start setWarResult. Retry ${retry++} times`);
+      logger.info({ addresses, lostGangsters, lostGoons, wonReputations, wonTokens });
       const workerWallet = await getWorkerWallet();
       const gameContract = await getGameContract(workerWallet);
 
       const baseGasPrice = await ethersProvider.getGasPrice();
       const gasPrice = (baseGasPrice.toBigInt() * BigInt(Math.round(Math.pow(1.2, retry) * 1000000))) / BigInt(1000000);
-      logger.info(`Start burnNFT transaction with gasPrice: ${JSON.stringify(gasPrice)}`);
-      const tx = await gameContract.burnNFT(addresses, ids, amounts, { gasPrice });
+      logger.info(`Start setWarResult transaction with gasPrice: ${JSON.stringify(gasPrice)}`);
+      const tx = await gameContract.finalWarResult(addresses, lostGangsters, lostGoons, wonReputations, wonTokens, {
+        gasPrice,
+      });
       txnHash = tx.hash;
-      logger.info('BurnNFT Transaction:' + tx.hash);
+      logger.info('finalWarResult Transaction:' + tx.hash);
       const receipt = await tx.wait();
 
       if (receipt.status !== 1) {
@@ -226,11 +155,11 @@ export const burnNFT = async ({ addresses, ids, amounts }) => {
         throw new Error(`API error: Txn failed`);
       }
       isSuccess = true;
-      logger.info(`Finished burnNFT transaction with txnHash: ${txnHash}`);
+      logger.info(`Finished setWarResult transaction with txnHash: ${txnHash}`);
       return { txnHash, status: 'Success' };
     } catch (err) {
       try {
-        logger.info(`Error burnNFT transaction with txnHash: ${txnHash}`);
+        logger.info(`Error setWarResult transaction with txnHash: ${txnHash}`);
         if (isError(err, 'UNPREDICTABLE_GAS_LIMIT')) {
           logger.info('UNPREDICTABLE_GAS_LIMIT');
         } else if (isError(err, 'TRANSACTION_REPLACED')) {
@@ -265,7 +194,7 @@ export const burnNFT = async ({ addresses, ids, amounts }) => {
           logger.error(err.message);
         }
       } catch {
-        logger.info('Error happened at burnNFT catch');
+        logger.info('Error happened at setWarResult catch');
       }
     }
   }
