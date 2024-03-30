@@ -807,6 +807,7 @@ export const getBuildingPriceChart = async ({ timeMode }) => {
     .collection('building-txn-prices')
     .where('seasonId', '==', activeSeason.id)
     .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startTimeUnix))
+    .where('createdAt', '<', admin.firestore.Timestamp.fromMillis(now))
     .orderBy('createdAt', 'asc')
     .get();
 
@@ -822,6 +823,7 @@ export const getBuildingPriceChart = async ({ timeMode }) => {
     .where('type', '==', 'buy-building')
     .where('status', '==', 'Success')
     .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(now - 12 * 60 * 60 * 1000))
+    .where('createdAt', '<', admin.firestore.Timestamp.fromMillis(now))
     .get();
 
   const buildingSalesLastPeriod = last12hTxns.docs.reduce((total, doc) => total + doc.data().amount, 0);
@@ -847,6 +849,7 @@ export const getWorkerPriceChart = async ({ timeMode }) => {
     .collection('worker-txn-prices')
     .where('seasonId', '==', activeSeason.id)
     .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startTimeUnix))
+    .where('createdAt', '<', admin.firestore.Timestamp.fromMillis(now))
     .orderBy('createdAt', 'asc')
     .get();
 
@@ -862,6 +865,7 @@ export const getWorkerPriceChart = async ({ timeMode }) => {
     .where('type', '==', 'buy-worker')
     .where('status', '==', 'Success')
     .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(now - 12 * 60 * 60 * 1000))
+    .where('createdAt', '<', admin.firestore.Timestamp.fromMillis(now))
     .get();
 
   const workerSalesLastPeriod = last12hTxns.docs.reduce((total, doc) => total + doc.data().amount, 0);
