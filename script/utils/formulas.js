@@ -1,3 +1,8 @@
+// worker & building share same formula
+export const calculateBuyAmountFromEndPrice = (targetDailyPurchase, targetPrice, startPrice, endPrice) => {
+  return Math.ceil(Math.sqrt((endPrice - startPrice) / targetPrice) * targetDailyPurchase);
+};
+
 export const calculateNextWorkerBuyPrice = (salesLastPeriod, targetDailyPurchase, targetPrice, startPrice) => {
   return Math.pow(salesLastPeriod / targetDailyPurchase, 2) * targetPrice + startPrice;
 };
