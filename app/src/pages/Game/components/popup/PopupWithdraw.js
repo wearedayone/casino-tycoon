@@ -49,7 +49,7 @@ class PopupWithdraw extends Popup {
 
     this.tokenContainer = scene.add.image(width / 2, tokenContainerY, 'text-container');
     const tokenIcon = scene.add.image(imageX, tokenContainerY, 'icon-coin');
-    const tokenName = scene.add.text(resourceNameX, tokenContainerY, '$FIAT', resourceNameStyle).setOrigin(0, 0.5);
+    const tokenName = scene.add.text(resourceNameX, tokenContainerY, '$GANG', resourceNameStyle).setOrigin(0, 0.5);
     this.tokenAmount = scene.add
       .text(resourceValueX, tokenContainerY, '0', { ...resourceNameStyle, fontSize: '48px' })
       .setOrigin(1, 1);

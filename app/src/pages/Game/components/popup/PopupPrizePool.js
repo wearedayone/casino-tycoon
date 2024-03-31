@@ -17,7 +17,7 @@ class PopupPrizePool extends Popup {
     const leftMargin = this.popup.x - this.popup.width / 2;
     const paddedX = leftMargin + this.popup.width * 0.1;
     const startingY = this.popup.y - this.popup.height / 2;
-    const firstParagraphY = startingY + 200;
+    const firstParagraphY = startingY + 320;
     const secondParagraphY = firstParagraphY + 300;
     const thirdParagraphY = secondParagraphY + 300;
 
@@ -33,15 +33,16 @@ class PopupPrizePool extends Popup {
       '--% of ETH from player spend\ngoes to all players based on\nreputation.',
       largeBlackBold
     );
-    this.marketingFee = scene.add.text(
-      paddedX,
-      thirdParagraphY,
-      '--% is used to buy and burn\n$FIAT tokens.',
-      largeBlackBold
-    );
+
+    // this.marketingFee = scene.add.text(
+    //   paddedX,
+    //   thirdParagraphY,
+    //   '--% is used to buy and burn\n$GANG tokens.',
+    //   largeBlackBold
+    // );
     this.add(this.rankPrizePool);
     this.add(this.reputationPrizePool);
-    this.add(this.marketingFee);
+    // this.add(this.marketingFee);
 
     this.buttonBack = new TextButton(
       scene,
@@ -62,14 +63,12 @@ class PopupPrizePool extends Popup {
     this.add(this.buttonBack);
 
     scene.game.events.on(events.updateRankingRewards, ({ prizePoolConfig }) => {
-      const { rankRewardsPercent, reputationRewardsPercent, lowerRanksCutoffPercent, marketingFee } = prizePoolConfig;
-      this.rankPrizePool.text = `${rankRewardsPercent * 100}% of ETH from player spend\ngoes to the top ${
-        lowerRanksCutoffPercent * 100
-      }% players\nbased on rank.`;
-      this.reputationPrizePool.text = `${
+      const { rankRewardsPercent, reputationRewardsPercent, tokenTaxToPrizePoolPercent } = prizePoolConfig;
+      this.rankPrizePool.text = `${tokenTaxToPrizePoolPercent * 100}% of all $GANG trading\nfees go to prize pool`;
+      this.reputationPrizePool.text = `${rankRewardsPercent * 100}% to rank rewards and\n${
         reputationRewardsPercent * 100
-      }% of ETH from player spend\ngoes to all players based on\nreputation.`;
-      this.marketingFee.text = `${marketingFee * 100}% is used to buy and burn\n$FIAT tokens.`;
+      }% to reputation rewards.`;
+      // this.marketingFee.text = `${marketingFee * 100}% is used to buy and burn\n$GANG tokens.`;
     });
     scene.game.events.emit(events.requestRankingRewards);
   }

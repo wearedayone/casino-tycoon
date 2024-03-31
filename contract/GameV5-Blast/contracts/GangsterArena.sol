@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import '@openzeppelin/contracts/access/AccessControl.sol';
 import './Gangster.sol';
-import './POINT.sol';
+import './GANG.sol';
 import './IGangsterArena.sol';
 import './libs/SafeMath.sol';
 import './libs/SafeTransferLib.sol';
@@ -19,7 +19,7 @@ contract GangsterArena is AccessControl, IGangsterArena {
   // NFT token
   Gangster public nft;
   // pointToken token
-  POINT public pointToken;
+  GANG public pointToken;
 
   // Signer address
   address private signer;
@@ -91,7 +91,7 @@ contract GangsterArena is AccessControl, IGangsterArena {
     address payable _fiatAddress
   ) {
     nft = Gangster(_gangsterAddress);
-    pointToken = POINT(_fiatAddress);
+    pointToken = GANG(_fiatAddress);
     signer = _signerAddress;
 
     _grantRole(DEFAULT_ADMIN_ROLE, _defaultAdmin);

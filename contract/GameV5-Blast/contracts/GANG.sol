@@ -17,7 +17,7 @@ import './IGangsterArena.sol';
 
 // import 'hardhat/console.sol';
 
-contract POINT is ERC20, AccessControl, ERC20Burnable, ERC20Permit, ReentrancyGuard {
+contract GANG is ERC20, AccessControl, ERC20Burnable, ERC20Permit, ReentrancyGuard {
   using SafeMath for uint256;
   using SafeTransferLib for address payable;
   bytes32 public constant MINTER_ROLE = keccak256('MINTER_ROLE');
@@ -49,7 +49,7 @@ contract POINT is ERC20, AccessControl, ERC20Burnable, ERC20Permit, ReentrancyGu
 
   event SwapAndLiquify(uint256 tokensSwapped, uint256 ethReceived, uint256 tokensIntoLiquidity);
 
-  constructor(address defaultAdmin, address minter) ERC20('POINT', '$POINT') ERC20Permit('POINT') {
+  constructor(address defaultAdmin, address minter) ERC20('GANG', '$GANG') ERC20Permit('GANG') {
     _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
     _grantRole(MINTER_ROLE, minter);
     _defaultAdmin = defaultAdmin;

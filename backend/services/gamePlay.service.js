@@ -39,7 +39,9 @@ export const getLeaderboard = async (userId) => {
   const docs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
   // const userPromises = docs.map((doc) => getUserDisplayInfos(doc.userId)).filter(Boolean);
   // const userDatas = await Promise.all(userPromises);
-  const totalActiveReputation = docs.filter(({ active }) => !!active).reduce((sum, doc) => sum + doc.networth - 2, 0);
+  const totalSqrtActiveReputation = docs
+    .filter(({ active }) => !!active)
+    .reduce((sum, doc) => sum + Math.floor(Math.sqrt(doc.networth - 2)), 0);
 
   // implement logic calculate reward
   let rank = 0;
@@ -59,7 +61,9 @@ export const getLeaderboard = async (userId) => {
       avatarURL: doc.avatarURL,
       avatarURL_small: doc.avatarURL_small,
       rankReward: doc.active ? calculateReward(rankPrizePool, rankingRewards, rank - 1) : 0,
-      reputationReward: doc.active ? (doc.networth / totalActiveReputation) * reputationPrizePool : 0,
+      reputationReward: doc.active
+        ? (Math.floor(Math.sqrt(doc.networth - 2)) / totalSqrtActiveReputation) * reputationPrizePool
+        : 0,
     };
   });
 
@@ -104,11 +108,11 @@ export const getRank = async (userId) => {
   let totalActiveReputation = 0;
   for (let doc of snapshot.docs) {
     const { networth } = doc.data();
-    totalActiveReputation += networth;
+    totalActiveReputation += Math.floor(Math.sqrt(networth - 2));
   }
   let reputationReward = 0;
   if (totalActiveReputation !== 0) {
-    reputationReward = (networth / totalActiveReputation) * reputationPrizePool;
+    reputationReward = (Math.floor(Math.sqrt(networth - 2)) / totalActiveReputation) * reputationPrizePool;
   }
 
   const rank = rankSnapshot.data().count;
