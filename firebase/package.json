@@ -8,6 +8,7 @@
     "deploy:prd-beta": "firebase use prd && firebase deploy --only hosting:app-prd-test",
     "deploy:demo": "firebase use demo && firebase deploy --only hosting:app-demo",
     "deploy:stg": "firebase use stg && firebase deploy --only hosting:app-stg",
+    "deploy:stg-v2": "firebase use stg-v2 && firebase deploy --only hosting:app-stg-v2",
     "deploy:dev": "firebase use dev && firebase deploy --only hosting:app-dev"
   },
   "dependencies": {

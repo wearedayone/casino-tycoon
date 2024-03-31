@@ -1,6 +1,5 @@
 import { BigNumber } from 'alchemy-sdk';
 import { formatEther, parseEther } from '@ethersproject/units';
-
 import admin, { firestore } from '../configs/firebase.config.js';
 import alchemy from '../configs/alchemy.config.js';
 import { getActiveSeason, getActiveSeasonId, updateSeasonSnapshotSchedule } from './season.service.js';
@@ -14,6 +13,8 @@ import {
   signMessageRetire,
   getTotalSold,
   getTokenBalance,
+  getNoGangster,
+  convertEthInputToToken,
 } from './worker.service.js';
 import {
   calculateNextBuildingBuyPriceBatch,
@@ -59,7 +60,7 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       txnData.token = data.token;
       break;
     case 'buy-machine':
-      txnData.token = 'ETH';
+      txnData.token = 'FIAT';
       txnData.currentSold = machineSold;
 
       const gamePlaySnapshot = await firestore
@@ -210,16 +211,30 @@ export const initTransaction = async ({ userId, type, ...data }) => {
     if (userData.exists) {
       const { address } = userData.data();
       const time = Math.floor(Date.now() / 1000);
+      const nGangster = (await getNoGangster({ address })).toNumber();
+      const basePrice = await convertEthInputToToken(0.001);
+      const value = parseEther((basePrice.amount * txnData.amount).toString()).toBigInt();
       const signedData = {
         address,
         amount: txnData.amount,
+        value,
         time,
+        nGangster,
         nonce,
-        mintFunction: data.mintFunction,
+        bType: 1,
+        referral: txnData.referrerAddress ?? '0xb5987682d601354eA1e8620253191Fb4e43024e6',
       };
-      if (txnData.referrerAddress) signedData.referral = txnData.referrerAddress;
       const signature = await signMessageBuyGangster(signedData);
-      return { id: newTransaction.id, ...transaction, time, signature };
+      return {
+        id: newTransaction.id,
+        ...transaction,
+        value,
+        nGangster,
+        bType: 1,
+        time,
+        referrerAddress: signedData.referral,
+        signature,
+      };
     }
   }
   if (type === 'retire') {

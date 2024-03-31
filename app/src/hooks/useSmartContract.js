@@ -90,29 +90,38 @@ const useSmartContract = () => {
     }
   };
 
-  const buyMachine = async ({ amount, value, time, nonce, referrerAddress, signature, mintFunction }) => {
+  const buyMachine = async ({ amount, value, time, nGangster, nonce, bType, referrerAddress, signature }) => {
     console.log('Start buyMachine');
     if (!loadedAssets) return;
     const privyProvider = await embeddedWallet.getEthereumProvider();
     const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
+    const tokenContract = new Contract(TOKEN_ADDRESS, tokenAbi.abi, privyProvider.provider);
 
-    // eslint-disable-next-line no-undef
-    const bonusBigint = BigInt(parseEther('0').toString());
-    let params = [1, amount, bonusBigint, time, nonce, signature];
-    if (mintFunction === 'mintReferral') {
-      if (!referrerAddress) mintFunction = 'mint';
-      else {
-        params = [1, amount, bonusBigint, referrerAddress, time, nonce, signature];
-      }
+    const res = await tokenContract.allowance(embeddedWallet.address, GAME_CONTRACT_ADDRESS);
+    const approvedAmountInWei = res.toString();
+    const approvedAmountInToken = Number(approvedAmountInWei.slice(0, approvedAmountInWei.length - 18));
+    const needApprovedMore = approvedAmountInToken < value;
+
+    if (needApprovedMore) {
+      // eslint-disable-next-line no-undef
+      const approveValueBigint = BigInt(parseEther(1e9 + '').toString());
+      const data = tokenContract.interface.encodeFunctionData('approve', [GAME_CONTRACT_ADDRESS, approveValueBigint]);
+      const unsignedTx = {
+        to: TOKEN_ADDRESS,
+        chainId: Number(NETWORK_ID),
+        data,
+      };
+      await sendTransaction(unsignedTx);
+      await delay(1000);
     }
-    const data = gameContract.interface.encodeFunctionData(mintFunction, params);
 
+    const tokenId = 1;
+    let params = [tokenId, amount, value, time, nGangster, nonce, bType, referrerAddress, signature];
+    const data = gameContract.interface.encodeFunctionData('buyGangster', params);
     const unsignedTx = {
       to: GAME_CONTRACT_ADDRESS,
       chainId: Number(NETWORK_ID),
       data,
-      // eslint-disable-next-line
-      value: BigInt(parseEther(value.toString()).toString()),
     };
 
     const uiConfig = {

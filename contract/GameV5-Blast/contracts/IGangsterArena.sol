@@ -28,43 +28,43 @@ interface IGangsterArena {
    */
   function addReward(uint256 devFee, uint256 marketingFee, uint256 prizePool, uint256 retirePool) external payable;
 
-  /**
-   * public mint when user buy gangster NFT
-   *
-   */
-  function mint(
-    uint256 tokenId,
-    uint256 amount,
-    uint256 bonus,
-    uint256 time,
-    uint256 nonce,
-    bytes memory sig
-  ) external payable;
+  // /**
+  //  * public mint when user buy gangster NFT
+  //  *
+  //  */
+  // function mint(
+  //   uint256 tokenId,
+  //   uint256 amount,
+  //   uint256 bonus,
+  //   uint256 time,
+  //   uint256 nonce,
+  //   bytes memory sig
+  // ) external payable;
 
-  /**
-   * public referral mint when user buy gangster NFT
-   */
-  function mintReferral(
-    uint256 tokenId,
-    uint256 amount,
-    uint256 bonus,
-    address referral,
-    uint256 time,
-    uint256 nonce,
-    bytes memory sig
-  ) external payable;
+  // /**
+  //  * public referral mint when user buy gangster NFT
+  //  */
+  // function mintReferral(
+  //   uint256 tokenId,
+  //   uint256 amount,
+  //   uint256 bonus,
+  //   address referral,
+  //   uint256 time,
+  //   uint256 nonce,
+  //   bytes memory sig
+  // ) external payable;
 
-  /**
-   * Whitelist mint when user buy gangster NFT
-   */
-  function mintWL(
-    uint256 tokenId,
-    uint256 amount,
-    uint256 bonus,
-    uint256 time,
-    uint256 nonce,
-    bytes memory sig
-  ) external payable;
+  // /**
+  //  * Whitelist mint when user buy gangster NFT
+  //  */
+  // function mintWL(
+  //   uint256 tokenId,
+  //   uint256 amount,
+  //   uint256 bonus,
+  //   uint256 time,
+  //   uint256 nonce,
+  //   bytes memory sig
+  // ) external payable;
 
   /**
    * user deposit gangster NFTs

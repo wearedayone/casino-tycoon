@@ -32,7 +32,7 @@ const configGame = async () => {
   console.log('Configs game...');
   const { token, nft, game, pair, uniRouter } = readConfigs();
 
-  const FIAT = await ethers.getContractFactory('FIAT');
+  const FIAT = await ethers.getContractFactory('GANG');
   const fiatToken = FIAT.attach(token);
   const minterRole = await fiatToken.MINTER_ROLE();
   await fiatToken.grantRole(minterRole, game);
@@ -53,7 +53,7 @@ const configGameNewContract = async () => {
   console.log('Configs game...');
   const { token, nft, game, pair, uniRouter } = readConfigs();
 
-  const FIAT = await ethers.getContractFactory('FIAT');
+  const FIAT = await ethers.getContractFactory('GANG');
   const fiatToken = FIAT.attach(token);
   const minterRole = await fiatToken.MINTER_ROLE();
   await fiatToken.grantRole(minterRole, game);
@@ -71,13 +71,13 @@ const configGameNewContract = async () => {
 const setupVariables = async () => {
   console.log('setup contract variables...');
   const { token, nft, game } = readConfigs();
-  const FIAT = await ethers.getContractFactory('FIAT');
+  const FIAT = await ethers.getContractFactory('GANG');
   const tokenContract = FIAT.attach(token);
   if (tokenContractVariables) {
     console.log('update token contract fees');
-    const res1 = await tokenContract.revShareFee();
+    const res1 = await tokenContract.prizeFee();
     const res2 = await tokenContract.liquidityFee();
-    const res3 = await tokenContract.teamFee();
+    const res3 = await tokenContract.devFee();
     const res4 = await tokenContract.burnFee();
     const res5 = await tokenContract.swapTokensAtAmount();
 
@@ -101,14 +101,14 @@ const setupVariables = async () => {
           team: currentTeamFee,
           burn: currentBurnFee,
         })}, correct value: ${JSON.stringify({
-          revShare: revShareFee * 1000,
-          liquidity: liquidityFee * 1000,
-          team: teamFee * 1000,
-          burn: burnFee * 1000,
+          revShare: revShareFee * 10000,
+          liquidity: liquidityFee * 10000,
+          team: teamFee * 10000,
+          burn: burnFee * 10000,
         })}`
       );
 
-      await tokenContract.updateFees(revShareFee * 1000, liquidityFee * 1000, teamFee * 1000, burnFee * 1000);
+      await tokenContract.updateFees(revShareFee * 10000, liquidityFee * 10000, teamFee * 10000, burnFee * 10000);
     }
 
     if (swapAmount !== Number(currentSwapAmount)) {
@@ -173,7 +173,7 @@ const setupVariables = async () => {
       console.log(
         `updating basePriceWL, contract current value: ${currentBasePriceWL}, correct value: ${machine.whitelistPrice}`
       );
-      await gameContract.setBasePriceWL(parseEther(`${machine.whitelistPrice}`));
+      // await gameContract.setBasePriceWL(parseEther(`${machine.whitelistPrice}`));
     }
 
     console.log('update basePriceWL done');
@@ -261,10 +261,10 @@ const setupVariables = async () => {
 
 async function main() {
   try {
-    await deployGame();
-    await configGameNewContract();
-    // await configGame();
-    // await setupVariables();
+    // await deployGame();
+    // await configGameNewContract();
+    await configGame();
+    await setupVariables();
     // updateConfigs({ contractCompleted: true });
   } catch (err) {
     console.error(err);

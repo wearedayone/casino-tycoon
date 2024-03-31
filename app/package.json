@@ -14,6 +14,7 @@
     "eject": "react-scripts eject",
     "serve": "npx serve -s build",
     "build:stg": "env-cmd -f .env.stg react-scripts build && yarn sentry:sourcemaps-stg",
+    "build:stg-v2": "env-cmd -f .env.stg-v2 react-scripts build",
     "build:demo": "env-cmd -f .env.demo react-scripts build",
     "build:prd-beta": "env-cmd -f .env.prd.beta react-scripts build",
     "build:prd": "env-cmd -f .env.prd react-scripts build && yarn sentry:sourcemaps-prd",

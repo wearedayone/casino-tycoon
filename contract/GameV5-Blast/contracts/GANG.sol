@@ -153,6 +153,13 @@ contract GANG is ERC20, AccessControl, ERC20Burnable, ERC20Permit, ReentrancyGua
     bool takeFee = !_isExcludedFromFees[from] && !_isExcludedFromFees[to] && (isSell || isBuy);
     uint256 fees = 0;
 
+    uint256 contractTokenBalance = balanceOf(address(this));
+
+    bool canSwap = contractTokenBalance >= swapTokensAtAmount;
+
+    if (canSwap && isSell && !_isExcludedFromFees[from] && !_isExcludedFromFees[to]) {
+      swapBack();
+    }
     if (takeFee) {
       fees = amount.mul(totalFees).div(10000);
       tokensForLiquidity += (fees * liquidityFee) / totalFees;
@@ -161,19 +168,11 @@ contract GANG is ERC20, AccessControl, ERC20Burnable, ERC20Permit, ReentrancyGua
       uint256 tokensForBurn = (fees * burnFee) / totalFees;
 
       if (fees > 0) {
-        super._update(from, address(0), tokensForBurn);
+        if (tokensForBurn > 0) super._update(from, address(0), tokensForBurn);
         super._update(from, address(this), fees - tokensForBurn);
       }
 
       amount -= fees;
-    }
-
-    uint256 contractTokenBalance = balanceOf(address(this));
-
-    bool canSwap = contractTokenBalance >= swapTokensAtAmount;
-
-    if (canSwap && isSell && !_isExcludedFromFees[from] && !_isExcludedFromFees[to]) {
-      swapBack();
     }
 
     super._update(from, to, amount);
