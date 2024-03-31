@@ -454,13 +454,12 @@ const Game = () => {
   const buyGangster = async (quantity, mintFunction) => {
     try {
       const res = await create({ type: 'buy-machine', amount: quantity, mintFunction });
-      const { id, amount, value, bonusAmount, signature, referrerAddress, time, nonce } = res.data;
+      const { id, amount, value, signature, referrerAddress, time, nonce } = res.data;
       const receipt = await buyMachine({
         amount,
         value,
         time,
         nonce,
-        bonusAmount,
         signature,
         referrerAddress,
         mintFunction,
@@ -498,15 +497,6 @@ const Game = () => {
     const claimableReward = gamePlay.pendingReward + diffInDays * dailyMoney;
     gameRef.current?.events.emit('update-claimable-reward', { reward: claimableReward });
     gameRef.current?.events.emit('claimable-reward-added');
-  };
-
-  const calculateBuyBonusRef = useRef();
-  calculateBuyBonusRef.current = () => {
-    if (!activeSeason?.startTime) return;
-    gameRef.current?.events.emit('update-buy-bonus', {
-      daysElapsed: (Date.now() - (activeSeason?.startTime.toDate().getTime() || Date.now())) / MILISECONDS_IN_A_DAY,
-      gangsterDailyReward: machine.dailyReward,
-    });
   };
 
   const checkGameEndRef = useRef();
@@ -733,7 +723,6 @@ const Game = () => {
       });
 
       gameRef.current?.events.on('request-claimable-reward', () => calculateClaimableRewardRef.current?.());
-      gameRef.current?.events.on('request-buy-bonus', () => calculateBuyBonusRef.current?.());
       gameRef.current?.events.on('check-game-ended', () => checkGameEndRef.current?.());
 
       gameRef.current?.events.on('request-claimable-status', () => {
