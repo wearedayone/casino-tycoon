@@ -24,3 +24,6 @@ test.json
 contract/GameV4/.env.prd
 contract/GameV4/.env.stg
 app/.env.prd.beta
+app/.env.stg-v2
+backend/.env.stg-v2
+script/.env.stg-v2
