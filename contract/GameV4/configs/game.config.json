@@ -31,7 +31,7 @@
   },
   "prizePool": {
     "earlyRetirementTax": 0.2,
-    "rankRewardsPercent": 0.5,
+    "rankRewardsPercent": 0.6,
     "reputationRewardsPercent": 0.4,
     "rewardScalingRatio": 1.28,
     "higherRanksCutoffPercent": 0.1,
@@ -39,7 +39,8 @@
     "minRewardHigherRanks": 0.05,
     "minRewardLowerRanks": 0.02,
     "devFee": 0,
-    "marketingFee": 0.1
+    "marketingFee": 0.1,
+    "tokenTaxToPrizePoolPercent": 0.025
   },
   "war": {
     "buildingBonusMultiple": 0.1,
