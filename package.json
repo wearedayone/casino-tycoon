@@ -12,6 +12,7 @@
     "deploy:prd-beta": "yarn --cwd app build:prd-beta && yarn --cwd firebase deploy:prd-beta",
     "deploy:demo": "yarn --cwd app build:demo && yarn --cwd firebase deploy:demo",
     "deploy:stg": "yarn --cwd app build:stg && yarn --cwd firebase deploy:stg",
+    "deploy:stg-v2": "yarn --cwd app build:stg-v2 && yarn --cwd firebase deploy:stg-v2",
     "deploy:dev": "yarn --cwd app build:dev && yarn --cwd firebase deploy:dev"
   },
   "lint-staged": {

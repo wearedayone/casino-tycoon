@@ -454,15 +454,16 @@ const Game = () => {
   const buyGangster = async (quantity, mintFunction) => {
     try {
       const res = await create({ type: 'buy-machine', amount: quantity, mintFunction });
-      const { id, amount, value, signature, referrerAddress, time, nonce } = res.data;
+      const { id, amount, value, time, nGangster, nonce, bType, referrerAddress, signature } = res.data;
       const receipt = await buyMachine({
         amount,
         value,
         time,
+        nGangster,
         nonce,
-        signature,
+        bType,
         referrerAddress,
-        mintFunction,
+        signature,
       });
       if (receipt.status === 1) {
         await validate({ transactionId: id, txnHash: receipt.transactionHash });
@@ -944,6 +945,7 @@ const Game = () => {
           numberOfMachines,
           networth,
           balance: ETHBalance,
+          tokenBalance,
           basePrice: machine.basePrice,
           whitelistPrice: machine.whitelistPrice,
           maxPerBatch: machine.maxPerBatch,
@@ -1048,6 +1050,21 @@ const Game = () => {
         convertEthInputToToken(amount)
           .then((result) =>
             gameRef.current?.events.emit('convert-eth-input-to-token-result', {
+              amount: result.amount,
+              tradingFee: result.tradingFee,
+              tradingFeeInUSD: result.tradingFeeInUSD,
+            })
+          )
+          .catch((err) => {
+            gameRef.current?.events.emit('swap-error');
+            console.error(err);
+            Sentry.captureException(err);
+          });
+      });
+      gameRef.current?.events.on('request-gangster-price', () => {
+        convertEthInputToToken(0.001)
+          .then((result) =>
+            gameRef.current?.events.emit('update-gangster-price', {
               amount: result.amount,
               tradingFee: result.tradingFee,
               tradingFeeInUSD: result.tradingFeeInUSD,
@@ -1414,6 +1431,7 @@ const Game = () => {
       numberOfMachines,
       networth,
       balance: ETHBalance,
+      tokenBalance,
       basePrice: machine.basePrice,
       whitelistPrice: machine.whitelistPrice,
       maxPerBatch: machine.maxPerBatch,

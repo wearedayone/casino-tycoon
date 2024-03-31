@@ -69,11 +69,11 @@ const configs = {
   timeStepInMinutes: 1, // time increase when every nft is purchased
   openseaNftCollection: 'gangster-arena', // mainnet only
   tokenContract: {
-    revShareFee: 0.02,
+    revShareFee: 0.025,
     liquidityFee: 0.01,
-    teamFee: 0.02,
+    teamFee: 0.015,
     burnFee: 0,
-    swapAmount: 1000,
+    swapAmount: 5000,
   },
 };
 

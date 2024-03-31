@@ -3,7 +3,8 @@
     "dev": "casino-tycoon-14684",
     "prd": "gangster-arena-prd",
     "stg": "gangster-arena-d53fa",
-    "demo": "gangster-arena-demo"
+    "demo": "gangster-arena-demo",
+    "stg-v2": "gangster-arena-stg-v2"
   },
   "targets": {
     "casino-tycoon-14684": {
@@ -34,6 +35,13 @@
       "hosting": {
         "app-demo": [
           "gangster-arena-demo"
+        ]
+      }
+    },
+    "gangster-arena-stg-v2": {
+      "hosting": {
+        "app-stg-v2": [
+          "gangster-arena-stg-v2"
         ]
       }
     }

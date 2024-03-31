@@ -70,6 +70,7 @@ contract GangsterArena is AccessControl, IGangsterArena {
   mapping(address => uint256) public goon; // address -> number of goon
   mapping(address => uint256) public safehouse; // address -> number of safehouse
   mapping(address => uint256) public warRep; // address -> number of additional reputation from gangwar
+  mapping(address => uint256) public gangsterBought; // address -> number of gangster bought
   uint256 public tgoon; // total goon bought
   uint256 public tshouse; // total safehouse bought
 
@@ -149,78 +150,126 @@ contract GangsterArena is AccessControl, IGangsterArena {
     prizeDebt = prizeDebt.sub(int256(prizePool));
   }
 
-  /**
-   * @notice Normal buy gangster
-   */
-  function mint(
-    uint256 tokenId,
-    uint256 amount,
-    uint256 bonus,
-    uint256 time,
-    uint256 nonce,
-    bytes memory sig
-  ) public payable {
-    require(msg.value >= bPrice_ * amount, 'Need to send more ether');
-    require(!gameClosed, 'Game is closed');
-    require(block.timestamp < time + vtd, 'Invalid timestamp');
-    require(!usedNonces[nonce], 'Invalid nonce');
-    bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender, tokenId, amount, bonus, time, nonce, 'mint')));
-    require(verifyAddressSigner(message, sig), 'Invalid signature');
-    nft.mintOnBehalf(msg.sender, tokenId, amount);
-    usedNonces[nonce] = true;
-    if (bonus > 0) pointToken.mint(msg.sender, bonus);
-    emit Mint(msg.sender, tokenId, amount, nonce);
-  }
+  // /**
+  //  * @notice Normal buy gangster
+  //  */
+  // function mint(
+  //   uint256 tokenId,
+  //   uint256 amount,
+  //   uint256 bonus,
+  //   uint256 time,
+  //   uint256 nonce,
+  //   bytes memory sig
+  // ) public payable {
+  //   require(msg.value >= bPrice_ * amount, 'Need to send more ether');
+  //   require(!gameClosed, 'Game is closed');
+  //   require(block.timestamp < time + vtd, 'Invalid timestamp');
+  //   require(!usedNonces[nonce], 'Invalid nonce');
+  //   bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender, tokenId, amount, bonus, time, nonce, 'mint')));
+  //   require(verifyAddressSigner(message, sig), 'Invalid signature');
+  //   nft.mintOnBehalf(msg.sender, tokenId, amount);
+  //   usedNonces[nonce] = true;
+  //   if (bonus > 0) pointToken.mint(msg.sender, bonus);
+  //   emit Mint(msg.sender, tokenId, amount, nonce);
+  // }
+
+  // /**
+  //  * @notice Buy gangster with referral
+  //  */
+  // function mintReferral(
+  //   uint256 tokenId,
+  //   uint256 amount,
+  //   uint256 bonus,
+  //   address referral,
+  //   uint256 time,
+  //   uint256 nonce,
+  //   bytes memory sig
+  // ) public payable {
+  //   // require whitelisted for genesis token
+  //   require(!usedNonces[nonce], 'Invalid nonce');
+  //   require(block.timestamp < time + vtd, 'Invalid timestamp');
+  //   bytes32 message = prefixed(
+  //     keccak256(abi.encodePacked(msg.sender, tokenId, amount, bonus, referral, time, nonce, 'mintReferral'))
+  //   );
+  //   require(verifyAddressSigner(message, sig), 'Invalid signature');
+  //   require(msg.value >= (bPrice_ * refDiscount_ * amount) / 10000, 'Need to send more ether');
+  //   require(!gameClosed, 'Game is closed');
+  //   nft.mintOnBehalf(msg.sender, tokenId, amount);
+  //   usedNonces[nonce] = true;
+  //   payable(referral).safeTransferETH((msg.value * refReward_) / 10000);
+  //   if (bonus > 0) pointToken.mint(msg.sender, bonus);
+  //   emit Mint(msg.sender, tokenId, amount, nonce);
+  // }
+
+  // /**
+  //  * @notice Buy gangster with referral
+  //  */
+  // function mintWL(
+  //   uint256 tokenId,
+  //   uint256 amount,
+  //   uint256 bonus,
+  //   uint256 time,
+  //   uint256 nonce,
+  //   bytes memory sig
+  // ) public payable {
+  //   // require whitelisted for genesis token
+  //   require(msg.value >= bpwl_ * amount, 'Need to send more ether');
+  //   require(!gameClosed, 'Game is closed');
+  //   require(block.timestamp < time + vtd, 'Invalid timestamp');
+  //   require(!usedNonces[nonce], 'Invalid nonce');
+  //   bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender, tokenId, amount, bonus, time, nonce, 'mintWL')));
+  //   require(verifyAddressSigner(message, sig), 'Invalid signature');
+  //   nft.mintWLOnBehalf(msg.sender, tokenId, amount);
+  //   usedNonces[nonce] = true;
+  //   if (bonus > 0) pointToken.mint(msg.sender, bonus);
+  //   emit Mint(msg.sender, tokenId, amount, nonce);
+  // }
 
   /**
    * @notice Buy gangster with referral
    */
-  function mintReferral(
+  function buyGangster(
     uint256 tokenId,
     uint256 amount,
-    uint256 bonus,
-    address referral,
+    uint256 value,
     uint256 time,
+    uint256 nGangster,
     uint256 nonce,
+    uint256 bType,
+    address referral,
     bytes memory sig
-  ) public payable {
+  ) public {
     // require whitelisted for genesis token
-    require(!usedNonces[nonce], 'Invalid nonce');
+    require(!gameClosed, 'Game is closed');
     require(block.timestamp < time + vtd, 'Invalid timestamp');
+    require(!usedNonces[nonce], 'Invalid nonce');
+    // console.log('gbought:', gangsterBought[msg.sender]);
+    // console.log('nGangster:', nGangster);
+    // console.log('amount:', amount);
+    // console.log('sender:', msg.sender);
+    require(gangsterBought[msg.sender] == nGangster, 'outdated number of gangster');
+    // require(pointToken.transferFrom(msg.sender, address(this), value));
+
     bytes32 message = prefixed(
-      keccak256(abi.encodePacked(msg.sender, tokenId, amount, bonus, referral, time, nonce, 'mintReferral'))
+      keccak256(abi.encodePacked(msg.sender, tokenId, amount, value, time, nGangster, nonce, bType, referral))
     );
     require(verifyAddressSigner(message, sig), 'Invalid signature');
-    require(msg.value >= (bPrice_ * refDiscount_ * amount) / 10000, 'Need to send more ether');
-    require(!gameClosed, 'Game is closed');
-    nft.mintOnBehalf(msg.sender, tokenId, amount);
+    if (bType == 1) {
+      // normal buy
+      pointToken.burnFrom(msg.sender, value);
+      nft.mintOnBehalf(msg.sender, tokenId, amount);
+    } else if (bType == 2) {
+      //whitelisted buy
+      pointToken.burnFrom(msg.sender, value);
+      nft.mintWLOnBehalf(msg.sender, tokenId, amount);
+    } else {
+      // referral buy
+      require(pointToken.transfer(referral, (value * 1000) / 10000));
+      pointToken.burnFrom(address(this), (value * 9000) / 10000);
+      nft.mintOnBehalf(msg.sender, tokenId, amount);
+    }
     usedNonces[nonce] = true;
-    payable(referral).safeTransferETH((msg.value * refReward_) / 10000);
-    if (bonus > 0) pointToken.mint(msg.sender, bonus);
-    emit Mint(msg.sender, tokenId, amount, nonce);
-  }
-
-  /**
-   * @notice Buy gangster with referral
-   */
-  function mintWL(
-    uint256 tokenId,
-    uint256 amount,
-    uint256 bonus,
-    uint256 time,
-    uint256 nonce,
-    bytes memory sig
-  ) public payable {
-    // require whitelisted for genesis token
-    require(msg.value >= bpwl_ * amount, 'Need to send more ether');
-    require(!gameClosed, 'Game is closed');
-    require(block.timestamp < time + vtd, 'Invalid timestamp');
-    require(!usedNonces[nonce], 'Invalid nonce');
-    bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender, tokenId, amount, bonus, time, nonce, 'mintWL')));
-    require(verifyAddressSigner(message, sig), 'Invalid signature');
-    nft.mintWLOnBehalf(msg.sender, tokenId, amount);
-    usedNonces[nonce] = true;
-    if (bonus > 0) pointToken.mint(msg.sender, bonus);
+    gangsterBought[msg.sender] += amount;
     emit Mint(msg.sender, tokenId, amount, nonce);
   }
 
@@ -277,22 +326,22 @@ contract GangsterArena is AccessControl, IGangsterArena {
     emit BuySafeHouse(msg.sender, amount, nonce);
   }
 
-  // /**
-  //  * @notice depositNFT
-  //  */
-  // function depositNFT(address to, uint256 tokenId, uint256 amount) public {
-  //   require(!gameClosed, 'Game is closed');
-  //   nft.depositNFT(msg.sender, to, tokenId, amount);
-  //   emit Deposit(to, tokenId, amount);
-  // }
+  /**
+   * @notice depositNFT
+   */
+  function depositNFT(address to, uint256 tokenId, uint256 amount) public {
+    require(!gameClosed, 'Game is closed');
+    nft.depositNFT(msg.sender, to, tokenId, amount);
+    emit Deposit(to, tokenId, amount);
+  }
 
-  // /**
-  //  * @notice withdrawNFT
-  //  */
-  // function withdrawNFT(address to, uint256 tokenId, uint256 amount) public {
-  //   nft.withdrawNFT(msg.sender, to, tokenId, amount);
-  //   emit Withdraw(msg.sender, tokenId, amount);
-  // }
+  /**
+   * @notice withdrawNFT
+   */
+  function withdrawNFT(address to, uint256 tokenId, uint256 amount) public {
+    nft.withdrawNFT(msg.sender, to, tokenId, amount);
+    emit Withdraw(msg.sender, tokenId, amount);
+  }
 
   function retired(uint256 nonce) public {
     require(!gameClosed, 'Game is closed');

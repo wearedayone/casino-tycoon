@@ -23,7 +23,7 @@ describe('POINT', function () {
     const accounts = await ethers.getSigners();
     const [ownerWallet, teamWallet, revShareWallet, userWallet] = accounts;
 
-    const Token = await ethers.getContractFactory('POINT');
+    const Token = await ethers.getContractFactory('GANG');
     const token = await Token.deploy(ownerWallet.address, ownerWallet.address);
     await token.waitForDeployment();
     const tokenAddress = await token.getAddress();
@@ -641,7 +641,7 @@ describe('POINT', function () {
       const teamWalletETHBalanceBefore = await ethers.provider.getBalance(teamWallet.address);
       const revShareWalletETHBalanceBefore = await ethers.provider.getBalance(revShareWallet.address);
       // const reservesBefore = await pair.getReserves();
-
+      console.log('*******');
       // start a txn to trigger swapback
       await token.updateSwapTokensAtAmount(0);
       const totalFees = await token.totalFees();
@@ -672,7 +672,8 @@ describe('POINT', function () {
       const newTokensForTeam = await token.tokensForTeam();
       const newTokensForLiquidity = await token.tokensForLiquidity();
       const newTokensForRevShare = await token.tokensForRevShare();
-
+      console.log('---------');
+      console.log({ prizeFee, tokenAmount, newTokensForRevShare });
       // expect(newTokensForTeam).to.equal((devFee * tokenAmount) / BASE_100_PECENT);
       // expect(newTokensForLiquidity).to.equal((liquidityFee * tokenAmount) / BASE_100_PECENT);
       expect(newTokensForRevShare).to.equal((prizeFee * tokenAmount) / BASE_100_PECENT);

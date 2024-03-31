@@ -1,6 +1,7 @@
 import { Contract } from '@ethersproject/contracts';
 import { Wallet } from '@ethersproject/wallet';
-import { ethers, isError, parseEther } from 'ethers';
+import { formatEther, parseEther } from '@ethersproject/units';
+import { ethers, isError } from 'ethers';
 import { getParsedEthersError } from '@enzoferey/ethers-error-parser';
 
 import tokenABI from '../assets/abis/Token.json' assert { type: 'json' };
@@ -10,6 +11,8 @@ import environments from '../utils/environments.js';
 import alchemy from '../configs/alchemy.config.js';
 import logger from '../utils/logger.js';
 import { getActiveSeason } from './season.service.js';
+import RouterABI from '@uniswap/v2-periphery/build/IUniswapV2Router02.json' assert { type: 'json' };
+import PairABI from '@uniswap/v2-core/build/IUniswapV2Pair.json' assert { type: 'json' };
 
 const { WORKER_WALLET_PRIVATE_KEY, SIGNER_WALLET_PRIVATE_KEY } = environments;
 
@@ -352,19 +355,13 @@ export const signMessageBuyGoon = async ({ address, amount, value, totalAmount, 
   return signature;
 };
 
-export const signMessageBuyGangster = async ({ address, amount, referral, time, nonce, mintFunction }) => {
+export const signMessageBuyGangster = async ({ address, amount, value, time, nGangster, nonce, bType, referral }) => {
   const signerWallet = await getSignerWallet();
-  console.log({ address, amount, nonce, referral });
 
   // Array of types: declares the data types in the message.
-  const types = ['address', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'string'];
+  const types = ['address', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'address'];
   // Array of values: actual values of the parameters to be hashed.
-  const values = [address, 1, amount, BigInt(parseEther('0').toString()), time, nonce, mintFunction];
-
-  if (referral) {
-    types.splice(4, 0, 'address');
-    values.splice(4, 0, referral);
-  }
+  const values = [address, 1, amount, value, time, nGangster, nonce, bType, referral];
 
   let message = ethers.solidityPackedKeccak256(types, values);
 
@@ -403,4 +400,47 @@ export const getNFTBalance = async ({ address }) => {
   const contract = new Contract(nftAddress, nftABI.abi, ethersProvider);
   const value = await contract.gangster(address);
   return value;
+};
+
+export const getNoGangster = async ({ address }) => {
+  const ethersProvider = await alchemy.config.getProvider();
+  const activeSeason = await getActiveSeason();
+  const { gameAddress } = activeSeason || {};
+  const contract = new Contract(gameAddress, gameContractABI.abi, ethersProvider);
+  const value = await contract.gangsterBought(address);
+  return value;
+};
+
+export const convertEthInputToToken = async (ethAmount) => {
+  const { tokenAddress, wethAddress, routerContract, swapReceivePercent } = await getSwapContractInfo();
+
+  const amountIn = parseEther(`${ethAmount}`);
+  const res = await routerContract.getAmountsOut(amountIn, [wethAddress, tokenAddress]);
+  const amount = Number(formatEther(res[1]).toString()) * swapReceivePercent;
+  const tradingFee = Number(formatEther(res[1]).toString()) - amount;
+
+  return { amount, tradingFee: tradingFee.toFixed(2) };
+};
+
+const getSwapContractInfo = async () => {
+  const ethersProvider = await alchemy.config.getProvider();
+  const activeSeason = await getActiveSeason();
+  const { tokenAddress, routerAddress, wethAddress, pairAddress } = activeSeason || {};
+
+  const routerContract = new Contract(routerAddress, RouterABI.abi, ethersProvider);
+  const tokenContract = new Contract(tokenAddress, tokenABI.abi, ethersProvider);
+  const pairContract = new Contract(pairAddress, PairABI.abi, ethersProvider);
+
+  const totalFees = await tokenContract.totalFees();
+  const swapReceivePercent = (1000 - Number(totalFees.toString())) / 1000;
+
+  return {
+    routerAddress,
+    tokenAddress,
+    wethAddress,
+    routerContract,
+    tokenContract,
+    pairContract,
+    swapReceivePercent,
+  };
 };

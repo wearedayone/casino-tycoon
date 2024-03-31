@@ -230,7 +230,7 @@ class PopupBuyGangster extends Popup {
     this.add(this.insufficientBalance);
 
     this.coin = scene.add
-      .image(this.priceText.x + this.priceText.width + 40, counterY, 'eth-coin')
+      .image(this.priceText.x + this.priceText.width + 40, counterY, 'coin2')
       .setOrigin(0, 0.5)
       .setVisible(!isSimulator);
     this.add(this.coin);
@@ -272,7 +272,8 @@ class PopupBuyGangster extends Popup {
         referralDiscount,
       }) => {
         this.balance = balance;
-        this.basePrice = basePrice;
+        // this.basePrice = basePrice
+
         this.whitelistPrice = whitelistPrice;
         this.numberOfMachines = numberOfMachines;
         this.networth = networth;
@@ -292,15 +293,25 @@ class PopupBuyGangster extends Popup {
 
         this.networthText.text = `${networth.toLocaleString()}`;
         this.rateText.text = `${formatter.format(numberOfMachines * dailyReward)}`;
-        this.estimatedMaxPurchase = balance && this.unitPrice ? Math.floor((balance - this.gas) / this.unitPrice) : 0;
         this.maxQuantity =
           isWhitelisted && whitelistAmountLeft ? Math.min(whitelistAmountLeft, maxPerBatch) : maxPerBatch;
         this.updateValues();
       }
     );
-
+    scene.game.events.on('update-gangster-price', ({ amount }) => {
+      console.log({ amount });
+      this.basePrice = amount;
+      this.priceText.text = `${formatter.format(this.quantity * this.basePrice)}`;
+      this.coin.x = this.priceText.x + this.priceText.width + 20;
+      this.upgradeBtn.setDisabledState(this.scene?.isGameEnded || this.basePrice === 0);
+      // this.estimatedMaxPurchase = ;
+    });
     scene.game.events.emit(events.requestMachines);
     scene.game.events.emit('request-gas-mint');
+  }
+
+  onOpen() {
+    this.scene.game.events.emit('request-gangster-price');
   }
 
   cleanup() {
@@ -341,7 +352,8 @@ class PopupBuyGangster extends Popup {
     this.priceStrikethrough.setVisible(hasDifferentPrice);
     const insufficientBalance = this.quantity > this.estimatedMaxPurchase;
     this.insufficientBalance.setVisible(insufficientBalance);
-    this.upgradeBtn.setDisabledState(this.scene?.isGameEnded || insufficientBalance);
+    console.log({ disable: this.scene?.isGameEnded || this.basePrice === 0 });
+    this.upgradeBtn.setDisabledState(this.scene?.isGameEnded || this.basePrice === 0);
   }
 }
 

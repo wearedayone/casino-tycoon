@@ -32,7 +32,7 @@
     "deploy:production:tournament": "npx hardhat run scripts/deployTournament.js --network base_mainnet",
     "compile": "npx hardhat compile",
     "test": "npx hardhat test",
-    "test:point": "npx hardhat test test/point.test.js",
+    "test:token": "npx hardhat test test/token.test.js",
     "test-game": "npx hardhat test test/game.test.js",
     "test-tournament": "npx hardhat test test/Tournament.test.js",
     "verify": "npx hardhat verify --network base_goerli 0x666D080bD673679b927B7006bDbDF50925f27D9F"
