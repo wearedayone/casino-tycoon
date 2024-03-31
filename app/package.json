@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "env-cmd -f .env.dev react-scripts start",
     "stg": "env-cmd -f .env.stg react-scripts start",
+    "stg-v2": "env-cmd -f .env.stg-v2 react-scripts start",
     "demo": "env-cmd -f .env.demo react-scripts start",
     "start": "env-cmd -f .env.prd react-scripts start",
     "beta": "env-cmd -f .env.prd.beta react-scripts start",

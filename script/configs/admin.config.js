@@ -4,6 +4,7 @@ import environments from '../utils/environments.js';
 import serviceAccountDev from '../serviceAccounts/casino-tycoon.json' assert { type: 'json' };
 import serviceAccountDemo from '../serviceAccounts/casino-tycoon-demo.json' assert { type: 'json' };
 import serviceAccountStaging from '../serviceAccounts/casino-tycoon-staging.json' assert { type: 'json' };
+import serviceAccountStagingV2 from '../serviceAccounts/casino-tycoon-staging-v2.json' assert { type: 'json' };
 import serviceAccountProduction from '../serviceAccounts/casino-tycoon-production.json' assert { type: 'json' };
 
 const { ENVIRONMENT } = environments;
@@ -12,6 +13,8 @@ const serviceAccount =
     ? serviceAccountProduction
     : ENVIRONMENT === 'staging'
     ? serviceAccountStaging
+    : ENVIRONMENT === 'staging-v2'
+    ? serviceAccountStagingV2
     : ENVIRONMENT === 'demo'
     ? serviceAccountDemo
     : serviceAccountDev;
