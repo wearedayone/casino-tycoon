@@ -5,7 +5,7 @@ pragma solidity ^0.8.20;
 import '@openzeppelin/contracts/access/Ownable.sol';
 
 import './Gangster.sol';
-import './POINT.sol';
+import './GANG.sol';
 import './IGangsterArena.sol';
 import './libs/SafeMath.sol';
 import './libs/SafeTransferLib.sol';
@@ -21,7 +21,7 @@ contract GangsterArena2 is Ownable, IGangsterArena {
   // NFT token
   Gangster public nft;
   // pointToken token
-  POINT public pointToken;
+  GANG public pointToken;
 
   // Signer address
   address private signer;
@@ -98,7 +98,7 @@ contract GangsterArena2 is Ownable, IGangsterArena {
     address payable _fiatAddress
   ) Ownable(_defaultAdmin) {
     nft = Gangster(_gangsterAddress);
-    pointToken = POINT(_fiatAddress);
+    pointToken = GANG(_fiatAddress);
     signer = _signerAddress;
     workerAddr[_workerAddress] = true;
   }

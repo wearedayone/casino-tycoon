@@ -11,9 +11,9 @@ const deployToken = async () => {
   console.log('deploying token...');
   const configs = readConfigs();
   const { defaultAdmin, worker } = configs;
-  const POINT = await ethers.getContractFactory('POINT');
-  const POINTToken = await POINT.deploy(defaultAdmin, worker);
-  const tokenAddress = await POINTToken.getAddress();
+  const GANG = await ethers.getContractFactory('GANG');
+  const GANGToken = await GANG.deploy(defaultAdmin, worker);
+  const tokenAddress = await GANGToken.getAddress();
 
   await verifyContract({ address: tokenAddress, constructorArguments: [defaultAdmin, worker] });
 
