@@ -30,6 +30,7 @@ const createGamePlayIfNotExist = async (userId, isWhitelisted) => {
         userId,
         seasonId: season.id,
         networth: season.worker.networth,
+        networthFromWar: 0,
         numberOfMachines: 0,
         numberOfWorkers: 1,
         numberOfBuildings: 0,

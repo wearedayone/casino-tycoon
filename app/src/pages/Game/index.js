@@ -1094,8 +1094,10 @@ const Game = () => {
       });
 
       gameRef.current?.events.on('request-war-config', () => {
-        const { tokenRewardPerEarner, earningStealPercent, machinePercentLost } = activeSeason.warConfig;
+        const { workerBonusMultiple, tokenRewardPerEarner, earningStealPercent, machinePercentLost } =
+          activeSeason.warConfig;
         gameRef.current?.events.emit('update-war-config', {
+          workerBonusMultiple,
           tokenRewardPerEarner,
           earningStealPercent,
           machinePercentLost,
@@ -1513,8 +1515,9 @@ const Game = () => {
 
   useEffect(() => {
     if (warConfig) {
-      const { tokenRewardPerEarner, earningStealPercent, machinePercentLost } = warConfig;
+      const { workerBonusMultiple, tokenRewardPerEarner, earningStealPercent, machinePercentLost } = warConfig;
       gameRef.current?.events.emit('update-war-config', {
+        workerBonusMultiple,
         tokenRewardPerEarner,
         earningStealPercent,
         machinePercentLost,

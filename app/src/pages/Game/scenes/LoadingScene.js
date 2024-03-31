@@ -290,6 +290,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-eth', '/images/icons/eth.png');
     this.load.image('icon-eth-done', '/images/icons/eth-done.png');
     this.load.image('icon-gangster', '/images/icons/gangster.png');
+    this.load.image('icon-gangster-small', '/images/icons/gangster-small.png');
     this.load.image('icon-gangster-mini', '/images/icons/gangster-mini.png');
     this.load.image('icon-gangster-buy-done', '/images/icons/gangster-buy-done.png');
     this.load.image('icon-gangster-buy-fail', '/images/icons/gangster-buy-fail.png');
@@ -310,6 +311,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-sound-on', '/images/icons/sound-on.png');
     this.load.image('icon-sound-off', '/images/icons/sound-off.png');
     this.load.image('icon-star', '/images/icons/star.png');
+    this.load.image('icon-star-medium', '/images/icons/star-medium.png');
     this.load.image('icon-wallet', '/images/icons/wallet.png');
     this.load.image('icon-search', '/images/icon-search.png');
 
