@@ -32,13 +32,13 @@ class PopupBuyBonusInfo extends Popup {
     this.staticText = scene.add.text(
       this.paddedX,
       firstParagraphY,
-      'Get bonus         $FIAT as if you\nbought Gangsters at game launch',
+      'Get bonus         $GANG as if you\nbought Gangsters at game launch',
       largeBlackBold
     );
     this.bonusAmount = scene.add.text(
       this.paddedX,
       secondParagraphY,
-      'Current bonus: ---         $FIAT',
+      'Current bonus: ---         $GANG',
       largeBlackBold
     );
     this.add(this.staticText);
@@ -71,7 +71,7 @@ class PopupBuyBonusInfo extends Popup {
   updateData({ daysElapsed, gangsterDailyReward }) {
     const amount = formatter.format(Math.floor(daysElapsed * gangsterDailyReward));
     this.bonusAmountHidden.text = amount;
-    this.bonusAmount.text = `Current bonus: ${amount}         $FIAT`;
+    this.bonusAmount.text = `Current bonus: ${amount}         $GANG`;
 
     this.coinIcon.setX(width / 2 + this.bonusAmountHidden.width + 20);
   }

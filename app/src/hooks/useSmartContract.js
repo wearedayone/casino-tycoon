@@ -53,7 +53,7 @@ const useSmartContract = () => {
       };
 
       const uiConfig = {
-        header: `Send ${value.toLocaleString()} $FIAT to ${to}?`,
+        header: `Send ${value.toLocaleString()} $GANG to ${to}?`,
         description: '',
         buttonText: 'Transfer',
       };
@@ -163,7 +163,7 @@ const useSmartContract = () => {
     const unsignedTx = { to: GAME_CONTRACT_ADDRESS, chainId: Number(NETWORK_ID), data };
 
     const uiConfig = {
-      header: `Buy ${amount} Goon${amount > 1 ? 's' : ''} with ${formatter.format(value)} FIAT`,
+      header: `Buy ${amount} Goon${amount > 1 ? 's' : ''} with ${formatter.format(value)} GANG`,
       description: '',
       buttonText: 'Send transaction',
     };
@@ -210,7 +210,7 @@ const useSmartContract = () => {
     const unsignedTx = { to: GAME_CONTRACT_ADDRESS, chainId: Number(NETWORK_ID), data };
 
     const uiConfig = {
-      header: `Upgrade Safehouse ${amount} time${amount > 1 ? 's' : ''} with ${formatter.format(value)} FIAT`,
+      header: `Upgrade Safehouse ${amount} time${amount > 1 ? 's' : ''} with ${formatter.format(value)} GANG`,
       description: '',
       buttonText: 'Send transaction',
     };
@@ -422,7 +422,7 @@ const useSmartContract = () => {
     const tokenAmountFeesIncluded = tokenAmount / swapReceivePercent;
     if (tokenAmountFeesIncluded >= Number(formatEther(tokenInPool).toString()))
       throw new Error(
-        `Not enough $FIAT in pool, $FIAT left: ${formatter.format(Number(formatEther(tokenInPool).toString()))}`
+        `Not enough $GANG in pool, $GANG left: ${formatter.format(Number(formatEther(tokenInPool).toString()))}`
       );
 
     const amountOut = parseEther(`${tokenAmountFeesIncluded}`);
