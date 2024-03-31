@@ -6,7 +6,7 @@ import chunk from 'lodash.chunk';
 import admin, { firestore } from '../configs/firebase.config.js';
 import { getActiveSeasonId, getActiveSeason } from './season.service.js';
 import { initTransaction, validateNonWeb3Transaction } from './transaction.service.js';
-import { claimTokenBatch, burnNFT as burnNFTTask, getNFTBalance } from './worker.service.js';
+import { getNFTBalance, setWarResult } from './worker.service.js';
 import { getUserUsernames } from './user.service.js';
 import { getUserGamePlay } from './gamePlay.service.js';
 import logger from '../utils/logger.js';
@@ -200,6 +200,7 @@ export const generateDailyWarSnapshot = async () => {
         ...result,
         [gamePlay.userId]: {
           seasonId,
+          networth: gamePlay.networth,
           userId: gamePlay.userId,
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
           numberOfMachines: gamePlay.numberOfMachines,
@@ -216,6 +217,7 @@ export const generateDailyWarSnapshot = async () => {
           attackUserId: gamePlay.warDeployment.attackUserId,
           tokenEarnFromEarning: tokenRewardPerEarner * earnUnits,
           tokenEarnFromAttacking: 0, // havent been calculated at this time
+          gainedReputation: 0, // havent been calculated at this time
           tokenStolen: 0, // havent been calculated at this time
           totalTokenReward: tokenRewardPerEarner * earnUnits, // havent been fully calculated at this time
           machinesLost: 0, // havent been calculated at this time
@@ -226,7 +228,7 @@ export const generateDailyWarSnapshot = async () => {
     }, {});
 
     for (const user of Object.values(users)) {
-      const { userId, attackUserId, attackUnits } = user;
+      const { userId, attackUserId, attackUnits, networth } = user;
 
       if (!attackUserId || !users[attackUserId]) continue;
 
@@ -236,6 +238,17 @@ export const generateDailyWarSnapshot = async () => {
       const attackContribution = !!totalAttackUnits ? attackUnits / totalAttackUnits : 0;
 
       if (totalAttackUnits > attackedUser.defendUnits) {
+        // winners gain reputation
+        let gainedReputationPercent = 0;
+        const reputationRatio = attackedUser.networth / networth;
+
+        if (reputationRatio > 10) gainedReputationPercent = 0.005;
+        else if (reputationRatio > 5) gainedReputationPercent = 0.004;
+        else if (reputationRatio > 3) gainedReputationPercent = 0.003;
+        else if (reputationRatio > 2) gainedReputationPercent = 0.002;
+        else if (reputationRatio > 1) gainedReputationPercent = 0.001;
+        user.gainedReputation = Math.round(attackedUser.networth * gainedReputationPercent);
+
         const stolenToken = Math.floor(attackContribution * earningStealPercent * attackedUser.tokenEarnFromEarning);
         user.tokenEarnFromAttacking = stolenToken;
         user.totalTokenReward += stolenToken;
@@ -310,20 +323,17 @@ export const generateDailyWarSnapshot = async () => {
     await Promise.all(promises);
 
     // send rewards and burn NFT
-    const bonusUsers = Object.values(users).map((item) => ({ userId: item.userId, amount: item.totalTokenReward }));
-    const penaltyUsers = Object.values(users)
-      .filter((item) => !!item.machinesLost)
-      .map((item) => ({ userId: item.userId, amount: item.machinesLost }));
-
-    // fs.writeFileSync('../test.json', JSON.stringify({ users, bonusUsers, penaltyUsers }), { encoding: 'utf-8' });
-
-    // chunk to burn NFT
-    // burn nft 20 users per time
-    const chunkedPenaltyUsers = chunk(penaltyUsers, 20);
-    // console.log({ chunkedPenaltyUsers });
-    const burnMachineLostPromises = chunkedPenaltyUsers.map((pUsers) => burnMachinesLost(pUsers));
-    await Promise.all(burnMachineLostPromises);
-    await claimWarReward(bonusUsers);
+    const userWarResults = Object.values(users).map((item) => ({
+      userId: item.userId,
+      lostGangsters: item.machinesLost,
+      lostGoons: 0,
+      gainedTokens: item.totalTokenReward,
+      gainedReputation: item.gainedReputation,
+    }));
+    // chunk to set war results
+    const chunkedUsers = chunk(userWarResults, 50);
+    const setWarResultsPromises = chunkedUsers.map((pUsers) => submitWarResults(pUsers));
+    await Promise.all(setWarResultsPromises);
 
     logger.info('\n---------finish taking daily war snapshot--------\n\n');
   } catch (err) {
@@ -332,38 +342,75 @@ export const generateDailyWarSnapshot = async () => {
   }
 };
 
-export const claimWarReward = async (bonusUsers) => {
-  if (!bonusUsers.length) return;
+const submitWarResults = async (users) => {
+  if (!users.length) return;
 
-  const userIds = bonusUsers.map((item) => item.userId);
+  const userIds = users.map((item) => item.userId);
   const userPromises = userIds.map((id) => firestore.collection('user').doc(id).get());
   const userSnapshots = await Promise.all(userPromises);
-  const users = [];
+  const warTxnsForFirestore = [];
+  const warResultsForContract = [];
   for (const index in userSnapshots) {
     const snapshot = userSnapshots[index];
     if (!snapshot.exists) continue;
 
-    const txn = await initTransaction({
-      userId: snapshot.id,
-      type: 'war-bonus',
-      value: bonusUsers[index].amount,
-    });
+    const { lostGangsters, lostGoons, gainedTokens, gainedReputation } = users[index];
+    let burnedGangsters = lostGangsters;
+    console.log({ lostGangsters, lostGoons, gainedTokens, gainedReputation });
 
-    users.push({
-      userId: snapshot.id,
-      txnId: txn.id,
+    if (lostGangsters || lostGoons) {
+      const nft = await getNFTBalance({ address: snapshot.data().address });
+      const nftBalance = nft.toNumber();
+      console.log({ nftBalance });
+
+      burnedGangsters = Math.min(lostGangsters, nftBalance);
+      const txn = await initTransaction({
+        userId: snapshot.id,
+        type: 'war-penalty',
+        machinesDeadCount: burnedGangsters,
+        workersDeadCount: lostGoons,
+      });
+      warTxnsForFirestore.push({ userId: snapshot.id, txnId: txn.id });
+    }
+    if (gainedTokens || gainedReputation) {
+      const txn = await initTransaction({
+        userId: snapshot.id,
+        type: 'war-bonus',
+        value: gainedTokens,
+        gainedReputation,
+      });
+      warTxnsForFirestore.push({ userId: snapshot.id, txnId: txn.id });
+    }
+
+    warResultsForContract.push({
       address: snapshot.data().address,
-      amount: bonusUsers[index].amount,
+      lostGangsters,
+      lostGoons,
+      gainedTokens,
+      gainedReputation,
     });
   }
 
-  const addresses = users.map((item) => item.address);
-  const amounts = users.map((item) => parseEther(`${item.amount}`));
-  const { txnHash, status } = await claimTokenBatch({ addresses, amounts });
+  const addresses = warResultsForContract.map((item) => item.address);
+  const lostGangsters = warResultsForContract.map((item) => item.lostGangsters);
+  const lostGoons = warResultsForContract.map((item) => item.lostGoons);
+  const wonReputations = warResultsForContract.map((item) => item.gainedReputation);
+  const wonTokens = warResultsForContract.map((item) => item.gainedTokens);
+  const { txnHash, status } = await setWarResult({ addresses, lostGangsters, lostGoons, wonReputations, wonTokens });
 
-  logger.info(`War bonus, ${JSON.stringify({ addresses, amounts, txnHash, status })}`);
+  logger.info(
+    `Gangster penalties, ${JSON.stringify({
+      addresses,
+      lostGangsters,
+      lostGoons,
+      wonReputations,
+      wonTokens,
+      txnHash,
+      status,
+    })}`
+  );
 
-  const updateTxnPromises = users.map((item) => {
+  const updateTxnPromises = warTxnsForFirestore.map((item) => {
     return firestore.collection('transaction').doc(item.txnId).update({
       txnHash,
       status,
@@ -373,60 +420,7 @@ export const claimWarReward = async (bonusUsers) => {
   await Promise.all(updateTxnPromises);
 
   if (status === 'Success') {
-    const updateUserGamePlayPromises = users.map((item) =>
-      validateNonWeb3Transaction({ userId: item.userId, transactionId: item.txnId })
-    );
-    await Promise.all(updateUserGamePlayPromises);
-  }
-};
-
-export const burnMachinesLost = async (penaltyUsers) => {
-  if (!penaltyUsers.length) return;
-
-  const userIds = penaltyUsers.map((item) => item.userId);
-  const userPromises = userIds.map((id) => firestore.collection('user').doc(id).get());
-  const userSnapshots = await Promise.all(userPromises);
-  const users = [];
-  for (const index in userSnapshots) {
-    const snapshot = userSnapshots[index];
-    if (!snapshot.exists) continue;
-
-    const nft = await getNFTBalance({ address: snapshot.data().address });
-    const nftBalance = nft.toNumber();
-    console.log({ nftBalance });
-
-    const txn = await initTransaction({
-      userId: snapshot.id,
-      type: 'war-penalty',
-      machinesDeadCount: nftBalance > penaltyUsers[index].amount ? penaltyUsers[index].amount : nftBalance,
-    });
-
-    users.push({
-      userId: snapshot.id,
-      txnId: txn.id,
-      address: snapshot.data().address,
-      amount: nftBalance > penaltyUsers[index].amount ? penaltyUsers[index].amount : nftBalance,
-    });
-  }
-
-  const addresses = users.map((item) => item.address);
-  const ids = Array(users.length).fill(1);
-  const amounts = users.map((item) => item.amount);
-  const { txnHash, status } = await burnNFTTask({ addresses, ids, amounts });
-
-  logger.info(`Gangster penalties, ${JSON.stringify({ addresses, ids, amounts, txnHash, status })}`);
-
-  const updateTxnPromises = users.map((item) => {
-    return firestore.collection('transaction').doc(item.txnId).update({
-      txnHash,
-      status,
-    });
-  });
-
-  await Promise.all(updateTxnPromises);
-
-  if (status === 'Success') {
-    const updateUserGamePlayPromises = users.map((item) =>
+    const updateUserGamePlayPromises = warTxnsForFirestore.map((item) =>
       validateNonWeb3Transaction({ userId: item.userId, transactionId: item.txnId })
     );
     await Promise.all(updateUserGamePlayPromises);

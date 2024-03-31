@@ -142,6 +142,7 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       break;
     case 'war-bonus':
       txnData.value = data.value;
+      txnData.gainedReputation = data.gainedReputation;
       txnData.token = 'FIAT';
       break;
     case 'war-penalty':
@@ -446,6 +447,13 @@ const updateUserGamePlay = async (userId, transactionId) => {
     case 'buy-building':
       gamePlayData = { numberOfBuildings: admin.firestore.FieldValue.increment(amount) };
       assets.numberOfBuildings += amount;
+      break;
+    case 'war-bonus':
+      const { gainedReputation } = snapshot.data();
+      gamePlayData = {
+        networth: admin.firestore.FieldValue.increment(gainedReputation),
+        networthFromWar: admin.firestore.FieldValue.increment(gainedReputation),
+      };
       break;
     case 'war-penalty':
       const { machinesDeadCount } = snapshot.data();
@@ -901,5 +909,4 @@ export const calculateGeneratedReward = async (userId, { start, end, numberOfMac
 
 /* all txn types that change user's token generation rate */
 const userTokenGenerationRateChangedTypes = ['buy-machine', 'buy-worker', 'war-penalty', 'retire'];
-const userNetworthChangedTypes = userTokenGenerationRateChangedTypes.concat('buy-building');
 export const userPendingRewardChangedTypes = userTokenGenerationRateChangedTypes.concat('claim-token');

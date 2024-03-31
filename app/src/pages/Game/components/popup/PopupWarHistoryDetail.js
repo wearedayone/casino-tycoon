@@ -81,6 +81,7 @@ class PopupWarHistoryDetail extends Popup {
       attackResults,
       attackUnits,
       tokenEarnFromAttacking,
+      gainedReputation,
       tokenEarnFromEarning,
       machinesLost,
     } = this.data;
@@ -384,6 +385,26 @@ class PopupWarHistoryDetail extends Popup {
       .setOrigin(0, 0.5);
     y += 165;
 
+    const reputationGainedItemContainer = this.scene.add
+      .image(this.popup.width / 2 - 90, y, 'container-border')
+      .setOrigin(0.5, 0.5);
+    const reputationGainedItemIcon = this.scene.add
+      .image(this.popup.width * 0.13, y, 'icon-star-medium')
+      .setOrigin(0.5, 0.5);
+    const reputationGainedItemText = this.scene.add
+      .text(
+        this.popup.width * 0.13 + reputationGainedItemIcon.width / 2 + 30,
+        y,
+        `Reputation Gained: ${formatter.format(gainedReputation || 0)}`,
+        {
+          fontSize: '50px',
+          color: colors.black,
+          fontFamily: fontFamilies.bold,
+        }
+      )
+      .setOrigin(0, 0.5);
+    y += 165;
+
     const machinesLostItemContainer = this.scene.add
       .image(this.popup.width / 2 - 90, y, 'container-border')
       .setOrigin(0.5, 0.5);
@@ -440,6 +461,9 @@ class PopupWarHistoryDetail extends Popup {
       tokenEarnedFromAttackingItemContainer,
       tokenEarnedFromAttackingItemIcon,
       tokenEarnedFromAttackingItemText,
+      reputationGainedItemContainer,
+      reputationGainedItemIcon,
+      reputationGainedItemText,
       machinesLostItemContainer,
       machinesLostItemIcon,
       machinesLostItemText

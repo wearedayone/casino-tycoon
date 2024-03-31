@@ -63,6 +63,7 @@ export const initTransaction = async ({ userId, type, ...data }) => {
   switch (type) {
     case 'war-bonus':
       txnData.value = data.value;
+      txnData.gainedReputation = data.gainedReputation;
       txnData.token = 'FIAT';
       break;
     case 'war-penalty':
@@ -112,6 +113,7 @@ export const claimWarReward = async (bonusTxns) => {
     //   userId: snapshot.id,
     //   type: 'war-bonus',
     //   value: oldTxn.value,
+    //   gainedReputation: oldTxn.gainedReputation,
     // });
 
     users.push({
