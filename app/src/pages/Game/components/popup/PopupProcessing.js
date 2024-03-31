@@ -155,7 +155,7 @@ class PopupProcessing extends Popup {
             desc = 'Staking completed.';
             break;
           case 'withdraw-token-completed':
-            title = `${formatter.format(amount)} $FIAT`;
+            title = `${formatter.format(amount)} $GANG`;
             desc = 'Withdraw completed.';
             break;
           case 'withdraw-eth-completed':

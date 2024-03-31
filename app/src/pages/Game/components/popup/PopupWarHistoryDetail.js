@@ -104,7 +104,7 @@ class PopupWarHistoryDetail extends Popup {
       .text(
         this.popup.width * 0.13 + earnItemIcon.width / 2 + 30,
         y,
-        `$FIAT Earned: ${customFormat(tokenEarnFromEarning || 0, 1)} $FIAT`,
+        `$GANG Earned: ${customFormat(tokenEarnFromEarning || 0, 1)} $GANG`,
         {
           fontSize: '50px',
           color: colors.black,
@@ -159,7 +159,7 @@ class PopupWarHistoryDetail extends Popup {
       .text(
         this.popup.width * 0.13 + tokenStolenItemIcon.width / 2 + 30,
         y,
-        `$FIAT Lost: ${customFormat(tokenStolen || 0, 1)}`,
+        `$GANG Lost: ${customFormat(tokenStolen || 0, 1)}`,
         {
           fontSize: '50px',
           color: colors.black,
@@ -374,7 +374,7 @@ class PopupWarHistoryDetail extends Popup {
       .text(
         this.popup.width * 0.13 + tokenEarnedFromAttackingItemIcon.width / 2 + 30,
         y,
-        `$FIAT Stolen: ${customFormat(tokenEarnFromAttacking || 0, 1)}`,
+        `$GANG Stolen: ${customFormat(tokenEarnFromAttacking || 0, 1)}`,
         {
           fontSize: '50px',
           color: colors.black,

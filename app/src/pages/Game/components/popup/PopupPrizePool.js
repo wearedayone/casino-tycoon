@@ -33,10 +33,11 @@ class PopupPrizePool extends Popup {
       '--% of ETH from player spend\ngoes to all players based on\nreputation.',
       largeBlackBold
     );
+
     // this.marketingFee = scene.add.text(
     //   paddedX,
     //   thirdParagraphY,
-    //   '--% is used to buy and burn\n$FIAT tokens.',
+    //   '--% is used to buy and burn\n$GANG tokens.',
     //   largeBlackBold
     // );
     this.add(this.rankPrizePool);
@@ -67,7 +68,7 @@ class PopupPrizePool extends Popup {
       this.reputationPrizePool.text = `${rankRewardsPercent * 100}% to rank rewards and\n${
         reputationRewardsPercent * 100
       }% to reputation rewards.`;
-      // this.marketingFee.text = `${marketingFee * 100}% is used to buy and burn\n$FIAT tokens.`;
+      // this.marketingFee.text = `${marketingFee * 100}% is used to buy and burn\n$GANG tokens.`;
     });
     scene.game.events.emit(events.requestRankingRewards);
   }

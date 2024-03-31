@@ -822,8 +822,8 @@ const Game = () => {
             gameRef.current.events.emit('swap-completed', {
               txnHash: receipt.transactionHash,
               amount: receiveAmount,
-              token: tokenSwap === 'eth' ? '$FIAT' : 'ETH',
-              description: tokenSwap === 'eth' ? 'Swap ETH to $FIAT completed' : 'Swap $FIAT to ETH completed',
+              token: tokenSwap === 'eth' ? '$GANG' : 'ETH',
+              description: tokenSwap === 'eth' ? 'Swap ETH to $GANG completed' : 'Swap $GANG to ETH completed',
             });
             reloadBalance();
           }

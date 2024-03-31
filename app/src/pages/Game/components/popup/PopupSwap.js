@@ -67,7 +67,7 @@ class PopupSwap extends Popup {
             this.tokenSwap === 'eth' ? 'convert-eth-input-to-token-result' : 'convert-token-input-to-eth-result',
             { amount: '0.00', fee: 0 }
           );
-          this.tradingFeeText1.text = `0.00 $FIAT`;
+          this.tradingFeeText1.text = `0.00 $GANG`;
           this.tradingFeeText2.text = `(~$0.0000 USD)`;
 
           return;
@@ -126,7 +126,7 @@ class PopupSwap extends Popup {
             this.tokenSwap === 'eth' ? 'convert-token-output-to-eth-result' : 'convert-eth-output-to-token-result',
             { amount: '0.00', fee: 0 }
           );
-          this.tradingFeeText1.text = `0.00 $FIAT`;
+          this.tradingFeeText1.text = `0.00 $GANG`;
           this.tradingFeeText2.text = `(~$0.0000 USD)`;
 
           return;
@@ -161,7 +161,7 @@ class PopupSwap extends Popup {
 
     this.feeText1 = scene.add.text(textX, feeText1Y, 'Trading Fees - 5%', mediumBrownBold);
     const feeText2 = scene.add.text(textX, feeText2Y, '(Burn & fund treasury)', mediumBrownBold);
-    this.tradingFeeText1 = scene.add.text(width - textX, feeText1Y, '0 $FIAT', mediumBrownBold).setOrigin(1, 0);
+    this.tradingFeeText1 = scene.add.text(width - textX, feeText1Y, '0 $GANG', mediumBrownBold).setOrigin(1, 0);
     this.tradingFeeText2 = scene.add
       .text(width - textX, feeText2Y, '(~$0.0000 USD)', { ...mediumBrownBold, fontSize: '36px' })
       .setOrigin(1, 0);
@@ -254,28 +254,28 @@ class PopupSwap extends Popup {
     });
     scene.game.events.on('convert-eth-input-to-token-result', ({ amount, tradingFee, tradingFeeInUSD }) => {
       this.token2AmountInput.updateValue(`${amount}`, true, true);
-      this.tradingFeeText1.text = `${tradingFee} $FIAT`;
+      this.tradingFeeText1.text = `${tradingFee} $GANG`;
       this.tradingFeeText2.text = `(~$${tradingFeeInUSD} USD)`;
       this.setLoading(false);
       this.setError(false);
     });
     scene.game.events.on('convert-eth-output-to-token-result', ({ amount, tradingFee, tradingFeeInUSD }) => {
       this.token1AmountInput.updateValue(`${amount}`, true, true);
-      this.tradingFeeText1.text = `${tradingFee} $FIAT`;
+      this.tradingFeeText1.text = `${tradingFee} $GANG`;
       this.tradingFeeText2.text = `(~$${tradingFeeInUSD} USD)`;
       this.setLoading(false);
       this.setError(false);
     });
     scene.game.events.on('convert-token-input-to-eth-result', ({ amount, tradingFee, tradingFeeInUSD }) => {
       this.token2AmountInput.updateValue(`${amount}`, true, true);
-      this.tradingFeeText1.text = `${tradingFee} $FIAT`;
+      this.tradingFeeText1.text = `${tradingFee} $GANG`;
       this.tradingFeeText2.text = `(~$${tradingFeeInUSD} USD)`;
       this.setLoading(false);
       this.setError(false);
     });
     scene.game.events.on('convert-token-output-to-eth-result', ({ amount, tradingFee, tradingFeeInUSD }) => {
       this.token1AmountInput.updateValue(`${amount}`, true, true);
-      this.tradingFeeText1.text = `${tradingFee} $FIAT`;
+      this.tradingFeeText1.text = `${tradingFee} $GANG`;
       this.tradingFeeText2.text = `(~$${tradingFeeInUSD} USD)`;
       this.setLoading(false);
       this.setError(false);
