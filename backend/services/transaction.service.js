@@ -47,17 +47,8 @@ export const initTransaction = async ({ userId, type, ...data }) => {
     if (data.amount > activeSeason.building.maxPerBatch) throw new Error('API error: Bad request - over max per batch');
   }
 
-  const {
-    machine,
-    machineSold,
-    workerSold,
-    buildingSold,
-    worker,
-    building,
-    referralConfig,
-    prizePoolConfig,
-    startTime,
-  } = activeSeason;
+  const { machine, machineSold, workerSold, buildingSold, worker, building, referralConfig, prizePoolConfig } =
+    activeSeason;
   const txnData = {};
   const now = Date.now();
   const startSalePeriod = now - 12 * 60 * 60 * 1000;
@@ -104,10 +95,6 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       const estimatedPrice = data.amount * unitPrice;
       txnData.value = getAccurate(estimatedPrice);
       txnData.prices = Array.from({ length: data.amount }, () => unitPrice);
-      // bonus
-      const daysElapsed = (now - startTime.toDate().getTime()) / (24 * 60 * 60 * 1000);
-      const bonus = Math.floor(daysElapsed * machine.dailyReward * data.amount);
-      txnData.bonusAmount = bonus;
       break;
     case 'buy-worker':
       txnData.amount = data.amount;
@@ -225,7 +212,6 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       const signedData = {
         address,
         amount: txnData.amount,
-        bonus: txnData.bonusAmount,
         time,
         nonce,
         mintFunction: data.mintFunction,

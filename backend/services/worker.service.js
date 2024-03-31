@@ -423,14 +423,14 @@ export const signMessageBuyGoon = async ({ address, amount, value, totalAmount, 
   return signature;
 };
 
-export const signMessageBuyGangster = async ({ address, amount, bonus, referral, time, nonce, mintFunction }) => {
+export const signMessageBuyGangster = async ({ address, amount, referral, time, nonce, mintFunction }) => {
   const signerWallet = await getSignerWallet();
   console.log({ address, amount, nonce, referral });
 
   // Array of types: declares the data types in the message.
   const types = ['address', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'string'];
   // Array of values: actual values of the parameters to be hashed.
-  const values = [address, 1, amount, BigInt(parseEther(bonus.toString()).toString()), time, nonce, mintFunction];
+  const values = [address, 1, amount, BigInt(parseEther('0').toString()), time, nonce, mintFunction];
 
   if (referral) {
     types.splice(4, 0, 'address');

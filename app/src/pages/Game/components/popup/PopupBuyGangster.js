@@ -1,7 +1,5 @@
 import Popup from './Popup';
-import PopupBuyBonusInfo from './PopupBuyBonusInfo';
 import PopupProcessing from './PopupProcessing';
-import Button from '../button/Button';
 import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
 import { customFormat, formatter } from '../../../../utils/numbers';
@@ -29,7 +27,6 @@ class PopupBuyGangster extends Popup {
   basePrice = 0;
   unitPrice = 0;
   whitelistPrice = 0;
-  daysElapsed = 0;
   quantity = DEFAULT_QUANTITY;
   maxQuantity = 10;
   isWhitelisted = false;
@@ -47,15 +44,10 @@ class PopupBuyGangster extends Popup {
       gameEnded: isSimulator ? 'simulator-game-ended' : 'game-ended',
       updateMachines: isSimulator ? 'simulator-update-machines' : 'update-machines',
       requestMachines: isSimulator ? 'simulator-request-machines' : 'request-machines',
-      updateBuyBonus: isSimulator ? 'simulator-update-buy-bonus' : 'update-buy-bonus',
-      requestBuyBonus: isSimulator ? 'simulator-request-buy-bonus' : 'request-buy-bonus',
     };
     this.onCompleted = onCompleted;
     this.isSimulator = isSimulator;
 
-    // child modals
-    const popupBuyBonusInfo = new PopupBuyBonusInfo(scene, this, { isSimulator });
-    scene.add.existing(popupBuyBonusInfo);
     this.popupBuyProcessing = new PopupProcessing(scene, {
       sound: 'gangster',
       completedEvent: events.completed,
@@ -120,29 +112,6 @@ class PopupBuyGangster extends Popup {
       })
       .setOrigin(1, 0);
     this.add(this.roiText);
-
-    const infoButton = new Button(
-      scene,
-      width / 2 + 60,
-      this.popup.y + 260,
-      'button-info',
-      'button-info-pressed',
-      () => {
-        if (isSimulator) return;
-        this.close();
-        popupBuyBonusInfo.open();
-      },
-      { sound: 'open' }
-    );
-    this.add(infoButton);
-
-    this.bonusText = scene.add.text(this.popup.x + 110, this.popup.y + 295, '0', largeBlackExtraBold).setOrigin(0, 0.5);
-    this.add(this.bonusText);
-
-    this.bonusCoin = scene.add
-      .image(this.bonusText.x + this.bonusText.width + 20, this.popup.y + 295, 'coin')
-      .setOrigin(0, 0.5);
-    this.add(this.bonusCoin);
 
     const counterY = this.popup.y + this.popup.height / 2 - 260;
     const minusBtnX = this.popup.x - this.popup.width / 2 + 310;
@@ -283,10 +252,6 @@ class PopupBuyGangster extends Popup {
     scene.game.events.on(events.gameEnded, () => {
       this.upgradeBtn.setDisabledState(true);
     });
-    scene.game.events.on(events.updateBuyBonus, ({ daysElapsed }) => {
-      this.daysElapsed = daysElapsed;
-      this.updateValues();
-    });
     scene.game.events.on(
       events.updateMachines,
       ({
@@ -335,7 +300,6 @@ class PopupBuyGangster extends Popup {
     );
 
     scene.game.events.emit(events.requestMachines);
-    scene.game.events.emit(events.requestBuyBonus);
     scene.game.events.emit('request-gas-mint');
   }
 
@@ -356,12 +320,9 @@ class PopupBuyGangster extends Popup {
     const roi = estimatedPrice
       ? (((this.rateIncrease * this.quantity * this.tokenPrice) / estimatedPrice) * 100).toFixed(1)
       : 0;
-    const bonus = Math.floor(this.daysElapsed * this.rateIncrease * this.quantity);
 
     this.quantityText.text = `${this.quantity}`;
     this.roiText.text = `${roi}%`;
-    this.bonusText.text = `${formatter.format(bonus)}`;
-    this.bonusCoin.x = this.bonusText.x + this.bonusText.width + 20;
     this.priceText.text = `${formatter.format(this.quantity * this.basePrice)}`;
     const discountNote =
       this.mintFunction === 'mintReferral'
