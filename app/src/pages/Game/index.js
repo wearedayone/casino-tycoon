@@ -944,10 +944,7 @@ const Game = () => {
         gameRef.current?.events.emit('update-machines', {
           numberOfMachines,
           networth,
-          balance: ETHBalance,
-          tokenBalance,
-          basePrice: machine.basePrice,
-          whitelistPrice: machine.whitelistPrice,
+          balance: tokenBalance,
           maxPerBatch: machine.maxPerBatch,
           dailyReward: machine.dailyReward,
           reservePool,
@@ -1061,17 +1058,15 @@ const Game = () => {
             Sentry.captureException(err);
           });
       });
-      gameRef.current?.events.on('request-gangster-price', () => {
-        convertEthInputToToken(0.001)
-          .then((result) =>
+      gameRef.current?.events.on('request-gangster-price', async () => {
+        Promise.all([convertEthInputToToken(machine.basePrice), convertEthInputToToken(machine.whitelistPrice)])
+          .then(([resBasePrice, resWhitelistPrice]) => {
             gameRef.current?.events.emit('update-gangster-price', {
-              amount: result.amount,
-              tradingFee: result.tradingFee,
-              tradingFeeInUSD: result.tradingFeeInUSD,
-            })
-          )
+              basePrice: resBasePrice.amount,
+              whitelistPrice: resWhitelistPrice.amount,
+            });
+          })
           .catch((err) => {
-            gameRef.current?.events.emit('swap-error');
             console.error(err);
             Sentry.captureException(err);
           });
@@ -1430,10 +1425,7 @@ const Game = () => {
     gameRef.current?.events.emit('update-machines', {
       numberOfMachines,
       networth,
-      balance: ETHBalance,
-      tokenBalance,
-      basePrice: machine.basePrice,
-      whitelistPrice: machine.whitelistPrice,
+      balance: tokenBalance,
       maxPerBatch: machine.maxPerBatch,
       dailyReward: machine.dailyReward,
       reservePool,
@@ -1448,7 +1440,7 @@ const Game = () => {
   }, [
     numberOfMachines,
     networth,
-    ETHBalance,
+    tokenBalance,
     machine,
     reservePool,
     reservePoolReward,
