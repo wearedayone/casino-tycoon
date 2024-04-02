@@ -233,7 +233,7 @@
     },
     {
       "target": "app-stg-v2",
-      "public": "build/demo/app",
+      "public": "build/stg-v2/app",
       "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
       "rewrites": [
         {
