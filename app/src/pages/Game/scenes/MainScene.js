@@ -205,7 +205,6 @@ class MainScene extends Phaser.Scene {
 
       this.popupDailySpin = new PopupDailySpin(this);
       this.add.existing(this.popupDailySpin);
-      this.popupDailySpin.open();
 
       const footer = new Footer(this, 2600);
       footer.setDepth(1);

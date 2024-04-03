@@ -130,6 +130,9 @@ class PopupDailySpin extends Popup {
 
     scene.game.events.on('spin-error', ({ code, message }) => {
       console.error({ code, message });
+      scene.game.events.emit('stop-spin');
+      this.spinSound.stop();
+      this.destinationIndex = null;
     });
 
     scene.game.events.on('spin-result', ({ destinationIndex }) => {

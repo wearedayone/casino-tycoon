@@ -64,10 +64,24 @@ class InfoButtons extends Phaser.GameObjects.Container {
       { sound: 'button-1' }
     );
 
+    this.spinButton = new Button(
+      scene,
+      width - px - buttonSize / 2,
+      y + 2 * verticalGap,
+      'button-square-normal',
+      'button-square-normal-pressed',
+      () => {
+        if (isSimulator) return;
+        scene.popupDailySpin?.open();
+      },
+      { sound: 'button-1' }
+    );
+
     this.add(this.settingButton);
     this.add(this.referralButton);
     this.add(this.rankButton);
     this.add(this.portfolioButton);
+    this.add(this.spinButton);
   }
 }
 
