@@ -292,6 +292,7 @@ const Game = () => {
     houseLevels,
     prizePoolConfig,
     spinRewards,
+    spinPrice,
   } = activeSeason || {
     rankPrizePool: 0,
     reputationPrizePool: 0,
@@ -312,6 +313,7 @@ const Game = () => {
       earlyRetirementTax: 0,
     },
     spinRewards: [],
+    spinPrice: 0,
   };
 
   const dailyMoney = numberOfMachines * machine.dailyReward + numberOfWorkers * worker.dailyReward;
@@ -582,7 +584,7 @@ const Game = () => {
       });
 
       gameRef.current?.events.on('request-spin-rewards', () => {
-        gameRef.current?.events.emit('update-spin-rewards', { spinRewards });
+        gameRef.current?.events.emit('update-spin-rewards', { spinRewards, spinPrice });
       });
 
       gameRef.current?.events.on('export-wallet', exportWallet);
@@ -1542,8 +1544,8 @@ const Game = () => {
   }, [warConfig]);
 
   useEffect(() => {
-    gameRef.current?.events.emit('update-spin-rewards', { spinRewards });
-  }, [spinRewards]);
+    gameRef.current?.events.emit('update-spin-rewards', { spinRewards, spinPrice });
+  }, [spinRewards, spinPrice]);
 
   return (
     <Box

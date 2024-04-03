@@ -117,6 +117,7 @@ const ROW_STRUCTURE = {
     worker: { row: 64, formatter: Number },
     building: { row: 65, formatter: Number },
   },
+  spinPrice: { row: 67, formatter: Number },
 };
 
 const main = async () => {

@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { ScrollablePanel } from 'phaser3-rex-plugins/templates/ui/ui-components.js';
 
 import Popup from './Popup';
-import TextButton from '../button/TextButton';
+import SpinButton from '../button/SpinButton';
 import configs from '../../configs/configs';
 import { fontFamilies } from '../../../../utils/styles';
 
@@ -43,7 +43,7 @@ class PopupDailySpin extends Popup {
 
     this.spinSound = scene.sound.add('spin-sound', { loop: true });
 
-    scene.game.events.on('update-spin-rewards', ({ spinRewards }) => {
+    scene.game.events.on('update-spin-rewards', ({ spinRewards, spinPrice }) => {
       this.numberOfRewards = spinRewards.length;
       this.maxContainerX = -70 - 0.5 * SPIN_ITEM_WIDTH;
       this.minContainerX = this.maxContainerX - (this.numberOfRewards - 1) * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP);
@@ -59,6 +59,19 @@ class PopupDailySpin extends Popup {
         this.table.destroy(true);
         this.table = null;
       }
+
+      if (this.spinButton) {
+        this.spinButton.destroy();
+      }
+
+      if (this.arrowDown) {
+        this.arrowDown.destroy();
+      }
+
+      if (this.arrowUp) {
+        this.arrowUp.destroy();
+      }
+
       this.spinItems = [spinRewards.at(-1), ...spinRewards, spinRewards[0]].map((item, index) => {
         const spinItem = new SpinItem(
           scene,
@@ -93,20 +106,16 @@ class PopupDailySpin extends Popup {
       this.contentContainer.x = this.maxContainerX;
       this.add(this.table);
 
-      const buttonBack = new TextButton(
-        scene,
-        width / 2,
-        height / 2 + this.popup.height / 2 - 20,
-        'button-blue',
-        'button-blue-pressed',
-        () => {
+      this.spinButton = new SpinButton(scene, {
+        x: width / 2,
+        y: height / 2 + this.popup.height / 2 - 20,
+        onClick: () => {
           scene.game.events.emit('start-spin');
           this.spinSound.play();
         },
-        'Spin',
-        { fontSize: '82px', sound: 'close' }
-      );
-      this.add(buttonBack);
+        value: spinPrice,
+      });
+      this.add(this.spinButton);
 
       this.arrowDown = scene.add
         .image(width / 2, this.popup.y - this.popup.height / 2 + 160, 'arrow-spin-down')

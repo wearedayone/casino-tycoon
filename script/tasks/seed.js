@@ -86,6 +86,7 @@ const main = async () => {
       prizePoolConfig: gameConfigs.prizePool,
       warConfig: gameConfigs.war,
       referralConfig: gameConfigs.referral,
+      spinPrice: gameConfigs.spinPrice,
     });
   console.log('created season');
 
