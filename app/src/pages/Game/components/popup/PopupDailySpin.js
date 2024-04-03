@@ -128,6 +128,10 @@ class PopupDailySpin extends Popup {
       this.add(this.arrowUp);
     });
 
+    scene.game.events.on('spin-error', ({ code, message }) => {
+      console.error({ code, message });
+    });
+
     scene.game.events.on('spin-result', ({ destinationIndex }) => {
       this.destinationIndex = destinationIndex;
     });

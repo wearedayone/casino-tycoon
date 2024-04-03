@@ -241,9 +241,7 @@ class MainScene extends Phaser.Scene {
     this.game.events.on('start-spin', () => {
       if (this.isSpinning) return;
       this.isSpinning = true;
-      setTimeout(() => {
-        this.game.events.emit('spin-result', { destinationIndex: 5 });
-      }, 5000);
+      this.game.events.emit('daily-spin');
     });
 
     this.game.events.on('stop-spin', () => {

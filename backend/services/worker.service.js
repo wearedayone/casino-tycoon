@@ -54,6 +54,13 @@ export const decodeTokenTxnLogs = async (name, log) => {
   return tokenContract.interface.decodeEventLog(name, data, topics);
 };
 
+export const decodeGameTxnLogs = async (name, log) => {
+  const { data, topics } = log;
+  const workerWallet = await getWorkerWallet();
+  const gameContract = await getGameContract(workerWallet);
+  return gameContract.interface.decodeEventLog(name, data, topics);
+};
+
 export const claimToken = async ({ address, amount }) => {
   let txnHash = '';
   let isSuccess = false;
@@ -366,6 +373,19 @@ export const signMessageRetire = async ({ address, reward, nonce }) => {
   let message = ethers.solidityPackedKeccak256(types, values);
 
   console.log('message', message);
+
+  const signature = await signerWallet.signMessage(ethers.toBeArray(message));
+  return signature;
+};
+
+export const signMessageDailySpin = async ({ address, value, nonce }) => {
+  const signerWallet = await getSignerWallet();
+  // Array of types: declares the data types in the message.
+  const types = ['address', 'uint256', 'uint256'];
+  // Array of values: actual values of the parameters to be hashed.
+  const values = [address, value, nonce];
+
+  let message = ethers.solidityPackedKeccak256(types, values);
 
   const signature = await signerWallet.signMessage(ethers.toBeArray(message));
   return signature;

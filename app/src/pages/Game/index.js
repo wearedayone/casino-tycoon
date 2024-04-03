@@ -18,7 +18,7 @@ import {
   updateBalance,
   checkUserCode,
 } from '../../services/user.service';
-import { claimToken, getWorkerPrices, getBuildingPrices } from '../../services/transaction.service';
+import { claimToken, getWorkerPrices, getBuildingPrices, validateDailySpin } from '../../services/transaction.service';
 import {
   getLeaderboard,
   getNextWarSnapshotUnixTime,
@@ -79,8 +79,6 @@ const handleError = (err) => {
     const message = err.message;
     const code = err.code?.toString();
 
-    console.log({ message, code, reason: err.reason, error: err.error.reason });
-
     if (message === 'Network Error') {
       return { code: '12002', message: 'Network Error' };
     }
@@ -108,8 +106,8 @@ const handleError = (err) => {
       return { code: 'INSUFFICIENT_FUNDS', message: 'Insufficient ETH' };
 
     if (code === 'UNPREDICTABLE_GAS_LIMIT' || code === '-32603') {
-      if (err.error.reason && err.error.reason.includes('execution reverted:')) {
-        const error = err.error.reason.replace('execution reverted: ', '');
+      if (err.error?.reason && err.error?.reason.includes('execution reverted:')) {
+        const error = err.error?.reason.replace('execution reverted: ', '');
         return { code: 'UNPREDICTABLE_GAS_LIMIT', message: error ? lineBreakMessage(error) : 'INSUFFICIENT GAS' };
       }
 
@@ -165,6 +163,7 @@ const Game = () => {
     buySafeHouse,
     buyMachine,
     buyGoon,
+    dailySpin,
     retire,
     swapEthToToken,
     swapTokenToEth,
@@ -479,6 +478,25 @@ const Game = () => {
     }
   };
 
+  const initDailySpin = async () => {
+    try {
+      await delay(2000); // delay 2s to spin
+      const res = await create({ type: 'daily-spin' });
+      const { id, value, nonce, signature } = res.data;
+      const receipt = await dailySpin({ value, nonce, signature });
+      if (receipt.status !== 1) {
+        throw new Error('Transaction failed');
+      }
+      const txnHash = receipt.transactionHash;
+      const res1 = await validateDailySpin({ transactionId: id, txnHash });
+      const { result } = res1.data;
+      gameRef.current?.events.emit('spin-result', { destinationIndex: result });
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
+  };
+
   const startRetirement = async () => {
     try {
       const res = await create({ type: 'retire' });
@@ -584,7 +602,10 @@ const Game = () => {
       });
 
       gameRef.current?.events.on('request-spin-rewards', () => {
-        gameRef.current?.events.emit('update-spin-rewards', { spinRewards, spinPrice });
+        gameRef.current?.events.emit('update-spin-rewards', {
+          spinRewards: JSON.parse(JSON.stringify(spinRewards)).sort((item1, item2) => item1.order - item2.order),
+          spinPrice,
+        });
       });
 
       gameRef.current?.events.on('export-wallet', exportWallet);
@@ -899,6 +920,18 @@ const Game = () => {
           const { message, code } = handleError(err);
           gameRef.current?.events.emit('buy-goon-completed', {
             status: 'failed',
+            code,
+            message,
+          });
+        }
+      });
+
+      gameRef.current?.events.on('daily-spin', async () => {
+        try {
+          await initDailySpin();
+        } catch (err) {
+          const { message, code } = handleError(err);
+          gameRef.current?.events.emit('spin-error', {
             code,
             message,
           });
@@ -1544,7 +1577,10 @@ const Game = () => {
   }, [warConfig]);
 
   useEffect(() => {
-    gameRef.current?.events.emit('update-spin-rewards', { spinRewards, spinPrice });
+    gameRef.current?.events.emit('update-spin-rewards', {
+      spinRewards: JSON.parse(JSON.stringify(spinRewards)).sort((item1, item2) => item1.order - item2.order),
+      spinPrice,
+    });
   }, [spinRewards, spinPrice]);
 
   return (
