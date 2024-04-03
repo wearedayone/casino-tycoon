@@ -291,6 +291,7 @@ const Game = () => {
     reservePoolReward,
     houseLevels,
     prizePoolConfig,
+    spinRewards,
   } = activeSeason || {
     rankPrizePool: 0,
     reputationPrizePool: 0,
@@ -310,6 +311,7 @@ const Game = () => {
       // reputation leaderboard
       earlyRetirementTax: 0,
     },
+    spinRewards: [],
   };
 
   const dailyMoney = numberOfMachines * machine.dailyReward + numberOfWorkers * worker.dailyReward;
@@ -577,6 +579,10 @@ const Game = () => {
       gameRef.current?.events.on('check-user-completed-tutorial', () => {
         const completed = profile.completedTutorial;
         gameRef.current?.events.emit('update-user-completed-tutorial', { completed });
+      });
+
+      gameRef.current?.events.on('request-spin-rewards', () => {
+        gameRef.current?.events.emit('update-spin-rewards', { spinRewards });
       });
 
       gameRef.current?.events.on('export-wallet', exportWallet);
@@ -1534,6 +1540,10 @@ const Game = () => {
       });
     }
   }, [warConfig]);
+
+  useEffect(() => {
+    gameRef.current?.events.emit('update-spin-rewards', { spinRewards });
+  }, [spinRewards]);
 
   return (
     <Box

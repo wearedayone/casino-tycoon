@@ -33,6 +33,7 @@ import PopupWarAttackDetail from '../components/popup/PopupWarAttackDetail';
 import PopupWarHistoryDetail from '../components/popup/PopupWarHistoryDetail';
 import PopupGoonPrice from '../components/popup/PopupGoonPrice';
 import PopupSafehousePrice from '../components/popup/PopupSafehousePrice';
+import PopupDailySpin from '../components/popup/PopupDailySpin';
 
 const { goonAnimation, gangsterAnimation, width } = configs;
 
@@ -65,6 +66,7 @@ class MainScene extends Phaser.Scene {
   isGameEnded = false;
   isUserActive = false;
   isFromTutorial = false;
+  isSpinning = false;
   timeout = null;
 
   constructor() {
@@ -201,6 +203,10 @@ class MainScene extends Phaser.Scene {
       this.popupWarAttack = new PopupWarAttack(this);
       this.add.existing(this.popupWarAttack);
 
+      this.popupDailySpin = new PopupDailySpin(this);
+      this.add.existing(this.popupDailySpin);
+      this.popupDailySpin.open();
+
       const footer = new Footer(this, 2600);
       footer.setDepth(1);
       this.add.existing(footer);
@@ -227,7 +233,22 @@ class MainScene extends Phaser.Scene {
     if (!this.isFromTutorial) this.game.events.emit('request-user-away-reward');
   }
 
-  create() {}
+  create() {
+    this.spinListener();
+  }
+
+  spinListener() {
+    this.game.events.on('start-spin', () => {
+      this.isSpinning = true;
+      setTimeout(() => {
+        this.game.events.emit('spin-result', { destinationIndex: 5 });
+      }, 10000);
+    });
+
+    this.game.events.on('stop-spin', () => {
+      this.isSpinning = false;
+    });
+  }
 
   updateAnimationPositions(delta) {
     if (this.animationLayer.gangsterAction === 'back') {
@@ -327,8 +348,14 @@ class MainScene extends Phaser.Scene {
     }
   }
 
+  updateSpin() {
+    if (!this.isSpinning) return;
+    this.game.events.emit('continue-spin');
+  }
+
   update(_time, delta) {
     this.updateAnimationPositions(delta);
+    this.updateSpin();
   }
 }
 
