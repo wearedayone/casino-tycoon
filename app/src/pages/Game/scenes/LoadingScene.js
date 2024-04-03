@@ -96,6 +96,8 @@ class LoadingScene extends Phaser.Scene {
     this.load.audio('war', '/audios/war.wav');
     this.load.audio('toggle-1', '/audios/toggle-1.wav');
     this.load.audio('toggle-2', '/audios/toggle-2.wav');
+    this.load.audio('spin-sound', '/audios/spin-sound.wav');
+    this.load.audio('spin-result-sound', '/audios/spin-result-sound.wav');
 
     this.load.image('bg', '/images/bg_full.png');
     this.load.image('gangster-house-1', '/images/gangster-house-1.png');

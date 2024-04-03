@@ -41,6 +41,8 @@ class PopupDailySpin extends Popup {
   constructor(scene) {
     super(scene, 'popup-spin', { title: 'Daily Spin' });
 
+    this.spinSound = scene.sound.add('spin-sound', { loop: true });
+
     scene.game.events.on('update-spin-rewards', ({ spinRewards }) => {
       this.numberOfRewards = spinRewards.length;
       this.maxContainerX = -70 - 0.5 * SPIN_ITEM_WIDTH;
@@ -99,6 +101,7 @@ class PopupDailySpin extends Popup {
         'button-blue-pressed',
         () => {
           scene.game.events.emit('start-spin');
+          this.spinSound.play();
         },
         'Spin',
         { fontSize: '82px', sound: 'close' }
@@ -129,8 +132,13 @@ class PopupDailySpin extends Popup {
 
       if (this.destinationIndex) {
         const destinationX = this.maxContainerX - this.destinationIndex * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP);
-        if (this.contentContainer.x <= destinationX) {
+        if (
+          this.contentContainer.x <= destinationX &&
+          Math.abs(this.contentContainer.x - destinationX) < SPIN_ITEM_WIDTH / 2
+        ) {
           scene.game.events.emit('stop-spin');
+          this.spinSound.stop();
+          this.destinationIndex = null;
         }
       }
     });
