@@ -220,11 +220,11 @@ const useSmartContract = () => {
     return receipt;
   };
 
-  const dailySpin = async ({ value, nonce, signature }) => {
-    // test
-    // TODO: remove test
-    console.log('dailySpin');
-    return { status: 1, transactionHash: 'test-daily-spin' };
+  const dailySpin = async ({ spinType, amount, value, lastSpin, time, nonce, signature }) => {
+    // SPIN_TODO: remove 2 lines below
+    const GAME_CONTRACT_ADDRESS = '0xabe2FFF62795F3b562409f0596Afc773e714C28f';
+    const TOKEN_ADDRESS = '0xc01fDDe00463e2EF7F8ceDD4416f287c0b6f3AbC';
+    console.log({ spinType, amount, value, lastSpin, time, nonce, signature });
 
     if (!loadedAssets) return;
     const privyProvider = await embeddedWallet.getEthereumProvider();
@@ -250,10 +250,20 @@ const useSmartContract = () => {
     }
 
     // eslint-disable-next-line no-undef
-    const data = gameContract.interface.encodeFunctionData('dailySpin', [value, nonce, signature]);
+    const valueBigint = BigInt(parseEther(value + '').toString());
+    const data = gameContract.interface.encodeFunctionData('spin', [
+      spinType,
+      amount,
+      valueBigint,
+      lastSpin,
+      time,
+      nonce,
+      signature,
+    ]);
     const unsignedTx = { to: GAME_CONTRACT_ADDRESS, chainId: Number(NETWORK_ID), data };
 
     const receipt = await sendTransaction(unsignedTx);
+    console.log('daily spin', receipt);
 
     return receipt;
   };

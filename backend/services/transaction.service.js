@@ -276,9 +276,14 @@ export const initTransaction = async ({ userId, type, ...data }) => {
     const userData = await firestore.collection('user').doc(userId).get();
     if (userData.exists) {
       const { address } = userData.data();
-      const signedData = { address, value: activeSeason.spinPrice, nonce };
+      const time = Math.floor(Date.now() / 1000);
+      const spinType = 1;
+      const amount = 1;
+      const lastSpin = 0;
+      const value = activeSeason.spinPrice;
+      const signedData = { address, spinType, amount, value, lastSpin, time, nonce };
       const signature = await signMessageDailySpin(signedData);
-      return { id: newTransaction.id, ...transaction, signature };
+      return { id: newTransaction.id, ...transaction, spinType, amount, value, lastSpin, time, nonce, signature };
     }
   }
 
@@ -286,50 +291,6 @@ export const initTransaction = async ({ userId, type, ...data }) => {
 };
 
 export const validateDailySpinTxnAndReturnSpinResult = async ({ userId, transactionId, txnHash }) => {
-  // test
-  // TODO: remove test
-  const snapshot1 = await firestore.collection('transaction').doc(transactionId).get();
-  if (!snapshot1.exists) throw new Error('API error: Not found');
-
-  const { id: activeSeasonId1, spinRewards: spinRewards1 } = await getActiveSeason();
-  const { reward: reward1, index: index1 } = randomSpinResult(spinRewards1);
-
-  if (reward1.type === 'house') {
-    const gamePlaySnapshot = await firestore
-      .collection('gamePlay')
-      .where('userId', '==', userId)
-      .where('seasonId', '==', activeSeasonId1)
-      .limit(1)
-      .get();
-    if (!gamePlaySnapshot.empty) {
-      await gamePlaySnapshot.docs[0].ref.update({
-        numberOfBuildings: admin.firestore.FieldValue.increment(reward1.value),
-      });
-    }
-
-    await snapshot1.ref.update({ txnHash, status: 'Success', reward: { type: reward1.type, value: reward1.value } });
-  }
-
-  if (reward1.type === 'point') {
-    const userSnapshot = await firestore.collection('user').doc(userId).get();
-    if (userSnapshot.exists) {
-      const { address } = userSnapshot.data();
-
-      const { txnHash, status } = await claimTokenTask({
-        address,
-        amount: BigInt(parseEther(reward1.value.toString()).toString()),
-      });
-
-      await snapshot1.ref.update({
-        txnHash,
-        status: 'Success',
-        reward: { type: reward1.type, value: reward1.value, rewardTxnHash: txnHash, rewardTxnStatus: status },
-      });
-    }
-  }
-
-  return index1;
-
   // spin txn validations:
   // - txnHash not used
   // - user has one pending txn with transactionId
@@ -353,18 +314,22 @@ export const validateDailySpinTxnAndReturnSpinResult = async ({ userId, transact
   const { from, to, status: txnStatus, logs } = receipt;
   if (txnStatus !== 1) throw new Error('API error: Invalid txn status');
 
-  const { id: activeSeasonId, gameAddress, spinPrice, spinRewards } = await getActiveSeason();
+  console.log('validate spin txn logs', { logs });
+
+  const activeSeason = await getActiveSeason();
+  // SPIN-TODO: remove line below
+  activeSeason.gameAddress = '0xabe2FFF62795F3b562409f0596Afc773e714C28f';
+
+  const { id: activeSeasonId, gameAddress, spinPrice, spinRewards } = activeSeason;
   const user = await firestore.collection('user').doc(userId).get();
   const { address } = user.data();
   if (from.toLowerCase() !== address.toLowerCase()) throw new Error('API error: Bad credential');
   if (to.toLowerCase() !== gameAddress.toLowerCase()) throw newError('API error: Bad credential');
 
   const decodedData = await decodeGameTxnLogs('DailySpin', logs[1]);
-  // TODO: event DailySpin(address user, uint256 price)
   const price = Number(decodedData[1].toString());
   if (price !== spinPrice) throw new Error('API error: Mismatching price');
 
-  // generate random spin result and return to frontend
   const { reward, index } = randomSpinResult(spinRewards);
 
   if (reward.type === 'house') {

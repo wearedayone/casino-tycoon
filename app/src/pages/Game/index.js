@@ -486,8 +486,8 @@ const Game = () => {
     try {
       await delay(2000); // delay 2s to spin
       const res = await create({ type: 'daily-spin' });
-      const { id, value, nonce, signature } = res.data;
-      const receipt = await dailySpin({ value, nonce, signature });
+      const { id, spinType, amount, value, lastSpin, time, nonce, signature } = res.data;
+      const receipt = await dailySpin({ spinType, amount, value, lastSpin, time, nonce, signature });
       if (receipt.status !== 1) {
         throw new Error('Transaction failed');
       }

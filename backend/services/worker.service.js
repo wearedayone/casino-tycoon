@@ -378,12 +378,12 @@ export const signMessageRetire = async ({ address, reward, nonce }) => {
   return signature;
 };
 
-export const signMessageDailySpin = async ({ address, value, nonce }) => {
+export const signMessageDailySpin = async ({ address, spinType, amount, value, lastSpin, time, nonce }) => {
   const signerWallet = await getSignerWallet();
   // Array of types: declares the data types in the message.
-  const types = ['address', 'uint256', 'uint256'];
+  const types = ['address', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256'];
   // Array of values: actual values of the parameters to be hashed.
-  const values = [address, value, nonce];
+  const values = [address, spinType, amount, value, lastSpin, time, nonce];
 
   let message = ethers.solidityPackedKeccak256(types, values);
 
