@@ -291,9 +291,43 @@ export const validateDailySpinTxnAndReturnSpinResult = async ({ userId, transact
   const snapshot1 = await firestore.collection('transaction').doc(transactionId).get();
   if (!snapshot1.exists) throw new Error('API error: Not found');
 
-  const { spinRewards: spinRewards1 } = await getActiveSeason();
+  const { id: activeSeasonId1, spinRewards: spinRewards1 } = await getActiveSeason();
   const { reward: reward1, index: index1 } = randomSpinResult(spinRewards1);
-  await snapshot1.ref.update({ txnHash, status: 'Success', reward: { type: reward1.type, value: reward1.value } });
+
+  if (reward1.type === 'house') {
+    const gamePlaySnapshot = await firestore
+      .collection('gamePlay')
+      .where('userId', '==', userId)
+      .where('seasonId', '==', activeSeasonId1)
+      .limit(1)
+      .get();
+    if (!gamePlaySnapshot.empty) {
+      await gamePlaySnapshot.docs[0].ref.update({
+        numberOfBuildings: admin.firestore.FieldValue.increment(reward1.value),
+      });
+    }
+
+    await snapshot1.ref.update({ txnHash, status: 'Success', reward: { type: reward1.type, value: reward1.value } });
+  }
+
+  if (reward1.type === 'point') {
+    const userSnapshot = await firestore.collection('user').doc(userId).get();
+    if (userSnapshot.exists) {
+      const { address } = userSnapshot.data();
+
+      const { txnHash, status } = await claimTokenTask({
+        address,
+        amount: BigInt(parseEther(reward1.value.toString()).toString()),
+      });
+
+      await snapshot1.ref.update({
+        txnHash,
+        status: 'Success',
+        reward: { type: reward1.type, value: reward1.value, rewardTxnHash: txnHash, rewardTxnStatus: status },
+      });
+    }
+  }
+
   return index1;
 
   // spin txn validations:
@@ -319,7 +353,7 @@ export const validateDailySpinTxnAndReturnSpinResult = async ({ userId, transact
   const { from, to, status: txnStatus, logs } = receipt;
   if (txnStatus !== 1) throw new Error('API error: Invalid txn status');
 
-  const { gameAddress, spinPrice, spinRewards } = await getActiveSeason();
+  const { id: activeSeasonId, gameAddress, spinPrice, spinRewards } = await getActiveSeason();
   const user = await firestore.collection('user').doc(userId).get();
   const { address } = user.data();
   if (from.toLowerCase() !== address.toLowerCase()) throw new Error('API error: Bad credential');
@@ -332,7 +366,41 @@ export const validateDailySpinTxnAndReturnSpinResult = async ({ userId, transact
 
   // generate random spin result and return to frontend
   const { reward, index } = randomSpinResult(spinRewards);
-  await snapshot.ref.update({ txnHash, status: 'Success', reward: { type: reward.type, value: reward.value } });
+
+  if (reward.type === 'house') {
+    const gamePlaySnapshot = await firestore
+      .collection('gamePlay')
+      .where('userId', '==', userId)
+      .where('seasonId', '==', activeSeasonId)
+      .limit(1)
+      .get();
+    if (!gamePlaySnapshot.empty) {
+      await gamePlaySnapshot.docs[0].ref.update({
+        numberOfBuildings: admin.firestore.FieldValue.increment(reward.value),
+      });
+    }
+
+    await snapshot.ref.update({ txnHash, status: 'Success', reward: { type: reward.type, value: reward.value } });
+  }
+
+  if (reward.type === 'point') {
+    const userSnapshot = await firestore.collection('user').doc(userId).get();
+    if (userSnapshot.exists) {
+      const { address } = userSnapshot.data();
+
+      const { txnHash, status } = await claimTokenTask({
+        address,
+        amount: BigInt(parseEther(reward.value.toString()).toString()),
+      });
+
+      await snapshot.ref.update({
+        txnHash,
+        status: 'Success',
+        reward: { type: reward.type, value: reward.value, rewardTxnHash: txnHash, rewardTxnStatus: status },
+      });
+    }
+  }
+
   return index;
 };
 
@@ -347,7 +415,6 @@ const randomSpinResult = (spinRewards) => {
     const reward = spinRewards[i];
     cumulativePercentage += reward.percentage;
 
-    console.log({ cumulativePercentage, randomPercentage });
     if (cumulativePercentage >= randomPercentage) {
       return { reward, index: i };
     }
