@@ -55,9 +55,9 @@
   "openseaNftCollection": "gangster-arena",
   "tokenContract": {
     "liquidityFee": 0.01,
-    "teamFee": 0.02,
-    "burnFee": 0.02,
-    "revShareFee": 0,
+    "teamFee": 0.015,
+    "burnFee": 0,
+    "revShareFee": 0.025,
     "swapAmount": 1000
   },
   "initPurchased": {

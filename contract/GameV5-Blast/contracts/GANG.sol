@@ -40,6 +40,7 @@ contract GANG is ERC20, AccessControl, ERC20Burnable, ERC20Permit, ReentrancyGua
   uint256 public tokensForRevShare = 0;
   uint256 public tokensForLiquidity = 0;
   uint256 public tokensForTeam = 0;
+  uint256 public percentOfRankPrize = 60_00; //60%
 
   /******************/
 
@@ -108,14 +109,17 @@ contract GANG is ERC20, AccessControl, ERC20Burnable, ERC20Permit, ReentrancyGua
     uint256 _prizeFee,
     uint256 _liquidityFee,
     uint256 _devFee,
-    uint256 _burnFee
+    uint256 _burnFee,
+    uint256 _percentOfRankPrize
   ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(_prizeFee + _liquidityFee + _devFee + _burnFee <= 1000, 'Fees must be <= 1000.');
+    require(_prizeFee + _liquidityFee + _devFee + _burnFee <= 1000, 'Fees must be <= 10000.');
+    require(_percentOfRankPrize <= 10000, 'percen must be <= 10000.');
     prizeFee = _prizeFee;
     liquidityFee = _liquidityFee;
     devFee = _devFee;
     burnFee = _burnFee;
     totalFees = _prizeFee + _liquidityFee + _devFee + _burnFee;
+    percentOfRankPrize = _percentOfRankPrize;
   }
 
   function excludeFromFees(address account, bool excluded) public onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -233,6 +237,7 @@ contract GANG is ERC20, AccessControl, ERC20Burnable, ERC20Permit, ReentrancyGua
     uint256 ethForLiquidity = ethBalance.mul(tokensForLiquidity).div(totalTokensToSwap);
 
     uint256 ethForRevShare = ethBalance - ethForTeam - ethForLiquidity;
+    uint256 ethForRankPrize = (ethForRevShare * percentOfRankPrize) / 10000;
 
     if (liquidityTokens > 0 && ethForLiquidity > 0) {
       addLiquidity(liquidityTokens, ethForLiquidity);
@@ -240,7 +245,12 @@ contract GANG is ERC20, AccessControl, ERC20Burnable, ERC20Permit, ReentrancyGua
       emit SwapAndLiquify(amountToSwapForETH, ethForLiquidity, tokensForLiquidity);
     }
 
-    gangsterArena.addReward{value: ethForTeam + ethForRevShare}(ethForTeam, 0, ethForRevShare, 0);
+    gangsterArena.addReward{value: ethForTeam + ethForRevShare}(
+      ethForTeam,
+      0,
+      ethForRankPrize,
+      ethForRevShare - ethForRankPrize
+    );
     tokensForLiquidity = 0;
     tokensForRevShare = 0;
     tokensForTeam = 0;

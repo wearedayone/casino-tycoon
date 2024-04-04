@@ -27,7 +27,7 @@
     "dotenv": "^16.3.1"
   },
   "scripts": {
-    "deploy:staging": "npx hardhat run scripts/deploy.js --network base_goerli",
+    "deploy:staging": "npx hardhat run scripts/1.token.deploy.js --network blast-sepolia",
     "deploy:production": "npx hardhat run scripts/deploy.js --network base_mainnet",
     "deploy:production:tournament": "npx hardhat run scripts/deployTournament.js --network base_mainnet",
     "compile": "npx hardhat compile",

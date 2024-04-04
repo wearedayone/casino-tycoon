@@ -7,14 +7,16 @@ interface IGangsterArena {
     Event
   ***************************
    */
-  event Mint(address indexed to, uint256 tokenId, uint256 amount, uint256 nonce);
+  event BuyGangster(address indexed to, uint256 tokenId, uint256 amount, uint256 nonce);
   event BuyGoon(address indexed to, uint256 amount, uint256 nonce);
   event BuySafeHouse(address indexed to, uint256 amount, uint256 nonce);
+  event DailySpin(address indexed to, uint256 spinType, uint256 amount, uint256 value, uint256 nonce);
   event Deposit(address indexed to, uint256 tokenId, uint256 amount);
   event Withdraw(address indexed to, uint256 tokenId, uint256 amount);
   event Burn(address[] to, uint256[] tokenId, uint256[] amount);
   event BurnGoon(address[] to, uint256[] amount);
   event Retire(address to, uint256 reward, uint256 nonce);
+  event WarResult(address[] addr, uint256[] _lGang, uint256[] _wToken);
 
   /**
   ***************************
@@ -26,63 +28,39 @@ interface IGangsterArena {
    * public send reward from ourside to contract (ex: from LP)
    *
    */
-  function addReward(uint256 devFee, uint256 marketingFee, uint256 prizePool, uint256 retirePool) external payable;
+  function addReward(uint256 devValue, uint256 burnValue, uint256 rankPrize, uint256 reputationPrize) external payable;
 
-  // /**
-  //  * public mint when user buy gangster NFT
-  //  *
-  //  */
-  // function mint(
-  //   uint256 tokenId,
-  //   uint256 amount,
-  //   uint256 bonus,
-  //   uint256 time,
-  //   uint256 nonce,
-  //   bytes memory sig
-  // ) external payable;
+  function buyGangster(
+    uint256 amount,
+    uint256 value,
+    uint256 time,
+    uint256 nGangster,
+    uint256 nonce,
+    uint256 bType,
+    address referral,
+    bytes memory sig
+  ) external;
 
-  // /**
-  //  * public referral mint when user buy gangster NFT
-  //  */
-  // function mintReferral(
-  //   uint256 tokenId,
-  //   uint256 amount,
-  //   uint256 bonus,
-  //   address referral,
-  //   uint256 time,
-  //   uint256 nonce,
-  //   bytes memory sig
-  // ) external payable;
+  function buyAsset(
+    uint256 _typeA,
+    uint256 _amount,
+    uint256 _value,
+    uint256 _lastB,
+    uint256 _sTime,
+    uint256 _nonce,
+    bytes memory _sig
+  ) external;
 
-  // /**
-  //  * Whitelist mint when user buy gangster NFT
-  //  */
-  // function mintWL(
-  //   uint256 tokenId,
-  //   uint256 amount,
-  //   uint256 bonus,
-  //   uint256 time,
-  //   uint256 nonce,
-  //   bytes memory sig
-  // ) external payable;
+  function depositNFT(address to, uint256 amount) external;
 
-  /**
-   * user deposit gangster NFTs
-   */
-  // function depositNFT(address to, uint256 tokenId, uint256 amount) external;
+  function withdrawNFT(address to, uint256 amount) external;
 
-  // /**
-  //  * Withdraw gangster NFTs
-  //  */
-  // function withdrawNFT(address to, uint256 tokenId, uint256 amount) external;
+  function finalWarResult(address[] memory addr, uint256[] memory _lGang, uint256[] memory _wToken) external;
 
-  /**
-   * Burn gangster NFTs
-   */
-  function burnNFT(address[] memory to, uint256 tokenId, uint256[] memory amount) external;
+  function setWinner(address[] memory to, uint256[] memory points) external;
 
   /**
    * user retire game
    */
-  function retired(uint256 nonce) external;
+  function retired(address to, uint256 payout, uint256 nonce) external;
 }
