@@ -5,7 +5,7 @@ import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
 import environments from '../../../../utils/environments';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
-import { BASESCAN_PREFIX } from './PopupTxnCompleted';
+import { SCANNER_URL } from './PopupTxnCompleted';
 
 const { width, height } = configs;
 const { NETWORK_ID } = environments;
@@ -34,7 +34,7 @@ class PopupTxnProcessingSwap extends Popup {
       viewTxnHashY,
       'button-green-long',
       'button-green-long-pressed',
-      () => window.open(`https://${BASESCAN_PREFIX[NETWORK_ID]}basescan.org/tx/${txnHash}`),
+      () => window.open(`https://${SCANNER_URL[NETWORK_ID]}/tx/${txnHash}`),
       'Proceed in your wallet',
       { icon: 'icon-open-link', iconPosition: 'end', sound: 'toggle-2' }
     );
@@ -62,7 +62,7 @@ class PopupTxnProcessingSwap extends Popup {
       })
       .on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
         this.viewTxnHash.setAlpha(1);
-        window.open(`https://${BASESCAN_PREFIX[NETWORK_ID]}basescan.org/tx/${txnHash}`);
+        window.open(`https://${SCANNER_URL[NETWORK_ID]}/tx/${txnHash}`);
       });
   }
 }

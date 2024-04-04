@@ -1,8 +1,9 @@
 import { Contract } from '@ethersproject/contracts';
 import { formatEther } from '@ethersproject/units';
+
 import tokenABI from '../assets/abis/Token.json' assert { type: 'json' };
 import admin, { firestore } from '../configs/firebase.config.js';
-import alchemy from '../configs/alchemy.config.js';
+import provider from '../configs/provider.config.js';
 import environments from '../utils/environments.js';
 import logger from '../utils/logger.js';
 import { getActiveSeason } from '../services/season.service.js';
@@ -13,11 +14,11 @@ const tokenListener = async () => {
   const activeSeason = await getActiveSeason();
   const { tokenAddress: TOKEN_ADDRESS } = activeSeason || {};
   logger.info(`Start listen contract ${TOKEN_ADDRESS} on Network ${NETWORK_ID}`);
-  const ethersProvider = await alchemy.config.getWebSocketProvider();
-  const contract = new Contract(TOKEN_ADDRESS, tokenABI.abi, ethersProvider);
+  const contract = new Contract(TOKEN_ADDRESS, tokenABI.abi, provider);
 
   contract.on('Transfer', async (from, to, value, event) => {
-    await firestore.collection('web3Listener').doc(NETWORK_ID).update({ lastBlock: event.blockNumber });
+    console.log('Transfer', { from, to, value, event });
+    await firestore.collection('web3Listener').doc(NETWORK_ID).set({ lastBlock: event.blockNumber });
     await processTransferEvent({ from, to, value, event, contract });
   });
 };
@@ -25,8 +26,7 @@ const tokenListener = async () => {
 export const queryEvent = async (fromBlock) => {
   const activeSeason = await getActiveSeason();
   const { tokenAddress: TOKEN_ADDRESS } = activeSeason || {};
-  const ethersProvider = await alchemy.config.getWebSocketProvider();
-  const contract = new Contract(TOKEN_ADDRESS, tokenABI.abi, ethersProvider);
+  const contract = new Contract(TOKEN_ADDRESS, tokenABI.abi, provider);
   const depositEvents = await contract.queryFilter('Transfer', fromBlock);
   for (const event of depositEvents) {
     const [from, to, value] = event.args;

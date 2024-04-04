@@ -4,7 +4,7 @@ import chunk from 'lodash.chunk';
 
 import admin, { firestore } from '../configs/firebase.config.js';
 import privy from '../configs/privy.config.js';
-import alchemy from '../configs/alchemy.config.js';
+import quickNode from '../configs/quicknode.config.js';
 import { getActiveSeason } from './season.service.js';
 import { getLeaderboard, getRank } from './gamePlay.service.js';
 import { generateCode } from '../utils/formulas.js';
@@ -147,8 +147,7 @@ export const createUserIfNotExist = async (userId) => {
 
 const updateETHBalance = async (userId, wallet, ETHBalance) => {
   try {
-    const ethersProvider = await alchemy.config.getProvider();
-    const value = await ethersProvider.getBalance(wallet.address);
+    const value = await quickNode.getBalance(wallet.address, 'latest');
 
     if (ETHBalance !== Number(formatEther(value))) {
       await firestore
@@ -180,8 +179,7 @@ export const getUserDisplayInfos = async (userId) => {
 export const updateBalance = async (userId) => {
   const snapshot = await firestore.collection('user').doc(userId).get();
   const { ETHBalance, address } = snapshot.data();
-  const ethersProvider = await alchemy.config.getProvider();
-  const value = await ethersProvider.getBalance(address);
+  const value = await quickNode.getBalance(address, 'latest');
 
   if (ETHBalance !== formatEther(value)) {
     await firestore

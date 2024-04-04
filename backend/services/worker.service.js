@@ -8,23 +8,21 @@ import tokenABI from '../assets/abis/Token.json' assert { type: 'json' };
 import nftABI from '../assets/abis/NFT.json' assert { type: 'json' };
 import gameContractABI from '../assets/abis/GameContract.json' assert { type: 'json' };
 import environments from '../utils/environments.js';
-import alchemy from '../configs/alchemy.config.js';
 import logger from '../utils/logger.js';
 import { getActiveSeason } from './season.service.js';
 import RouterABI from '@uniswap/v2-periphery/build/IUniswapV2Router02.json' assert { type: 'json' };
 import PairABI from '@uniswap/v2-core/build/IUniswapV2Pair.json' assert { type: 'json' };
+import quickNode from '../configs/quicknode.config.js';
 
 const { WORKER_WALLET_PRIVATE_KEY, SIGNER_WALLET_PRIVATE_KEY } = environments;
 
 const getWorkerWallet = async () => {
-  const ethersProvider = await alchemy.config.getProvider();
-  const workerWallet = new Wallet(WORKER_WALLET_PRIVATE_KEY, ethersProvider);
+  const workerWallet = new Wallet(WORKER_WALLET_PRIVATE_KEY, quickNode);
   return workerWallet;
 };
 
 const getSignerWallet = async () => {
-  const ethersProvider = await alchemy.config.getProvider();
-  const workerWallet = new Wallet(SIGNER_WALLET_PRIVATE_KEY, ethersProvider);
+  const workerWallet = new Wallet(SIGNER_WALLET_PRIVATE_KEY, quickNode);
   return workerWallet;
 };
 
@@ -65,11 +63,10 @@ export const claimToken = async ({ address, amount }) => {
     try {
       logger.info(`Start claimToken - ${retry++} times`);
       logger.info({ address, amount });
-      const ethersProvider = await alchemy.config.getProvider();
       const workerWallet = await getWorkerWallet();
       const tokenContract = await getTokenContract(workerWallet);
 
-      const baseGasPrice = await ethersProvider.getGasPrice();
+      const baseGasPrice = await quickNode.getGasPrice();
       const gasPrice = (baseGasPrice.toBigInt() * BigInt(Math.round(Math.pow(1.2, retry) * 1000000))) / BigInt(1000000);
 
       logger.info(`Start claimToken transaction with gasPrice: ${JSON.stringify(gasPrice)}`);
@@ -135,7 +132,6 @@ export const setWarResult = async ({ addresses, lostGangsters, lostGoons, wonRep
   let txnHash = '';
   let isSuccess = false;
   let retry = 0;
-  const ethersProvider = await alchemy.config.getProvider();
   while (!isSuccess && retry < 10) {
     try {
       logger.info(`Start setWarResult. Retry ${retry++} times`);
@@ -143,7 +139,7 @@ export const setWarResult = async ({ addresses, lostGangsters, lostGoons, wonRep
       const workerWallet = await getWorkerWallet();
       const gameContract = await getGameContract(workerWallet);
 
-      const baseGasPrice = await ethersProvider.getGasPrice();
+      const baseGasPrice = await quickNode.getGasPrice();
       const gasPrice = (baseGasPrice.toBigInt() * BigInt(Math.round(Math.pow(1.2, retry) * 1000000))) / BigInt(1000000);
       logger.info(`Start setWarResult transaction with gasPrice: ${JSON.stringify(gasPrice)}`);
       const tx = await gameContract.finalWarResult(addresses, lostGangsters, lostGoons, wonReputations, wonTokens, {
@@ -283,8 +279,7 @@ export const setWinner = async ({ winners, points }) => {
   try {
     logger.info('start setWinner');
     logger.info({ winners, points });
-    const ethersProvider = await alchemy.config.getProvider();
-    const gasPrice = await ethersProvider.getGasPrice();
+    const gasPrice = await quickNode.getGasPrice();
     const workerWallet = await getWorkerWallet();
     const gameContract = await getGameContract(workerWallet);
     logger.info('start Transaction:');
@@ -385,28 +380,25 @@ export const signMessageRetire = async ({ address, reward, nonce }) => {
 };
 
 export const getTokenBalance = async ({ address }) => {
-  const ethersProvider = await alchemy.config.getProvider();
   const activeSeason = await getActiveSeason();
   const { tokenAddress: TOKEN_ADDRESS } = activeSeason || {};
-  const contract = new Contract(TOKEN_ADDRESS, tokenABI.abi, ethersProvider);
+  const contract = new Contract(TOKEN_ADDRESS, tokenABI.abi, quickNode);
   const value = await contract.balanceOf(address);
   return value;
 };
 
 export const getNFTBalance = async ({ address }) => {
-  const ethersProvider = await alchemy.config.getProvider();
   const activeSeason = await getActiveSeason();
   const { nftAddress } = activeSeason || {};
-  const contract = new Contract(nftAddress, nftABI.abi, ethersProvider);
+  const contract = new Contract(nftAddress, nftABI.abi, quickNode);
   const value = await contract.gangster(address);
   return value;
 };
 
 export const getNoGangster = async ({ address }) => {
-  const ethersProvider = await alchemy.config.getProvider();
   const activeSeason = await getActiveSeason();
   const { gameAddress } = activeSeason || {};
-  const contract = new Contract(gameAddress, gameContractABI.abi, ethersProvider);
+  const contract = new Contract(gameAddress, gameContractABI.abi, quickNode);
   const value = await contract.gangsterBought(address);
   return value;
 };
@@ -423,13 +415,12 @@ export const convertEthInputToToken = async (ethAmount) => {
 };
 
 const getSwapContractInfo = async () => {
-  const ethersProvider = await alchemy.config.getProvider();
   const activeSeason = await getActiveSeason();
   const { tokenAddress, routerAddress, wethAddress, pairAddress } = activeSeason || {};
 
-  const routerContract = new Contract(routerAddress, RouterABI.abi, ethersProvider);
-  const tokenContract = new Contract(tokenAddress, tokenABI.abi, ethersProvider);
-  const pairContract = new Contract(pairAddress, PairABI.abi, ethersProvider);
+  const routerContract = new Contract(routerAddress, RouterABI.abi, quickNode);
+  const tokenContract = new Contract(tokenAddress, tokenABI.abi, quickNode);
+  const pairContract = new Contract(pairAddress, PairABI.abi, quickNode);
 
   const totalFees = await tokenContract.totalFees();
   const swapReceivePercent = (1000 - Number(totalFees.toString())) / 1000;
