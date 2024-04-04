@@ -1,8 +1,8 @@
 {
   "assets": {
     "machine": {
-      "basePrice": 0.01,
-      "whitelistPrice": 0.01,
+      "basePrice": 0.001,
+      "whitelistPrice": 0.0005,
       "maxPerBatch": 100,
       "maxWhitelistAmount": 10,
       "dailyReward": 1000,
@@ -39,7 +39,7 @@
     "minRewardHigherRanks": 0.05,
     "minRewardLowerRanks": 0.02,
     "devFee": 0,
-    "marketingFee": 0.1,
+    "marketingFee": 0,
     "tokenTaxToPrizePoolPercent": 0.025
   },
   "war": {
