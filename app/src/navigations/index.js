@@ -7,6 +7,7 @@ import useSystem from '../hooks/useSystem';
 import useUserProfile from '../hooks/useUserProfile';
 import useUserGamePlay from '../hooks/useUserGamePlay';
 import useLastOnlineTime from '../hooks/useLastOnlineTime';
+import useLastSpin from '../hooks/useLastSpin';
 import useSystemStore from '../stores/system.store';
 
 const Navigations = () => {
@@ -16,6 +17,7 @@ const Navigations = () => {
   useUserProfile(ready, user);
   useUserGamePlay();
   useLastOnlineTime();
+  useLastSpin();
 
   const configs = useSystemStore((state) => state.configs);
 

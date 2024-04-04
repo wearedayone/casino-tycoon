@@ -37,6 +37,7 @@ class PopupDailySpin extends Popup {
   minContainerX = 0;
   maxContainerX = 0;
   destinationIndex = null;
+  spinned = false;
 
   constructor(scene) {
     super(scene, 'popup-spin', { title: 'Daily Spin' });
@@ -110,6 +111,7 @@ class PopupDailySpin extends Popup {
         x: width / 2,
         y: height / 2 + this.popup.height / 2 - 20,
         onClick: () => {
+          if (this.spinned) return;
           scene.game.events.emit('start-spin');
           this.spinSound.play();
         },
@@ -126,6 +128,10 @@ class PopupDailySpin extends Popup {
         .image(width / 2, this.popup.y + this.popup.height / 2 - 190, 'arrow-spin-up')
         .setOrigin(0.5, 0.5);
       this.add(this.arrowUp);
+    });
+
+    scene.game.events.on('update-spinned-status', ({ spinned }) => {
+      this.spinned = spinned;
     });
 
     scene.game.events.on('spin-error', ({ code, message }) => {

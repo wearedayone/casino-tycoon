@@ -76,6 +76,7 @@ class InfoButtons extends Phaser.GameObjects.Container {
       },
       { sound: 'button-1' }
     );
+    this.spinButton.setVisible(false);
 
     this.add(this.settingButton);
     this.add(this.referralButton);

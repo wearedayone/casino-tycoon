@@ -10,6 +10,7 @@ import * as Sentry from '@sentry/react';
 import useUserStore from '../../stores/user.store';
 import useSystemStore from '../../stores/system.store';
 import useSettingStore from '../../stores/setting.store';
+import useSpinStore from '../../stores/spin.store';
 import {
   applyInviteCode,
   getRank,
@@ -188,6 +189,9 @@ const Game = () => {
     enableBuildingSalesTracking,
     disableBuildingSalesTracking,
   } = useSalesLast24h();
+
+  const spinInitialized = useSpinStore((state) => state.initialized);
+  const spinned = useSpinStore((state) => state.spinned);
 
   const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -640,6 +644,11 @@ const Game = () => {
         } catch (err) {
           console.error(err);
           Sentry.captureException(err);
+        }
+      });
+      gameRef.current?.events.on('request-spinned-status', () => {
+        if (spinInitialized) {
+          gameRef.current?.events.emit('update-spinned-status', { spinned });
         }
       });
       gameRef.current?.events.on('request-app-version', () => {
@@ -1582,6 +1591,12 @@ const Game = () => {
       spinPrice,
     });
   }, [spinRewards, spinPrice]);
+
+  useEffect(() => {
+    if (spinInitialized) {
+      gameRef.current?.events.emit('update-spinned-status', { spinned });
+    }
+  }, [spinInitialized, spinned]);
 
   return (
     <Box

@@ -211,8 +211,8 @@ class MainScene extends Phaser.Scene {
       this.add.existing(footer);
     });
 
-    const infoButtons = new InfoButtons(this, 550);
-    this.add.existing(infoButtons);
+    this.infoButtons = new InfoButtons(this, 550);
+    this.add.existing(this.infoButtons);
     this.game.events.on('update-user-away-reward', ({ showWarPopup, claimableReward }) => {
       this.popupWelcome = showWarPopup
         ? new PopupWelcomeWar(this, claimableReward)
@@ -226,10 +226,17 @@ class MainScene extends Phaser.Scene {
     this.game.events.on('update-active-status', ({ active }) => {
       this.isUserActive = active;
     });
+
+    this.game.events.on('update-spinned-status', ({ spinned }) => {
+      this.infoButtons?.spinButton?.setVisible(!spinned);
+    });
     this.game.events.emit('request-game-ended-status');
     this.game.events.emit('request-active-status');
     this.game.events.emit('request-deposit-code');
-    if (!this.isFromTutorial) this.game.events.emit('request-user-away-reward');
+    if (!this.isFromTutorial) {
+      this.game.events.emit('request-user-away-reward');
+      this.game.events.emit('request-spinned-status');
+    }
   }
 
   create() {
