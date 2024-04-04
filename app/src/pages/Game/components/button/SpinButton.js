@@ -5,18 +5,18 @@ class SpinButton extends Button {
   constructor(scene, { x, y, onClick, value }) {
     super(scene, x, y, 'button-spin', 'button-spin-pressed', onClick, { sound: 'button-1' });
 
-    this.spinText = scene.add
-      .text(-130, 0, 'Spin', { fontSize: '82px', fontFamily: fontFamilies.extraBold, color: '#fff' })
+    this.text = scene.add
+      .text(0, 0, `${value}`, { fontSize: '82px', fontFamily: fontFamilies.extraBold, color: '#fff' })
       .setOrigin(0.5, 0.5);
-    this.spinText.setStroke('#0004A0', 10);
+    this.text.setStroke('#0004A0', 10);
 
-    this.valueText = scene.add
-      .text(150, 0, `x${value}`, { fontSize: '82px', fontFamily: fontFamilies.extraBold, color: '#fff' })
-      .setOrigin(0.5, 0.5);
-    this.valueText.setStroke('#0004A0', 10);
+    this.icon = scene.add.image(0, 0, 'icon-coin').setOrigin(0.5, 0.5);
 
-    this.add(this.spinText);
-    this.add(this.valueText);
+    this.text.x -= this.icon.width / 2 + 5;
+    this.icon.x = this.text.x + this.text.width / 2 + this.icon.width / 2 + 10;
+
+    this.add(this.text);
+    this.add(this.icon);
   }
 }
 
