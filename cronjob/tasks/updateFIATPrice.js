@@ -3,7 +3,7 @@ import { TickMath, FullMath } from '@uniswap/v3-sdk';
 import { Contract } from '@ethersproject/contracts';
 import { formatEther, parseEther } from '@ethersproject/units';
 import { firestore } from '../configs/admin.config.js';
-import alchemy from '../configs/alchemy.config.js';
+import quickNode from '../configs/quicknode.config.js';
 import environments from '../utils/environments.js';
 import UniswapABI from '../assets/abis/Uniswap.json' assert { type: 'json' };
 import TokenAbi from '../assets/abis/Token.json' assert { type: 'json' };
@@ -31,8 +31,7 @@ async function getPrice({ currentTick, inputAmount, baseTokenDecimals, quoteToke
 
 export const updateFIATPriceUniswapV3 = async () => {
   try {
-    const provider = await alchemy.config.getProvider();
-    const contract = new Contract(UNISWAP_CONTRACT_ADDRESS, UniswapABI.abi, provider);
+    const contract = new Contract(UNISWAP_CONTRACT_ADDRESS, UniswapABI.abi, quickNode);
     const { tick } = await contract.slot0();
 
     const quote = await getPrice({
@@ -112,16 +111,14 @@ const getSwapContractInfo = async () => {
     pairAddress: PAIR_ADDRESS,
   } = season.data() || {};
 
-  const provider = await alchemy.config.getProvider();
-
   const tokenAddress = TOKEN_ADDRESS;
   const routerAddress = ROUTER_ADDRESS;
   const wethAddress = WETH_ADDRESS;
   const pairAddress = PAIR_ADDRESS;
 
-  const routerContract = new Contract(routerAddress, RouterABI.abi, provider);
-  const tokenContract = new Contract(tokenAddress, TokenAbi.abi, provider);
-  const pairContract = new Contract(pairAddress, PairABI.abi, provider);
+  const routerContract = new Contract(routerAddress, RouterABI.abi, quickNode);
+  const tokenContract = new Contract(tokenAddress, TokenAbi.abi, quickNode);
+  const pairContract = new Contract(pairAddress, PairABI.abi, quickNode);
 
   const totalFees = await tokenContract.totalFees();
   const swapReceivePercent = (1000 - Number(totalFees.toString())) / 1000;
