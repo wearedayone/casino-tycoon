@@ -105,7 +105,7 @@ class PopupWarHistoryDetail extends Popup {
       .text(
         this.popup.width * 0.13 + earnItemIcon.width / 2 + 30,
         y,
-        `$GANG Earned: ${customFormat(tokenEarnFromEarning || 0, 1)} $GANG`,
+        `$GANG Earned: ${customFormat(tokenEarnFromEarning || 0, 1)}`,
         {
           fontSize: '50px',
           color: colors.black,
