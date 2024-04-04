@@ -9,227 +9,103 @@ import './libs/SafeMath.sol';
 import './libs/SafeTransferLib.sol';
 import './libs/SignedSafeMath.sol';
 
+interface IBlastPoints {
+  function configurePointsOperator(address operator) external;
+
+  function configurePointsOperatorOnBehalf(address contractAddress, address operator) external;
+}
+
 // import 'hardhat/console.sol';
 
 contract GangsterArena is AccessControl, IGangsterArena {
   using SafeMath for uint256;
-  using SignedSafeMath for int256;
   using SafeTransferLib for address payable;
 
-  // NFT token
-  Gangster public nft;
-  // pointToken token
-  GANG public pointToken;
+  Gangster public nft; // NFT token
+  GANG public pointToken; // pointToken token
+  address private signer; // Signer address
 
-  // Signer address
-  address private signer;
+  bytes32 public constant WORKER_ROLE = keccak256('WORKER_ROLE'); // Worker role - process game transaction
+  bytes32 public constant ADMIN_ROLE = keccak256('ADMIN_ROLE'); // Admin role - setting contract
 
-  /// Roles
-  // Worker role - process game transaction
-  bytes32 public constant WORKER_ROLE = keccak256('WORKER_ROLE');
-  // Admin role - setting contract
-  bytes32 public constant ADMIN_ROLE = keccak256('ADMIN_ROLE');
-  // Dev role - withdraw dev fee
-  bytes32 public constant DEV_ROLE = keccak256('DEV_ROLE');
-  // Marketing role - withdraw marketing fee
-  bytes32 public constant MARKETING_ROLE = keccak256('MARKETING_ROLE');
-  // NFT base price
-  uint256 public bPrice_ = 0.01 ether; // base price
+  /*
+   ****************
+   * Game config
+   ****************
+   */
 
-  uint256 public bpwl_ = 0.005 ether; // NFT price for whitelisted
+  uint256 public tokenId = 1; // NFT tokenId
 
-  // Referral reward
-  uint256 public refReward_ = 1000;
-
-  // Referral discount
-  uint256 public refDiscount_ = 9000;
-
-  // Dev fee - over 10000
-  uint256 public DEV_PERCENT = 0;
-  // Marketing fee - over 10000
-  uint256 public MARKETING_PERCENT = 1000;
-  // Prize Pool value percentage - over 10000
-  uint256 public PRIZE_PERCENT = 5000;
-  // Retire pool value percentage - over 10000
-  uint256 public RETIRE_PERCENT = 4000;
+  uint256 public refReward_ = 10_00; // Referral reward: 10%
 
   uint256 public vtd = 60; // valid timestamp different
 
-  // Value dev spent - use to calculate
-  int256 public devDebt;
-  // Value marketing spent - use to calculate
-  int256 public marketingDebt;
-  // Value retire pool spent - use to calculate
-  int256 public retireDebt;
-  // Value prize pool spent - use to calculate
-  int256 public prizeDebt;
+  //****************
+  // Game Contract Balance
+  //****************
+  uint256 public devValue; // dev fee
+  uint256 public burnValue; // burn value
+  uint256 public reputationPrize; // reputation prize
+  uint256 public rankPrize; // rank prize
 
-  // Flag toggle when game close
-  bool public gameClosed;
+  //****************
+  // Game Address
+  //****************
+  address public burnAddr_;
+  address public devAddr_;
+  address public pointsOperator_;
 
-  mapping(address => uint256) public goon; // address -> number of goon
-  mapping(address => uint256) public safehouse; // address -> number of safehouse
-  mapping(address => uint256) public warRep; // address -> number of additional reputation from gangwar
+  //****************
+  // Game Data
+  //****************
+  bool public gameClosed; // Flag toggle when game close
+  mapping(address => mapping(uint256 => uint256)) public lastB; // address -> type -> timestamp
   mapping(address => uint256) public gangsterBought; // address -> number of gangster bought
-  uint256 public tgoon; // total goon bought
-  uint256 public tshouse; // total safehouse bought
 
-  uint256 rpGangster = 10; // reputation per gangster
-  uint256 rpGoon = 2; // reputation per goon
-  uint256 rpSHouse = 8; // reputation per safe house
-  uint256 retireTax = 2000; // Retire tax (over 10000)
-  uint256 public tPBalance; // total prize balance when game end
-  uint256 public totalPoint; // total allocation points, use when calculate prize
   // Nonces of transaction
   mapping(uint256 => bool) usedNonces;
+  uint256 public totalPoint; // total reputation when game end
 
   constructor(
     address _defaultAdmin,
     address _adminAddress,
     address _workerAddress,
     address _signerAddress,
+    address _pointsOperator,
     address _gangsterAddress,
     address payable _fiatAddress
   ) {
     nft = Gangster(_gangsterAddress);
     pointToken = GANG(_fiatAddress);
     signer = _signerAddress;
+    pointsOperator_ = _pointsOperator;
 
     _grantRole(DEFAULT_ADMIN_ROLE, _defaultAdmin);
     _grantRole(ADMIN_ROLE, _adminAddress);
     _grantRole(WORKER_ROLE, _workerAddress);
+    IBlastPoints(0x2fc95838c71e76ec69ff817983BFf17c710F34E0).configurePointsOperator(_pointsOperator);
   }
 
   receive() external payable {}
 
   fallback() external payable {}
 
-  /**
-  ***************************
-  Public
-  ***************************
-   */
+  //***************************
+  // Public
+  //***************************
 
-  function getBalance() public view returns (uint256) {
-    return address(this).balance;
+  function addReward(uint256 dev_, uint256 burn_, uint256 reputationPrize_, uint256 rankPrize_) public payable {
+    require(msg.value == (dev_ + burn_ + reputationPrize_ + rankPrize_), 'Need to send more ether');
+    devValue += dev_;
+    burnValue += burn_;
+    reputationPrize += reputationPrize_;
+    rankPrize += rankPrize_;
   }
-
-  function getDevBalance() public view returns (uint256) {
-    int256 totalDebt = devDebt + marketingDebt + retireDebt + prizeDebt;
-    return totalDebt.add(int256(address(this).balance)).mul(int256(DEV_PERCENT)).div(10000).sub(devDebt).toUInt256();
-  }
-
-  function getMarketingBalance() public view returns (uint256) {
-    int256 totalDebt = devDebt + marketingDebt + retireDebt + prizeDebt;
-    return
-      totalDebt
-        .add(int256(address(this).balance))
-        .mul(int256(MARKETING_PERCENT))
-        .div(10000)
-        .sub(marketingDebt)
-        .toUInt256();
-  }
-
-  function getRetireBalance() public view returns (uint256) {
-    int256 totalDebt = devDebt + marketingDebt + retireDebt + prizeDebt;
-    return
-      totalDebt.add(int256(address(this).balance)).mul(int256(RETIRE_PERCENT)).div(10000).sub(retireDebt).toUInt256();
-  }
-
-  function getPrizeBalance() public view returns (uint256) {
-    int256 totalDebt = devDebt + marketingDebt + retireDebt + prizeDebt;
-    return
-      totalDebt.add(int256(address(this).balance)).mul(int256(PRIZE_PERCENT)).div(10000).sub(prizeDebt).toUInt256();
-  }
-
-  function addReward(uint256 devFee, uint256 marketingFee, uint256 prizePool, uint256 retirePool) public payable {
-    require(msg.value >= devFee + marketingFee + prizePool + retirePool, 'Need to send more ether');
-    devDebt = devDebt.sub(int256(devFee));
-    marketingDebt = marketingDebt.sub(int256(marketingFee));
-    retireDebt = retireDebt.sub(int256(retirePool));
-    prizeDebt = prizeDebt.sub(int256(prizePool));
-  }
-
-  // /**
-  //  * @notice Normal buy gangster
-  //  */
-  // function mint(
-  //   uint256 tokenId,
-  //   uint256 amount,
-  //   uint256 bonus,
-  //   uint256 time,
-  //   uint256 nonce,
-  //   bytes memory sig
-  // ) public payable {
-  //   require(msg.value >= bPrice_ * amount, 'Need to send more ether');
-  //   require(!gameClosed, 'Game is closed');
-  //   require(block.timestamp < time + vtd, 'Invalid timestamp');
-  //   require(!usedNonces[nonce], 'Invalid nonce');
-  //   bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender, tokenId, amount, bonus, time, nonce, 'mint')));
-  //   require(verifyAddressSigner(message, sig), 'Invalid signature');
-  //   nft.mintOnBehalf(msg.sender, tokenId, amount);
-  //   usedNonces[nonce] = true;
-  //   if (bonus > 0) pointToken.mint(msg.sender, bonus);
-  //   emit Mint(msg.sender, tokenId, amount, nonce);
-  // }
-
-  // /**
-  //  * @notice Buy gangster with referral
-  //  */
-  // function mintReferral(
-  //   uint256 tokenId,
-  //   uint256 amount,
-  //   uint256 bonus,
-  //   address referral,
-  //   uint256 time,
-  //   uint256 nonce,
-  //   bytes memory sig
-  // ) public payable {
-  //   // require whitelisted for genesis token
-  //   require(!usedNonces[nonce], 'Invalid nonce');
-  //   require(block.timestamp < time + vtd, 'Invalid timestamp');
-  //   bytes32 message = prefixed(
-  //     keccak256(abi.encodePacked(msg.sender, tokenId, amount, bonus, referral, time, nonce, 'mintReferral'))
-  //   );
-  //   require(verifyAddressSigner(message, sig), 'Invalid signature');
-  //   require(msg.value >= (bPrice_ * refDiscount_ * amount) / 10000, 'Need to send more ether');
-  //   require(!gameClosed, 'Game is closed');
-  //   nft.mintOnBehalf(msg.sender, tokenId, amount);
-  //   usedNonces[nonce] = true;
-  //   payable(referral).safeTransferETH((msg.value * refReward_) / 10000);
-  //   if (bonus > 0) pointToken.mint(msg.sender, bonus);
-  //   emit Mint(msg.sender, tokenId, amount, nonce);
-  // }
-
-  // /**
-  //  * @notice Buy gangster with referral
-  //  */
-  // function mintWL(
-  //   uint256 tokenId,
-  //   uint256 amount,
-  //   uint256 bonus,
-  //   uint256 time,
-  //   uint256 nonce,
-  //   bytes memory sig
-  // ) public payable {
-  //   // require whitelisted for genesis token
-  //   require(msg.value >= bpwl_ * amount, 'Need to send more ether');
-  //   require(!gameClosed, 'Game is closed');
-  //   require(block.timestamp < time + vtd, 'Invalid timestamp');
-  //   require(!usedNonces[nonce], 'Invalid nonce');
-  //   bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender, tokenId, amount, bonus, time, nonce, 'mintWL')));
-  //   require(verifyAddressSigner(message, sig), 'Invalid signature');
-  //   nft.mintWLOnBehalf(msg.sender, tokenId, amount);
-  //   usedNonces[nonce] = true;
-  //   if (bonus > 0) pointToken.mint(msg.sender, bonus);
-  //   emit Mint(msg.sender, tokenId, amount, nonce);
-  // }
 
   /**
    * @notice Buy gangster with referral
    */
   function buyGangster(
-    uint256 tokenId,
     uint256 amount,
     uint256 value,
     uint256 time,
@@ -243,10 +119,6 @@ contract GangsterArena is AccessControl, IGangsterArena {
     require(!gameClosed, 'Game is closed');
     require(block.timestamp < time + vtd, 'Invalid timestamp');
     require(!usedNonces[nonce], 'Invalid nonce');
-    // console.log('gbought:', gangsterBought[msg.sender]);
-    // console.log('nGangster:', nGangster);
-    // console.log('amount:', amount);
-    // console.log('sender:', msg.sender);
     require(gangsterBought[msg.sender] == nGangster, 'outdated number of gangster');
     // require(pointToken.transferFrom(msg.sender, address(this), value));
 
@@ -264,72 +136,84 @@ contract GangsterArena is AccessControl, IGangsterArena {
       nft.mintWLOnBehalf(msg.sender, tokenId, amount);
     } else {
       // referral buy
-      require(pointToken.transfer(referral, (value * 1000) / 10000));
-      pointToken.burnFrom(address(this), (value * 9000) / 10000);
+      require(pointToken.transfer(referral, (value * refReward_) / 100_00));
+      pointToken.burnFrom(address(this), (value * (100_00 - refReward_)) / 100_00);
       nft.mintOnBehalf(msg.sender, tokenId, amount);
     }
     usedNonces[nonce] = true;
     gangsterBought[msg.sender] += amount;
-    emit Mint(msg.sender, tokenId, amount, nonce);
+    emit BuyGangster(msg.sender, tokenId, amount, nonce);
   }
 
   /**
-   * @notice Buy Goon
+   * @notice Buy Asset
+   * typeA: type of Asset, 1 is goon, 2 is safehouse
+   * amount: amount of asset
+   * value: value user have to pay in token
+   * lastB: lastB time block time
+   * sTime: signature time
+   * nonce: application transaction nonce
+   * sig: signatire from application
    */
-  function buyGoon(
-    uint256 amount,
-    uint256 value,
-    uint256 totalGoon,
-    uint256 time,
-    uint256 nonce,
-    bytes memory sig
+  function buyAsset(
+    uint256 _typeA,
+    uint256 _amount,
+    uint256 _value,
+    uint256 _lastB,
+    uint256 _sTime,
+    uint256 _nonce,
+    bytes memory _sig
   ) public {
     require(!gameClosed, 'Game is closed');
-    require(goon[msg.sender] == totalGoon, 'Invalid total Goon');
-    require(block.timestamp < time + vtd, 'Invalid timestamp');
-    require(!usedNonces[nonce], 'Nonce is used');
+    require(lastB[msg.sender][_typeA] == _lastB, 'Invalid last buy time');
+    require(block.timestamp < _sTime + vtd, 'Invalid timestamp');
+    require(!usedNonces[_nonce], 'Nonce is used');
     bytes32 message = prefixed(
-      keccak256(abi.encodePacked(msg.sender, amount, value, totalGoon, time, nonce, 'buyGoon'))
+      keccak256(abi.encodePacked(msg.sender, _typeA, _amount, _value, _lastB, _sTime, _nonce))
     );
-    require(verifyAddressSigner(message, sig), 'Invalid signature');
-    pointToken.burnFrom(msg.sender, value);
-    usedNonces[nonce] = true;
-    goon[msg.sender] += amount;
-    tgoon += amount;
-    emit BuyGoon(msg.sender, amount, nonce);
+    require(verifyAddressSigner(message, _sig), 'Invalid signature');
+    pointToken.burnFrom(msg.sender, _value);
+    usedNonces[_nonce] = true;
+    lastB[msg.sender][_typeA] = block.timestamp;
+    if (_typeA == 1) emit BuyGoon(msg.sender, _amount, _nonce);
+    if (_typeA == 2) emit BuySafeHouse(msg.sender, _amount, _nonce);
   }
 
   /**
-   * @notice Buy Safehouse
+   * @notice Buy Asset
+   * type: type of spint, default is 1
+   * amount: number of spin
+   * value: value user have to pay in token
+   * _lastP: last time user spin in block time
+   * sTime: signature time
+   * nonce: application transaction nonce
+   * sig: signatire from application
    */
-  function buySafeHouse(
-    uint256 amount,
-    uint256 value,
-    uint256 totalSafehouse,
-    uint256 time,
-    uint256 nonce,
-    bytes memory sig
+  function spin(
+    uint256 _spinType,
+    uint256 _amount,
+    uint256 _value,
+    uint256 _lastSpin,
+    uint256 _sTime,
+    uint256 _nonce,
+    bytes memory _sig
   ) public {
     require(!gameClosed, 'Game is closed');
-    require(safehouse[msg.sender] == totalSafehouse, 'Invalid total Safehouse');
-    require(block.timestamp < time + vtd, 'Invalid timestamp');
-    require(!usedNonces[nonce], 'Nonce is used');
-
+    require(block.timestamp < _sTime + vtd, 'Invalid timestamp');
+    require(!usedNonces[_nonce], 'Nonce is used');
     bytes32 message = prefixed(
-      keccak256(abi.encodePacked(msg.sender, amount, value, totalSafehouse, time, nonce, 'buySafeHouse'))
+      keccak256(abi.encodePacked(msg.sender, _spinType, _amount, _value, _lastSpin, _sTime, _nonce))
     );
-    require(verifyAddressSigner(message, sig), 'Invalid signature');
-    pointToken.burnFrom(msg.sender, value);
-    usedNonces[nonce] = true;
-    safehouse[msg.sender] += amount;
-    tshouse += amount;
-    emit BuySafeHouse(msg.sender, amount, nonce);
+    require(verifyAddressSigner(message, _sig), 'Invalid signature');
+    pointToken.burnFrom(msg.sender, _value);
+    usedNonces[_nonce] = true;
+    emit DailySpin(msg.sender, _value, _spinType, _amount, _nonce);
   }
 
   /**
    * @notice depositNFT
    */
-  function depositNFT(address to, uint256 tokenId, uint256 amount) public {
+  function depositNFT(address to, uint256 amount) public {
     require(!gameClosed, 'Game is closed');
     nft.depositNFT(msg.sender, to, tokenId, amount);
     emit Deposit(to, tokenId, amount);
@@ -338,71 +222,78 @@ contract GangsterArena is AccessControl, IGangsterArena {
   /**
    * @notice withdrawNFT
    */
-  function withdrawNFT(address to, uint256 tokenId, uint256 amount) public {
+  function withdrawNFT(address to, uint256 amount) public {
     nft.withdrawNFT(msg.sender, to, tokenId, amount);
     emit Withdraw(msg.sender, tokenId, amount);
   }
 
-  function retired(uint256 nonce) public {
+  /**
+   ***************************
+   *DEV withdraw
+   ***************************
+   */
+
+  function devWithdraw() public {
+    require(devValue > 0, 'Nothing to withdraw');
+    require(devAddr_ != address(0), 'Dev is not set');
+    address payable receiver = payable(devAddr_);
+    receiver.transfer(devValue);
+    devValue = 0;
+  }
+
+  /**
+   * ***************************
+   * Marketing withdraw to burn token
+   * ***************************
+   */
+
+  function markettingWithdraw() public {
+    require(burnValue > 0, 'Nothing to withdraw');
+    require(burnAddr_ != address(0), 'Burn is not set');
+    address payable receiver = payable(burnAddr_);
+    receiver.transfer(burnValue);
+    burnValue = 0;
+  }
+
+  /**
+   ***************************
+   *Customization for the contract (ADMIN_ROLE)
+   ***************************
+   */
+
+  function retired(address to, uint256 payout, uint256 nonce) public onlyRole(WORKER_ROLE) {
     require(!gameClosed, 'Game is closed');
-    uint256 numberOfGangster = nft.gangster(msg.sender);
-    uint256 totalGangster = nft.balanceOf(address(nft), 1);
-
-    uint256 reputation = numberOfGangster * rpGangster + goon[msg.sender] * rpGoon + safehouse[msg.sender] * rpSHouse;
-    uint256 totalRP = totalGangster * rpGangster + tgoon * rpGoon + tshouse * rpSHouse;
-
-    uint256 reward = (getRetireBalance() * reputation * (10000 - retireTax)) / (totalRP * 10000);
-
-    nft.retired(msg.sender);
-    address payable receiver = payable(msg.sender);
-    receiver.transfer(reward);
-    retireDebt += int256(reward);
-    tgoon -= goon[msg.sender];
-    tshouse -= safehouse[msg.sender];
-    goon[msg.sender] = 0;
-    safehouse[msg.sender] = 0;
-    emit Retire(msg.sender, reward, nonce);
+    nft.retired(to);
+    address payable receiver = payable(to);
+    receiver.transfer(payout);
+    reputationPrize -= payout;
+    emit Retire(to, payout, nonce);
   }
 
   function finalWarResult(
     address[] memory addr,
     uint256[] memory _lGang,
-    uint256[] memory _lGoon,
-    uint256[] memory _wRep,
-    uint256[] memory _wPoint
+    uint256[] memory _wToken
   ) public onlyRole(WORKER_ROLE) {
     require(!gameClosed, 'Game is closed');
-    pointToken.batchMint(addr, _wPoint);
-    nft.burnNFT(addr, 1, _lGang);
+    pointToken.batchMint(addr, _wToken);
+    nft.burnNFT(addr, tokenId, _lGang);
 
-    for (uint256 i = 0; i < addr.length; i++) {
-      require(goon[addr[i]] >= _lGoon[i], 'Invalid goon number');
-      goon[addr[i]] -= _lGoon[i];
-      warRep[addr[i]] += _wRep[i];
-    }
-  }
-
-  /**
-   * @notice Burn NFT for gangwar
-   */
-  function burnNFT(address[] memory addr, uint256 tokenId, uint256[] memory amount) public onlyRole(WORKER_ROLE) {
-    require(!gameClosed, 'Game is closed');
-
-    nft.burnNFT(addr, tokenId, amount);
-    // emit Burn(addr, tokenId, amount);
+    emit WarResult(addr, _lGang, _wToken);
   }
 
   /**
    * @notice update winners and payout
    */
   function setWinner(address[] memory to, uint256[] memory points) public onlyRole(WORKER_ROLE) {
-    require(gameClosed && tPBalance > 0 && totalPoint > 0, 'Game is not closed');
+    require(gameClosed && totalPoint > 0, 'Game is not closed');
     require(address(this).balance > 0, 'Nothing to withdraw');
     require(to.length == points.length, 'Invalid input array length');
-
+    uint256 totalPrize = reputationPrize + rankPrize;
     for (uint256 i = 0; i < to.length; i++) {
       address payable receiver = payable(to[i]);
-      uint256 reward = (tPBalance * points[i]) / totalPoint;
+      uint256 reward = (totalPrize * points[i]) / totalPoint;
+      require(address(this).balance >= reward, 'Nothing to payout');
       if (reward > 0) receiver.transfer(reward);
     }
   }
@@ -412,84 +303,21 @@ contract GangsterArena is AccessControl, IGangsterArena {
    */
   function setGameClosed(bool value, uint256 _totalPoint) public onlyRole(WORKER_ROLE) {
     gameClosed = value;
-    tPBalance = getPrizeBalance() + getRetireBalance();
     totalPoint = _totalPoint;
   }
 
   /**
-  ***************************
-  DEV withdraw (DEV_ROLE)
-  ***************************
+   ***************************
+   *Customization for the contract (ADMIN_ROLE)
+   ***************************
    */
-
-  function devWithdraw() public onlyRole(DEV_ROLE) {
-    require(getDevBalance() > 0, 'Nothing to withdraw');
-    address payable receiver = payable(msg.sender);
-    receiver.transfer(getDevBalance());
-    devDebt += int256(getDevBalance());
-  }
-
-  /**
-   * ***************************
-   * Marketing withdraw to burn token (ADMIN_ROLE)
-   * ***************************
-   */
-
-  function markettingWithdraw() public onlyRole(MARKETING_ROLE) {
-    uint256 b = getMarketingBalance();
-    require(b > 0, 'Nothing to withdraw');
-    address payable receiver = payable(msg.sender);
-    receiver.transfer(b);
-    marketingDebt += int256(b);
-  }
-
-  /**
-  ***************************
-  Customization for the contract (ADMIN_ROLE)
-  ***************************
-   */
-
-  /**
-   * @notice set setGameFee [0,10000]
-   */
-  function setGameFee(uint256 _dev, uint256 _marketing, uint256 _prize, uint256 _retire) public onlyRole(ADMIN_ROLE) {
-    require(_dev + _marketing + _prize + _retire == 10000, 'Invalid data');
-    DEV_PERCENT = _dev;
-    MARKETING_PERCENT = _marketing;
-    PRIZE_PERCENT = _prize;
-    RETIRE_PERCENT = _retire;
-  }
 
   /**
    * @notice set Base Price Gangster
    */
-  function setBasePrice(
-    uint256 _basePrice,
-    uint256 _basePriceWL,
-    uint256 _refferral,
-    uint256 refferral_discount,
-    uint256 _vtd
-  ) public onlyRole(ADMIN_ROLE) {
-    bPrice_ = _basePrice;
-    bpwl_ = _basePriceWL;
-    refReward_ = _refferral;
-    refDiscount_ = refferral_discount;
+  function setGameConfig(uint256 _refReward, uint256 _vtd) public onlyRole(ADMIN_ROLE) {
+    refReward_ = _refReward;
     vtd = _vtd;
-  }
-
-  /**
-   * @notice set setReputation and retire tax
-   */
-  function setReputation(
-    uint256 _rpGangster,
-    uint256 _rpGoon,
-    uint256 _rpSHouse,
-    uint256 _retireTax
-  ) public onlyRole(ADMIN_ROLE) {
-    rpGangster = _rpGangster;
-    rpGoon = _rpGoon;
-    rpSHouse = _rpSHouse;
-    retireTax = _retireTax;
   }
 
   /**
@@ -497,7 +325,7 @@ contract GangsterArena is AccessControl, IGangsterArena {
   DEFAULT_ADMIN_ROLE Function
   ***************************
    */
-  function withdraw() public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function emegencyWithdraw() public onlyRole(DEFAULT_ADMIN_ROLE) {
     require(gameClosed, 'Game is not closed');
     require(address(this).balance > 0, 'Nothing to withdraw');
     address payable receiver = payable(msg.sender);
