@@ -33,7 +33,8 @@ const main = async () => {
     .collection('system')
     .doc('estimated-gas')
     .set({
-      game: { mint: 0, buyGoon: 0, buySafeHouse: 0 },
+      game: { buyGangster: 0, buyGoon: 0, buySafeHouse: 0 },
+      swap: { swapEthToFiat: 0 },
     });
   // await firestore
   //   .collection('system')

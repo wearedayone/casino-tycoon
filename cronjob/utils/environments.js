@@ -4,7 +4,7 @@ dotenv.config();
 const environments = {
   ENVIRONMENT: process.env.ENVIRONMENT,
   NETWORK_ID: process.env.NETWORK_ID,
-  ALCHEMY_API_KEY: process.env.ALCHEMY_API_KEY,
+  QUICKNODE_API_ENDPOINT: process.env.QUICKNODE_API_ENDPOINT,
   OPENSEA_API_KEY: process.env.OPENSEA_API_KEY,
   PRIVY_APP_ID: process.env.PRIVY_APP_ID,
   PRIVY_APP_SECRET: process.env.PRIVY_APP_SECRET,

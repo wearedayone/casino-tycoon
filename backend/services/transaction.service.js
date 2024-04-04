@@ -1,8 +1,7 @@
-import { BigNumber } from 'alchemy-sdk';
 import { formatEther, parseEther } from '@ethersproject/units';
 import admin, { firestore } from '../configs/firebase.config.js';
-import alchemy from '../configs/alchemy.config.js';
-import { getActiveSeason, getActiveSeasonId, updateSeasonSnapshotSchedule } from './season.service.js';
+import quickNode from '../configs/quicknode.config.js';
+import { getActiveSeason, updateSeasonSnapshotSchedule } from './season.service.js';
 import { getLeaderboard } from './gamePlay.service.js';
 import {
   claimToken as claimTokenTask,
@@ -212,7 +211,7 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       const { address } = userData.data();
       const time = Math.floor(Date.now() / 1000);
       const nGangster = (await getNoGangster({ address })).toNumber();
-      const basePrice = await convertEthInputToToken(0.001);
+      const basePrice = await convertEthInputToToken(txnData.prices[0]);
       const value = parseEther((basePrice.amount * txnData.amount).toString()).toBigInt();
       const signedData = {
         address,
@@ -264,10 +263,10 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
     const txnSnapshot = await firestore.collection('transaction').where('txnHash', '==', txnHash).limit(1).get();
     if (!txnSnapshot.empty) throw new Error('API error: Existed txnHash');
 
-    const tx = await alchemy.core.getTransaction(txnHash);
+    const tx = await quickNode.send('eth_getTransactionByHash', [txnHash]);
     console.log({ userId, transactionId, txnHash, tx });
 
-    const receipt = await tx.wait();
+    const receipt = await quickNode.waitForTransaction(txnHash);
     // console.log(`transaction ${txnHash}`, tx, 'receipt', receipt);
     const { from, to, status, logs } = receipt;
 
@@ -282,7 +281,7 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
     const snapshot = await firestore.collection('transaction').doc(transactionId).get();
     const { type, value, token } = snapshot.data();
 
-    const transactionValue = token === 'ETH' ? tx.value : BigNumber.from(logs[0].data);
+    const transactionValue = token === 'ETH' ? tx.value : BigInt(logs[0].data);
     const bnValue = parseEther(value.toString());
     console.log({ logdata: logs[0]?.data, value, bnValue });
 
@@ -377,8 +376,7 @@ const updateUserBalance = async (userId, transactionId) => {
   if (userSnapshot.exists) {
     const { address, ETHBalance } = userSnapshot.data();
     if (token === 'ETH') {
-      const ethersProvider = await alchemy.config.getProvider();
-      const value = await ethersProvider.getBalance(address);
+      const value = await quickNode.getBalance(address, 'latest');
       if (ETHBalance !== formatEther(value)) {
         await firestore
           .collection('user')

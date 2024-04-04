@@ -7,16 +7,16 @@ const routerArtifact = require('@uniswap/v2-periphery/build/UniswapV2Router02.js
 const pairArtifact = require('@uniswap/v2-periphery/build/IUniswapV2Pair.json');
 const WETH9 = require('../WETH9.json');
 
-const _fiatAddress = '0x7F629879320f48479D1C8f58616BB6E12bFe673c';
+const _fiatAddress = '0x589c6835C21c51Bf297a7DdD7aEAb134c5a11858';
 
 async function main() {
   const _defaultAdmin = '0x7866Ac3933dCA99b2e9a80F8948344a387a7BF62';
 
-  const FIAT = await ethers.getContractFactory('FIAT');
+  const FIAT = await ethers.getContractFactory('GANG');
   const fiatToken = FIAT.attach(_fiatAddress);
   const minterRole = await fiatToken.MINTER_ROLE();
   await fiatToken.grantRole(minterRole, _defaultAdmin);
-  //   await fiatToken.mint(_defaultAdmin, parseEther('100000'));
+  await fiatToken.mint(_defaultAdmin, parseEther('100000'));
 
   const Factory = await ethers.getContractFactory(factoryArtifact.abi, factoryArtifact.bytecode);
   const factoryContract = await Factory.deploy(_defaultAdmin);

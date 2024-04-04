@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 
 import Popup from './Popup';
+import { SCANNER_URL } from './PopupTxnCompleted';
 import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
 import environments from '../../../../utils/environments';
@@ -125,15 +126,9 @@ class PopupTxnError extends Popup {
       })
       .on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
         this.viewTxnHash.setAlpha(1);
-        window.open(`https://${BASESCAN_PREFIX[NETWORK_ID]}basescan.org/tx/${txnHash}`);
+        window.open(`https://${SCANNER_URL[NETWORK_ID]}/tx/${txnHash}`);
       });
   }
 }
-
-export const BASESCAN_PREFIX = {
-  8453: '',
-  84531: 'goerli.',
-  84532: 'sepolia.',
-};
 
 export default PopupTxnError;

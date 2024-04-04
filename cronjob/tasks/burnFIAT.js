@@ -5,7 +5,7 @@ import RouterABI from '@uniswap/v2-periphery/build/IUniswapV2Router02.json' asse
 import { parseEther, formatEther } from '@ethersproject/units';
 
 import { firestore } from '../configs/admin.config.js';
-import alchemy from '../configs/alchemy.config.js';
+import quickNode from '../configs/quicknode.config.js';
 import environments from '../utils/environments.js';
 import gameContractABI from '../assets/abis/GameContract.json' assert { type: 'json' };
 import tokenABI from '../assets/abis/Token.json' assert { type: 'json' };
@@ -54,10 +54,9 @@ const getTokenContract = async (signer) => {
 const burnFiat = async () => {
   try {
     console.log('1. start burn FIAT job', new Date().toLocaleString());
-    const ethersProvider = await alchemy.config.getProvider();
-    const marketingWallet = new Wallet(MARKETING_WALLET_PRIVATE_KEY, ethersProvider);
+    const marketingWallet = new Wallet(MARKETING_WALLET_PRIVATE_KEY, quickNode);
     const gameContract = await getGameContract(marketingWallet);
-    let walletBalance = await ethersProvider.getBalance(marketingWallet.address);
+    let walletBalance = await quickNode.getBalance(marketingWallet.address, 'latest');
     let burnValue = parseEther('0.01');
     const minWalletValue = parseEther('0.2');
 
@@ -65,11 +64,11 @@ const burnFiat = async () => {
       // withdraw from game contract
       const withdrawable = await gameContract.getMarketingBalance();
       if (withdrawable.gt(parseEther('0'))) {
-        let gasPrice = await ethersProvider.getGasPrice();
+        let gasPrice = await quickNode.getGasPrice();
         const tx1 = await gameContract.markettingWithdraw({ gasPrice: gasPrice });
       }
       // update wallet balance
-      walletBalance = await ethersProvider.getBalance(marketingWallet.address);
+      walletBalance = await quickNode.getBalance(marketingWallet.address, 'latest');
       if (walletBalance.lte(minWalletValue)) {
         burnValue = parseEther('0');
       } else if (walletBalance.lte(minWalletValue.add(burnValue))) {
@@ -94,7 +93,7 @@ const burnFiat = async () => {
       'swapExactETHForTokensSupportingFeeOnTransferTokens',
       params
     );
-    let gasPrice = await ethersProvider.getGasPrice();
+    let gasPrice = await quickNode.getGasPrice();
     const tx2 = await marketingWallet.sendTransaction({
       to: routerAddress,
       data,
@@ -111,7 +110,7 @@ const burnFiat = async () => {
     console.log({ balanceRes });
     const balance = formatEther(balanceRes.toString());
     console.log('burn', balance);
-    gasPrice = await ethersProvider.getGasPrice();
+    gasPrice = await quickNode.getGasPrice();
     const tx3 = await tokenContract.burn(parseEther(balance), { gasPrice: gasPrice });
     const receipt3 = await tx3.wait();
     console.log(`3. done burning ${balance} FIAT. Txn hash ${receipt3.transactionHash}`);
