@@ -65,7 +65,7 @@ class PopupTxnCompleted extends Popup {
       })
       .on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
         this.viewTxnHash.setAlpha(1);
-        window.open(`https://${BASESCAN_PREFIX[NETWORK_ID]}basescan.org/tx/${txnHash}`);
+        window.open(`https://${SCANNER_URL[NETWORK_ID]}/tx/${txnHash}`);
       });
   }
 
@@ -78,10 +78,12 @@ class PopupTxnCompleted extends Popup {
   }
 }
 
-export const BASESCAN_PREFIX = {
-  8453: '',
-  84531: 'goerli.',
-  84532: 'sepolia.',
+export const SCANNER_URL = {
+  8453: 'basescan.org',
+  84531: 'goerli.basescan.org',
+  84532: 'sepolia.basescan.org',
+  81457: 'blastscan.io',
+  168587773: 'testnet.blastscan.io',
 };
 
 export default PopupTxnCompleted;
