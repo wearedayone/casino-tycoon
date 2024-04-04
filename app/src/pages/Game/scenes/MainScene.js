@@ -240,7 +240,6 @@ class MainScene extends Phaser.Scene {
     this.game.events.emit('request-deposit-code');
     if (!this.isFromTutorial) {
       this.game.events.emit('request-user-away-reward');
-      this.game.events.emit('request-spinned-status');
     }
   }
 

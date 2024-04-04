@@ -3,7 +3,10 @@ import { fontFamilies } from '../../../../utils/styles';
 
 class SpinButton extends Button {
   constructor(scene, { x, y, onClick, value }) {
-    super(scene, x, y, 'button-spin', 'button-spin-pressed', onClick, { sound: 'button-1' });
+    super(scene, x, y, 'button-spin', 'button-spin-pressed', onClick, {
+      sound: 'button-1',
+      disabledImage: 'button-spin-disabled',
+    });
 
     this.text = scene.add
       .text(0, 0, `${value}`, { fontSize: '82px', fontFamily: fontFamilies.extraBold, color: '#fff' })

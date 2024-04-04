@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { ScrollablePanel } from 'phaser3-rex-plugins/templates/ui/ui-components.js';
 
 import Popup from './Popup';
+import PopupTxnError from './PopupTxnError';
 import SpinButton from '../button/SpinButton';
 import configs from '../../configs/configs';
 import { fontFamilies } from '../../../../utils/styles';
@@ -34,6 +35,7 @@ class SpinItem extends Phaser.GameObjects.Container {
 
 class PopupDailySpin extends Popup {
   spinRewards = [];
+  spinPrice = 0;
   numberOfRewards = 0;
   minContainerX = 0;
   maxContainerX = 0;
@@ -47,7 +49,9 @@ class PopupDailySpin extends Popup {
 
     scene.game.events.on('update-spin-rewards', ({ spinRewards, spinPrice }) => {
       this.spinRewards = spinRewards;
+      this.spinPrice = spinPrice;
       this.numberOfRewards = spinRewards.length;
+
       this.maxContainerX = this.popup.x - this.popup.width / 2 - 1 * SPIN_ITEM_WIDTH - SPIN_ITEM_GAP;
       this.minContainerX = this.maxContainerX - this.numberOfRewards * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP);
       if (this.contentContainer) {
@@ -61,18 +65,6 @@ class PopupDailySpin extends Popup {
         this.remove(this.table);
         this.table.destroy(true);
         this.table = null;
-      }
-
-      if (this.spinButton) {
-        this.spinButton.destroy();
-      }
-
-      if (this.arrowDown) {
-        this.arrowDown.destroy();
-      }
-
-      if (this.arrowUp) {
-        this.arrowUp.destroy();
       }
 
       this.spinItems = [spinRewards.at(-1), ...spinRewards, spinRewards[0]].map((item, index) => {
@@ -109,38 +101,66 @@ class PopupDailySpin extends Popup {
       this.contentContainer.x = this.maxContainerX;
       this.add(this.table);
 
-      this.spinButton = new SpinButton(scene, {
-        x: width / 2,
-        y: height / 2 + this.popup.height / 2 - 20,
-        onClick: () => {
-          if (this.spinned) return;
-          scene.game.events.emit('start-spin');
-          this.spinSound.play();
-        },
-        value: spinPrice,
-      });
-      this.add(this.spinButton);
+      if (!this.spinButton) {
+        this.spinButton = new SpinButton(scene, {
+          x: width / 2,
+          y: height / 2 + this.popup.height / 2 - 20,
+          onClick: () => {
+            if (this.spinned) return;
+            scene.game.events.emit('start-spin');
+            this.spinSound.play();
+          },
+          value: spinPrice,
+        });
+        this.add(this.spinButton);
+      }
 
-      this.arrowDown = scene.add
-        .image(width / 2, this.popup.y - this.popup.height / 2 + 160, 'arrow-spin-down')
-        .setOrigin(0.5, 0.5);
-      this.add(this.arrowDown);
+      if (!this.arrowDown) {
+        this.arrowDown = scene.add
+          .image(width / 2, this.popup.y - this.popup.height / 2 + 160, 'arrow-spin-down')
+          .setOrigin(0.5, 0.5);
+        this.add(this.arrowDown);
+      }
 
-      this.arrowUp = scene.add
-        .image(width / 2, this.popup.y + this.popup.height / 2 - 190, 'arrow-spin-up')
-        .setOrigin(0.5, 0.5);
-      this.add(this.arrowUp);
+      if (!this.arrowUp) {
+        this.arrowUp = scene.add
+          .image(width / 2, this.popup.y + this.popup.height / 2 - 190, 'arrow-spin-up')
+          .setOrigin(0.5, 0.5);
+        this.add(this.arrowUp);
+      }
+
+      scene.game.events.emit('request-balances');
+      scene.game.events.emit('request-spinned-status');
     });
 
     scene.game.events.on('update-spinned-status', ({ spinned }) => {
       this.spinned = spinned;
+      if (spinned) {
+        this.spinButton?.setDisabledState(true);
+      } else {
+        this.spinButton?.setDisabledState(false);
+      }
+    });
+
+    scene.game.events.on('update-balances', ({ ETHBalance, tokenBalance }) => {
+      if (!ETHBalance || !tokenBalance || tokenBalance < this.spinPrice) {
+        this.spinButton?.setDisabledState(true);
+      } else {
+        this.spinButton?.setDisabledState(false);
+      }
     });
 
     scene.game.events.on('spin-error', ({ code, message }) => {
-      console.error({ code, message });
       scene.game.events.emit('stop-spin');
       this.spinSound.stop();
       this.destinationIndex = null;
+      this.popupTxnCompleted = new PopupTxnError({
+        scene,
+        code,
+        description: message,
+      });
+      scene.add.existing(this.popupTxnCompleted);
+      this.close();
     });
 
     scene.game.events.on('spin-result', ({ destinationIndex }) => {
