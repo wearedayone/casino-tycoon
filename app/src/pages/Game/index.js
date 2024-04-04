@@ -247,6 +247,7 @@ const Game = () => {
     address,
     avatarURL,
     avatarURL_big,
+    xTokenBalance,
     tokenBalance,
     ETHBalance,
     inviteCode,
@@ -254,6 +255,7 @@ const Game = () => {
     referralTotalReward = 0,
     referralTotalDiscount = 0,
   } = profile || {
+    xTokenBalance: 0,
     tokenBalance: 0,
     ETHBalance: 0,
   };
@@ -636,7 +638,7 @@ const Game = () => {
       });
 
       gameRef.current?.events.on('request-balances', () => {
-        gameRef.current.events.emit('update-balances', { dailyMoney, ETHBalance, tokenBalance });
+        gameRef.current.events.emit('update-balances', { xTokenBalance, ETHBalance, tokenBalance });
       });
 
       gameRef.current?.events.on('request-deposit-code', () => {
@@ -1283,8 +1285,8 @@ const Game = () => {
   }, [estimatedGas?.game?.buySafeHouse]);
 
   useEffect(() => {
-    gameRef.current?.events.emit('update-balances', { dailyMoney, ETHBalance, tokenBalance });
-  }, [tokenBalance, ETHBalance, dailyMoney]);
+    gameRef.current?.events.emit('update-balances', { xTokenBalance, ETHBalance, tokenBalance });
+  }, [tokenBalance, ETHBalance, xTokenBalance]);
 
   useEffect(() => {
     gameRef.current?.events.emit('update-balances-for-withdraw', {

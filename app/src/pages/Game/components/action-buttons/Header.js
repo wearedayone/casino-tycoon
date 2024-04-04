@@ -1,6 +1,5 @@
 import Phaser from 'phaser';
 
-import DailyMoney from './DailyMoney';
 import Balance from './Balance';
 import configs from '../../configs/configs';
 import { formatter, customFormat } from '../../../../utils/numbers';
@@ -32,11 +31,11 @@ class Header extends Phaser.GameObjects.Container {
       .setOrigin(0.5, 0);
     this.addedAmount.setStroke(colors.brown, 10);
 
-    this.dailyMoney = new DailyMoney(scene, width / 2 - gap, y, 0);
+    this.xFiatBalance = new Balance(scene, width / 2 - gap, y, () => scene.popupBuyGoon?.open(), 'xgang-balance', 0);
     this.fiatBalance = new Balance(scene, width / 2, y, () => scene.popupSwap?.open(), 'fiat-balance', 0);
     this.ethBalance = new Balance(scene, width / 2 + gap, y, () => scene.popupDeposit.open(), 'eth-balance', 0);
 
-    this.add(this.dailyMoney);
+    this.add(this.xFiatBalance);
     this.add(this.fiatBalance);
     this.add(this.ethBalance);
 
@@ -57,8 +56,8 @@ class Header extends Phaser.GameObjects.Container {
     scene.game.events.emit(events.requestBalances);
   }
 
-  updateValues({ dailyMoney, ETHBalance, tokenBalance }) {
-    this.dailyMoney.updateValue(dailyMoney);
+  updateValues({ xTokenBalance, ETHBalance, tokenBalance }) {
+    this.xFiatBalance.updateValue(customFormat(xTokenBalance || 0, 1));
     this.fiatBalance.updateValue(customFormat(tokenBalance || 0, 1));
     this.ethBalance.updateValue(formatter.format(ETHBalance));
   }

@@ -114,6 +114,7 @@ export const createUserIfNotExist = async (userId) => {
         avatarURL_small,
         avatarURL_big,
         tokenBalance: tokenBalance,
+        xTokenBalance: 0,
         ETHBalance: 0,
         isWhitelisted,
         walletPasswordAsked: false,

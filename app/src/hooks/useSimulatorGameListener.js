@@ -18,7 +18,7 @@ const useSimulatorGameListener = () => {
   // })
   const market = useSystemStore((state) => state.market);
   const [gameRef, setGameRef] = useState(null);
-  const [balances, setBalances] = useState({ dailyMoney: 10000, ETHBalance: 100000, tokenBalance: 100000 });
+  const [balances, setBalances] = useState({ xTokenBalance: 10000, ETHBalance: 100000, tokenBalance: 100000 });
   const [assets, setAssets] = useState({
     numberOfMachines: 0,
     numberOfWorkers: 0,
