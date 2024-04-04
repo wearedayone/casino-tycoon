@@ -840,7 +840,7 @@ const Game = () => {
       });
 
       gameRef.current?.events.on('request-gas-mint', () => {
-        gameRef.current.events.emit('update-gas-mint', { gas: estimatedGas?.game?.mint });
+        gameRef.current.events.emit('update-gas-mint', { gas: estimatedGas?.game?.buyGangster });
       });
 
       gameRef.current?.events.on('request-gas-swap-eth-fiat', () => {
@@ -1276,8 +1276,8 @@ const Game = () => {
   }, [address, ETHBalance]);
 
   useEffect(() => {
-    gameRef.current?.events.emit('update-gas-mint', { gas: estimatedGas?.game?.mint });
-  }, [estimatedGas?.game?.mint]);
+    gameRef.current?.events.emit('update-gas-mint', { gas: estimatedGas?.game?.buyGangster });
+  }, [estimatedGas?.game?.buyGangster]);
 
   useEffect(() => {
     gameRef.current?.events.emit('update-gas-buy-goon', { gas: estimatedGas?.game?.buyGoon });
