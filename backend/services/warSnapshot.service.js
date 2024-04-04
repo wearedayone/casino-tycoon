@@ -395,7 +395,7 @@ const submitWarResults = async (users) => {
   const lostGangsters = warResultsForContract.map((item) => item.lostGangsters);
   const lostGoons = warResultsForContract.map((item) => item.lostGoons);
   const wonReputations = warResultsForContract.map((item) => item.gainedReputation);
-  const wonTokens = warResultsForContract.map((item) => item.gainedTokens);
+  const wonTokens = warResultsForContract.map((item) => parseEther(`${item.gainedTokens}`));
   const { txnHash, status } = await setWarResult({ addresses, lostGangsters, lostGoons, wonReputations, wonTokens });
 
   logger.info(
