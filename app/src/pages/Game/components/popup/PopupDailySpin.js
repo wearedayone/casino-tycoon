@@ -19,7 +19,7 @@ class SpinItem extends Phaser.GameObjects.Container {
 
     const iconImg = type === 'house' ? 'spin-house' : 'spin-point';
     const text = type === 'house' ? `Safehouse x${value}` : `$GANG x${value}`;
-    this.container = scene.add.image(x, y, 'spin-item').setOrigin(0.5, 0.5);
+    this.container = scene.add.sprite(x, y, 'spin-item').setOrigin(0.5, 0.5);
     this.icon = scene.add.image(x, y - 60, iconImg).setOrigin(0.5, 0.5);
     this.text = scene.add
       .text(x, y + 190, text, { fontSize: 64, fontFamily: fontFamilies.extraBold })
@@ -48,7 +48,7 @@ class PopupDailySpin extends Popup {
     scene.game.events.on('update-spin-rewards', ({ spinRewards, spinPrice }) => {
       this.spinRewards = spinRewards;
       this.numberOfRewards = spinRewards.length;
-      this.maxContainerX = -70 - 0.5 * SPIN_ITEM_WIDTH;
+      this.maxContainerX = this.popup.x - this.popup.width / 2 - 1 * SPIN_ITEM_WIDTH - SPIN_ITEM_GAP;
       this.minContainerX = this.maxContainerX - this.numberOfRewards * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP);
       if (this.contentContainer) {
         this.spinItems.map((item) => {
@@ -101,7 +101,7 @@ class PopupDailySpin extends Popup {
         panel: { child: this.contentContainer, mask: { padding: 1 } },
         slider: {},
         mouseWheelScroller: { focus: true, speed: 0.3 },
-        space: { left: 40, right: 40, top: 40, bottom: 40, panel: 20, header: 10, footer: 10 },
+        space: { left: 40, right: 40, top: 40, bottom: 40, header: 10, footer: 10 },
       }).layout();
 
       this.table.setMouseWheelScrollerEnable(false);
@@ -161,6 +161,7 @@ class PopupDailySpin extends Popup {
           Math.abs(this.contentContainer.x - destinationX) < SPIN_ITEM_WIDTH / 2
         ) {
           const reward = this.spinRewards[this.destinationIndex];
+          this.spinItems[this.destinationIndex + 1]?.container?.setTexture('spin-item-active');
           this.spinSound.stop();
           this.destinationIndex = null;
           scene.game.events.emit('stop-spin', reward);

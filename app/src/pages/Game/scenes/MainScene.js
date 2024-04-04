@@ -261,7 +261,7 @@ class MainScene extends Phaser.Scene {
         setTimeout(() => {
           this.popupDailySpin?.close();
           this.popupSpinReward?.showReward(reward);
-        }, 1000);
+        }, 1500);
       }
     });
   }
