@@ -1,9 +1,10 @@
 import { Contract } from '@ethersproject/contracts';
 import { formatEther } from '@ethersproject/units';
+
 import GangsterArenaABI from '../assets/abis/GameContract.json' assert { type: 'json' };
 import GangsterABI from '../assets/abis/NFT.json' assert { type: 'json' };
 import admin, { firestore } from '../configs/firebase.config.js';
-import alchemy from '../configs/alchemy.config.js';
+import provider from '../configs/provider.config.js';
 import environments from '../utils/environments.js';
 import logger from '../utils/logger.js';
 import { GangsterEvent } from '../utils/constants.js';
@@ -15,51 +16,48 @@ const gangsterArenaListener = async () => {
   const activeSeason = await getActiveSeason();
   const { gameAddress: GAME_CONTRACT_ADDRESS, nftAddress: NFT_ADDRESS } = activeSeason || {};
   logger.info(`Start listen contract ${GAME_CONTRACT_ADDRESS} on Network ${NETWORK_ID}`);
-  const ethersProvider = await alchemy.config.getWebSocketProvider();
-  const contract = new Contract(GAME_CONTRACT_ADDRESS, GangsterArenaABI.abi, ethersProvider);
-  const nftContract = new Contract(NFT_ADDRESS, GangsterABI.abi, ethersProvider);
+  const contract = new Contract(GAME_CONTRACT_ADDRESS, GangsterArenaABI.abi, provider);
+  const nftContract = new Contract(NFT_ADDRESS, GangsterABI.abi, provider);
 
   contract.on(GangsterEvent.Mint, async (to, tokenId, amount, nonce, event) => {
-    console.log({ to, tokenId, amount, nonce, event });
-    await firestore.collection('web3Listener').doc(NETWORK_ID).update({ lastBlock: event.blockNumber });
+    await firestore.collection('web3Listener').doc(NETWORK_ID).set({ lastBlock: event.blockNumber });
     await processMintEvent({ to, tokenId, amount, nonce, event, contract, nftContract });
   });
 
   contract.on(GangsterEvent.Deposit, async (from, to, amount, event) => {
-    await firestore.collection('web3Listener').doc(NETWORK_ID).update({ lastBlock: event.blockNumber });
+    await firestore.collection('web3Listener').doc(NETWORK_ID).set({ lastBlock: event.blockNumber });
     await processDepositEvent({ from, to, amount, event, contract, nftContract });
   });
 
   contract.on(GangsterEvent.Withdraw, async (from, to, amount, event) => {
-    await firestore.collection('web3Listener').doc(NETWORK_ID).update({ lastBlock: event.blockNumber });
+    await firestore.collection('web3Listener').doc(NETWORK_ID).set({ lastBlock: event.blockNumber });
     await processWithdrawEvent({ from, to, amount, event, contract, nftContract });
   });
 
   contract.on(GangsterEvent.Burn, async (from, to, amount, event) => {
-    await firestore.collection('web3Listener').doc(NETWORK_ID).update({ lastBlock: event.blockNumber });
+    await firestore.collection('web3Listener').doc(NETWORK_ID).set({ lastBlock: event.blockNumber });
     for (let i = 0; i < from.length; i++) {
       await processBurnEvent({ from: from[i], to: to[i], amount: amount[i], event, contract, nftContract });
     }
   });
 
   contract.on(GangsterEvent.BuyGoon, async (to, amount, nonce, event) => {
-    await firestore.collection('web3Listener').doc(NETWORK_ID).update({ lastBlock: event.blockNumber });
+    await firestore.collection('web3Listener').doc(NETWORK_ID).set({ lastBlock: event.blockNumber });
     await processBuyGoonEvent({ to, amount, nonce, event, contract });
   });
   contract.on(GangsterEvent.BuySafeHouse, async (to, amount, nonce, event) => {
-    await firestore.collection('web3Listener').doc(NETWORK_ID).update({ lastBlock: event.blockNumber });
+    await firestore.collection('web3Listener').doc(NETWORK_ID).set({ lastBlock: event.blockNumber });
     await processBuySafeHouseEvent({ to, amount, nonce, event, contract });
   });
 
   contract.on(GangsterEvent.Retire, async (to, amount, nonce, event) => {
-    await firestore.collection('web3Listener').doc(NETWORK_ID).update({ lastBlock: event.blockNumber });
+    await firestore.collection('web3Listener').doc(NETWORK_ID).set({ lastBlock: event.blockNumber });
     await processRetireEvent({ to, amount, nonce, event, contract });
   });
 };
 
 // export const queryEvent = async (fromBlock) => {
-//   const ethersProvider = await alchemy.config.getWebSocketProvider();
-//   const contract = new Contract(TOKEN_ADDRESS, tokenABI.abi, ethersProvider);
+//   const contract = new Contract(TOKEN_ADDRESS, tokenABI.abi, quicknode);
 //   const depositEvents = await contract.queryFilter('Transfer', fromBlock);
 //   for (const event of depositEvents) {
 //     const [from, to, value] = event.args;

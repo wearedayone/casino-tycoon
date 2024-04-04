@@ -1,8 +1,9 @@
 import { Contract } from '@ethersproject/contracts';
 import { formatEther } from '@ethersproject/units';
+
 import gangsterABI from '../assets/abis/NFT.json' assert { type: 'json' };
-import admin, { firestore } from '../configs/firebase.config.js';
-import alchemy from '../configs/alchemy.config.js';
+import { firestore } from '../configs/firebase.config.js';
+import provider from '../configs/provider.config.js';
 import environments from '../utils/environments.js';
 import logger from '../utils/logger.js';
 import { GangsterEvent } from '../utils/constants.js';
@@ -12,10 +13,10 @@ const { NETWORK_ID } = environments;
 
 const nftListener = async () => {
   const activeSeason = await getActiveSeason();
-  const { gameAddress: GAME_CONTRACT_ADDRESS } = activeSeason || {};
+  const { nftAddress } = activeSeason || {};
 
-  const ethersProvider = await alchemy.config.getWebSocketProvider();
-  const contract = new Contract(GAME_CONTRACT_ADDRESS, gangsterABI.abi, ethersProvider);
+  logger.info(`Start listen contract ${nftAddress} on Network ${NETWORK_ID}`);
+  const contract = new Contract(nftAddress, gangsterABI.abi, provider);
 
   contract.on(GangsterEvent.Mint, async (from, to, amount, event) => {
     await firestore.collection('web3Listener').doc(NETWORK_ID).update({ lastBlock: event.blockNumber });
@@ -39,8 +40,7 @@ const nftListener = async () => {
 };
 
 // export const queryEvent = async (fromBlock) => {
-//   const ethersProvider = await alchemy.config.getWebSocketProvider();
-//   const contract = new Contract(TOKEN_ADDRESS, tokenABI.abi, ethersProvider);
+//   const contract = new Contract(TOKEN_ADDRESS, tokenABI.abi, provider);
 //   const depositEvents = await contract.queryFilter('Transfer', fromBlock);
 //   for (const event of depositEvents) {
 //     const [from, to, value] = event.args;
