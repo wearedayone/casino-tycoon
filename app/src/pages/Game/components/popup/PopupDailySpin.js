@@ -33,6 +33,7 @@ class SpinItem extends Phaser.GameObjects.Container {
 }
 
 class PopupDailySpin extends Popup {
+  spinRewards = [];
   numberOfRewards = 0;
   minContainerX = 0;
   maxContainerX = 0;
@@ -45,6 +46,7 @@ class PopupDailySpin extends Popup {
     this.spinSound = scene.sound.add('spin-sound', { loop: true });
 
     scene.game.events.on('update-spin-rewards', ({ spinRewards, spinPrice }) => {
+      this.spinRewards = spinRewards;
       this.numberOfRewards = spinRewards.length;
       this.maxContainerX = -70 - 0.5 * SPIN_ITEM_WIDTH;
       this.minContainerX = this.maxContainerX - (this.numberOfRewards - 1) * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP);
@@ -152,15 +154,16 @@ class PopupDailySpin extends Popup {
         this.contentContainer.x += (this.numberOfRewards - 1) * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP);
       }
 
-      if (this.destinationIndex) {
+      if (this.destinationIndex !== null) {
         const destinationX = this.maxContainerX - this.destinationIndex * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP);
         if (
           this.contentContainer.x <= destinationX &&
           Math.abs(this.contentContainer.x - destinationX) < SPIN_ITEM_WIDTH / 2
         ) {
-          scene.game.events.emit('stop-spin');
+          const reward = this.spinRewards[this.destinationIndex];
           this.spinSound.stop();
           this.destinationIndex = null;
+          scene.game.events.emit('stop-spin', reward);
         }
       }
     });

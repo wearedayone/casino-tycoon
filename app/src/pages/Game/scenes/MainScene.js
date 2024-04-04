@@ -34,6 +34,7 @@ import PopupWarHistoryDetail from '../components/popup/PopupWarHistoryDetail';
 import PopupGoonPrice from '../components/popup/PopupGoonPrice';
 import PopupSafehousePrice from '../components/popup/PopupSafehousePrice';
 import PopupDailySpin from '../components/popup/PopupDailySpin';
+import PopupSpinReward from '../components/popup/PopupSpinReward';
 
 const { goonAnimation, gangsterAnimation, width } = configs;
 
@@ -211,6 +212,10 @@ class MainScene extends Phaser.Scene {
       this.add.existing(footer);
     });
 
+    this.popupSpinReward = new PopupSpinReward(this);
+    this.popupSpinReward.setDepth(2);
+    this.add.existing(this.popupSpinReward);
+
     this.infoButtons = new InfoButtons(this, 550);
     this.add.existing(this.infoButtons);
     this.game.events.on('update-user-away-reward', ({ showWarPopup, claimableReward }) => {
@@ -250,8 +255,14 @@ class MainScene extends Phaser.Scene {
       this.game.events.emit('daily-spin');
     });
 
-    this.game.events.on('stop-spin', () => {
+    this.game.events.on('stop-spin', (reward) => {
       this.isSpinning = false;
+      if (reward) {
+        setTimeout(() => {
+          this.popupDailySpin?.close();
+          this.popupSpinReward?.showReward(reward);
+        }, 1000);
+      }
     });
   }
 

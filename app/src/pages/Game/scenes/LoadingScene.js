@@ -170,6 +170,9 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('spin-item-active', '/images/spin-item-active.png');
     this.load.image('spin-house', '/images/spin-house.png');
     this.load.image('spin-point', '/images/spin-point.png');
+    this.load.image('spin-reward-house', '/images/spin-reward-house.png');
+    this.load.image('spin-reward-point', '/images/spin-reward-point.png');
+    this.load.image('spin-reward-glow-fx', '/images/spin-reward-glow-fx.png');
 
     this.load.image('button-blue', '/images/button-blue.png');
     this.load.image('button-blue-pressed', '/images/button-blue-pressed.png');
@@ -240,6 +243,8 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-spin', '/images/button-spin.png');
     this.load.image('button-spin-pressed', '/images/button-spin-pressed.png');
     this.load.image('spin-button', '/images/spin-button.png');
+    this.load.image('button-spin-claim', '/images/button-spin-claim.png');
+    this.load.image('button-spin-claim-pressed', '/images/button-spin-claim-pressed.png');
 
     this.load.image('button-buy-safehouse', '/images/button-buy-safehouse.png');
     this.load.image('button-buy-safehouse-pressed', '/images/button-buy-safehouse-pressed.png');
