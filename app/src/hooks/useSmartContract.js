@@ -532,7 +532,7 @@ const useSmartContract = () => {
       const tokenContract = new Contract(TOKEN_ADDRESS, tokenAbi.abi, privyProvider.provider);
 
       const totalFees = await tokenContract.totalFees();
-      return Number(totalFees.toString()) / 10;
+      return Number(totalFees.toString()) / 100;
     } catch (err) {
       return 0;
     }
