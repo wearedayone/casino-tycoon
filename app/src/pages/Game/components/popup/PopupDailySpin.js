@@ -49,7 +49,7 @@ class PopupDailySpin extends Popup {
       this.spinRewards = spinRewards;
       this.numberOfRewards = spinRewards.length;
       this.maxContainerX = -70 - 0.5 * SPIN_ITEM_WIDTH;
-      this.minContainerX = this.maxContainerX - (this.numberOfRewards - 1) * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP);
+      this.minContainerX = this.maxContainerX - this.numberOfRewards * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP);
       if (this.contentContainer) {
         this.spinItems.map((item) => {
           this.contentContainer.remove(item);
@@ -151,7 +151,7 @@ class PopupDailySpin extends Popup {
       if (!this.contentContainer) return;
       this.contentContainer.x -= 50;
       if (this.contentContainer.x < this.minContainerX) {
-        this.contentContainer.x += (this.numberOfRewards - 1) * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP);
+        this.contentContainer.x += this.numberOfRewards * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP);
       }
 
       if (this.destinationIndex !== null) {

@@ -67,6 +67,7 @@ class PopupSpinReward extends Phaser.GameObjects.Container {
   cleanup() {}
 
   open() {
+    window.poof?.();
     this.setVisible(true);
     this.sound.play();
   }
