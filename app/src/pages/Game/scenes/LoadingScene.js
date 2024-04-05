@@ -148,7 +148,6 @@ class LoadingScene extends Phaser.Scene {
 
     this.load.image('glow', '/images/glow.png');
     this.load.image('coin', '/images/coin.png');
-    this.load.image('coin2', '/images/coin-2.png');
     this.load.image('coin3', '/images/coin-3.png');
     this.load.image('guard', '/images/guard.png');
     this.load.image('mini-gangster-2', '/images/mini-gangster-2.png');
