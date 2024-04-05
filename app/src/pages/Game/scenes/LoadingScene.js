@@ -279,8 +279,11 @@ class LoadingScene extends Phaser.Scene {
 
     this.load.image('icon-chevron-right', '/images/icons/chevron-right.png');
     this.load.image('icon-check', '/images/icons/check.png');
+    this.load.image('icon-checkbox-true', '/images/icons/checkbox-true.png');
+    this.load.image('icon-checkbox-false', '/images/icons/checkbox-false.png');
     this.load.image('icon-clock', '/images/icons/clock.png');
     this.load.image('icon-coin', '/images/icons/coin.png');
+    this.load.image('icon-coin-small', '/images/icons/coin-small.png');
     this.load.image('icon-coin-mini', '/images/icons/coin-mini.png');
     this.load.image('icon-coin-done', '/images/icons/coin-done.png');
     this.load.image('icon-coin-glowing', '/images/icons/coin-glowing.png');
@@ -314,6 +317,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-star-medium', '/images/icons/star-medium.png');
     this.load.image('icon-wallet', '/images/icons/wallet.png');
     this.load.image('icon-search', '/images/icon-search.png');
+    this.load.image('icon-xgang-small', '/images/icons/xgang-small.png');
 
     this.load.image('icon-history', '/images/icon-history.png');
     this.load.image('icon-war', '/images/icon-war.png');
