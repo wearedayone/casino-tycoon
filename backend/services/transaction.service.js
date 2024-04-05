@@ -13,7 +13,6 @@ import {
   signMessageBuyGangster,
   signMessageRetire,
   signMessageDailySpin,
-  getTotalSold,
   getTokenBalance,
   getNoGangster,
   convertEthInputToToken,
