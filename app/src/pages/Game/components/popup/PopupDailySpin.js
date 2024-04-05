@@ -146,6 +146,7 @@ class PopupDailySpin extends Popup {
         this.spinButton?.setDisabledState(true);
       } else {
         this.spinButton?.setDisabledState(false);
+        this.contentContainer && (this.contentContainer.x = this.maxContainerX);
       }
     });
 
