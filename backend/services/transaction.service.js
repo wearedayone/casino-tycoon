@@ -5,7 +5,6 @@ import { getActiveSeason, updateSeasonSnapshotSchedule } from './season.service.
 import { getLeaderboard } from './gamePlay.service.js';
 import {
   claimToken as claimTokenTask,
-  decodeTokenTxnLogs,
   isMinted,
   signMessageBuyGangster,
   signMessageRetire,
@@ -299,12 +298,12 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
     const snapshot = await firestore.collection('transaction').doc(transactionId).get();
     const { type, value, token } = snapshot.data();
 
-    const transactionValue = token === 'ETH' ? tx.value : BigInt(logs[0].data);
+    const transactionValue = token === 'ETH' ? tx.value : token === 'FIAT' ? BigInt(logs[0].data) : 0;
     const bnValue = parseEther(value.toString());
     console.log({ logdata: logs[0]?.data, value, bnValue });
 
     const activeSeason = await getActiveSeason();
-    const { tokenAddress: TOKEN_ADDRESS } = activeSeason || {};
+    const { tokenAddress: TOKEN_ADDRESS, gameAddress: GAME_ADDRESS } = activeSeason || {};
 
     if (type === 'withdraw') {
       if (token === 'FIAT' && to.toLowerCase() !== TOKEN_ADDRESS.toLowerCase())
@@ -317,12 +316,9 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
     }
 
     if (['buy-worker', 'buy-building'].includes(type)) {
-      if (to.toLowerCase() !== TOKEN_ADDRESS.toLowerCase())
+      if (to.toLowerCase() !== GAME_ADDRESS.toLowerCase())
         throw new Error(`API error: Bad request - invalid receiver for ${type}, txn: ${JSON.stringify(receipt)}`);
 
-      const decodedData = await decodeTokenTxnLogs('Transfer', logs[0]);
-      if (decodedData.to.toLowerCase() !== SYSTEM_ADDRESS.toLowerCase())
-        throw new Error(`API error: Bad request - invalid token receiver for ${type}, txn: ${JSON.stringify(receipt)}`);
       console.log({ value, bnValue, transactionValue });
       console.log(bnValue.eq(transactionValue));
       if (!bnValue.eq(transactionValue))

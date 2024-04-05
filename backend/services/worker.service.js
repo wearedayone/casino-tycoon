@@ -47,13 +47,6 @@ const getGameContract = async (signer) => {
   return contract;
 };
 
-export const decodeTokenTxnLogs = async (name, log) => {
-  const { data, topics } = log;
-  const workerWallet = await getWorkerWallet();
-  const tokenContract = await getTokenContract(workerWallet);
-  return tokenContract.interface.decodeEventLog(name, data, topics);
-};
-
 export const claimToken = async ({ address, amount }) => {
   let txnHash = '';
   let isSuccess = false;
