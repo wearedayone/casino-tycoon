@@ -298,7 +298,7 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
     const snapshot = await firestore.collection('transaction').doc(transactionId).get();
     const { type, value, token } = snapshot.data();
 
-    const transactionValue = token === 'ETH' ? tx.value : token === 'FIAT' ? BigInt(logs[0].data) : 0;
+    const transactionValue = token === 'ETH' ? tx.value : token === 'FIAT' ? BigInt(logs[0].data) : parseEther('0');
     const bnValue = parseEther(value.toString());
     console.log({ logdata: logs[0]?.data, value, bnValue });
 
@@ -321,7 +321,7 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
 
       console.log({ value, bnValue, transactionValue });
       console.log(bnValue.eq(transactionValue));
-      if (!bnValue.eq(transactionValue))
+      if (token !== 'xGANG' && !bnValue.eq(transactionValue))
         throw new Error(
           `API error: Bad request - Value doesnt match, ${JSON.stringify({ transactionValue, bnValue })}`
         );
