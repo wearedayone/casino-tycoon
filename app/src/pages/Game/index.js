@@ -425,9 +425,16 @@ const Game = () => {
   const buyBuilding = async ({ quantity, token }) => {
     try {
       const res = await create({ type: 'buy-building', amount: quantity, token });
-      console.log(res);
       const { id, amount, value, time, nonce, signature, type, lastB } = res.data;
-      const receipt = await buySafeHouse({ type, amount, value, lastB, time, nonce, signature });
+      const receipt = await buySafeHouse({
+        type,
+        amount,
+        value: token === 'FIAT' ? value : 0,
+        lastB,
+        time,
+        nonce,
+        signature,
+      });
 
       if (receipt.status === 1) await validate({ transactionId: id, txnHash: receipt.transactionHash });
       else throw new Error('Transaction failed');
@@ -442,7 +449,7 @@ const Game = () => {
     try {
       const res = await create({ type: 'buy-worker', amount: quantity, token });
       const { id, amount, value, time, nonce, signature, lastB } = res.data;
-      const receipt = await buyGoon({ amount, value, lastB, time, nonce, signature });
+      const receipt = await buyGoon({ amount, value: token === 'FIAT' ? value : 0, lastB, time, nonce, signature });
       if (receipt.status === 1) await validate({ transactionId: id, txnHash: receipt.transactionHash });
       else throw new Error('Transaction failed');
       return receipt.transactionHash;
@@ -507,6 +514,7 @@ const Game = () => {
     const diffInDays = (Date.now() - gamePlay.startXTokenCountingTime.toDate().getTime()) / MILISECONDS_IN_A_DAY;
     const newEarnedXToken = diffInDays * dailyXToken;
     const newXTokenBalance = xTokenBalance + newEarnedXToken;
+    console.log({ newXTokenBalance, startXTokenCountingTime: gamePlay?.startXTokenCountingTime });
     gameRef.current?.events.emit('update-xtoken-balance', { balance: newXTokenBalance });
   };
 
