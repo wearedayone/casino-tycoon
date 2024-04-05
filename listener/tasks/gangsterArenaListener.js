@@ -19,7 +19,7 @@ const gangsterArenaListener = async () => {
   const contract = new Contract(GAME_CONTRACT_ADDRESS, GangsterArenaABI.abi, provider);
   const nftContract = new Contract(NFT_ADDRESS, GangsterABI.abi, provider);
 
-  contract.on(GangsterEvent.Mint, async (to, tokenId, amount, nonce, event) => {
+  contract.on(GangsterEvent.BuyGangster, async (to, tokenId, amount, nonce, event) => {
     await firestore.collection('web3Listener').doc(NETWORK_ID).set({ lastBlock: event.blockNumber });
     await processMintEvent({ to, tokenId, amount, nonce, event, contract, nftContract });
   });

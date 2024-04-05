@@ -322,28 +322,20 @@ export const isMinted = async (address) => {
   return minted;
 };
 
-export const getTotalSold = async (type, address) => {
-  const workerWallet = await getWorkerWallet();
-  const gameContract = await getGameContract(workerWallet);
-
-  const totalSold = type == 'buy-worker' ? await gameContract.goon(address) : await gameContract.safehouse(address);
-  return totalSold.toNumber();
-};
-
 export const signMessage = async (message) => {
   const signerWallet = await getSignerWallet();
   const signature = await signerWallet.signMessage(ethers.toBeArray(message));
   return signature;
 };
 
-export const signMessageBuyGoon = async ({ address, amount, value, totalAmount, time, nonce, mintFunction }) => {
+export const signMessageBuyAsset = async ({ address, type, amount, value, lastB, time, nonce }) => {
   const signerWallet = await getSignerWallet();
   console.log({ address, amount, value: value.toString(), nonce });
   let message = ethers.solidityPackedKeccak256(
     // Array of types: declares the data types in the message.
-    ['address', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'string'],
+    ['address', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256'],
     // Array of values: actual values of the parameters to be hashed.
-    [address, amount, value.toString(), totalAmount, time, nonce, mintFunction]
+    [address, type, amount, value.toString(), lastB, time, nonce]
   );
 
   const signature = await signerWallet.signMessage(ethers.toBeArray(message));
@@ -401,6 +393,14 @@ export const getNoGangster = async ({ address }) => {
   const contract = new Contract(gameAddress, gameContractABI.abi, quickNode);
   const value = await contract.gangsterBought(address);
   return value;
+};
+export const getLastBuyTime = async ({ address, type }) => {
+  const activeSeason = await getActiveSeason();
+  const { gameAddress } = activeSeason || {};
+  const contract = new Contract(gameAddress, gameContractABI.abi, quickNode);
+  const value = await contract.lastB(address, type);
+  console.log({ address, type, value });
+  return value.toNumber();
 };
 
 export const convertEthInputToToken = async (ethAmount) => {

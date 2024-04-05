@@ -21,7 +21,7 @@ const deployGame = async () => {
 
   await verifyContract({
     address: gameAddress,
-    constructorArguments: [defaultAdmin, admin, worker, signer, nft, token],
+    constructorArguments: [defaultAdmin, admin, worker, signer, admin, nft, token],
   });
 
   updateConfigs({ game: gameAddress, gameDeployed: true });

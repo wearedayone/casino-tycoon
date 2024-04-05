@@ -423,8 +423,8 @@ const Game = () => {
     try {
       const res = await create({ type: 'buy-building', amount: quantity });
       console.log(res);
-      const { amount, value, time, nonce, signature, currentSold, totalSold } = res.data;
-      const receipt = await buySafeHouse({ amount, value, totalSafehouse: totalSold, time, nonce, signature });
+      const { amount, value, time, nonce, signature, type, lastB } = res.data;
+      const receipt = await buySafeHouse({ type, amount, value, lastB, time, nonce, signature });
 
       if (receipt.status !== 1) {
         throw new Error('Transaction failed');
@@ -439,8 +439,8 @@ const Game = () => {
   const buyWorker = async (quantity) => {
     try {
       const res = await create({ type: 'buy-worker', amount: quantity });
-      const { amount, value, time, nonce, signature, currentSold, totalSold } = res.data;
-      const receipt = await buyGoon({ amount, value, totalGoon: totalSold, time, nonce, signature });
+      const { amount, value, time, nonce, signature, lastB } = res.data;
+      const receipt = await buyGoon({ amount, value, lastB, time, nonce, signature });
       if (receipt.status !== 1) {
         throw new Error('Transaction failed');
       }

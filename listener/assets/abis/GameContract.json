@@ -27,6 +27,11 @@
         },
         {
           "internalType": "address",
+          "name": "_pointsOperator",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
           "name": "_gangsterAddress",
           "type": "address"
         },
@@ -116,6 +121,37 @@
         {
           "indexed": false,
           "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "nonce",
+          "type": "uint256"
+        }
+      ],
+      "name": "BuyGangster",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
           "name": "amount",
           "type": "uint256"
         },
@@ -166,7 +202,7 @@
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "tokenId",
+          "name": "spinType",
           "type": "uint256"
         },
         {
@@ -174,9 +210,21 @@
           "internalType": "uint256",
           "name": "amount",
           "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "nonce",
+          "type": "uint256"
         }
       ],
-      "name": "Deposit",
+      "name": "DailySpin",
       "type": "event"
     },
     {
@@ -199,15 +247,9 @@
           "internalType": "uint256",
           "name": "amount",
           "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "nonce",
-          "type": "uint256"
         }
       ],
-      "name": "Mint",
+      "name": "Deposit",
       "type": "event"
     },
     {
@@ -314,6 +356,31 @@
       "anonymous": false,
       "inputs": [
         {
+          "indexed": false,
+          "internalType": "address[]",
+          "name": "addr",
+          "type": "address[]"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256[]",
+          "name": "_lGang",
+          "type": "uint256[]"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256[]",
+          "name": "_wToken",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "WarResult",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
           "indexed": true,
           "internalType": "address",
           "name": "to",
@@ -367,84 +434,6 @@
     },
     {
       "inputs": [],
-      "name": "DEV_PERCENT",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "DEV_ROLE",
-      "outputs": [
-        {
-          "internalType": "bytes32",
-          "name": "",
-          "type": "bytes32"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "MARKETING_PERCENT",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "MARKETING_ROLE",
-      "outputs": [
-        {
-          "internalType": "bytes32",
-          "name": "",
-          "type": "bytes32"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "PRIZE_PERCENT",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "RETIRE_PERCENT",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
       "name": "WORKER_ROLE",
       "outputs": [
         {
@@ -460,22 +449,22 @@
       "inputs": [
         {
           "internalType": "uint256",
-          "name": "devFee",
+          "name": "dev_",
           "type": "uint256"
         },
         {
           "internalType": "uint256",
-          "name": "marketingFee",
+          "name": "burn_",
           "type": "uint256"
         },
         {
           "internalType": "uint256",
-          "name": "prizePool",
+          "name": "reputationPrize_",
           "type": "uint256"
         },
         {
           "internalType": "uint256",
-          "name": "retirePool",
+          "name": "rankPrize_",
           "type": "uint256"
         }
       ],
@@ -486,12 +475,12 @@
     },
     {
       "inputs": [],
-      "name": "bPrice_",
+      "name": "burnAddr_",
       "outputs": [
         {
-          "internalType": "uint256",
+          "internalType": "address",
           "name": "",
-          "type": "uint256"
+          "type": "address"
         }
       ],
       "stateMutability": "view",
@@ -499,7 +488,7 @@
     },
     {
       "inputs": [],
-      "name": "bpwl_",
+      "name": "burnValue",
       "outputs": [
         {
           "internalType": "uint256",
@@ -513,33 +502,48 @@
     {
       "inputs": [
         {
-          "internalType": "address[]",
-          "name": "addr",
-          "type": "address[]"
-        },
-        {
           "internalType": "uint256",
-          "name": "tokenId",
+          "name": "_typeA",
           "type": "uint256"
         },
         {
-          "internalType": "uint256[]",
-          "name": "amount",
-          "type": "uint256[]"
+          "internalType": "uint256",
+          "name": "_amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_lastB",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_sTime",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_nonce",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_sig",
+          "type": "bytes"
         }
       ],
-      "name": "burnNFT",
+      "name": "buyAsset",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
     },
     {
       "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "tokenId",
-          "type": "uint256"
-        },
         {
           "internalType": "uint256",
           "name": "amount",
@@ -589,90 +593,9 @@
     {
       "inputs": [
         {
-          "internalType": "uint256",
-          "name": "amount",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "value",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "totalGoon",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "time",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "nonce",
-          "type": "uint256"
-        },
-        {
-          "internalType": "bytes",
-          "name": "sig",
-          "type": "bytes"
-        }
-      ],
-      "name": "buyGoon",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "amount",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "value",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "totalSafehouse",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "time",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "nonce",
-          "type": "uint256"
-        },
-        {
-          "internalType": "bytes",
-          "name": "sig",
-          "type": "bytes"
-        }
-      ],
-      "name": "buySafeHouse",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
           "internalType": "address",
           "name": "to",
           "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "tokenId",
-          "type": "uint256"
         },
         {
           "internalType": "uint256",
@@ -687,12 +610,25 @@
     },
     {
       "inputs": [],
-      "name": "devDebt",
+      "name": "devAddr_",
       "outputs": [
         {
-          "internalType": "int256",
+          "internalType": "address",
           "name": "",
-          "type": "int256"
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "devValue",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
         }
       ],
       "stateMutability": "view",
@@ -701,6 +637,13 @@
     {
       "inputs": [],
       "name": "devWithdraw",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "emegencyWithdraw",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -719,17 +662,7 @@
         },
         {
           "internalType": "uint256[]",
-          "name": "_lGoon",
-          "type": "uint256[]"
-        },
-        {
-          "internalType": "uint256[]",
-          "name": "_wRep",
-          "type": "uint256[]"
-        },
-        {
-          "internalType": "uint256[]",
-          "name": "_wPoint",
+          "name": "_wToken",
           "type": "uint256[]"
         }
       ],
@@ -771,71 +704,6 @@
       "type": "function"
     },
     {
-      "inputs": [],
-      "name": "getBalance",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getDevBalance",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getMarketingBalance",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getPrizeBalance",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getRetireBalance",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
       "inputs": [
         {
           "internalType": "bytes32",
@@ -849,25 +717,6 @@
           "internalType": "bytes32",
           "name": "",
           "type": "bytes32"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "name": "goon",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
         }
       ],
       "stateMutability": "view",
@@ -916,13 +765,24 @@
       "type": "function"
     },
     {
-      "inputs": [],
-      "name": "marketingDebt",
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "lastB",
       "outputs": [
         {
-          "internalType": "int256",
+          "internalType": "uint256",
           "name": "",
-          "type": "int256"
+          "type": "uint256"
         }
       ],
       "stateMutability": "view",
@@ -963,12 +823,12 @@
     },
     {
       "inputs": [],
-      "name": "prizeDebt",
+      "name": "pointsOperator_",
       "outputs": [
         {
-          "internalType": "int256",
+          "internalType": "address",
           "name": "",
-          "type": "int256"
+          "type": "address"
         }
       ],
       "stateMutability": "view",
@@ -976,7 +836,7 @@
     },
     {
       "inputs": [],
-      "name": "refDiscount_",
+      "name": "rankPrize",
       "outputs": [
         {
           "internalType": "uint256",
@@ -1020,12 +880,12 @@
     },
     {
       "inputs": [],
-      "name": "retireDebt",
+      "name": "reputationPrize",
       "outputs": [
         {
-          "internalType": "int256",
+          "internalType": "uint256",
           "name": "",
-          "type": "int256"
+          "type": "uint256"
         }
       ],
       "stateMutability": "view",
@@ -1033,6 +893,16 @@
     },
     {
       "inputs": [
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "payout",
+          "type": "uint256"
+        },
         {
           "internalType": "uint256",
           "name": "nonce",
@@ -1065,58 +935,6 @@
     {
       "inputs": [
         {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "name": "safehouse",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "_basePrice",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_basePriceWL",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_refferral",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "refferral_discount",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_vtd",
-          "type": "uint256"
-        }
-      ],
-      "name": "setBasePrice",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
           "internalType": "bool",
           "name": "value",
           "type": "bool"
@@ -1136,54 +954,16 @@
       "inputs": [
         {
           "internalType": "uint256",
-          "name": "_dev",
+          "name": "_refReward",
           "type": "uint256"
         },
         {
           "internalType": "uint256",
-          "name": "_marketing",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_prize",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_retire",
+          "name": "_vtd",
           "type": "uint256"
         }
       ],
-      "name": "setGameFee",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "_rpGangster",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_rpGoon",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_rpSHouse",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_retireTax",
-          "type": "uint256"
-        }
-      ],
-      "name": "setReputation",
+      "name": "setGameConfig",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -1209,6 +989,49 @@
     {
       "inputs": [
         {
+          "internalType": "uint256",
+          "name": "_spinType",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_lastSpin",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_sTime",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_nonce",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_sig",
+          "type": "bytes"
+        }
+      ],
+      "name": "spin",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
           "internalType": "bytes4",
           "name": "interfaceId",
           "type": "bytes4"
@@ -1227,20 +1050,7 @@
     },
     {
       "inputs": [],
-      "name": "tPBalance",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "tgoon",
+      "name": "tokenId",
       "outputs": [
         {
           "internalType": "uint256",
@@ -1254,19 +1064,6 @@
     {
       "inputs": [],
       "name": "totalPoint",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "tshouse",
       "outputs": [
         {
           "internalType": "uint256",
@@ -1294,39 +1091,8 @@
       "inputs": [
         {
           "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "name": "warRep",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "withdraw",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
           "name": "to",
           "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "tokenId",
-          "type": "uint256"
         },
         {
           "internalType": "uint256",
@@ -1343,5 +1109,7 @@
       "stateMutability": "payable",
       "type": "receive"
     }
-  ]
+  ],
+  "linkReferences": {},
+  "deployedLinkReferences": {}
 }

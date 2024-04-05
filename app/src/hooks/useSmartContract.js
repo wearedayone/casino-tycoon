@@ -115,8 +115,7 @@ const useSmartContract = () => {
       await delay(1000);
     }
 
-    const tokenId = 1;
-    let params = [tokenId, amount, value, time, nGangster, nonce, bType, referrerAddress, signature];
+    let params = [amount, value, time, nGangster, nonce, bType, referrerAddress, signature];
     const data = gameContract.interface.encodeFunctionData('buyGangster', params);
     const unsignedTx = {
       to: GAME_CONTRACT_ADDRESS,
@@ -135,8 +134,9 @@ const useSmartContract = () => {
     return receipt;
   };
 
-  const buyGoon = async ({ amount, value, totalGoon, time, nonce, signature }) => {
+  const buyGoon = async ({ amount, value, lastB, time, nonce, signature }) => {
     if (!loadedAssets) return;
+    console.log({ amount, value, lastB, time, nonce });
     const privyProvider = await embeddedWallet.getEthereumProvider();
     const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
     const tokenContract = new Contract(TOKEN_ADDRESS, tokenAbi.abi, privyProvider.provider);
@@ -161,14 +161,10 @@ const useSmartContract = () => {
 
     // eslint-disable-next-line no-undef
     const valueBigint = BigInt(parseEther(value + '').toString());
-    const data = gameContract.interface.encodeFunctionData('buyGoon', [
-      amount,
-      valueBigint,
-      totalGoon,
-      time,
-      nonce,
-      signature,
-    ]);
+    const bType = 1;
+    let params = [bType, amount, valueBigint, lastB, time, nonce, signature];
+    const data = gameContract.interface.encodeFunctionData('buyAsset', params);
+
     const unsignedTx = { to: GAME_CONTRACT_ADDRESS, chainId: Number(NETWORK_ID), data };
 
     const uiConfig = {
@@ -182,7 +178,7 @@ const useSmartContract = () => {
     return receipt;
   };
 
-  const buySafeHouse = async ({ amount, value, totalSafehouse, time, nonce, signature }) => {
+  const buySafeHouse = async ({ type, amount, value, lastB, time, nonce, signature }) => {
     if (!loadedAssets) return;
     const privyProvider = await embeddedWallet.getEthereumProvider();
     const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
@@ -208,14 +204,9 @@ const useSmartContract = () => {
 
     // eslint-disable-next-line no-undef
     const valueBigint = BigInt(parseEther(value + '').toString());
-    const data = gameContract.interface.encodeFunctionData('buySafeHouse', [
-      amount,
-      valueBigint,
-      totalSafehouse,
-      time,
-      nonce,
-      signature,
-    ]);
+    const bType = 2;
+    let params = [bType, amount, valueBigint, lastB, time, nonce, signature];
+    const data = gameContract.interface.encodeFunctionData('buyAsset', params);
     const unsignedTx = { to: GAME_CONTRACT_ADDRESS, chainId: Number(NETWORK_ID), data };
 
     const uiConfig = {
