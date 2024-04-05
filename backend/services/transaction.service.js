@@ -7,13 +7,13 @@ import {
   claimToken as claimTokenTask,
   decodeTokenTxnLogs,
   isMinted,
-  signMessageBuyGoon,
   signMessageBuyGangster,
   signMessageRetire,
-  getTotalSold,
   getTokenBalance,
   getNoGangster,
   convertEthInputToToken,
+  signMessageBuyAsset,
+  getLastBuyTime,
 } from './worker.service.js';
 import {
   calculateNextBuildingBuyPriceBatch,
@@ -188,20 +188,20 @@ export const initTransaction = async ({ userId, type, ...data }) => {
     const userData = await firestore.collection('user').doc(userId).get();
     if (userData.exists) {
       const time = Math.floor(Date.now() / 1000);
-      const mintFunction = type === 'buy-worker' ? 'buyGoon' : 'buySafeHouse';
+      const buyType = type === 'buy-worker' ? 1 : 2;
 
       const { address } = userData.data();
-      const totalSold = await getTotalSold(type, address);
-      const signature = await signMessageBuyGoon({
+      const lastB = await getLastBuyTime({ address, type: buyType });
+      const signature = await signMessageBuyAsset({
         address: address,
+        type: buyType,
         amount: txnData.amount,
         value: parseEther(txnData.value + ''),
-        totalAmount: totalSold,
+        lastB,
         time,
         nonce,
-        mintFunction,
       });
-      return { id: newTransaction.id, ...transaction, totalSold, time, signature };
+      return { id: newTransaction.id, ...transaction, type: buyType, lastB, time, signature };
     }
   }
 

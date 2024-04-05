@@ -1,6 +1,6 @@
 export const GangsterEvent = {
   TransferSingle: 'TransferSingle',
-  Mint: 'Mint',
+  BuyGangster: 'BuyGangster',
   BuyGoon: 'BuyGoon',
   BuySafeHouse: 'BuySafeHouse',
   Deposit: 'Deposit',
