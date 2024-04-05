@@ -101,33 +101,40 @@ class PopupDailySpin extends Popup {
       this.contentContainer.x = this.maxContainerX;
       this.add(this.table);
 
-      if (!this.spinButton) {
-        this.spinButton = new SpinButton(scene, {
-          x: width / 2,
-          y: height / 2 + this.popup.height / 2 - 20,
-          onClick: () => {
-            if (this.spinned) return;
-            scene.game.events.emit('start-spin');
-            this.spinSound.play();
-          },
-          value: spinPrice,
-        });
-        this.add(this.spinButton);
+      if (this.spinButton) {
+        this.remove(this.spinButton);
+        this.spinButton.destroy();
       }
 
-      if (!this.arrowDown) {
-        this.arrowDown = scene.add
-          .image(width / 2, this.popup.y - this.popup.height / 2 + 160, 'arrow-spin-down')
-          .setOrigin(0.5, 0.5);
-        this.add(this.arrowDown);
-      }
+      this.spinButton = new SpinButton(scene, {
+        x: width / 2,
+        y: height / 2 + this.popup.height / 2 - 20,
+        onClick: () => {
+          if (this.spinned) return;
+          scene.game.events.emit('start-spin');
+          this.spinSound.play();
+        },
+        value: spinPrice,
+      });
+      this.add(this.spinButton);
 
-      if (!this.arrowUp) {
-        this.arrowUp = scene.add
-          .image(width / 2, this.popup.y + this.popup.height / 2 - 190, 'arrow-spin-up')
-          .setOrigin(0.5, 0.5);
-        this.add(this.arrowUp);
+      if (this.arrowDown) {
+        this.remove(this.arrowDown);
+        this.arrowDown.destroy();
       }
+      this.arrowDown = scene.add
+        .image(width / 2, this.popup.y - this.popup.height / 2 + 160, 'arrow-spin-down')
+        .setOrigin(0.5, 0.5);
+      this.add(this.arrowDown);
+
+      if (this.arrowUp) {
+        this.remove(this.arrowUp);
+        this.arrowUp.destroy();
+      }
+      this.arrowUp = scene.add
+        .image(width / 2, this.popup.y + this.popup.height / 2 - 190, 'arrow-spin-up')
+        .setOrigin(0.5, 0.5);
+      this.add(this.arrowUp);
 
       scene.game.events.emit('request-balances');
       scene.game.events.emit('request-spinned-status');
