@@ -39,7 +39,6 @@ export const initTransaction = async ({ userId, type, ...data }) => {
 
   const utcDate = moment().utc().format('DD/MM/YYYY');
   const todayStartTime = moment(`${utcDate} 00:00:00`, 'DD/MM/YYYY HH:mm:ss').utc(true).toDate().getTime();
-  console.log({ todayStartTime });
 
   if (type !== 'withdraw' && data.token !== 'NFT' && activeSeason.status !== 'open')
     throw new Error('API error: Season ended');
@@ -323,8 +322,6 @@ export const validateDailySpinTxnAndReturnSpinResult = async ({ userId, transact
   console.log('validate spin txn logs', { logs });
 
   const activeSeason = await getActiveSeason();
-  // SPIN-TODO: remove line below
-  activeSeason.gameAddress = '0xabe2FFF62795F3b562409f0596Afc773e714C28f';
 
   const {
     id: activeSeasonId,
@@ -337,7 +334,7 @@ export const validateDailySpinTxnAndReturnSpinResult = async ({ userId, transact
   if (to.toLowerCase() !== gameAddress.toLowerCase()) throw newError('API error: Bad credential');
 
   const decodedData = await decodeGameTxnLogs('DailySpin', logs[1]);
-  const price = Number(decodedData[1].toString());
+  const price = Number(formatEther(decodedData[1]));
   if (price !== value) throw new Error('API error: Mismatching price');
 
   const { reward, index } = randomSpinResult(spinRewards);

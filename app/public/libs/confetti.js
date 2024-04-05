@@ -208,7 +208,6 @@ function poof() {
 
   if (!frame) {
     // Append the container
-    console.log({ container });
     document.body.appendChild(container);
 
     // Add confetti

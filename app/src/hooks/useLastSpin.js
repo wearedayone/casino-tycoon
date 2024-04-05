@@ -4,28 +4,30 @@ import moment from 'moment';
 
 import useSpinStore from '../stores/spin.store';
 import useSystemStore from '../stores/system.store';
+import useUserStore from '../stores/user.store';
 import { firestore } from '../configs/firebase.config';
 
 const useLastSpin = () => {
+  const userId = useUserStore((state) => state.profile?.id);
   const setSpinned = useSpinStore((state) => state.setSpinned);
   const setInitialized = useSpinStore((state) => state.setInitialized);
-  const configs = useSystemStore((state) => state.configs);
+  const activeSeasonId = useSystemStore((state) => state.configs?.activeSeasonId);
 
   useEffect(() => {
     let unsubscribe;
 
-    if (configs?.activeSeasonId) {
+    if (activeSeasonId && userId) {
       const utcDate = moment().utc().format('DD/MM/YYYY');
       const todayStartTime = moment(`${utcDate} 00:00:00`, 'DD/MM/YYYY HH:mm:ss').utc(true).toDate().getTime();
       const q = query(
         collection(firestore, 'transaction'),
-        where('seasonId', '==', configs?.activeSeasonId || null),
+        where('seasonId', '==', activeSeasonId || null),
         where('type', '==', 'daily-spin'),
+        where('userId', '==', userId),
         where('status', 'in', ['Success', 'Pending']),
         where('createdAt', '>=', Timestamp.fromMillis(todayStartTime))
       );
       unsubscribe = onSnapshot(q, (snapshot) => {
-        console.log(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
         setSpinned(!snapshot.empty);
         setInitialized(true);
       });
@@ -36,7 +38,7 @@ const useLastSpin = () => {
     return () => {
       unsubscribe?.();
     };
-  }, [configs?.activeSeasonId]);
+  }, [activeSeasonId, userId]);
 };
 
 export default useLastSpin;

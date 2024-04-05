@@ -125,7 +125,7 @@ export const createUserIfNotExist = async (userId) => {
       });
   } else {
     const { ETHBalance, avatarURL_small } = snapshot.data();
-    isWhitelisted = snapshot.data().isWhitelisted;
+    isWhitelisted = snapshot.data()?.isWhitelisted ?? false;
     // check if user has twitter avatar now
     if (twitter.profilePictureUrl && avatarURL_small !== twitter.profilePictureUrl) {
       firestore

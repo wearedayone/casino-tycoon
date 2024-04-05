@@ -258,6 +258,7 @@ class MainScene extends Phaser.Scene {
       this.isSpinning = false;
       if (reward) {
         setTimeout(() => {
+          this.popupDailySpin && (this.popupDailySpin.loading = false);
           this.popupDailySpin?.close();
           this.popupSpinReward?.showReward(reward);
         }, 1500);

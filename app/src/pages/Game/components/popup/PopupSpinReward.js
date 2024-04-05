@@ -75,6 +75,7 @@ class PopupSpinReward extends Phaser.GameObjects.Container {
   close = () => {
     this.setVisible(false);
     this.sound.stop();
+    this.amountText.x = this.iconX;
   };
 
   showReward({ type, value }) {

@@ -48,6 +48,7 @@ class PopupDailySpin extends Popup {
     this.spinSound = scene.sound.add('spin-sound', { loop: true });
 
     scene.game.events.on('update-spin-rewards', ({ spinRewards, spinPrice }) => {
+      if (this.loading) return;
       this.spinRewards = spinRewards;
       this.spinPrice = spinPrice;
       this.numberOfRewards = spinRewards.length;
@@ -111,6 +112,8 @@ class PopupDailySpin extends Popup {
         y: height / 2 + this.popup.height / 2 - 20,
         onClick: () => {
           if (this.spinned) return;
+          this.loading = true;
+          this.spinButton?.setDisabledState(true);
           scene.game.events.emit('start-spin');
           this.spinSound.play();
         },
@@ -135,32 +138,36 @@ class PopupDailySpin extends Popup {
         .image(width / 2, this.popup.y + this.popup.height / 2 - 190, 'arrow-spin-up')
         .setOrigin(0.5, 0.5);
       this.add(this.arrowUp);
-
-      scene.game.events.emit('request-balances');
-      scene.game.events.emit('request-spinned-status');
     });
 
     scene.game.events.on('update-spinned-status', ({ spinned }) => {
       this.spinned = spinned;
-      if (spinned) {
-        this.spinButton?.setDisabledState(true);
-      } else {
-        this.spinButton?.setDisabledState(false);
-        this.contentContainer && (this.contentContainer.x = this.maxContainerX);
+      if (!this.loading) {
+        if (spinned) {
+          this.spinButton?.setDisabledState(true);
+        } else {
+          this.spinButton?.setDisabledState(false);
+          this.contentContainer && (this.contentContainer.x = this.maxContainerX);
+        }
       }
+      scene.game.events.emit('request-balances');
     });
 
     scene.game.events.on('update-balances', ({ ETHBalance, tokenBalance }) => {
-      if (!ETHBalance || !tokenBalance || tokenBalance < this.spinPrice) {
-        this.spinButton?.setDisabledState(true);
-      } else {
-        this.spinButton?.setDisabledState(false);
+      if (!this.loading) {
+        if (!ETHBalance || !tokenBalance || tokenBalance < this.spinPrice) {
+          this.spinButton?.setDisabledState(true);
+        } else {
+          this.spinButton?.setDisabledState(false);
+        }
       }
+      scene.game.events.emit('request-spin-rewards');
     });
 
     scene.game.events.on('spin-error', ({ code, message }) => {
       scene.game.events.emit('stop-spin');
       this.spinSound.stop();
+      this.loading = false;
       this.destinationIndex = null;
       this.popupTxnCompleted = new PopupTxnError({
         scene,
@@ -197,7 +204,7 @@ class PopupDailySpin extends Popup {
       }
     });
 
-    scene.game.events.emit('request-spin-rewards');
+    scene.game.events.emit('request-spinned-status');
   }
 }
 
