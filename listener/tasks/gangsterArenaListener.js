@@ -81,10 +81,10 @@ const processMintEvent = async ({ to, tokenId, amount, nonce, event, contract, n
     });
 
     // TODO: update separate fields: rankPrizePool, reputationPrizePool, burnValue, devFee
-    const prizePool = await contract.getPrizeBalance();
+    const prizePool = await contract.rankPrize();
     await updatePrizePool(parseFloat(formatEther(prizePool)).toFixed(6));
 
-    const retirePool = await contract.getRetireBalance();
+    const retirePool = await contract.reputationPrize();
     await updateReputationPool(parseFloat(formatEther(retirePool)).toFixed(6));
   } catch (err) {
     logger.error(err);
