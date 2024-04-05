@@ -316,8 +316,7 @@ export const validateDailySpinTxnAndReturnSpinResult = async ({ userId, transact
   if (txnUserId !== userId) throw new Error('API error: Bad credential');
   if (status !== 'Pending') throw new Error('API error: Bad request');
 
-  const tx = await alchemy.core.getTransaction(txnHash);
-  const receipt = await tx.wait();
+  const receipt = await quickNode.waitForTransaction(txnHash);
   const { from, to, status: txnStatus, logs } = receipt;
   if (txnStatus !== 1) throw new Error('API error: Invalid txn status');
 
