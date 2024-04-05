@@ -34,7 +34,7 @@ import {
   getLatestWarResult,
 } from '../../services/war.service';
 import QueryKeys from '../../utils/queryKeys';
-import { calculateHouseLevel } from '../../utils/formulas';
+import { calculateHouseLevel, calculateSpinPrice } from '../../utils/formulas';
 import useSmartContract from '../../hooks/useSmartContract';
 import { create, validate } from '../../services/transaction.service';
 
@@ -294,8 +294,7 @@ const Game = () => {
     reservePoolReward,
     houseLevels,
     prizePoolConfig,
-    spinRewards,
-    spinPrice,
+    spinConfig: { spinRewards },
   } = activeSeason || {
     rankPrizePool: 0,
     reputationPrizePool: 0,
@@ -315,8 +314,7 @@ const Game = () => {
       // reputation leaderboard
       earlyRetirementTax: 0,
     },
-    spinRewards: [],
-    spinPrice: 0,
+    spinConfig: { spinRewards: [] },
   };
 
   const dailyMoney = numberOfMachines * machine.dailyReward + numberOfWorkers * worker.dailyReward;
@@ -608,7 +606,7 @@ const Game = () => {
       gameRef.current?.events.on('request-spin-rewards', () => {
         gameRef.current?.events.emit('update-spin-rewards', {
           spinRewards: JSON.parse(JSON.stringify(spinRewards)).sort((item1, item2) => item1.order - item2.order),
-          spinPrice,
+          spinPrice: calculateSpinPrice(networth),
         });
       });
 
@@ -1595,9 +1593,9 @@ const Game = () => {
   useEffect(() => {
     gameRef.current?.events.emit('update-spin-rewards', {
       spinRewards: JSON.parse(JSON.stringify(spinRewards)).sort((item1, item2) => item1.order - item2.order),
-      spinPrice,
+      spinPrice: calculateSpinPrice(networth),
     });
-  }, [spinRewards, spinPrice]);
+  }, [spinRewards, networth]);
 
   useEffect(() => {
     if (spinInitialized) {

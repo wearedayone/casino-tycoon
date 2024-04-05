@@ -9,8 +9,8 @@
       "networth": 10
     },
     "worker": {
-      "basePrice": 1000,
-      "dailyReward": 800,
+      "basePrice": 200,
+      "dailyReward": 400,
       "networth": 2,
       "targetDailyPurchase": 200,
       "targetPrice": 1000,
@@ -31,16 +31,15 @@
   },
   "prizePool": {
     "earlyRetirementTax": 0.2,
-    "rankRewardsPercent": 0.6,
+    "rankRewardsPercent": 0.5,
     "reputationRewardsPercent": 0.4,
     "rewardScalingRatio": 1.28,
     "higherRanksCutoffPercent": 0.1,
     "lowerRanksCutoffPercent": 0.2,
-    "minRewardHigherRanks": 0.05,
-    "minRewardLowerRanks": 0.02,
+    "minRewardHigherRanks": 0.04,
+    "minRewardLowerRanks": 0,
     "devFee": 0,
-    "marketingFee": 0.1,
-    "tokenTaxToPrizePoolPercent": 0.025
+    "marketingFee": 0.1
   },
   "war": {
     "buildingBonusMultiple": 0.1,
@@ -49,8 +48,8 @@
     "tokenRewardPerEarner": 1000,
     "machinePercentLost": 0.05
   },
-  "initGameDurationInDays": 7,
-  "timeStepInMinutes": 1,
+  "initGameDurationInDays": 4,
+  "timeStepInMinutes": 0,
   "claimGapInSeconds": 3600,
   "openseaNftCollection": "gangster-arena",
   "tokenContract": {
@@ -61,8 +60,8 @@
     "swapAmount": 1000
   },
   "initPurchased": {
-    "worker": 0,
-    "building": 0
+    "worker": 10,
+    "building": 10
   },
   "houseLevels": [
     {
@@ -140,21 +139,98 @@
       "level": 15
     }
   ],
-  "spinRewards": [
-    { "type": "house", "value": 1, "order": 1, "percentage": 0.26 },
-    { "type": "house", "value": 2, "order": 2, "percentage": 0.13 },
-    { "type": "house", "value": 3, "order": 3, "percentage": 0.07 },
-    { "type": "house", "value": 5, "order": 4, "percentage": 0.03 },
-    { "type": "house", "value": 10, "order": 5, "percentage": 0.009 },
-    { "type": "house", "value": 50, "order": 6, "percentage": 0.001 },
-    { "type": "point", "value": 10, "order": 7, "percentage": 0.01 },
-    { "type": "point", "value": 50, "order": 8, "percentage": 0.03 },
-    { "type": "point", "value": 100, "order": 9, "percentage": 0.07 },
-    { "type": "point", "value": 250, "order": 10, "percentage": 0.15 },
-    { "type": "point", "value": 500, "order": 11, "percentage": 0.13 },
-    { "type": "point", "value": 1000, "order": 12, "percentage": 0.07 },
-    { "type": "point", "value": 2500, "order": 13, "percentage": 0.03 },
-    { "type": "point", "value": 10000, "order": 14, "percentage": 0.009 },
-    { "type": "point", "value": 50000, "order": 15, "percentage": 0.001 }
-  ]
+  "spinConfig": {
+    "spinRewards": [
+      {
+        "type": "house",
+        "value": 1,
+        "order": 1,
+        "percentage": 0.26
+      },
+      {
+        "type": "house",
+        "value": 2,
+        "order": 2,
+        "percentage": 0.13
+      },
+      {
+        "type": "house",
+        "value": 3,
+        "order": 3,
+        "percentage": 0.07
+      },
+      {
+        "type": "house",
+        "value": 5,
+        "order": 4,
+        "percentage": 0.03
+      },
+      {
+        "type": "house",
+        "value": 10,
+        "order": 5,
+        "percentage": 0.009
+      },
+      {
+        "type": "house",
+        "value": 50,
+        "order": 6,
+        "percentage": 0.001
+      },
+      {
+        "type": "point",
+        "value": 10,
+        "order": 7,
+        "percentage": 0.01
+      },
+      {
+        "type": "point",
+        "value": 50,
+        "order": 8,
+        "percentage": 0.03
+      },
+      {
+        "type": "point",
+        "value": 100,
+        "order": 9,
+        "percentage": 0.07
+      },
+      {
+        "type": "point",
+        "value": 250,
+        "order": 10,
+        "percentage": 0.15
+      },
+      {
+        "type": "point",
+        "value": 500,
+        "order": 11,
+        "percentage": 0.13
+      },
+      {
+        "type": "point",
+        "value": 1000,
+        "order": 12,
+        "percentage": 0.07
+      },
+      {
+        "type": "point",
+        "value": 2500,
+        "order": 13,
+        "percentage": 0.03
+      },
+      {
+        "type": "point",
+        "value": 10000,
+        "order": 14,
+        "percentage": 0.009
+      },
+      {
+        "type": "point",
+        "value": 50000,
+        "order": 15,
+        "percentage": 0.001
+      }
+    ]
+  }
 }

@@ -221,7 +221,7 @@ const useSmartContract = () => {
   };
 
   const dailySpin = async ({ spinType, amount, value, lastSpin, time, nonce, signature }) => {
-    // SPIN_TODO: remove 2 lines below
+    // SPIN-TODO: remove 2 lines below
     const GAME_CONTRACT_ADDRESS = '0xabe2FFF62795F3b562409f0596Afc773e714C28f';
     const TOKEN_ADDRESS = '0xc01fDDe00463e2EF7F8ceDD4416f287c0b6f3AbC';
     console.log({ spinType, amount, value, lastSpin, time, nonce, signature });

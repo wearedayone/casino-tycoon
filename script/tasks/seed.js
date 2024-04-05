@@ -75,7 +75,7 @@ const main = async () => {
       ...gameConfigs.assets,
       status: 'open',
       houseLevels: gameConfigs.houseLevels,
-      spinRewards: gameConfigs.spinRewards,
+      spinConfig: gameConfigs.spinConfig,
       openseaNftCollection: gameConfigs.openseaNftCollection,
       tokenAddress: TOKEN_ADDRESS,
       nftAddress: NFT_ADDRESS,
@@ -86,7 +86,6 @@ const main = async () => {
       prizePoolConfig: gameConfigs.prizePool,
       warConfig: gameConfigs.war,
       referralConfig: gameConfigs.referral,
-      spinPrice: gameConfigs.spinPrice,
     });
   console.log('created season');
 

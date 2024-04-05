@@ -25,6 +25,7 @@ import {
   calculateNextBuildingBuyPrice,
   calculateNextWorkerBuyPrice,
   calculateNewEstimatedEndTimeUnix,
+  calculateSpinPrice,
 } from '../utils/formulas.js';
 import { getAccurate } from '../utils/math.js';
 import logger from '../utils/logger.js';
@@ -179,7 +180,14 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       txnData.token = 'ETH';
       break;
     case 'daily-spin':
-      txnData.value = activeSeason.spinPrice;
+      const userGamePlay = await firestore
+        .collection('gamePlay')
+        .where('userId', '==', userId)
+        .where('seasonId', '==', activeSeason.id)
+        .limit(1)
+        .get();
+      const gamePlay = userGamePlay.docs[0]?.data();
+      txnData.value = calculateSpinPrice(gamePlay?.networth || 0);
       txnData.token = 'FIAT';
     default:
       break;
@@ -304,7 +312,7 @@ export const validateDailySpinTxnAndReturnSpinResult = async ({ userId, transact
   const snapshot = await firestore.collection('transaction').doc(transactionId).get();
   if (!snapshot.exists) throw new Error('API error: Not found');
 
-  const { userId: txnUserId, status } = snapshot.data();
+  const { userId: txnUserId, status, value } = snapshot.data();
   if (txnUserId !== userId) throw new Error('API error: Bad credential');
   if (status !== 'Pending') throw new Error('API error: Bad request');
 
@@ -319,7 +327,11 @@ export const validateDailySpinTxnAndReturnSpinResult = async ({ userId, transact
   // SPIN-TODO: remove line below
   activeSeason.gameAddress = '0xabe2FFF62795F3b562409f0596Afc773e714C28f';
 
-  const { id: activeSeasonId, gameAddress, spinPrice, spinRewards } = activeSeason;
+  const {
+    id: activeSeasonId,
+    gameAddress,
+    spinConfig: { spinRewards },
+  } = activeSeason;
   const user = await firestore.collection('user').doc(userId).get();
   const { address } = user.data();
   if (from.toLowerCase() !== address.toLowerCase()) throw new Error('API error: Bad credential');
@@ -327,7 +339,7 @@ export const validateDailySpinTxnAndReturnSpinResult = async ({ userId, transact
 
   const decodedData = await decodeGameTxnLogs('DailySpin', logs[1]);
   const price = Number(decodedData[1].toString());
-  if (price !== spinPrice) throw new Error('API error: Mismatching price');
+  if (price !== value) throw new Error('API error: Mismatching price');
 
   const { reward, index } = randomSpinResult(spinRewards);
 

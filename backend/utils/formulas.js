@@ -126,3 +126,7 @@ export const generateCode = (length) => {
   }
   return retVal;
 };
+
+export const calculateSpinPrice = (networth) => {
+  return networth * 5 + 500;
+};
