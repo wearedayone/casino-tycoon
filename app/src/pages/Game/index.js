@@ -939,11 +939,18 @@ const Game = () => {
         try {
           await initDailySpin();
         } catch (err) {
-          const { message, code } = handleError(err);
-          gameRef.current?.events.emit('spin-error', {
-            code,
-            message,
-          });
+          if (err.message === 'Already spin today') {
+            gameRef.current?.events.emit('spin-error', {
+              code: '4001',
+              message: err.message,
+            });
+          } else {
+            const { message, code } = handleError(err);
+            gameRef.current?.events.emit('spin-error', {
+              code,
+              message,
+            });
+          }
         }
       });
 

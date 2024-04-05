@@ -280,10 +280,10 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       const spinType = 1;
       const amount = 1;
       const lastSpin = 0;
-      const value = activeSeason.spinPrice;
+      const value = parseEther(txnData.value + '');
       const signedData = { address, spinType, amount, value, lastSpin, time, nonce };
       const signature = await signMessageDailySpin(signedData);
-      return { id: newTransaction.id, ...transaction, spinType, amount, value, lastSpin, time, nonce, signature };
+      return { id: newTransaction.id, ...transaction, spinType, amount, lastSpin, time, nonce, signature };
     }
   }
 

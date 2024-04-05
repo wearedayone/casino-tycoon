@@ -383,7 +383,7 @@ export const signMessageDailySpin = async ({ address, spinType, amount, value, l
   // Array of types: declares the data types in the message.
   const types = ['address', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256'];
   // Array of values: actual values of the parameters to be hashed.
-  const values = [address, spinType, amount, value, lastSpin, time, nonce];
+  const values = [address, spinType, amount, value.toString(), lastSpin, time, nonce];
 
   let message = ethers.solidityPackedKeccak256(types, values);
 
