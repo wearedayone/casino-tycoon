@@ -314,7 +314,8 @@ const Game = () => {
     },
   };
 
-  const dailyMoney = numberOfMachines * machine.dailyReward + numberOfWorkers * worker.dailyReward;
+  const dailyToken = numberOfMachines * machine.dailyReward;
+  const dailyXToken = numberOfWorkers * worker.dailyReward;
 
   useEffect(() => {
     setStartLoadingTime(Date.now());
@@ -497,9 +498,18 @@ const Game = () => {
   calculateClaimableRewardRef.current = () => {
     if (!gamePlay?.startRewardCountingTime) return;
     const diffInDays = (Date.now() - gamePlay.startRewardCountingTime.toDate().getTime()) / MILISECONDS_IN_A_DAY;
-    const claimableReward = gamePlay.pendingReward + diffInDays * dailyMoney;
+    const claimableReward = gamePlay.pendingReward + diffInDays * dailyToken;
     gameRef.current?.events.emit('update-claimable-reward', { reward: claimableReward });
     gameRef.current?.events.emit('claimable-reward-added');
+  };
+
+  const calculateXTokenBalanceRef = useRef();
+  calculateXTokenBalanceRef.current = () => {
+    if (!gamePlay?.startXTokenCountingTime) return;
+    const diffInDays = (Date.now() - gamePlay.startXTokenCountingTime.toDate().getTime()) / MILISECONDS_IN_A_DAY;
+    const newEarnedXToken = diffInDays * dailyXToken;
+    const newXTokenBalance = xTokenBalance + newEarnedXToken;
+    gameRef.current?.events.emit('update-xtoken-balance', { balance: newXTokenBalance });
   };
 
   const checkGameEndRef = useRef();
@@ -607,7 +617,7 @@ const Game = () => {
 
           const now = Date.now();
           const diffInDays = (now - startTime) / MILISECONDS_IN_A_DAY;
-          const claimableReward = Math.abs(diffInDays * dailyMoney);
+          const claimableReward = Math.abs(diffInDays * dailyToken);
           gameRef.current?.events.emit('update-user-away-reward', { showWarPopup, claimableReward });
           setOnlineListener(true);
         } catch (err) {
@@ -638,7 +648,7 @@ const Game = () => {
       });
 
       gameRef.current?.events.on('request-balances', () => {
-        gameRef.current.events.emit('update-balances', { xTokenBalance, ETHBalance, tokenBalance });
+        gameRef.current.events.emit('update-balances', { ETHBalance, tokenBalance });
       });
 
       gameRef.current?.events.on('request-deposit-code', () => {
@@ -726,6 +736,7 @@ const Game = () => {
       });
 
       gameRef.current?.events.on('request-claimable-reward', () => calculateClaimableRewardRef.current?.());
+      gameRef.current?.events.on('request-xtoken-balance', () => calculateXTokenBalanceRef.current?.());
       gameRef.current?.events.on('check-game-ended', () => checkGameEndRef.current?.());
 
       gameRef.current?.events.on('request-claimable-status', () => {
@@ -1285,8 +1296,8 @@ const Game = () => {
   }, [estimatedGas?.game?.buySafeHouse]);
 
   useEffect(() => {
-    gameRef.current?.events.emit('update-balances', { xTokenBalance, ETHBalance, tokenBalance });
-  }, [tokenBalance, ETHBalance, xTokenBalance]);
+    gameRef.current?.events.emit('update-balances', { ETHBalance, tokenBalance });
+  }, [tokenBalance, ETHBalance]);
 
   useEffect(() => {
     gameRef.current?.events.emit('update-balances-for-withdraw', {
@@ -1372,10 +1383,10 @@ const Game = () => {
   useEffect(() => {
     if (gamePlay?.startRewardCountingTime && gamePlay?.pendingReward) {
       const diffInDays = (Date.now() - gamePlay?.startRewardCountingTime.toDate().getTime()) / MILISECONDS_IN_A_DAY;
-      const claimableReward = gamePlay?.pendingReward + diffInDays * dailyMoney;
+      const claimableReward = gamePlay?.pendingReward + diffInDays * dailyToken;
       gameRef.current?.events.emit('update-claimable-reward', { reward: claimableReward });
     }
-  }, [gamePlay?.startRewardCountingTime, gamePlay?.pendingreward, dailyMoney]);
+  }, [gamePlay?.startRewardCountingTime, gamePlay?.pendingreward, dailyToken]);
 
   useEffect(() => {
     if (gamePlay) {
@@ -1536,6 +1547,12 @@ const Game = () => {
       });
     }
   }, [warConfig]);
+
+  useEffect(() => {
+    if (gamePlay?.startXTokenCountingTime) {
+      calculateXTokenBalanceRef.current?.();
+    }
+  }, [xTokenBalance, gamePlay?.startXTokenCountingTime]);
 
   return (
     <Box

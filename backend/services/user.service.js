@@ -38,6 +38,7 @@ const createGamePlayIfNotExist = async (userId, isWhitelisted) => {
         point: 0,
         pendingReward: 0,
         startRewardCountingTime: admin.firestore.FieldValue.serverTimestamp(),
+        startXTokenCountingTime: admin.firestore.FieldValue.serverTimestamp(),
         active: false,
         isWhitelisted,
         whitelistAmountMinted: 0,
