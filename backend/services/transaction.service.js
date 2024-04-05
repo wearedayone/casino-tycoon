@@ -491,14 +491,6 @@ const updateUserGamePlay = async (userId, transactionId) => {
         await referrerSnapshot.docs[0].ref.update({ referralTotalReward });
       }
       break;
-    case 'buy-worker':
-      gamePlayData = { numberOfWorkers: admin.firestore.FieldValue.increment(amount) };
-      assets.numberOfWorkers += amount;
-      break;
-    case 'buy-building':
-      gamePlayData = { numberOfBuildings: admin.firestore.FieldValue.increment(amount) };
-      assets.numberOfBuildings += amount;
-      break;
     case 'war-bonus':
       const { gainedReputation } = snapshot.data();
       gamePlayData = {
@@ -971,5 +963,5 @@ const calculateGeneratedXToken = async (userId) => {
 };
 
 /* all txn types that change user's token generation rate */
-const userTokenGenerationRateChangedTypes = ['buy-machine', 'buy-worker', 'war-penalty', 'retire'];
+const userTokenGenerationRateChangedTypes = ['buy-machine', 'war-penalty', 'retire'];
 export const userPendingRewardChangedTypes = userTokenGenerationRateChangedTypes.concat('claim-token');
