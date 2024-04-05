@@ -79,7 +79,7 @@ const handleError = (err) => {
     const message = err.message;
     const code = err.code?.toString();
 
-    console.log({ message, code, reason: err.reason, error: err.error.reason });
+    console.log({ message, code, reason: err?.reason, error: err?.error?.reason });
 
     if (message === 'Network Error') {
       return { code: '12002', message: 'Network Error' };
@@ -108,7 +108,7 @@ const handleError = (err) => {
       return { code: 'INSUFFICIENT_FUNDS', message: 'Insufficient ETH' };
 
     if (code === 'UNPREDICTABLE_GAS_LIMIT' || code === '-32603') {
-      if (err.error.reason && err.error.reason.includes('execution reverted:')) {
+      if (err?.error?.reason && err.error.reason.includes('execution reverted:')) {
         const error = err.error.reason.replace('execution reverted: ', '');
         return { code: 'UNPREDICTABLE_GAS_LIMIT', message: error ? lineBreakMessage(error) : 'INSUFFICIENT GAS' };
       }
@@ -422,16 +422,15 @@ const Game = () => {
     }
   };
 
-  const buyBuilding = async (quantity) => {
+  const buyBuilding = async ({ quantity, token }) => {
     try {
-      const res = await create({ type: 'buy-building', amount: quantity });
+      const res = await create({ type: 'buy-building', amount: quantity, token });
       console.log(res);
-      const { amount, value, time, nonce, signature, type, lastB } = res.data;
+      const { id, amount, value, time, nonce, signature, type, lastB } = res.data;
       const receipt = await buySafeHouse({ type, amount, value, lastB, time, nonce, signature });
 
-      if (receipt.status !== 1) {
-        throw new Error('Transaction failed');
-      }
+      if (receipt.status === 1) await validate({ transactionId: id, txnHash: receipt.transactionHash });
+      else throw new Error('Transaction failed');
       return receipt.transactionHash;
     } catch (err) {
       console.error(err);
@@ -439,14 +438,13 @@ const Game = () => {
     }
   };
 
-  const buyWorker = async (quantity) => {
+  const buyWorker = async ({ quantity, token }) => {
     try {
-      const res = await create({ type: 'buy-worker', amount: quantity });
-      const { amount, value, time, nonce, signature, lastB } = res.data;
+      const res = await create({ type: 'buy-worker', amount: quantity, token });
+      const { id, amount, value, time, nonce, signature, lastB } = res.data;
       const receipt = await buyGoon({ amount, value, lastB, time, nonce, signature });
-      if (receipt.status !== 1) {
-        throw new Error('Transaction failed');
-      }
+      if (receipt.status === 1) await validate({ transactionId: id, txnHash: receipt.transactionHash });
+      else throw new Error('Transaction failed');
       return receipt.transactionHash;
     } catch (err) {
       console.error(err);
@@ -868,9 +866,9 @@ const Game = () => {
         gameRef.current.events.emit('update-gas-upgrade-safehouse', { gas: estimatedGas?.game?.buySafeHouse });
       });
 
-      gameRef.current?.events.on('upgrade-safehouse', async ({ quantity }) => {
+      gameRef.current?.events.on('upgrade-safehouse', async ({ quantity, token }) => {
         try {
-          const txnHash = await buyBuilding(quantity);
+          const txnHash = await buyBuilding({ quantity, token });
           gameRef.current?.events.emit('upgrade-safehouse-completed', { txnHash, amount: quantity });
         } catch (err) {
           const { message, code } = handleError(err);
@@ -896,9 +894,9 @@ const Game = () => {
         });
       });
 
-      gameRef.current?.events.on('buy-goon', async ({ quantity }) => {
+      gameRef.current?.events.on('buy-goon', async ({ quantity, token }) => {
         try {
-          const txnHash = await buyWorker(quantity);
+          const txnHash = await buyWorker({ quantity, token });
           gameRef.current?.events.emit('buy-goon-completed', { txnHash, amount: quantity });
         } catch (err) {
           const { message, code } = handleError(err);

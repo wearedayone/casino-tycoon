@@ -27,6 +27,7 @@ class PopupBuyGoon extends Popup {
   networthIncrease = 0;
   rateIncrease = 0;
   balance = 0;
+  xTokenBalance = 0;
   basePrice = 0;
   maxPerBatch = 10;
   targetDailyPurchase = 1;
@@ -88,7 +89,7 @@ class PopupBuyGoon extends Popup {
         this.onCompleted = null;
         this.close();
 
-        scene.game.events.emit(events.buyGoon, { quantity: this.quantity });
+        scene.game.events.emit(events.buyGoon, { quantity: this.quantity, token: this.purchaseToken });
       },
       'Buy',
       { fontSize: '82px', sound: 'buy', disabledImage: 'button-disabled' }
@@ -139,12 +140,14 @@ class PopupBuyGoon extends Popup {
       this.tokenChecked.setVisible(false);
       this.purchaseToken = 'xGANG';
       if (this.coin) this.coin.setTexture('icon-xgang-small');
+      this.updateValues();
     });
     this.tokenUnchecked.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
       this.xgangChecked.setVisible(false);
       this.tokenChecked.setVisible(true);
       this.purchaseToken = 'FIAT';
       if (this.coin) this.coin.setTexture('icon-coin-small');
+      this.updateValues();
     });
 
     this.xgangAvailable = scene.add.text(leftCheckBoxX + 140, availableY, 'Available: 0', smallBrownBold);
@@ -284,14 +287,6 @@ class PopupBuyGoon extends Popup {
       if (isNaN(gas)) return;
 
       this.gas = gas;
-      this.estimatedMaxPurchase = estimateNumberOfWorkerCanBuy(
-        this.balance,
-        this.salesLastPeriod,
-        this.targetDailyPurchase,
-        this.targetPrice,
-        this.basePrice,
-        this.maxPerBatch
-      );
       this.updateValues();
     });
     scene.game.events.on(events.completed, () => {
@@ -302,6 +297,13 @@ class PopupBuyGoon extends Popup {
     scene.game.events.on(events.gameEnded, () => {
       this.upgradeBtn.setDisabledState(true);
     });
+
+    scene.game.events.on('update-xtoken-balance', ({ balance }) => {
+      this.xTokenBalance = balance;
+      this.xgangAvailable.text = `Available: ${customFormat(balance || 0, 1)}`;
+      if (this.purchaseToken === 'xGANG') this.updateValues();
+    });
+
     scene.game.events.on(
       events.updateWorkers,
       ({
@@ -317,6 +319,7 @@ class PopupBuyGoon extends Popup {
         networthIncrease,
       }) => {
         this.balance = balance;
+        this.tokenAvailable.text = `Available: ${customFormat(balance || 0, 1)}`;
         this.basePrice = basePrice;
         this.maxPerBatch = maxPerBatch;
         this.targetDailyPurchase = targetDailyPurchase;
@@ -330,14 +333,6 @@ class PopupBuyGoon extends Popup {
         this.numberOfWorkersText.text = numberOfWorkers.toLocaleString();
         this.networthText.text = `${networth.toLocaleString()}`;
         this.rateText.text = `${formatter.format(numberOfWorkers * dailyReward)}`;
-        this.estimatedMaxPurchase = estimateNumberOfWorkerCanBuy(
-          balance,
-          salesLastPeriod,
-          targetDailyPurchase,
-          targetPrice,
-          basePrice,
-          maxPerBatch
-        );
         this.updateValues();
       }
     );
@@ -362,6 +357,23 @@ class PopupBuyGoon extends Popup {
     this.networthIncreaseText.text = `+${(this.networthIncrease * this.quantity).toLocaleString()}`;
     this.rateIncreaseText.text = `+${(this.rateIncrease * this.quantity).toLocaleString()} /d`;
 
+    this.estimatedMaxPurchase = estimateNumberOfWorkerCanBuy(
+      this.balance,
+      this.salesLastPeriod,
+      this.targetDailyPurchase,
+      this.targetPrice,
+      this.basePrice,
+      this.maxPerBatch
+    );
+    this.xTokenMaxPurchase = estimateNumberOfWorkerCanBuy(
+      this.xTokenBalance,
+      this.salesLastPeriod,
+      this.targetDailyPurchase,
+      this.targetPrice,
+      this.basePrice,
+      this.maxPerBatch
+    );
+
     const estimatedPrice = calculateNextWorkerBuyPriceBatch(
       this.salesLastPeriod,
       this.targetDailyPurchase,
@@ -379,7 +391,8 @@ class PopupBuyGoon extends Popup {
     this.coin.x = this.priceText.x + this.priceText.width + 10;
     if (this.infoButton) this.infoButton.x = this.coin.x + this.coin.width + 30;
 
-    const insufficientBalance = this.quantity > this.estimatedMaxPurchase;
+    const maxPurchase = this.purchaseToken === 'FIAT' ? this.estimatedMaxPurchase : this.xTokenMaxPurchase;
+    const insufficientBalance = this.quantity > maxPurchase;
     this.insufficientBalance.setVisible(insufficientBalance);
     this.upgradeBtn.setDisabledState(
       this.scene?.isGameEnded || (!this.scene?.isUserActive && !this.isSimulator) || insufficientBalance

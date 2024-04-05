@@ -40,11 +40,23 @@ export const initTransaction = async ({ userId, type, ...data }) => {
   }
 
   if (type === 'buy-worker') {
+    if (!['xGANG', 'FIAT'].includes(data.token)) throw new Error('API error: Bad request - invalid token');
     if (data.amount > activeSeason.worker.maxPerBatch) throw new Error('API error: Bad request - over max per batch');
   }
 
   if (type === 'buy-building') {
+    if (!['xGANG', 'FIAT'].includes(data.token)) throw new Error('API error: Bad request - invalid token');
     if (data.amount > activeSeason.building.maxPerBatch) throw new Error('API error: Bad request - over max per batch');
+  }
+  let userSnapshot,
+    currentXTokenBalance = 0;
+  if (['buy-machine', 'buy-building', 'buy-worker'].includes(type)) {
+    userSnapshot = await firestore.collection('user').doc(userId).get();
+
+    if (['buy-building', 'buy-worker'].includes(type) && data.token === 'xGANG') {
+      const generatedXToken = await calculateGeneratedXToken(userId);
+      currentXTokenBalance = userSnapshot.data().xTokenBalance + generatedXToken;
+    }
   }
 
   const { machine, machineSold, workerSold, buildingSold, worker, building, referralConfig, prizePoolConfig } =
@@ -68,7 +80,6 @@ export const initTransaction = async ({ userId, type, ...data }) => {
         .where('seasonId', '==', activeSeason.id)
         .limit(1)
         .get();
-      const userSnapshot = await firestore.collection('user').doc(userId).get();
       const { isWhitelisted, whitelistAmountMinted } = gamePlaySnapshot.docs[0].data();
       const { inviteCode } = userSnapshot.data();
       let userReferralDiscount = 0;
@@ -98,7 +109,7 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       break;
     case 'buy-worker':
       txnData.amount = data.amount;
-      txnData.token = 'FIAT';
+      txnData.token = data.token;
       txnData.currentSold = workerSold;
       const workerTxns = await firestore
         .collection('transaction')
@@ -117,10 +128,13 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       );
       txnData.value = workerPrices.total;
       txnData.prices = workerPrices.prices;
+
+      if (data.token === 'xGANG' && currentXTokenBalance < txnData.value)
+        throw new Error('API error: Not enough xGANG for purchase');
       break;
     case 'buy-building':
       txnData.amount = data.amount;
-      txnData.token = 'FIAT';
+      txnData.token = data.token;
       txnData.currentSold = buildingSold;
       const buildingTxns = await firestore
         .collection('transaction')
@@ -139,6 +153,9 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       );
       txnData.value = buildingPrices.total;
       txnData.prices = buildingPrices.prices;
+
+      if (data.token === 'xGANG' && currentXTokenBalance < txnData.value)
+        throw new Error('API error: Not enough xGANG for purchase');
       break;
     case 'war-bonus':
       txnData.value = data.value;
@@ -189,6 +206,7 @@ export const initTransaction = async ({ userId, type, ...data }) => {
     if (userData.exists) {
       const time = Math.floor(Date.now() / 1000);
       const buyType = type === 'buy-worker' ? 1 : 2;
+      const web3TokenValue = txnData.token === 'FIAT' ? txnData.value : 0;
 
       const { address } = userData.data();
       const lastB = await getLastBuyTime({ address, type: buyType });
@@ -196,7 +214,7 @@ export const initTransaction = async ({ userId, type, ...data }) => {
         address: address,
         type: buyType,
         amount: txnData.amount,
-        value: parseEther(txnData.value + ''),
+        value: parseEther(web3TokenValue + ''),
         lastB,
         time,
         nonce,
@@ -371,7 +389,7 @@ const updateSeasonState = async (transactionId) => {
 const updateUserBalance = async (userId, transactionId) => {
   const userSnapshot = await firestore.collection('user').doc(userId).get();
   const snapshot = await firestore.collection('transaction').doc(transactionId).get();
-  const { token } = snapshot.data();
+  const { token, seasonId, value: txnValue } = snapshot.data();
 
   if (userSnapshot.exists) {
     const { address, ETHBalance } = userSnapshot.data();
@@ -384,6 +402,30 @@ const updateUserBalance = async (userId, transactionId) => {
           .update({
             ETHBalance: formatEther(value),
           });
+      }
+    }
+    if (token === 'xGANG') {
+      const gamePlay = await firestore
+        .collection('gamePlay')
+        .where('userId', '==', userId)
+        .where('seasonId', '==', seasonId)
+        .limit(1)
+        .get();
+      if (!gamePlay.empty) {
+        const now = Date.now();
+        const generatedXToken = await calculateGeneratedXToken(userId);
+        await firestore
+          .collection('gamePlay')
+          .doc(gamePlay.docs[0].id)
+          .update({
+            startXTokenCountingTime: admin.firestore.Timestamp.fromMillis(now),
+          });
+
+        const balanceDiff = generatedXToken - txnValue;
+        await firestore
+          .collection('user')
+          .doc(userId)
+          .update({ xTokenBalance: admin.firestore.FieldValue.increment(balanceDiff) });
       }
     }
   }
@@ -905,6 +947,31 @@ export const calculateGeneratedReward = async (userId) => {
 
   const generatedReward = diffInDays * (numberOfMachines * machine.dailyReward);
   return Math.round(generatedReward * 1000) / 1000;
+};
+const calculateGeneratedXToken = async (userId) => {
+  const userSnapshot = await firestore.collection('user').doc(userId).get();
+  if (!userSnapshot.exists) return 0;
+
+  const activeSeason = await getActiveSeason();
+  const gamePlaySnapshot = await firestore
+    .collection('gamePlay')
+    .where('userId', '==', userId)
+    .where('seasonId', '==', activeSeason.id)
+    .limit(1)
+    .get();
+
+  const gamePlay = gamePlaySnapshot.docs[0];
+  if (!gamePlay) return 0;
+
+  const { numberOfWorkers, startXTokenCountingTime } = gamePlay.data();
+  const { worker } = activeSeason;
+
+  const now = Date.now();
+  const start = startXTokenCountingTime.toDate().getTime();
+  const diffInDays = (now - start) / (24 * 60 * 60 * 1000);
+  const generatedXToken = Math.round(diffInDays * (numberOfWorkers * worker.dailyReward) * 1000) / 1000;
+
+  return generatedXToken;
 };
 
 /* all txn types that change user's token generation rate */

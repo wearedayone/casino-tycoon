@@ -25,6 +25,7 @@ class PopupSafeHouseUpgrade extends Popup {
   networth = 0;
   networthIncrease = 0;
   balance = 0;
+  xTokenBalance = 0;
   basePrice = 0;
   maxPerBatch = 10;
   targetDailyPurchase = 1;
@@ -74,12 +75,14 @@ class PopupSafeHouseUpgrade extends Popup {
       this.tokenChecked.setVisible(false);
       this.purchaseToken = 'xGANG';
       if (this.coin) this.coin.setTexture('icon-xgang-small');
+      this.updateValues();
     });
     this.tokenUnchecked.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
       this.xgangChecked.setVisible(false);
       this.tokenChecked.setVisible(true);
       this.purchaseToken = 'FIAT';
       if (this.coin) this.coin.setTexture('icon-coin-small');
+      this.updateValues();
     });
 
     this.xgangAvailable = scene.add.text(leftCheckBoxX + 140, availableY, 'Available: 0', smallBrownBold);
@@ -109,7 +112,7 @@ class PopupSafeHouseUpgrade extends Popup {
         this.onCompleted = null;
         this.close();
 
-        scene.game.events.emit(events.upgradeHouse, { quantity: this.quantity });
+        scene.game.events.emit(events.upgradeHouse, { quantity: this.quantity, token: this.purchaseToken });
       },
       'Upgrade',
       { fontSize: '82px', sound: 'buy' }
@@ -274,15 +277,13 @@ class PopupSafeHouseUpgrade extends Popup {
       if (isNaN(gas)) return;
 
       this.gas = gas;
-      this.estimatedMaxPurchase = estimateNumberOfBuildingCanBuy(
-        this.balance - this.gas,
-        this.salesLastPeriod,
-        this.targetDailyPurchase,
-        this.targetPrice,
-        this.basePrice,
-        this.maxPerBatch
-      );
       this.updateValues();
+    });
+
+    scene.game.events.on('update-xtoken-balance', ({ balance }) => {
+      this.xTokenBalance = balance;
+      this.xgangAvailable.text = `Available: ${customFormat(balance || 0, 1)}`;
+      if (this.purchaseToken === 'xGANG') this.updateValues();
     });
 
     scene.game.events.on(
@@ -299,6 +300,7 @@ class PopupSafeHouseUpgrade extends Popup {
         networthIncrease,
       }) => {
         this.balance = balance;
+        this.tokenAvailable.text = `Available: ${customFormat(balance || 0, 1)}`;
         this.basePrice = basePrice;
         this.maxPerBatch = maxPerBatch;
         this.targetDailyPurchase = targetDailyPurchase;
@@ -310,14 +312,6 @@ class PopupSafeHouseUpgrade extends Popup {
 
         this.numberOfBuildingsText.text = numberOfBuildings.toLocaleString();
         this.networthText.text = `${networth.toLocaleString()}`;
-        this.estimatedMaxPurchase = estimateNumberOfBuildingCanBuy(
-          balance - this.gas,
-          salesLastPeriod,
-          targetDailyPurchase,
-          targetPrice,
-          basePrice,
-          maxPerBatch
-        );
         this.updateValues();
       }
     );
@@ -340,6 +334,22 @@ class PopupSafeHouseUpgrade extends Popup {
   updateValues() {
     this.networthIncreaseText.text = `+${(this.networthIncrease * this.quantity).toLocaleString()}`;
 
+    this.estimatedMaxPurchase = estimateNumberOfBuildingCanBuy(
+      this.balance,
+      this.salesLastPeriod,
+      this.targetDailyPurchase,
+      this.targetPrice,
+      this.basePrice,
+      this.maxPerBatch
+    );
+    this.xTokenMaxPurchase = estimateNumberOfBuildingCanBuy(
+      this.xTokenBalance,
+      this.salesLastPeriod,
+      this.targetDailyPurchase,
+      this.targetPrice,
+      this.basePrice,
+      this.maxPerBatch
+    );
     const estimatedPrice = calculateNextBuildingBuyPriceBatch(
       this.salesLastPeriod,
       this.targetDailyPurchase,
@@ -355,7 +365,8 @@ class PopupSafeHouseUpgrade extends Popup {
     this.coin.x = this.priceText.x + this.priceText.width + 10;
     if (this.infoButton) this.infoButton.x = this.coin.x + this.coin.width + 30;
 
-    const insufficientBalance = this.quantity > this.estimatedMaxPurchase;
+    const maxPurchase = this.purchaseToken === 'FIAT' ? this.estimatedMaxPurchase : this.xTokenMaxPurchase;
+    const insufficientBalance = this.quantity > maxPurchase;
     this.insufficientBalance.setVisible(insufficientBalance);
     this.upgradeBtn.setDisabledState(
       this.scene?.isGameEnded || (!this.scene?.isUserActive && !this.isSimulator) || insufficientBalance
