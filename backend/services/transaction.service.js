@@ -883,37 +883,28 @@ export const getWorkerPriceChart = async ({ timeMode }) => {
 };
 
 // utils
-export const calculateGeneratedReward = async (userId, { start, end, numberOfMachines, numberOfWorkers } = {}) => {
+export const calculateGeneratedReward = async (userId) => {
   const activeSeason = await getActiveSeason();
-  if (activeSeason.status !== 'open') throw new Error('API error: Season ended');
+  // if (activeSeason.status !== 'open') throw new Error('Season ended');
 
-  const { machine, worker } = activeSeason;
+  const { machine } = activeSeason;
 
-  if (!start || !numberOfMachines || !numberOfWorkers) {
-    const gamePlaySnapshot = await firestore
-      .collection('gamePlay')
-      .where('userId', '==', userId)
-      .where('seasonId', '==', activeSeason.id)
-      .limit(1)
-      .get();
+  const gamePlaySnapshot = await firestore
+    .collection('gamePlay')
+    .where('userId', '==', userId)
+    .where('seasonId', '==', activeSeason.id)
+    .limit(1)
+    .get();
 
-    const gamePlay = gamePlaySnapshot.docs[0];
-    const {
-      startRewardCountingTime,
-      numberOfMachines: userMachinesCount,
-      numberOfWorkers: userWorkersCount,
-    } = gamePlay.data();
+  const gamePlay = gamePlaySnapshot.docs[0];
+  const { startRewardCountingTime, numberOfMachines } = gamePlay.data();
 
-    if (!start) start = startRewardCountingTime.toDate().getTime();
-    if (!numberOfMachines) numberOfMachines = userMachinesCount;
-    if (!numberOfWorkers) numberOfWorkers = userWorkersCount;
-  }
-
-  const now = end || Date.now();
+  const now = Date.now();
+  const start = startRewardCountingTime.toDate().getTime();
   const diffInDays = (now - start) / (24 * 60 * 60 * 1000);
 
-  const generatedReward = diffInDays * (numberOfMachines * machine.dailyReward + numberOfWorkers * worker.dailyReward);
-  return getAccurate(generatedReward, 3);
+  const generatedReward = diffInDays * (numberOfMachines * machine.dailyReward);
+  return Math.round(generatedReward * 1000) / 1000;
 };
 
 /* all txn types that change user's token generation rate */

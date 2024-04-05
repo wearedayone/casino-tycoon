@@ -413,7 +413,7 @@ export const calculateGeneratedReward = async (userId) => {
   const activeSeason = { id: activeSeasonId, ...activeSeasonSnapshot.data() };
   // if (activeSeason.status !== 'open') throw new Error('Season ended');
 
-  const { machine, worker } = activeSeason;
+  const { machine } = activeSeason;
 
   const gamePlaySnapshot = await firestore
     .collection('gamePlay')
@@ -423,12 +423,12 @@ export const calculateGeneratedReward = async (userId) => {
     .get();
 
   const gamePlay = gamePlaySnapshot.docs[0];
-  const { startRewardCountingTime, numberOfMachines, numberOfWorkers } = gamePlay.data();
+  const { startRewardCountingTime, numberOfMachines } = gamePlay.data();
 
   const now = Date.now();
   const start = startRewardCountingTime.toDate().getTime();
   const diffInDays = (now - start) / (24 * 60 * 60 * 1000);
 
-  const generatedReward = diffInDays * (numberOfMachines * machine.dailyReward + numberOfWorkers * worker.dailyReward);
+  const generatedReward = diffInDays * (numberOfMachines * machine.dailyReward);
   return Math.round(generatedReward * 1000) / 1000;
 };

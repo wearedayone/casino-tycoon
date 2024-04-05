@@ -318,9 +318,6 @@ class MainScene extends Phaser.Scene {
       if (y >= goonAnimation.front.end.y) {
         this.game.events.emit('animation-goon-back');
         this.game.events.emit('check-game-ended');
-        // only update claimable when gangsters return to safehouse
-        // -> uncomment if gangster & goon's running are no longer synchronized
-        // this.game.events.emit('request-claimable-reward');
         this.requestXTokenBalance();
       } else {
         const newY = Math.min(
