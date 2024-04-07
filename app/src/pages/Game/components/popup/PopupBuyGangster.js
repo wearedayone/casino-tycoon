@@ -230,7 +230,7 @@ class PopupBuyGangster extends Popup {
     this.add(this.insufficientBalance);
 
     this.coin = scene.add
-      .image(this.priceText.x + this.priceText.width + 40, counterY, 'coin2')
+      .image(this.priceText.x + this.priceText.width + 40, counterY, 'icon-coin-small')
       .setOrigin(0, 0.5)
       .setVisible(!isSimulator);
     this.add(this.coin);

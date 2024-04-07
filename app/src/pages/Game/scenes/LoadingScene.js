@@ -117,9 +117,9 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('gangster-house-15', '/images/gangster-house-15.png');
     this.load.image('gangster-house-sign', '/images/gangster-house-sign.png');
 
-    this.load.image('daily-money', '/images/daily-money.png');
-    this.load.image('eth-balance', '/images/eth-balance.png');
+    this.load.image('xgang-balance', '/images/xgang-balance.png');
     this.load.image('fiat-balance', '/images/fiat-balance.png');
+    this.load.image('eth-balance', '/images/eth-balance.png');
 
     this.load.image('popup', '/images/popup.png');
     this.load.image('popup-small', '/images/popup-small.png');
@@ -151,7 +151,6 @@ class LoadingScene extends Phaser.Scene {
 
     this.load.image('glow', '/images/glow.png');
     this.load.image('coin', '/images/coin.png');
-    this.load.image('coin2', '/images/coin-2.png');
     this.load.image('coin3', '/images/coin-3.png');
     this.load.image('guard', '/images/guard.png');
     this.load.image('mini-gangster-2', '/images/mini-gangster-2.png');
@@ -297,8 +296,11 @@ class LoadingScene extends Phaser.Scene {
 
     this.load.image('icon-chevron-right', '/images/icons/chevron-right.png');
     this.load.image('icon-check', '/images/icons/check.png');
+    this.load.image('icon-checkbox-true', '/images/icons/checkbox-true.png');
+    this.load.image('icon-checkbox-false', '/images/icons/checkbox-false.png');
     this.load.image('icon-clock', '/images/icons/clock.png');
     this.load.image('icon-coin', '/images/icons/coin.png');
+    this.load.image('icon-coin-small', '/images/icons/coin-small.png');
     this.load.image('icon-coin-mini', '/images/icons/coin-mini.png');
     this.load.image('icon-coin-done', '/images/icons/coin-done.png');
     this.load.image('icon-coin-glowing', '/images/icons/coin-glowing.png');
@@ -332,6 +334,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-star-medium', '/images/icons/star-medium.png');
     this.load.image('icon-wallet', '/images/icons/wallet.png');
     this.load.image('icon-search', '/images/icon-search.png');
+    this.load.image('icon-xgang-small', '/images/icons/xgang-small.png');
 
     this.load.image('icon-history', '/images/icon-history.png');
     this.load.image('icon-war', '/images/icon-war.png');

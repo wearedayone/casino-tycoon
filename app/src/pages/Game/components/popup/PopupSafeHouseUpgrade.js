@@ -1,3 +1,5 @@
+import Phaser from 'phaser';
+
 import Popup from './Popup';
 import PopupProcessing from './PopupProcessing';
 import TextButton from '../button/TextButton';
@@ -15,6 +17,7 @@ const largeBlackExtraBold = {
   color: colors.black,
   fontFamily: fontFamilies.extraBold,
 };
+const smallBrownBold = { fontSize: fontSizes.small, color: colors.brown, fontFamily: fontFamilies.bold };
 
 class PopupSafeHouseUpgrade extends Popup {
   gas = 0;
@@ -22,6 +25,7 @@ class PopupSafeHouseUpgrade extends Popup {
   networth = 0;
   networthIncrease = 0;
   balance = 0;
+  xTokenBalance = 0;
   basePrice = 0;
   maxPerBatch = 10;
   targetDailyPurchase = 1;
@@ -30,6 +34,7 @@ class PopupSafeHouseUpgrade extends Popup {
   quantity = DEFAULT_QUANTITY;
   onCompleted;
   isSimulator = false;
+  purchaseToken = 'FIAT'; // 'xGANG' || 'FIAT'
 
   constructor(scene, { isSimulator, onCompleted } = {}) {
     super(scene, 'popup-safehouse-upgrade', { title: 'Upgrade Safehouse', noCloseBtn: !!isSimulator });
@@ -48,6 +53,42 @@ class PopupSafeHouseUpgrade extends Popup {
     this.events = events;
     this.onCompleted = onCompleted;
     this.isSimulator = isSimulator;
+    const networthY = this.popup.y - 200;
+    const checkBoxY = this.popup.y + 390;
+    const leftCheckBoxX = this.popup.x - this.popup.width / 2 + 180;
+    const rightCheckBoxX = this.popup.x + 70;
+    const availableY = checkBoxY + 50;
+    const counterY = this.popup.y + this.popup.height / 2 - 250;
+    const minusBtnX = this.popup.x - this.popup.width / 2 + 320;
+
+    this.xgangUnchecked = scene.add.image(leftCheckBoxX, checkBoxY, 'icon-checkbox-false');
+    this.xgangChecked = scene.add.image(leftCheckBoxX, checkBoxY, 'icon-checkbox-true').setVisible(false);
+    this.tokenUnchecked = scene.add.image(rightCheckBoxX, checkBoxY, 'icon-checkbox-false');
+    this.tokenChecked = scene.add.image(rightCheckBoxX, checkBoxY, 'icon-checkbox-true');
+    this.add(this.xgangUnchecked);
+    this.add(this.xgangChecked);
+    this.add(this.tokenUnchecked);
+    this.add(this.tokenChecked);
+
+    this.xgangUnchecked.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
+      this.xgangChecked.setVisible(true);
+      this.tokenChecked.setVisible(false);
+      this.purchaseToken = 'xGANG';
+      if (this.coin) this.coin.setTexture('icon-xgang-small');
+      this.updateValues();
+    });
+    this.tokenUnchecked.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
+      this.xgangChecked.setVisible(false);
+      this.tokenChecked.setVisible(true);
+      this.purchaseToken = 'FIAT';
+      if (this.coin) this.coin.setTexture('icon-coin-small');
+      this.updateValues();
+    });
+
+    this.xgangAvailable = scene.add.text(leftCheckBoxX + 140, availableY, 'Available: 0', smallBrownBold);
+    this.tokenAvailable = scene.add.text(rightCheckBoxX + 140, availableY, 'Available: 0', smallBrownBold);
+    this.add(this.xgangAvailable);
+    this.add(this.tokenAvailable);
 
     this.popupBuyProcessing = new PopupProcessing(scene, {
       sound: 'house',
@@ -71,7 +112,7 @@ class PopupSafeHouseUpgrade extends Popup {
         this.onCompleted = null;
         this.close();
 
-        scene.game.events.emit(events.upgradeHouse, { quantity: this.quantity });
+        scene.game.events.emit(events.upgradeHouse, { quantity: this.quantity, token: this.purchaseToken });
       },
       'Upgrade',
       { fontSize: '82px', sound: 'buy' }
@@ -85,9 +126,9 @@ class PopupSafeHouseUpgrade extends Popup {
     });
     this.add(this.numberOfBuildingsText);
 
-    this.networthText = scene.add.text(this.popup.x + 380, this.popup.y - 80, '0', largeBlackExtraBold).setOrigin(1, 0);
+    this.networthText = scene.add.text(this.popup.x + 380, networthY, '0', largeBlackExtraBold).setOrigin(1, 0);
     this.networthIncreaseText = scene.add
-      .text(this.popup.x + this.popup.width * 0.4, this.popup.y, '+0', {
+      .text(this.popup.x + this.popup.width * 0.4, networthY + 80, '+0', {
         fontSize: fontSizes.small,
         color: colors.green,
         fontFamily: fontFamilies.bold,
@@ -96,8 +137,6 @@ class PopupSafeHouseUpgrade extends Popup {
     this.add(this.networthText);
     this.add(this.networthIncreaseText);
 
-    const counterY = this.popup.y + this.popup.height / 2 - 280;
-    const minusBtnX = this.popup.x - this.popup.width / 2 + 310;
     this.minusBtn = new TextButton(
       scene,
       minusBtnX,
@@ -204,13 +243,15 @@ class PopupSafeHouseUpgrade extends Popup {
       .setVisible(false);
     this.add(this.insufficientBalance);
 
-    this.coin = scene.add.image(this.priceText.x + this.priceText.width + 40, counterY, 'coin2').setOrigin(0, 0.5);
+    this.coin = scene.add
+      .image(this.priceText.x + this.priceText.width + 10, counterY, 'icon-coin-small')
+      .setOrigin(0, 0.5);
     this.add(this.coin);
 
     if (!isSimulator) {
       this.infoButton = new Button(
         scene,
-        this.coin.x + this.coin.width + 40,
+        this.coin.x + this.coin.width + 30,
         counterY - 40,
         'button-info',
         'button-info-pressed',
@@ -236,15 +277,13 @@ class PopupSafeHouseUpgrade extends Popup {
       if (isNaN(gas)) return;
 
       this.gas = gas;
-      this.estimatedMaxPurchase = estimateNumberOfBuildingCanBuy(
-        this.balance - this.gas,
-        this.salesLastPeriod,
-        this.targetDailyPurchase,
-        this.targetPrice,
-        this.basePrice,
-        this.maxPerBatch
-      );
       this.updateValues();
+    });
+
+    scene.game.events.on('update-xtoken-balance', ({ balance }) => {
+      this.xTokenBalance = balance;
+      this.xgangAvailable.text = `Available: ${customFormat(balance || 0, 1)}`;
+      if (this.purchaseToken === 'xGANG') this.updateValues();
     });
 
     scene.game.events.on(
@@ -261,6 +300,7 @@ class PopupSafeHouseUpgrade extends Popup {
         networthIncrease,
       }) => {
         this.balance = balance;
+        this.tokenAvailable.text = `Available: ${customFormat(balance || 0, 1)}`;
         this.basePrice = basePrice;
         this.maxPerBatch = maxPerBatch;
         this.targetDailyPurchase = targetDailyPurchase;
@@ -272,14 +312,6 @@ class PopupSafeHouseUpgrade extends Popup {
 
         this.numberOfBuildingsText.text = numberOfBuildings.toLocaleString();
         this.networthText.text = `${networth.toLocaleString()}`;
-        this.estimatedMaxPurchase = estimateNumberOfBuildingCanBuy(
-          balance - this.gas,
-          salesLastPeriod,
-          targetDailyPurchase,
-          targetPrice,
-          basePrice,
-          maxPerBatch
-        );
         this.updateValues();
       }
     );
@@ -302,6 +334,22 @@ class PopupSafeHouseUpgrade extends Popup {
   updateValues() {
     this.networthIncreaseText.text = `+${(this.networthIncrease * this.quantity).toLocaleString()}`;
 
+    this.estimatedMaxPurchase = estimateNumberOfBuildingCanBuy(
+      this.balance,
+      this.salesLastPeriod,
+      this.targetDailyPurchase,
+      this.targetPrice,
+      this.basePrice,
+      this.maxPerBatch
+    );
+    this.xTokenMaxPurchase = estimateNumberOfBuildingCanBuy(
+      this.xTokenBalance,
+      this.salesLastPeriod,
+      this.targetDailyPurchase,
+      this.targetPrice,
+      this.basePrice,
+      this.maxPerBatch
+    );
     const estimatedPrice = calculateNextBuildingBuyPriceBatch(
       this.salesLastPeriod,
       this.targetDailyPurchase,
@@ -314,10 +362,11 @@ class PopupSafeHouseUpgrade extends Popup {
     this.priceText.text = `${customFormat(estimatedPrice, 1)}`;
     const formattedGas = customFormat(this.gas, 4) === '0' ? '<0.0001' : customFormat(this.gas, 4);
     this.gasPrice.text = `+${formattedGas} ETH (gas)`;
-    this.coin.x = this.priceText.x + this.priceText.width + 20;
-    if (this.infoButton) this.infoButton.x = this.coin.x + this.coin.width + 40;
+    this.coin.x = this.priceText.x + this.priceText.width + 10;
+    if (this.infoButton) this.infoButton.x = this.coin.x + this.coin.width + 30;
 
-    const insufficientBalance = this.quantity > this.estimatedMaxPurchase;
+    const maxPurchase = this.purchaseToken === 'FIAT' ? this.estimatedMaxPurchase : this.xTokenMaxPurchase;
+    const insufficientBalance = this.quantity > maxPurchase;
     this.insufficientBalance.setVisible(insufficientBalance);
     this.upgradeBtn.setDisabledState(
       this.scene?.isGameEnded || (!this.scene?.isUserActive && !this.isSimulator) || insufficientBalance

@@ -80,6 +80,8 @@ const handleError = (err) => {
     const message = err.message;
     const code = err.code?.toString();
 
+    console.log({ message, code, reason: err?.reason, error: err?.error?.reason });
+
     if (message === 'Network Error') {
       return { code: '12002', message: 'Network Error' };
     }
@@ -107,7 +109,7 @@ const handleError = (err) => {
       return { code: 'INSUFFICIENT_FUNDS', message: 'Insufficient ETH' };
 
     if (code === 'UNPREDICTABLE_GAS_LIMIT' || code === '-32603') {
-      if (err.error?.reason && err.error?.reason.includes('execution reverted:')) {
+      if (err?.error?.reason && err.error?.reason.includes('execution reverted:')) {
         const error = err.error?.reason.replace('execution reverted: ', '');
         return { code: 'UNPREDICTABLE_GAS_LIMIT', message: error ? lineBreakMessage(error) : 'INSUFFICIENT GAS' };
       }
@@ -250,6 +252,7 @@ const Game = () => {
     address,
     avatarURL,
     avatarURL_big,
+    xTokenBalance,
     tokenBalance,
     ETHBalance,
     inviteCode,
@@ -257,6 +260,7 @@ const Game = () => {
     referralTotalReward = 0,
     referralTotalDiscount = 0,
   } = profile || {
+    xTokenBalance: 0,
     tokenBalance: 0,
     ETHBalance: 0,
   };
@@ -317,7 +321,8 @@ const Game = () => {
     spinConfig: { spinRewards: [] },
   };
 
-  const dailyMoney = numberOfMachines * machine.dailyReward + numberOfWorkers * worker.dailyReward;
+  const dailyToken = numberOfMachines * machine.dailyReward;
+  const dailyXToken = numberOfWorkers * worker.dailyReward;
 
   useEffect(() => {
     setStartLoadingTime(Date.now());
@@ -424,16 +429,22 @@ const Game = () => {
     }
   };
 
-  const buyBuilding = async (quantity) => {
+  const buyBuilding = async ({ quantity, token }) => {
     try {
-      const res = await create({ type: 'buy-building', amount: quantity });
-      console.log(res);
-      const { amount, value, time, nonce, signature, type, lastB } = res.data;
-      const receipt = await buySafeHouse({ type, amount, value, lastB, time, nonce, signature });
+      const res = await create({ type: 'buy-building', amount: quantity, token });
+      const { id, amount, value, time, nonce, signature, type, lastB } = res.data;
+      const receipt = await buySafeHouse({
+        type,
+        amount,
+        value: token === 'FIAT' ? value : 0,
+        lastB,
+        time,
+        nonce,
+        signature,
+      });
 
-      if (receipt.status !== 1) {
-        throw new Error('Transaction failed');
-      }
+      if (receipt.status === 1) await validate({ transactionId: id, txnHash: receipt.transactionHash });
+      else throw new Error('Transaction failed');
       return receipt.transactionHash;
     } catch (err) {
       console.error(err);
@@ -441,14 +452,13 @@ const Game = () => {
     }
   };
 
-  const buyWorker = async (quantity) => {
+  const buyWorker = async ({ quantity, token }) => {
     try {
-      const res = await create({ type: 'buy-worker', amount: quantity });
-      const { amount, value, time, nonce, signature, lastB } = res.data;
-      const receipt = await buyGoon({ amount, value, lastB, time, nonce, signature });
-      if (receipt.status !== 1) {
-        throw new Error('Transaction failed');
-      }
+      const res = await create({ type: 'buy-worker', amount: quantity, token });
+      const { id, amount, value, time, nonce, signature, lastB } = res.data;
+      const receipt = await buyGoon({ amount, value: token === 'FIAT' ? value : 0, lastB, time, nonce, signature });
+      if (receipt.status === 1) await validate({ transactionId: id, txnHash: receipt.transactionHash });
+      else throw new Error('Transaction failed');
       return receipt.transactionHash;
     } catch (err) {
       console.error(err);
@@ -519,9 +529,19 @@ const Game = () => {
   calculateClaimableRewardRef.current = () => {
     if (!gamePlay?.startRewardCountingTime) return;
     const diffInDays = (Date.now() - gamePlay.startRewardCountingTime.toDate().getTime()) / MILISECONDS_IN_A_DAY;
-    const claimableReward = gamePlay.pendingReward + diffInDays * dailyMoney;
+    const claimableReward = gamePlay.pendingReward + diffInDays * dailyToken;
     gameRef.current?.events.emit('update-claimable-reward', { reward: claimableReward });
     gameRef.current?.events.emit('claimable-reward-added');
+  };
+
+  const calculateXTokenBalanceRef = useRef();
+  calculateXTokenBalanceRef.current = () => {
+    if (!gamePlay?.startXTokenCountingTime) return;
+    const diffInDays = (Date.now() - gamePlay.startXTokenCountingTime.toDate().getTime()) / MILISECONDS_IN_A_DAY;
+    const newEarnedXToken = diffInDays * dailyXToken;
+    const newXTokenBalance = xTokenBalance + newEarnedXToken;
+    console.log({ newXTokenBalance, startXTokenCountingTime: gamePlay?.startXTokenCountingTime });
+    gameRef.current?.events.emit('update-xtoken-balance', { balance: newXTokenBalance });
   };
 
   const checkGameEndRef = useRef();
@@ -636,7 +656,7 @@ const Game = () => {
 
           const now = Date.now();
           const diffInDays = (now - startTime) / MILISECONDS_IN_A_DAY;
-          const claimableReward = Math.abs(diffInDays * dailyMoney);
+          const claimableReward = Math.abs(diffInDays * dailyToken);
           gameRef.current?.events.emit('update-user-away-reward', { showWarPopup, claimableReward });
           setOnlineListener(true);
         } catch (err) {
@@ -672,7 +692,7 @@ const Game = () => {
       });
 
       gameRef.current?.events.on('request-balances', () => {
-        gameRef.current.events.emit('update-balances', { dailyMoney, ETHBalance, tokenBalance });
+        gameRef.current.events.emit('update-balances', { ETHBalance, tokenBalance });
       });
 
       gameRef.current?.events.on('request-deposit-code', () => {
@@ -760,6 +780,7 @@ const Game = () => {
       });
 
       gameRef.current?.events.on('request-claimable-reward', () => calculateClaimableRewardRef.current?.());
+      gameRef.current?.events.on('request-xtoken-balance', () => calculateXTokenBalanceRef.current?.());
       gameRef.current?.events.on('check-game-ended', () => checkGameEndRef.current?.());
 
       gameRef.current?.events.on('request-claimable-status', () => {
@@ -891,9 +912,9 @@ const Game = () => {
         gameRef.current.events.emit('update-gas-upgrade-safehouse', { gas: estimatedGas?.game?.buySafeHouse });
       });
 
-      gameRef.current?.events.on('upgrade-safehouse', async ({ quantity }) => {
+      gameRef.current?.events.on('upgrade-safehouse', async ({ quantity, token }) => {
         try {
-          const txnHash = await buyBuilding(quantity);
+          const txnHash = await buyBuilding({ quantity, token });
           gameRef.current?.events.emit('upgrade-safehouse-completed', { txnHash, amount: quantity });
         } catch (err) {
           const { message, code } = handleError(err);
@@ -919,9 +940,9 @@ const Game = () => {
         });
       });
 
-      gameRef.current?.events.on('buy-goon', async ({ quantity }) => {
+      gameRef.current?.events.on('buy-goon', async ({ quantity, token }) => {
         try {
-          const txnHash = await buyWorker(quantity);
+          const txnHash = await buyWorker({ quantity, token });
           gameRef.current?.events.emit('buy-goon-completed', { txnHash, amount: quantity });
         } catch (err) {
           const { message, code } = handleError(err);
@@ -1338,8 +1359,8 @@ const Game = () => {
   }, [estimatedGas?.game?.buySafeHouse]);
 
   useEffect(() => {
-    gameRef.current?.events.emit('update-balances', { dailyMoney, ETHBalance, tokenBalance });
-  }, [tokenBalance, ETHBalance, dailyMoney]);
+    gameRef.current?.events.emit('update-balances', { ETHBalance, tokenBalance });
+  }, [tokenBalance, ETHBalance]);
 
   useEffect(() => {
     gameRef.current?.events.emit('update-balances-for-withdraw', {
@@ -1425,10 +1446,10 @@ const Game = () => {
   useEffect(() => {
     if (gamePlay?.startRewardCountingTime && gamePlay?.pendingReward) {
       const diffInDays = (Date.now() - gamePlay?.startRewardCountingTime.toDate().getTime()) / MILISECONDS_IN_A_DAY;
-      const claimableReward = gamePlay?.pendingReward + diffInDays * dailyMoney;
+      const claimableReward = gamePlay?.pendingReward + diffInDays * dailyToken;
       gameRef.current?.events.emit('update-claimable-reward', { reward: claimableReward });
     }
-  }, [gamePlay?.startRewardCountingTime, gamePlay?.pendingreward, dailyMoney]);
+  }, [gamePlay?.startRewardCountingTime, gamePlay?.pendingreward, dailyToken]);
 
   useEffect(() => {
     if (gamePlay) {
@@ -1589,6 +1610,12 @@ const Game = () => {
       });
     }
   }, [warConfig]);
+
+  useEffect(() => {
+    if (gamePlay?.startXTokenCountingTime) {
+      calculateXTokenBalanceRef.current?.();
+    }
+  }, [xTokenBalance, gamePlay?.startXTokenCountingTime]);
 
   useEffect(() => {
     gameRef.current?.events.emit('update-spin-rewards', {

@@ -1,6 +1,5 @@
 import Phaser from 'phaser';
 
-import DailyMoney from './DailyMoney';
 import Balance from './Balance';
 import configs from '../../configs/configs';
 import { formatter, customFormat } from '../../../../utils/numbers';
@@ -21,6 +20,8 @@ class Header extends Phaser.GameObjects.Container {
       updateBalanes: isSimulator ? 'simulator-update-balances' : 'update-balances',
       claimCompleted: isSimulator ? 'simulator-claim-completed' : 'claim-completed',
       requestBalances: isSimulator ? 'simulator-request-balances' : 'request-balances',
+      requestXTokenBalance: isSimulator ? 'simulator-request-xtoken-balance' : 'request-xtoken-balance',
+      updateXTokenBalance: isSimulator ? 'simulator-update-xtoken-balance' : 'update-xtoken-balance',
     };
 
     this.addedAmount = scene.add
@@ -32,11 +33,11 @@ class Header extends Phaser.GameObjects.Container {
       .setOrigin(0.5, 0);
     this.addedAmount.setStroke(colors.brown, 10);
 
-    this.dailyMoney = new DailyMoney(scene, width / 2 - gap, y, 0);
+    this.xTokenBalance = new Balance(scene, width / 2 - gap, y, () => scene.popupBuyGoon?.open(), 'xgang-balance', 0);
     this.fiatBalance = new Balance(scene, width / 2, y, () => scene.popupSwap?.open(), 'fiat-balance', 0);
     this.ethBalance = new Balance(scene, width / 2 + gap, y, () => scene.popupDeposit.open(), 'eth-balance', 0);
 
-    this.add(this.dailyMoney);
+    this.add(this.xTokenBalance);
     this.add(this.fiatBalance);
     this.add(this.ethBalance);
 
@@ -54,13 +55,19 @@ class Header extends Phaser.GameObjects.Container {
       });
     });
 
+    scene.game.events.on(events.updateXTokenBalance, (data) => this.updateXTokenBalance(data));
+
     scene.game.events.emit(events.requestBalances);
+    scene.game.events.emit(events.requestXTokenBalance);
   }
 
-  updateValues({ dailyMoney, ETHBalance, tokenBalance }) {
-    this.dailyMoney.updateValue(dailyMoney);
+  updateValues({ ETHBalance, tokenBalance }) {
     this.fiatBalance.updateValue(customFormat(tokenBalance || 0, 1));
     this.ethBalance.updateValue(formatter.format(ETHBalance));
+  }
+
+  updateXTokenBalance({ balance }) {
+    this.xTokenBalance.updateValue(customFormat(balance || 0, 1));
   }
 }
 
