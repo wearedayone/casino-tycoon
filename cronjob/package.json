@@ -7,6 +7,7 @@
   "scripts": {
     "cron:demo": "env-cmd -f .env.demo node index.js",
     "cron:stg": "env-cmd -f .env.stg node index.js",
+    "cron:stg-v2": "env-cmd -f .env.stg-v2 node index.js",
     "cron:prd": "env-cmd -f .env.prd node index.js"
   },
   "dependencies": {

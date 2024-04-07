@@ -28,3 +28,4 @@ app/.env.stg-v2
 backend/.env.stg-v2
 script/.env.stg-v2
 listener/.env.stg-v2
+cronjob/.env.stg-v2
