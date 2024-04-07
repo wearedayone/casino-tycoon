@@ -387,7 +387,7 @@ const useSmartContract = () => {
     const pairContract = new Contract(pairAddress, PairABI.abi, privyProvider.provider);
 
     const totalFees = await tokenContract.totalFees();
-    const swapReceivePercent = (1000 - Number(totalFees.toString())) / 1000;
+    const swapReceivePercent = (10000 - Number(totalFees.toString())) / 10000;
 
     return {
       routerAddress,
