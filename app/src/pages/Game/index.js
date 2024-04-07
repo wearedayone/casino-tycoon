@@ -10,6 +10,7 @@ import * as Sentry from '@sentry/react';
 import useUserStore from '../../stores/user.store';
 import useSystemStore from '../../stores/system.store';
 import useSettingStore from '../../stores/setting.store';
+import useSpinStore from '../../stores/spin.store';
 import {
   applyInviteCode,
   getRank,
@@ -18,7 +19,7 @@ import {
   updateBalance,
   checkUserCode,
 } from '../../services/user.service';
-import { claimToken, getWorkerPrices, getBuildingPrices } from '../../services/transaction.service';
+import { claimToken, getWorkerPrices, getBuildingPrices, validateDailySpin } from '../../services/transaction.service';
 import {
   getLeaderboard,
   getNextWarSnapshotUnixTime,
@@ -33,7 +34,7 @@ import {
   getLatestWarResult,
 } from '../../services/war.service';
 import QueryKeys from '../../utils/queryKeys';
-import { calculateHouseLevel } from '../../utils/formulas';
+import { calculateHouseLevel, calculateSpinPrice } from '../../utils/formulas';
 import useSmartContract from '../../hooks/useSmartContract';
 import { create, validate } from '../../services/transaction.service';
 
@@ -79,8 +80,6 @@ const handleError = (err) => {
     const message = err.message;
     const code = err.code?.toString();
 
-    console.log({ message, code, reason: err.reason, error: err.error.reason });
-
     if (message === 'Network Error') {
       return { code: '12002', message: 'Network Error' };
     }
@@ -108,8 +107,8 @@ const handleError = (err) => {
       return { code: 'INSUFFICIENT_FUNDS', message: 'Insufficient ETH' };
 
     if (code === 'UNPREDICTABLE_GAS_LIMIT' || code === '-32603') {
-      if (err.error.reason && err.error.reason.includes('execution reverted:')) {
-        const error = err.error.reason.replace('execution reverted: ', '');
+      if (err.error?.reason && err.error?.reason.includes('execution reverted:')) {
+        const error = err.error?.reason.replace('execution reverted: ', '');
         return { code: 'UNPREDICTABLE_GAS_LIMIT', message: error ? lineBreakMessage(error) : 'INSUFFICIENT GAS' };
       }
 
@@ -165,6 +164,7 @@ const Game = () => {
     buySafeHouse,
     buyMachine,
     buyGoon,
+    dailySpin,
     retire,
     swapEthToToken,
     swapTokenToEth,
@@ -189,6 +189,9 @@ const Game = () => {
     enableBuildingSalesTracking,
     disableBuildingSalesTracking,
   } = useSalesLast24h();
+
+  const spinInitialized = useSpinStore((state) => state.initialized);
+  const spinned = useSpinStore((state) => state.spinned);
 
   const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -291,6 +294,7 @@ const Game = () => {
     reservePoolReward,
     houseLevels,
     prizePoolConfig,
+    spinConfig: { spinRewards },
   } = activeSeason || {
     rankPrizePool: 0,
     reputationPrizePool: 0,
@@ -310,6 +314,7 @@ const Game = () => {
       // reputation leaderboard
       earlyRetirementTax: 0,
     },
+    spinConfig: { spinRewards: [] },
   };
 
   const dailyMoney = numberOfMachines * machine.dailyReward + numberOfWorkers * worker.dailyReward;
@@ -475,6 +480,25 @@ const Game = () => {
     }
   };
 
+  const initDailySpin = async () => {
+    try {
+      await delay(2000); // delay 2s to spin
+      const res = await create({ type: 'daily-spin' });
+      const { id, spinType, amount, value, lastSpin, time, nonce, signature } = res.data;
+      const receipt = await dailySpin({ spinType, amount, value, lastSpin, time, nonce, signature });
+      if (receipt.status !== 1) {
+        throw new Error('Transaction failed');
+      }
+      const txnHash = receipt.transactionHash;
+      const res1 = await validateDailySpin({ transactionId: id, txnHash });
+      const { result } = res1.data;
+      gameRef.current?.events.emit('spin-result', { destinationIndex: result });
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
+  };
+
   const startRetirement = async () => {
     try {
       const res = await create({ type: 'retire' });
@@ -579,6 +603,13 @@ const Game = () => {
         gameRef.current?.events.emit('update-user-completed-tutorial', { completed });
       });
 
+      gameRef.current?.events.on('request-spin-rewards', () => {
+        gameRef.current?.events.emit('update-spin-rewards', {
+          spinRewards: JSON.parse(JSON.stringify(spinRewards)).sort((item1, item2) => item1.order - item2.order),
+          spinPrice: calculateSpinPrice(networth),
+        });
+      });
+
       gameRef.current?.events.on('export-wallet', exportWallet);
       gameRef.current?.events.on('log-out', logout);
       gameRef.current?.events.on('toggle-game-sound', toggleSound);
@@ -611,6 +642,11 @@ const Game = () => {
         } catch (err) {
           console.error(err);
           Sentry.captureException(err);
+        }
+      });
+      gameRef.current?.events.on('request-spinned-status', () => {
+        if (spinInitialized) {
+          gameRef.current?.events.emit('update-spinned-status', { spinned });
         }
       });
       gameRef.current?.events.on('request-app-version', () => {
@@ -894,6 +930,25 @@ const Game = () => {
             code,
             message,
           });
+        }
+      });
+
+      gameRef.current?.events.on('daily-spin', async () => {
+        try {
+          await initDailySpin();
+        } catch (err) {
+          if (err.message === 'Already spin today') {
+            gameRef.current?.events.emit('spin-error', {
+              code: '4001',
+              message: err.message,
+            });
+          } else {
+            const { message, code } = handleError(err);
+            gameRef.current?.events.emit('spin-error', {
+              code,
+              message,
+            });
+          }
         }
       });
 
@@ -1534,6 +1589,19 @@ const Game = () => {
       });
     }
   }, [warConfig]);
+
+  useEffect(() => {
+    gameRef.current?.events.emit('update-spin-rewards', {
+      spinRewards: JSON.parse(JSON.stringify(spinRewards)).sort((item1, item2) => item1.order - item2.order),
+      spinPrice: calculateSpinPrice(networth),
+    });
+  }, [spinRewards, networth]);
+
+  useEffect(() => {
+    if (spinInitialized) {
+      gameRef.current?.events.emit('update-spinned-status', { spinned });
+    }
+  }, [spinInitialized, spinned]);
 
   return (
     <Box

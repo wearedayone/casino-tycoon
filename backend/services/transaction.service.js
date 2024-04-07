@@ -1,4 +1,6 @@
 import { formatEther, parseEther } from '@ethersproject/units';
+import moment from 'moment';
+
 import admin, { firestore } from '../configs/firebase.config.js';
 import quickNode from '../configs/quicknode.config.js';
 import { getActiveSeason, updateSeasonSnapshotSchedule } from './season.service.js';
@@ -6,9 +8,11 @@ import { getLeaderboard } from './gamePlay.service.js';
 import {
   claimToken as claimTokenTask,
   decodeTokenTxnLogs,
+  decodeGameTxnLogs,
   isMinted,
   signMessageBuyGangster,
   signMessageRetire,
+  signMessageDailySpin,
   getTokenBalance,
   getNoGangster,
   convertEthInputToToken,
@@ -21,6 +25,7 @@ import {
   calculateNextBuildingBuyPrice,
   calculateNextWorkerBuyPrice,
   calculateNewEstimatedEndTimeUnix,
+  calculateSpinPrice,
 } from '../utils/formulas.js';
 import { getAccurate } from '../utils/math.js';
 import logger from '../utils/logger.js';
@@ -31,6 +36,9 @@ const { SYSTEM_ADDRESS } = environments;
 export const initTransaction = async ({ userId, type, ...data }) => {
   logger.info(`init transaction user:${userId} - type:${type}`);
   const activeSeason = await getActiveSeason();
+
+  const utcDate = moment().utc().format('DD/MM/YYYY');
+  const todayStartTime = moment(`${utcDate} 00:00:00`, 'DD/MM/YYYY HH:mm:ss').utc(true).toDate().getTime();
 
   if (type !== 'withdraw' && data.token !== 'NFT' && activeSeason.status !== 'open')
     throw new Error('API error: Season ended');
@@ -45,6 +53,20 @@ export const initTransaction = async ({ userId, type, ...data }) => {
 
   if (type === 'buy-building') {
     if (data.amount > activeSeason.building.maxPerBatch) throw new Error('API error: Bad request - over max per batch');
+  }
+
+  if (type === 'daily-spin') {
+    const utcDate = moment().utc().format('DD/MM/YYYY');
+    const todayStartTime = moment(`${utcDate} 00:00:00`, 'DD/MM/YYYY HH:mm:ss').utc(true).toDate().getTime();
+    const existedSnapshot = await firestore
+      .collection('transaction')
+      .where('seasonId', '==', activeSeason.id)
+      .where('userId', '==', userId)
+      .where('type', '==', 'daily-spin')
+      .where('status', 'in', ['Pending', 'Success'])
+      .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(todayStartTime))
+      .get();
+    if (!existedSnapshot.empty) throw new Error('API error: Already spin today');
   }
 
   const { machine, machineSold, workerSold, buildingSold, worker, building, referralConfig, prizePoolConfig } =
@@ -156,6 +178,16 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       txnData.value = retireReward;
       txnData.token = 'ETH';
       break;
+    case 'daily-spin':
+      const userGamePlay = await firestore
+        .collection('gamePlay')
+        .where('userId', '==', userId)
+        .where('seasonId', '==', activeSeason.id)
+        .limit(1)
+        .get();
+      const gamePlay = userGamePlay.docs[0]?.data();
+      txnData.value = calculateSpinPrice(gamePlay?.networth || 0);
+      txnData.token = 'FIAT';
     default:
       break;
   }
@@ -246,7 +278,119 @@ export const initTransaction = async ({ userId, type, ...data }) => {
     }
   }
 
+  if (type === 'daily-spin') {
+    const userData = await firestore.collection('user').doc(userId).get();
+    if (userData.exists) {
+      const { address } = userData.data();
+      const time = Math.floor(Date.now() / 1000);
+      const spinType = 1;
+      const amount = 1;
+      const lastSpin = 0;
+      const value = parseEther(txnData.value + '');
+      const signedData = { address, spinType, amount, value, lastSpin, time, nonce };
+      const signature = await signMessageDailySpin(signedData);
+      return { id: newTransaction.id, ...transaction, spinType, amount, lastSpin, time, nonce, signature };
+    }
+  }
+
   return { id: newTransaction.id, ...transaction };
+};
+
+export const validateDailySpinTxnAndReturnSpinResult = async ({ userId, transactionId, txnHash }) => {
+  // spin txn validations:
+  // - txnHash not used
+  // - user has one pending txn with transactionId
+  // - user call api === txn owner
+  // - user address === txn from address
+  // - game address === txn to address
+  // - txn status === 1
+  // - game contract burn correct amount of token
+  const existed = await firestore.collection('transaction').where('txnHash', '==', txnHash).get();
+  if (!existed.empty) throw new Error('API error: Transaction duplicated');
+
+  const snapshot = await firestore.collection('transaction').doc(transactionId).get();
+  if (!snapshot.exists) throw new Error('API error: Not found');
+
+  const { userId: txnUserId, status, value } = snapshot.data();
+  if (txnUserId !== userId) throw new Error('API error: Bad credential');
+  if (status !== 'Pending') throw new Error('API error: Bad request');
+
+  const receipt = await quickNode.waitForTransaction(txnHash);
+  const { from, to, status: txnStatus, logs } = receipt;
+  if (txnStatus !== 1) throw new Error('API error: Invalid txn status');
+
+  console.log('validate spin txn logs', { logs });
+
+  const activeSeason = await getActiveSeason();
+
+  const {
+    id: activeSeasonId,
+    gameAddress,
+    spinConfig: { spinRewards },
+  } = activeSeason;
+  const user = await firestore.collection('user').doc(userId).get();
+  const { address } = user.data();
+  if (from.toLowerCase() !== address.toLowerCase()) throw new Error('API error: Bad credential');
+  if (to.toLowerCase() !== gameAddress.toLowerCase()) throw newError('API error: Bad credential');
+
+  const decodedData = await decodeGameTxnLogs('DailySpin', logs[1]);
+  const price = Number(formatEther(decodedData[1]));
+  if (price !== value) throw new Error('API error: Mismatching price');
+
+  const { reward, index } = randomSpinResult(spinRewards);
+
+  if (reward.type === 'house') {
+    const gamePlaySnapshot = await firestore
+      .collection('gamePlay')
+      .where('userId', '==', userId)
+      .where('seasonId', '==', activeSeasonId)
+      .limit(1)
+      .get();
+    if (!gamePlaySnapshot.empty) {
+      await gamePlaySnapshot.docs[0].ref.update({
+        numberOfBuildings: admin.firestore.FieldValue.increment(reward.value),
+      });
+    }
+
+    await snapshot.ref.update({ txnHash, status: 'Success', reward: { type: reward.type, value: reward.value } });
+  }
+
+  if (reward.type === 'point') {
+    const userSnapshot = await firestore.collection('user').doc(userId).get();
+    if (userSnapshot.exists) {
+      const { address } = userSnapshot.data();
+
+      const { txnHash, status } = await claimTokenTask({
+        address,
+        amount: BigInt(parseEther(reward.value.toString()).toString()),
+      });
+
+      await snapshot.ref.update({
+        txnHash,
+        status: 'Success',
+        reward: { type: reward.type, value: reward.value, rewardTxnHash: txnHash, rewardTxnStatus: status },
+      });
+    }
+  }
+
+  return index;
+};
+
+const randomSpinResult = (spinRewards) => {
+  const randomPercentage = Math.random();
+
+  let cumulativePercentage = 0;
+
+  spinRewards.sort((item1, item2) => item1.order - item2.order);
+
+  for (let i = 0; i < spinRewards.length; i++) {
+    const reward = spinRewards[i];
+    cumulativePercentage += reward.percentage;
+
+    if (cumulativePercentage >= randomPercentage) {
+      return { reward, index: i };
+    }
+  }
 };
 
 const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
