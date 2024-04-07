@@ -1,7 +1,4 @@
 {
-  "_format": "hh-sol-artifact-1",
-  "contractName": "Gangster",
-  "sourceName": "contracts/Gangster.sol",
   "abi": [
     {
       "inputs": [
@@ -520,9 +517,9 @@
           "type": "address[]"
         },
         {
-          "internalType": "uint256[]",
+          "internalType": "uint256",
           "name": "tokenId",
-          "type": "uint256[]"
+          "type": "uint256"
         },
         {
           "internalType": "uint256[]",

@@ -220,6 +220,49 @@ const useSmartContract = () => {
     return receipt;
   };
 
+  const dailySpin = async ({ spinType, amount, value, lastSpin, time, nonce, signature }) => {
+    if (!loadedAssets) return;
+    const privyProvider = await embeddedWallet.getEthereumProvider();
+    const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
+    const tokenContract = new Contract(TOKEN_ADDRESS, tokenAbi.abi, privyProvider.provider);
+
+    const res = await tokenContract.allowance(embeddedWallet.address, GAME_CONTRACT_ADDRESS);
+    const approvedAmountInWei = res.toString();
+    const approvedAmountInToken = Number(approvedAmountInWei.slice(0, approvedAmountInWei.length - 18));
+    const needApprovedMore = approvedAmountInToken < value;
+
+    if (needApprovedMore) {
+      // eslint-disable-next-line no-undef
+      const approveValueBigint = BigInt(parseEther(1e9 + '').toString());
+      const data = tokenContract.interface.encodeFunctionData('approve', [GAME_CONTRACT_ADDRESS, approveValueBigint]);
+      const unsignedTx = {
+        to: TOKEN_ADDRESS,
+        chainId: Number(NETWORK_ID),
+        data,
+      };
+      await sendTransaction(unsignedTx);
+      await delay(1000);
+    }
+
+    // eslint-disable-next-line no-undef
+    const valueBigint = BigInt(parseEther(value + '').toString());
+    const data = gameContract.interface.encodeFunctionData('spin', [
+      spinType,
+      amount,
+      valueBigint,
+      lastSpin,
+      time,
+      nonce,
+      signature,
+    ]);
+    const unsignedTx = { to: GAME_CONTRACT_ADDRESS, chainId: Number(NETWORK_ID), data };
+
+    const receipt = await sendTransaction(unsignedTx);
+    console.log('daily spin', receipt);
+
+    return receipt;
+  };
+
   const withdrawNFT = async (address, amount) => {
     if (!loadedAssets) return;
     const privyProvider = await embeddedWallet.getEthereumProvider();
@@ -533,6 +576,7 @@ const useSmartContract = () => {
     buyMachine,
     buyGoon,
     buySafeHouse,
+    dailySpin,
     withdrawETH,
     withdrawToken,
     withdrawNFT,

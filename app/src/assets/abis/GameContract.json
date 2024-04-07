@@ -1,7 +1,4 @@
 {
-  "_format": "hh-sol-artifact-1",
-  "contractName": "GangsterArena",
-  "sourceName": "contracts/GangsterArena.sol",
   "abi": [
     {
       "inputs": [
@@ -1109,7 +1106,5 @@
       "stateMutability": "payable",
       "type": "receive"
     }
-  ],
-  "linkReferences": {},
-  "deployedLinkReferences": {}
+  ]
 }

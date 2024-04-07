@@ -33,6 +33,8 @@ import PopupWarAttackDetail from '../components/popup/PopupWarAttackDetail';
 import PopupWarHistoryDetail from '../components/popup/PopupWarHistoryDetail';
 import PopupGoonPrice from '../components/popup/PopupGoonPrice';
 import PopupSafehousePrice from '../components/popup/PopupSafehousePrice';
+import PopupDailySpin from '../components/popup/PopupDailySpin';
+import PopupSpinReward from '../components/popup/PopupSpinReward';
 
 const { goonAnimation, gangsterAnimation, width } = configs;
 
@@ -65,6 +67,7 @@ class MainScene extends Phaser.Scene {
   isGameEnded = false;
   isUserActive = false;
   isFromTutorial = false;
+  isSpinning = false;
   timeout = null;
   timeout2 = null;
 
@@ -212,13 +215,20 @@ class MainScene extends Phaser.Scene {
       this.popupWarAttack = new PopupWarAttack(this);
       this.add.existing(this.popupWarAttack);
 
+      this.popupDailySpin = new PopupDailySpin(this);
+      this.add.existing(this.popupDailySpin);
+
       const footer = new Footer(this, 2600);
       footer.setDepth(1);
       this.add.existing(footer);
     });
 
-    const infoButtons = new InfoButtons(this, 550);
-    this.add.existing(infoButtons);
+    this.popupSpinReward = new PopupSpinReward(this);
+    this.popupSpinReward.setDepth(2);
+    this.add.existing(this.popupSpinReward);
+
+    this.infoButtons = new InfoButtons(this, 550);
+    this.add.existing(this.infoButtons);
     this.game.events.on('update-user-away-reward', ({ showWarPopup, claimableReward }) => {
       this.popupWelcome = showWarPopup
         ? new PopupWelcomeWar(this, claimableReward)
@@ -232,13 +242,40 @@ class MainScene extends Phaser.Scene {
     this.game.events.on('update-active-status', ({ active }) => {
       this.isUserActive = active;
     });
+
+    this.game.events.on('update-spinned-status', ({ spinned }) => {
+      this.infoButtons?.spinButton?.setVisible(!spinned);
+    });
     this.game.events.emit('request-game-ended-status');
     this.game.events.emit('request-active-status');
     this.game.events.emit('request-deposit-code');
-    if (!this.isFromTutorial) this.game.events.emit('request-user-away-reward');
+    if (!this.isFromTutorial) {
+      this.game.events.emit('request-user-away-reward');
+    }
   }
 
-  create() {}
+  create() {
+    this.spinListener();
+  }
+
+  spinListener() {
+    this.game.events.on('start-spin', () => {
+      if (this.isSpinning) return;
+      this.isSpinning = true;
+      this.game.events.emit('daily-spin');
+    });
+
+    this.game.events.on('stop-spin', (reward) => {
+      this.isSpinning = false;
+      if (reward) {
+        setTimeout(() => {
+          this.popupDailySpin && (this.popupDailySpin.loading = false);
+          this.popupDailySpin?.close();
+          this.popupSpinReward?.showReward(reward);
+        }, 1500);
+      }
+    });
+  }
 
   updateAnimationPositions(delta) {
     if (this.animationLayer.gangsterAction === 'back') {
@@ -335,8 +372,14 @@ class MainScene extends Phaser.Scene {
     }
   }
 
+  updateSpin() {
+    if (!this.isSpinning) return;
+    this.game.events.emit('continue-spin');
+  }
+
   update(_time, delta) {
     this.updateAnimationPositions(delta);
+    this.updateSpin();
   }
 }
 

@@ -190,7 +190,6 @@ class PopupSwap extends Popup {
       'button-green',
       'button-green-pressed',
       () => {
-        console.log('approve');
         if (this.loading) return;
 
         // TODO: show validation to user
@@ -328,7 +327,6 @@ class PopupSwap extends Popup {
   }
 
   setLoading(state) {
-    console.log('setLoading', state);
     this.loading = state;
     this.buttonApprove.setDisabledState(state);
   }
@@ -345,7 +343,6 @@ class PopupSwap extends Popup {
   }
 
   updateBalance({ ETHBalance, tokenBalance }) {
-    console.log({ ETHBalance, tokenBalance });
     this.ethBalance = ETHBalance;
     this.tokenBalance = tokenBalance;
     this.balanceText.text = `${formatter.format(this.tokenSwap === 'eth' ? ETHBalance : tokenBalance)}`;
