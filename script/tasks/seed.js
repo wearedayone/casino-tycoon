@@ -170,6 +170,7 @@ const main = async () => {
   for (let user of userSnapshot.docs) {
     await firestore.collection('user').doc(user.id).update({
       tokenBalance: 0,
+      xTokenBalance: 0,
     });
   }
 

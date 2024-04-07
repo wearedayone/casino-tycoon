@@ -69,6 +69,7 @@ class MainScene extends Phaser.Scene {
   isFromTutorial = false;
   isSpinning = false;
   timeout = null;
+  timeout2 = null;
 
   constructor() {
     super('MainScene');
@@ -86,6 +87,16 @@ class MainScene extends Phaser.Scene {
 
     this.timeout = setTimeout(() => {
       this.game.events.emit('request-claimable-reward');
+    }, 200);
+  }
+
+  requestXTokenBalance() {
+    if (this.timeout2) {
+      clearTimeout(this.timeout2);
+    }
+
+    this.timeout2 = setTimeout(() => {
+      this.game.events.emit('request-xtoken-balance');
     }, 200);
   }
 
@@ -344,10 +355,7 @@ class MainScene extends Phaser.Scene {
       if (y >= goonAnimation.front.end.y) {
         this.game.events.emit('animation-goon-back');
         this.game.events.emit('check-game-ended');
-        // only update claimable when gangsters return to safehouse
-        // -> uncomment if gangster & goon's running are no longer synchronized
-        // this.game.events.emit('request-claimable-reward');
-        this.requestClaimableReward();
+        this.requestXTokenBalance();
       } else {
         const newY = Math.min(
           this.animationLayer.goonFront.y + goonFrontAnimationSpeed.y * delta,

@@ -8,7 +8,7 @@ import provider from '../configs/provider.config.js';
 import environments from '../utils/environments.js';
 import logger from '../utils/logger.js';
 import { GangsterEvent } from '../utils/constants.js';
-import { getActiveSeason } from '../services/season.service.js';
+import { getActiveSeason, getActiveSeasonId } from '../services/season.service.js';
 
 const { NETWORK_ID } = environments;
 
@@ -81,10 +81,10 @@ const processMintEvent = async ({ to, tokenId, amount, nonce, event, contract, n
     });
 
     // TODO: update separate fields: rankPrizePool, reputationPrizePool, burnValue, devFee
-    const prizePool = await contract.getPrizeBalance();
+    const prizePool = await contract.rankPrize();
     await updatePrizePool(parseFloat(formatEther(prizePool)).toFixed(6));
 
-    const retirePool = await contract.getRetireBalance();
+    const retirePool = await contract.reputationPrize();
     await updateReputationPool(parseFloat(formatEther(retirePool)).toFixed(6));
   } catch (err) {
     logger.error(err);
@@ -192,6 +192,7 @@ const processBuyGoonEvent = async ({ to, amount, nonce, event, contract }) => {
       const txnData = txn.docs[0].data();
       await firestore.collection('transaction').doc(txnId).update({
         status: 'Success',
+        txnHash: transactionHash,
       });
       const { prices, value, seasonId, createdAt } = txnData;
       await firestore
@@ -223,6 +224,7 @@ const processBuySafeHouseEvent = async ({ to, amount, nonce, event, contract }) 
       const txnData = txn.docs[0].data();
       await firestore.collection('transaction').doc(txnId).update({
         status: 'Success',
+        txnHash: transactionHash,
       });
 
       const { prices, value, seasonId, createdAt } = txnData;
@@ -353,15 +355,16 @@ const increaseGoon = async ({ address, amount }) => {
       .get();
     if (!gamePlay.empty) {
       const now = Date.now();
-      const generatedReward = await calculateGeneratedReward(user.docs[0].id);
+      const generatedXToken = await calculateGeneratedXToken(user.docs[0].id);
       await firestore
         .collection('gamePlay')
         .doc(gamePlay.docs[0].id)
         .update({
           numberOfWorkers: admin.firestore.FieldValue.increment(amount),
-          startRewardCountingTime: admin.firestore.Timestamp.fromMillis(now),
-          pendingReward: admin.firestore.FieldValue.increment(generatedReward),
+          startXTokenCountingTime: admin.firestore.Timestamp.fromMillis(now),
         });
+
+      await user.docs[0].ref.update({ xTokenBalance: admin.firestore.FieldValue.increment(generatedXToken) });
     }
 
     await firestore
@@ -433,13 +436,9 @@ const updateReputationPool = async (value) => {
 };
 
 const calculateGeneratedReward = async (userId) => {
-  const system = await firestore.collection('system').doc('default').get();
-  const { activeSeasonId } = system.data();
-  const activeSeasonSnapshot = await firestore.collection('season').doc(activeSeasonId).get();
-  const activeSeason = { id: activeSeasonId, ...activeSeasonSnapshot.data() };
-  // if (activeSeason.status !== 'open') throw new Error('Season ended');
+  const activeSeason = await getActiveSeason();
 
-  const { machine, worker } = activeSeason;
+  const { machine } = activeSeason;
 
   const gamePlaySnapshot = await firestore
     .collection('gamePlay')
@@ -449,14 +448,50 @@ const calculateGeneratedReward = async (userId) => {
     .get();
 
   const gamePlay = gamePlaySnapshot.docs[0];
-  const { startRewardCountingTime, numberOfMachines, numberOfWorkers } = gamePlay.data();
+  const { startRewardCountingTime, numberOfMachines } = gamePlay.data();
 
   const now = Date.now();
   const start = startRewardCountingTime.toDate().getTime();
   const diffInDays = (now - start) / (24 * 60 * 60 * 1000);
 
-  const generatedReward = diffInDays * (numberOfMachines * machine.dailyReward + numberOfWorkers * worker.dailyReward);
+  const generatedReward = diffInDays * (numberOfMachines * machine.dailyReward);
   return Math.round(generatedReward * 1000) / 1000;
+};
+
+const calculateGeneratedXToken = async (userId) => {
+  const userSnapshot = await firestore.collection('user').doc(userId).get();
+  if (!userSnapshot.exists) return 0;
+
+  const gamePlay = await getUserActiveGamePlay(userId);
+  if (!gamePlay) return;
+
+  const { numberOfWorkers, startXTokenCountingTime } = gamePlay;
+
+  const activeSeason = await getActiveSeason();
+  const { worker } = activeSeason;
+
+  const now = Date.now();
+  const start = startXTokenCountingTime.toDate().getTime();
+  const diffInDays = (now - start) / (24 * 60 * 60 * 1000);
+  const generatedXToken = Math.round(diffInDays * (numberOfWorkers * worker.dailyReward) * 1000) / 1000;
+
+  return generatedXToken;
+};
+
+// utils
+const getUserActiveGamePlay = async (userId) => {
+  const activeSeasonId = await getActiveSeasonId();
+  const gamePlaySnapshot = await firestore
+    .collection('gamePlay')
+    .where('userId', '==', userId)
+    .where('seasonId', '==', activeSeasonId)
+    .limit(1)
+    .get();
+
+  const gamePlay = gamePlaySnapshot.docs[0];
+  if (!gamePlay) return null;
+
+  return { id: gamePlay.id, ...gamePlay.data() };
 };
 
 export default gangsterArenaListener;

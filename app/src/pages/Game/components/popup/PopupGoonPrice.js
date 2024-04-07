@@ -72,7 +72,7 @@ class PopupGoonPrice extends Popup {
         fontFamily: fontFamilies.extraBold,
       })
       .setOrigin(0, 0.5);
-    this.coin = scene.add.image(width / 2 + this.titleContainer.width / 2 - 40, titleY, 'coin2').setOrigin(1, 0.5);
+    this.coin = scene.add.image(width / 2 + this.titleContainer.width / 2 - 40, titleY, 'icon-coin-small').setOrigin(1, 0.5);
     this.goon = scene.add.image(
       leftMargin + this.popup.displayWidth * 0.175,
       titleY + this.popup.displayHeight * 0.07,

@@ -18,7 +18,7 @@ const useSimulatorGameListener = () => {
   // })
   const market = useSystemStore((state) => state.market);
   const [gameRef, setGameRef] = useState(null);
-  const [balances, setBalances] = useState({ dailyMoney: 10000, ETHBalance: 100000, tokenBalance: 100000 });
+  const [balances, setBalances] = useState({ xTokenBalance: 10000, ETHBalance: 100000, tokenBalance: 100000 });
   const [assets, setAssets] = useState({
     numberOfMachines: 0,
     numberOfWorkers: 0,
@@ -94,6 +94,10 @@ const useSimulatorGameListener = () => {
 
     game.events.on('simulator-request-balances', () => {
       game.events.emit('simulator-update-balances', balances);
+    });
+
+    game.events.on('simulator-request-xtoken-balance', () => {
+      game.events.emit('simulator-update-xtoken-balance', { balance: balances.xTokenBalance });
     });
 
     game.events.on('simulator-request-machines', () => {
@@ -303,6 +307,7 @@ const useSimulatorGameListener = () => {
   useEffect(() => {
     if (gameRef) {
       gameRef.events.emit('simulator-update-balances', balances);
+      gameRef.events.emit('simulator-xbalance-token', { balance: balances.xTokenBalance });
     }
   }, [balances]);
 

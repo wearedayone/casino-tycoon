@@ -1,3 +1,5 @@
+import Phaser from 'phaser';
+
 import Popup from './Popup';
 import PopupProcessing from './PopupProcessing';
 import TextButton from '../button/TextButton';
@@ -15,6 +17,7 @@ const largeBlackExtraBold = {
   color: colors.black,
   fontFamily: fontFamilies.extraBold,
 };
+const smallBrownBold = { fontSize: fontSizes.small, color: colors.brown, fontFamily: fontFamilies.bold };
 const smallGreenBold = { fontSize: fontSizes.small, color: colors.green, fontFamily: fontFamilies.bold };
 
 class PopupBuyGoon extends Popup {
@@ -24,6 +27,7 @@ class PopupBuyGoon extends Popup {
   networthIncrease = 0;
   rateIncrease = 0;
   balance = 0;
+  xTokenBalance = 0;
   basePrice = 0;
   maxPerBatch = 10;
   targetDailyPurchase = 1;
@@ -33,6 +37,7 @@ class PopupBuyGoon extends Popup {
   estimatedMaxPurchase = 0;
   onCompleted;
   isSimulator = false;
+  purchaseToken = 'FIAT'; // 'xGANG' || 'FIAT'
 
   constructor(scene, { isSimulator, onCompleted } = {}) {
     super(scene, 'popup-buy-goon', { title: 'Buy Goons', noCloseBtn: !!isSimulator });
@@ -50,6 +55,16 @@ class PopupBuyGoon extends Popup {
     this.events = events;
     this.onCompleted = onCompleted;
     this.isSimulator = isSimulator;
+    const numberOfWorkersY = this.popup.y - this.popup.height / 2 + 170;
+    const rateY = numberOfWorkersY + 340;
+    const networthY = rateY + 180;
+    const roiY = networthY + 200;
+    const checkBoxY = roiY + 270;
+    const leftCheckBoxX = this.popup.x - this.popup.width / 2 + 180;
+    const rightCheckBoxX = this.popup.x + 70;
+    const availableY = checkBoxY + 50;
+    const counterY = this.popup.y + this.popup.height / 2 - 260;
+    const minusBtnX = this.popup.x - this.popup.width / 2 + 320;
 
     this.popupBuyProcessing = new PopupProcessing(scene, {
       sound: 'minion',
@@ -74,36 +89,36 @@ class PopupBuyGoon extends Popup {
         this.onCompleted = null;
         this.close();
 
-        scene.game.events.emit(events.buyGoon, { quantity: this.quantity });
+        scene.game.events.emit(events.buyGoon, { quantity: this.quantity, token: this.purchaseToken });
       },
       'Buy',
       { fontSize: '82px', sound: 'buy', disabledImage: 'button-disabled' }
     );
     this.add(this.upgradeBtn);
 
-    this.numberOfWorkersText = scene.add.text(this.popup.x + 40, this.popup.y - this.popup.height / 2 + 170, '0', {
+    this.numberOfWorkersText = scene.add.text(this.popup.x + 60, numberOfWorkersY, '0', {
       fontSize: '76px',
       color: colors.black,
       fontFamily: fontFamilies.extraBold,
     });
     this.add(this.numberOfWorkersText);
 
-    this.rateText = scene.add.text(this.popup.x + 320, this.popup.y - 265, '0', largeBlackExtraBold).setOrigin(1, 0);
+    this.rateText = scene.add.text(this.popup.x + 320, rateY, '0', largeBlackExtraBold).setOrigin(1, 0);
     this.rateIncreaseText = scene.add
-      .text(this.popup.x + this.popup.width * 0.4, this.popup.y - 185, '+0 /d', smallGreenBold)
+      .text(this.popup.x + this.popup.width * 0.4, rateY + 80, '+0 /d', smallGreenBold)
       .setOrigin(1, 0);
     this.add(this.rateText);
     this.add(this.rateIncreaseText);
 
-    this.networthText = scene.add.text(this.popup.x + 380, this.popup.y - 80, '0', largeBlackExtraBold).setOrigin(1, 0);
+    this.networthText = scene.add.text(this.popup.x + 380, networthY, '0', largeBlackExtraBold).setOrigin(1, 0);
     this.networthIncreaseText = scene.add
-      .text(this.popup.x + this.popup.width * 0.4, this.popup.y + 0, '+0', smallGreenBold)
+      .text(this.popup.x + this.popup.width * 0.4, networthY + 80, '+0', smallGreenBold)
       .setOrigin(1, 0);
     this.add(this.networthText);
     this.add(this.networthIncreaseText);
 
     this.roiText = scene.add
-      .text(this.popup.x + this.popup.width * 0.4, this.popup.y + 120, '+0%', {
+      .text(this.popup.x + this.popup.width * 0.4, roiY, '+0%', {
         fontSize: fontSizes.large,
         color: colors.green,
         fontFamily: fontFamilies.extraBold,
@@ -111,8 +126,35 @@ class PopupBuyGoon extends Popup {
       .setOrigin(1, 0);
     this.add(this.roiText);
 
-    const counterY = this.popup.y + this.popup.height / 2 - 280;
-    const minusBtnX = this.popup.x - this.popup.width / 2 + 310;
+    this.xgangUnchecked = scene.add.image(leftCheckBoxX, checkBoxY, 'icon-checkbox-false');
+    this.xgangChecked = scene.add.image(leftCheckBoxX, checkBoxY, 'icon-checkbox-true').setVisible(false);
+    this.tokenUnchecked = scene.add.image(rightCheckBoxX, checkBoxY, 'icon-checkbox-false');
+    this.tokenChecked = scene.add.image(rightCheckBoxX, checkBoxY, 'icon-checkbox-true');
+    this.add(this.xgangUnchecked);
+    this.add(this.xgangChecked);
+    this.add(this.tokenUnchecked);
+    this.add(this.tokenChecked);
+
+    this.xgangUnchecked.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
+      this.xgangChecked.setVisible(true);
+      this.tokenChecked.setVisible(false);
+      this.purchaseToken = 'xGANG';
+      if (this.coin) this.coin.setTexture('icon-xgang-small');
+      this.updateValues();
+    });
+    this.tokenUnchecked.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
+      this.xgangChecked.setVisible(false);
+      this.tokenChecked.setVisible(true);
+      this.purchaseToken = 'FIAT';
+      if (this.coin) this.coin.setTexture('icon-coin-small');
+      this.updateValues();
+    });
+
+    this.xgangAvailable = scene.add.text(leftCheckBoxX + 140, availableY, 'Available: 0', smallBrownBold);
+    this.tokenAvailable = scene.add.text(rightCheckBoxX + 140, availableY, 'Available: 0', smallBrownBold);
+    this.add(this.xgangAvailable);
+    this.add(this.tokenAvailable);
+
     this.minusBtn = new TextButton(
       scene,
       minusBtnX,
@@ -219,13 +261,15 @@ class PopupBuyGoon extends Popup {
       .setVisible(false);
     this.add(this.insufficientBalance);
 
-    this.coin = scene.add.image(this.priceText.x + this.priceText.width + 40, counterY, 'coin2').setOrigin(0, 0.5);
+    this.coin = scene.add
+      .image(this.priceText.x + this.priceText.width + 10, counterY, 'icon-coin-small')
+      .setOrigin(0, 0.5);
     this.add(this.coin);
 
     if (!isSimulator) {
       this.infoButton = new Button(
         scene,
-        this.coin.x + this.coin.width + 40,
+        this.coin.x + this.coin.width + 30,
         counterY - 40,
         'button-info',
         'button-info-pressed',
@@ -243,14 +287,6 @@ class PopupBuyGoon extends Popup {
       if (isNaN(gas)) return;
 
       this.gas = gas;
-      this.estimatedMaxPurchase = estimateNumberOfWorkerCanBuy(
-        this.balance - this.gas,
-        this.salesLastPeriod,
-        this.targetDailyPurchase,
-        this.targetPrice,
-        this.basePrice,
-        this.maxPerBatch
-      );
       this.updateValues();
     });
     scene.game.events.on(events.completed, () => {
@@ -261,6 +297,13 @@ class PopupBuyGoon extends Popup {
     scene.game.events.on(events.gameEnded, () => {
       this.upgradeBtn.setDisabledState(true);
     });
+
+    scene.game.events.on('update-xtoken-balance', ({ balance }) => {
+      this.xTokenBalance = balance;
+      this.xgangAvailable.text = `Available: ${customFormat(balance || 0, 1)}`;
+      if (this.purchaseToken === 'xGANG') this.updateValues();
+    });
+
     scene.game.events.on(
       events.updateWorkers,
       ({
@@ -276,6 +319,7 @@ class PopupBuyGoon extends Popup {
         networthIncrease,
       }) => {
         this.balance = balance;
+        this.tokenAvailable.text = `Available: ${customFormat(balance || 0, 1)}`;
         this.basePrice = basePrice;
         this.maxPerBatch = maxPerBatch;
         this.targetDailyPurchase = targetDailyPurchase;
@@ -289,14 +333,6 @@ class PopupBuyGoon extends Popup {
         this.numberOfWorkersText.text = numberOfWorkers.toLocaleString();
         this.networthText.text = `${networth.toLocaleString()}`;
         this.rateText.text = `${formatter.format(numberOfWorkers * dailyReward)}`;
-        this.estimatedMaxPurchase = estimateNumberOfWorkerCanBuy(
-          balance - this.gas,
-          salesLastPeriod,
-          targetDailyPurchase,
-          targetPrice,
-          basePrice,
-          maxPerBatch
-        );
         this.updateValues();
       }
     );
@@ -321,6 +357,23 @@ class PopupBuyGoon extends Popup {
     this.networthIncreaseText.text = `+${(this.networthIncrease * this.quantity).toLocaleString()}`;
     this.rateIncreaseText.text = `+${(this.rateIncrease * this.quantity).toLocaleString()} /d`;
 
+    this.estimatedMaxPurchase = estimateNumberOfWorkerCanBuy(
+      this.balance,
+      this.salesLastPeriod,
+      this.targetDailyPurchase,
+      this.targetPrice,
+      this.basePrice,
+      this.maxPerBatch
+    );
+    this.xTokenMaxPurchase = estimateNumberOfWorkerCanBuy(
+      this.xTokenBalance,
+      this.salesLastPeriod,
+      this.targetDailyPurchase,
+      this.targetPrice,
+      this.basePrice,
+      this.maxPerBatch
+    );
+
     const estimatedPrice = calculateNextWorkerBuyPriceBatch(
       this.salesLastPeriod,
       this.targetDailyPurchase,
@@ -335,10 +388,11 @@ class PopupBuyGoon extends Popup {
     this.priceText.text = `${customFormat(estimatedPrice, 1)}`;
     const formattedGas = customFormat(this.gas, 4) === '0' ? '<0.0001' : customFormat(this.gas, 4);
     this.gasPrice.text = `+${formattedGas} ETH (gas)`;
-    this.coin.x = this.priceText.x + this.priceText.width + 20;
-    if (this.infoButton) this.infoButton.x = this.coin.x + this.coin.width + 40;
+    this.coin.x = this.priceText.x + this.priceText.width + 10;
+    if (this.infoButton) this.infoButton.x = this.coin.x + this.coin.width + 30;
 
-    const insufficientBalance = this.quantity > this.estimatedMaxPurchase;
+    const maxPurchase = this.purchaseToken === 'FIAT' ? this.estimatedMaxPurchase : this.xTokenMaxPurchase;
+    const insufficientBalance = this.quantity > maxPurchase;
     this.insufficientBalance.setVisible(insufficientBalance);
     this.upgradeBtn.setDisabledState(
       this.scene?.isGameEnded || (!this.scene?.isUserActive && !this.isSimulator) || insufficientBalance
