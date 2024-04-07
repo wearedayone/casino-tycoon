@@ -75,6 +75,7 @@ const main = async () => {
       ...gameConfigs.assets,
       status: 'open',
       houseLevels: gameConfigs.houseLevels,
+      spinConfig: gameConfigs.spinConfig,
       openseaNftCollection: gameConfigs.openseaNftCollection,
       tokenAddress: TOKEN_ADDRESS,
       nftAddress: NFT_ADDRESS,

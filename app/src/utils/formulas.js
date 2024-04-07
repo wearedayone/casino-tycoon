@@ -156,3 +156,7 @@ export const calculateHouseLevel = (houseLevels, networth) => {
 
   return levelItem?.level;
 };
+
+export const calculateSpinPrice = (networth) => {
+  return networth * 5 + 500;
+};
