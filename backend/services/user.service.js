@@ -54,6 +54,10 @@ const createGamePlayIfNotExist = async (userId, isWhitelisted) => {
         numberOfMachinesToDefend: 0,
         attackUserId: null,
       }),
+      //TODO: Remove for testing
+      firestore.collection('user').doc(userId).update({
+        xTokenBalance: 10000,
+      }),
     ]);
   }
 };
