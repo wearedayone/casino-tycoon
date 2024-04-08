@@ -4,7 +4,7 @@ import moment from 'moment';
 import admin, { firestore } from '../configs/firebase.config.js';
 import quickNode from '../configs/quicknode.config.js';
 import { getActiveSeason, getActiveSeasonId } from './season.service.js';
-import { getLeaderboard, getUserGamePlay } from './gamePlay.service.js';
+import { getLeaderboard, getUserGamePlay, calculateGeneratedXToken } from './gamePlay.service.js';
 import {
   claimToken as claimTokenTask,
   decodeGameTxnLogs,
@@ -1028,20 +1028,17 @@ export const convertXTokenToToken = async ({ userId, amount }) => {
 
 // utils
 export const calculateGeneratedReward = async (userId) => {
-  const activeSeason = await getActiveSeason();
-  // if (activeSeason.status !== 'open') throw new Error('Season ended');
-
-  const { machine } = activeSeason;
+  const activeSeasonId = await getActiveSeasonId();
 
   const gamePlaySnapshot = await firestore
     .collection('gamePlay')
     .where('userId', '==', userId)
-    .where('seasonId', '==', activeSeason.id)
+    .where('seasonId', '==', activeSeasonId)
     .limit(1)
     .get();
 
   const gamePlay = gamePlaySnapshot.docs[0];
-  const { startRewardCountingTime, numberOfMachines } = gamePlay.data();
+  const { startRewardCountingTime, numberOfMachines, machine } = gamePlay.data();
 
   const now = Date.now();
   const start = startRewardCountingTime.toDate().getTime();

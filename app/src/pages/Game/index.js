@@ -1064,7 +1064,7 @@ const Game = () => {
           networth,
           balance: tokenBalance,
           maxPerBatch: machine.maxPerBatch,
-          dailyReward: machine.dailyReward,
+          dailyReward: gamePlay.machine?.dailyReward || machine.dailyReward,
           reservePool,
           reservePoolReward,
           networthIncrease: machine.networth,
@@ -1546,21 +1546,23 @@ const Game = () => {
   }, [numberOfWorkers, networth, tokenBalance, worker, workerSoldLast24h]);
 
   useEffect(() => {
-    gameRef.current?.events.emit('update-machines', {
-      numberOfMachines,
-      networth,
-      balance: tokenBalance,
-      maxPerBatch: machine.maxPerBatch,
-      dailyReward: machine.dailyReward,
-      reservePool,
-      reservePoolReward,
-      networthIncrease: machine.networth,
-      tokenPrice,
-      isWhitelisted: Boolean(isWhitelisted),
-      whitelistAmountLeft: Number(machine.maxWhitelistAmount - whitelistAmountMinted),
-      hasInviteCode: Boolean(inviteCode),
-      referralDiscount: inviteCode ? Number(activeSeason?.referralConfig?.referralDiscount) : 0,
-    });
+    if (gamePlay?.machine?.dailyReward) {
+      gameRef.current?.events.emit('update-machines', {
+        numberOfMachines,
+        networth,
+        balance: tokenBalance,
+        maxPerBatch: machine.maxPerBatch,
+        dailyReward: gamePlay?.machine?.dailyReward,
+        reservePool,
+        reservePoolReward,
+        networthIncrease: machine.networth,
+        tokenPrice,
+        isWhitelisted: Boolean(isWhitelisted),
+        whitelistAmountLeft: Number(machine.maxWhitelistAmount - whitelistAmountMinted),
+        hasInviteCode: Boolean(inviteCode),
+        referralDiscount: inviteCode ? Number(activeSeason?.referralConfig?.referralDiscount) : 0,
+      });
+    }
   }, [
     numberOfMachines,
     networth,
@@ -1573,6 +1575,7 @@ const Game = () => {
     whitelistAmountMinted,
     inviteCode,
     activeSeason?.referralConfig?.referralDiscount,
+    gamePlay?.machine?.dailyReward,
   ]);
 
   useEffect(() => {

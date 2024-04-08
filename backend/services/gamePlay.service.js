@@ -2,8 +2,7 @@ import moment from 'moment';
 
 import admin, { firestore } from '../configs/firebase.config.js';
 import { getActiveSeason, getActiveSeasonId, getActiveSeasonWithRank } from './season.service.js';
-import { getUserDisplayInfos } from './user.service.js';
-import { calculateReward } from '../utils/formulas.js';
+import { calculateReward, calculateUpgradeMachinePrice } from '../utils/formulas.js';
 
 export const getUserGamePlay = async (userId) => {
   const activeSeasonId = await getActiveSeasonId();
@@ -236,4 +235,66 @@ export const getUserWarDeployment = async (userId) => {
   if (snapshot.empty) return null;
 
   return snapshot.docs[0].data();
+};
+
+export const calculateGeneratedXToken = async (userId) => {
+  const userSnapshot = await firestore.collection('user').doc(userId).get();
+  if (!userSnapshot.exists) return 0;
+
+  const activeSeason = await getActiveSeason();
+  const gamePlaySnapshot = await firestore
+    .collection('gamePlay')
+    .where('userId', '==', userId)
+    .where('seasonId', '==', activeSeason.id)
+    .limit(1)
+    .get();
+
+  const gamePlay = gamePlaySnapshot.docs[0];
+  if (!gamePlay) return 0;
+
+  const { numberOfWorkers, startXTokenCountingTime } = gamePlay.data();
+  const { worker } = activeSeason;
+
+  const now = Date.now();
+  const start = startXTokenCountingTime.toDate().getTime();
+  const diffInDays = (now - start) / (24 * 60 * 60 * 1000);
+  const generatedXToken = Math.round(diffInDays * (numberOfWorkers * worker.dailyReward) * 1000) / 1000;
+
+  return generatedXToken;
+};
+
+export const upgradeMachine = async (userId) => {
+  const season = await getActiveSeason();
+  const gamePlay = await getUserGamePlay(userId);
+  const upgradePrice = calculateUpgradeMachinePrice(machine.level);
+
+  const user = await firestore.collection('user').doc(userId).get();
+
+  const generatedXToken = calculateGeneratedXToken(userId);
+  const xTokenBalance = user.data().xTokenBalance + generatedXToken;
+  if (xTokenBalance < upgradePrice) throw new Error('API error: Insufficient xGANG');
+
+  const newLevel = gamePlay.machine.level + 1;
+  const xTokenLeft = xTokenBalance - upgradePrice;
+  await user.ref.update({ xTokenBalance: xTokenLeft });
+  await firestore
+    .collection('gamePlay')
+    .doc(gamePlay.id)
+    .update({
+      startXTokenCountingTime: admin.firestore.FieldValue.serverTimestamp(),
+      machine: {
+        level: newLevel,
+        dailyReward: (1 + newLevel * season.machine.earningRateIncrementPerLevel) * season.machine.dailyReward,
+      },
+    });
+
+  await firestore.collection('transaction').add({
+    seasonId: season.id,
+    userId,
+    type: 'upgrade-machine',
+    value: upgradePrice,
+    token: 'xGANG',
+    status: 'Success',
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
 };

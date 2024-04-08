@@ -608,19 +608,17 @@ const getUserNewMachines = async ({ userId, address, nftContract }) => {
 
 // utils
 const calculateGeneratedReward = async (userId) => {
-  const activeSeason = await getActiveSeason();
-
-  const { machine } = activeSeason;
+  const activeSeasonId = await getActiveSeasonId();
 
   const gamePlaySnapshot = await firestore
     .collection('gamePlay')
     .where('userId', '==', userId)
-    .where('seasonId', '==', activeSeason.id)
+    .where('seasonId', '==', activeSeasonId)
     .limit(1)
     .get();
 
   const gamePlay = gamePlaySnapshot.docs[0];
-  const { startRewardCountingTime, numberOfMachines } = gamePlay.data();
+  const { startRewardCountingTime, numberOfMachines, machine } = gamePlay.data();
 
   const now = Date.now();
   const start = startRewardCountingTime.toDate().getTime();

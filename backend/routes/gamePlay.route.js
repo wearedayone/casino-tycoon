@@ -8,6 +8,7 @@ import {
   updateUserWarMachines,
   updateUserWarAttack,
   getWarDeployment,
+  upgradeUserMachines,
 } from '../controllers/gamePlay.controller.js';
 
 const router = Router();
@@ -18,5 +19,6 @@ router.put('/last-time-seen-war-result', auth, updateLastTimeSeenGangWarResult);
 router.put('/war-machines', auth, updateUserWarMachines);
 router.put('/war-attack', auth, updateUserWarAttack);
 router.get('/war-deployment', auth, getWarDeployment);
+router.put('/machine-levels', auth, upgradeUserMachines);
 
 export default router;

@@ -134,3 +134,8 @@ export const calculateSpinPrice = (networth) => {
 export const getTokenFromXToken = (xToken) => {
   return xToken;
 };
+
+export const calculateUpgradeMachinePrice = (currentLevel) => {
+  const nextLevel = currentLevel + 1;
+  return Math.pow(nextLevel, 1.5) * 1000;
+};

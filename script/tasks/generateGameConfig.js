@@ -62,6 +62,7 @@ const ROW_STRUCTURE = {
       maxWhitelistAmount: { row: 5, formatter: Number },
       dailyReward: { row: 6, formatter: Number },
       networth: { row: 7, formatter: Number },
+      earningRateIncrementPerLevel: { row: 8, formatter: Number },
     },
     worker: {
       basePrice: { row: 10, formatter: Number },
