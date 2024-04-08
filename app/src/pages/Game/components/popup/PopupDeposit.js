@@ -167,7 +167,7 @@ class PopupDeposit extends Popup {
 
   updateAddress(address) {
     this.address = address;
-    this.baseDescription.text = `${address.slice(0, 5)}...${address.slice(-9)}`;
+    this.baseDescription.text = `${address?.slice(0, 5)}...${address?.slice(-9)}`;
   }
 }
 
