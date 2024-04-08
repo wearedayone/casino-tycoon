@@ -49,7 +49,10 @@
     "machinePercentLost": 0.05
   },
   "initGameDurationInDays": 4,
-  "timeStepInMinutes": 0,
+  "endTimeConfig": {
+    "timeIncrementInSeconds": 60,
+    "timeDecrementInSeconds": 10
+  },
   "claimGapInSeconds": 3600,
   "openseaNftCollection": "gangster-arena",
   "tokenContract": {

@@ -679,10 +679,10 @@ const Game = () => {
         setLeaderboardModalOpen(true);
         console.log('open-leaderboard-modal', 'invalidateQueries-QueryKeys.Leaderboard');
         queryClient.invalidateQueries({ queryKey: [QueryKeys.Leaderboard] });
-        const { name, timeStepInMinutes, rankPrizePool, reputationPrizePool } = activeSeason || {};
+        const { name, endTimeConfig, rankPrizePool, reputationPrizePool } = activeSeason || {};
         gameRef.current.events.emit('update-season', {
           name,
-          timeStepInMinutes,
+          endTimeConfig,
           prizePool: rankPrizePool + reputationPrizePool,
           isEnded,
         });
@@ -1376,10 +1376,10 @@ const Game = () => {
 
   useEffect(() => {
     if (isLeaderboardModalOpen) {
-      const { name, timeStepInMinutes, rankPrizePool, reputationPrizePool } = activeSeason || {};
+      const { name, endTimeConfig, rankPrizePool, reputationPrizePool } = activeSeason || {};
       gameRef.current?.events.emit('update-season', {
         name,
-        timeStepInMinutes,
+        endTimeConfig,
         prizePool: rankPrizePool + reputationPrizePool,
         isEnded,
       });
@@ -1387,7 +1387,7 @@ const Game = () => {
   }, [
     isLeaderboardModalOpen,
     activeSeason?.name,
-    activeSeason?.timeStepInMinutes,
+    activeSeason?.endTimeConfig,
     activeSeason?.rankPrizePool,
     activeSeason?.reputationPrizePool,
     machine.networth,
