@@ -3,7 +3,7 @@ import moment from 'moment';
 
 import admin, { firestore } from '../configs/firebase.config.js';
 import quickNode from '../configs/quicknode.config.js';
-import { getActiveSeason, updateSeasonSnapshotSchedule } from './season.service.js';
+import { getActiveSeason, updateSeasonSnapshotSchedule, invokeSeasonSnapshotJob } from './season.service.js';
 import { getLeaderboard } from './gamePlay.service.js';
 import {
   claimToken as claimTokenTask,
@@ -492,12 +492,12 @@ const updateSeasonState = async (transactionId) => {
   const estimatedEndTimeUnix = estimatedEndTime.toDate().getTime();
 
   let newData;
+  let newEndTimeUnix;
   switch (type) {
     case 'buy-machine':
+      newEndTimeUnix = calculateNewEstimatedEndTimeUnix(estimatedEndTimeUnix, amount, timeIncrementInSeconds);
       newData = {
-        estimatedEndTime: admin.firestore.Timestamp.fromMillis(
-          calculateNewEstimatedEndTimeUnix(estimatedEndTimeUnix, amount, timeIncrementInSeconds)
-        ),
+        estimatedEndTime: admin.firestore.Timestamp.fromMillis(newEndTimeUnix),
         machineSold: admin.firestore.FieldValue.increment(1),
       };
       break;
@@ -508,10 +508,9 @@ const updateSeasonState = async (transactionId) => {
       };
       break;
     case 'buy-building':
+      newEndTimeUnix = calculateNewEstimatedEndTimeUnix(estimatedEndTimeUnix, amount, -timeDecrementInSeconds);
       newData = {
-        estimatedEndTime: admin.firestore.Timestamp.fromMillis(
-          calculateNewEstimatedEndTimeUnix(estimatedEndTimeUnix, amount, -timeDecrementInSeconds)
-        ),
+        estimatedEndTime: admin.firestore.Timestamp.fromMillis(newEndTimeUnix),
         buildingSold: admin.firestore.FieldValue.increment(amount),
         reservePool: admin.firestore.FieldValue.increment(value),
       };
@@ -529,7 +528,14 @@ const updateSeasonState = async (transactionId) => {
     .update({ ...newData });
 
   // end time changed
-  if (newData.estimatedEndTime) await updateSeasonSnapshotSchedule().catch((e) => logger.error(e));
+  if (newEndTimeUnix) {
+    const now = Date.now();
+    if (newEndTimeUnix <= now) {
+      invokeSeasonSnapshotJob();
+    } else {
+      await updateSeasonSnapshotSchedule().catch((e) => logger.error(e));
+    }
+  }
 };
 
 const updateUserBalance = async (userId, transactionId) => {
