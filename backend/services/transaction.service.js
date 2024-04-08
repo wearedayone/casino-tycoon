@@ -485,7 +485,10 @@ const updateSeasonState = async (transactionId) => {
 
   console.log('\n\nupdateSeasonState', { type, value, amount });
   const activeSeason = await getActiveSeason();
-  const { estimatedEndTime, timeStepInMinutes } = activeSeason;
+  const {
+    estimatedEndTime,
+    endTimeConfig: { timeIncrementInSeconds, timeDecrementInSeconds },
+  } = activeSeason;
   const estimatedEndTimeUnix = estimatedEndTime.toDate().getTime();
 
   let newData;
@@ -493,7 +496,7 @@ const updateSeasonState = async (transactionId) => {
     case 'buy-machine':
       newData = {
         estimatedEndTime: admin.firestore.Timestamp.fromMillis(
-          calculateNewEstimatedEndTimeUnix(estimatedEndTimeUnix, amount, timeStepInMinutes)
+          calculateNewEstimatedEndTimeUnix(estimatedEndTimeUnix, amount, timeIncrementInSeconds)
         ),
         machineSold: admin.firestore.FieldValue.increment(1),
       };
@@ -506,6 +509,9 @@ const updateSeasonState = async (transactionId) => {
       break;
     case 'buy-building':
       newData = {
+        estimatedEndTime: admin.firestore.Timestamp.fromMillis(
+          calculateNewEstimatedEndTimeUnix(estimatedEndTimeUnix, amount, -timeDecrementInSeconds)
+        ),
         buildingSold: admin.firestore.FieldValue.increment(amount),
         reservePool: admin.firestore.FieldValue.increment(value),
       };

@@ -68,7 +68,7 @@ const main = async () => {
       devFee: 0,
       reservePool: 0,
       reservePoolReward: 0.01,
-      timeStepInMinutes: gameConfigs.timeStepInMinutes,
+      endTimeConfig: gameConfigs.endTimeConfig,
       machineSold: 0,
       workerSold: 0,
       buildingSold: 0,
