@@ -459,18 +459,6 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
         );
     }
 
-    if (['buy-building'].includes(type)) {
-      if (to.toLowerCase() !== GAME_ADDRESS.toLowerCase())
-        throw new Error(`API error: Bad request - invalid receiver for ${type}, txn: ${JSON.stringify(receipt)}`);
-
-      console.log({ value, bnValue, transactionValue });
-      console.log(bnValue.eq(transactionValue));
-      if (token !== 'xGANG' && !bnValue.eq(transactionValue))
-        throw new Error(
-          `API error: Bad request - Value doesnt match, ${JSON.stringify({ transactionValue, bnValue })}`
-        );
-    }
-
     return true;
   } catch (err) {
     logger.error(
@@ -494,14 +482,6 @@ const updateSeasonState = async (transactionId) => {
   let newData;
   let newEndTimeUnix;
   switch (type) {
-    case 'buy-building':
-      newEndTimeUnix = calculateNewEstimatedEndTimeUnix(estimatedEndTimeUnix, amount, -timeDecrementInSeconds);
-      newData = {
-        estimatedEndTime: admin.firestore.Timestamp.fromMillis(newEndTimeUnix),
-        buildingSold: admin.firestore.FieldValue.increment(amount),
-        reservePool: admin.firestore.FieldValue.increment(value),
-      };
-      break;
     default:
       break;
   }

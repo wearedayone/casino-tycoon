@@ -449,8 +449,7 @@ const Game = () => {
         signature,
       });
 
-      if (receipt.status === 1) await validate({ transactionId: id, txnHash: receipt.transactionHash });
-      else throw new Error('Transaction failed');
+      if (receipt.status !== 1) throw new Error('Transaction failed');
       return receipt.transactionHash;
     } catch (err) {
       console.error(err);
@@ -463,8 +462,8 @@ const Game = () => {
       const res = await create({ type: 'buy-worker', amount: quantity, token });
       const { id, amount, value, time, nonce, signature, lastB } = res.data;
       const receipt = await buyGoon({ amount, value: token === 'FIAT' ? value : 0, lastB, time, nonce, signature });
-      if (receipt.status === 1) await validate({ transactionId: id, txnHash: receipt.transactionHash });
-      else throw new Error('Transaction failed');
+
+      if (receipt.status !== 1) throw new Error('Transaction failed');
       return receipt.transactionHash;
     } catch (err) {
       console.error(err);

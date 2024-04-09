@@ -275,7 +275,6 @@ const processBuyGoonEvent = async ({ to, amount, nonce, event, contract }) => {
     const txn = txnSnapshot.docs[0];
 
     const activeSeasonId = await getActiveSeasonId();
-    const gamePlay = await getUserActiveGamePlay(user.id);
 
     // update txn
     batch.update(txn.ref, { status: 'Success', txnHash: transactionHash });
@@ -285,6 +284,7 @@ const processBuyGoonEvent = async ({ to, amount, nonce, event, contract }) => {
     batch.update(seasonRef, { workerSold: admin.firestore.FieldValue.increment(amount) });
 
     // update gamePlay
+    const gamePlay = await getUserActiveGamePlay(user.id);
     const generatedXToken = await calculateGeneratedXToken(user.id);
     const gamePlayRef = firestore.collection('gamePlay').doc(gamePlay.id);
     batch.update(gamePlayRef, {
@@ -327,28 +327,72 @@ const processBuySafeHouseEvent = async ({ to, amount, nonce, event, contract }) 
     logger.info('process event');
     logger.info({ to, amount, nonce, event });
     const { transactionHash } = event;
-    console.log(Number(nonce.toString()));
-    await increaseSafeHouse({ address: to, amount: Number(amount.toString()) });
-    // handle in backend
-    const txn = await firestore.collection('transaction').where('nonce', '==', Number(nonce.toString())).limit(1).get();
-    if (!txn.empty) {
-      const txnId = txn.docs[0].id;
-      const txnData = txn.docs[0].data();
-      await firestore.collection('transaction').doc(txnId).update({
-        status: 'Success',
-        txnHash: transactionHash,
-      });
 
-      const { prices, value, seasonId, createdAt } = txnData;
-      await firestore
-        .collection('building-txn-prices')
-        .doc(txnId)
-        .set({
-          txnId,
-          createdAt: createdAt,
-          avgPrice: prices.length > 0 ? value / prices.length : 0,
-          seasonId: seasonId,
-        });
+    // need to update txn, season, gamePlay, building-txn-prices
+    const batch = firestore.batch();
+
+    const user = await getUserFromAddress(to);
+    if (!user) return;
+
+    const txnSnapshot = await firestore
+      .collection('transaction')
+      .where('nonce', '==', Number(nonce.toString()))
+      .limit(1)
+      .get();
+
+    if (txnSnapshot.empty) return;
+
+    const txn = txnSnapshot.docs[0];
+
+    const activeSeason = await getActiveSeason();
+    const {
+      id: activeSeasonId,
+      estimatedEndTime,
+      endTimeConfig: { timeDecrementInSeconds },
+    } = activeSeason;
+
+    // update txn
+    batch.update(txn.ref, { status: 'Success', txnHash: transactionHash });
+
+    // update season
+    const estimatedEndTimeUnix = estimatedEndTime.toDate().getTime();
+    const newEndTimeUnix = calculateNewEstimatedEndTimeUnix(estimatedEndTimeUnix, amount, -timeDecrementInSeconds);
+    const seasonRef = firestore.collection('season').doc(activeSeasonId);
+    batch.update(seasonRef, {
+      workerSold: admin.firestore.FieldValue.increment(amount),
+      estimatedEndTime: admin.firestore.Timestamp.fromMillis(newEndTimeUnix),
+    });
+
+    // update gamePlay
+    const gamePlay = await getUserActiveGamePlay(user.id);
+    const gamePlayRef = firestore.collection('gamePlay').doc(gamePlay.id);
+    batch.update(gamePlayRef, {
+      numberOfBuildings: admin.firestore.FieldValue.increment(amount),
+    });
+
+    // update building-txn-price
+    const { createdAt, prices } = txn;
+    const buildingTxnPriceRef = firestore.collection('building-txn-prices').doc(txn.id);
+    batch.set(buildingTxnPriceRef, {
+      txnId: txn.id,
+      createdAt,
+      avgPrice: prices.length > 0 ? value / prices.length : 0,
+      seasonId: activeSeasonId,
+    });
+
+    let retry = 0;
+    let isSuccess = false;
+
+    while (retry < MAX_RETRY && !isSuccess) {
+      try {
+        logger.info(
+          `Start processBuySafeHouse. Retry ${retry++} times. ${JSON.stringify({ to, amount, nonce, event })}`
+        );
+        await batch.commit();
+        isSuccess = true;
+      } catch (err) {
+        logger.error(`Unsuccessful processBuySafeHouse txn: ${JSON.stringify(err)}`);
+      }
     }
   } catch (err) {
     logger.error(err);
