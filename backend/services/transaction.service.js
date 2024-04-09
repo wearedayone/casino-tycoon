@@ -596,12 +596,7 @@ export const validateTxnHash = async ({ userId, transactionId, txnHash }) => {
     txnHash,
   });
 
-  // TODO: move this logic to trigger later
-  // !!NOTE: everytime we update user balance, need to call to contract
-  //       dont ever calculate balance manually
   await updateUserBalance(userId, transactionId);
-  await updateUserGamePlay(userId, transactionId);
-  // await sendUserBonus(userId, transactionId);
 };
 
 // for non web3 transactions: war-switch
