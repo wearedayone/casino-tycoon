@@ -19,7 +19,14 @@ import {
   updateBalance,
   checkUserCode,
 } from '../../services/user.service';
-import { claimToken, getWorkerPrices, getBuildingPrices, validateDailySpin } from '../../services/transaction.service';
+import {
+  create,
+  validate,
+  claimToken,
+  getWorkerPrices,
+  getBuildingPrices,
+  validateDailySpin,
+} from '../../services/transaction.service';
 import {
   getLeaderboard,
   getNextWarSnapshotUnixTime,
@@ -36,7 +43,6 @@ import {
 import QueryKeys from '../../utils/queryKeys';
 import { calculateHouseLevel, calculateSpinPrice } from '../../utils/formulas';
 import useSmartContract from '../../hooks/useSmartContract';
-import { create, validate } from '../../services/transaction.service';
 
 import gameConfigs from './configs/configs';
 import LoadingScene from './scenes/LoadingScene';
@@ -469,7 +475,7 @@ const Game = () => {
   const buyGangster = async (quantity, mintFunction) => {
     try {
       const res = await create({ type: 'buy-machine', amount: quantity, mintFunction });
-      const { id, amount, value, time, nGangster, nonce, bType, referrerAddress, signature } = res.data;
+      const { amount, value, time, nGangster, nonce, bType, referrerAddress, signature } = res.data;
       const receipt = await buyMachine({
         amount,
         value,
@@ -481,7 +487,6 @@ const Game = () => {
         signature,
       });
       if (receipt.status === 1) {
-        await validate({ transactionId: id, txnHash: receipt.transactionHash });
         return receipt.transactionHash;
       }
     } catch (err) {

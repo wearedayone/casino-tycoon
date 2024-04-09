@@ -617,36 +617,6 @@ const updateUserGamePlay = async (userId, transactionId) => {
   let gamePlayData = {};
   let warDeploymentData = {};
   switch (type) {
-    case 'buy-machine':
-      // gamePlayData = { numberOfMachines: admin.firestore.FieldValue.increment(amount) };
-      assets.numberOfMachines += amount;
-      // TODO: move this to listener later
-      if (isMintWhitelist) gamePlayData = { whitelistAmountMinted: admin.firestore.FieldValue.increment(amount) };
-      if (referrerAddress) {
-        // update discount
-        const user = await firestore.collection('user').doc(userId).get();
-        const currentDiscount = user.data().referralTotalDiscount;
-        const referralTotalDiscount = currentDiscount
-          ? admin.firestore.FieldValue.increment(referralDiscount)
-          : referralDiscount;
-
-        await user.ref.update({ referralTotalDiscount });
-
-        // update reward
-        const referrerSnapshot = await firestore
-          .collection('user')
-          .where('address', '==', referrerAddress)
-          .limit(1)
-          .get();
-
-        if (!referrerSnapshot.size) break;
-        const reward = getAccurate(value * referralConfig.referralBonus, 7);
-        const userCurrentReward = referrerSnapshot.docs[0].data().referralTotalReward;
-        const referralTotalReward = userCurrentReward ? admin.firestore.FieldValue.increment(reward) : reward;
-
-        await referrerSnapshot.docs[0].ref.update({ referralTotalReward });
-      }
-      break;
     case 'war-bonus':
       const { gainedReputation } = snapshot.data();
       gamePlayData = {
