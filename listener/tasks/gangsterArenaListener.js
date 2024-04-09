@@ -254,8 +254,20 @@ const processDepositEvent = async ({ from, to, amount, event, contract, nftContr
     logger.info({ from, to, amount, event });
     const { transactionHash } = event;
 
-    await createTransaction({
-      address: from.toLowerCase(),
+    // need to create txn, gamePlay, warDeployment
+    const batch = firestore.batch();
+
+    const user = await getUserFromAddress(to);
+    if (!user) return;
+
+    const activeSeasonId = await getActiveSeasonId();
+
+    // create txn
+    const txnRef = firestore.collection('transaction').doc();
+    batch.create(txnRef, {
+      userId: user.id,
+      seasonId: activeSeasonId,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
       type: 'deposit-machine',
       txnHash: transactionHash,
       token: 'Machine',
@@ -264,12 +276,33 @@ const processDepositEvent = async ({ from, to, amount, event, contract, nftContr
       value: 0,
     });
 
-    const gangsterNumber = await nftContract.gangster(from);
-    const newBalance = gangsterNumber.toString();
-    await updateNumberOfGangster({
-      address: from.toLowerCase(),
-      newBalance,
+    // update gamePlay && warDeployment
+    const { gamePlayId, gamePlay, warDeploymentId, warDeployment } = await getUserNewMachines({
+      userId: user.id,
+      nftContract,
     });
+
+    if (gamePlayId) {
+      const gamePlayRef = firestore.collection('gamePlay').doc(gamePlayId);
+      batch.update(gamePlayRef, { ...gamePlay });
+    }
+
+    if (warDeploymentId) {
+      const warDeploymentRef = firestore.collection('warDeployment').doc(warDeploymentId);
+      batch.update(warDeploymentRef, warDeployment);
+    }
+
+    let retry = 0;
+    let isSuccess = false;
+    while (retry < MAX_RETRY && !isSuccess) {
+      try {
+        logger.info(`Start processDeposit. Retry ${retry++} times. ${JSON.stringify({ from, to, amount, event })}`);
+        await batch.commit();
+        isSuccess = true;
+      } catch (err) {
+        logger.error(`Unsuccessful processDeposit txn: ${JSON.stringify(err)}`);
+      }
+    }
   } catch (err) {
     logger.error(err);
   }
