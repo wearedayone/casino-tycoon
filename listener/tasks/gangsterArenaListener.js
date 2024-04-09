@@ -95,6 +95,9 @@ const processMintEvent = async ({ to, tokenId, amount, nonce, event, contract, n
     const estimatedEndTimeUnix = estimatedEndTime.toDate().getTime();
     const newEndTimeUnix = calculateNewEstimatedEndTimeUnix(estimatedEndTimeUnix, amount, timeIncrementInSeconds);
 
+    const prizePool = await contract.getPrizeBalance();
+    const retirePool = await contract.getRetireBalance();
+
     const seasonRef = firestore.collection('season').doc(activeSeason.id);
     batch.update(seasonRef, {
       estimatedEndTime: admin.firestore.Timestamp.fromMillis(newEndTimeUnix),
@@ -167,20 +170,77 @@ const processMintEvent = async ({ to, tokenId, amount, nonce, event, contract, n
 
 const processRetireEvent = async ({ to, amount, nonce, event, contract }) => {
   try {
-    logger.info('NFT minted');
+    logger.info('retire event');
     logger.info({ to, amount, nonce, event });
 
-    await updateNumberOfGangster({
-      address: to.toLowerCase(),
-      newBalance: 0,
-      active: false,
-    });
-    // TODO: update separate fields: rankPrizePool, reputationPrizePool, burnValue, devFee
-    const prizePool = await contract.getPrizeBalance();
-    await updatePrizePool(parseFloat(formatEther(prizePool)).toFixed(6));
+    const { transactionHash } = event;
 
+    // need to update txn, gamePlay, warDeployment, season
+    const batch = firestore.batch();
+
+    const user = await getUserFromAddress(to);
+    if (!user) return;
+
+    const txnSnapshot = await firestore
+      .collection('transaction')
+      .where('nonce', '==', Number(nonce.toString()))
+      .limit(1)
+      .get();
+
+    if (txnSnapshot.empty) return;
+
+    const txn = txnSnapshot.docs[0];
+
+    // update txn
+    batch.update(txn.ref, { status: 'Success', txnHash: transactionHash });
+
+    // update gamePlay
+    const gamePlay = await getUserActiveGamePlay();
+    const gamePlayRef = firestore.collection('gamePlay').doc(gamePlay.id);
+    batch.update(gamePlayRef, {
+      numberOfMachines: 0,
+      numberOfBuildings: 0,
+      numberOfWorkers: 0,
+      active: false,
+      pendingReward: 0,
+      startRewardCountingTime: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    // update warDeployment
+    const warDeploymentSnapshot = await firestore
+      .collection('warDeployment')
+      .where('userId', '==', user.docs[0].id)
+      .where('seasonId', '==', gamePlay.seasonId)
+      .limit(1)
+      .get();
+    if (!warDeploymentSnapshot.empty) {
+      const warDeploymentRef = warDeploymentSnapshot.docs[0].ref;
+      batch.update(warDeploymentRef, {
+        numberOfMachinesToEarn: 0,
+        numberOfMachinesToAttack: 0,
+        numberOfMachinesToDefend: 0,
+        attackUserId: null,
+      });
+    }
+
+    // update season
+    const prizePool = await contract.getPrizeBalance();
     const retirePool = await contract.getRetireBalance();
-    await updateReputationPool(parseFloat(formatEther(retirePool)).toFixed(6));
+    const seasonRef = firestore.collection('season').doc(gamePlay.seasonId);
+    batch.update(seasonRef, {
+      rankPrizePool: Number(parseFloat(formatEther(prizePool)).toFixed(6)),
+      reputationPrizePool: Number(parseFloat(formatEther(retirePool)).toFixed(6)),
+    });
+
+    while (retry < MAX_RETRY && !isSuccess) {
+      try {
+        logger.info(`Start processRetire. Retry ${retry++} times. ${JSON.stringify({ to, amount, nonce, event })}`);
+        await batch.commit();
+        isSuccess = true;
+      } catch (err) {
+        logger.error(`Unsuccessful processRetire txn: ${JSON.stringify(err)}`);
+      }
+    }
   } catch (err) {
     logger.error(err);
   }

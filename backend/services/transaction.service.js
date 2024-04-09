@@ -552,10 +552,9 @@ const updateUserBalance = async (userId, transactionId) => {
 
 const updateUserGamePlay = async (userId, transactionId) => {
   const snapshot = await firestore.collection('transaction').doc(transactionId).get();
-  const { type, amount, value, isMintWhitelist, referrerAddress, referralDiscount } = snapshot.data();
+  const { type } = snapshot.data();
 
   const activeSeason = await getActiveSeason();
-  const { referralConfig } = activeSeason;
 
   // update user number of assets && pendingReward && startRewardCountingTime
   const gamePlaySnapshot = await firestore
@@ -600,21 +599,6 @@ const updateUserGamePlay = async (userId, transactionId) => {
       };
       warDeploymentData = {
         numberOfMachinesToAttack: warDeployment.numberOfMachinesToAttack - machinesDeadCount,
-      };
-      break;
-    case 'retire':
-      assets.numberOfMachines = 0;
-      assets.numberOfBuildings = 0;
-      assets.numberOfWorkers = 0;
-      gamePlayData = {
-        ...assets,
-        active: false,
-      };
-      warDeploymentData = {
-        numberOfMachinesToEarn: 0,
-        numberOfMachinesToAttack: 0,
-        numberOfMachinesToDefend: 0,
-        attackUserId: null,
       };
       break;
     default:
@@ -1060,5 +1044,5 @@ const calculateGeneratedXToken = async (userId) => {
 };
 
 /* all txn types that change user's token generation rate */
-const userTokenGenerationRateChangedTypes = ['buy-machine', 'war-penalty', 'retire'];
+const userTokenGenerationRateChangedTypes = ['war-penalty'];
 export const userPendingRewardChangedTypes = userTokenGenerationRateChangedTypes.concat('claim-token');
