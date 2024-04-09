@@ -2,9 +2,10 @@
 import moment from 'moment';
 import { parseEther } from '@ethersproject/units';
 import chunk from 'lodash.chunk';
+import schedule from 'node-schedule';
 
 import admin, { firestore } from '../configs/firebase.config.js';
-import { getActiveSeasonId, getActiveSeason } from './season.service.js';
+import { getActiveSeasonId, getActiveSeason, takeSeasonLeaderboardSnapshot } from './season.service.js';
 import { initTransaction, validateNonWeb3Transaction } from './transaction.service.js';
 import { getNFTBalance, setWarResult } from './worker.service.js';
 import { getUserUsernames } from './user.service.js';
@@ -534,4 +535,43 @@ export const getUserToAttackDetail = async (userId) => {
     gamePlay: { numberOfMachines, numberOfWorkers, numberOfBuildings },
     warResults,
   };
+};
+
+const TAKE_SEASON_SNAPSHOT = 'take-season-snapshot';
+export const onSnapshotSeasonChange = async () => {
+  const systemSnapshot = firestore.collection('system').doc('default');
+
+  systemSnapshot.onSnapshot(async (doc) => {
+    try {
+      logger.info(`detect system default changes, ${JSON.stringify(doc.data())}`);
+      const existingJob = schedule.scheduledJobs[TAKE_SEASON_SNAPSHOT];
+      logger.info(`existingJobExists: ${!!existingJob}`);
+      const activeSeasonId = doc.data().activeSeasonId;
+      const season = await firestore.collection('season').doc(activeSeasonId).get();
+      const { estimatedEndTime } = season.data();
+      const now = Date.now();
+      const date = estimatedEndTime.toDate();
+      const dateUnix = estimatedEndTime.toDate().getTime();
+
+      logger.info(`Scheduling season ${season.id} snapshot at ${date.toLocaleString()}`);
+      if (dateUnix <= now) {
+        if (existingJob) {
+          existingJob.cancelNext();
+          existingJob.invoke();
+        } else {
+          logger.info(`Detect season ended, takeSeasonLeaderboardSnapshot immediately`);
+          takeSeasonLeaderboardSnapshot();
+        }
+      } else {
+        if (existingJob) {
+          existingJob.reschedule(date);
+        } else {
+          schedule.scheduleJob(TAKE_SEASON_SNAPSHOT, date, takeSeasonLeaderboardSnapshot);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      logger.error(`Error onSnapshotSeasonChange, ${JSON.stringify(err)}`);
+    }
+  });
 };

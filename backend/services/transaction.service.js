@@ -3,7 +3,7 @@ import moment from 'moment';
 
 import admin, { firestore } from '../configs/firebase.config.js';
 import quickNode from '../configs/quicknode.config.js';
-import { getActiveSeason, updateSeasonSnapshotSchedule, invokeSeasonSnapshotJob } from './season.service.js';
+import { getActiveSeason } from './season.service.js';
 import { getLeaderboard } from './gamePlay.service.js';
 import {
   claimToken as claimTokenTask,
@@ -460,44 +460,6 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
   }
 };
 
-const updateSeasonState = async (transactionId) => {
-  const snapshot = await firestore.collection('transaction').doc(transactionId).get();
-  const { type, value, amount } = snapshot.data();
-
-  console.log('\n\nupdateSeasonState', { type, value, amount });
-  const activeSeason = await getActiveSeason();
-  const {
-    estimatedEndTime,
-    endTimeConfig: { timeIncrementInSeconds, timeDecrementInSeconds },
-  } = activeSeason;
-  const estimatedEndTimeUnix = estimatedEndTime.toDate().getTime();
-
-  let newData;
-  let newEndTimeUnix;
-  switch (type) {
-    default:
-      break;
-  }
-
-  // type 'war-switch' | 'war-penalty'
-  if (!newData) return;
-
-  await firestore
-    .collection('season')
-    .doc(activeSeason.id)
-    .update({ ...newData });
-
-  // end time changed
-  if (newEndTimeUnix) {
-    const now = Date.now();
-    if (newEndTimeUnix <= now) {
-      invokeSeasonSnapshotJob();
-    } else {
-      await updateSeasonSnapshotSchedule().catch((e) => logger.error(e));
-    }
-  }
-};
-
 const updateUserBalance = async (userId, transactionId) => {
   const userSnapshot = await firestore.collection('user').doc(userId).get();
   const snapshot = await firestore.collection('transaction').doc(transactionId).get();
@@ -637,7 +599,6 @@ export const validateTxnHash = async ({ userId, transactionId, txnHash }) => {
   // TODO: move this logic to trigger later
   // !!NOTE: everytime we update user balance, need to call to contract
   //       dont ever calculate balance manually
-  await updateSeasonState(transactionId);
   await updateUserBalance(userId, transactionId);
   await updateUserGamePlay(userId, transactionId);
   // await sendUserBonus(userId, transactionId);

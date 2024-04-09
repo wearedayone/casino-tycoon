@@ -31,35 +31,17 @@ export const getActiveSeasonWithRank = async () => {
   return { id: snapshot.id, ...rest, rankPrizePool, rankingRewards, prizePoolConfig };
 };
 
-const TAKE_SEASON_SNAPSHOT = 'take-season-snapshot';
-export const updateSeasonSnapshotSchedule = async () => {
-  const existingJob = schedule.scheduledJobs[TAKE_SEASON_SNAPSHOT];
-  logger.info(`existingJobExists: ${!!existingJob}`);
-  const season = await getActiveSeason();
-  const date = season.estimatedEndTime.toDate();
-
-  logger.info(`Scheduling season ${season.id} snapshot at ${date.toLocaleString()}`);
-  if (existingJob) existingJob.reschedule(date);
-  else schedule.scheduleJob(TAKE_SEASON_SNAPSHOT, date, takeSeasonLeaderboardSnapshot);
-};
-
-export const invokeSeasonSnapshotJob = () => {
-  const job = schedule.scheduledJobs[TAKE_SEASON_SNAPSHOT];
-  if (job) {
-    job.cancelNext();
-    job.invoke();
-  }
-};
-
 export const takeSeasonLeaderboardSnapshot = async () => {
   try {
-    const activeSeasonId = await getActiveSeasonId();
-    logger.info(`Taking snapshot for season ${activeSeasonId}`);
+    const activeSeason = await getActiveSeason();
+    if (activeSeason.status !== 'open') return;
+
+    logger.info(`Taking snapshot for season ${activeSeason.id}`);
 
     // freeze season state
-    const seasonRef = firestore.collection('season').doc(activeSeasonId);
+    const seasonRef = firestore.collection('season').doc(activeSeason.id);
 
-    const { rankPrizePool, reputationPrizePool } = await getActiveSeason();
+    const { rankPrizePool, reputationPrizePool } = activeSeason;
 
     // take leaderboard snapshot
     const leaderboard = await getLeaderboard();
