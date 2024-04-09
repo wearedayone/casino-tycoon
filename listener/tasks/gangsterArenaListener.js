@@ -236,11 +236,13 @@ const processRetireEvent = async ({ to, amount, nonce, event, contract }) => {
     let isSuccess = false;
     while (retry < MAX_RETRY && !isSuccess) {
       try {
-        logger.info(`Start processRetire. Retry ${retry++} times. ${JSON.stringify({ to, amount, nonce, event })}`);
+        logger.info(
+          `Start processRetireEvent. Retry ${retry++} times. ${JSON.stringify({ to, amount, nonce, event })}`
+        );
         await batch.commit();
         isSuccess = true;
       } catch (err) {
-        logger.error(`Unsuccessful processRetire txn: ${JSON.stringify(err)}`);
+        logger.error(`Unsuccessful processRetireEvent txn: ${JSON.stringify(err)}`);
       }
     }
   } catch (err) {
@@ -296,11 +298,13 @@ const processDepositEvent = async ({ from, to, amount, event, contract, nftContr
     let isSuccess = false;
     while (retry < MAX_RETRY && !isSuccess) {
       try {
-        logger.info(`Start processDeposit. Retry ${retry++} times. ${JSON.stringify({ from, to, amount, event })}`);
+        logger.info(
+          `Start processDepositEvent. Retry ${retry++} times. ${JSON.stringify({ from, to, amount, event })}`
+        );
         await batch.commit();
         isSuccess = true;
       } catch (err) {
-        logger.error(`Unsuccessful processDeposit txn: ${JSON.stringify(err)}`);
+        logger.error(`Unsuccessful processDepositEvent txn: ${JSON.stringify(err)}`);
       }
     }
   } catch (err) {
@@ -356,11 +360,13 @@ const processWithdrawEvent = async ({ from, to, amount, event, contract, nftCont
     let isSuccess = false;
     while (retry < MAX_RETRY && !isSuccess) {
       try {
-        logger.info(`Start processWithdraw. Retry ${retry++} times. ${JSON.stringify({ from, to, amount, event })}`);
+        logger.info(
+          `Start processWithdrawEvent. Retry ${retry++} times. ${JSON.stringify({ from, to, amount, event })}`
+        );
         await batch.commit();
         isSuccess = true;
       } catch (err) {
-        logger.error(`Unsuccessful processWithdraw txn: ${JSON.stringify(err)}`);
+        logger.error(`Unsuccessful processWithdrawEvent txn: ${JSON.stringify(err)}`);
       }
     }
   } catch (err) {
@@ -437,11 +443,13 @@ const processBuyGoonEvent = async ({ to, amount, nonce, event, contract }) => {
     let isSuccess = false;
     while (retry < MAX_RETRY && !isSuccess) {
       try {
-        logger.info(`Start processBuyGoon. Retry ${retry++} times. ${JSON.stringify({ to, amount, nonce, event })}`);
+        logger.info(
+          `Start processBuyGoonEvent. Retry ${retry++} times. ${JSON.stringify({ to, amount, nonce, event })}`
+        );
         await batch.commit();
         isSuccess = true;
       } catch (err) {
-        logger.error(`Unsuccessful processBuyGoon txn: ${JSON.stringify(err)}`);
+        logger.error(`Unsuccessful processBuyGoonEvent txn: ${JSON.stringify(err)}`);
       }
     }
   } catch (err) {
@@ -512,12 +520,12 @@ const processBuySafeHouseEvent = async ({ to, amount, nonce, event, contract }) 
     while (retry < MAX_RETRY && !isSuccess) {
       try {
         logger.info(
-          `Start processBuySafeHouse. Retry ${retry++} times. ${JSON.stringify({ to, amount, nonce, event })}`
+          `Start processBuySafeHouseEvent. Retry ${retry++} times. ${JSON.stringify({ to, amount, nonce, event })}`
         );
         await batch.commit();
         isSuccess = true;
       } catch (err) {
-        logger.error(`Unsuccessful processBuySafeHouse txn: ${JSON.stringify(err)}`);
+        logger.error(`Unsuccessful processBuySafeHouseEvent txn: ${JSON.stringify(err)}`);
       }
     }
   } catch (err) {

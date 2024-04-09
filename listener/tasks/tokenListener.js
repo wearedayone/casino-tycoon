@@ -2,13 +2,14 @@ import { Contract } from '@ethersproject/contracts';
 import { formatEther } from '@ethersproject/units';
 
 import tokenABI from '../assets/abis/Token.json' assert { type: 'json' };
-import admin, { firestore } from '../configs/firebase.config.js';
+import { firestore } from '../configs/firebase.config.js';
 import provider from '../configs/provider.config.js';
 import environments from '../utils/environments.js';
 import logger from '../utils/logger.js';
 import { getActiveSeason } from '../services/season.service.js';
 
 const { NETWORK_ID } = environments;
+const MAX_RETRY = 3;
 
 const tokenListener = async () => {
   const activeSeason = await getActiveSeason();
@@ -37,78 +38,49 @@ export const queryEvent = async (fromBlock) => {
 
 const processTransferEvent = async ({ from, to, value, event, contract }) => {
   try {
-    const activeSeason = await getActiveSeason();
-    const { gameAddress: GAME_CONTRACT_ADDRESS } = activeSeason || {};
-
     logger.info('Token Transfer');
     logger.info({ from, to, value, event });
     const { transactionHash } = event;
-    const newBalanceFrom = await contract.balanceOf(from);
-    if (from.toLowerCase() == GAME_CONTRACT_ADDRESS.toLowerCase()) {
-      updatePoolReserve({
-        newBalance: parseFloat(formatEther(newBalanceFrom)).toFixed(6),
-      });
-    } else {
-      await updateBalance({
-        address: from.toLowerCase(),
-        newBalance: parseFloat(formatEther(newBalanceFrom)).toFixed(6),
-      });
+
+    const batch = firestore.batch();
+
+    const fromUserSnapshot = await firestore
+      .collection('user')
+      .where('address', '==', from.toLowerCase())
+      .limit(1)
+      .get();
+    if (!fromUserSnapshot.empty) {
+      const fromUserBalance = await contract.balanceOf(from);
+      const fromUser = fromUserSnapshot.docs[0];
+      const tokenBalance = Number(parseFloat(formatEther(fromUserBalance)).toFixed(6));
+      batch.update(fromUser.ref, { tokenBalance });
     }
 
-    const newBalanceTo = await contract.balanceOf(to);
-    if (to.toLowerCase() == GAME_CONTRACT_ADDRESS.toLowerCase()) {
-      updatePoolReserve({
-        newBalance: parseFloat(formatEther(newBalanceTo)).toFixed(6),
-      });
-    } else {
-      await updateBalance({
-        address: to.toLowerCase(),
-        newBalance: parseFloat(formatEther(newBalanceTo)).toFixed(6),
-      });
+    if (from !== to) {
+      const toUserSnapshot = await firestore.collection('user').where('address', '==', to.toLowerCase()).limit(1).get();
+      if (!toUserSnapshot.empty) {
+        const toUserBalance = await contract.balanceOf(to);
+        const toUser = toUserSnapshot.docs[0];
+        const tokenBalance = Number(parseFloat(formatEther(toUserBalance)).toFixed(6));
+        batch.update(toUser.ref, { tokenBalance });
+      }
+    }
+
+    let retry = 0;
+    let isSuccess = false;
+    while (retry < MAX_RETRY && !isSuccess) {
+      try {
+        logger.info(
+          `Start processTransferEvent. Retry ${retry++} times. ${JSON.stringify({ from, to, value, event })}`
+        );
+        await batch.commit();
+        isSuccess = true;
+      } catch (err) {
+        logger.error(`Unsuccessful processTransferEvent txn: ${JSON.stringify(err)}`);
+      }
     }
   } catch (err) {
     logger.error(err);
-  }
-};
-
-const updateBalance = async ({ address, newBalance }) => {
-  logger.info({ address, newBalance: Number(newBalance) });
-  const user = await firestore.collection('user').where('address', '==', address).limit(1).get();
-  if (user.empty) return;
-  const userId = user.docs[0].id;
-  await firestore
-    .collection('user')
-    .doc(userId)
-    .update({
-      tokenBalance: Number(newBalance),
-    });
-};
-
-const updatePoolReserve = async ({ newBalance }) => {
-  logger.info({ newBalance: Number(newBalance) });
-  const system = await firestore.collection('system').doc('default').get();
-  if (!system.exists) return;
-  const { activeSeasonId } = system.data();
-  await firestore
-    .collection('season')
-    .doc(activeSeasonId)
-    .update({
-      reservePool: Number(newBalance),
-    });
-};
-
-const createTransaction = async ({ address, ...data }) => {
-  const system = await firestore.collection('system').doc('default').get();
-  const { activeSeasonId } = system.data();
-
-  const user = await firestore.collection('user').where('address', '==', address).limit(1).get();
-  if (!user.empty) {
-    await firestore.collection('transaction').add({
-      userId: user.docs[0].id,
-      seasonId: activeSeasonId,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      ...data,
-    });
   }
 };
 
