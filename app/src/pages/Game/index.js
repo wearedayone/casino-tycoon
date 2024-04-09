@@ -405,7 +405,8 @@ const Game = () => {
         console.log({ receipt });
         gameRef.current?.events.emit(txnCompletedEvent, { amount, txnHash: receipt.transactionHash });
         if (receipt.status === 1) {
-          if (txnId) await validate({ transactionId: txnId, txnHash: receipt.transactionHash });
+          if (txnId && ['ETH', 'FIAT'].includes(tokenType))
+            await validate({ transactionId: txnId, txnHash: receipt.transactionHash });
         }
       }
     } catch (err) {

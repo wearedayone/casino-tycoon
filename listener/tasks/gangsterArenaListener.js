@@ -232,6 +232,8 @@ const processRetireEvent = async ({ to, amount, nonce, event, contract }) => {
       reputationPrizePool: Number(parseFloat(formatEther(retirePool)).toFixed(6)),
     });
 
+    let retry = 0;
+    let isSuccess = false;
     while (retry < MAX_RETRY && !isSuccess) {
       try {
         logger.info(`Start processRetire. Retry ${retry++} times. ${JSON.stringify({ to, amount, nonce, event })}`);
@@ -279,8 +281,20 @@ const processWithdrawEvent = async ({ from, to, amount, event, contract, nftCont
     logger.info({ from, to, amount, event });
     const { transactionHash } = event;
 
-    await createTransaction({
-      address: from.toLowerCase(),
+    // need to create txn, gamePlay, warDeployment
+    const batch = firestore.batch();
+
+    const user = await getUserFromAddress(to);
+    if (!user) return;
+
+    const activeSeasonId = await getActiveSeasonId();
+
+    // create txn
+    const txnRef = firestore.collection('transaction').doc();
+    batch.create(txnRef, {
+      userId: user.id,
+      seasonId: activeSeasonId,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
       type: 'withdraw-machine',
       txnHash: transactionHash,
       token: 'Machine',
@@ -289,12 +303,33 @@ const processWithdrawEvent = async ({ from, to, amount, event, contract, nftCont
       value: 0,
     });
 
-    const gangsterNumber = await nftContract.gangster(from);
-    const newBalance = gangsterNumber.toString();
-    await updateNumberOfGangster({
-      address: from.toLowerCase(),
-      newBalance,
+    // update gamePlay && warDeployment
+    const { gamePlayId, gamePlay, warDeploymentId, warDeployment } = await getUserNewMachines({
+      userId: user.id,
+      nftContract,
     });
+
+    if (gamePlayId) {
+      const gamePlayRef = firestore.collection('gamePlay').doc(gamePlayId);
+      batch.update(gamePlayRef, { ...gamePlay });
+    }
+
+    if (warDeploymentId) {
+      const warDeploymentRef = firestore.collection('warDeployment').doc(warDeploymentId);
+      batch.update(warDeploymentRef, warDeployment);
+    }
+
+    let retry = 0;
+    let isSuccess = false;
+    while (retry < MAX_RETRY && !isSuccess) {
+      try {
+        logger.info(`Start processWithdraw. Retry ${retry++} times. ${JSON.stringify({ from, to, amount, event })}`);
+        await batch.commit();
+        isSuccess = true;
+      } catch (err) {
+        logger.error(`Unsuccessful processWithdraw txn: ${JSON.stringify(err)}`);
+      }
+    }
   } catch (err) {
     logger.error(err);
   }
@@ -367,7 +402,6 @@ const processBuyGoonEvent = async ({ to, amount, nonce, event, contract }) => {
 
     let retry = 0;
     let isSuccess = false;
-
     while (retry < MAX_RETRY && !isSuccess) {
       try {
         logger.info(`Start processBuyGoon. Retry ${retry++} times. ${JSON.stringify({ to, amount, nonce, event })}`);
@@ -442,7 +476,6 @@ const processBuySafeHouseEvent = async ({ to, amount, nonce, event, contract }) 
 
     let retry = 0;
     let isSuccess = false;
-
     while (retry < MAX_RETRY && !isSuccess) {
       try {
         logger.info(
