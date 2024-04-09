@@ -520,7 +520,6 @@ const Game = () => {
       const { id, value, nonce, signature } = res.data;
       const receipt = await retire({ value, nonce, numberOfGangsters: gamePlay.numberOfMachines, signature });
       if (receipt.status === 1) {
-        await validate({ transactionId: id, txnHash: receipt.transactionHash });
         return receipt.transactionHash;
       }
     } catch (err) {
