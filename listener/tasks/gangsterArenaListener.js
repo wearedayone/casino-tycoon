@@ -68,6 +68,7 @@ const processMintEvent = async ({ to, tokenId, amount, nonce, event, contract, n
     const batch = firestore.batch();
 
     const user = await getUserFromAddress(to);
+    if (!user) return;
 
     const activeSeason = await getActiveSeason();
     const {
@@ -104,29 +105,25 @@ const processMintEvent = async ({ to, tokenId, amount, nonce, event, contract, n
 
     // update user && referrer
     if (referrerAddress) {
-      const userSnapshot = await firestore.collection('user').where('address', '==', to.toLowerCase()).limit(1).get();
-      if (!userSnapshot.empty) {
-        const user = userSnapshot.docs[0];
-        const currentDiscount = user.data().referralTotalDiscount;
-        const referralTotalDiscount = currentDiscount
-          ? admin.firestore.FieldValue.increment(referralDiscount)
-          : referralDiscount;
+      const currentDiscount = user.data().referralTotalDiscount;
+      const referralTotalDiscount = currentDiscount
+        ? admin.firestore.FieldValue.increment(referralDiscount)
+        : referralDiscount;
 
-        batch.update(user.ref, { referralTotalDiscount });
+      batch.update(user.ref, { referralTotalDiscount });
 
-        const referrerSnapshot = await firestore
-          .collection('user')
-          .where('address', '==', referrerAddress)
-          .limit(1)
-          .get();
+      const referrerSnapshot = await firestore
+        .collection('user')
+        .where('address', '==', referrerAddress)
+        .limit(1)
+        .get();
 
-        if (!referrerSnapshot.empty) {
-          const reward = getAccurate(value * referralConfig.referralBonus, 7);
-          const userCurrentReward = referrerSnapshot.docs[0].data().referralTotalReward;
-          const referralTotalReward = userCurrentReward ? admin.firestore.FieldValue.increment(reward) : reward;
+      if (!referrerSnapshot.empty) {
+        const reward = getAccurate(value * referralConfig.referralBonus, 7);
+        const userCurrentReward = referrerSnapshot.docs[0].data().referralTotalReward;
+        const referralTotalReward = userCurrentReward ? admin.firestore.FieldValue.increment(reward) : reward;
 
-          batch.update(referrerSnapshot.docs[0].ref, { referralTotalReward });
-        }
+        batch.update(referrerSnapshot.docs[0].ref, { referralTotalReward });
       }
     }
 
@@ -160,7 +157,7 @@ const processMintEvent = async ({ to, tokenId, amount, nonce, event, contract, n
         await batch.commit();
         isSuccess = true;
       } catch (err) {
-        logger.error(`Unsuccessful txn: ${JSON.stringify(err)}`);
+        logger.error(`Unsuccessful processMintEvent txn: ${JSON.stringify(err)}`);
       }
     }
   } catch (err) {
@@ -260,26 +257,65 @@ const processBuyGoonEvent = async ({ to, amount, nonce, event, contract }) => {
     logger.info('process event');
     logger.info({ to, amount, nonce, event });
     const { transactionHash } = event;
-    console.log(Number(nonce.toString()));
-    await increaseGoon({ address: to, amount: Number(amount.toString()) });
-    const txn = await firestore.collection('transaction').where('nonce', '==', Number(nonce.toString())).limit(1).get();
-    if (!txn.empty) {
-      const txnId = txn.docs[0].id;
-      const txnData = txn.docs[0].data();
-      await firestore.collection('transaction').doc(txnId).update({
-        status: 'Success',
-        txnHash: transactionHash,
-      });
-      const { prices, value, seasonId, createdAt } = txnData;
-      await firestore
-        .collection('worker-txn-prices')
-        .doc(txnId)
-        .set({
-          txnId,
-          createdAt: createdAt,
-          avgPrice: prices.length > 0 ? value / prices.length : 0,
-          seasonId: seasonId,
-        });
+
+    // need to update txn, season, gamePlay, user, worker-txn-prices
+    const batch = firestore.batch();
+
+    const user = await getUserFromAddress(to);
+    if (!user) return;
+
+    const txnSnapshot = await firestore
+      .collection('transaction')
+      .where('nonce', '==', Number(nonce.toString()))
+      .limit(1)
+      .get();
+
+    if (txnSnapshot.empty) return;
+
+    const txn = txnSnapshot.docs[0];
+
+    const activeSeasonId = await getActiveSeasonId();
+    const gamePlay = await getUserActiveGamePlay(user.id);
+
+    // update txn
+    batch.update(txn.ref, { status: 'Success', txnHash: transactionHash });
+
+    // update season
+    const seasonRef = firestore.collection('season').doc(activeSeasonId);
+    batch.update(seasonRef, { workerSold: admin.firestore.FieldValue.increment(amount) });
+
+    // update gamePlay
+    const generatedXToken = await calculateGeneratedXToken(user.id);
+    const gamePlayRef = firestore.collection('gamePlay').doc(gamePlay.id);
+    batch.update(gamePlayRef, {
+      numberOfWorkers: admin.firestore.FieldValue.increment(amount),
+      startXTokenCountingTime: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    // update user xTokenBalance
+    batch.update(user.ref, { xTokenBalance: admin.firestore.FieldValue.increment(generatedXToken) });
+
+    // update worker-txn-price
+    const { createdAt, prices } = txn;
+    const workerTxnPriceRef = firestore.collection('worker-txn-prices').doc(txn.id);
+    batch.set(workerTxnPriceRef, {
+      txnId: txn.id,
+      createdAt,
+      avgPrice: prices.length > 0 ? value / prices.length : 0,
+      seasonId: activeSeasonId,
+    });
+
+    let retry = 0;
+    let isSuccess = false;
+
+    while (retry < MAX_RETRY && !isSuccess) {
+      try {
+        logger.info(`Start processBuyGoon. Retry ${retry++} times. ${JSON.stringify({ to, amount, nonce, event })}`);
+        await batch.commit();
+        isSuccess = true;
+      } catch (err) {
+        logger.error(`Unsuccessful processBuyGoon txn: ${JSON.stringify(err)}`);
+      }
     }
   } catch (err) {
     logger.error(err);

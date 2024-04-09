@@ -459,7 +459,7 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
         );
     }
 
-    if (['buy-worker', 'buy-building'].includes(type)) {
+    if (['buy-building'].includes(type)) {
       if (to.toLowerCase() !== GAME_ADDRESS.toLowerCase())
         throw new Error(`API error: Bad request - invalid receiver for ${type}, txn: ${JSON.stringify(receipt)}`);
 
@@ -494,19 +494,6 @@ const updateSeasonState = async (transactionId) => {
   let newData;
   let newEndTimeUnix;
   switch (type) {
-    case 'buy-machine':
-      newEndTimeUnix = calculateNewEstimatedEndTimeUnix(estimatedEndTimeUnix, amount, timeIncrementInSeconds);
-      newData = {
-        estimatedEndTime: admin.firestore.Timestamp.fromMillis(newEndTimeUnix),
-        machineSold: admin.firestore.FieldValue.increment(1),
-      };
-      break;
-    case 'buy-worker':
-      newData = {
-        workerSold: admin.firestore.FieldValue.increment(amount),
-        reservePool: admin.firestore.FieldValue.increment(value),
-      };
-      break;
     case 'buy-building':
       newEndTimeUnix = calculateNewEstimatedEndTimeUnix(estimatedEndTimeUnix, amount, -timeDecrementInSeconds);
       newData = {
