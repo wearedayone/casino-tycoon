@@ -39,9 +39,6 @@ export const initTransaction = async ({ userId, type, ...data }) => {
   const utcDate = moment().utc().format('DD/MM/YYYY');
   const todayStartTime = moment(`${utcDate} 00:00:00`, 'DD/MM/YYYY HH:mm:ss').utc(true).toDate().getTime();
 
-  if (type !== 'withdraw' && data.token !== 'NFT' && activeSeason.status !== 'open')
-    throw new Error('API error: Season ended');
-
   if (type === 'buy-machine') {
     if (data.amount > activeSeason.machine.maxPerBatch) throw new Error('API error: Bad request - over max per batch');
   }
@@ -416,9 +413,6 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
     // - doesnt belongs to transaction in firestore - OK
     // - status === 1 - OK
     // - comes from user wallet address - OK
-    // - buy-worker | buy-building ---> goes to token address - OK
-    //                             ---> token sent to system wallet address - OK
-    // - buy-machine ---> goes to game contract address - OK
     // - has the same token as the transaction doc in firestore - OK
     // - has the same value as the transaction doc in firestore - OK
     const txnSnapshot = await firestore.collection('transaction').where('txnHash', '==', txnHash).limit(1).get();
@@ -428,7 +422,6 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
     console.log({ userId, transactionId, txnHash, tx });
 
     const receipt = await quickNode.waitForTransaction(txnHash);
-    // console.log(`transaction ${txnHash}`, tx, 'receipt', receipt);
     const { from, to, status, logs } = receipt;
 
     if (status !== 1) throw new Error('API error: Invalid txn status');
@@ -436,7 +429,7 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
     const userSnapshot = await firestore.collection('user').doc(userId).get();
     const { address } = userSnapshot.data();
 
-    if (address?.toLowerCase() !== from.toLowerCase() && SYSTEM_ADDRESS?.toLowerCase() !== from.toLowerCase())
+    if (address?.toLowerCase() !== from.toLowerCase())
       throw new Error(`API error: Bad request - invalid sender, txn: ${JSON.stringify(receipt)}`);
 
     const snapshot = await firestore.collection('transaction').doc(transactionId).get();
@@ -447,7 +440,7 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
     console.log({ logdata: logs[0]?.data, value, bnValue });
 
     const activeSeason = await getActiveSeason();
-    const { tokenAddress: TOKEN_ADDRESS, gameAddress: GAME_ADDRESS } = activeSeason || {};
+    const { tokenAddress: TOKEN_ADDRESS } = activeSeason || {};
 
     if (type === 'withdraw') {
       if (token === 'FIAT' && to.toLowerCase() !== TOKEN_ADDRESS.toLowerCase())
