@@ -50,8 +50,7 @@ export const initTransaction = async ({ userId, type, ...data }) => {
     if (!['FIAT'].includes(data.token)) throw new Error('API error: Bad request - invalid token');
     if (data.amount > activeSeason.building.maxPerBatch) throw new Error('API error: Bad request - over max per batch');
   }
-  let userSnapshot,
-    currentXTokenBalance = 0;
+  let userSnapshot;
   if (['buy-machine', 'buy-building', 'buy-worker'].includes(type)) {
     userSnapshot = await firestore.collection('user').doc(userId).get();
   }
@@ -399,6 +398,10 @@ export const buyAssetsWithXToken = async ({ userId, type, amount }) => {
       logger.error(`Unsuccessful buy-${type} txn: ${JSON.stringify(err)}`);
     }
   }
+
+  if (!isSuccess) {
+    throw new Error('API error: Error when buying assets');
+  }
 };
 
 export const validateDailySpinTxnAndReturnSpinResult = async ({ userId, transactionId, txnHash }) => {
@@ -556,16 +559,14 @@ const updateUserBalance = async (userId) => {
 
   if (userSnapshot.exists) {
     const { address, ETHBalance } = userSnapshot.data();
-    if (token === 'ETH') {
-      const value = await quickNode.getBalance(address, 'latest');
-      if (ETHBalance !== formatEther(value)) {
-        await firestore
-          .collection('user')
-          .doc(userId)
-          .update({
-            ETHBalance: formatEther(value),
-          });
-      }
+    const value = await quickNode.getBalance(address, 'latest');
+    if (ETHBalance !== formatEther(value)) {
+      await firestore
+        .collection('user')
+        .doc(userId)
+        .update({
+          ETHBalance: formatEther(value),
+        });
     }
   }
 };

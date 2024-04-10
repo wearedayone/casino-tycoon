@@ -74,10 +74,10 @@ const main = () => {
 main();
 
 // everyday at 1AM and 1PM
-cron.schedule(
-  CRON_GANG_WAR,
-  function () {
-    generateDailyWarSnapshot();
-  },
-  { timezone: 'Etc/UTC' }
-);
+// cron.schedule(
+//   CRON_GANG_WAR,
+//   function () {
+//     generateDailyWarSnapshot();
+//   },
+//   { timezone: 'Etc/UTC' }
+// );

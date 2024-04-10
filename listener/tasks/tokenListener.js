@@ -80,7 +80,7 @@ const processTransferEvent = async ({ from, to, value, event, contract }) => {
       }
     }
   } catch (err) {
-    logger.error(err);
+    logger.error(`Error in processTransferEvent, ${JSON.stringify(err)}`);
   }
 };
 

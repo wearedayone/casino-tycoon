@@ -268,7 +268,7 @@ const useSmartContract = () => {
     const privyProvider = await embeddedWallet.getEthereumProvider();
 
     const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
-    const data = gameContract.interface.encodeFunctionData('withdrawNFT', [address, 1, amount]);
+    const data = gameContract.interface.encodeFunctionData('withdrawNFT', [address, amount]);
     const unsignedTx = {
       to: GAME_CONTRACT_ADDRESS,
       chainId: Number(NETWORK_ID),
@@ -301,7 +301,7 @@ const useSmartContract = () => {
 
     if (!approveReceipt || approveReceipt.status === 1) {
       const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
-      const data = gameContract.interface.encodeFunctionData('depositNFT', [address, 1, amount]);
+      const data = gameContract.interface.encodeFunctionData('depositNFT', [address, amount]);
       const unsignedTx = {
         to: GAME_CONTRACT_ADDRESS,
         chainId: Number(NETWORK_ID),

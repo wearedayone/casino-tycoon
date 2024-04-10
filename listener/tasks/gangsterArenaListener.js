@@ -26,27 +26,21 @@ const gangsterArenaListener = async () => {
     await processMintEvent({ to, tokenId, amount, nonce, event, contract, nftContract });
   });
 
-  contract.on(GangsterEvent.Deposit, async (from, to, amount, event) => {
+  contract.on(GangsterEvent.Deposit, async (to, tokenId, amount, event) => {
     await firestore.collection('web3Listener').doc(NETWORK_ID).set({ lastBlock: event.blockNumber });
-    await processDepositEvent({ from, to, amount, event, contract, nftContract });
+    await processDepositEvent({ to, amount, event, contract, nftContract });
   });
 
-  contract.on(GangsterEvent.Withdraw, async (from, to, amount, event) => {
+  contract.on(GangsterEvent.Withdraw, async (to, tokenId, amount, event) => {
     await firestore.collection('web3Listener').doc(NETWORK_ID).set({ lastBlock: event.blockNumber });
-    await processWithdrawEvent({ from, to, amount, event, contract, nftContract });
-  });
-
-  contract.on(GangsterEvent.Burn, async (from, to, amount, event) => {
-    await firestore.collection('web3Listener').doc(NETWORK_ID).set({ lastBlock: event.blockNumber });
-    for (let i = 0; i < from.length; i++) {
-      await processBurnEvent({ from: from[i], to: to[i], amount: amount[i], event, contract, nftContract });
-    }
+    await processWithdrawEvent({ to, amount, event, contract, nftContract });
   });
 
   contract.on(GangsterEvent.BuyGoon, async (to, amount, nonce, event) => {
     await firestore.collection('web3Listener').doc(NETWORK_ID).set({ lastBlock: event.blockNumber });
     await processBuyGoonEvent({ to, amount, nonce, event, contract });
   });
+
   contract.on(GangsterEvent.BuySafeHouse, async (to, amount, nonce, event) => {
     await firestore.collection('web3Listener').doc(NETWORK_ID).set({ lastBlock: event.blockNumber });
     await processBuySafeHouseEvent({ to, amount, nonce, event, contract });
@@ -68,7 +62,7 @@ const processMintEvent = async ({ to, tokenId, amount, nonce, event, contract, n
     const batch = firestore.batch();
 
     const user = await getUserFromAddress(to);
-    if (!user) return;
+    if (!user) throw new Error('Not found user');
 
     const activeSeason = await getActiveSeason();
     const {
@@ -83,30 +77,37 @@ const processMintEvent = async ({ to, tokenId, amount, nonce, event, contract, n
       .limit(1)
       .get();
 
-    if (txnSnapshot.empty) return;
+    if (txnSnapshot.empty) throw new Error('Not found txn');
 
     const txn = txnSnapshot.docs[0];
     const { isMintWhitelist, referrerAddress, referralDiscount } = txn.data();
 
     // update txn
+    console.log('update txn');
     batch.update(txn.ref, { status: 'Success', txnHash: transactionHash });
 
     // update season
+    console.log('update season');
     const estimatedEndTimeUnix = estimatedEndTime.toDate().getTime();
-    const newEndTimeUnix = calculateNewEstimatedEndTimeUnix(estimatedEndTimeUnix, amount, timeIncrementInSeconds);
+    const newEndTimeUnix = calculateNewEstimatedEndTimeUnix(
+      estimatedEndTimeUnix,
+      Number(amount.toString()),
+      timeIncrementInSeconds
+    );
 
-    const prizePool = await contract.getPrizeBalance();
-    const retirePool = await contract.getRetireBalance();
+    const prizePool = await contract.rankPrize();
+    const retirePool = await contract.reputationPrize();
 
     const seasonRef = firestore.collection('season').doc(activeSeason.id);
     batch.update(seasonRef, {
       estimatedEndTime: admin.firestore.Timestamp.fromMillis(newEndTimeUnix),
-      machineSold: admin.firestore.FieldValue.increment(amount),
+      machineSold: admin.firestore.FieldValue.increment(Number(amount.toString())),
       rankPrizePool: Number(parseFloat(formatEther(prizePool)).toFixed(6)),
       reputationPrizePool: Number(parseFloat(formatEther(retirePool)).toFixed(6)),
     });
 
     // update user && referrer
+    console.log('update user && referrer');
     if (referrerAddress) {
       const currentDiscount = user.data().referralTotalDiscount;
       const referralTotalDiscount = currentDiscount
@@ -131,13 +132,15 @@ const processMintEvent = async ({ to, tokenId, amount, nonce, event, contract, n
     }
 
     // update gamePlay && warDeployment
+    console.log('update gamPlay && warDeployment');
     const { gamePlayId, gamePlay, warDeploymentId, warDeployment } = await getUserNewMachines({
       userId: user.id,
+      address: user.data().address,
       nftContract,
     });
 
     if (isMintWhitelist) {
-      gamePlay.whitelistAmountMinted = admin.firestore.FieldValue.increment(amount);
+      gamePlay.whitelistAmountMinted = admin.firestore.FieldValue.increment(Number(amount.toString()));
     }
 
     if (gamePlayId) {
@@ -150,6 +153,7 @@ const processMintEvent = async ({ to, tokenId, amount, nonce, event, contract, n
       batch.update(warDeploymentRef, warDeployment);
     }
 
+    console.log('start batching...');
     let retry = 0;
     let isSuccess = false;
     while (retry < MAX_RETRY && !isSuccess) {
@@ -164,7 +168,7 @@ const processMintEvent = async ({ to, tokenId, amount, nonce, event, contract, n
       }
     }
   } catch (err) {
-    logger.error(err);
+    logger.error(`Error in processMintEvent, ${err.message}, ${JSON.stringify(err)}`);
   }
 };
 
@@ -224,8 +228,8 @@ const processRetireEvent = async ({ to, amount, nonce, event, contract }) => {
     }
 
     // update season
-    const prizePool = await contract.getPrizeBalance();
-    const retirePool = await contract.getRetireBalance();
+    const prizePool = await contract.rankPrize();
+    const retirePool = await contract.reputationPrize();
     const seasonRef = firestore.collection('season').doc(gamePlay.seasonId);
     batch.update(seasonRef, {
       rankPrizePool: Number(parseFloat(formatEther(prizePool)).toFixed(6)),
@@ -246,14 +250,14 @@ const processRetireEvent = async ({ to, amount, nonce, event, contract }) => {
       }
     }
   } catch (err) {
-    logger.error(err);
+    logger.error(`Error in processRetireEvent, ${err.message}, ${JSON.stringify(err)}`);
   }
 };
 
-const processDepositEvent = async ({ from, to, amount, event, contract, nftContract }) => {
+const processDepositEvent = async ({ to, amount, event, contract, nftContract }) => {
   try {
     logger.info('process deposit event');
-    logger.info({ from, to, amount, event });
+    logger.info({ to, amount, event });
     const { transactionHash } = event;
 
     // need to create txn, gamePlay, warDeployment
@@ -281,6 +285,7 @@ const processDepositEvent = async ({ from, to, amount, event, contract, nftContr
     // update gamePlay && warDeployment
     const { gamePlayId, gamePlay, warDeploymentId, warDeployment } = await getUserNewMachines({
       userId: user.id,
+      address: user.data().address,
       nftContract,
     });
 
@@ -298,9 +303,7 @@ const processDepositEvent = async ({ from, to, amount, event, contract, nftContr
     let isSuccess = false;
     while (retry < MAX_RETRY && !isSuccess) {
       try {
-        logger.info(
-          `Start processDepositEvent. Retry ${retry++} times. ${JSON.stringify({ from, to, amount, event })}`
-        );
+        logger.info(`Start processDepositEvent. Retry ${retry++} times. ${JSON.stringify({ to, amount, event })}`);
         await batch.commit();
         isSuccess = true;
       } catch (err) {
@@ -308,14 +311,14 @@ const processDepositEvent = async ({ from, to, amount, event, contract, nftContr
       }
     }
   } catch (err) {
-    logger.error(err);
+    logger.error(`Error in processDepositEvent, ${err.message}, ${JSON.stringify(err)}`);
   }
 };
 
-const processWithdrawEvent = async ({ from, to, amount, event, contract, nftContract }) => {
+const processWithdrawEvent = async ({ to, amount, event, contract, nftContract }) => {
   try {
     logger.info('process withdraw event');
-    logger.info({ from, to, amount, event });
+    logger.info({ to, amount, event });
     const { transactionHash } = event;
 
     // need to create txn, gamePlay, warDeployment
@@ -343,6 +346,7 @@ const processWithdrawEvent = async ({ from, to, amount, event, contract, nftCont
     // update gamePlay && warDeployment
     const { gamePlayId, gamePlay, warDeploymentId, warDeployment } = await getUserNewMachines({
       userId: user.id,
+      address: user.data().address,
       nftContract,
     });
 
@@ -360,35 +364,21 @@ const processWithdrawEvent = async ({ from, to, amount, event, contract, nftCont
     let isSuccess = false;
     while (retry < MAX_RETRY && !isSuccess) {
       try {
-        logger.info(
-          `Start processWithdrawEvent. Retry ${retry++} times. ${JSON.stringify({ from, to, amount, event })}`
-        );
+        logger.info(`Start processWithdrawEvent. Retry ${retry++} times. ${JSON.stringify({ to, amount, event })}`);
         await batch.commit();
         isSuccess = true;
       } catch (err) {
-        logger.error(`Unsuccessful processWithdrawEvent txn: ${JSON.stringify(err)}`);
+        logger.error(`Unsuccessful processWithdrawEvent txn: ${err.message}, ${JSON.stringify(err)}`);
       }
     }
   } catch (err) {
-    logger.error(err);
-  }
-};
-
-const processBurnEvent = async ({ from, to, amount, event, contract, nftContract }) => {
-  try {
-    logger.info('process event');
-    logger.info({ from, to, amount, event });
-    const { transactionHash } = event;
-
-    // handle in backend
-  } catch (err) {
-    logger.error(err);
+    logger.error(`Error in processWithdrawEvent, ${err.message}, ${JSON.stringify(err)}`);
   }
 };
 
 const processBuyGoonEvent = async ({ to, amount, nonce, event, contract }) => {
   try {
-    logger.info('process event');
+    logger.info('processBuyGoonEvent');
     logger.info({ to, amount, nonce, event });
     const { transactionHash } = event;
 
@@ -415,14 +405,14 @@ const processBuyGoonEvent = async ({ to, amount, nonce, event, contract }) => {
 
     // update season
     const seasonRef = firestore.collection('season').doc(activeSeasonId);
-    batch.update(seasonRef, { workerSold: admin.firestore.FieldValue.increment(amount) });
+    batch.update(seasonRef, { workerSold: admin.firestore.FieldValue.increment(Number(amount.toString())) });
 
     // update gamePlay
     const gamePlay = await getUserActiveGamePlay(user.id);
     const generatedXToken = await calculateGeneratedXToken(user.id);
     const gamePlayRef = firestore.collection('gamePlay').doc(gamePlay.id);
     batch.update(gamePlayRef, {
-      numberOfWorkers: admin.firestore.FieldValue.increment(amount),
+      numberOfWorkers: admin.firestore.FieldValue.increment(Number(amount.toString())),
       startXTokenCountingTime: admin.firestore.FieldValue.serverTimestamp(),
     });
 
@@ -430,7 +420,7 @@ const processBuyGoonEvent = async ({ to, amount, nonce, event, contract }) => {
     batch.update(user.ref, { xTokenBalance: admin.firestore.FieldValue.increment(generatedXToken) });
 
     // update worker-txn-price
-    const { createdAt, prices } = txn;
+    const { createdAt, prices, value } = txn.data();
     const workerTxnPriceRef = firestore.collection('worker-txn-prices').doc(txn.id);
     batch.set(workerTxnPriceRef, {
       txnId: txn.id,
@@ -453,7 +443,7 @@ const processBuyGoonEvent = async ({ to, amount, nonce, event, contract }) => {
       }
     }
   } catch (err) {
-    logger.error(err);
+    logger.error(`Error in processBuyGoonEvent, ${err.message}, ${JSON.stringify(err)}`);
   }
 };
 
@@ -491,10 +481,14 @@ const processBuySafeHouseEvent = async ({ to, amount, nonce, event, contract }) 
 
     // update season
     const estimatedEndTimeUnix = estimatedEndTime.toDate().getTime();
-    const newEndTimeUnix = calculateNewEstimatedEndTimeUnix(estimatedEndTimeUnix, amount, -timeDecrementInSeconds);
+    const newEndTimeUnix = calculateNewEstimatedEndTimeUnix(
+      estimatedEndTimeUnix,
+      Number(amount.toString()),
+      -timeDecrementInSeconds
+    );
     const seasonRef = firestore.collection('season').doc(activeSeasonId);
     batch.update(seasonRef, {
-      workerSold: admin.firestore.FieldValue.increment(amount),
+      workerSold: admin.firestore.FieldValue.increment(Number(amount.toString())),
       estimatedEndTime: admin.firestore.Timestamp.fromMillis(newEndTimeUnix),
     });
 
@@ -502,11 +496,11 @@ const processBuySafeHouseEvent = async ({ to, amount, nonce, event, contract }) 
     const gamePlay = await getUserActiveGamePlay(user.id);
     const gamePlayRef = firestore.collection('gamePlay').doc(gamePlay.id);
     batch.update(gamePlayRef, {
-      numberOfBuildings: admin.firestore.FieldValue.increment(amount),
+      numberOfBuildings: admin.firestore.FieldValue.increment(Number(amount.toString())),
     });
 
     // update building-txn-price
-    const { createdAt, prices } = txn;
+    const { createdAt, prices, value } = txn.data();
     const buildingTxnPriceRef = firestore.collection('building-txn-prices').doc(txn.id);
     batch.set(buildingTxnPriceRef, {
       txnId: txn.id,
@@ -529,277 +523,87 @@ const processBuySafeHouseEvent = async ({ to, amount, nonce, event, contract }) 
       }
     }
   } catch (err) {
-    logger.error(err);
+    logger.error(`Error in processBuySafeHouseEvent, ${err.message}, ${JSON.stringify(err)}`);
   }
 };
 
-const createTransaction = async ({ address, ...data }) => {
-  const system = await firestore.collection('system').doc('default').get();
-  const { activeSeasonId } = system.data();
+const getUserNewMachines = async ({ userId, address, nftContract }) => {
+  try {
+    const gangsterNumber = await nftContract.gangster(address);
+    const newBalance = Number(gangsterNumber.toString());
 
-  const user = await firestore.collection('user').where('address', '==', address).limit(1).get();
-  if (!user.empty) {
-    await firestore.collection('transaction').add({
-      userId: user.docs[0].id,
-      seasonId: activeSeasonId,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      ...data,
-    });
-  }
-};
+    const gamePlay = await getUserActiveGamePlay(userId);
+    if (!gamePlay) return { gamePlay: {}, warDeployment: {} };
 
-const getUserNewMachines = async ({ userId, nftContract }) => {
-  const gangsterNumber = await nftContract.gangster(to);
-  const newBalance = Number(gangsterNumber.toString());
+    const { numberOfMachines } = gamePlay;
+    const now = Date.now();
+    const generatedReward = await calculateGeneratedReward(userId);
 
-  const gamePlay = await getUserActiveGamePlay(userId);
-  if (!gamePlay) return { gamePlay: {}, warDeployment: {} };
+    const warDeploymentSnapshot = await admin
+      .firestore()
+      .collection('warDeployment')
+      .where('userId', '==', userId)
+      .where('seasonId', '==', gamePlay.seasonId)
+      .limit(1)
+      .get();
+    if (warDeploymentSnapshot.empty)
+      return {
+        gamePlayId: gamePlay.id,
+        warDeploymentId: null,
+        gamePlay: {
+          numberOfMachines: newNumberOfMachines,
+          startRewardCountingTime: admin.firestore.Timestamp.fromMillis(now),
+          pendingReward: admin.firestore.FieldValue.increment(generatedReward),
+        },
+        warDeployment: {},
+      };
 
-  const { numberOfMachines } = gamePlay.data();
-  const now = Date.now();
-  const generatedReward = await calculateGeneratedReward(user.docs[0].id);
+    const warDeployment = { id: warDeploymentSnapshot.docs[0].id, ...warDeploymentSnapshot.docs[0].data() };
 
-  const warDeploymentSnapshot = await admin
-    .firestore()
-    .collection('warDeployment')
-    .where('userId', '==', user.docs[0].id)
-    .where('seasonId', '==', gamePlay.seasonId)
-    .limit(1)
-    .get();
-  if (warDeploymentSnapshot.empty)
+    const newNumberOfMachines = Number(newBalance);
+    let numberOfMachinesToEarn = warDeployment.numberOfMachinesToEarn;
+    let numberOfMachinesToAttack = warDeployment.numberOfMachinesToAttack;
+    let numberOfMachinesToDefend = warDeployment.numberOfMachinesToDefend;
+
+    // when mint, deposit --> increasement is added to machinesToEarn
+    if (newNumberOfMachines > numberOfMachines) {
+      numberOfMachinesToDefend = Math.min(numberOfMachinesToDefend, newNumberOfMachines);
+      numberOfMachinesToAttack = Math.max(
+        0,
+        Math.min(numberOfMachinesToAttack, newNumberOfMachines - numberOfMachinesToDefend)
+      );
+      numberOfMachinesToEarn = Math.max(0, newNumberOfMachines - numberOfMachinesToDefend - numberOfMachinesToAttack);
+    }
+
+    // when withdraw --> withdraw order: attack -> defend -> earn
+    if (newNumberOfMachines < numberOfMachines) {
+      numberOfMachinesToEarn = Math.min(numberOfMachinesToEarn, newNumberOfMachines);
+      numberOfMachinesToDefend = Math.max(
+        0,
+        Math.min(numberOfMachinesToDefend, newNumberOfMachines - numberOfMachinesToEarn)
+      );
+      numberOfMachinesToAttack = Math.max(0, newNumberOfMachines - numberOfMachinesToDefend - numberOfMachinesToEarn);
+    }
+
     return {
       gamePlayId: gamePlay.id,
-      warDeploymentId: null,
+      warDeploymentId: warDeployment.id,
       gamePlay: {
         numberOfMachines: newNumberOfMachines,
         startRewardCountingTime: admin.firestore.Timestamp.fromMillis(now),
         pendingReward: admin.firestore.FieldValue.increment(generatedReward),
       },
-      warDeployment: {},
+      warDeployment: {
+        numberOfMachinesToEarn,
+        numberOfMachinesToAttack,
+        numberOfMachinesToDefend,
+      },
     };
-
-  const warDeployment = { id: gamePlaySnapshot.docs[0].id, ...warDeploymentSnapshot.docs[0].data() };
-
-  const newNumberOfMachines = Number(newBalance);
-  let numberOfMachinesToEarn = warDeployment.numberOfMachinesToEarn;
-  let numberOfMachinesToAttack = warDeployment.numberOfMachinesToAttack;
-  let numberOfMachinesToDefend = warDeployment.numberOfMachinesToDefend;
-
-  // when mint, deposit --> increasement is added to machinesToEarn
-  if (newNumberOfMachines > numberOfMachines) {
-    numberOfMachinesToDefend = Math.min(numberOfMachinesToDefend, newNumberOfMachines);
-    numberOfMachinesToAttack = Math.max(
-      0,
-      Math.min(numberOfMachinesToAttack, newNumberOfMachines - numberOfMachinesToDefend)
-    );
-    numberOfMachinesToEarn = Math.max(0, newNumberOfMachines - numberOfMachinesToDefend - numberOfMachinesToAttack);
+  } catch (err) {
+    console.error(err);
+    logger.error(`Error in getting user new machines, ${JSON.stringify(err)}`);
+    throw err;
   }
-
-  // when withdraw --> withdraw order: attack -> defend -> earn
-  if (newNumberOfMachines < numberOfMachines) {
-    numberOfMachinesToEarn = Math.min(numberOfMachinesToEarn, newNumberOfMachines);
-    numberOfMachinesToDefend = Math.max(
-      0,
-      Math.min(numberOfMachinesToDefend, newNumberOfMachines - numberOfMachinesToEarn)
-    );
-    numberOfMachinesToAttack = Math.max(0, newNumberOfMachines - numberOfMachinesToDefend - numberOfMachinesToEarn);
-  }
-
-  return {
-    gamePlayId: gamePlay.id,
-    warDeploymentId: warDeployment.id,
-    gamePlay: {
-      numberOfMachines: newNumberOfMachines,
-      startRewardCountingTime: admin.firestore.Timestamp.fromMillis(now),
-      pendingReward: admin.firestore.FieldValue.increment(generatedReward),
-    },
-    warDeployment: {
-      numberOfMachinesToEarn,
-      numberOfMachinesToAttack,
-      numberOfMachinesToDefend,
-    },
-  };
-};
-
-const updateNumberOfGangster = async ({ address, newBalance, active = false }) => {
-  logger.info({ address, newBalance: Number(newBalance) });
-  const activeSeasonId = await getActiveSeasonId();
-  const user = await firestore.collection('user').where('address', '==', address).limit(1).get();
-  if (!user.empty) {
-    const gamePlaySnapshot = await firestore
-      .collection('gamePlay')
-      .where('userId', '==', user.docs[0].id)
-      .where('seasonId', '==', activeSeasonId)
-      .limit(1)
-      .get();
-    if (!gamePlaySnapshot.empty) {
-      const gamePlay = gamePlaySnapshot.docs[0];
-      const { numberOfMachines } = gamePlay.data();
-      const now = Date.now();
-      const generatedReward = await calculateGeneratedReward(user.docs[0].id);
-
-      const warDeploymentSnapshot = await admin
-        .firestore()
-        .collection('warDeployment')
-        .where('userId', '==', user.docs[0].id)
-        .where('seasonId', '==', activeSeasonId)
-        .limit(1)
-        .get();
-      if (warDeploymentSnapshot.empty) return;
-
-      const warDeployment = warDeploymentSnapshot.docs[0].data();
-
-      const newNumberOfMachines = Number(newBalance);
-      let numberOfMachinesToEarn = warDeployment.numberOfMachinesToEarn;
-      let numberOfMachinesToAttack = warDeployment.numberOfMachinesToAttack;
-      let numberOfMachinesToDefend = warDeployment.numberOfMachinesToDefend;
-
-      // when mint, deposit --> increasement is added to machinesToEarn
-      if (newNumberOfMachines > numberOfMachines) {
-        numberOfMachinesToDefend = Math.min(numberOfMachinesToDefend, newNumberOfMachines);
-        numberOfMachinesToAttack = Math.max(
-          0,
-          Math.min(numberOfMachinesToAttack, newNumberOfMachines - numberOfMachinesToDefend)
-        );
-        numberOfMachinesToEarn = Math.max(0, newNumberOfMachines - numberOfMachinesToDefend - numberOfMachinesToAttack);
-      }
-
-      // when withdraw --> withdraw order: attack -> defend -> earn
-      if (newNumberOfMachines < numberOfMachines) {
-        numberOfMachinesToEarn = Math.min(numberOfMachinesToEarn, newNumberOfMachines);
-        numberOfMachinesToDefend = Math.max(
-          0,
-          Math.min(numberOfMachinesToDefend, newNumberOfMachines - numberOfMachinesToEarn)
-        );
-        numberOfMachinesToAttack = Math.max(0, newNumberOfMachines - numberOfMachinesToDefend - numberOfMachinesToEarn);
-      }
-
-      await firestore
-        .collection('gamePlay')
-        .doc(gamePlay.id)
-        .update({
-          numberOfMachines: newNumberOfMachines,
-          startRewardCountingTime: admin.firestore.Timestamp.fromMillis(now),
-          pendingReward: admin.firestore.FieldValue.increment(generatedReward),
-          active: !!active || gamePlay.data().active,
-        });
-
-      const snapshot = await admin
-        .firestore()
-        .collection('warDeployment')
-        .where('userId', '==', user.docs[0].id)
-        .where('seasonId', '==', activeSeasonId)
-        .limit(1)
-        .get();
-
-      if (!snapshot.empty) {
-        await snapshot.docs[0].ref.update({
-          numberOfMachinesToEarn,
-          numberOfMachinesToAttack,
-          numberOfMachinesToDefend,
-        });
-      }
-    }
-  }
-};
-
-const increaseGoon = async ({ address, amount }) => {
-  console.log({ address, amount });
-  const system = await firestore.collection('system').doc('default').get();
-  const { activeSeasonId } = system.data();
-  const user = await firestore.collection('user').where('address', '==', address.toLowerCase()).limit(1).get();
-  if (!user.empty) {
-    const gamePlay = await firestore
-      .collection('gamePlay')
-      .where('userId', '==', user.docs[0].id)
-      .where('seasonId', '==', activeSeasonId)
-      .limit(1)
-      .get();
-    if (!gamePlay.empty) {
-      const now = Date.now();
-      const generatedXToken = await calculateGeneratedXToken(user.docs[0].id);
-      await firestore
-        .collection('gamePlay')
-        .doc(gamePlay.docs[0].id)
-        .update({
-          numberOfWorkers: admin.firestore.FieldValue.increment(amount),
-          startXTokenCountingTime: admin.firestore.Timestamp.fromMillis(now),
-        });
-
-      await user.docs[0].ref.update({ xTokenBalance: admin.firestore.FieldValue.increment(generatedXToken) });
-    }
-
-    await firestore
-      .collection('season')
-      .doc(activeSeasonId)
-      .update({
-        workerSold: admin.firestore.FieldValue.increment(amount),
-      });
-  }
-};
-
-const increaseSafeHouse = async ({ address, amount }) => {
-  console.log({ address, amount });
-  const system = await firestore.collection('system').doc('default').get();
-  const { activeSeasonId } = system.data();
-  const user = await firestore.collection('user').where('address', '==', address.toLowerCase()).limit(1).get();
-  if (!user.empty) {
-    console.log('get Game play');
-    const gamePlay = await firestore
-      .collection('gamePlay')
-      .where('userId', '==', user.docs[0].id)
-      .where('seasonId', '==', activeSeasonId)
-      .limit(1)
-      .get();
-    if (!gamePlay.empty) {
-      const now = Date.now();
-      const generatedReward = await calculateGeneratedReward(user.docs[0].id);
-      console.log('Update Game play');
-      await firestore
-        .collection('gamePlay')
-        .doc(gamePlay.docs[0].id)
-        .update({
-          numberOfBuildings: admin.firestore.FieldValue.increment(amount),
-          startRewardCountingTime: admin.firestore.Timestamp.fromMillis(now),
-          pendingReward: admin.firestore.FieldValue.increment(generatedReward),
-        });
-    }
-    await firestore
-      .collection('season')
-      .doc(activeSeasonId)
-      .update({
-        buildingSold: admin.firestore.FieldValue.increment(amount),
-      });
-  }
-};
-
-const updatePrizePool = async (value) => {
-  const system = await firestore.collection('system').doc('default').get();
-  const { activeSeasonId } = system.data();
-
-  await firestore
-    .collection('season')
-    .doc(activeSeasonId)
-    .update({
-      rankPrizePool: Number(value),
-    });
-};
-
-const updateReputationPool = async (value) => {
-  const system = await firestore.collection('system').doc('default').get();
-  const { activeSeasonId } = system.data();
-
-  await firestore
-    .collection('season')
-    .doc(activeSeasonId)
-    .update({
-      reputationPrizePool: Number(value),
-    });
-};
-
-const increaseUserWhitelistAmountMinted = async ({ userId, amount }) => {
-  const gamePlay = await getUserActiveGamePlay(userId);
-  await gamePlay.update({ whitelistAmountMinted: admin.firestore.FieldValue.increment(amount) });
 };
 
 // utils

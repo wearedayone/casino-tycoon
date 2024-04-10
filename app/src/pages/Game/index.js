@@ -431,7 +431,13 @@ const Game = () => {
         gameRef.current?.events.emit('deposit-nft-completed', { amount, txnHash: receipt.transactionHash });
       }
     } catch (err) {
-      err.message && enqueueSnackbar(err.message, { variant: 'error' });
+      const { message, code } = handleError(err);
+      gameRef.current?.events.emit('deposit-nft-completed', {
+        status: 'failed',
+        code,
+        message,
+      });
+
       console.error(err);
       Sentry.captureException(err);
     }
@@ -485,6 +491,7 @@ const Game = () => {
     try {
       const res = await create({ type: 'buy-machine', amount: quantity, mintFunction });
       const { amount, value, time, nGangster, nonce, bType, referrerAddress, signature } = res.data;
+      console.log({ amount, value, time, nGangster, nonce, bType, referrerAddress, signature });
       const receipt = await buyMachine({
         amount,
         value,
