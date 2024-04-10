@@ -49,6 +49,7 @@ class PopupSafeHouseUpgrade extends Popup {
       disableSalesTracking: isSimulator
         ? 'simulator-disable-building-sales-tracking'
         : 'disable-building-sales-tracking',
+      updateXTokenBalance: isSimulator ? 'simulator-update-xtoken-balance' : 'update-xtoken-balance',
     };
     this.events = events;
     this.onCompleted = onCompleted;
@@ -280,7 +281,7 @@ class PopupSafeHouseUpgrade extends Popup {
       this.updateValues();
     });
 
-    scene.game.events.on('update-xtoken-balance', ({ balance }) => {
+    scene.game.events.on(events.updateXTokenBalance, ({ balance }) => {
       this.xTokenBalance = balance;
       this.xgangAvailable.text = `Available: ${customFormat(balance || 0, 1)}`;
       if (this.purchaseToken === 'xGANG') this.updateValues();
