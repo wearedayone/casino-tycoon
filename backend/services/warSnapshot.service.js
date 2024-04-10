@@ -199,7 +199,7 @@ export const generateDailyWarSnapshot = async () => {
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
           startRewardCountingTime: gamePlay.startRewardCountingTime,
           pendingReward: gamePlay.pendingReward,
-          dailyReward: activeSeason.machine.dailyReward,
+          dailyReward: activeSeason.machine.dailyReward * gamePlay.numberOfMachines,
           numberOfMachines: gamePlay.numberOfMachines,
           numberOfWorkers: gamePlay.numberOfWorkers,
           numberOfBuildings: gamePlay.numberOfBuildings,
@@ -345,14 +345,19 @@ export const generateDailyWarSnapshot = async () => {
       const userWarResults = Object.values(users).map((item) => ({
         userId: item.userId,
         gamePlayId: item.gamePlayId,
-        startRewardCountingTime: item.startRewardCountingTime,
-        numberOfMachines: item.numberOfMachines,
         warDeploymentId: item.warDeploymentId,
+        startRewardCountingTime: item.startRewardCountingTime,
+        pendingReward: item.pendingReward,
+        dailyReward: item.dailyReward,
+        numberOfMachines: item.numberOfMachines,
         lostGangsters: item.machinesLost,
         lostGoons: 0,
         gainedTokens: item.totalTokenReward,
         gainedReputation: item.gainedReputation,
       }));
+
+      // fs.writeFileSync('../test.json', JSON.stringify(userWarResults, null, 2), { encoding: 'utf-8' });
+
       // chunk to set war results
       const chunkedUsers = chunk(userWarResults, 50);
       const setWarResultsPromises = chunkedUsers.map((pUsers) => submitWarResults(pUsers));
@@ -360,38 +365,13 @@ export const generateDailyWarSnapshot = async () => {
     }
 
     logger.info('\n---------finish taking daily war snapshot--------\n\n');
-
-    // const promises = Object.values(users).map((data) =>
-    //   firestore
-    //     .collection('warSnapshot')
-    //     .doc(todayDateString)
-    //     .collection('warResult')
-    //     .doc(data.userId)
-    //     .set({ ...data })
-    // );
-    // await Promise.all(promises);
-
-    // // send rewards and burn NFT
-    // const userWarResults = Object.values(users).map((item) => ({
-    //   userId: item.userId,
-    //   lostGangsters: item.machinesLost,
-    //   lostGoons: 0,
-    //   gainedTokens: item.totalTokenReward,
-    //   gainedReputation: item.gainedReputation,
-    // }));
-    // // chunk to set war results
-    // const chunkedUsers = chunk(userWarResults, 50);
-    // const setWarResultsPromises = chunkedUsers.map((pUsers) => submitWarResults(pUsers));
-    // await Promise.all(setWarResultsPromises);
-
-    // logger.info('\n---------finish taking daily war snapshot--------\n\n');
   } catch (err) {
     console.error(err);
     logger.error(err.message);
   }
 };
 
-const submitWarResults = async ({ users }) => {
+const submitWarResults = async (users) => {
   if (!users.length) return;
 
   logger.info(`Start submit war result for users:\n ${JSON.stringify(users.map((user) => user.userId).join('\n'))}`);
@@ -408,9 +388,30 @@ const submitWarResults = async ({ users }) => {
     const snapshot = userSnapshots[index];
     if (!snapshot.exists) continue;
 
-    const { lostGangsters, lostGoons, gainedTokens, gainedReputation, gamePlayId, warDeploymentId } = users[index];
+    const {
+      lostGangsters,
+      lostGoons,
+      gainedTokens,
+      gainedReputation,
+      gamePlayId,
+      warDeploymentId,
+      dailyReward,
+      pendingReward,
+      startRewardCountingTime,
+      numberOfMachines,
+    } = users[index];
     let burnedGangsters = lostGangsters;
-    console.log({ lostGangsters, lostGoons, gainedTokens, gainedReputation, gamePlayId, warDeploymentId });
+    console.log({
+      lostGangsters,
+      lostGoons,
+      gainedTokens,
+      gainedReputation,
+      gamePlayId,
+      warDeploymentId,
+      dailyReward,
+      pendingReward,
+      startRewardCountingTime,
+    });
 
     if (lostGangsters || lostGoons) {
       const nft = await getNFTBalance({ address: snapshot.data().address });
@@ -420,6 +421,10 @@ const submitWarResults = async ({ users }) => {
       burnedGangsters = Math.min(lostGangsters, nftBalance);
       warPenaltyTxns.push({
         userId: snapshot.id,
+        pendingReward,
+        startRewardCountingTime,
+        dailyReward,
+        numberOfMachines,
         machinesDeadCount: burnedGangsters,
         workersDeadCount: lostGoons,
         gamePlayId,
@@ -457,6 +462,12 @@ const submitWarResults = async ({ users }) => {
     })}`
   );
 
+  // fs.writeFileSync(
+  //   '../test1.json',
+  //   JSON.stringify({ txn: { txnHash, status }, warPenaltyTxns, warBonusTxns }, null, 2),
+  //   { encoding: 'utf-8' }
+  // );
+
   const activeSeasonId = await getActiveSeasonId();
 
   warPenaltyTxns.map((item) => {
@@ -469,6 +480,7 @@ const submitWarResults = async ({ users }) => {
       workersDeadCount: item.workersDeadCount,
       status,
       txnHash,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
     if (status === 'Success') {
@@ -478,10 +490,10 @@ const submitWarResults = async ({ users }) => {
         };
         if (item.startRewardCountingTime && item.numberOfMachines) {
           const now = Date.now();
-          const start = startRewardCountingTime.toDate().getTime();
+          const start = item.startRewardCountingTime.toDate().getTime();
           const diffInDays = (now - start) / (24 * 60 * 60 * 1000);
 
-          const generatedReward = diffInDays * (numberOfMachines * item.dailyReward);
+          const generatedReward = diffInDays * (item.numberOfMachines * item.dailyReward);
           const reward = Math.round(generatedReward * 1000) / 1000;
           const newReward = Number(item.pendingReward) + Number(reward);
           gamePlayData.pendingReward = newReward;
@@ -494,7 +506,7 @@ const submitWarResults = async ({ users }) => {
       if (item.warDeploymentId) {
         const warDeploymentRef = firestore.collection('warDeployment').doc(item.warDeploymentId);
         batch.update(warDeploymentRef, {
-          numberOfMachinesToAttack: admin.firestore.FieldValue.increment(-machinesDeadCount),
+          numberOfMachinesToAttack: admin.firestore.FieldValue.increment(-item.machinesDeadCount),
         });
       }
     }
@@ -511,10 +523,11 @@ const submitWarResults = async ({ users }) => {
       token: 'FIAT',
       status,
       txnHash,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
     if (status === 'Success') {
-      if (item.gamePlayId) {
+      if (item.gamePlayId && item.gainedReputation) {
         const gamePlayRef = firestore.collection('gamePlay').doc(item.gamePlayId);
         batch.update(gamePlayRef, { networthFromWar: admin.firestore.FieldValue.increment(item.gainedReputation) });
       }

@@ -1,0 +1,48 @@
+{
+  "txn": {
+    "txnHash": "0xe093313226662b329bb36f67f7554ad5a4e68bf07d0057400fd5649c0a9de37e",
+    "status": "Success"
+  },
+  "warPenaltyTxns": [
+    {
+      "userId": "did:privy:clofgk7y90168jz0fkttecnl5",
+      "pendingReward": 0.8420000000014625,
+      "startRewardCountingTime": {
+        "_seconds": 1712739345,
+        "_nanoseconds": 60000000
+      },
+      "dailyReward": 11000,
+      "numberOfMachines": 11,
+      "machinesDeadCount": 1,
+      "workersDeadCount": 0,
+      "gamePlayId": "Mmv1EImSpx7iWyCAmZfg",
+      "warDeploymentId": "rk2u90UOtR0i5jTX8kJV"
+    }
+  ],
+  "warBonusTxns": [
+    {
+      "userId": "did:privy:cludfi2x502fzzzcgr1mh77zk",
+      "value": 24100,
+      "gainedReputation": 0,
+      "gamePlayId": "9vXNAV1DllQIzjEwQNFM"
+    },
+    {
+      "userId": "did:privy:clofgk7y90168jz0fkttecnl5",
+      "value": 1500,
+      "gainedReputation": 0,
+      "gamePlayId": "Mmv1EImSpx7iWyCAmZfg"
+    },
+    {
+      "userId": "did:privy:clonvt4x801zrjr0fecvjgh1a",
+      "value": 3400,
+      "gainedReputation": 0,
+      "gamePlayId": "le3oYH011Mb7bsrJLxFH"
+    },
+    {
+      "userId": "did:privy:clo1oucjl0esgk10f4ca9d0k7",
+      "value": 5200,
+      "gainedReputation": 0,
+      "gamePlayId": "xPJTBtM2WteVvJ7oDXNE"
+    }
+  ]
+}
