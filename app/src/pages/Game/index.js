@@ -1650,7 +1650,7 @@ const Game = () => {
         sx={
           showBg
             ? {
-                backgroundImage: 'url(/images/bg-login.webp)',
+                backgroundImage: { xs: 'url(images/bg-login-vertical.webp)', md: 'url(images/bg-login.webp)' },
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 '& canvas': { position: 'absolute' },
@@ -1664,7 +1664,7 @@ const Game = () => {
               <Box p={2} width="100%" display="flex" flexDirection="column" alignItems="center" gap={2}>
                 <Box
                   mx="auto"
-                  mt="20vh"
+                  mt={5}
                   width={{ xs: '100%', sm: '600px' }}
                   display="flex"
                   flexDirection="column"

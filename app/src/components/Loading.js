@@ -10,7 +10,7 @@ const Loading = ({ isBlocked }) => {
         sx={{
           zIndex: -1,
           top: 0,
-          backgroundImage: 'url(images/bg-login.webp)',
+          backgroundImage: { xs: 'url(images/bg-login-vertical.webp)', md: 'url(images/bg-login.webp)' },
           backgroundSize: 'cover',
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'center',
@@ -27,7 +27,7 @@ const Loading = ({ isBlocked }) => {
           <Box
             flex={1}
             mx="auto"
-            mt="20vh"
+            pt={5}
             width={{ xs: '100%', sm: '600px' }}
             display="flex"
             flexDirection="column"

@@ -26,7 +26,7 @@ const Navigations = () => {
 
   if (isLoading) return <Loading isBlocked={isBlocked} />;
 
-  if (!authenticated) return <AuthRoutes />;
+  if (!authenticated || !user?.twitter) return <AuthRoutes />;
 
   return <MainRoutes />;
 };

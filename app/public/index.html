@@ -76,6 +76,21 @@
         font-weight: 800;
         src: url('fonts/WixMadeforDisplay-ExtraBold.ttf') format('truetype');
       }
+
+      #flash {
+        height: 100vh;
+        background-image: url(images/bg-login.webp);
+        background-size: cover;
+        background-repeat: no-repeat;
+        justify-content: center;
+        -webkit-box-pack: center;
+        background-position: center;
+      }
+      @media (max-width: 600px) {
+        #flash {
+          background-image: url(images/bg-login-vertical.webp);
+        }
+      }
     </style>
   </head>
   <body style="margin: 0">
@@ -105,7 +120,7 @@
           background-position: center;
         ">
         <div style="padding: 16px">
-          <div style="margin-top: 20vh; display: flex; justify-content: center">
+          <div style="margin-top: 40px; display: flex; justify-content: center">
             <img src="/images/logo.svg" width="100%" style="max-width: 600px" />
           </div>
         </div>
