@@ -96,7 +96,7 @@ const Login = () => {
         flexDirection="column"
         justifyContent="center"
         bgcolor="rgba(0, 0, 0, 0.2)">
-        <Box flex={1} display="flex" flexDirection="column" justifyContent="center" gap={5}>
+        <Box flex={1} display="flex" flexDirection="column" justifyContent="center" gap={3}>
           <Box
             flex={1}
             pt={5}
@@ -110,15 +110,12 @@ const Login = () => {
           <Box
             flex={1}
             mx="auto"
-            py={2}
             width={{ xs: '100%', sm: '400px' }}
             display="flex"
             flexDirection="column"
             justifyContent="flex-end"
             gap={2}>
-            <Box display="flex" flexDirection="column" gap={1}>
-              <Box id="privy-container" />
-            </Box>
+            <Box id="privy-container" />
           </Box>
         </Box>
       </Box>
