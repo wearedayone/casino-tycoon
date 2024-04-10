@@ -149,7 +149,7 @@ export const setWarResult = async ({ addresses, lostGangsters, lostGoons, wonRep
       const baseGasPrice = await quickNode.getGasPrice();
       const gasPrice = (baseGasPrice.toBigInt() * BigInt(Math.round(Math.pow(1.2, retry) * 1000000))) / BigInt(1000000);
       logger.info(`Start setWarResult transaction with gasPrice: ${JSON.stringify(gasPrice)}`);
-      const tx = await gameContract.finalWarResult(addresses, lostGangsters, lostGoons, wonReputations, wonTokens, {
+      const tx = await gameContract.finalWarResult(addresses, lostGangsters, wonTokens, {
         gasPrice,
       });
       txnHash = tx.hash;

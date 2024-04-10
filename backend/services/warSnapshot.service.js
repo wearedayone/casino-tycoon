@@ -6,12 +6,13 @@ import schedule from 'node-schedule';
 
 import admin, { firestore } from '../configs/firebase.config.js';
 import { getActiveSeasonId, getActiveSeason, takeSeasonLeaderboardSnapshot } from './season.service.js';
-import { initTransaction, validateNonWeb3Transaction } from './transaction.service.js';
 import { getNFTBalance, setWarResult } from './worker.service.js';
 import { getUserUsernames } from './user.service.js';
 import { getUserGamePlay } from './gamePlay.service.js';
 import logger from '../utils/logger.js';
 import { getAccurate } from '../utils/math.js';
+
+const MAX_RETRY = 3;
 
 export const getLatestWar = async (userId) => {
   const snapshot = await firestore.collection('warSnapshot').orderBy('createdAt', 'desc').limit(1).get();
@@ -146,6 +147,9 @@ export const generateDailyWarSnapshot = async () => {
       return;
     }
 
+    const warDeploymentSnapshot = await firestore.collection('warDeployment').where('seasonId', '==', seasonId).get();
+    const allWarDeployments = warDeploymentSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
     const gamePlaySnapshot = await firestore
       .collection('gamePlay')
       .where('active', '==', true)
@@ -156,13 +160,7 @@ export const generateDailyWarSnapshot = async () => {
     const gamePlays = [];
     for (const doc of gamePlaySnapshot.docs) {
       const thisUserId = doc.data().userId;
-      const warDeploymentSnapshot = await firestore
-        .collection('warDeployment')
-        .where('seasonId', '==', seasonId)
-        .where('userId', '==', thisUserId)
-        .limit(1)
-        .get();
-      const warDeployment = warDeploymentSnapshot.docs[0]?.data() || {};
+      const warDeployment = allWarDeployments.find((item) => item.userId === thisUserId) ?? {};
       const attackUserId = warDeployment.attackUserId;
       if (attackUserId) {
         attackers[attackUserId] = [
@@ -173,13 +171,6 @@ export const generateDailyWarSnapshot = async () => {
 
       gamePlays.push({ id: doc.id, ...doc.data(), warDeployment });
     }
-
-    // create warSnapshot
-    const todayDateString = moment().format('YYYYMMDD-HHmmss');
-    await firestore.collection('warSnapshot').doc(todayDateString).set({
-      seasonId,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
 
     const {
       buildingBonusMultiple,
@@ -201,9 +192,14 @@ export const generateDailyWarSnapshot = async () => {
         ...result,
         [gamePlay.userId]: {
           seasonId,
+          gamePlayId: gamePlay.id,
+          warDeploymentId: gamePlay.warDeployment?.id,
           networth: gamePlay.networth,
           userId: gamePlay.userId,
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          startRewardCountingTime: gamePlay.startRewardCountingTime,
+          pendingReward: gamePlay.pendingReward,
+          dailyReward: activeSeason.machine.dailyReward,
           numberOfMachines: gamePlay.numberOfMachines,
           numberOfWorkers: gamePlay.numberOfWorkers,
           numberOfBuildings: gamePlay.numberOfBuildings,
@@ -313,51 +309,108 @@ export const generateDailyWarSnapshot = async () => {
 
     // logger.info(`Users war snapshot, ${JSON.stringify(users)}`);
 
-    const promises = Object.values(users).map((data) =>
-      firestore
+    // need to create warSnapshot document, warResult documents
+    const batch = firestore.batch();
+
+    // create warSnapshot
+    const todayDateString = moment().format('YYYYMMDD-HHmmss');
+    const warSnapshotDocRef = firestore.collection('warSnapshot').doc(todayDateString);
+    batch.set(warSnapshotDocRef, { seasonId, createdAt: admin.firestore.FieldValue.serverTimestamp() });
+
+    // create warResult documents
+    Object.values(users).map((data) => {
+      const warResultRef = firestore
         .collection('warSnapshot')
         .doc(todayDateString)
         .collection('warResult')
-        .doc(data.userId)
-        .set({ ...data })
-    );
-    await Promise.all(promises);
+        .doc(data.userId);
 
-    // send rewards and burn NFT
-    const userWarResults = Object.values(users).map((item) => ({
-      userId: item.userId,
-      lostGangsters: item.machinesLost,
-      lostGoons: 0,
-      gainedTokens: item.totalTokenReward,
-      gainedReputation: item.gainedReputation,
-    }));
-    // chunk to set war results
-    const chunkedUsers = chunk(userWarResults, 50);
-    const setWarResultsPromises = chunkedUsers.map((pUsers) => submitWarResults(pUsers));
-    await Promise.all(setWarResultsPromises);
+      batch.set(warResultRef, { ...data });
+    });
+
+    let retry = 0;
+    let isSuccess = false;
+    while (retry < MAX_RETRY && !isSuccess) {
+      try {
+        logger.info(`Create warSnapshot && war result in ${todayDateString}. Retry ${retry++} times`);
+        await batch.commit();
+        isSuccess = true;
+      } catch (err) {
+        logger.error(`Unsuccessful create warSnapshot && war result in ${todayDateString}: ${JSON.stringify(err)}`);
+      }
+    }
+
+    if (isSuccess) {
+      // submitWarResults
+      const userWarResults = Object.values(users).map((item) => ({
+        userId: item.userId,
+        gamePlayId: item.gamePlayId,
+        startRewardCountingTime: item.startRewardCountingTime,
+        numberOfMachines: item.numberOfMachines,
+        warDeploymentId: item.warDeploymentId,
+        lostGangsters: item.machinesLost,
+        lostGoons: 0,
+        gainedTokens: item.totalTokenReward,
+        gainedReputation: item.gainedReputation,
+      }));
+      // chunk to set war results
+      const chunkedUsers = chunk(userWarResults, 50);
+      const setWarResultsPromises = chunkedUsers.map((pUsers) => submitWarResults(pUsers));
+      await Promise.all(setWarResultsPromises);
+    }
 
     logger.info('\n---------finish taking daily war snapshot--------\n\n');
+
+    // const promises = Object.values(users).map((data) =>
+    //   firestore
+    //     .collection('warSnapshot')
+    //     .doc(todayDateString)
+    //     .collection('warResult')
+    //     .doc(data.userId)
+    //     .set({ ...data })
+    // );
+    // await Promise.all(promises);
+
+    // // send rewards and burn NFT
+    // const userWarResults = Object.values(users).map((item) => ({
+    //   userId: item.userId,
+    //   lostGangsters: item.machinesLost,
+    //   lostGoons: 0,
+    //   gainedTokens: item.totalTokenReward,
+    //   gainedReputation: item.gainedReputation,
+    // }));
+    // // chunk to set war results
+    // const chunkedUsers = chunk(userWarResults, 50);
+    // const setWarResultsPromises = chunkedUsers.map((pUsers) => submitWarResults(pUsers));
+    // await Promise.all(setWarResultsPromises);
+
+    // logger.info('\n---------finish taking daily war snapshot--------\n\n');
   } catch (err) {
     console.error(err);
     logger.error(err.message);
   }
 };
 
-const submitWarResults = async (users) => {
+const submitWarResults = async ({ users }) => {
   if (!users.length) return;
+
+  logger.info(`Start submit war result for users:\n ${JSON.stringify(users.map((user) => user.userId).join('\n'))}`);
+  const batch = firestore.batch();
 
   const userIds = users.map((item) => item.userId);
   const userPromises = userIds.map((id) => firestore.collection('user').doc(id).get());
   const userSnapshots = await Promise.all(userPromises);
-  const warTxnsForFirestore = [];
   const warResultsForContract = [];
+  const warPenaltyTxns = [];
+  const warBonusTxns = [];
+
   for (const index in userSnapshots) {
     const snapshot = userSnapshots[index];
     if (!snapshot.exists) continue;
 
-    const { lostGangsters, lostGoons, gainedTokens, gainedReputation } = users[index];
+    const { lostGangsters, lostGoons, gainedTokens, gainedReputation, gamePlayId, warDeploymentId } = users[index];
     let burnedGangsters = lostGangsters;
-    console.log({ lostGangsters, lostGoons, gainedTokens, gainedReputation });
+    console.log({ lostGangsters, lostGoons, gainedTokens, gainedReputation, gamePlayId, warDeploymentId });
 
     if (lostGangsters || lostGoons) {
       const nft = await getNFTBalance({ address: snapshot.data().address });
@@ -365,22 +418,16 @@ const submitWarResults = async (users) => {
       console.log({ nftBalance });
 
       burnedGangsters = Math.min(lostGangsters, nftBalance);
-      const txn = await initTransaction({
+      warPenaltyTxns.push({
         userId: snapshot.id,
-        type: 'war-penalty',
         machinesDeadCount: burnedGangsters,
         workersDeadCount: lostGoons,
+        gamePlayId,
+        warDeploymentId,
       });
-      warTxnsForFirestore.push({ userId: snapshot.id, txnId: txn.id });
     }
     if (gainedTokens || gainedReputation) {
-      const txn = await initTransaction({
-        userId: snapshot.id,
-        type: 'war-bonus',
-        value: gainedTokens,
-        gainedReputation,
-      });
-      warTxnsForFirestore.push({ userId: snapshot.id, txnId: txn.id });
+      warBonusTxns.push({ userId: snapshot.id, value: gainedTokens, gainedReputation, gamePlayId });
     }
 
     warResultsForContract.push({
@@ -398,9 +445,8 @@ const submitWarResults = async (users) => {
   const wonReputations = warResultsForContract.map((item) => item.gainedReputation);
   const wonTokens = warResultsForContract.map((item) => parseEther(`${item.gainedTokens}`));
   const { txnHash, status } = await setWarResult({ addresses, lostGangsters, lostGoons, wonReputations, wonTokens });
-
   logger.info(
-    `Gangster penalties, ${JSON.stringify({
+    `SetWarResult, ${JSON.stringify({
       addresses,
       lostGangsters,
       lostGoons,
@@ -411,20 +457,88 @@ const submitWarResults = async (users) => {
     })}`
   );
 
-  const updateTxnPromises = warTxnsForFirestore.map((item) => {
-    return firestore.collection('transaction').doc(item.txnId).update({
-      txnHash,
+  const activeSeasonId = await getActiveSeasonId();
+
+  warPenaltyTxns.map((item) => {
+    const penaltyTxnRef = firestore.collection('transaction').doc();
+    batch.create(penaltyTxnRef, {
+      userId: item.userId,
+      seasonId: activeSeasonId,
+      type: 'war-penalty',
+      machinesDeadCount: item.machinesDeadCount,
+      workersDeadCount: item.workersDeadCount,
       status,
+      txnHash,
     });
+
+    if (status === 'Success') {
+      if (item.gamePlayId) {
+        const gamePlayData = {
+          numberOfMachines: admin.firestore.FieldValue.increment(-item.machinesDeadCount),
+        };
+        if (item.startRewardCountingTime && item.numberOfMachines) {
+          const now = Date.now();
+          const start = startRewardCountingTime.toDate().getTime();
+          const diffInDays = (now - start) / (24 * 60 * 60 * 1000);
+
+          const generatedReward = diffInDays * (numberOfMachines * item.dailyReward);
+          const reward = Math.round(generatedReward * 1000) / 1000;
+          const newReward = Number(item.pendingReward) + Number(reward);
+          gamePlayData.pendingReward = newReward;
+          gamePlayData.startRewardCountingTime = admin.firestore.FieldValue.serverTimestamp();
+        }
+        const gamePlayRef = firestore.collection('gamePlay').doc(item.gamePlayId);
+        batch.update(gamePlayRef, gamePlayData);
+      }
+
+      if (item.warDeploymentId) {
+        const warDeploymentRef = firestore.collection('warDeployment').doc(item.warDeploymentId);
+        batch.update(warDeploymentRef, {
+          numberOfMachinesToAttack: admin.firestore.FieldValue.increment(-machinesDeadCount),
+        });
+      }
+    }
   });
 
-  await Promise.all(updateTxnPromises);
+  warBonusTxns.map((item) => {
+    const bonusTxnRef = firestore.collection('transaction').doc();
+    batch.create(bonusTxnRef, {
+      userId: item.userId,
+      seasonId: activeSeasonId,
+      type: 'war-bonus',
+      value: item.value,
+      gainedReputation: item.gainedReputation,
+      token: 'FIAT',
+      status,
+      txnHash,
+    });
 
-  if (status === 'Success') {
-    const updateUserGamePlayPromises = warTxnsForFirestore.map((item) =>
-      validateNonWeb3Transaction({ userId: item.userId, transactionId: item.txnId })
-    );
-    await Promise.all(updateUserGamePlayPromises);
+    if (status === 'Success') {
+      if (item.gamePlayId) {
+        const gamePlayRef = firestore.collection('gamePlay').doc(item.gamePlayId);
+        batch.update(gamePlayRef, { networthFromWar: admin.firestore.FieldValue.increment(item.gainedReputation) });
+      }
+    }
+  });
+
+  let retry = 0;
+  let isSuccess = false;
+  while (retry < MAX_RETRY && !isSuccess) {
+    try {
+      logger.info(
+        `Create submit war result for users:\n ${JSON.stringify(
+          users.map((user) => user.userId).join('\n')
+        )}. Retry ${retry++} times`
+      );
+      await batch.commit();
+      isSuccess = true;
+    } catch (err) {
+      logger.error(
+        `Unsuccessful submit war result for users:\n ${JSON.stringify(
+          users.map((user) => user.userId).join('\n')
+        )}: ${JSON.stringify(err)}`
+      );
+    }
   }
 };
 

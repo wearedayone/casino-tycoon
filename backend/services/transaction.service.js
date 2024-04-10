@@ -570,87 +570,6 @@ const updateUserBalance = async (userId) => {
   }
 };
 
-const updateUserGamePlay = async (userId, transactionId) => {
-  const snapshot = await firestore.collection('transaction').doc(transactionId).get();
-  const { type } = snapshot.data();
-
-  const activeSeason = await getActiveSeason();
-
-  // update user number of assets && pendingReward && startRewardCountingTime
-  const gamePlaySnapshot = await firestore
-    .collection('gamePlay')
-    .where('userId', '==', userId)
-    .where('seasonId', '==', activeSeason.id)
-    .limit(1)
-    .get();
-  const warDeploymentSnapshot = await firestore
-    .collection('warDeployment')
-    .where('seasonId', '==', activeSeason.id)
-    .where('userId', '==', userId)
-    .limit(1)
-    .get();
-
-  const userGamePlay = gamePlaySnapshot.docs[0];
-  const warDeployment = warDeploymentSnapshot.docs[0]?.data() || {};
-  logger.debug(`userGamePlay before update: ${JSON.stringify(userGamePlay.data())}`);
-  const { numberOfWorkers, numberOfMachines, numberOfBuildings } = userGamePlay.data();
-  const assets = {
-    numberOfBuildings,
-    numberOfMachines,
-    numberOfWorkers,
-  };
-
-  let gamePlayData = {};
-  let warDeploymentData = {};
-  switch (type) {
-    case 'war-bonus':
-      const { gainedReputation } = snapshot.data();
-      gamePlayData = {
-        networth: admin.firestore.FieldValue.increment(gainedReputation),
-        networthFromWar: admin.firestore.FieldValue.increment(gainedReputation),
-      };
-      break;
-    case 'war-penalty':
-      const { machinesDeadCount } = snapshot.data();
-      assets.numberOfMachines -= machinesDeadCount;
-
-      gamePlayData = {
-        numberOfMachines: admin.firestore.FieldValue.increment(-machinesDeadCount),
-      };
-      warDeploymentData = {
-        numberOfMachinesToAttack: warDeployment.numberOfMachinesToAttack - machinesDeadCount,
-      };
-      break;
-    default:
-      break;
-  }
-
-  /* recalculate `pendingReward` */
-  if (userTokenGenerationRateChangedTypes.includes(type)) {
-    const generatedReward = await calculateGeneratedReward(userId);
-    gamePlayData.pendingReward = admin.firestore.FieldValue.increment(generatedReward);
-    gamePlayData.startRewardCountingTime = admin.firestore.FieldValue.serverTimestamp();
-  }
-
-  const isGamePlayChanged = Object.keys(gamePlayData).length > 0;
-  if (isGamePlayChanged) await userGamePlay.ref.update({ ...gamePlayData });
-
-  const isWarDeploymentChanged = Object.keys(warDeploymentData).length > 0;
-  if (isWarDeploymentChanged) {
-    const warDeploymentSnapshot = await admin
-      .firestore()
-      .collection('warDeployment')
-      .where('userId', '==', userId)
-      .where('seasonId', '==', activeSeason.id)
-      .limit(1)
-      .get();
-
-    if (!warDeploymentSnapshot.empty) {
-      await warDeploymentSnapshot.docs[0].ref.update({ ...warDeploymentData });
-    }
-  }
-};
-
 export const validateTxnHash = async ({ userId, transactionId, txnHash }) => {
   const valid = await validateBlockchainTxn({ userId, transactionId, txnHash });
   if (!valid) throw new Error('API error: Bad request - Invalid txn');
@@ -662,18 +581,6 @@ export const validateTxnHash = async ({ userId, transactionId, txnHash }) => {
   });
 
   await updateUserBalance(userId);
-};
-
-// for non web3 transactions: war-switch
-// OR self-triggered web3 txns: war-penalty
-export const validateNonWeb3Transaction = async ({ userId, transactionId }) => {
-  // update txnHash and status for transaction doc in firestore
-  await firestore.collection('transaction').doc(transactionId).update({
-    status: 'Success',
-  });
-
-  // TODO: move this logic to trigger later
-  await updateUserGamePlay(userId, transactionId);
 };
 
 export const claimToken = async ({ userId }) => {
@@ -1056,7 +963,3 @@ const calculateGeneratedXToken = async (userId) => {
 
   return generatedXToken;
 };
-
-/* all txn types that change user's token generation rate */
-const userTokenGenerationRateChangedTypes = ['war-penalty'];
-export const userPendingRewardChangedTypes = userTokenGenerationRateChangedTypes.concat('claim-token');
