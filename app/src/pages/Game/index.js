@@ -26,6 +26,7 @@ import {
   getWorkerPrices,
   getBuildingPrices,
   validateDailySpin,
+  buyAssetsWithXToken,
 } from '../../services/transaction.service';
 import {
   getLeaderboard,
@@ -438,20 +439,24 @@ const Game = () => {
 
   const buyBuilding = async ({ quantity, token }) => {
     try {
-      const res = await create({ type: 'buy-building', amount: quantity, token });
-      const { id, amount, value, time, nonce, signature, type, lastB } = res.data;
-      const receipt = await buySafeHouse({
-        type,
-        amount,
-        value: token === 'FIAT' ? value : 0,
-        lastB,
-        time,
-        nonce,
-        signature,
-      });
+      if (token === 'xGANG') {
+        await buyAssetsWithXToken({ type: 'building', amount: quantity });
+      } else {
+        const res = await create({ type: 'buy-building', amount: quantity, token });
+        const { id, amount, value, time, nonce, signature, type, lastB } = res.data;
+        const receipt = await buySafeHouse({
+          type,
+          amount,
+          value: token === 'FIAT' ? value : 0,
+          lastB,
+          time,
+          nonce,
+          signature,
+        });
 
-      if (receipt.status !== 1) throw new Error('Transaction failed');
-      return receipt.transactionHash;
+        if (receipt.status !== 1) throw new Error('Transaction failed');
+        return receipt.transactionHash;
+      }
     } catch (err) {
       console.error(err);
       throw err;
@@ -460,12 +465,16 @@ const Game = () => {
 
   const buyWorker = async ({ quantity, token }) => {
     try {
-      const res = await create({ type: 'buy-worker', amount: quantity, token });
-      const { id, amount, value, time, nonce, signature, lastB } = res.data;
-      const receipt = await buyGoon({ amount, value: token === 'FIAT' ? value : 0, lastB, time, nonce, signature });
+      if (token === 'xGANG') {
+        await buyAssetsWithXToken({ type: 'worker', amount: quantity });
+      } else {
+        const res = await create({ type: 'buy-worker', amount: quantity, token });
+        const { id, amount, value, time, nonce, signature, lastB } = res.data;
+        const receipt = await buyGoon({ amount, value: token === 'FIAT' ? value : 0, lastB, time, nonce, signature });
 
-      if (receipt.status !== 1) throw new Error('Transaction failed');
-      return receipt.transactionHash;
+        if (receipt.status !== 1) throw new Error('Transaction failed');
+        return receipt.transactionHash;
+      }
     } catch (err) {
       console.error(err);
       throw err;

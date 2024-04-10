@@ -8,6 +8,7 @@ import {
   claimToken,
   getWorkerPrices,
   getBuildingPrices,
+  buyAssetsXToken,
 } from '../controllers/transaction.controller.js';
 
 const router = Router();
@@ -18,4 +19,5 @@ router.post('/validation', auth, validate);
 router.post('/claimToken', auth, claimToken);
 router.get('/worker/price-chart', getWorkerPrices);
 router.get('/building/price-chart', getBuildingPrices);
+router.post('/assets/x-token', auth, buyAssetsXToken);
 export default router;

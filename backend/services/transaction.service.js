@@ -4,7 +4,7 @@ import moment from 'moment';
 import admin, { firestore } from '../configs/firebase.config.js';
 import quickNode from '../configs/quicknode.config.js';
 import { getActiveSeason } from './season.service.js';
-import { getLeaderboard } from './gamePlay.service.js';
+import { getLeaderboard, getUserGamePlay } from './gamePlay.service.js';
 import {
   claimToken as claimTokenTask,
   decodeGameTxnLogs,
@@ -23,14 +23,12 @@ import {
   calculateNextWorkerBuyPriceBatch,
   calculateNextBuildingBuyPrice,
   calculateNextWorkerBuyPrice,
-  calculateNewEstimatedEndTimeUnix,
   calculateSpinPrice,
 } from '../utils/formulas.js';
 import { getAccurate } from '../utils/math.js';
 import logger from '../utils/logger.js';
-import environments from '../utils/environments.js';
 
-const { SYSTEM_ADDRESS } = environments;
+const MAX_RETRY = 3;
 
 export const initTransaction = async ({ userId, type, ...data }) => {
   logger.info(`init transaction user:${userId} - type:${type}`);
@@ -44,23 +42,18 @@ export const initTransaction = async ({ userId, type, ...data }) => {
   }
 
   if (type === 'buy-worker') {
-    if (!['xGANG', 'FIAT'].includes(data.token)) throw new Error('API error: Bad request - invalid token');
+    if (!['FIAT'].includes(data.token)) throw new Error('API error: Bad request - invalid token');
     if (data.amount > activeSeason.worker.maxPerBatch) throw new Error('API error: Bad request - over max per batch');
   }
 
   if (type === 'buy-building') {
-    if (!['xGANG', 'FIAT'].includes(data.token)) throw new Error('API error: Bad request - invalid token');
+    if (!['FIAT'].includes(data.token)) throw new Error('API error: Bad request - invalid token');
     if (data.amount > activeSeason.building.maxPerBatch) throw new Error('API error: Bad request - over max per batch');
   }
   let userSnapshot,
     currentXTokenBalance = 0;
   if (['buy-machine', 'buy-building', 'buy-worker'].includes(type)) {
     userSnapshot = await firestore.collection('user').doc(userId).get();
-
-    if (['buy-building', 'buy-worker'].includes(type) && data.token === 'xGANG') {
-      const generatedXToken = await calculateGeneratedXToken(userId);
-      currentXTokenBalance = userSnapshot.data().xTokenBalance + generatedXToken;
-    }
   }
 
   if (type === 'daily-spin') {
@@ -146,9 +139,6 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       );
       txnData.value = workerPrices.total;
       txnData.prices = workerPrices.prices;
-
-      if (data.token === 'xGANG' && currentXTokenBalance < txnData.value)
-        throw new Error('API error: Not enough xGANG for purchase');
       break;
     case 'buy-building':
       txnData.amount = data.amount;
@@ -171,9 +161,6 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       );
       txnData.value = buildingPrices.total;
       txnData.prices = buildingPrices.prices;
-
-      if (data.token === 'xGANG' && currentXTokenBalance < txnData.value)
-        throw new Error('API error: Not enough xGANG for purchase');
       break;
     case 'war-bonus':
       txnData.value = data.value;
@@ -308,6 +295,110 @@ export const initTransaction = async ({ userId, type, ...data }) => {
   }
 
   return { id: newTransaction.id, ...transaction };
+};
+
+export const buyAssetsWithXToken = async ({ userId, type, amount }) => {
+  if (!['worker', 'building'].includes(type)) throw new Error('API error: Invalid txn type');
+
+  const activeSeason = await getActiveSeason();
+  const { status, workerSold, buildingSold, worker, building } = activeSeason;
+  if (status !== 'open') throw new Error('API error: Season is ended');
+
+  const user = await firestore.collection('user').doc(userId).get();
+  if (!user.exists) throw new Error('API error: Bad credential');
+  const { xTokenBalance } = user.data();
+
+  const gamePlay = await getUserGamePlay(userId);
+  if (!gamePlay) throw new Error('API error: No game play');
+
+  const generatedXToken = await calculateGeneratedXToken(userId);
+  const currentTotalBalance = xTokenBalance + generatedXToken;
+
+  const now = Date.now();
+  const startSalePeriod = now - 12 * 60 * 60 * 1000;
+  const txnData = {};
+  txnData.amount = amount;
+  txnData.token = 'xGANG';
+
+  if (type === 'worker') {
+    txnData.currentSold = workerSold;
+    const workerTxns = await firestore
+      .collection('transaction')
+      .where('seasonId', '==', activeSeason.id)
+      .where('type', '==', 'buy-worker')
+      .where('status', '==', 'Success')
+      .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startSalePeriod))
+      .get();
+    const workerSalesLastPeriod = workerTxns.docs.reduce((total, doc) => total + doc.data().amount, 0);
+    const workerPrices = calculateNextWorkerBuyPriceBatch(
+      workerSalesLastPeriod,
+      worker.targetDailyPurchase,
+      worker.targetPrice,
+      worker.basePrice,
+      amount
+    );
+    txnData.value = workerPrices.total;
+    txnData.prices = workerPrices.prices;
+  }
+
+  if (type === 'building') {
+    txnData.currentSold = buildingSold;
+    const buildingTxns = await firestore
+      .collection('transaction')
+      .where('seasonId', '==', activeSeason.id)
+      .where('type', '==', 'buy-building')
+      .where('status', '==', 'Success')
+      .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startSalePeriod))
+      .get();
+    const buildingSalesLastPeriod = buildingTxns.docs.reduce((total, doc) => total + doc.data().amount, 0);
+    const buildingPrices = calculateNextBuildingBuyPriceBatch(
+      buildingSalesLastPeriod,
+      building.targetDailyPurchase,
+      building.targetPrice,
+      building.basePrice,
+      amount
+    );
+    txnData.value = buildingPrices.total;
+    txnData.prices = buildingPrices.prices;
+  }
+
+  if (currentTotalBalance < txnData.value) throw new Error('API error: Insufficient xGANG');
+
+  const batch = firestore.batch();
+
+  // create txn
+  const txnRef = firestore.collection('transaction').doc();
+  batch.create(txnRef, {
+    userId,
+    seasonId: activeSeason.id,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    type: `buy-${type}`,
+    status: 'Success',
+    ...txnData,
+  });
+
+  // update gamePlay
+  const gamePlayRef = firestore.collection('gamePlay').doc(gamePlay.id);
+  const gamePlayData =
+    type === 'worker'
+      ? { numberOfWorkers: admin.firestore.FieldValue.increment(amount) }
+      : { numberOfBuildings: admin.firestore.FieldValue.increment(amount) };
+  batch.update(gamePlayRef, { ...gamePlayData, startXTokenCountingTime: admin.firestore.FieldValue.serverTimestamp() });
+
+  // update user
+  batch.update(user.ref, { xTokenBalance: currentTotalBalance - txnData.value });
+
+  let retry = 0;
+  let isSuccess = false;
+  while (retry < MAX_RETRY && !isSuccess) {
+    try {
+      logger.info(`Start buy-${type}. Retry ${retry++} times. ${JSON.stringify({ userId, type, amount })}`);
+      await batch.commit();
+      isSuccess = true;
+    } catch (err) {
+      logger.error(`Unsuccessful buy-${type} txn: ${JSON.stringify(err)}`);
+    }
+  }
 };
 
 export const validateDailySpinTxnAndReturnSpinResult = async ({ userId, transactionId, txnHash }) => {
@@ -460,10 +551,8 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
   }
 };
 
-const updateUserBalance = async (userId, transactionId) => {
+const updateUserBalance = async (userId) => {
   const userSnapshot = await firestore.collection('user').doc(userId).get();
-  const snapshot = await firestore.collection('transaction').doc(transactionId).get();
-  const { token, seasonId, value: txnValue } = snapshot.data();
 
   if (userSnapshot.exists) {
     const { address, ETHBalance } = userSnapshot.data();
@@ -476,30 +565,6 @@ const updateUserBalance = async (userId, transactionId) => {
           .update({
             ETHBalance: formatEther(value),
           });
-      }
-    }
-    if (token === 'xGANG') {
-      const gamePlay = await firestore
-        .collection('gamePlay')
-        .where('userId', '==', userId)
-        .where('seasonId', '==', seasonId)
-        .limit(1)
-        .get();
-      if (!gamePlay.empty) {
-        const now = Date.now();
-        const generatedXToken = await calculateGeneratedXToken(userId);
-        await firestore
-          .collection('gamePlay')
-          .doc(gamePlay.docs[0].id)
-          .update({
-            startXTokenCountingTime: admin.firestore.Timestamp.fromMillis(now),
-          });
-
-        const balanceDiff = generatedXToken - txnValue;
-        await firestore
-          .collection('user')
-          .doc(userId)
-          .update({ xTokenBalance: admin.firestore.FieldValue.increment(balanceDiff) });
       }
     }
   }
@@ -596,7 +661,7 @@ export const validateTxnHash = async ({ userId, transactionId, txnHash }) => {
     txnHash,
   });
 
-  await updateUserBalance(userId, transactionId);
+  await updateUserBalance(userId);
 };
 
 // for non web3 transactions: war-switch

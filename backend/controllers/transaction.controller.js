@@ -6,6 +6,7 @@ import {
   finishClaimToken,
   getWorkerPriceChart,
   getBuildingPriceChart,
+  buyAssetsWithXToken,
 } from '../services/transaction.service.js';
 import logger from '../utils/logger.js';
 
@@ -80,6 +81,20 @@ export const getBuildingPrices = async (req, res) => {
     const { timeMode } = req.query;
     const result = await getBuildingPriceChart({ timeMode });
     return res.status(200).send(result);
+  } catch (err) {
+    console.error(err);
+    logger.error(err.message);
+    const message = err.message.startsWith('API error') ? err.message : 'Something is wrong';
+    return res.status(400).send(message);
+  }
+};
+
+export const buyAssetsXToken = async (req, res) => {
+  try {
+    const { userId } = req;
+    const { type, amount } = req.body;
+    await buyAssetsWithXToken({ userId, type, amount });
+    return res.sendStatus(200);
   } catch (err) {
     console.error(err);
     logger.error(err.message);
