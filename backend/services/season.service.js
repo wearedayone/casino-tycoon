@@ -115,3 +115,50 @@ export const getBuildingPrices = async () => {
 
   return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 };
+
+const TAKE_SEASON_SNAPSHOT = 'take-season-snapshot';
+export const onSnapshotSeasonChange = async () => {
+  let unsubscribe;
+  const systemSnapshot = firestore.collection('system').doc('default');
+
+  systemSnapshot.onSnapshot(async (systemDoc) => {
+    try {
+      if (unsubscribe) {
+        unsubscribe?.();
+      }
+
+      const activeSeasonId = systemDoc.data().activeSeasonId;
+      const seasonSnapshot = firestore.collection('season').doc(activeSeasonId);
+      unsubscribe = seasonSnapshot.onSnapshot((doc) => {
+        logger.info(`detect season changes, ${JSON.stringify(doc.data())}`);
+        const existingJob = schedule.scheduledJobs[TAKE_SEASON_SNAPSHOT];
+        logger.info(`existingJobExists: ${!!existingJob}`);
+
+        const { estimatedEndTime } = doc.data();
+        const now = Date.now();
+        const date = estimatedEndTime.toDate();
+        const dateUnix = estimatedEndTime.toDate().getTime();
+
+        logger.info(`Scheduling season ${doc.id} snapshot at ${date.toLocaleString()}`);
+        if (dateUnix <= now) {
+          if (existingJob) {
+            existingJob.cancelNext();
+            existingJob.invoke();
+          } else {
+            logger.info(`Detect season ended, takeSeasonLeaderboardSnapshot immediately`);
+            takeSeasonLeaderboardSnapshot();
+          }
+        } else {
+          if (existingJob) {
+            existingJob.reschedule(date);
+          } else {
+            schedule.scheduleJob(TAKE_SEASON_SNAPSHOT, date, takeSeasonLeaderboardSnapshot);
+          }
+        }
+      });
+    } catch (err) {
+      console.error(err);
+      logger.error(`Error onSnapshotSeasonChange, ${JSON.stringify(err)}`);
+    }
+  });
+};
