@@ -3,6 +3,9 @@ import moment from 'moment';
 import admin, { firestore } from '../configs/firebase.config.js';
 import { getActiveSeason, getActiveSeasonId, getActiveSeasonWithRank } from './season.service.js';
 import { calculateReward, calculateUpgradeMachinePrice } from '../utils/formulas.js';
+import logger from '../utils/logger.js';
+
+const MAX_RETRY = 3;
 
 export const getUserGamePlay = async (userId) => {
   const activeSeasonId = await getActiveSeasonId();
@@ -276,19 +279,26 @@ export const upgradeMachine = async (userId) => {
 
   const newLevel = gamePlay.machine.level + 1;
   const xTokenLeft = xTokenBalance - upgradePrice;
-  await user.ref.update({ xTokenBalance: xTokenLeft });
-  await firestore
-    .collection('gamePlay')
-    .doc(gamePlay.id)
-    .update({
-      startXTokenCountingTime: admin.firestore.FieldValue.serverTimestamp(),
-      machine: {
-        level: newLevel,
-        dailyReward: (1 + newLevel * season.machine.earningRateIncrementPerLevel) * season.machine.dailyReward,
-      },
-    });
 
-  await firestore.collection('transaction').add({
+  // need to update user, gameplay, create txn
+  const batch = firestore.batch();
+
+  // update user
+  batch.update(user.ref, { xTokenBalance: xTokenLeft });
+
+  // update gameplay
+  const gamePlayRef = firestore.collection('gamePlay').doc(gamePlay.id);
+  batch.update(gamePlayRef, {
+    startXTokenCountingTime: admin.firestore.FieldValue.serverTimestamp(),
+    machine: {
+      level: newLevel,
+      dailyReward: (1 + newLevel * season.machine.earningRateIncrementPerLevel) * season.machine.dailyReward,
+    },
+  });
+
+  // create txn
+  const txnRef = firestore.collection('transaction').doc();
+  batch.create(txnRef, {
     seasonId: season.id,
     userId,
     type: 'upgrade-machine',
@@ -297,4 +307,18 @@ export const upgradeMachine = async (userId) => {
     status: 'Success',
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
   });
+
+  let retry = 0;
+  let isSuccess = false;
+  while (retry < MAX_RETRY && !isSuccess) {
+    try {
+      logger.info(`Upgrading machine for user ${userId}. Retry ${retry++} times`);
+      await batch.commit();
+      isSuccess = true;
+    } catch (err) {
+      logger.error(`Unsuccessful upgrading machine for user ${userId}: ${err.message} ${JSON.stringify(err)}`);
+    }
+  }
+
+  if (!isSuccess) throw new Error('API error: Upgrade machine failed');
 };
