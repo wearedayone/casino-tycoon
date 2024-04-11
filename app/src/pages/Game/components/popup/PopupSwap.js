@@ -136,7 +136,6 @@ class PopupSwap extends Popup {
         onClick: () => {
           if (this.loading) return;
           this.mode = 'web3';
-          scene.game.events.emit('request-balances');
           if (this.interval) {
             clearInterval(this.interval);
             this.interval = null;
@@ -437,9 +436,9 @@ class PopupSwap extends Popup {
       if (isNaN(gas)) return;
       this.gas = gas;
     });
-    scene.game.events.on('update-balances', ({ ETHBalance, tokenBalance }) =>
-      this.updateBalance({ ETHBalance, tokenBalance })
-    );
+    scene.game.events.on('update-balances', ({ ETHBalance, tokenBalance }) => {
+      this.updateBalance({ ETHBalance, tokenBalance });
+    });
 
     scene.game.events.on('update-xtoken-balance', ({ balance }) => {
       this.updateXTokenBalance({ balance });
@@ -597,16 +596,16 @@ class PopupSwap extends Popup {
   }
 
   updateBalance({ ETHBalance, tokenBalance }) {
-    if (this.mode !== 'web3') return;
     this.ethBalance = ETHBalance;
     this.tokenBalance = tokenBalance;
+    if (this.mode !== 'web3') return;
     this.balanceText.text = `${formatter.format(this.tokenSwap === 'eth' ? ETHBalance : tokenBalance)}`;
     this.available.x = this.balanceText.x - this.balanceText.width - 20;
   }
 
   updateXTokenBalance({ balance }) {
-    if (this.mode !== 'web2') return;
     this.xTokenBalance = balance;
+    if (this.mode !== 'web2') return;
     this.balanceText.text = `${formatter.format(this.xTokenBalance)}`;
     this.available.x = this.balanceText.x - this.balanceText.width - 20;
   }
