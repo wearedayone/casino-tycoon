@@ -3,7 +3,7 @@ import moment from 'moment';
 
 import admin, { firestore } from '../configs/firebase.config.js';
 import quickNode from '../configs/quicknode.config.js';
-import { getActiveSeason } from './season.service.js';
+import { getActiveSeason, getActiveSeasonId } from './season.service.js';
 import { getLeaderboard, getUserGamePlay } from './gamePlay.service.js';
 import {
   claimToken as claimTokenTask,
@@ -24,6 +24,7 @@ import {
   calculateNextBuildingBuyPrice,
   calculateNextWorkerBuyPrice,
   calculateSpinPrice,
+  getTokenFromXToken,
 } from '../utils/formulas.js';
 import { getAccurate } from '../utils/math.js';
 import logger from '../utils/logger.js';
@@ -915,6 +916,91 @@ export const getWorkerPriceChart = async ({ timeMode }) => {
   return [...txns, { createdAt: now, value: currentPrice }];
 };
 
+export const convertXTokenToToken = async ({ userId, amount }) => {
+  // validation
+  if (!amount || !Number(amount)) throw new Error('API error: Bad request');
+
+  // reduce xTokenBalance
+  await firestore.runTransaction(async (transaction) => {
+    // lock user doc && gamePlay doc
+    const userRef = firestore.collection('user').doc(userId);
+    const user = await transaction.get(userRef);
+
+    const { xTokenBalance } = user.data();
+
+    const gamePlayId = (await getUserGamePlay(userId)).id;
+    const gamePlayRef = firestore.collection('gamePlay').doc(gamePlayId);
+    const gamePlay = await transaction.get(gamePlayRef);
+
+    const { numberOfWorkers, startXTokenCountingTime, lastTimeSwapXToken } = gamePlay.data();
+    const { worker, swapXTokenGapInSeconds } = await getActiveSeason();
+
+    const now = Date.now();
+    const diff = Math.round((now - lastTimeSwapXToken.toDate().getTime()) / 1000);
+    if (diff < swapXTokenGapInSeconds) throw new Error('API error: Too many attempts');
+
+    const start = startXTokenCountingTime.toDate().getTime();
+    const diffInDays = (now - start) / (24 * 60 * 60 * 1000);
+    const generatedXToken = Math.round(diffInDays * (numberOfWorkers * worker.dailyReward) * 1000) / 1000;
+    const currentXTokenBalance = xTokenBalance + generatedXToken;
+
+    if (currentXTokenBalance < amount) throw new Error('API error: Insufficient xGANG');
+
+    transaction.update(userRef, { xTokenBalance: currentXTokenBalance - amount });
+    transaction.update(gamePlayRef, { startXTokenCountingTime: admin.firestore.FieldValue.serverTimestamp() });
+  });
+
+  // create txn
+  await firestore
+    .collection('system')
+    .doc('data')
+    .update({
+      nonce: admin.firestore.FieldValue.increment(1),
+    });
+  const systemData = await firestore.collection('system').doc('data').get();
+  const { nonce } = systemData.data();
+  const activeSeasonId = await getActiveSeasonId();
+  const txn = await firestore.collection('transaction').add({
+    userId,
+    seasonId: activeSeasonId,
+    nonce,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    type: 'swap-x-token',
+    status: 'Pending',
+    token: 'xGANG',
+    value: amount,
+    txnHash: '',
+  });
+
+  // call contract to mint
+  const user = await firestore.collection('user').doc(userId).get();
+  const receiveAmount = getTokenFromXToken(amount);
+  const { txnHash, status } = await claimTokenTask({
+    address: user.data().address,
+    amount: BigInt(parseEther(receiveAmount.toString()).toString()),
+  });
+
+  // update txn && user && gamePlay
+  await firestore.collection('transaction').doc(txn.id).update({ status, txnHash });
+
+  if (status === 'Success') {
+    const gamePlayId = (await getUserGamePlay(userId)).id;
+    await firestore
+      .collection('gamePlay')
+      .doc(gamePlayId)
+      .update({ lastTimeSwapXToken: admin.firestore.FieldValue.serverTimestamp() });
+  } else {
+    await firestore
+      .collection('user')
+      .doc(userId)
+      .update({ xTokenBalance: admin.firestore.FieldValue.increment(amount) });
+
+    throw new Error('API error: Transaction failed');
+  }
+
+  return { txnHash, receiveAmount };
+};
+
 // utils
 export const calculateGeneratedReward = async (userId) => {
   const activeSeason = await getActiveSeason();
@@ -939,6 +1025,7 @@ export const calculateGeneratedReward = async (userId) => {
   const generatedReward = diffInDays * (numberOfMachines * machine.dailyReward);
   return Math.round(generatedReward * 1000) / 1000;
 };
+
 const calculateGeneratedXToken = async (userId) => {
   const userSnapshot = await firestore.collection('user').doc(userId).get();
   if (!userSnapshot.exists) return 0;
