@@ -48,28 +48,22 @@ contract Gangster is ERC1155, AccessControl, ERC1155Burnable, ERC1155Supply, ERC
     _setURI(newuri);
   }
 
+  /**
+   * @notice Pre-sale buy gangster
+   */
   function mint(address account, uint256 id, uint256 amount, bytes memory data) public onlyRole(MINTER_ROLE) {
     _mint(account, id, amount, data);
   }
 
-  function mintBatch(
-    address to,
-    uint256[] memory ids,
-    uint256[] memory amounts,
-    bytes memory data
-  ) public onlyRole(MINTER_ROLE) {
-    _mintBatch(to, ids, amounts, data);
-  }
-
   /**
-   * @notice Normal buy gangster
+   * @notice In-game buy gangster
    */
   function mintOnBehalf(address to, uint256 tokenId, uint256 amount) public onlyRole(MINTER_ROLE) {
     mintNFT(to, tokenId, amount);
   }
 
   /**
-   * @notice Buy gangster with referral
+   * @notice In-game buy gangster with whitelisted
    */
   function mintWLOnBehalf(address to, uint256 tokenId, uint256 amount) public onlyRole(MINTER_ROLE) {
     // require whitelisted for genesis token
@@ -88,21 +82,15 @@ contract Gangster is ERC1155, AccessControl, ERC1155Burnable, ERC1155Supply, ERC
   }
 
   /**
-   * @notice set Max per batch
+   * @notice set Max per batch and Max Per Whitelisted Wallet
    */
-  function setMaxPerBatch(uint256 _maxPerBatch) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setMaxPerBatch(uint256 _maxPerBatch, uint256 _maxPerWL) public onlyRole(DEFAULT_ADMIN_ROLE) {
     MAX_PER_BATCH = _maxPerBatch;
-  }
-
-  /**
-   * @notice set Max Per Whitelisted Wallet
-   */
-  function setMaxPerWL(uint256 _maxPerWL) public onlyRole(DEFAULT_ADMIN_ROLE) {
     MAX_PER_WL = _maxPerWL;
   }
 
   /**
-   * @notice common logic for minting
+   * @notice common logic for buy nft in-game
    */
   function mintNFT(address sender, uint256 tokenId, uint256 amount) private {
     uint256 maxSully = tokenMaxSupply[tokenId];
