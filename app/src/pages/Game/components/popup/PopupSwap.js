@@ -541,6 +541,11 @@ class PopupSwap extends Popup {
 
   onOpen() {
     // this.scene.game.events.emit('request-balances');
+    if (this.mode === 'web2') {
+      if (!this.interval) {
+        this.interval = setInterval(() => this.countdown(), 1000);
+      }
+    }
   }
 
   validate() {
@@ -577,6 +582,11 @@ class PopupSwap extends Popup {
     // reset form
     this.token1AmountInput.updateValue('');
     this.token2AmountInput.updateValue('');
+
+    if (this.interval) {
+      clearInterval(this.interval);
+      this.interval = null;
+    }
   }
 
   updateBalance({ ETHBalance, tokenBalance }) {
