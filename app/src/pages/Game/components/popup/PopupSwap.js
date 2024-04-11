@@ -161,7 +161,6 @@ class PopupSwap extends Popup {
           this.mode = 'web2';
           this.buttonApprove.setDisabledState(true);
           scene.game.events.emit('request-xtoken-balance');
-          scene.game.events.emit('request-last-swap-x-token');
           if (this.interval) {
             clearInterval(this.interval);
           }
