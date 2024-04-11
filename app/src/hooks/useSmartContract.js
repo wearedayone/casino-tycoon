@@ -1,7 +1,7 @@
 import { Contract } from '@ethersproject/contracts';
 import { usePrivy } from '@privy-io/react-auth';
 import { parseEther, formatEther } from '@ethersproject/units';
-import { defaultAbiCoder } from '@ethersproject/abi';
+import { Interface, defaultAbiCoder } from '@ethersproject/abi';
 import RouterABI from '@uniswap/v2-periphery/build/IUniswapV2Router02.json';
 import PairABI from '@uniswap/v2-core/build/IUniswapV2Pair.json';
 
@@ -17,9 +17,12 @@ const { NETWORK_ID } = environments;
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+const tokenInterface = new Interface(tokenAbi.abi);
+const gameInterface = new Interface(gameContractAbi.abi);
+
 const useSmartContract = () => {
   const { sendTransaction } = usePrivy();
-  const embeddedWallet = useUserWallet();
+  const { userWallet, getProvider } = useUserWallet();
   const activeSeason = useSystemStore((state) => state.activeSeason);
   const market = useSystemStore((state) => state.market);
 
@@ -34,17 +37,14 @@ const useSmartContract = () => {
     pairAddress: PAIR_ADDRESS,
   } = activeSeason || {};
 
-  const loadedAssets = !!TOKEN_ADDRESS && !!GAME_CONTRACT_ADDRESS && !!NFT_ADDRESS && !!embeddedWallet;
+  const loadedAssets = !!TOKEN_ADDRESS && !!GAME_CONTRACT_ADDRESS && !!NFT_ADDRESS && !!userWallet;
 
   const withdrawToken = async (to, value) => {
     if (!loadedAssets) return;
     try {
-      const privyProvider = await embeddedWallet.getEthereumProvider();
-      const tokenContract = new Contract(TOKEN_ADDRESS, tokenAbi.abi, privyProvider.provider);
-
       // eslint-disable-next-line no-undef
       const valueInWei = BigInt(parseEther(value.toString()).toString());
-      const data = tokenContract.interface.encodeFunctionData('transfer', [to, valueInWei]);
+      const data = tokenInterface.encodeFunctionData('transfer', [to, valueInWei]);
 
       const unsignedTx = {
         to: TOKEN_ADDRESS,
@@ -93,11 +93,10 @@ const useSmartContract = () => {
   const buyMachine = async ({ amount, value, time, nGangster, nonce, bType, referrerAddress, signature }) => {
     console.log('Start buyMachine');
     if (!loadedAssets) return;
-    const privyProvider = await embeddedWallet.getEthereumProvider();
-    const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
-    const tokenContract = new Contract(TOKEN_ADDRESS, tokenAbi.abi, privyProvider.provider);
+    const provider = await getProvider();
+    const tokenContract = new Contract(TOKEN_ADDRESS, tokenAbi.abi, provider);
 
-    const res = await tokenContract.allowance(embeddedWallet.address, GAME_CONTRACT_ADDRESS);
+    const res = await tokenContract.allowance(userWallet.address, GAME_CONTRACT_ADDRESS);
     const approvedAmountInWei = res.toString();
     const approvedAmountInToken = Number(approvedAmountInWei.slice(0, approvedAmountInWei.length - 18));
     const needApprovedMore = approvedAmountInToken < value;
@@ -116,7 +115,7 @@ const useSmartContract = () => {
     }
 
     let params = [amount, value, time, nGangster, nonce, bType, referrerAddress, signature];
-    const data = gameContract.interface.encodeFunctionData('buyGangster', params);
+    const data = gameInterface.encodeFunctionData('buyGangster', params);
     const unsignedTx = {
       to: GAME_CONTRACT_ADDRESS,
       chainId: Number(NETWORK_ID),
@@ -137,11 +136,10 @@ const useSmartContract = () => {
   const buyGoon = async ({ amount, value, lastB, time, nonce, signature }) => {
     if (!loadedAssets) return;
     console.log({ amount, value, lastB, time, nonce });
-    const privyProvider = await embeddedWallet.getEthereumProvider();
-    const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
-    const tokenContract = new Contract(TOKEN_ADDRESS, tokenAbi.abi, privyProvider.provider);
+    const provider = await getProvider();
+    const tokenContract = new Contract(TOKEN_ADDRESS, tokenAbi.abi, provider);
 
-    const res = await tokenContract.allowance(embeddedWallet.address, GAME_CONTRACT_ADDRESS);
+    const res = await tokenContract.allowance(userWallet.address, GAME_CONTRACT_ADDRESS);
     const approvedAmountInWei = res.toString();
     const approvedAmountInToken = Number(approvedAmountInWei.slice(0, approvedAmountInWei.length - 18));
     const needApprovedMore = approvedAmountInToken < value;
@@ -163,7 +161,7 @@ const useSmartContract = () => {
     const valueBigint = BigInt(parseEther(value + '').toString());
     const bType = 1;
     let params = [bType, amount, valueBigint, lastB, time, nonce, signature];
-    const data = gameContract.interface.encodeFunctionData('buyAsset', params);
+    const data = gameInterface.encodeFunctionData('buyAsset', params);
 
     const unsignedTx = { to: GAME_CONTRACT_ADDRESS, chainId: Number(NETWORK_ID), data };
 
@@ -180,11 +178,10 @@ const useSmartContract = () => {
 
   const buySafeHouse = async ({ type, amount, value, lastB, time, nonce, signature }) => {
     if (!loadedAssets) return;
-    const privyProvider = await embeddedWallet.getEthereumProvider();
-    const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
-    const tokenContract = new Contract(TOKEN_ADDRESS, tokenAbi.abi, privyProvider.provider);
+    const provider = await getProvider();
+    const tokenContract = new Contract(TOKEN_ADDRESS, tokenAbi.abi, provider);
 
-    const res = await tokenContract.allowance(embeddedWallet.address, GAME_CONTRACT_ADDRESS);
+    const res = await tokenContract.allowance(userWallet.address, GAME_CONTRACT_ADDRESS);
     const approvedAmountInWei = res.toString();
     const approvedAmountInToken = Number(approvedAmountInWei.slice(0, approvedAmountInWei.length - 18));
     const needApprovedMore = approvedAmountInToken < value;
@@ -206,7 +203,7 @@ const useSmartContract = () => {
     const valueBigint = BigInt(parseEther(value + '').toString());
     const bType = 2;
     let params = [bType, amount, valueBigint, lastB, time, nonce, signature];
-    const data = gameContract.interface.encodeFunctionData('buyAsset', params);
+    const data = gameInterface.encodeFunctionData('buyAsset', params);
     const unsignedTx = { to: GAME_CONTRACT_ADDRESS, chainId: Number(NETWORK_ID), data };
 
     const uiConfig = {
@@ -222,11 +219,10 @@ const useSmartContract = () => {
 
   const dailySpin = async ({ spinType, amount, value, lastSpin, time, nonce, signature }) => {
     if (!loadedAssets) return;
-    const privyProvider = await embeddedWallet.getEthereumProvider();
-    const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
-    const tokenContract = new Contract(TOKEN_ADDRESS, tokenAbi.abi, privyProvider.provider);
+    const provider = await getProvider();
+    const tokenContract = new Contract(TOKEN_ADDRESS, tokenAbi.abi, provider);
 
-    const res = await tokenContract.allowance(embeddedWallet.address, GAME_CONTRACT_ADDRESS);
+    const res = await tokenContract.allowance(userWallet.address, GAME_CONTRACT_ADDRESS);
     const approvedAmountInWei = res.toString();
     const approvedAmountInToken = Number(approvedAmountInWei.slice(0, approvedAmountInWei.length - 18));
     const needApprovedMore = approvedAmountInToken < value;
@@ -246,7 +242,7 @@ const useSmartContract = () => {
 
     // eslint-disable-next-line no-undef
     const valueBigint = BigInt(parseEther(value + '').toString());
-    const data = gameContract.interface.encodeFunctionData('spin', [
+    const data = gameInterface.encodeFunctionData('spin', [
       spinType,
       amount,
       valueBigint,
@@ -265,10 +261,7 @@ const useSmartContract = () => {
 
   const withdrawNFT = async (address, amount) => {
     if (!loadedAssets) return;
-    const privyProvider = await embeddedWallet.getEthereumProvider();
-
-    const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
-    const data = gameContract.interface.encodeFunctionData('withdrawNFT', [address, amount]);
+    const data = gameInterface.encodeFunctionData('withdrawNFT', [address, amount]);
     const unsignedTx = {
       to: GAME_CONTRACT_ADDRESS,
       chainId: Number(NETWORK_ID),
@@ -280,10 +273,10 @@ const useSmartContract = () => {
 
   const stakeNFT = async (address, amount) => {
     if (!loadedAssets) return;
-    const privyProvider = await embeddedWallet.getEthereumProvider();
-    const nftContract = new Contract(NFT_ADDRESS, nftAbi.abi, privyProvider.provider);
+    const provider = await getProvider();
+    const nftContract = new Contract(NFT_ADDRESS, nftAbi.abi, provider);
 
-    const isApprovedForAll = await nftContract.isApprovedForAll(embeddedWallet.address, GAME_CONTRACT_ADDRESS);
+    const isApprovedForAll = await nftContract.isApprovedForAll(userWallet.address, GAME_CONTRACT_ADDRESS);
 
     let approveReceipt;
     if (!isApprovedForAll) {
@@ -300,8 +293,7 @@ const useSmartContract = () => {
     }
 
     if (!approveReceipt || approveReceipt.status === 1) {
-      const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
-      const data = gameContract.interface.encodeFunctionData('depositNFT', [address, amount]);
+      const data = gameInterface.encodeFunctionData('depositNFT', [address, amount]);
       const unsignedTx = {
         to: GAME_CONTRACT_ADDRESS,
         chainId: Number(NETWORK_ID),
@@ -315,14 +307,11 @@ const useSmartContract = () => {
   const retire = async ({ value, nonce, numberOfGangsters, signature }) => {
     console.log('Start retire', { value, nonce, numberOfGangsters, signature });
     if (!loadedAssets) return;
-    const privyProvider = await embeddedWallet.getEthereumProvider();
-    const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
-
     // eslint-disable-next-line
     const valueBigInt = BigInt(parseEther(value + '').toString());
     // const params = [valueBigInt, numberOfGangsters, nonce, signature];
     const params = [nonce];
-    const data = gameContract.interface.encodeFunctionData('retired', params);
+    const data = gameInterface.encodeFunctionData('retired', params);
 
     const unsignedTx = {
       to: GAME_CONTRACT_ADDRESS,
@@ -343,8 +332,8 @@ const useSmartContract = () => {
 
   const getNFTBalance = async (address) => {
     if (!loadedAssets || !address) return 0;
-    const privyProvider = await embeddedWallet.getEthereumProvider();
-    const nftContract = new Contract(NFT_ADDRESS, nftAbi.abi, privyProvider.provider);
+    const provider = await getProvider();
+    const nftContract = new Contract(NFT_ADDRESS, nftAbi.abi, provider);
 
     const res = await nftContract.balanceOf(address, 1);
     return Number(res.toString());
@@ -352,15 +341,18 @@ const useSmartContract = () => {
 
   const getETHBalance = async (address) => {
     if (!loadedAssets || !address) return 0;
-    const privyProvider = await embeddedWallet.getEthereumProvider();
-    const res = await privyProvider.provider.getBalance(address);
+    const provider = await getProvider();
+    const res = await provider.request({
+      method: 'eth_getBalance',
+      params: [address],
+    });
     return Number(formatEther(res.toString()));
   };
 
   const getStakedNFTBalance = async (address) => {
     if (!loadedAssets || !address) return 0;
-    const privyProvider = await embeddedWallet.getEthereumProvider();
-    const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, privyProvider.provider);
+    const provider = await getProvider();
+    const gameContract = new Contract(GAME_CONTRACT_ADDRESS, gameContractAbi.abi, provider);
 
     const res = await gameContract.gangster(address);
     return Number(res.toString());
@@ -368,23 +360,23 @@ const useSmartContract = () => {
 
   const isMinted = async (address) => {
     if (!loadedAssets || !address) return false;
-    const privyProvider = await embeddedWallet.getEthereumProvider();
-    const nftContract = new Contract(NFT_ADDRESS, nftAbi.abi, privyProvider.provider);
+    const provider = await getProvider();
+    const nftContract = new Contract(NFT_ADDRESS, nftAbi.abi, provider);
     const minted = await nftContract.mintedAddess(address);
     return minted;
   };
 
   const getSwapContractInfo = async () => {
-    const privyProvider = await embeddedWallet.getEthereumProvider();
+    const provider = await getProvider();
 
     const tokenAddress = TOKEN_ADDRESS;
     const routerAddress = ROUTER_ADDRESS;
     const wethAddress = WETH_ADDRESS;
     const pairAddress = PAIR_ADDRESS;
 
-    const routerContract = new Contract(routerAddress, RouterABI.abi, privyProvider.provider);
-    const tokenContract = new Contract(tokenAddress, tokenAbi.abi, privyProvider.provider);
-    const pairContract = new Contract(pairAddress, PairABI.abi, privyProvider.provider);
+    const routerContract = new Contract(routerAddress, RouterABI.abi, provider);
+    const tokenContract = new Contract(tokenAddress, tokenAbi.abi, provider);
+    const pairContract = new Contract(pairAddress, PairABI.abi, provider);
 
     const totalFees = await tokenContract.totalFees();
     const swapReceivePercent = (10000 - Number(totalFees.toString())) / 10000;
@@ -413,10 +405,8 @@ const useSmartContract = () => {
     const { tokenAddress, wethAddress, routerContract, swapReceivePercent } = await getSwapContractInfo();
 
     const amountIn = parseEther(`${ethAmount}`);
-    console.log({ tokenAddress, wethAddress, routerContract, swapReceivePercent, amountIn, ROUTER_ADDRESS });
     const res = await routerContract.getAmountsOut(amountIn, [wethAddress, tokenAddress]);
     const amount = Number(formatEther(res[1]).toString()) * swapReceivePercent;
-    console.log({ res, amount, routerContract });
     const tradingFee = Number(formatEther(res[1]).toString()) - amount;
     const tradingFeeInUSD = tradingFee * parseFloat(tokenPrice);
 
@@ -484,7 +474,7 @@ const useSmartContract = () => {
 
     const paths = [wethAddress, tokenAddress];
     const deadline = Math.floor(Date.now() / 1000 + 10 * 60);
-    const params = [0, paths, embeddedWallet.address, deadline];
+    const params = [0, paths, userWallet.address, deadline];
 
     const data = routerContract.interface.encodeFunctionData(
       'swapExactETHForTokensSupportingFeeOnTransferTokens',
@@ -501,7 +491,7 @@ const useSmartContract = () => {
     const logs = receipt.logs;
     const tokenTransferLog = logs.find(
       (log) =>
-        log.topics.length === 3 && defaultAbiCoder.decode(['address'], log.topics[2]).includes(embeddedWallet.address)
+        log.topics.length === 3 && defaultAbiCoder.decode(['address'], log.topics[2]).includes(userWallet.address)
     );
     const receiveAmountHex = tokenTransferLog.data;
     const receiveAmountDec = parseInt(
@@ -518,7 +508,7 @@ const useSmartContract = () => {
 
     const amountIn = parseEther(`${amount}`);
 
-    const res = await tokenContract.allowance(embeddedWallet.address, routerAddress);
+    const res = await tokenContract.allowance(userWallet.address, routerAddress);
     const approvedAmountInWei = res.toString();
     const approvedAmountInToken = Number(approvedAmountInWei.slice(0, approvedAmountInWei.length - 18));
     const needApprovedMore = approvedAmountInToken < amount;
@@ -538,7 +528,7 @@ const useSmartContract = () => {
 
     const paths = [tokenAddress, wethAddress];
     const deadline = Math.floor(Date.now() / 1000 + 10 * 60);
-    const params = [amountIn, 0, paths, embeddedWallet.address, deadline];
+    const params = [amountIn, 0, paths, userWallet.address, deadline];
 
     const data = routerContract.interface.encodeFunctionData(
       'swapExactTokensForETHSupportingFeeOnTransferTokens',
@@ -562,8 +552,8 @@ const useSmartContract = () => {
     if (!loadedAssets) return;
 
     try {
-      const privyProvider = await embeddedWallet.getEthereumProvider();
-      const tokenContract = new Contract(TOKEN_ADDRESS, tokenAbi.abi, privyProvider.provider);
+      const provider = await getProvider();
+      const tokenContract = new Contract(TOKEN_ADDRESS, tokenAbi.abi, provider);
 
       const totalFees = await tokenContract.totalFees();
       return Number(totalFees.toString()) / 100;
