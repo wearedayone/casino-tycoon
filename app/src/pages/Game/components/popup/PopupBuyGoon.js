@@ -51,6 +51,7 @@ class PopupBuyGoon extends Popup {
       requestWorkers: isSimulator ? 'simulator-request-workers' : 'request-workers',
       enableSalesTracking: isSimulator ? 'simulator-enable-worker-sales-tracking' : 'enable-worker-sales-tracking',
       disableSalesTracking: isSimulator ? 'simulator-disable-worker-sales-tracking' : 'disable-worker-sales-tracking',
+      updateXTokenBalance: isSimulator ? 'simulator-update-xtoken-balance' : 'update-xtoken-balance',
     };
     this.events = events;
     this.onCompleted = onCompleted;
@@ -298,7 +299,7 @@ class PopupBuyGoon extends Popup {
       this.upgradeBtn.setDisabledState(true);
     });
 
-    scene.game.events.on('update-xtoken-balance', ({ balance }) => {
+    scene.game.events.on(events.updateXTokenBalance, ({ balance }) => {
       this.xTokenBalance = balance;
       this.xgangAvailable.text = `Available: ${customFormat(balance || 0, 1)}`;
       if (this.purchaseToken === 'xGANG') this.updateValues();

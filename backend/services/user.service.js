@@ -74,14 +74,14 @@ export const createUserIfNotExist = async (userId) => {
     const whitelistedUsernames = whitelistSnapshot.docs
       .filter((doc) => !!doc.data().username)
       .map((doc) => doc.data().username.toLowerCase());
-    isWhitelisted = twitter?.username && whitelistedUsernames.includes(twitter.username.toLowerCase());
+    isWhitelisted = Boolean(twitter?.username && whitelistedUsernames.includes(twitter.username.toLowerCase()));
     // create user
     const username = twitter ? twitter.username : faker.internet.userName();
 
     const defaultAvatar = `https://placehold.co/400x400/1e90ff/FFF?text=${username[0].toUpperCase()}`;
     let avatarURL_small = defaultAvatar;
     let avatarURL_big = defaultAvatar;
-    if (twitter.profilePictureUrl) {
+    if (twitter?.profilePictureUrl) {
       avatarURL_small = twitter.profilePictureUrl;
       avatarURL_big = twitter.profilePictureUrl.replace('_normal', '_bigger');
     }
@@ -130,10 +130,10 @@ export const createUserIfNotExist = async (userId) => {
         completedTutorial: false,
       });
   } else {
-    const { ETHBalance, avatarURL_small } = snapshot.data();
+    const { username, ETHBalance, avatarURL_small } = snapshot.data();
     isWhitelisted = snapshot.data()?.isWhitelisted ?? false;
     // check if user has twitter avatar now
-    if (twitter.profilePictureUrl && avatarURL_small !== twitter.profilePictureUrl) {
+    if (twitter?.profilePictureUrl && avatarURL_small !== twitter.profilePictureUrl) {
       firestore
         .collection('user')
         .doc(userId)
@@ -141,6 +141,11 @@ export const createUserIfNotExist = async (userId) => {
           avatarURL_small: twitter.profilePictureUrl,
           avatarURL_big: twitter.profilePictureUrl.replace('_normal', '_bigger'),
         });
+    }
+    if (twitter?.username && username !== twitter.username) {
+      firestore.collection('user').doc(userId).update({
+        username: twitter.username,
+      });
     }
 
     if (wallet) {

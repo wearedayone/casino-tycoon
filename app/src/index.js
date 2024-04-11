@@ -63,17 +63,20 @@ root.render(
           console.log('logged in', { user });
         }}
         config={{
-          loginMethods: ['email', 'twitter'],
+          loginMethods: ['email', 'sms', 'google', 'wallet'],
           embeddedWallets: {
             createOnLogin: 'all-users',
             noPromptOnSignature: true,
           },
           supportedChains: [base, baseSepolia, blast, blastSepolia],
           appearance: {
-            // TODO: update logo
             theme: 'light',
             accentColor: '#1e90ff',
-            logo: 'https://placehold.co/600x600/1e90ff/FFF?text=Gangster+Arena',
+            logo: '',
+          },
+          _render: {
+            inDialog: false,
+            inParentNodeId: 'privy-container',
           },
         }}>
         <QueryClientProvider client={queryClient}>
