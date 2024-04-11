@@ -5,18 +5,22 @@ import AuthRoutes from './AuthRoutes';
 import MainRoutes from './MainRoutes';
 import Loading from '../components/Loading';
 import useSystem from '../hooks/useSystem';
+import useCheckCreateWallet from '../hooks/useCheckCreateWallet';
 import useUserProfile from '../hooks/useUserProfile';
 import useUserGamePlay from '../hooks/useUserGamePlay';
+import useUserWallet from '../hooks/useUserWallet';
 import useLastOnlineTime from '../hooks/useLastOnlineTime';
 import useLastSpin from '../hooks/useLastSpin';
 import useSystemStore from '../stores/system.store';
 
 const Navigations = () => {
-  const { ready, authenticated, user } = usePrivy();
+  const { ready, authenticated, user, logout } = usePrivy();
+  const { userWallet } = useUserWallet();
   const [isInAuthFlow, setIsInAuthFlow] = useState(true);
 
   useSystem();
-  useUserProfile(ready, user);
+  useUserProfile(ready, user, userWallet);
+  useCheckCreateWallet(userWallet);
   useUserGamePlay();
   useLastOnlineTime();
   useLastSpin();

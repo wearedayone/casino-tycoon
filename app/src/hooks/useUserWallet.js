@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useWallets, usePrivy } from '@privy-io/react-auth';
 import * as Sentry from '@sentry/react';
 
@@ -8,8 +8,8 @@ const { NETWORK_ID } = environments;
 
 const useUserWallet = () => {
   const [walletProvider, setWalletProvider] = useState(null);
-  const { ready: authReady, authenticated, user, createWallet } = usePrivy();
-  const { ready: walletReady, wallets } = useWallets();
+  const { user } = usePrivy();
+  const { wallets } = useWallets();
   const userWallet = useMemo(
     () => user?.wallet && wallets.find((wallet) => wallet.address.toLowerCase() === user.wallet.address.toLowerCase()),
     [user?.wallet, wallets]
@@ -24,29 +24,6 @@ const useUserWallet = () => {
       throw err;
     }
   };
-
-  const timeout = useRef();
-  useEffect(() => {
-    if (timeout.current) {
-      clearTimeout(timeout.current);
-      timeout.current = null;
-    }
-    console.log({ walletReady, embeddedWallet, user, userWallet: userWallet });
-    if (authReady && authenticated && (!walletReady || !userWallet)) {
-      if (!userWallet) {
-        timeout.current = setTimeout(() => {
-          // createWallet()
-          //   .then(() => console.log('New wallet created'))
-          //   .catch((err) => {
-          //     console.error(err);
-          //     if (!err.message.includes('Only one Privy wallet per user is currently allowed')) {
-          //       Sentry.captureException(err);
-          //     }
-          //   });
-        }, 2000);
-      }
-    }
-  }, [authReady, walletReady, authenticated]);
 
   useEffect(() => {
     if (userWallet) {
@@ -63,7 +40,7 @@ const useUserWallet = () => {
     const provider =
       userWallet.walletClientType === 'privy'
         ? (await userWallet.getEthereumProvider()).provider
-        : (await userWallet.getEthersProvider());
+        : await userWallet.getEthersProvider();
 
     setWalletProvider(provider);
 

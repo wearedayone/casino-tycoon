@@ -6,13 +6,11 @@ import { useQuery } from '@tanstack/react-query';
 import { firestore } from '../configs/firebase.config';
 import useUserStore from '../stores/user.store';
 import useModalStore from '../stores/modal.store';
-import useUserWallet from './useUserWallet';
 import { getMe } from '../services/user.service';
 import useSmartContract from './useSmartContract';
 import QueryKeys from '../utils/queryKeys';
 
-const useUserProfile = (ready, user) => {
-  const { userWallet } = useUserWallet();
+const useUserProfile = (ready, user, userWallet) => {
   const setInitialized = useUserStore((state) => state.setInitialized);
   const setProfile = useUserStore((state) => state.setProfile);
   const profile = useUserStore((state) => state.profile);
