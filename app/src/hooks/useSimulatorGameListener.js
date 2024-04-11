@@ -216,10 +216,10 @@ const useSimulatorGameListener = () => {
 
     game.events.on('simulator-open-leaderboard-modal', () => {
       setLeaderboardModalOpen(true);
-      const { name, timeStepInMinutes, rankPrizePool, reputationPrizePool } = activeSeason || {};
+      const { name, endTimeConfig, rankPrizePool, reputationPrizePool } = activeSeason || {};
       game.events.emit('simulator-update-season', {
         name,
-        timeStepInMinutes,
+        endTimeConfig,
         prizePool: rankPrizePool + reputationPrizePool,
         isEnded,
       });
@@ -384,11 +384,11 @@ const useSimulatorGameListener = () => {
 
   useEffect(() => {
     if (isLeaderboardModalOpen) {
-      const { name, timeStepInMinutes, rankPrizePool, reputationPrizePool } = activeSeason || {};
+      const { name, endTimeConfig, rankPrizePool, reputationPrizePool } = activeSeason || {};
       gameRef &&
         gameRef.events.emit('simulator-update-season', {
           name,
-          timeStepInMinutes,
+          endTimeConfig,
           prizePool: rankPrizePool + reputationPrizePool,
           isEnded,
         });
@@ -396,7 +396,7 @@ const useSimulatorGameListener = () => {
   }, [
     isLeaderboardModalOpen,
     activeSeason?.name,
-    activeSeason?.timeStepInMinutes,
+    activeSeason?.endTimeConfig,
     activeSeason?.rankPrizePool,
     activeSeason?.reputationPrizePool,
     activeSeason?.machine?.networth,

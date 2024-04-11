@@ -11,7 +11,8 @@ exports.onGamePlayUpdate = functions.firestore
     if (
       beforeData.numberOfBuildings !== afterData.numberOfBuildings ||
       beforeData.numberOfMachines !== afterData.numberOfMachines ||
-      beforeData.numberOfWorkers !== afterData.numberOfWorkers
+      beforeData.numberOfWorkers !== afterData.numberOfWorkers ||
+      beforeData.networthFromWar !== afterData.networthFromWar
     ) {
       const { seasonId } = afterData;
       const season = await admin.firestore().collection('season').doc(seasonId).get();

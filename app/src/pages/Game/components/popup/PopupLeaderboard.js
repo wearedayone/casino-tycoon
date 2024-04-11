@@ -51,7 +51,8 @@ class PopupLeaderboard extends Popup {
     const startingY = this.popup.y - this.popup.height / 2;
     const gameEndsY = startingY + 150;
     const endTimeExtensionY = gameEndsY + 90;
-    this.prizePoolContainerY = endTimeExtensionY + 180;
+    const endTimeExtensionY1 = endTimeExtensionY + 50;
+    this.prizePoolContainerY = endTimeExtensionY1 + 180;
     const reputationY = this.prizePoolContainerY + 210;
     const leaderboardHeaderY = reputationY + 140;
     this.leaderboardY = leaderboardHeaderY + 80;
@@ -65,12 +66,16 @@ class PopupLeaderboard extends Popup {
       largeBlackExtraBold
     );
     this.endTimeExtension = scene.add
-      .text(width / 2, endTimeExtensionY, 'Every Gangster purchased increases time by - hour', smallBrownBold)
+      .text(width / 2, endTimeExtensionY, 'Gangster purchases increase time by - seconds', smallBrownBold)
+      .setOrigin(0.5, 0);
+    this.endTimeExtension1 = scene.add
+      .text(width / 2, endTimeExtensionY1, 'Safehouse reduces time by - seconds', smallBrownBold)
       .setOrigin(0.5, 0);
     this.add(this.gameEndsIn);
     this.add(this.clockIcon);
     this.add(this.gameEndTime);
     this.add(this.endTimeExtension);
+    this.add(this.endTimeExtension1);
 
     this.youFinished = scene.add
       .text(width / 2, gameEndsY, `You finished at`, mediumBlackBoldRight)
@@ -279,14 +284,19 @@ class PopupLeaderboard extends Popup {
   }
 
   updateValues(season) {
-    const { name, timeStepInMinutes, prizePool, isEnded } = season;
+    const { name, endTimeConfig, prizePool, isEnded } = season;
+
+    const { timeIncrementInSeconds, timeDecrementInSeconds } = endTimeConfig || {};
 
     this.isEnded = isEnded;
     this.updateEndedState();
     const title = this.isEnded ? `${name} Ended` : `${name} Leaderboard`;
     this.setTitle(title);
-    this.endTimeExtension.text = `Every Gangster purchased increases time by ${timeStepInMinutes} minute${
-      timeStepInMinutes > 1 ? 's' : ''
+    this.endTimeExtension.text = `Gangster purchases increase time by ${timeIncrementInSeconds || 0} second${
+      timeIncrementInSeconds > 1 ? 's' : ''
+    }`;
+    this.endTimeExtension1.text = `Safehouses reduce time by ${timeDecrementInSeconds} second${
+      timeDecrementInSeconds > 1 ? 's' : ''
     }`;
     this.prizePool.text = formatter.format(prizePool);
   }

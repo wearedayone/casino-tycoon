@@ -3,8 +3,8 @@ import moment from 'moment';
 
 import admin, { firestore } from '../configs/firebase.config.js';
 import quickNode from '../configs/quicknode.config.js';
-import { getActiveSeason, updateSeasonSnapshotSchedule } from './season.service.js';
-import { getLeaderboard } from './gamePlay.service.js';
+import { getActiveSeason } from './season.service.js';
+import { getLeaderboard, getUserGamePlay } from './gamePlay.service.js';
 import {
   claimToken as claimTokenTask,
   decodeGameTxnLogs,
@@ -23,14 +23,12 @@ import {
   calculateNextWorkerBuyPriceBatch,
   calculateNextBuildingBuyPrice,
   calculateNextWorkerBuyPrice,
-  calculateNewEstimatedEndTimeUnix,
   calculateSpinPrice,
 } from '../utils/formulas.js';
 import { getAccurate } from '../utils/math.js';
 import logger from '../utils/logger.js';
-import environments from '../utils/environments.js';
 
-const { SYSTEM_ADDRESS } = environments;
+const MAX_RETRY = 3;
 
 export const initTransaction = async ({ userId, type, ...data }) => {
   logger.info(`init transaction user:${userId} - type:${type}`);
@@ -39,31 +37,22 @@ export const initTransaction = async ({ userId, type, ...data }) => {
   const utcDate = moment().utc().format('DD/MM/YYYY');
   const todayStartTime = moment(`${utcDate} 00:00:00`, 'DD/MM/YYYY HH:mm:ss').utc(true).toDate().getTime();
 
-  if (type !== 'withdraw' && data.token !== 'NFT' && activeSeason.status !== 'open')
-    throw new Error('API error: Season ended');
-
   if (type === 'buy-machine') {
     if (data.amount > activeSeason.machine.maxPerBatch) throw new Error('API error: Bad request - over max per batch');
   }
 
   if (type === 'buy-worker') {
-    if (!['xGANG', 'FIAT'].includes(data.token)) throw new Error('API error: Bad request - invalid token');
+    if (!['FIAT'].includes(data.token)) throw new Error('API error: Bad request - invalid token');
     if (data.amount > activeSeason.worker.maxPerBatch) throw new Error('API error: Bad request - over max per batch');
   }
 
   if (type === 'buy-building') {
-    if (!['xGANG', 'FIAT'].includes(data.token)) throw new Error('API error: Bad request - invalid token');
+    if (!['FIAT'].includes(data.token)) throw new Error('API error: Bad request - invalid token');
     if (data.amount > activeSeason.building.maxPerBatch) throw new Error('API error: Bad request - over max per batch');
   }
-  let userSnapshot,
-    currentXTokenBalance = 0;
+  let userSnapshot;
   if (['buy-machine', 'buy-building', 'buy-worker'].includes(type)) {
     userSnapshot = await firestore.collection('user').doc(userId).get();
-
-    if (['buy-building', 'buy-worker'].includes(type) && data.token === 'xGANG') {
-      const generatedXToken = await calculateGeneratedXToken(userId);
-      currentXTokenBalance = userSnapshot.data().xTokenBalance + generatedXToken;
-    }
   }
 
   if (type === 'daily-spin') {
@@ -149,9 +138,6 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       );
       txnData.value = workerPrices.total;
       txnData.prices = workerPrices.prices;
-
-      if (data.token === 'xGANG' && currentXTokenBalance < txnData.value)
-        throw new Error('API error: Not enough xGANG for purchase');
       break;
     case 'buy-building':
       txnData.amount = data.amount;
@@ -174,9 +160,6 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       );
       txnData.value = buildingPrices.total;
       txnData.prices = buildingPrices.prices;
-
-      if (data.token === 'xGANG' && currentXTokenBalance < txnData.value)
-        throw new Error('API error: Not enough xGANG for purchase');
       break;
     case 'war-bonus':
       txnData.value = data.value;
@@ -313,6 +296,114 @@ export const initTransaction = async ({ userId, type, ...data }) => {
   return { id: newTransaction.id, ...transaction };
 };
 
+export const buyAssetsWithXToken = async ({ userId, type, amount }) => {
+  if (!['worker', 'building'].includes(type)) throw new Error('API error: Invalid txn type');
+
+  const activeSeason = await getActiveSeason();
+  const { status, workerSold, buildingSold, worker, building } = activeSeason;
+  if (status !== 'open') throw new Error('API error: Season is ended');
+
+  const user = await firestore.collection('user').doc(userId).get();
+  if (!user.exists) throw new Error('API error: Bad credential');
+  const { xTokenBalance } = user.data();
+
+  const gamePlay = await getUserGamePlay(userId);
+  if (!gamePlay) throw new Error('API error: No game play');
+
+  const generatedXToken = await calculateGeneratedXToken(userId);
+  const currentTotalBalance = xTokenBalance + generatedXToken;
+
+  const now = Date.now();
+  const startSalePeriod = now - 12 * 60 * 60 * 1000;
+  const txnData = {};
+  txnData.amount = amount;
+  txnData.token = 'xGANG';
+
+  if (type === 'worker') {
+    txnData.currentSold = workerSold;
+    const workerTxns = await firestore
+      .collection('transaction')
+      .where('seasonId', '==', activeSeason.id)
+      .where('type', '==', 'buy-worker')
+      .where('status', '==', 'Success')
+      .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startSalePeriod))
+      .get();
+    const workerSalesLastPeriod = workerTxns.docs.reduce((total, doc) => total + doc.data().amount, 0);
+    const workerPrices = calculateNextWorkerBuyPriceBatch(
+      workerSalesLastPeriod,
+      worker.targetDailyPurchase,
+      worker.targetPrice,
+      worker.basePrice,
+      amount
+    );
+    txnData.value = workerPrices.total;
+    txnData.prices = workerPrices.prices;
+  }
+
+  if (type === 'building') {
+    txnData.currentSold = buildingSold;
+    const buildingTxns = await firestore
+      .collection('transaction')
+      .where('seasonId', '==', activeSeason.id)
+      .where('type', '==', 'buy-building')
+      .where('status', '==', 'Success')
+      .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startSalePeriod))
+      .get();
+    const buildingSalesLastPeriod = buildingTxns.docs.reduce((total, doc) => total + doc.data().amount, 0);
+    const buildingPrices = calculateNextBuildingBuyPriceBatch(
+      buildingSalesLastPeriod,
+      building.targetDailyPurchase,
+      building.targetPrice,
+      building.basePrice,
+      amount
+    );
+    txnData.value = buildingPrices.total;
+    txnData.prices = buildingPrices.prices;
+  }
+
+  if (currentTotalBalance < txnData.value) throw new Error('API error: Insufficient xGANG');
+
+  const batch = firestore.batch();
+
+  // create txn
+  const txnRef = firestore.collection('transaction').doc();
+  batch.create(txnRef, {
+    userId,
+    seasonId: activeSeason.id,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    type: `buy-${type}`,
+    status: 'Success',
+    ...txnData,
+  });
+
+  // update gamePlay
+  const gamePlayRef = firestore.collection('gamePlay').doc(gamePlay.id);
+  const gamePlayData =
+    type === 'worker'
+      ? { numberOfWorkers: admin.firestore.FieldValue.increment(amount) }
+      : { numberOfBuildings: admin.firestore.FieldValue.increment(amount) };
+  batch.update(gamePlayRef, { ...gamePlayData, startXTokenCountingTime: admin.firestore.FieldValue.serverTimestamp() });
+
+  // update user
+  batch.update(user.ref, { xTokenBalance: currentTotalBalance - txnData.value });
+
+  let retry = 0;
+  let isSuccess = false;
+  while (retry < MAX_RETRY && !isSuccess) {
+    try {
+      logger.info(`Start buy-${type}. Retry ${retry++} times. ${JSON.stringify({ userId, type, amount })}`);
+      await batch.commit();
+      isSuccess = true;
+    } catch (err) {
+      logger.error(`Unsuccessful buy-${type} txn: ${JSON.stringify(err)}`);
+    }
+  }
+
+  if (!isSuccess) {
+    throw new Error('API error: Error when buying assets');
+  }
+};
+
 export const validateDailySpinTxnAndReturnSpinResult = async ({ userId, transactionId, txnHash }) => {
   // spin txn validations:
   // - txnHash not used
@@ -416,9 +507,6 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
     // - doesnt belongs to transaction in firestore - OK
     // - status === 1 - OK
     // - comes from user wallet address - OK
-    // - buy-worker | buy-building ---> goes to token address - OK
-    //                             ---> token sent to system wallet address - OK
-    // - buy-machine ---> goes to game contract address - OK
     // - has the same token as the transaction doc in firestore - OK
     // - has the same value as the transaction doc in firestore - OK
     const txnSnapshot = await firestore.collection('transaction').where('txnHash', '==', txnHash).limit(1).get();
@@ -428,7 +516,6 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
     console.log({ userId, transactionId, txnHash, tx });
 
     const receipt = await quickNode.waitForTransaction(txnHash);
-    // console.log(`transaction ${txnHash}`, tx, 'receipt', receipt);
     const { from, to, status, logs } = receipt;
 
     if (status !== 1) throw new Error('API error: Invalid txn status');
@@ -436,7 +523,7 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
     const userSnapshot = await firestore.collection('user').doc(userId).get();
     const { address } = userSnapshot.data();
 
-    if (address?.toLowerCase() !== from.toLowerCase() && SYSTEM_ADDRESS?.toLowerCase() !== from.toLowerCase())
+    if (address?.toLowerCase() !== from.toLowerCase())
       throw new Error(`API error: Bad request - invalid sender, txn: ${JSON.stringify(receipt)}`);
 
     const snapshot = await firestore.collection('transaction').doc(transactionId).get();
@@ -447,25 +534,13 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
     console.log({ logdata: logs[0]?.data, value, bnValue });
 
     const activeSeason = await getActiveSeason();
-    const { tokenAddress: TOKEN_ADDRESS, gameAddress: GAME_ADDRESS } = activeSeason || {};
+    const { tokenAddress: TOKEN_ADDRESS } = activeSeason || {};
 
     if (type === 'withdraw') {
       if (token === 'FIAT' && to.toLowerCase() !== TOKEN_ADDRESS.toLowerCase())
         throw new Error(`API error: Bad request - invalid receiver for ${type}, txn: ${JSON.stringify(receipt)}`);
 
       if (!bnValue.eq(transactionValue))
-        throw new Error(
-          `API error: Bad request - Value doesnt match, ${JSON.stringify({ transactionValue, bnValue })}`
-        );
-    }
-
-    if (['buy-worker', 'buy-building'].includes(type)) {
-      if (to.toLowerCase() !== GAME_ADDRESS.toLowerCase())
-        throw new Error(`API error: Bad request - invalid receiver for ${type}, txn: ${JSON.stringify(receipt)}`);
-
-      console.log({ value, bnValue, transactionValue });
-      console.log(bnValue.eq(transactionValue));
-      if (token !== 'xGANG' && !bnValue.eq(transactionValue))
         throw new Error(
           `API error: Bad request - Value doesnt match, ${JSON.stringify({ transactionValue, bnValue })}`
         );
@@ -479,221 +554,19 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
   }
 };
 
-const updateSeasonState = async (transactionId) => {
-  const snapshot = await firestore.collection('transaction').doc(transactionId).get();
-  const { type, value, amount } = snapshot.data();
-
-  console.log('\n\nupdateSeasonState', { type, value, amount });
-  const activeSeason = await getActiveSeason();
-  const { estimatedEndTime, timeStepInMinutes } = activeSeason;
-  const estimatedEndTimeUnix = estimatedEndTime.toDate().getTime();
-
-  let newData;
-  switch (type) {
-    case 'buy-machine':
-      newData = {
-        estimatedEndTime: admin.firestore.Timestamp.fromMillis(
-          calculateNewEstimatedEndTimeUnix(estimatedEndTimeUnix, amount, timeStepInMinutes)
-        ),
-        machineSold: admin.firestore.FieldValue.increment(1),
-      };
-      break;
-    case 'buy-worker':
-      newData = {
-        workerSold: admin.firestore.FieldValue.increment(amount),
-        reservePool: admin.firestore.FieldValue.increment(value),
-      };
-      break;
-    case 'buy-building':
-      newData = {
-        buildingSold: admin.firestore.FieldValue.increment(amount),
-        reservePool: admin.firestore.FieldValue.increment(value),
-      };
-      break;
-    default:
-      break;
-  }
-
-  // type 'war-switch' | 'war-penalty'
-  if (!newData) return;
-
-  await firestore
-    .collection('season')
-    .doc(activeSeason.id)
-    .update({ ...newData });
-
-  // end time changed
-  if (newData.estimatedEndTime) await updateSeasonSnapshotSchedule().catch((e) => logger.error(e));
-};
-
-const updateUserBalance = async (userId, transactionId) => {
+const updateUserBalance = async (userId) => {
   const userSnapshot = await firestore.collection('user').doc(userId).get();
-  const snapshot = await firestore.collection('transaction').doc(transactionId).get();
-  const { token, seasonId, value: txnValue } = snapshot.data();
 
   if (userSnapshot.exists) {
     const { address, ETHBalance } = userSnapshot.data();
-    if (token === 'ETH') {
-      const value = await quickNode.getBalance(address, 'latest');
-      if (ETHBalance !== formatEther(value)) {
-        await firestore
-          .collection('user')
-          .doc(userId)
-          .update({
-            ETHBalance: formatEther(value),
-          });
-      }
-    }
-    if (token === 'xGANG') {
-      const gamePlay = await firestore
-        .collection('gamePlay')
-        .where('userId', '==', userId)
-        .where('seasonId', '==', seasonId)
-        .limit(1)
-        .get();
-      if (!gamePlay.empty) {
-        const now = Date.now();
-        const generatedXToken = await calculateGeneratedXToken(userId);
-        await firestore
-          .collection('gamePlay')
-          .doc(gamePlay.docs[0].id)
-          .update({
-            startXTokenCountingTime: admin.firestore.Timestamp.fromMillis(now),
-          });
-
-        const balanceDiff = generatedXToken - txnValue;
-        await firestore
-          .collection('user')
-          .doc(userId)
-          .update({ xTokenBalance: admin.firestore.FieldValue.increment(balanceDiff) });
-      }
-    }
-  }
-};
-
-const updateUserGamePlay = async (userId, transactionId) => {
-  const snapshot = await firestore.collection('transaction').doc(transactionId).get();
-  const { type, amount, value, isMintWhitelist, referrerAddress, referralDiscount } = snapshot.data();
-
-  const activeSeason = await getActiveSeason();
-  const { referralConfig } = activeSeason;
-
-  // update user number of assets && pendingReward && startRewardCountingTime
-  const gamePlaySnapshot = await firestore
-    .collection('gamePlay')
-    .where('userId', '==', userId)
-    .where('seasonId', '==', activeSeason.id)
-    .limit(1)
-    .get();
-  const warDeploymentSnapshot = await firestore
-    .collection('warDeployment')
-    .where('seasonId', '==', activeSeason.id)
-    .where('userId', '==', userId)
-    .limit(1)
-    .get();
-
-  const userGamePlay = gamePlaySnapshot.docs[0];
-  const warDeployment = warDeploymentSnapshot.docs[0]?.data() || {};
-  logger.debug(`userGamePlay before update: ${JSON.stringify(userGamePlay.data())}`);
-  const { numberOfWorkers, numberOfMachines, numberOfBuildings } = userGamePlay.data();
-  const assets = {
-    numberOfBuildings,
-    numberOfMachines,
-    numberOfWorkers,
-  };
-
-  let gamePlayData = {};
-  let warDeploymentData = {};
-  switch (type) {
-    case 'buy-machine':
-      // gamePlayData = { numberOfMachines: admin.firestore.FieldValue.increment(amount) };
-      assets.numberOfMachines += amount;
-      // TODO: move this to listener later
-      if (isMintWhitelist) gamePlayData = { whitelistAmountMinted: admin.firestore.FieldValue.increment(amount) };
-      if (referrerAddress) {
-        // update discount
-        const user = await firestore.collection('user').doc(userId).get();
-        const currentDiscount = user.data().referralTotalDiscount;
-        const referralTotalDiscount = currentDiscount
-          ? admin.firestore.FieldValue.increment(referralDiscount)
-          : referralDiscount;
-
-        await user.ref.update({ referralTotalDiscount });
-
-        // update reward
-        const referrerSnapshot = await firestore
-          .collection('user')
-          .where('address', '==', referrerAddress)
-          .limit(1)
-          .get();
-
-        if (!referrerSnapshot.size) break;
-        const reward = getAccurate(value * referralConfig.referralBonus, 7);
-        const userCurrentReward = referrerSnapshot.docs[0].data().referralTotalReward;
-        const referralTotalReward = userCurrentReward ? admin.firestore.FieldValue.increment(reward) : reward;
-
-        await referrerSnapshot.docs[0].ref.update({ referralTotalReward });
-      }
-      break;
-    case 'war-bonus':
-      const { gainedReputation } = snapshot.data();
-      gamePlayData = {
-        networth: admin.firestore.FieldValue.increment(gainedReputation),
-        networthFromWar: admin.firestore.FieldValue.increment(gainedReputation),
-      };
-      break;
-    case 'war-penalty':
-      const { machinesDeadCount } = snapshot.data();
-      assets.numberOfMachines -= machinesDeadCount;
-
-      gamePlayData = {
-        numberOfMachines: admin.firestore.FieldValue.increment(-machinesDeadCount),
-      };
-      warDeploymentData = {
-        numberOfMachinesToAttack: warDeployment.numberOfMachinesToAttack - machinesDeadCount,
-      };
-      break;
-    case 'retire':
-      assets.numberOfMachines = 0;
-      assets.numberOfBuildings = 0;
-      assets.numberOfWorkers = 0;
-      gamePlayData = {
-        ...assets,
-        active: false,
-      };
-      warDeploymentData = {
-        numberOfMachinesToEarn: 0,
-        numberOfMachinesToAttack: 0,
-        numberOfMachinesToDefend: 0,
-        attackUserId: null,
-      };
-      break;
-    default:
-      break;
-  }
-
-  /* recalculate `pendingReward` */
-  if (userTokenGenerationRateChangedTypes.includes(type)) {
-    const generatedReward = await calculateGeneratedReward(userId);
-    gamePlayData.pendingReward = admin.firestore.FieldValue.increment(generatedReward);
-    gamePlayData.startRewardCountingTime = admin.firestore.FieldValue.serverTimestamp();
-  }
-
-  const isGamePlayChanged = Object.keys(gamePlayData).length > 0;
-  if (isGamePlayChanged) await userGamePlay.ref.update({ ...gamePlayData });
-
-  const isWarDeploymentChanged = Object.keys(warDeploymentData).length > 0;
-  if (isWarDeploymentChanged) {
-    const warDeploymentSnapshot = await admin
-      .firestore()
-      .collection('warDeployment')
-      .where('userId', '==', userId)
-      .where('seasonId', '==', activeSeason.id)
-      .limit(1)
-      .get();
-
-    if (!warDeploymentSnapshot.empty) {
-      await warDeploymentSnapshot.docs[0].ref.update({ ...warDeploymentData });
+    const value = await quickNode.getBalance(address, 'latest');
+    if (ETHBalance !== formatEther(value)) {
+      await firestore
+        .collection('user')
+        .doc(userId)
+        .update({
+          ETHBalance: formatEther(value),
+        });
     }
   }
 };
@@ -708,25 +581,7 @@ export const validateTxnHash = async ({ userId, transactionId, txnHash }) => {
     txnHash,
   });
 
-  // TODO: move this logic to trigger later
-  // !!NOTE: everytime we update user balance, need to call to contract
-  //       dont ever calculate balance manually
-  await updateSeasonState(transactionId);
-  await updateUserBalance(userId, transactionId);
-  await updateUserGamePlay(userId, transactionId);
-  // await sendUserBonus(userId, transactionId);
-};
-
-// for non web3 transactions: war-switch
-// OR self-triggered web3 txns: war-penalty
-export const validateNonWeb3Transaction = async ({ userId, transactionId }) => {
-  // update txnHash and status for transaction doc in firestore
-  await firestore.collection('transaction').doc(transactionId).update({
-    status: 'Success',
-  });
-
-  // TODO: move this logic to trigger later
-  await updateUserGamePlay(userId, transactionId);
+  await updateUserBalance(userId);
 };
 
 export const claimToken = async ({ userId }) => {
@@ -1109,7 +964,3 @@ const calculateGeneratedXToken = async (userId) => {
 
   return generatedXToken;
 };
-
-/* all txn types that change user's token generation rate */
-const userTokenGenerationRateChangedTypes = ['buy-machine', 'war-penalty', 'retire'];
-export const userPendingRewardChangedTypes = userTokenGenerationRateChangedTypes.concat('claim-token');

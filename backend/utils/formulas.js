@@ -46,8 +46,8 @@ export const calculateNextBuildingBuyPriceBatch = (
   };
 };
 
-export const calculateNewEstimatedEndTimeUnix = (currentEndTimeUnix, newMachineAddedQuantity, timeStepInMinutes) => {
-  return currentEndTimeUnix + newMachineAddedQuantity * timeStepInMinutes * 60 * 1000;
+export const calculateNewEstimatedEndTimeUnix = (currentEndTimeUnix, amount, timeIncrementInSeconds) => {
+  return currentEndTimeUnix + amount * timeIncrementInSeconds * 1000;
 };
 
 export const calculateReservePoolBonus = (reservePool, reservePoolReward, quantity) => {

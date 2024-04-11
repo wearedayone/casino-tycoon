@@ -19,7 +19,15 @@ import {
   updateBalance,
   checkUserCode,
 } from '../../services/user.service';
-import { claimToken, getWorkerPrices, getBuildingPrices, validateDailySpin } from '../../services/transaction.service';
+import {
+  create,
+  validate,
+  claimToken,
+  getWorkerPrices,
+  getBuildingPrices,
+  validateDailySpin,
+  buyAssetsWithXToken,
+} from '../../services/transaction.service';
 import {
   getLeaderboard,
   getNextWarSnapshotUnixTime,
@@ -36,7 +44,6 @@ import {
 import QueryKeys from '../../utils/queryKeys';
 import { calculateHouseLevel, calculateSpinPrice } from '../../utils/formulas';
 import useSmartContract from '../../hooks/useSmartContract';
-import { create, validate } from '../../services/transaction.service';
 
 import gameConfigs from './configs/configs';
 import LoadingScene from './scenes/LoadingScene';
@@ -399,7 +406,8 @@ const Game = () => {
         console.log({ receipt });
         gameRef.current?.events.emit(txnCompletedEvent, { amount, txnHash: receipt.transactionHash });
         if (receipt.status === 1) {
-          if (txnId) await validate({ transactionId: txnId, txnHash: receipt.transactionHash });
+          if (txnId && ['ETH', 'FIAT'].includes(tokenType))
+            await validate({ transactionId: txnId, txnHash: receipt.transactionHash });
         }
       }
     } catch (err) {
@@ -423,7 +431,13 @@ const Game = () => {
         gameRef.current?.events.emit('deposit-nft-completed', { amount, txnHash: receipt.transactionHash });
       }
     } catch (err) {
-      err.message && enqueueSnackbar(err.message, { variant: 'error' });
+      const { message, code } = handleError(err);
+      gameRef.current?.events.emit('deposit-nft-completed', {
+        status: 'failed',
+        code,
+        message,
+      });
+
       console.error(err);
       Sentry.captureException(err);
     }
@@ -431,21 +445,24 @@ const Game = () => {
 
   const buyBuilding = async ({ quantity, token }) => {
     try {
-      const res = await create({ type: 'buy-building', amount: quantity, token });
-      const { id, amount, value, time, nonce, signature, type, lastB } = res.data;
-      const receipt = await buySafeHouse({
-        type,
-        amount,
-        value: token === 'FIAT' ? value : 0,
-        lastB,
-        time,
-        nonce,
-        signature,
-      });
+      if (token === 'xGANG') {
+        await buyAssetsWithXToken({ type: 'building', amount: quantity });
+      } else {
+        const res = await create({ type: 'buy-building', amount: quantity, token });
+        const { id, amount, value, time, nonce, signature, type, lastB } = res.data;
+        const receipt = await buySafeHouse({
+          type,
+          amount,
+          value: token === 'FIAT' ? value : 0,
+          lastB,
+          time,
+          nonce,
+          signature,
+        });
 
-      if (receipt.status === 1) await validate({ transactionId: id, txnHash: receipt.transactionHash });
-      else throw new Error('Transaction failed');
-      return receipt.transactionHash;
+        if (receipt.status !== 1) throw new Error('Transaction failed');
+        return receipt.transactionHash;
+      }
     } catch (err) {
       console.error(err);
       throw err;
@@ -454,12 +471,16 @@ const Game = () => {
 
   const buyWorker = async ({ quantity, token }) => {
     try {
-      const res = await create({ type: 'buy-worker', amount: quantity, token });
-      const { id, amount, value, time, nonce, signature, lastB } = res.data;
-      const receipt = await buyGoon({ amount, value: token === 'FIAT' ? value : 0, lastB, time, nonce, signature });
-      if (receipt.status === 1) await validate({ transactionId: id, txnHash: receipt.transactionHash });
-      else throw new Error('Transaction failed');
-      return receipt.transactionHash;
+      if (token === 'xGANG') {
+        await buyAssetsWithXToken({ type: 'worker', amount: quantity });
+      } else {
+        const res = await create({ type: 'buy-worker', amount: quantity, token });
+        const { id, amount, value, time, nonce, signature, lastB } = res.data;
+        const receipt = await buyGoon({ amount, value: token === 'FIAT' ? value : 0, lastB, time, nonce, signature });
+
+        if (receipt.status !== 1) throw new Error('Transaction failed');
+        return receipt.transactionHash;
+      }
     } catch (err) {
       console.error(err);
       throw err;
@@ -469,7 +490,8 @@ const Game = () => {
   const buyGangster = async (quantity, mintFunction) => {
     try {
       const res = await create({ type: 'buy-machine', amount: quantity, mintFunction });
-      const { id, amount, value, time, nGangster, nonce, bType, referrerAddress, signature } = res.data;
+      const { amount, value, time, nGangster, nonce, bType, referrerAddress, signature } = res.data;
+      console.log({ amount, value, time, nGangster, nonce, bType, referrerAddress, signature });
       const receipt = await buyMachine({
         amount,
         value,
@@ -481,7 +503,6 @@ const Game = () => {
         signature,
       });
       if (receipt.status === 1) {
-        await validate({ transactionId: id, txnHash: receipt.transactionHash });
         return receipt.transactionHash;
       }
     } catch (err) {
@@ -515,7 +536,6 @@ const Game = () => {
       const { id, value, nonce, signature } = res.data;
       const receipt = await retire({ value, nonce, numberOfGangsters: gamePlay.numberOfMachines, signature });
       if (receipt.status === 1) {
-        await validate({ transactionId: id, txnHash: receipt.transactionHash });
         return receipt.transactionHash;
       }
     } catch (err) {
@@ -679,10 +699,10 @@ const Game = () => {
         setLeaderboardModalOpen(true);
         console.log('open-leaderboard-modal', 'invalidateQueries-QueryKeys.Leaderboard');
         queryClient.invalidateQueries({ queryKey: [QueryKeys.Leaderboard] });
-        const { name, timeStepInMinutes, rankPrizePool, reputationPrizePool } = activeSeason || {};
+        const { name, endTimeConfig, rankPrizePool, reputationPrizePool } = activeSeason || {};
         gameRef.current.events.emit('update-season', {
           name,
-          timeStepInMinutes,
+          endTimeConfig,
           prizePool: rankPrizePool + reputationPrizePool,
           isEnded,
         });
@@ -1376,10 +1396,10 @@ const Game = () => {
 
   useEffect(() => {
     if (isLeaderboardModalOpen) {
-      const { name, timeStepInMinutes, rankPrizePool, reputationPrizePool } = activeSeason || {};
+      const { name, endTimeConfig, rankPrizePool, reputationPrizePool } = activeSeason || {};
       gameRef.current?.events.emit('update-season', {
         name,
-        timeStepInMinutes,
+        endTimeConfig,
         prizePool: rankPrizePool + reputationPrizePool,
         isEnded,
       });
@@ -1387,7 +1407,7 @@ const Game = () => {
   }, [
     isLeaderboardModalOpen,
     activeSeason?.name,
-    activeSeason?.timeStepInMinutes,
+    activeSeason?.endTimeConfig,
     activeSeason?.rankPrizePool,
     activeSeason?.reputationPrizePool,
     machine.networth,

@@ -14,7 +14,7 @@ const getDecimalFromPercentString = (percentString) => {
 
 // configs
 const JSON_PATH = path.join(process.cwd(), `configs/game.config.json`);
-const JSON_PATH_CONTRACT = path.join(process.cwd(), '../contract/GameV4/configs/game.config.json');
+const JSON_PATH_CONTRACT = path.join(process.cwd(), '../contract/GameV5-Blast/configs/game.config.json');
 const columnIndex = col.toUpperCase().charCodeAt(0) - 65;
 
 const houseLevels = [
@@ -103,7 +103,10 @@ const ROW_STRUCTURE = {
     machinePercentLost: { row: 41, formatter: Number },
   },
   initGameDurationInDays: { row: 45, formatter: Number },
-  timeStepInMinutes: { row: 46, formatter: Number }, // time increase when every nft is purchased
+  endTimeConfig: {
+    timeIncrementInSeconds: { row: 69, formatter: Number },
+    timeDecrementInSeconds: { row: 70, formatter: Number },
+  },
   claimGapInSeconds: { row: 47, formatter: Number },
   openseaNftCollection: { row: 49, formatter: null },
   tokenContract: {

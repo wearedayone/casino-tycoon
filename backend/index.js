@@ -5,7 +5,7 @@ import cors from 'cors';
 import routes from './routes/index.js';
 import environments from './utils/environments.js';
 import { generateDailyWarSnapshot } from './services/warSnapshot.service.js';
-import { updateSeasonSnapshotSchedule } from './services/season.service.js';
+import { onSnapshotSeasonChange } from './services/season.service.js';
 import Sentry from '@sentry/node';
 import { ProfilingIntegration } from '@sentry/profiling-node';
 
@@ -69,7 +69,7 @@ const main = () => {
   app.listen(PORT, () => console.log(`server is running on port ${PORT}`));
 
   // set a schedule in case server restarted
-  updateSeasonSnapshotSchedule();
+  onSnapshotSeasonChange();
 };
 
 main();

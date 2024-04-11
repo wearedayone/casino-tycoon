@@ -178,7 +178,7 @@ class PopupProcessing extends Popup {
 
         this.popupTxnCompleted = new PopupTxnCompleted(scene, this.completedIcon, title, desc, txnHash, {
           onCompleted,
-          hideTxnHash: simulatorBuyEvents.includes(completedEvent),
+          hideTxnHash: simulatorBuyEvents.includes(completedEvent) || !txnHash,
         });
         scene.add.existing(this.popupTxnCompleted);
         this.onCompleted = null;
