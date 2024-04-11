@@ -21,7 +21,7 @@ const tokenInterface = new Interface(tokenAbi.abi);
 const gameInterface = new Interface(gameContractAbi.abi);
 
 const useSmartContract = () => {
-  const { sendTransaction } = usePrivy();
+  const { sendTransaction: privySendTransaction } = usePrivy();
   const { userWallet, getProvider } = useUserWallet();
   const activeSeason = useSystemStore((state) => state.activeSeason);
   const market = useSystemStore((state) => state.market);
@@ -39,6 +39,28 @@ const useSmartContract = () => {
 
   const loadedAssets = !!TOKEN_ADDRESS && !!GAME_CONTRACT_ADDRESS && !!NFT_ADDRESS && !!userWallet;
 
+  const sendTransaction = async ({ txnRequest, privyUiConfig = {} }) => {
+    if (userWallet.walletClientType === 'privy') {
+      const receipt = await privySendTransaction({ ...txnRequest, chainId: Number(NETWORK_ID) }, privyUiConfig);
+      return receipt;
+    } else {
+      const { provider } = await getProvider();
+      const transactionHash = await provider.request({
+        method: 'eth_sendTransaction',
+        params: [{ ...txnRequest, chainId: Number(NETWORK_ID), from: userWallet.address }],
+      });
+
+      let receipt = {};
+      try {
+        receipt = await provider.request({
+          method: 'eth_getTransactionReceipt',
+          params: [transactionHash],
+        });
+      } catch (error) {}
+
+      return { ...receipt, transactionHash, status: Number(receipt?.status || 1) };
+    }
+  };
   const withdrawToken = async (to, value) => {
     if (!loadedAssets) return;
     try {
@@ -46,19 +68,15 @@ const useSmartContract = () => {
       const valueInWei = BigInt(parseEther(value.toString()).toString());
       const data = tokenInterface.encodeFunctionData('transfer', [to, valueInWei]);
 
-      const unsignedTx = {
-        to: TOKEN_ADDRESS,
-        chainId: Number(NETWORK_ID),
-        data,
-      };
+      const txnRequest = { to: TOKEN_ADDRESS, data };
 
-      const uiConfig = {
+      const privyUiConfig = {
         header: `Send ${value.toLocaleString()} $GANG to ${to}?`,
         description: '',
         buttonText: 'Transfer',
       };
 
-      const receipt = await sendTransaction(unsignedTx, uiConfig);
+      const receipt = await sendTransaction({ txnRequest, privyUiConfig });
 
       return receipt;
     } catch (err) {
@@ -70,19 +88,18 @@ const useSmartContract = () => {
   const withdrawETH = async (to, value) => {
     if (!loadedAssets) return;
     try {
-      const unsignedTx = {
+      const txnRequest = {
         to,
-        chainId: Number(NETWORK_ID),
         // eslint-disable-next-line
         value: BigInt(parseEther(value.toString()).toString()),
       };
 
-      const uiConfig = {
+      const privyUiConfig = {
         header: `Send ${formatter.format(value)} ETH to ${to}?`,
         description: '',
         buttonText: 'Transfer',
       };
-      const txReceipt = await sendTransaction(unsignedTx, uiConfig);
+      const txReceipt = await sendTransaction({ txnRequest, privyUiConfig });
       return txReceipt;
     } catch (err) {
       console.error(err.message);
@@ -105,37 +122,31 @@ const useSmartContract = () => {
       // eslint-disable-next-line no-undef
       const approveValueBigint = BigInt(parseEther(1e9 + '').toString());
       const data = tokenContract.interface.encodeFunctionData('approve', [GAME_CONTRACT_ADDRESS, approveValueBigint]);
-      const unsignedTx = {
-        to: TOKEN_ADDRESS,
-        chainId: Number(NETWORK_ID),
-        data,
-      };
-      await sendTransaction(unsignedTx);
+      const txnRequest = { to: TOKEN_ADDRESS, data };
+      await sendTransaction({ txnRequest });
       await delay(1000);
     }
-
-    let params = [amount, value, time, nGangster, nonce, bType, referrerAddress, signature];
+    // eslint-disable-next-line no-undef
+    const valueBigint = BigInt(parseEther(value + '').toString());
+    let params = [amount, valueBigint, time, nGangster, nonce, bType, referrerAddress, signature];
     const data = gameInterface.encodeFunctionData('buyGangster', params);
-    const unsignedTx = {
-      to: GAME_CONTRACT_ADDRESS,
-      chainId: Number(NETWORK_ID),
-      data,
-    };
+    const txnRequest = { to: GAME_CONTRACT_ADDRESS, data };
 
-    const uiConfig = {
-      header: `Buy ${amount} gangster${amount > 1 ? 's' : ''} with ${formatter.format(value)} ETH`,
+    const privyUiConfig = {
+      header: `Buy ${amount} gangster${amount > 1 ? 's' : ''} with ${formatter.format(value)} GANG`,
       description: '',
       buttonText: 'Send transaction',
     };
     console.log('Start sendTransaction');
-    const receipt = await sendTransaction(unsignedTx, uiConfig);
+    const receipt = await sendTransaction({ txnRequest, privyUiConfig });
+
     console.log('Finish buyMachine', receipt);
     return receipt;
   };
 
   const buyGoon = async ({ amount, value, lastB, time, nonce, signature }) => {
     if (!loadedAssets) return;
-    console.log({ amount, value, lastB, time, nonce });
+    // console.log({ amount, value, lastB, time, nonce });
     const provider = await getProvider();
     const tokenContract = new Contract(TOKEN_ADDRESS, tokenAbi.abi, provider);
 
@@ -148,12 +159,8 @@ const useSmartContract = () => {
       // eslint-disable-next-line no-undef
       const approveValueBigint = BigInt(parseEther(1e9 + '').toString());
       const data = tokenContract.interface.encodeFunctionData('approve', [GAME_CONTRACT_ADDRESS, approveValueBigint]);
-      const unsignedTx = {
-        to: TOKEN_ADDRESS,
-        chainId: Number(NETWORK_ID),
-        data,
-      };
-      await sendTransaction(unsignedTx);
+      const txnRequest = { to: TOKEN_ADDRESS, data };
+      await sendTransaction({ txnRequest });
       await delay(1000);
     }
 
@@ -163,20 +170,20 @@ const useSmartContract = () => {
     let params = [bType, amount, valueBigint, lastB, time, nonce, signature];
     const data = gameInterface.encodeFunctionData('buyAsset', params);
 
-    const unsignedTx = { to: GAME_CONTRACT_ADDRESS, chainId: Number(NETWORK_ID), data };
+    const txnRequest = { to: GAME_CONTRACT_ADDRESS, data };
 
-    const uiConfig = {
+    const privyUiConfig = {
       header: `Buy ${amount} Goon${amount > 1 ? 's' : ''} with ${formatter.format(value)} GANG`,
       description: '',
       buttonText: 'Send transaction',
     };
 
-    const receipt = await sendTransaction(unsignedTx, uiConfig);
+    const receipt = await sendTransaction({ txnRequest, privyUiConfig });
 
     return receipt;
   };
 
-  const buySafeHouse = async ({ type, amount, value, lastB, time, nonce, signature }) => {
+  const buySafeHouse = async ({ amount, value, lastB, time, nonce, signature }) => {
     if (!loadedAssets) return;
     const provider = await getProvider();
     const tokenContract = new Contract(TOKEN_ADDRESS, tokenAbi.abi, provider);
@@ -190,12 +197,8 @@ const useSmartContract = () => {
       // eslint-disable-next-line no-undef
       const approveValueBigint = BigInt(parseEther(1e9 + '').toString());
       const data = tokenContract.interface.encodeFunctionData('approve', [GAME_CONTRACT_ADDRESS, approveValueBigint]);
-      const unsignedTx = {
-        to: TOKEN_ADDRESS,
-        chainId: Number(NETWORK_ID),
-        data,
-      };
-      await sendTransaction(unsignedTx);
+      const txnRequest = { to: TOKEN_ADDRESS, data };
+      await sendTransaction({ txnRequest });
       await delay(1000);
     }
 
@@ -204,15 +207,15 @@ const useSmartContract = () => {
     const bType = 2;
     let params = [bType, amount, valueBigint, lastB, time, nonce, signature];
     const data = gameInterface.encodeFunctionData('buyAsset', params);
-    const unsignedTx = { to: GAME_CONTRACT_ADDRESS, chainId: Number(NETWORK_ID), data };
+    const txnRequest = { to: GAME_CONTRACT_ADDRESS, data };
 
-    const uiConfig = {
+    const privyUiConfig = {
       header: `Upgrade Safehouse ${amount} time${amount > 1 ? 's' : ''} with ${formatter.format(value)} GANG`,
       description: '',
       buttonText: 'Send transaction',
     };
 
-    const receipt = await sendTransaction(unsignedTx, uiConfig);
+    const receipt = await sendTransaction({ txnRequest, privyUiConfig });
 
     return receipt;
   };
@@ -231,12 +234,8 @@ const useSmartContract = () => {
       // eslint-disable-next-line no-undef
       const approveValueBigint = BigInt(parseEther(1e9 + '').toString());
       const data = tokenContract.interface.encodeFunctionData('approve', [GAME_CONTRACT_ADDRESS, approveValueBigint]);
-      const unsignedTx = {
-        to: TOKEN_ADDRESS,
-        chainId: Number(NETWORK_ID),
-        data,
-      };
-      await sendTransaction(unsignedTx);
+      const txnRequest = { to: TOKEN_ADDRESS, data };
+      await sendTransaction({ txnRequest });
       await delay(1000);
     }
 
@@ -251,9 +250,9 @@ const useSmartContract = () => {
       nonce,
       signature,
     ]);
-    const unsignedTx = { to: GAME_CONTRACT_ADDRESS, chainId: Number(NETWORK_ID), data };
+    const txnRequest = { to: GAME_CONTRACT_ADDRESS, data };
 
-    const receipt = await sendTransaction(unsignedTx);
+    const receipt = await sendTransaction({ txnRequest });
     console.log('daily spin', receipt);
 
     return receipt;
@@ -262,12 +261,8 @@ const useSmartContract = () => {
   const withdrawNFT = async (address, amount) => {
     if (!loadedAssets) return;
     const data = gameInterface.encodeFunctionData('withdrawNFT', [address, amount]);
-    const unsignedTx = {
-      to: GAME_CONTRACT_ADDRESS,
-      chainId: Number(NETWORK_ID),
-      data,
-    };
-    const receipt = await sendTransaction(unsignedTx);
+    const txnRequest = { to: GAME_CONTRACT_ADDRESS, data };
+    const receipt = await sendTransaction({ txnRequest });
     return receipt;
   };
 
@@ -282,30 +277,21 @@ const useSmartContract = () => {
     if (!isApprovedForAll) {
       const approveData = nftContract.interface.encodeFunctionData('setApprovalForAll', [GAME_CONTRACT_ADDRESS, true]);
 
-      const approveUnsignedTx = {
-        to: NFT_ADDRESS,
-        chainId: Number(NETWORK_ID),
-        data: approveData,
-      };
-
-      approveReceipt = await sendTransaction(approveUnsignedTx);
+      const approveUnsignedTx = { to: NFT_ADDRESS, data: approveData };
+      approveReceipt = await sendTransaction({ txnRequest: approveUnsignedTx });
       await delay(1000);
     }
 
     if (!approveReceipt || approveReceipt.status === 1) {
       const data = gameInterface.encodeFunctionData('depositNFT', [address, amount]);
-      const unsignedTx = {
-        to: GAME_CONTRACT_ADDRESS,
-        chainId: Number(NETWORK_ID),
-        data,
-      };
-      const receipt = await sendTransaction(unsignedTx);
+      const txnRequest = { to: GAME_CONTRACT_ADDRESS, data };
+      const receipt = await sendTransaction({ txnRequest });
       return receipt;
     }
   };
 
   const retire = async ({ value, nonce, numberOfGangsters, signature }) => {
-    console.log('Start retire', { value, nonce, numberOfGangsters, signature });
+    // console.log('Start retire', { value, nonce, numberOfGangsters, signature });
     if (!loadedAssets) return;
     // eslint-disable-next-line
     const valueBigInt = BigInt(parseEther(value + '').toString());
@@ -313,19 +299,15 @@ const useSmartContract = () => {
     const params = [nonce];
     const data = gameInterface.encodeFunctionData('retired', params);
 
-    const unsignedTx = {
-      to: GAME_CONTRACT_ADDRESS,
-      chainId: Number(NETWORK_ID),
-      data,
-    };
+    const txnRequest = { to: GAME_CONTRACT_ADDRESS, data };
 
-    const uiConfig = {
+    const privyUiConfig = {
       header: `Retire now to receive ${formatter.format(value)} ETH`,
       description: '',
       buttonText: 'Send transaction',
     };
     console.log('Start sendTransaction');
-    const receipt = await sendTransaction(unsignedTx, uiConfig);
+    const receipt = await sendTransaction({ txnRequest, privyUiConfig });
     console.log('Finish retire', receipt);
     return receipt;
   };
@@ -480,14 +462,13 @@ const useSmartContract = () => {
       'swapExactETHForTokensSupportingFeeOnTransferTokens',
       params
     );
-    const unsignedTx = {
+    const txnRequest = {
       to: routerAddress,
-      chainId: Number(NETWORK_ID),
       data,
       // eslint-disable-next-line
       value: BigInt(parseEther(`${amount}`).toString()),
     };
-    const receipt = await sendTransaction(unsignedTx);
+    const receipt = await sendTransaction({ txnRequest });
     const logs = receipt.logs;
     const tokenTransferLog = logs.find(
       (log) =>
@@ -517,12 +498,8 @@ const useSmartContract = () => {
       // eslint-disable-next-line no-undef
       const approveValueBigint = BigInt(parseEther(1e9 + '').toString());
       const data = tokenContract.interface.encodeFunctionData('approve', [routerAddress, approveValueBigint]);
-      const unsignedTx = {
-        to: tokenAddress,
-        chainId: Number(NETWORK_ID),
-        data,
-      };
-      await sendTransaction(unsignedTx);
+      const txnRequest = { to: tokenAddress, data };
+      await sendTransaction({ txnRequest });
       await delay(1000);
     }
 
@@ -534,12 +511,8 @@ const useSmartContract = () => {
       'swapExactTokensForETHSupportingFeeOnTransferTokens',
       params
     );
-    const unsignedTx = {
-      to: routerAddress,
-      chainId: Number(NETWORK_ID),
-      data,
-    };
-    const receipt = await sendTransaction(unsignedTx);
+    const txnRequest = { to: routerAddress, data };
+    const receipt = await sendTransaction({ txnRequest });
     const logs = receipt.logs;
     const ethWithdrawLog = logs[logs.length - 1];
     const receiveAmountHex = ethWithdrawLog.data;
