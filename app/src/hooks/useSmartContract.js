@@ -324,10 +324,14 @@ const useSmartContract = () => {
   const getETHBalance = async (address) => {
     if (!loadedAssets || !address) return 0;
     const provider = await getProvider();
-    const res = await provider.request({
-      method: 'eth_getBalance',
-      params: [address],
-    });
+    const res =
+      userWallet.walletClientType === 'privy'
+        ? await provider.getBalance(address)
+        : await provider.provider.request({
+            method: 'eth_getBalance',
+            params: [address],
+          });
+    console.log({ res });
     return Number(formatEther(res.toString()));
   };
 
