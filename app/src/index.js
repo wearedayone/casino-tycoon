@@ -5,7 +5,6 @@ import { ThemeProvider, createTheme } from '@mui/material';
 import { SnackbarProvider } from 'notistack';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { PrivyProvider } from '@privy-io/react-auth';
-import { base, baseSepolia } from 'viem/chains';
 import { blast, blastSepolia } from './utils/chains';
 import * as Sentry from '@sentry/react';
 
@@ -68,7 +67,8 @@ root.render(
             createOnLogin: 'all-users',
             noPromptOnSignature: true,
           },
-          supportedChains: [base, baseSepolia, blast, blastSepolia],
+          defaultChain: ENVIRONMENT === 'production' ? blast : blastSepolia,
+          supportedChains: [blast, blastSepolia],
           appearance: {
             theme: 'light',
             accentColor: '#1e90ff',
