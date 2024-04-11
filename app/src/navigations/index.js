@@ -3,6 +3,7 @@ import { useState, useLayoutEffect, useMemo } from 'react';
 
 import AuthRoutes from './AuthRoutes';
 import MainRoutes from './MainRoutes';
+import ValidationRoutes from './ValidationRoutes';
 import Loading from '../components/Loading';
 import useSystem from '../hooks/useSystem';
 import useCheckCreateWallet from '../hooks/useCheckCreateWallet';
@@ -12,6 +13,7 @@ import useUserWallet from '../hooks/useUserWallet';
 import useLastOnlineTime from '../hooks/useLastOnlineTime';
 import useLastSpin from '../hooks/useLastSpin';
 import useSystemStore from '../stores/system.store';
+import useUserStore from '../stores/user.store';
 
 const Navigations = () => {
   const { ready, authenticated, user, logout } = usePrivy();
@@ -26,6 +28,7 @@ const Navigations = () => {
   useLastSpin();
 
   const configs = useSystemStore((state) => state.configs);
+  const profile = useUserStore((state) => state.profile);
 
   const isLoading = useMemo(
     () => !ready || !configs || configs?.disabledUrls?.includes(window.location.host),
@@ -33,16 +36,20 @@ const Navigations = () => {
   );
   const isBlocked = configs?.disabledUrls?.includes(window.location.host);
 
-  useLayoutEffect(() => {
-    if (!isLoading) {
-      if (authenticated) setTimeout(() => setIsInAuthFlow(false), 200);
-      else setIsInAuthFlow(true);
-    }
-  }, [isLoading, authenticated]);
+  // useLayoutEffect(() => {
+  //   if (!isLoading) {
+  //     if (authenticated) setTimeout(() => setIsInAuthFlow(false), 200);
+  //     else setIsInAuthFlow(true);
+  //   }
+  // }, [isLoading, authenticated]);
 
   if (isLoading) return <Loading isBlocked={isBlocked} />;
 
-  if (!authenticated || isInAuthFlow) return <AuthRoutes />;
+  if (!authenticated) return <AuthRoutes />;
+
+  if (!profile) return <Loading />;
+
+  if (profile && !profile.socials?.twitter?.verified) return <ValidationRoutes />;
 
   return <MainRoutes />;
 };

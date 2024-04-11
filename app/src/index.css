@@ -26,3 +26,27 @@
     transform: rotate(360deg);
   }
 }
+
+/* twitter-linking */
+#twitter-link-container * {
+  font-family: Wix Madefor Display;
+  padding: 2;
+}
+#twitter-link-container > div {
+  position: relative;
+  border-radius: 15px;
+  border: 3px solid #4a65b9;
+  margin: 3px;
+  overflow: visible;
+}
+#twitter-link-container > div::before {
+  border-radius: 17px;
+  content: ' ';
+  position: absolute;
+  z-index: -1;
+  top: -6px;
+  left: -6px;
+  right: -6px;
+  bottom: -6px;
+  background: #4ab0ef;
+}
