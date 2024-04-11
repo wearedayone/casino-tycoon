@@ -1728,6 +1728,10 @@ const Game = () => {
           </>
         )}
       </Box>
+      <Box
+        id="privy-container"
+        sx={{ width: 0, height: 0, visibility: 'hidden', '& *': { width: 0, height: 0, visibility: 'hidden' } }}
+      />
     </Box>
   );
 };

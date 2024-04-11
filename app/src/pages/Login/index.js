@@ -3,10 +3,9 @@ import { Box } from '@mui/material';
 import { usePrivy } from '@privy-io/react-auth';
 
 const Login = () => {
-  const { authenticated, login, logout } = usePrivy();
+  const { login } = usePrivy();
 
   useEffect(() => {
-    // if (authenticated) logout(); // uncomment to test flow
     addCssForPrivyDialog();
     login();
   }, []);
