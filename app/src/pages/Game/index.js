@@ -27,6 +27,7 @@ import {
   getBuildingPrices,
   validateDailySpin,
   buyAssetsWithXToken,
+  convertWeb2Token,
 } from '../../services/transaction.service';
 import {
   getLeaderboard,
@@ -281,6 +282,7 @@ const Game = () => {
     isWhitelisted,
     whitelistAmountMinted,
     warDeployment,
+    lastTimeSwapXToken,
   } = gamePlay || {
     numberOfMachines: 0,
     numberOfWorkers: 0,
@@ -306,6 +308,7 @@ const Game = () => {
     houseLevels,
     prizePoolConfig,
     spinConfig: { spinRewards },
+    swapXTokenGapInSeconds,
   } = activeSeason || {
     rankPrizePool: 0,
     reputationPrizePool: 0,
@@ -904,6 +907,27 @@ const Game = () => {
         }
       });
 
+      gameRef.current?.events.on('swap-x-token', async ({ amount }) => {
+        try {
+          gameRef.current.events.emit('swap-started', { amount, txnHash: '' });
+          const res = await convertWeb2Token({ amount });
+          const { txnHash, receiveAmount } = res.data;
+          gameRef.current.events.emit('swap-completed', {
+            txnHash,
+            amount: receiveAmount,
+            token: '$GANG',
+            description: 'Swap xGANG to $GANG completed',
+          });
+        } catch (err) {
+          const { message, code } = handleError(err);
+          gameRef.current?.events.emit('swap-completed', {
+            status: 'failed',
+            code,
+            message,
+          });
+        }
+      });
+
       gameRef.current?.events.on('claim', async () => {
         let amount;
         try {
@@ -1338,6 +1362,13 @@ const Game = () => {
           });
       });
 
+      gameRef.current?.events.on('request-last-swap-x-token', () => {
+        gameRef.current?.events.emit('update-last-swap-x-token', {
+          swapXTokenGapInSeconds,
+          lastTimeSwapXToken,
+        });
+      });
+
       gameRef.current?.events.on('request-auth', () => {
         gameRef.current?.events.emit('update-auth', { uid: profile.id });
       });
@@ -1649,6 +1680,15 @@ const Game = () => {
       gameRef.current?.events.emit('update-spinned-status', { spinned });
     }
   }, [spinInitialized, spinned]);
+
+  useEffect(() => {
+    if ((swapXTokenGapInSeconds, lastTimeSwapXToken)) {
+      gameRef.current?.events.emit('update-last-swap-x-token', {
+        swapXTokenGapInSeconds,
+        lastTimeSwapXToken,
+      });
+    }
+  }, [swapXTokenGapInSeconds, lastTimeSwapXToken]);
 
   return (
     <Box

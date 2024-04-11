@@ -146,6 +146,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('popup-house-price', '/images/popup-house-price.png');
     this.load.image('popup-goon-price', '/images/popup-goon-price.png');
     this.load.image('popup-spin', '/images/popup-spin.png');
+    this.load.image('popup-swap', '/images/popup-swap.png');
 
     this.load.image('ribbon-welcome', '/images/ribbon-welcome.png');
 
@@ -165,6 +166,10 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('swap-arrow', '/images/swap-arrow.png');
     this.load.image('arrow-spin-down', '/images/arrow-spin-down.png');
     this.load.image('arrow-spin-up', '/images/arrow-spin-up.png');
+    this.load.image('arrow-1-white', '/images/arrow-1-white.png');
+    this.load.image('arrow-1-blue', '/images/arrow-1-blue.png');
+    this.load.image('arrow-2-white', '/images/arrow-2-white.png');
+    this.load.image('arrow-2-blue', '/images/arrow-2-blue.png');
     this.load.image('spin-item', '/images/spin-item.png');
     this.load.image('spin-item-active', '/images/spin-item-active.png');
     this.load.image('spin-house', '/images/spin-house.png');
@@ -172,6 +177,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('spin-reward-house', '/images/spin-reward-house.png');
     this.load.image('spin-reward-point', '/images/spin-reward-point.png');
     this.load.image('spin-reward-glow-fx', '/images/spin-reward-glow-fx.png');
+    this.load.image('swap-switch-container', '/images/swap-switch-container.png');
 
     this.load.image('button-blue', '/images/button-blue.png');
     this.load.image('button-blue-pressed', '/images/button-blue-pressed.png');
@@ -335,6 +341,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-wallet', '/images/icons/wallet.png');
     this.load.image('icon-search', '/images/icon-search.png');
     this.load.image('icon-xgang-small', '/images/icons/xgang-small.png');
+    this.load.image('icon-xgang', '/images/icon-xgang.png');
 
     this.load.image('icon-history', '/images/icon-history.png');
     this.load.image('icon-war', '/images/icon-war.png');

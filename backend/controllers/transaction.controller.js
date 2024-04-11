@@ -7,6 +7,7 @@ import {
   getWorkerPriceChart,
   getBuildingPriceChart,
   buyAssetsWithXToken,
+  convertXTokenToToken,
 } from '../services/transaction.service.js';
 import logger from '../utils/logger.js';
 
@@ -95,6 +96,20 @@ export const buyAssetsXToken = async (req, res) => {
     const { type, amount } = req.body;
     await buyAssetsWithXToken({ userId, type, amount });
     return res.sendStatus(200);
+  } catch (err) {
+    console.error(err);
+    logger.error(err.message);
+    const message = err.message.startsWith('API error') ? err.message : 'Something is wrong';
+    return res.status(400).send(message);
+  }
+};
+
+export const convertWeb2Token = async (req, res) => {
+  try {
+    const { userId } = req;
+    const { amount } = req.body;
+    const data = await convertXTokenToToken({ userId, amount });
+    return res.status(200).send(data);
   } catch (err) {
     console.error(err);
     logger.error(err.message);

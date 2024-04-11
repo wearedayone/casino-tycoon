@@ -9,6 +9,7 @@ import {
   getWorkerPrices,
   getBuildingPrices,
   buyAssetsXToken,
+  convertWeb2Token,
 } from '../controllers/transaction.controller.js';
 
 const router = Router();
@@ -20,4 +21,6 @@ router.post('/claimToken', auth, claimToken);
 router.get('/worker/price-chart', getWorkerPrices);
 router.get('/building/price-chart', getBuildingPrices);
 router.post('/assets/x-token', auth, buyAssetsXToken);
+router.post('/convert-x-token', auth, convertWeb2Token);
+
 export default router;

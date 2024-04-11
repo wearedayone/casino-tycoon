@@ -109,6 +109,7 @@ const ROW_STRUCTURE = {
   },
   claimGapInSeconds: { row: 47, formatter: Number },
   openseaNftCollection: { row: 49, formatter: null },
+  swapXTokenGapInSeconds: { row: 73, formatter: Number },
   tokenContract: {
     liquidityFee: { row: 52, formatter: getDecimalFromPercentString },
     teamFee: { row: 53, formatter: getDecimalFromPercentString },

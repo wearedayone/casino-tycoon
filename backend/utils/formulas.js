@@ -130,3 +130,7 @@ export const generateCode = (length) => {
 export const calculateSpinPrice = (networth) => {
   return networth * 5 + 500;
 };
+
+export const getTokenFromXToken = (xToken) => {
+  return xToken;
+};

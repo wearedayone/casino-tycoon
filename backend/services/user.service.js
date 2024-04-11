@@ -45,6 +45,7 @@ const createGamePlayIfNotExist = async (userId, isWhitelisted) => {
         avatarURL: userData.avatarURL ?? '',
         avatarURL_small: userData.avatarURL_small ?? '',
         username: userData.username ?? '',
+        lastTimeSwapXToken: admin.firestore.FieldValue.serverTimestamp(),
       }),
       firestore.collection('warDeployment').add({
         userId,

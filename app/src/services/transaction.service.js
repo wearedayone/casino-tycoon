@@ -18,3 +18,5 @@ export const getBuildingPrices = ({ timeMode }) =>
 
 export const buyAssetsWithXToken = ({ type, amount }) =>
   api.post('/api/v1/transactions/assets/x-token', { type, amount });
+
+export const convertWeb2Token = ({ amount }) => api.post('/api/v1/transactions/convert-x-token', { amount });
