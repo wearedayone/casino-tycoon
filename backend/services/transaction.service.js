@@ -917,8 +917,9 @@ export const getWorkerPriceChart = async ({ timeMode }) => {
 };
 
 export const convertXTokenToToken = async ({ userId, amount }) => {
-  console.log('convert', { userId, amount });
+  // validation
   if (!amount || !Number(amount)) throw new Error('API error: Bad request');
+
   // reduce xTokenBalance
   await firestore.runTransaction(async (transaction) => {
     // lock user doc && gamePlay doc
@@ -931,10 +932,13 @@ export const convertXTokenToToken = async ({ userId, amount }) => {
     const gamePlayRef = firestore.collection('gamePlay').doc(gamePlayId);
     const gamePlay = await transaction.get(gamePlayRef);
 
-    const { numberOfWorkers, startXTokenCountingTime } = gamePlay.data();
-    const { worker } = await getActiveSeason();
+    const { numberOfWorkers, startXTokenCountingTime, lastTimeSwapXToken } = gamePlay.data();
+    const { worker, swapXTokenGapInSeconds } = await getActiveSeason();
 
     const now = Date.now();
+    const diff = Math.round((now - lastTimeSwapXToken.toDate().getTime()) / 1000);
+    if (diff < swapXTokenGapInSeconds) throw new Error('API error: Too many attempts');
+
     const start = startXTokenCountingTime.toDate().getTime();
     const diffInDays = (now - start) / (24 * 60 * 60 * 1000);
     const generatedXToken = Math.round(diffInDays * (numberOfWorkers * worker.dailyReward) * 1000) / 1000;

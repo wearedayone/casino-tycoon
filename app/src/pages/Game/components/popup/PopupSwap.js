@@ -418,10 +418,12 @@ class PopupSwap extends Popup {
     this.add(this.maxBtn);
 
     scene.game.events.on('update-last-swap-x-token', ({ lastTimeSwapXToken, swapXTokenGapInSeconds }) => {
-      console.log('update-last-swap-x-token', { lastTimeSwapXToken, swapXTokenGapInSeconds });
       if ((lastTimeSwapXToken, swapXTokenGapInSeconds)) {
         const nextTimeUnix = lastTimeSwapXToken.toDate().getTime() + swapXTokenGapInSeconds * 1000;
         this.nextConversionTime = nextTimeUnix;
+        if (this.mode === 'web2') {
+          this.buttonApprove.setDisabledState(true);
+        }
       }
     });
 
