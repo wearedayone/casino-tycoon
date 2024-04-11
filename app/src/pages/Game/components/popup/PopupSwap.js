@@ -68,12 +68,13 @@ class ModeSwitch extends Phaser.GameObjects.Container {
       .setInteractive()
       .on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, (pointer, localX, localY, event) => {
         const isModeOneClicked = localX <= this.container.width / 2;
+        const newMode = isModeOneClicked ? modeOne : modeTwo;
+        const valid = newMode.onClick();
+        if (!valid) return;
         this.btnOne.setAlpha(Number(isModeOneClicked));
         this.btnTwo.setAlpha(Number(!isModeOneClicked));
 
-        const newMode = isModeOneClicked ? modeOne : modeTwo;
         this.mode = newMode.title;
-        newMode.onClick();
         if (newMode === modeOne) {
           this.textOne.setColor('#fff');
           this.textOne.setStroke('#0004a0', 10);
@@ -133,6 +134,7 @@ class PopupSwap extends Popup {
       modeOne: {
         title: 'GANG        ETH',
         onClick: () => {
+          if (this.loading) return;
           this.mode = 'web3';
           scene.game.events.emit('request-balances');
           if (this.interval) {
@@ -153,11 +155,14 @@ class PopupSwap extends Popup {
 
           this.tokenSwap = 'token';
           this.switch();
+
+          return true;
         },
       },
       modeTwo: {
         title: 'xGANG     GANG',
         onClick: () => {
+          if (this.loading) return;
           this.mode = 'web2';
           this.buttonApprove.setDisabledState(true);
           scene.game.events.emit('request-xtoken-balance');
@@ -180,6 +185,8 @@ class PopupSwap extends Popup {
           this.nextConversionText.setVisible(true);
           this.clockIcon.setVisible(true);
           this.gameEndText.setVisible(true);
+
+          return true;
         },
       },
     });
