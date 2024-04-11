@@ -113,9 +113,11 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       const unitPrice = isMintWhitelist
         ? machine.whitelistPrice
         : getAccurate(machine.basePrice * (1 - userReferralDiscount));
-      const estimatedPrice = data.amount * unitPrice;
-      txnData.value = getAccurate(estimatedPrice);
-      txnData.prices = Array.from({ length: data.amount }, () => unitPrice);
+      const unitPriceInToken = (await convertEthInputToToken(unitPrice)).amount;
+
+      const estimatedPrice = data.amount * unitPriceInToken;
+      txnData.value = estimatedPrice;
+      txnData.prices = Array.from({ length: data.amount }, () => unitPriceInToken);
       break;
     case 'buy-worker':
       txnData.amount = data.amount;
@@ -243,8 +245,7 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       const { address } = userData.data();
       const time = Math.floor(Date.now() / 1000);
       const nGangster = (await getNoGangster({ address })).toNumber();
-      const basePrice = await convertEthInputToToken(txnData.prices[0]);
-      const value = parseEther((basePrice.amount * txnData.amount).toString()).toBigInt();
+      const value = parseEther(txnData.value.toString()).toBigInt();
       const signedData = {
         address,
         amount: txnData.amount,
@@ -259,7 +260,6 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       return {
         id: newTransaction.id,
         ...transaction,
-        value,
         nGangster,
         bType: 1,
         time,
