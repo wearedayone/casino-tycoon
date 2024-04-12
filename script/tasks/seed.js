@@ -83,7 +83,7 @@ const main = async () => {
       routerAddress: ROUTER_ADDRESS,
       wethAddress: WETH_ADDRESS,
       pairAddress: PAIR_ADDRESS,
-      prizePoolConfig: gameConfigs.prizePool,
+      prizePoolConfig: { ...gameConfigs.prizePool, tokenTaxToPrizePoolPercent: gameConfigs.tokenContract.revShareFee },
       warConfig: gameConfigs.war,
       referralConfig: gameConfigs.referral,
       swapXTokenGapInSeconds: gameConfigs.swapXTokenGapInSeconds,
