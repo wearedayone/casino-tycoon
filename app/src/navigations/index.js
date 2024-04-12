@@ -16,9 +16,9 @@ import useSystemStore from '../stores/system.store';
 import useUserStore from '../stores/user.store';
 
 const Navigations = () => {
-  const { ready, authenticated, user, logout } = usePrivy();
+  const { ready, authenticated, user } = usePrivy();
   const { userWallet } = useUserWallet();
-  const [isInAuthFlow, setIsInAuthFlow] = useState(true);
+  const [isInAuthFlow, setIsInAuthFlow] = useState(false);
 
   useSystem();
   useUserProfile(ready, user, userWallet);
@@ -36,16 +36,17 @@ const Navigations = () => {
   );
   const isBlocked = configs?.disabledUrls?.includes(window.location.host);
 
-  // useLayoutEffect(() => {
-  //   if (!isLoading) {
-  //     if (authenticated) setTimeout(() => setIsInAuthFlow(false), 200);
-  //     else setIsInAuthFlow(true);
-  //   }
-  // }, [isLoading, authenticated]);
+  useLayoutEffect(() => {
+    if (!isLoading) {
+      // add delay when moving away from /login page => privy has time to hide login ui
+      if (authenticated) setTimeout(() => setIsInAuthFlow(false), 200);
+      else setIsInAuthFlow(true);
+    }
+  }, [isLoading, authenticated]);
 
   if (isLoading) return <Loading isBlocked={isBlocked} />;
 
-  if (!authenticated) return <AuthRoutes />;
+  if (!authenticated || isInAuthFlow) return <AuthRoutes />;
 
   if (!profile) return <Loading />;
 

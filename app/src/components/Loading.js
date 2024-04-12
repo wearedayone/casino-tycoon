@@ -41,6 +41,11 @@ const Loading = ({ isBlocked }) => {
           )}
         </Box>
       </Box>
+      {/* all routes directly handling a login success state must have this */}
+      <Box
+        id="privy-container"
+        sx={{ width: 0, height: 0, visibility: 'hidden', '& *': { width: 0, height: 0, visibility: 'hidden' } }}
+      />
     </>
   );
 };
