@@ -25,6 +25,7 @@ import {
   calculateNextWorkerBuyPrice,
   calculateSpinPrice,
   getTokenFromXToken,
+  calculateNewEstimatedEndTimeUnix,
 } from '../utils/formulas.js';
 import { getAccurate } from '../utils/math.js';
 import logger from '../utils/logger.js';
@@ -301,7 +302,15 @@ export const buyAssetsWithXToken = async ({ userId, type, amount }) => {
   if (!['worker', 'building'].includes(type)) throw new Error('API error: Invalid txn type');
 
   const activeSeason = await getActiveSeason();
-  const { status, workerSold, buildingSold, worker, building } = activeSeason;
+  const {
+    status,
+    workerSold,
+    buildingSold,
+    worker,
+    building,
+    estimatedEndTime,
+    endTimeConfig: { timeDecrementInSeconds },
+  } = activeSeason;
   if (status !== 'open') throw new Error('API error: Season is ended');
 
   const user = await firestore.collection('user').doc(userId).get();
@@ -310,6 +319,7 @@ export const buyAssetsWithXToken = async ({ userId, type, amount }) => {
 
   const gamePlay = await getUserGamePlay(userId);
   if (!gamePlay) throw new Error('API error: No game play');
+  if (!gamePlay.active) throw new Error('API error: Inactive user');
 
   const generatedXToken = await calculateGeneratedXToken(userId);
   const currentTotalBalance = xTokenBalance + generatedXToken;
@@ -387,6 +397,20 @@ export const buyAssetsWithXToken = async ({ userId, type, amount }) => {
 
   // update user
   batch.update(user.ref, { xTokenBalance: currentTotalBalance - txnData.value });
+
+  // update season
+  const seasonData =
+    type === 'worker'
+      ? { workerSold: admin.firestore.FieldValue.increment(amount) }
+      : { buildingSold: admin.firestore.FieldValue.increment(amount) };
+
+  if (type === 'building') {
+    const currentEndTimeUnix = estimatedEndTime.toDate().getTime();
+    const newEndTimeUnix = calculateNewEstimatedEndTimeUnix(currentEndTimeUnix, amount, -timeDecrementInSeconds);
+    seasonData.estimatedEndTime = admin.firestore.Timestamp.fromMillis(newEndTimeUnix);
+  }
+  const seasonRef = firestore.collection('season').doc(activeSeason.id);
+  batch.update(seasonRef, seasonData);
 
   let retry = 0;
   let isSuccess = false;
