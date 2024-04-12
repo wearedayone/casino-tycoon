@@ -23,6 +23,7 @@
     "@sentry/profiling-node": "^7.106.1",
     "@uniswap/v2-core": "^1.0.1",
     "@uniswap/v2-periphery": "^1.1.0-beta.0",
+    "axios": "^1.6.8",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "env-cmd": "^10.1.0",
