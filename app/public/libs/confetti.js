@@ -98,7 +98,7 @@ function createPoisson() {
 }
 
 // Confetto constructor
-function Confetto(theme) {
+function Confetto(theme, containerWidth) {
   this.frame = 0;
   this.outer = document.createElement('div');
   this.inner = document.createElement('div');
@@ -107,7 +107,8 @@ function Confetto(theme) {
   const outerStyle = this.outer.style;
   const innerStyle = this.inner.style;
   outerStyle.position = 'absolute';
-  outerStyle.width = sizeMin + sizeMax * random() + 'px';
+  const outerWidth = sizeMin + sizeMax * random();
+  outerStyle.width = outerWidth + 'px';
   outerStyle.height = sizeMin + sizeMax * random() + 'px';
   innerStyle.width = '100%';
   innerStyle.height = '100%';
@@ -120,7 +121,7 @@ function Confetto(theme) {
   this.dTheta = dThetaMin + dThetaMax * random();
   innerStyle.transform = this.axis + this.theta + 'deg)';
 
-  this.x = window.innerWidth * random();
+  this.x = containerWidth * random();
   this.y = -deviation;
   this.dx = sin(dxThetaMin + dxThetaMax * random());
   this.dy = dyMin + dyMax * random();
@@ -151,7 +152,12 @@ function Confetto(theme) {
     );
     phi *= PI2;
 
-    outerStyle.left = this.x + rho * cos(phi) + 'px';
+    let left = this.x + rho * cos(phi);
+    while (left < 0) left += containerWidth;
+    while (left > containerWidth - outerWidth) left -= containerWidth - outerWidth;
+    outerStyle.left = left + 'px';
+
+    // outerStyle.left = this.x + rho * cos(phi) + 'px';
     outerStyle.top = this.y + rho * sin(phi) + 'px';
     innerStyle.transform = this.axis + this.theta + 'deg)';
     return this.y > height + deviation;
@@ -159,12 +165,19 @@ function Confetto(theme) {
 }
 
 function poof() {
+  const gameContainer = document.querySelector('#game-container');
+  if (!gameContainer) return;
+
+  const canvas = gameContainer.querySelector('canvas');
+  console.log({ width: canvas.width, realWidth: canvas.clientWidth });
+
   // Create the overarching container
   const container = document.createElement('div');
-  container.style.position = 'fixed';
+  container.style.position = 'absolute';
   container.style.top = '0';
-  container.style.left = '0';
-  container.style.width = '100%';
+  container.style.left = '50%';
+  container.style.transform = 'translateX(-50%)';
+  container.style.width = `${canvas.clientWidth}px`;
   container.style.height = '0';
   container.style.overflow = 'visible';
   container.style.zIndex = '9999';
@@ -208,7 +221,8 @@ function poof() {
 
   if (!frame) {
     // Append the container
-    document.body.appendChild(container);
+    // document.body.appendChild(container);
+    gameContainer.appendChild(container);
 
     // Add confetti
 
@@ -219,7 +233,7 @@ function poof() {
       if (++count > particles) return (timer = undefined);
 
       if (isRunning) {
-        const confetto = new Confetto(theme);
+        const confetto = new Confetto(theme, canvas.clientWidth);
         confetti.push(confetto);
 
         container.appendChild(confetto.outer);
@@ -244,7 +258,7 @@ function poof() {
       if (confetti.length) return (frame = requestAnimationFrame(loop));
 
       // Cleanup
-      document.body.removeChild(container);
+      gameContainer.removeChild(container);
       container.remove();
       frame = undefined;
     });
