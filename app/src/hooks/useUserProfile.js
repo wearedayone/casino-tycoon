@@ -6,13 +6,11 @@ import { useQuery } from '@tanstack/react-query';
 import { firestore } from '../configs/firebase.config';
 import useUserStore from '../stores/user.store';
 import useModalStore from '../stores/modal.store';
-import useUserWallet from './useUserWallet';
 import { getMe } from '../services/user.service';
 import useSmartContract from './useSmartContract';
 import QueryKeys from '../utils/queryKeys';
 
-const useUserProfile = (ready, user) => {
-  const embeddedWallet = useUserWallet();
+const useUserProfile = (ready, user, userWallet) => {
   const setInitialized = useUserStore((state) => state.setInitialized);
   const setProfile = useUserStore((state) => state.setProfile);
   const profile = useUserStore((state) => state.profile);
@@ -23,7 +21,7 @@ const useUserProfile = (ready, user) => {
   const { status, data } = useQuery({
     queryFn: getMe,
     queryKey: [QueryKeys.Me],
-    enabled: ready && !!user && !!embeddedWallet,
+    enabled: ready && !!user && !!userWallet,
     retry: 3,
     onError: (err) => {
       console.error(err);
@@ -35,7 +33,7 @@ const useUserProfile = (ready, user) => {
   useEffect(() => {
     let unsubscribe;
     if (ready) {
-      if (user && !!embeddedWallet) {
+      if (user && !!userWallet) {
         if (loaded) {
           unsubscribe = onSnapshot(doc(firestore, 'user', user.id), (snapshot) => {
             if (snapshot.exists()) {
@@ -55,10 +53,10 @@ const useUserProfile = (ready, user) => {
     }
 
     return () => unsubscribe?.();
-  }, [ready, user, embeddedWallet, loaded]);
+  }, [ready, user, userWallet, loaded]);
 
   useEffect(() => {
-    if (embeddedWallet && profile) {
+    if (userWallet && profile) {
       isMinted(profile.address)
         .then((minted) => setClaimable(minted))
         .catch((err) => {
@@ -66,11 +64,11 @@ const useUserProfile = (ready, user) => {
           Sentry.captureException(err);
         });
 
-      if (!profile.walletPasswordAsked) {
+      if (userWallet.walletClientType === 'privy' && !profile.walletPasswordAsked) {
         setOpenSetWalletPassword(true);
       }
     }
-  }, [embeddedWallet, profile]);
+  }, [userWallet, profile]);
 };
 
 export default useUserProfile;

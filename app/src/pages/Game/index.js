@@ -138,7 +138,7 @@ const handleError = (err) => {
 
 const Game = () => {
   const { enqueueSnackbar } = useSnackbar();
-  const embeddedWallet = useUserWallet();
+  const { userWallet } = useUserWallet();
   const queryClient = useQueryClient();
   const [userHasInteractive, setUserHasInteracted] = useState(false);
   const gameRef = useRef();
@@ -214,26 +214,11 @@ const Game = () => {
     }
   };
 
-  // useEffect(() => {
-  //   if (!!embeddedWallet) {
-  //     console.log('swap', embeddedWallet);
-  //     swapTokenToEth(10)
-  //       .then(console.log)
-  //       .catch((err) => console.log('error swap', err));
-  //   }
-  // }, [embeddedWallet]);
-
   const { appVersion, appReloadThresholdInSeconds } = configs || {};
   const { ethPriceInUsd, tokenPrice, nftPrice } = market || {};
 
   // Check that your user is authenticated
   const isAuthenticated = useMemo(() => ready && authenticated, [ready, authenticated]);
-
-  // Check that your user has an embedded wallet
-  const hasEmbeddedWallet = useMemo(
-    () => !!user.linkedAccounts.find((account) => account.type === 'wallet' && account.walletClientType === 'privy'),
-    [user]
-  );
 
   const { status, data: rankData } = useQuery({
     queryFn: getRank,
@@ -355,7 +340,7 @@ const Game = () => {
   }, [userCanReload, startLoadingTime, appReloadThresholdInSeconds]);
 
   const exportWallet = async () => {
-    if (!isAuthenticated || !hasEmbeddedWallet) return;
+    if (!isAuthenticated || userWallet?.walletClientType !== 'privy') return;
     try {
       await exportWalletPrivy();
     } catch (err) {
@@ -580,10 +565,10 @@ const Game = () => {
   };
 
   useEffect(() => {
-    if (profile && gamePlay && activeSeasonId && !loaded && !!embeddedWallet) {
+    if (profile && gamePlay && activeSeasonId && !loaded && !!userWallet) {
       setLoaded(true);
     }
-  }, [loaded, profile, gamePlay, activeSeasonId, embeddedWallet]);
+  }, [loaded, profile, gamePlay, activeSeasonId, userWallet]);
 
   useEffect(() => {
     if (rankData && rankData.data) {
@@ -1783,6 +1768,10 @@ const Game = () => {
           </>
         )}
       </Box>
+      <Box
+        id="privy-container"
+        sx={{ width: 0, height: 0, visibility: 'hidden', '& *': { width: 0, height: 0, visibility: 'hidden' } }}
+      />
     </Box>
   );
 };
