@@ -367,6 +367,12 @@ const useSimulatorGameListener = () => {
 
   useEffect(() => {
     if (gameRef) {
+      gameRef.events.emit('simulator-update-deposit-code', user?.code);
+    }
+  }, [user?.code]);
+
+  useEffect(() => {
+    if (gameRef) {
       gameRef.events.emit('simulator-update-buildings', {
         numberOfBuildings: assets.numberOfBuildings,
         networth: assets.networth,
