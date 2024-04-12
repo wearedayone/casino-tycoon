@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Box, Typography } from '@mui/material';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { Box, Button, Typography } from '@mui/material';
 
 import { submitOauthData } from '../../services/twitter.service';
 
 const VerifyTwitter = () => {
+  const navigate = useNavigate();
   const [status, setStatus] = useState('loading');
+  const [error, setError] = useState('');
   const [searchParams] = useSearchParams();
   const oauth_token = searchParams.get('oauth_token');
   const oauth_verifier = searchParams.get('oauth_verifier');
@@ -15,8 +17,10 @@ const VerifyTwitter = () => {
       try {
         await submitOauthData({ oauth_token, oauth_verifier });
         setStatus('success');
+        setError('');
       } catch (err) {
         setStatus('error');
+        setError(err.message);
       }
     }
   };
@@ -34,7 +38,7 @@ const VerifyTwitter = () => {
         sx={{
           zIndex: -1,
           top: 0,
-          backgroundImage: { xs: 'url(images/bg-login-vertical.webp)', md: 'url(images/bg-login.webp)' },
+          backgroundImage: { xs: 'url(/images/bg-login-vertical.webp)', md: 'url(/images/bg-login.webp)' },
           backgroundSize: 'cover',
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'center',
@@ -46,7 +50,7 @@ const VerifyTwitter = () => {
         display="flex"
         flexDirection="column"
         justifyContent="center"
-        bgcolor="rgba(0, 0, 0, 0.2)">
+        bgcolor="rgba(0, 0, 0, 0.4)">
         <Box flex={1} display="flex" flexDirection="column" justifyContent="center" gap={3}>
           <Box
             flex={1}
@@ -58,14 +62,19 @@ const VerifyTwitter = () => {
             sx={{ maxWidth: '600px', '& img': { width: '100%' } }}>
             <img src="/images/logo.svg" />
           </Box>
-          <Box px={3} flex={1} display="flex" flexDirection="column" justifyContent="center">
-            <Typography fontSize={20} align="center" color="white">
+          <Box px={3} flex={1} display="flex" flexDirection="column" alignItems="center" justifyContent="center">
+            <Typography fontSize={20} fontWeight={700} align="center" color="white">
               {status === 'loading'
                 ? 'Verifying your Twitter...'
                 : status === 'success'
                 ? 'Twitter verified!'
-                : 'Something error'}
+                : `Error: ${error}`}
             </Typography>
+            {status !== 'loading' && (
+              <Button variant="text" sx={{ textTransform: 'none', fontWeight: 500 }} onClick={() => navigate('/')}>
+                Back to home
+              </Button>
+            )}
           </Box>
         </Box>
       </Box>

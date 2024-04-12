@@ -32,7 +32,9 @@ export const submitOauthData = async ({ userId, oauth_token, oauth_verifier }) =
 
   const { oauth_token: oauth_token_response, oauth_token_secret, user_id, screen_name } = data;
 
-  console.log('submit twitter', userId);
+  const existed = await firestore.collection('user').where('username', '==', screen_name).get();
+  if (!existed.empty) throw new Error('API error: Twitter linked with another account already');
+
   await firestore
     .collection('user')
     .doc(userId)
