@@ -956,7 +956,8 @@ export const convertXTokenToToken = async ({ userId, amount }) => {
     const gamePlayRef = firestore.collection('gamePlay').doc(gamePlayId);
     const gamePlay = await transaction.get(gamePlayRef);
 
-    const { numberOfWorkers, startXTokenCountingTime, lastTimeSwapXToken } = gamePlay.data();
+    const { active, numberOfWorkers, startXTokenCountingTime, lastTimeSwapXToken } = gamePlay.data();
+    if (!active) throw new Error('API error: Inactive user');
     const { worker, swapXTokenGapInSeconds } = await getActiveSeason();
 
     const now = Date.now();
