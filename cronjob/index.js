@@ -8,6 +8,7 @@ import getEthPrice from './tasks/getEthPrice.js';
 import burnFiat from './tasks/burnFIAT.js';
 import extractUser from './tasks/extractUser.js';
 import calculateTxnPrice from './tasks/calculateTxnPrice.js';
+import increaseSpin from './tasks/increaseSpin.js';
 import environments from './utils/environments.js';
 
 const {
@@ -19,6 +20,7 @@ const {
   CRON_BURN_FIAT,
   CRON_EXTRACT_USER,
   CRON_CALCULATE_TXN_PRICE,
+  CRON_INCREASE_SPIN,
 } = environments;
 
 cron.schedule(CRON_UPDATE_FIAT_PRICE, function () {
@@ -55,4 +57,8 @@ cron.schedule(CRON_BURN_FIAT, function () {
 
 cron.schedule(CRON_CALCULATE_TXN_PRICE, function () {
   calculateTxnPrice();
+});
+
+cron.schedule(CRON_INCREASE_SPIN, () => {
+  increaseSpin();
 });

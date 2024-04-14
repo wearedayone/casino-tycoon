@@ -20,6 +20,7 @@ const environments = {
   CRON_BURN_FIAT: process.env.CRON_BURN_FIAT,
   CRON_EXTRACT_USER: process.env.CRON_EXTRACT_USER,
   CRON_CALCULATE_TXN_PRICE: process.env.CRON_CALCULATE_TXN_PRICE,
+  CRON_INCREASE_SPIN: process.env.CRON_INCREASE_SPIN,
 };
 
 export default environments;

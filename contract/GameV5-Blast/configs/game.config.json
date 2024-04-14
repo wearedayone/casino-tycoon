@@ -68,7 +68,6 @@
     "building": 10
   },
   "spinConfig": {
-    "spinIncrementTimeInSeconds": 10800,
     "spinIncrementStep": 1,
     "maxSpin": 10,
     "spinRewards": [

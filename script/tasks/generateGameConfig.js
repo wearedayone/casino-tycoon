@@ -122,7 +122,6 @@ const ROW_STRUCTURE = {
     building: { row: 65, formatter: Number },
   },
   spinConfig: {
-    spinIncrementTimeInSeconds: { row: 76, formatter: Number },
     spinIncrementStep: { row: 77, formatter: Number },
     maxSpin: { row: 78, formatter: Number },
   },
