@@ -6,6 +6,7 @@ import PopupTxnError from './PopupTxnError';
 import SpinButton from '../button/SpinButton';
 import configs from '../../configs/configs';
 import { fontFamilies } from '../../../../utils/styles';
+import { randomNumberInRange } from '../../../../utils/numbers';
 
 const { width, height } = configs;
 
@@ -41,8 +42,9 @@ class PopupDailySpin extends Popup {
   numberOfRewards = 0;
   minContainerX = 0;
   maxContainerX = 0;
+  numberOfSpins = 0;
   destinationIndex = null;
-  numberOfSpins = null;
+  randomDistanceFromCenter = 0;
 
   constructor(scene) {
     super(scene, 'popup-spin', { title: 'Daily Spin' });
@@ -166,6 +168,7 @@ class PopupDailySpin extends Popup {
       this.spinSound.stop();
       this.loading = false;
       this.destinationIndex = null;
+      this.randomDistanceFromCenter = 0;
       this.popupTxnCompleted = new PopupTxnError({
         scene,
         code,
@@ -176,6 +179,7 @@ class PopupDailySpin extends Popup {
     });
 
     scene.game.events.on('spin-result', ({ destinationIndex }) => {
+      this.randomDistanceFromCenter = randomNumberInRange(-SPIN_ITEM_WIDTH / 2 + 50, SPIN_ITEM_WIDTH / 2 - 50);
       this.destinationIndex = destinationIndex;
     });
 
@@ -187,7 +191,10 @@ class PopupDailySpin extends Popup {
       }
 
       if (this.destinationIndex !== null) {
-        const destinationX = this.maxContainerX - this.destinationIndex * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP);
+        const destinationX =
+          this.maxContainerX -
+          this.destinationIndex * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP) +
+          this.randomDistanceFromCenter;
         if (
           this.contentContainer.x <= destinationX &&
           Math.abs(this.contentContainer.x - destinationX) < SPIN_ITEM_WIDTH / 2
@@ -196,6 +203,7 @@ class PopupDailySpin extends Popup {
           this.spinItems[this.destinationIndex + 1]?.container?.setTexture('spin-item-active');
           this.spinSound.stop();
           this.destinationIndex = null;
+          this.randomDistanceFromCenter = 0;
           scene.game.events.emit('stop-spin', reward);
         }
       }
