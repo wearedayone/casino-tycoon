@@ -1,8 +1,8 @@
 {
   "assets": {
     "machine": {
-      "basePrice": 0.01,
-      "whitelistPrice": 0.01,
+      "basePrice": 1000,
+      "whitelistPrice": 500,
       "maxPerBatch": 100,
       "maxWhitelistAmount": 10,
       "dailyReward": 1000,

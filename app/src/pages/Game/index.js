@@ -184,7 +184,7 @@ const Game = () => {
     convertTokenOutputToEth,
     getTotalFees,
   } = useSmartContract();
-  const { ready, authenticated, user, exportWallet: exportWalletPrivy, logout } = usePrivy();
+  const { ready, authenticated, exportWallet: exportWalletPrivy, logout } = usePrivy();
   const [isLeaderboardModalOpen, setLeaderboardModalOpen] = useState(false);
   const [userCanReload, setUserCanReload] = useState(false);
   const [mouseDown, setMouseDown] = useState(false);
@@ -286,8 +286,6 @@ const Game = () => {
     machine,
     worker,
     building,
-    workerSold,
-    buildingSold,
     reservePool,
     reservePoolReward,
     houseLevels,
@@ -1163,18 +1161,11 @@ const Game = () => {
             Sentry.captureException(err);
           });
       });
-      gameRef.current?.events.on('request-gangster-price', async () => {
-        Promise.all([convertEthInputToToken(machine.basePrice), convertEthInputToToken(machine.whitelistPrice)])
-          .then(([resBasePrice, resWhitelistPrice]) => {
-            gameRef.current?.events.emit('update-gangster-price', {
-              basePrice: resBasePrice.amount,
-              whitelistPrice: resWhitelistPrice.amount,
-            });
-          })
-          .catch((err) => {
-            console.error(err);
-            Sentry.captureException(err);
-          });
+      gameRef.current?.events.on('request-gangster-price', () => {
+        gameRef.current?.events.emit('update-gangster-price', {
+          basePrice: machine.basePrice,
+          whitelistPrice: machine.whitelistPrice,
+        });
       });
 
       gameRef.current?.events.on('update-war-attack', (data) => {
@@ -1562,6 +1553,13 @@ const Game = () => {
     inviteCode,
     activeSeason?.referralConfig?.referralDiscount,
   ]);
+
+  useEffect(() => {
+    gameRef.current?.events.emit('update-gangster-price', {
+      basePrice: machine.basePrice,
+      whitelistPrice: machine.whitelistPrice,
+    });
+  }, [machine.basePrice, machine.whitelistPrice]);
 
   useEffect(() => {
     queryClient.invalidateQueries({ queryKey: [QueryKeys.Leaderboard] });

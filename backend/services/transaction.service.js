@@ -14,7 +14,6 @@ import {
   signMessageDailySpin,
   getTokenBalance,
   getNoGangster,
-  convertEthInputToToken,
   signMessageBuyAsset,
   getLastBuyTime,
 } from './worker.service.js';
@@ -114,11 +113,10 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       const unitPrice = isMintWhitelist
         ? machine.whitelistPrice
         : getAccurate(machine.basePrice * (1 - userReferralDiscount));
-      const unitPriceInToken = (await convertEthInputToToken(unitPrice)).amount;
 
-      const estimatedPrice = data.amount * unitPriceInToken;
+      const estimatedPrice = data.amount * unitPrice;
       txnData.value = estimatedPrice;
-      txnData.prices = Array.from({ length: data.amount }, () => unitPriceInToken);
+      txnData.prices = Array.from({ length: data.amount }, () => unitPrice);
       break;
     case 'buy-worker':
       txnData.amount = data.amount;

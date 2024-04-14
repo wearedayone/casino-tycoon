@@ -293,9 +293,6 @@ class PopupBuyGangster extends Popup {
       this.basePrice = basePrice;
       this.whitelistPrice = whitelistPrice;
       this.updateValues();
-
-      if (this.updatePriceTimeout) clearTimeout(this.updatePriceTimeout);
-      this.updatePriceTimeout = setTimeout(() => scene.game.events.emit('request-gangster-price'), 30 * 1000);
     });
     scene.game.events.emit(events.requestMachines);
     scene.game.events.emit('request-gas-mint');
@@ -308,7 +305,6 @@ class PopupBuyGangster extends Popup {
 
   cleanup() {
     this.onCompleted?.();
-    if (this.updatePriceTimeout) clearTimeout(this.updatePriceTimeout);
   }
 
   updateValues() {
