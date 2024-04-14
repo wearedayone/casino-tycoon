@@ -11,7 +11,6 @@ import useUserProfile from '../hooks/useUserProfile';
 import useUserGamePlay from '../hooks/useUserGamePlay';
 import useUserWallet from '../hooks/useUserWallet';
 import useLastOnlineTime from '../hooks/useLastOnlineTime';
-import useLastSpin from '../hooks/useLastSpin';
 import useSystemStore from '../stores/system.store';
 import useUserStore from '../stores/user.store';
 
@@ -25,7 +24,6 @@ const Navigations = () => {
   useCheckCreateWallet(userWallet);
   useUserGamePlay();
   useLastOnlineTime();
-  useLastSpin();
 
   const configs = useSystemStore((state) => state.configs);
   const profile = useUserStore((state) => state.profile);

@@ -147,6 +147,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('popup-goon-price', '/images/popup-goon-price.png');
     this.load.image('popup-spin', '/images/popup-spin.png');
     this.load.image('popup-swap', '/images/popup-swap.png');
+    this.load.image('popup-reward', '/images/popup-reward.png');
 
     this.load.image('ribbon-welcome', '/images/ribbon-welcome.png');
 
@@ -178,6 +179,8 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('spin-reward-point', '/images/spin-reward-point.png');
     this.load.image('spin-reward-glow-fx', '/images/spin-reward-glow-fx.png');
     this.load.image('swap-switch-container', '/images/swap-switch-container.png');
+    this.load.image('hand-shake', '/images/hand-shake.png');
+    this.load.image('daily-spin', '/images/daily-spin.png');
 
     this.load.image('button-blue', '/images/button-blue.png');
     this.load.image('button-blue-pressed', '/images/button-blue-pressed.png');
@@ -247,7 +250,6 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-square-tiny-pressed', '/images/button-square-tiny-pressed.png');
     this.load.image('button-spin', '/images/button-spin.png');
     this.load.image('button-spin-pressed', '/images/button-spin-pressed.png');
-    this.load.image('spin-button', '/images/spin-button.png');
     this.load.image('button-spin-claim', '/images/button-spin-claim.png');
     this.load.image('button-spin-claim-pressed', '/images/button-spin-claim-pressed.png');
     this.load.image('button-spin-disabled', '/images/button-spin-disabled.png');
@@ -268,6 +270,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('pagination-disabled', '/images/pagination-disabled.png');
     this.load.image('deploy-now', '/images/deploy-now.png');
     this.load.image('tooltip-next-war', '/images/tooltip-next-war.png');
+    this.load.image('badge', '/images/badge.png');
 
     this.load.image('text-container', '/images/text-container.png');
     this.load.image('text-container-outlined', '/images/text-container-outlined.png');

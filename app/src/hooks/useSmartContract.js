@@ -253,7 +253,6 @@ const useSmartContract = () => {
     const txnRequest = { to: GAME_CONTRACT_ADDRESS, data };
 
     const receipt = await sendTransaction({ txnRequest });
-    console.log('daily spin', receipt);
 
     return receipt;
   };

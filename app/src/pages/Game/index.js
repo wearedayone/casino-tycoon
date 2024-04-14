@@ -10,7 +10,6 @@ import * as Sentry from '@sentry/react';
 import useUserStore from '../../stores/user.store';
 import useSystemStore from '../../stores/system.store';
 import useSettingStore from '../../stores/setting.store';
-import useSpinStore from '../../stores/spin.store';
 import {
   applyInviteCode,
   getRank,
@@ -199,9 +198,6 @@ const Game = () => {
     enableBuildingSalesTracking,
     disableBuildingSalesTracking,
   } = useSalesLast24h();
-
-  const spinInitialized = useSpinStore((state) => state.initialized);
-  const spinned = useSpinStore((state) => state.spinned);
 
   const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -549,7 +545,6 @@ const Game = () => {
     const diffInDays = (Date.now() - gamePlay.startXTokenCountingTime.toDate().getTime()) / MILISECONDS_IN_A_DAY;
     const newEarnedXToken = diffInDays * dailyXToken;
     const newXTokenBalance = xTokenBalance + newEarnedXToken;
-    console.log({ newXTokenBalance, startXTokenCountingTime: gamePlay?.startXTokenCountingTime });
     gameRef.current?.events.emit('update-xtoken-balance', { balance: newXTokenBalance });
   };
 
@@ -671,11 +666,6 @@ const Game = () => {
         } catch (err) {
           console.error(err);
           Sentry.captureException(err);
-        }
-      });
-      gameRef.current?.events.on('request-spinned-status', () => {
-        if (spinInitialized) {
-          gameRef.current?.events.emit('update-spinned-status', { spinned });
         }
       });
       gameRef.current?.events.on('request-app-version', () => {
@@ -1367,6 +1357,12 @@ const Game = () => {
         });
       });
 
+      gameRef.current?.events.on('request-badge-number', () => {
+        gameRef.current?.events.emit('update-badge-number', {
+          numberOfSpins: gamePlay.numberOfSpins,
+        });
+      });
+
       gameRef.current?.events.on('request-auth', () => {
         gameRef.current?.events.emit('update-auth', { uid: profile.id });
       });
@@ -1674,12 +1670,6 @@ const Game = () => {
   }, [spinRewards, networth]);
 
   useEffect(() => {
-    if (spinInitialized) {
-      gameRef.current?.events.emit('update-spinned-status', { spinned });
-    }
-  }, [spinInitialized, spinned]);
-
-  useEffect(() => {
     if ((swapXTokenGapInSeconds, lastTimeSwapXToken)) {
       gameRef.current?.events.emit('update-last-swap-x-token', {
         swapXTokenGapInSeconds,
@@ -1698,6 +1688,14 @@ const Game = () => {
       });
     }
   }, [endTimeConfig]);
+
+  useEffect(() => {
+    if (gamePlay) {
+      gameRef.current?.events.emit('update-badge-number', {
+        numberOfSpins: gamePlay.numberOfSpins,
+      });
+    }
+  }, [gamePlay?.numberOfSpins]);
 
   return (
     <Box

@@ -36,11 +36,13 @@ class SpinItem extends Phaser.GameObjects.Container {
 class PopupDailySpin extends Popup {
   spinRewards = [];
   spinPrice = 0;
+  ETHBalance = 0;
+  tokenBalance = 0;
   numberOfRewards = 0;
   minContainerX = 0;
   maxContainerX = 0;
   destinationIndex = null;
-  spinned = false;
+  numberOfSpins = null;
 
   constructor(scene) {
     super(scene, 'popup-spin', { title: 'Daily Spin' });
@@ -111,7 +113,7 @@ class PopupDailySpin extends Popup {
         x: width / 2,
         y: height / 2 + this.popup.height / 2 - 20,
         onClick: () => {
-          if (this.spinned) return;
+          if (!this.numberOfSpins) return;
           this.loading = true;
           this.spinButton?.setDisabledState(true);
           scene.game.events.emit('start-spin');
@@ -119,6 +121,7 @@ class PopupDailySpin extends Popup {
         },
         value: spinPrice,
       });
+      this.spinButton.setDisabledState(true);
       this.add(this.spinButton);
 
       if (this.arrowDown) {
@@ -138,30 +141,24 @@ class PopupDailySpin extends Popup {
         .image(width / 2, this.popup.y + this.popup.height / 2 - 190, 'arrow-spin-up')
         .setOrigin(0.5, 0.5);
       this.add(this.arrowUp);
+
+      this.checkSpinButtonState();
     });
 
-    scene.game.events.on('update-spinned-status', ({ spinned }) => {
-      this.spinned = spinned;
+    scene.game.events.on('update-badge-number', ({ numberOfSpins }) => {
+      this.numberOfSpins = numberOfSpins;
       if (!this.loading) {
-        if (spinned) {
-          this.spinButton?.setDisabledState(true);
-        } else {
-          this.spinButton?.setDisabledState(false);
-          this.contentContainer && (this.contentContainer.x = this.maxContainerX);
-        }
+        this.checkSpinButtonState();
+        this.resetSpinPosition();
       }
-      scene.game.events.emit('request-balances');
     });
 
     scene.game.events.on('update-balances', ({ ETHBalance, tokenBalance }) => {
+      this.ETHBalance = ETHBalance;
+      this.tokenBalance = tokenBalance;
       if (!this.loading) {
-        if (!ETHBalance || !tokenBalance || tokenBalance < this.spinPrice) {
-          this.spinButton?.setDisabledState(true);
-        } else {
-          this.spinButton?.setDisabledState(false);
-        }
+        this.checkSpinButtonState();
       }
-      scene.game.events.emit('request-spin-rewards');
     });
 
     scene.game.events.on('spin-error', ({ code, message }) => {
@@ -204,7 +201,31 @@ class PopupDailySpin extends Popup {
       }
     });
 
-    scene.game.events.emit('request-spinned-status');
+    scene.game.events.emit('request-spin-rewards');
+    scene.game.events.emit('request-balances');
+    scene.game.events.emit('request-badge-number');
+  }
+
+  checkSpinButtonState() {
+    let valid = true;
+    if (!this.ETHBalance || !this.tokenBalance || this.tokenBalance < this.spinPrice) {
+      valid = false;
+    }
+    if (!this.numberOfSpins) {
+      valid = false;
+    }
+
+    this.spinButton?.setDisabledState(!valid);
+  }
+
+  resetSpinPosition() {
+    this.contentContainer && (this.contentContainer.x = this.maxContainerX);
+  }
+
+  resetSpinItemCard() {
+    if (this.spinItems?.length) {
+      this.spinItems.map((item) => item.container?.setTexture('spin-item'));
+    }
   }
 }
 
