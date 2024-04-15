@@ -1472,7 +1472,6 @@ const Game = () => {
   useEffect(() => {
     if (profile?.code) {
       gameRef.current.events.emit('update-deposit-code', profile?.code);
-      gameRef.current.events.emit('simulator-update-deposit-code', profile?.code);
     }
   }, [profile?.code]);
 
