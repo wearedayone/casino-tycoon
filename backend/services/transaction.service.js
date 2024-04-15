@@ -1047,29 +1047,3 @@ export const calculateGeneratedReward = async (userId) => {
   const generatedReward = diffInDays * (numberOfMachines * machine.dailyReward);
   return Math.round(generatedReward * 1000) / 1000;
 };
-
-const calculateGeneratedXToken = async (userId) => {
-  const userSnapshot = await firestore.collection('user').doc(userId).get();
-  if (!userSnapshot.exists) return 0;
-
-  const activeSeason = await getActiveSeason();
-  const gamePlaySnapshot = await firestore
-    .collection('gamePlay')
-    .where('userId', '==', userId)
-    .where('seasonId', '==', activeSeason.id)
-    .limit(1)
-    .get();
-
-  const gamePlay = gamePlaySnapshot.docs[0];
-  if (!gamePlay) return 0;
-
-  const { numberOfWorkers, startXTokenCountingTime } = gamePlay.data();
-  const { worker } = activeSeason;
-
-  const now = Date.now();
-  const start = startXTokenCountingTime.toDate().getTime();
-  const diffInDays = (now - start) / (24 * 60 * 60 * 1000);
-  const generatedXToken = Math.round(diffInDays * (numberOfWorkers * worker.dailyReward) * 1000) / 1000;
-
-  return generatedXToken;
-};
