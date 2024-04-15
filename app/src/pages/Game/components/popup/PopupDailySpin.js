@@ -6,11 +6,12 @@ import PopupTxnError from './PopupTxnError';
 import SpinButton from '../button/SpinButton';
 import configs from '../../configs/configs';
 import { fontFamilies } from '../../../../utils/styles';
-import { randomNumberInRange } from '../../../../utils/numbers';
+import { randomNumberInRange, formatTimeDigit } from '../../../../utils/numbers';
 
 const { width, height } = configs;
 
 const SPIN_ITEM_WIDTH = 560;
+const SPIN_ITEM_HEIGHT = 634;
 const SPIN_CONTAINER_WIDTH = 1195;
 const SPIN_CONTAINER_HEIGHT = 900;
 const SPIN_ITEM_GAP = 40;
@@ -43,15 +44,37 @@ class PopupDailySpin extends Popup {
   minContainerX = 0;
   maxContainerX = 0;
   numberOfSpins = 0;
+  nextSpinIncrementTime = null;
+  spinIncrementStep = 0;
+  maxSpin = 0;
   destinationIndex = null;
   preDestinationIndex = null;
   randomDistanceFromCenter = 0;
   spinXStep = 30;
+  interval = null;
 
   constructor(scene) {
     super(scene, 'popup-spin', { title: 'Daily Spin' });
 
     this.spinSound = scene.sound.add('spin-sound', { loop: true });
+
+    this.spinIncrementText = scene.add
+      .text(this.popup.x, this.popup.y + this.popup.height / 2 - 330, '+1 spin in 00h00m00s', {
+        fontSize: '72px',
+        fontFamily: fontFamilies.extraBold,
+        color: '#30030B',
+      })
+      .setOrigin(0.5, 0.5);
+    this.add(this.spinIncrementText);
+
+    this.numberOfSpinsText = scene.add
+      .text(this.popup.x, this.popup.y + this.popup.height / 2 - 220, '+1 spin in 00h00m00s', {
+        fontSize: '48px',
+        fontFamily: fontFamilies.bold,
+        color: '#7D2E00',
+      })
+      .setOrigin(0.5, 0.5);
+    this.add(this.numberOfSpinsText);
 
     scene.game.events.on('update-spin-rewards', ({ spinRewards, spinPrice }) => {
       if (this.loading) return;
@@ -78,7 +101,7 @@ class PopupDailySpin extends Popup {
         const spinItem = new SpinItem(
           scene,
           SPIN_ITEM_WIDTH * (index + 1) + 40 * (index + 1),
-          SPIN_CONTAINER_HEIGHT / 2,
+          SPIN_CONTAINER_HEIGHT / 2 - 130,
           item.type,
           item.value
         );
@@ -142,7 +165,7 @@ class PopupDailySpin extends Popup {
         this.arrowUp.destroy();
       }
       this.arrowUp = scene.add
-        .image(width / 2, this.popup.y + this.popup.height / 2 - 190, 'arrow-spin-up')
+        .image(width / 2, this.arrowDown.y + SPIN_ITEM_HEIGHT, 'arrow-spin-up')
         .setOrigin(0.5, 0.5);
       this.add(this.arrowUp);
 
@@ -151,6 +174,7 @@ class PopupDailySpin extends Popup {
 
     scene.game.events.on('update-badge-number', ({ numberOfSpins }) => {
       this.numberOfSpins = numberOfSpins;
+      this.updateNumberOfSpinText();
       if (!this.loading) {
         this.checkSpinButtonState();
         this.resetSpinPosition();
@@ -225,9 +249,29 @@ class PopupDailySpin extends Popup {
       }
     });
 
+    scene.game.events.on('update-spin-config', ({ spinIncrementStep, maxSpin }) => {
+      this.spinIncrementStep = spinIncrementStep;
+      this.maxSpin = maxSpin;
+      this.updateSpinIncrementText();
+      this.updateNumberOfSpinText();
+    });
+
+    scene.game.events.on('update-next-spin-increment-time', ({ time }) => {
+      console.log('update-next-spin-increment-time', time);
+      this.nextSpinIncrementTime = time;
+      if (this.interval) {
+        clearInterval(this.interval);
+      }
+      this.interval = setInterval(() => {
+        this.updateSpinIncrementText();
+      }, 1000);
+    });
+
     scene.game.events.emit('request-spin-rewards');
     scene.game.events.emit('request-balances');
     scene.game.events.emit('request-badge-number');
+    scene.game.events.emit('request-spin-config');
+    scene.game.events.emit('request-next-spin-increment-time');
   }
 
   checkSpinButtonState() {
@@ -242,6 +286,22 @@ class PopupDailySpin extends Popup {
     this.spinButton?.setDisabledState(!valid);
   }
 
+  updateSpinIncrementText() {
+    if (!this.nextSpinIncrementTime) return;
+    const now = Date.now();
+    const diffInSeconds = (this.nextSpinIncrementTime - now) / 1000;
+    const hours = Math.floor(diffInSeconds / 3600);
+    const mins = Math.floor((diffInSeconds % 3600) / 60);
+    const seconds = Math.round(diffInSeconds % 60);
+    this.spinIncrementText.text = `+${this.spinIncrementStep} spin${
+      this.spinIncrementStep > 1 ? 's' : ''
+    } in ${formatTimeDigit(hours)}h${formatTimeDigit(mins)}m${formatTimeDigit(seconds)}s`;
+  }
+
+  updateNumberOfSpinText() {
+    this.numberOfSpinsText.text = `${this.numberOfSpins}/${this.maxSpin} left`;
+  }
+
   resetSpinPosition() {
     this.contentContainer && (this.contentContainer.x = this.maxContainerX);
   }
@@ -249,6 +309,17 @@ class PopupDailySpin extends Popup {
   resetSpinItemCard() {
     if (this.spinItems?.length) {
       this.spinItems.map((item) => item.container?.setTexture('spin-item'));
+    }
+  }
+
+  onOpen() {
+    this.scene.game.events.emit('request-next-spin-increment-time');
+  }
+
+  cleanup() {
+    if (this.interval) {
+      clearInterval(this.interval);
+      this.interval = null;
     }
   }
 }

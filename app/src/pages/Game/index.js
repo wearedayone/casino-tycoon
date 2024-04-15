@@ -34,6 +34,7 @@ import {
   updateLastTimeSeenGangWarResult,
   updateUserWarAttack,
   updateUserWarMachines,
+  getNextSpinIncrementUnixTime,
 } from '../../services/gamePlay.service';
 import {
   getLatestWar,
@@ -850,6 +851,17 @@ const Game = () => {
           });
       });
 
+      gameRef.current?.events.on('request-next-spin-increment-time', () => {
+        getNextSpinIncrementUnixTime()
+          .then((res) => {
+            gameRef.current.events.emit('update-next-spin-increment-time', { time: res.data.time });
+          })
+          .catch((err) => {
+            console.error(err);
+            Sentry.captureException(err);
+          });
+      });
+
       gameRef.current?.events.on('withdraw-token', ({ amount, address }) => {
         transfer({ amount, address, tokenType: 'FIAT' });
       });
@@ -1367,6 +1379,13 @@ const Game = () => {
         });
       });
 
+      gameRef.current?.events.on('request-spin-config', () => {
+        gameRef.current?.events.emit('update-spin-config', {
+          spinIncrementStep: activeSeason?.spinConfig?.spinIncrementStep,
+          maxSpin: activeSeason?.spinConfig?.maxSpin,
+        });
+      });
+
       gameRef.current?.events.on('request-auth', () => {
         gameRef.current?.events.emit('update-auth', { uid: profile.id });
       });
@@ -1700,6 +1719,15 @@ const Game = () => {
       });
     }
   }, [gamePlay?.numberOfSpins]);
+
+  useEffect(() => {
+    if (activeSeason?.spinConfig) {
+      gameRef.current?.events.emit('update-spin-config', {
+        spinIncrementStep: activeSeason?.spinConfig?.spinIncrementStep,
+        maxSpin: activeSeason?.spinConfig?.maxSpin,
+      });
+    }
+  }, [activeSeason?.spinConfig]);
 
   return (
     <Box

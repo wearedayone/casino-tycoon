@@ -237,3 +237,25 @@ export const getUserWarDeployment = async (userId) => {
 
   return snapshot.docs[0].data();
 };
+
+export const getNextSpinIncrementUnixTime = async () => {
+  const utcDate = moment().utc().format('DD/MM/YYYY');
+
+  const snapshotTimes = [
+    moment(`${utcDate} 00:00:00`, 'DD/MM/YYYY HH:mm:ss').utc(true).toDate().getTime(),
+    moment(`${utcDate} 03:00:00`, 'DD/MM/YYYY HH:mm:ss').utc(true).toDate().getTime(),
+    moment(`${utcDate} 06:00:00`, 'DD/MM/YYYY HH:mm:ss').utc(true).toDate().getTime(),
+    moment(`${utcDate} 09:00:00`, 'DD/MM/YYYY HH:mm:ss').utc(true).toDate().getTime(),
+    moment(`${utcDate} 12:00:00`, 'DD/MM/YYYY HH:mm:ss').utc(true).toDate().getTime(),
+    moment(`${utcDate} 15:00:00`, 'DD/MM/YYYY HH:mm:ss').utc(true).toDate().getTime(),
+    moment(`${utcDate} 18:00:00`, 'DD/MM/YYYY HH:mm:ss').utc(true).toDate().getTime(),
+    moment(`${utcDate} 21:00:00`, 'DD/MM/YYYY HH:mm:ss').utc(true).toDate().getTime(),
+    moment(`${utcDate} 00:00:00`, 'DD/MM/YYYY HH:mm:ss').utc(true).add(1, 'day').toDate().getTime(),
+    moment(`${utcDate} 03:00:00`, 'DD/MM/YYYY HH:mm:ss').utc(true).add(1, 'day').toDate().getTime(),
+  ];
+
+  const now = Date.now();
+  const nextTime = snapshotTimes.find((time) => time > now);
+
+  return nextTime;
+};

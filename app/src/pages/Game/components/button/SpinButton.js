@@ -13,7 +13,7 @@ class SpinButton extends Button {
       .setOrigin(0.5, 0.5);
     this.text.setStroke('#0004A0', 10);
 
-    this.icon = scene.add.image(0, 0, 'icon-coin').setOrigin(0.5, 0.5);
+    this.icon = scene.add.image(0, 0, 'gang-coin-small').setOrigin(0.5, 0.5);
 
     this.text.x -= this.icon.width / 2 + 5;
     this.icon.x = this.text.x + this.text.width / 2 + this.icon.width / 2 + 10;

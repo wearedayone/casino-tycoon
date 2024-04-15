@@ -178,6 +178,8 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('spin-reward-point', '/images/spin-reward-point.png');
     this.load.image('spin-reward-glow-fx', '/images/spin-reward-glow-fx.png');
     this.load.image('swap-switch-container', '/images/swap-switch-container.png');
+    this.load.image('gang-coin', '/images/gang-coin.png');
+    this.load.image('gang-coin-small', '/images/gang-coin-small.png');
 
     this.load.image('button-blue', '/images/button-blue.png');
     this.load.image('button-blue-pressed', '/images/button-blue-pressed.png');
