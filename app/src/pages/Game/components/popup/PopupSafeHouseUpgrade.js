@@ -50,6 +50,8 @@ class PopupSafeHouseUpgrade extends Popup {
         ? 'simulator-disable-building-sales-tracking'
         : 'disable-building-sales-tracking',
       updateXTokenBalance: isSimulator ? 'simulator-update-xtoken-balance' : 'update-xtoken-balance',
+      requestDecrementTime: isSimulator ? 'simulator-request-decrement-time' : 'request-decrement-time',
+      updateDecrementTime: isSimulator ? 'simulator-update-decrement-time' : 'update-decrement-time',
     };
     this.events = events;
     this.onCompleted = onCompleted;
@@ -137,6 +139,29 @@ class PopupSafeHouseUpgrade extends Popup {
       .setOrigin(1, 0);
     this.add(this.networthText);
     this.add(this.networthIncreaseText);
+
+    this.gameTimerText = scene.add
+      .text(this.popup.x - 130, this.popup.y + 210, 'Game Timer:', {
+        fontSize: '52px',
+        color: colors.black,
+        fontFamily: fontFamilies.bold,
+      })
+      .setOrigin(0.5, 0.5);
+    this.add(this.gameTimerText);
+
+    this.clockIcon = scene.add
+      .image(this.gameTimerText.x + this.gameTimerText.width / 2 + 20, this.gameTimerText.y, 'icon-clock')
+      .setOrigin(0, 0.5);
+    this.add(this.clockIcon);
+
+    this.decrementTimeText = scene.add
+      .text(this.clockIcon.x + this.clockIcon.width / 2 + 50, this.gameTimerText.y, '', {
+        fontSize: fontSizes.large,
+        color: colors.black,
+        fontFamily: fontFamilies.extraBold,
+      })
+      .setOrigin(0, 0.5);
+    this.add(this.decrementTimeText);
 
     this.minusBtn = new TextButton(
       scene,
@@ -317,7 +342,12 @@ class PopupSafeHouseUpgrade extends Popup {
       }
     );
 
+    scene.game.events.on(events.updateDecrementTime, ({ timeDecrementInSeconds }) => {
+      this.decrementTimeText.text = `-${timeDecrementInSeconds}s`;
+    });
+
     scene.game.events.emit(events.requestBuildings);
+    scene.game.events.emit(events.requestDecrementTime);
     scene.game.events.emit('request-gas-upgrade-safehouse');
   }
 

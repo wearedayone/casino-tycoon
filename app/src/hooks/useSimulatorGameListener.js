@@ -280,6 +280,18 @@ const useSimulatorGameListener = () => {
     game.events.on('simulator-request-eth-balance', async () => {
       game.events.emit('simulator-update-eth-balance', { address: user.address, ETHBalance: balances.ETHBalance });
     });
+
+    game.events.on('simulator-request-increment-time', () => {
+      game.events.emit('simulator-update-increment-time', {
+        timeIncrementInSeconds: activeSeason?.endTimeConfig?.timeIncrementInSeconds,
+      });
+    });
+
+    game.events.on('simulator-request-decrement-time', () => {
+      game.events.emit('simulator-update-decrement-time', {
+        timeDecrementInSeconds: activeSeason?.endTimeConfig?.timeDecrementInSeconds,
+      });
+    });
   };
 
   useEffect(() => {
@@ -419,6 +431,14 @@ const useSimulatorGameListener = () => {
     if (isLeaderboardModalOpen && gameRef)
       gameRef.events.emit('simulator-update-ranking-rewards', { prizePoolConfig: activeSeason?.prizePoolConfig });
   }, [isLeaderboardModalOpen, activeSeason?.prizePoolConfig]);
+
+  useEffect(() => {
+    if (gameRef && activeSeason?.endTimeConfig?.timeIncrementInSeconds) {
+      gameRef.events.emit('simulator-update-increment-time', {
+        timeIncrementInSeconds: activeSeason?.endTimeConfig?.timeIncrementInSeconds,
+      });
+    }
+  }, [activeSeason?.endTimeConfig?.timeIncrementInSeconds]);
 
   return { setupSimulatorGameListener };
 };

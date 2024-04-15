@@ -44,6 +44,8 @@ class PopupBuyGangster extends Popup {
       gameEnded: isSimulator ? 'simulator-game-ended' : 'game-ended',
       updateMachines: isSimulator ? 'simulator-update-machines' : 'update-machines',
       requestMachines: isSimulator ? 'simulator-request-machines' : 'request-machines',
+      requestIncrementTime: isSimulator ? 'simulator-request-increment-time' : 'request-increment-time',
+      updateIncrementTime: isSimulator ? 'simulator-update-increment-time' : 'update-increment-time',
     };
     this.onCompleted = onCompleted;
     this.isSimulator = isSimulator;
@@ -112,6 +114,29 @@ class PopupBuyGangster extends Popup {
       })
       .setOrigin(1, 0);
     this.add(this.roiText);
+
+    this.gameTimerText = scene.add
+      .text(this.popup.x - 130, this.popup.y + 300, 'Game Timer:', {
+        fontSize: '52px',
+        color: colors.black,
+        fontFamily: fontFamilies.bold,
+      })
+      .setOrigin(0.5, 0.5);
+    this.add(this.gameTimerText);
+
+    this.clockIcon = scene.add
+      .image(this.gameTimerText.x + this.gameTimerText.width / 2 + 20, this.gameTimerText.y, 'icon-clock')
+      .setOrigin(0, 0.5);
+    this.add(this.clockIcon);
+
+    this.incrementTimeText = scene.add
+      .text(this.clockIcon.x + this.clockIcon.width / 2 + 50, this.gameTimerText.y, '', {
+        fontSize: fontSizes.large,
+        color: colors.black,
+        fontFamily: fontFamilies.extraBold,
+      })
+      .setOrigin(0, 0.5);
+    this.add(this.incrementTimeText);
 
     const counterY = this.popup.y + this.popup.height / 2 - 260;
     const minusBtnX = this.popup.x - this.popup.width / 2 + 310;
@@ -289,7 +314,6 @@ class PopupBuyGangster extends Popup {
       }
     );
     scene.game.events.on('update-gangster-price', ({ basePrice, whitelistPrice }) => {
-      console.log({ whitelistPrice, basePrice });
       this.basePrice = basePrice;
       this.whitelistPrice = whitelistPrice;
       this.updateValues();
@@ -297,7 +321,13 @@ class PopupBuyGangster extends Popup {
       if (this.updatePriceTimeout) clearTimeout(this.updatePriceTimeout);
       this.updatePriceTimeout = setTimeout(() => scene.game.events.emit('request-gangster-price'), 30 * 1000);
     });
+
+    scene.game.events.on(events.updateIncrementTime, ({ timeIncrementInSeconds }) => {
+      this.incrementTimeText.text = `+${timeIncrementInSeconds}s`;
+    });
+
     scene.game.events.emit(events.requestMachines);
+    scene.game.events.emit(events.requestIncrementTime);
     scene.game.events.emit('request-gas-mint');
   }
 

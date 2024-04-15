@@ -294,6 +294,7 @@ const Game = () => {
     prizePoolConfig,
     spinConfig: { spinRewards },
     swapXTokenGapInSeconds,
+    endTimeConfig,
   } = activeSeason || {
     rankPrizePool: 0,
     reputationPrizePool: 0,
@@ -939,6 +940,18 @@ const Game = () => {
 
       gameRef.current?.events.on('request-gas-upgrade-safehouse', () => {
         gameRef.current.events.emit('update-gas-upgrade-safehouse', { gas: estimatedGas?.game?.buySafeHouse });
+      });
+
+      gameRef.current?.events.on('request-increment-time', () => {
+        gameRef.current?.events.emit('update-increment-time', {
+          timeIncrementInSeconds: endTimeConfig?.timeIncrementInSeconds || 0,
+        });
+      });
+
+      gameRef.current?.events.on('request-decrement-time', () => {
+        gameRef.current?.events.emit('update-decrement-time', {
+          timeDecrementInSeconds: endTimeConfig?.timeDecrementInSeconds || 0,
+        });
       });
 
       gameRef.current?.events.on('upgrade-safehouse', async ({ quantity, token }) => {
@@ -1674,6 +1687,17 @@ const Game = () => {
       });
     }
   }, [swapXTokenGapInSeconds, lastTimeSwapXToken]);
+
+  useEffect(() => {
+    if (endTimeConfig) {
+      gameRef.current?.events.emit('update-increment-time', {
+        timeIncrementInSeconds: endTimeConfig?.timeIncrementInSeconds || 0,
+      });
+      gameRef.current?.events.emit('update-decrement-time', {
+        timeDecrementInSeconds: endTimeConfig?.timeDecrementInSeconds || 0,
+      });
+    }
+  }, [endTimeConfig]);
 
   return (
     <Box
