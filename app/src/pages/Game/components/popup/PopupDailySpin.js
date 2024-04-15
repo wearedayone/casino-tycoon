@@ -213,10 +213,18 @@ class PopupDailySpin extends Popup {
 
     scene.game.events.on('continue-spin', () => {
       if (!this.contentContainer) return;
-      if (this.preDestinationIndex) {
-        this.spinXStep = Math.max(this.spinXStep - 0.3, 5);
-        if (Math.max(this.spinXStep, 5) === 5) {
-          this.destinationIndex = this.preDestinationIndex;
+      if (this.preDestinationIndex || this.preDestinationIndex === 0) {
+        const preDestinationX =
+          this.maxContainerX -
+          this.preDestinationIndex * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP) +
+          this.randomDistanceFromCenter;
+
+        const diff = preDestinationX - this.contentContainer.x;
+        if (diff > (this.numberOfRewards / 2) * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP)) {
+          this.spinXStep = Math.max(this.spinXStep - 0.3, 5);
+          if (Math.max(this.spinXStep, 5) === 5) {
+            this.destinationIndex = this.preDestinationIndex;
+          }
         }
       } else {
         this.spinXStep = Math.min(this.spinXStep + 1, 100);
@@ -290,6 +298,14 @@ class PopupDailySpin extends Popup {
     if (!this.nextSpinIncrementTime) return;
     const now = Date.now();
     const diffInSeconds = (this.nextSpinIncrementTime - now) / 1000;
+
+    if (diffInSeconds <= 0) {
+      clearInterval(this.interval);
+      this.interval = null;
+      this.scene.game.events.emit('request-next-spin-increment-time');
+      return;
+    }
+
     const hours = Math.floor(diffInSeconds / 3600);
     const mins = Math.floor((diffInSeconds % 3600) / 60);
     const seconds = Math.round(diffInSeconds % 60);
