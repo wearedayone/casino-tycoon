@@ -43,6 +43,11 @@ export const submitOauthData = async ({ userId, oauth_token, oauth_verifier }) =
     .collection('social')
     .doc(userId)
     .set({ twitter: { oauth_token: oauth_token_response, oauth_token_secret, user_id, screen_name } }, { merge: true });
+
+  const promises = [];
+  const gamePlaySnapshot = await firestore.collection('gamePlay').where('userId', '==', userId).get();
+  gamePlaySnapshot.docs.forEach((doc) => promises.push(doc.ref.update({ username: screen_name })));
+  await Promise.all(promises);
 };
 
 const obtainOauthAccessToken = async ({ consumerKey, consumerSecret, oauthToken, oauthVerifier, method, apiUrl }) => {
