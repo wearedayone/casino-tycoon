@@ -44,7 +44,9 @@ class PopupDailySpin extends Popup {
   maxContainerX = 0;
   numberOfSpins = 0;
   destinationIndex = null;
+  preDestinationIndex = null;
   randomDistanceFromCenter = 0;
+  spinXStep = 30;
 
   constructor(scene) {
     super(scene, 'popup-spin', { title: 'Daily Spin' });
@@ -72,7 +74,7 @@ class PopupDailySpin extends Popup {
         this.table = null;
       }
 
-      this.spinItems = [spinRewards.at(-1), ...spinRewards, spinRewards[0]].map((item, index) => {
+      this.spinItems = [spinRewards.at(-1), ...spinRewards, spinRewards[0], spinRewards[1]].map((item, index) => {
         const spinItem = new SpinItem(
           scene,
           SPIN_ITEM_WIDTH * (index + 1) + 40 * (index + 1),
@@ -168,7 +170,9 @@ class PopupDailySpin extends Popup {
       this.spinSound.stop();
       this.loading = false;
       this.destinationIndex = null;
+      this.preDestinationIndex = null;
       this.randomDistanceFromCenter = 0;
+      this.spinXStep = 30;
       this.popupTxnCompleted = new PopupTxnError({
         scene,
         code,
@@ -178,14 +182,23 @@ class PopupDailySpin extends Popup {
       this.close();
     });
 
-    scene.game.events.on('spin-result', ({ destinationIndex }) => {
+    scene.game.events.on('spin-result', ({ preDestinationIndex }) => {
       this.randomDistanceFromCenter = randomNumberInRange(-SPIN_ITEM_WIDTH / 2 + 50, SPIN_ITEM_WIDTH / 2 - 50);
-      this.destinationIndex = destinationIndex;
+      this.preDestinationIndex = preDestinationIndex;
     });
 
     scene.game.events.on('continue-spin', () => {
       if (!this.contentContainer) return;
-      this.contentContainer.x -= 50;
+      if (this.preDestinationIndex) {
+        this.spinXStep = Math.max(this.spinXStep - 0.3, 5);
+        if (Math.max(this.spinXStep, 5) === 5) {
+          this.destinationIndex = this.preDestinationIndex;
+        }
+      } else {
+        this.spinXStep = Math.min(this.spinXStep + 1, 100);
+      }
+      this.contentContainer.x -= Math.round(this.spinXStep);
+
       if (this.contentContainer.x < this.minContainerX) {
         this.contentContainer.x += this.numberOfRewards * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP);
       }
@@ -195,6 +208,7 @@ class PopupDailySpin extends Popup {
           this.maxContainerX -
           this.destinationIndex * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP) +
           this.randomDistanceFromCenter;
+
         if (
           this.contentContainer.x <= destinationX &&
           Math.abs(this.contentContainer.x - destinationX) < SPIN_ITEM_WIDTH / 2
@@ -203,7 +217,9 @@ class PopupDailySpin extends Popup {
           this.spinItems[this.destinationIndex + 1]?.container?.setTexture('spin-item-active');
           this.spinSound.stop();
           this.destinationIndex = null;
+          this.preDestinationIndex = null;
           this.randomDistanceFromCenter = 0;
+          this.spinXStep = 30;
           scene.game.events.emit('stop-spin', reward);
         }
       }

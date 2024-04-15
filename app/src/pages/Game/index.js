@@ -508,7 +508,11 @@ const Game = () => {
       const txnHash = receipt.transactionHash;
       const res1 = await validateDailySpin({ transactionId: id, txnHash });
       const { result } = res1.data;
-      gameRef.current?.events.emit('spin-result', { destinationIndex: result });
+      gameRef.current?.events.emit('spin-result', { preDestinationIndex: result });
+
+      // test
+      // await delay(5000);
+      // gameRef.current?.events.emit('spin-result', { preDestinationIndex: 3 });
     } catch (err) {
       console.error(err);
       throw err;
