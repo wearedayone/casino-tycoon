@@ -228,6 +228,7 @@ class MainScene extends Phaser.Scene {
     this.add.existing(this.popupSpinReward);
 
     this.infoButtons = new InfoButtons(this, 550);
+    this.infoButtons.setDepth(2);
     this.add.existing(this.infoButtons);
     this.game.events.on('update-user-away-reward', ({ showWarPopup, claimableReward }) => {
       this.popupWelcome = showWarPopup
