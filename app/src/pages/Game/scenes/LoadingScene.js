@@ -288,6 +288,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('price-chart-frame', '/images/price-chart-frame.png');
     this.load.image('swap-eth-token', '/images/swap-eth-token.png');
     this.load.image('swap-token-eth', '/images/swap-token-eth.png');
+    this.load.image('swap-xgang-gang', '/images/swap-xgang-gang.png');
     let path = this.load.path;
     this.load.path = '/images/animation/';
     this.load.multiatlas('gangster-front', 'gangster_front.json');
