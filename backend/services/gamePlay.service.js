@@ -267,59 +267,51 @@ export const calculateGeneratedXToken = async (userId) => {
 };
 
 export const upgradeMachine = async (userId) => {
-  const season = await getActiveSeason();
-  const gamePlay = await getUserGamePlay(userId);
-  if (!gamePlay.numberOfMachines) throw new Error('API error: You have no gangster');
-  const upgradePrice = calculateUpgradeMachinePrice(gamePlay?.machine.level);
+  await firestore.runTransaction(async (transaction) => {
+    // lock user doc && gamePlay doc
+    const userRef = firestore.collection('user').doc(userId);
+    const user = await transaction.get(userRef);
 
-  const user = await firestore.collection('user').doc(userId).get();
+    const { xTokenBalance } = user.data();
 
-  const generatedXToken = await calculateGeneratedXToken(userId);
-  const xTokenBalance = user.data().xTokenBalance + generatedXToken;
-  if (xTokenBalance < upgradePrice) throw new Error('API error: Insufficient xGANG');
+    const gamePlayId = (await getUserGamePlay(userId)).id;
+    const gamePlayRef = firestore.collection('gamePlay').doc(gamePlayId);
+    const gamePlay = await transaction.get(gamePlayRef);
 
-  const newLevel = gamePlay.machine.level + 1;
-  const xTokenLeft = xTokenBalance - upgradePrice;
+    const { active, numberOfMachines, numberOfWorkers, startXTokenCountingTime } = gamePlay.data();
+    if (!active) throw new Error('API error: Inactive user');
+    if (!numberOfMachines) throw new Error('API error: You have no gangster');
+    const { id: activeSeasonId, worker, machine } = await getActiveSeason();
 
-  // need to update user, gameplay, create txn
-  const batch = firestore.batch();
+    const now = Date.now();
+    const start = startXTokenCountingTime.toDate().getTime();
+    const diffInDays = (now - start) / (24 * 60 * 60 * 1000);
+    const generatedXToken = Math.round(diffInDays * (numberOfWorkers * worker.dailyReward) * 1000) / 1000;
+    const currentXTokenBalance = xTokenBalance + generatedXToken;
 
-  // update user
-  batch.update(user.ref, { xTokenBalance: xTokenLeft });
+    const upgradePrice = calculateUpgradeMachinePrice(gamePlay.data()?.machine?.level);
+    if (currentXTokenBalance < upgradePrice) throw new Error('API error: Insufficient xGANG');
+    const newLevel = gamePlay.data()?.machine?.level + 1;
 
-  // update gameplay
-  const gamePlayRef = firestore.collection('gamePlay').doc(gamePlay.id);
-  batch.update(gamePlayRef, {
-    startXTokenCountingTime: admin.firestore.FieldValue.serverTimestamp(),
-    machine: {
-      level: newLevel,
-      dailyReward: (1 + newLevel * season.machine.earningRateIncrementPerLevel) * season.machine.dailyReward,
-    },
+    transaction.update(userRef, { xTokenBalance: currentXTokenBalance - upgradePrice });
+
+    transaction.update(gamePlayRef, {
+      startXTokenCountingTime: admin.firestore.FieldValue.serverTimestamp(),
+      machine: {
+        level: newLevel,
+        dailyReward: (1 + newLevel * machine.earningRateIncrementPerLevel) * machine.dailyReward,
+      },
+    });
+
+    const txnRef = firestore.collection('transaction').doc();
+    transaction.create(txnRef, {
+      seasonId: activeSeasonId,
+      userId,
+      type: 'upgrade-machine',
+      value: upgradePrice,
+      token: 'xGANG',
+      status: 'Success',
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
   });
-
-  // create txn
-  const txnRef = firestore.collection('transaction').doc();
-  batch.create(txnRef, {
-    seasonId: season.id,
-    userId,
-    type: 'upgrade-machine',
-    value: upgradePrice,
-    token: 'xGANG',
-    status: 'Success',
-    createdAt: admin.firestore.FieldValue.serverTimestamp(),
-  });
-
-  let retry = 0;
-  let isSuccess = false;
-  while (retry < MAX_RETRY && !isSuccess) {
-    try {
-      logger.info(`Upgrading machine for user ${userId}. Retry ${retry++} times`);
-      await batch.commit();
-      isSuccess = true;
-    } catch (err) {
-      logger.error(`Unsuccessful upgrading machine for user ${userId}: ${err.message} ${JSON.stringify(err)}`);
-    }
-  }
-
-  if (!isSuccess) throw new Error('API error: Upgrade machine failed');
 };
