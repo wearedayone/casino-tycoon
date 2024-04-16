@@ -92,7 +92,7 @@ class PopupProcessing extends Popup {
       } else {
         this.setTitle('Success');
         this.title.text = 'All done!';
-        this.description.text = 'Your reputation & earnings \n are updated';
+        this.description.text = message ?? 'Your reputation & earnings \n are updated';
         this.doneSound?.play();
         this.iconDone.setVisible(true);
 
@@ -135,6 +135,10 @@ class PopupProcessing extends Popup {
           desc = '';
 
         switch (completedEvent) {
+          case 'upgrade-gangsters-completed':
+            title = `${formatter.format(amount)} Gangster${amount > 1 ? 's' : ''}`;
+            desc = 'Gangsters upgraded successfully';
+            break;
           case 'buy-gangster-completed':
           case 'simulator-buy-gangster-completed':
             title = `${formatter.format(amount)} Gangster${amount > 1 ? 's' : ''}`;

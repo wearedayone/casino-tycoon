@@ -180,7 +180,7 @@ export const generateDailyWarSnapshot = async () => {
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
           startRewardCountingTime: gamePlay.startRewardCountingTime,
           pendingReward: gamePlay.pendingReward,
-          dailyReward: activeSeason.machine.dailyReward * gamePlay.numberOfMachines,
+          dailyReward: gamePlay.machine.dailyReward * gamePlay.numberOfMachines,
           numberOfMachines: gamePlay.numberOfMachines,
           numberOfWorkers: gamePlay.numberOfWorkers,
           numberOfBuildings: gamePlay.numberOfBuildings,

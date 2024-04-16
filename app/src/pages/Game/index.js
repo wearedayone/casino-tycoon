@@ -35,6 +35,7 @@ import {
   updateLastTimeSeenGangWarResult,
   updateUserWarAttack,
   updateUserWarMachines,
+  upgradeUserMachines,
 } from '../../services/gamePlay.service';
 import {
   getLatestWar,
@@ -317,7 +318,7 @@ const Game = () => {
     spinConfig: { spinRewards: [] },
   };
 
-  const dailyToken = numberOfMachines * machine.dailyReward;
+  const dailyToken = numberOfMachines * gamePlay?.machine?.dailyReward;
   const dailyXToken = numberOfWorkers * worker.dailyReward;
 
   useEffect(() => {
@@ -1029,6 +1030,24 @@ const Game = () => {
         }
       });
 
+      gameRef.current?.events.on('upgrade-gangsters', async ({ amount }) => {
+        console.log('upgrading gangsters!', { amount });
+        try {
+          await upgradeUserMachines();
+          gameRef.current?.events.emit('upgrade-gangsters-completed', {
+            message: `Your ${amount} gangster${amount > 1 ? 's' : ''} ${amount > 1 ? 'are' : 'is'} upgraded`,
+            title: `Upgrade gangster${amount > 1 ? 's' : ''} successfully`,
+          });
+        } catch (err) {
+          gameRef.current?.events.emit('upgrade-gangsters-completed', {
+            status: 'failed',
+            code: 4001,
+            message: err.message,
+            action: err.message === 'You have no gangster' ? 'Please buy gangster first' : '',
+          });
+        }
+      });
+
       gameRef.current?.events.on('init-retire', async () => {
         try {
           const txnHash = await startRetirement();
@@ -1065,6 +1084,8 @@ const Game = () => {
           balance: tokenBalance,
           maxPerBatch: machine.maxPerBatch,
           dailyReward: gamePlay.machine?.dailyReward || machine.dailyReward,
+          earningRateIncrementPerLevel: activeSeason?.machine?.earningRateIncrementPerLevel,
+          level: gamePlay.machine?.level,
           reservePool,
           reservePoolReward,
           networthIncrease: machine.networth,
@@ -1553,6 +1574,8 @@ const Game = () => {
         balance: tokenBalance,
         maxPerBatch: machine.maxPerBatch,
         dailyReward: gamePlay?.machine?.dailyReward,
+        level: gamePlay.machine?.level,
+        earningRateIncrementPerLevel: activeSeason?.machine?.earningRateIncrementPerLevel,
         reservePool,
         reservePoolReward,
         networthIncrease: machine.networth,
@@ -1575,7 +1598,8 @@ const Game = () => {
     whitelistAmountMinted,
     inviteCode,
     activeSeason?.referralConfig?.referralDiscount,
-    gamePlay?.machine?.dailyReward,
+    gamePlay?.machine,
+    activeSeason?.machine?.earningRateIncrementPerLevel,
   ]);
 
   useEffect(() => {

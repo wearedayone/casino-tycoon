@@ -269,11 +269,12 @@ export const calculateGeneratedXToken = async (userId) => {
 export const upgradeMachine = async (userId) => {
   const season = await getActiveSeason();
   const gamePlay = await getUserGamePlay(userId);
-  const upgradePrice = calculateUpgradeMachinePrice(machine.level);
+  if (!gamePlay.numberOfMachines) throw new Error('API error: You have no gangster');
+  const upgradePrice = calculateUpgradeMachinePrice(gamePlay?.machine.level);
 
   const user = await firestore.collection('user').doc(userId).get();
 
-  const generatedXToken = calculateGeneratedXToken(userId);
+  const generatedXToken = await calculateGeneratedXToken(userId);
   const xTokenBalance = user.data().xTokenBalance + generatedXToken;
   if (xTokenBalance < upgradePrice) throw new Error('API error: Insufficient xGANG');
 
