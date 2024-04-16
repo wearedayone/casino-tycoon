@@ -1,9 +1,11 @@
 import Popup from './Popup';
 import PopupProcessing from './PopupProcessing';
 import TextButton from '../button/TextButton';
+import UpgradeMachineButton from '../button/UpgradeMachineButton';
 import configs from '../../configs/configs';
 import { customFormat, formatter } from '../../../../utils/numbers';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
+import { calculateUpgradeMachinePrice } from '../../../../utils/formulas';
 
 const { width, height } = configs;
 const DEFAULT_QUANTITY = 1;
@@ -33,6 +35,7 @@ class PopupBuyGangster extends Popup {
   whitelistAmountLeft = 0;
   referralDiscount = 0;
   mintFunction = 'mint';
+  level = 0;
   onCompleted;
 
   constructor(scene, { isSimulator, onCompleted } = {}) {
@@ -46,6 +49,8 @@ class PopupBuyGangster extends Popup {
       requestMachines: isSimulator ? 'simulator-request-machines' : 'request-machines',
       requestIncrementTime: isSimulator ? 'simulator-request-increment-time' : 'request-increment-time',
       updateIncrementTime: isSimulator ? 'simulator-update-increment-time' : 'update-increment-time',
+      upgradeGangsters: isSimulator ? 'simulator-upgrade-gangsters' : 'upgrade-gangsters',
+      upgradeCompleted: isSimulator ? 'simulator-upgrade-gangsters-completed' : 'upgrade-gangsters-completed',
     };
     this.onCompleted = onCompleted;
     this.isSimulator = isSimulator;
@@ -59,6 +64,16 @@ class PopupBuyGangster extends Popup {
       onCompleted,
     });
     scene.add.existing(this.popupBuyProcessing);
+
+    this.upgradePopupBuyProcessing = new PopupProcessing(scene, {
+      sound: 'gangster',
+      completedEvent: events.upgradeCompleted,
+      completedIcon: 'icon-gangster-buy-done',
+      failedIcon: 'icon-gangster-buy-fail',
+      description: '',
+      onCompleted,
+    });
+    scene.add.existing(this.upgradePopupBuyProcessing);
 
     this.upgradeBtn = new TextButton(
       scene,
@@ -89,7 +104,42 @@ class PopupBuyGangster extends Popup {
     });
     this.add(this.numberOfMachinesText);
 
-    const rateY = this.popup.y - 295;
+    this.levelText = scene.add
+      .text(this.popup.x - 370, this.popup.y - this.popup.height / 2 + 455, '- LVL', {
+        fontSize: '48px',
+        fontFamily: fontFamilies.extraBold,
+        color: '#B23F05',
+      })
+      .setOrigin(0.5, 0.5);
+    this.add(this.levelText);
+
+    this.earningBonusText = scene.add
+      .text(this.popup.x - 280, this.popup.y - this.popup.height / 2 + 580, '', {
+        fontSize: '60px',
+        fontFamily: fontFamilies.extraBold,
+        color: '#fff',
+      })
+      .setOrigin(0.5, 0.5);
+    this.add(this.earningBonusText);
+
+    this.upgradePriceButton = new UpgradeMachineButton(scene, {
+      x: this.popup.x + 250,
+      y: this.popup.y - 300,
+      value: 0,
+      onClick: () => {
+        if (isSimulator) return;
+        this.upgradePopupBuyProcessing.initLoading(`Upgrading gangsters to level ${this.level + 1}.\nPlease, wait`);
+        this.onCompleted = null;
+        this.close();
+
+        console.log('Upgrade gangstersss!', events.upgradeGangsters);
+
+        scene.game.events.emit(events.upgradeGangsters, { amount: this.numberOfMachines });
+      },
+    });
+    this.add(this.upgradePriceButton);
+
+    const rateY = this.popup.y - 122;
     this.rateText = scene.add.text(this.popup.x + 320, rateY, '0', largeBlackExtraBold).setOrigin(1, 0);
     this.rateIncreaseText = scene.add
       .text(this.popup.x + this.popup.width * 0.4, rateY + 80, '+0 /d', smallGreenBold)
@@ -97,17 +147,15 @@ class PopupBuyGangster extends Popup {
     this.add(this.rateText);
     this.add(this.rateIncreaseText);
 
-    this.networthText = scene.add
-      .text(this.popup.x + 380, this.popup.y - 110, '0', largeBlackExtraBold)
-      .setOrigin(1, 0);
+    this.networthText = scene.add.text(this.popup.x + 380, this.popup.y + 60, '0', largeBlackExtraBold).setOrigin(1, 0);
     this.networthIncreaseText = scene.add
-      .text(this.popup.x + this.popup.width * 0.4, this.popup.y - 30, '+0', smallGreenBold)
+      .text(this.popup.x + this.popup.width * 0.4, this.popup.y + 140, '+0', smallGreenBold)
       .setOrigin(1, 0);
     this.add(this.networthText);
     this.add(this.networthIncreaseText);
 
     this.roiText = scene.add
-      .text(this.popup.x + this.popup.width * 0.4, this.popup.y + 100, '+0%', {
+      .text(this.popup.x + this.popup.width * 0.4, this.popup.y + 270, '+0%', {
         fontSize: fontSizes.large,
         color: colors.green,
         fontFamily: fontFamilies.extraBold,
@@ -116,7 +164,7 @@ class PopupBuyGangster extends Popup {
     this.add(this.roiText);
 
     this.gameTimerText = scene.add
-      .text(this.popup.x - 130, this.popup.y + 300, 'Game Timer:', {
+      .text(this.popup.x - 130, this.popup.y + 470, 'Game Timer:', {
         fontSize: '52px',
         color: colors.black,
         fontFamily: fontFamilies.bold,
@@ -282,6 +330,8 @@ class PopupBuyGangster extends Popup {
         networth,
         balance,
         maxPerBatch,
+        level,
+        earningRateIncrementPerLevel,
         dailyReward,
         reservePool,
         reservePoolReward,
@@ -304,7 +354,18 @@ class PopupBuyGangster extends Popup {
         this.referralDiscount = referralDiscount;
         this.mintFunction = isWhitelisted && whitelistAmountLeft ? 'mintWL' : hasInviteCode ? 'mintReferral' : 'mint';
 
+        this.level = level;
         this.numberOfMachinesText.text = numberOfMachines.toLocaleString();
+        this.levelText.text = `${level} LVL`;
+        this.earningBonusText.text = `+${((level + 1) * earningRateIncrementPerLevel * 100).toLocaleString('en', {
+          maximumFractionDigits: 1,
+        })}%`;
+        const price = calculateUpgradeMachinePrice(level);
+        this.upgradePriceButton.updateValue(price);
+
+        if (!numberOfMachines || price > this.balance) {
+          this.upgradePriceButton.setDisabledState(true);
+        }
 
         this.networthText.text = `${networth.toLocaleString()}`;
         this.rateText.text = `${formatter.format(numberOfMachines * dailyReward)}`;
