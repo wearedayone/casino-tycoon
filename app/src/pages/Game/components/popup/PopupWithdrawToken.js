@@ -65,7 +65,7 @@ class PopupWithdrawToken extends Popup {
     this.add(this.balanceText);
 
     this.addressInput = new TextInput(scene, width / 2, addressInputY, {
-      placeholder: 'Enter Base address',
+      placeholder: 'Enter Blast address',
       valueRegex: addressInputRegex,
       characterRegex: addressCharacterRegex,
       maxDisplayedCharacters: 18,
