@@ -164,6 +164,7 @@ class PopupSwap extends Popup {
           if (this.loading) return;
           this.mode = 'web2';
           this.buttonApprove.setDisabledState(true);
+          this.popupProcessing.updateCompletedIcon('swap-xgang-gang');
           scene.game.events.emit('request-xtoken-balance');
           if (this.interval) {
             clearInterval(this.interval);
