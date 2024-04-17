@@ -14,6 +14,7 @@ import InstallGuideModal from './components/InstallGuideModal';
 import UpdateDetectedModal from './components/UpdateDetectedModal';
 import SetWalletPasswordModal from './components/SetWalletPasswordModal';
 import GameVersion from './components/GameVersion';
+import usePrivyStore from './stores/privy.store';
 import environments from './utils/environments';
 
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
@@ -52,55 +53,67 @@ Sentry.init({
 
 localStorage.setItem('windowHeight', window.innerHeight);
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
-    <Sentry.ErrorBoundary>
-      <PrivyProvider
-        appId={PRIVY_APP_ID}
-        onSuccess={(user) => {
-          console.log('logged in', { user });
-        }}
-        config={{
-          loginMethods: ['email', 'sms', 'google', 'wallet'],
-          embeddedWallets: {
-            createOnLogin: 'all-users',
-            noPromptOnSignature: true,
-          },
-          defaultChain: ENVIRONMENT === 'production' ? blast : blastSepolia,
-          supportedChains: [blast, blastSepolia],
-          appearance: {
-            theme: 'light',
-            accentColor: '#1e90ff',
-            logo: '',
-          },
+const Index = () => {
+  const isCustomContainer = usePrivyStore((state) => state.isCustomContainer);
+
+  const config = {
+    loginMethods: ['email', 'sms', 'google', 'wallet'],
+    embeddedWallets: {
+      createOnLogin: 'all-users',
+      noPromptOnSignature: true,
+    },
+    defaultChain: ENVIRONMENT === 'production' ? blast : blastSepolia,
+    supportedChains: [blast, blastSepolia],
+    appearance: {
+      theme: 'light',
+      accentColor: '#1e90ff',
+      logo: '',
+    },
+    ...(isCustomContainer
+      ? {
           _render: {
             inDialog: false,
             inParentNodeId: 'privy-container',
           },
-        }}>
-        <QueryClientProvider client={queryClient}>
-          <BrowserRouter>
-            <SnackbarProvider
-              maxSnack={3}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left',
-              }}>
-              <ThemeProvider theme={theme}>
-                <App />
-                <UpdateDetectedModal />
-                <InstallGuideModal />
-                <SetWalletPasswordModal />
-                <GameVersion />
-              </ThemeProvider>
-            </SnackbarProvider>
-          </BrowserRouter>
-        </QueryClientProvider>
-      </PrivyProvider>
-    </Sentry.ErrorBoundary>
-  </React.StrictMode>
-);
+        }
+      : {}),
+  };
+
+  return (
+    <React.StrictMode>
+      <Sentry.ErrorBoundary>
+        <PrivyProvider
+          appId={PRIVY_APP_ID}
+          onSuccess={(user) => {
+            console.log('logged in', { user });
+          }}
+          config={config}>
+          <QueryClientProvider client={queryClient}>
+            <BrowserRouter>
+              <SnackbarProvider
+                maxSnack={3}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'left',
+                }}>
+                <ThemeProvider theme={theme}>
+                  <App />
+                  <UpdateDetectedModal />
+                  <InstallGuideModal />
+                  <SetWalletPasswordModal />
+                  <GameVersion />
+                </ThemeProvider>
+              </SnackbarProvider>
+            </BrowserRouter>
+          </QueryClientProvider>
+        </PrivyProvider>
+      </Sentry.ErrorBoundary>
+    </React.StrictMode>
+  );
+};
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<Index />);
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

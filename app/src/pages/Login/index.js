@@ -1,9 +1,16 @@
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect } from 'react';
 import { Box } from '@mui/material';
 import { usePrivy } from '@privy-io/react-auth';
 
+import usePrivyStore from '../../stores/privy.store';
+
 const Login = () => {
+  const setIsCustomContainer = usePrivyStore((state) => state.setIsCustomContainer);
   const { login } = usePrivy();
+
+  useLayoutEffect(() => {
+    setIsCustomContainer(true);
+  }, []);
 
   useEffect(() => {
     addCssForPrivyDialog();
