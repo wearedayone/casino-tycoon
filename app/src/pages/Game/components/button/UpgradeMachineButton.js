@@ -6,6 +6,7 @@ class UpgradeMachineButton extends Button {
   constructor(scene, { x, y, onClick, value }) {
     super(scene, x, y, 'button-green-full-length', 'button-green-full-length-pressed', onClick, {
       sound: 'button-1',
+      disabledImage: 'button-green-full-length-disabled',
     });
 
     this.levelUpText = scene.add
