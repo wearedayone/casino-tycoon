@@ -15,7 +15,7 @@ const Twitter = () => {
       const res = await getOauthRequestToken();
       const { oauth_token } = res.data;
       const url = `https://api.twitter.com/oauth/authenticate?oauth_token=${oauth_token}`;
-      window.open(url);
+      window.location.href = url;
     } catch (err) {
       console.error(err);
     }
