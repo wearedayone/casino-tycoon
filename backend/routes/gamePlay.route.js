@@ -9,6 +9,7 @@ import {
   updateUserWarAttack,
   getWarDeployment,
   getNextSpinIncrement,
+  upgradeUserMachines,
 } from '../controllers/gamePlay.controller.js';
 
 const router = Router();
@@ -20,5 +21,6 @@ router.put('/war-machines', auth, updateUserWarMachines);
 router.put('/war-attack', auth, updateUserWarAttack);
 router.get('/war-deployment', auth, getWarDeployment);
 router.get('/next-spin-increment-time', getNextSpinIncrement);
+router.put('/machine-levels', auth, upgradeUserMachines);
 
 export default router;

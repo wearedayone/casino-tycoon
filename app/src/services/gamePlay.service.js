@@ -13,3 +13,5 @@ export const updateUserWarAttack = (data) => api.put('/api/v1/gamePlays/war-atta
 export const getUserWarDeployment = () => api.get('/api/v1/gamePlays/war-deployment');
 
 export const getNextSpinIncrementUnixTime = () => api.get('/api/v1/gamePlays/next-spin-increment-time');
+
+export const upgradeUserMachines = () => api.put('/api/v1/gamePlays/machine-levels');

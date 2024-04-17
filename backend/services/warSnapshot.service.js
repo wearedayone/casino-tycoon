@@ -117,24 +117,6 @@ const getDeadCount = (originalCount, dieChance) => {
   return certainDeathCount + extraDeath;
 };
 
-const getUserDailyIncome = async (userId) => {
-  const activeSeason = await getActiveSeason();
-  const { machine, worker } = activeSeason || {};
-  if (!machine || !worker) return 0;
-
-  const userGamePlaySnapshot = await firestore
-    .collection('gamePlay')
-    .where('userId', '==', userId)
-    .where('seasonId', '==', activeSeason.id)
-    .get();
-  if (userGamePlaySnapshot.empty) return 0;
-
-  const userGamePlay = { id: userGamePlaySnapshot.docs[0].id, ...userGamePlaySnapshot.docs[0].data() };
-  const { numberOfMachines, numberOfWorkers } = userGamePlay;
-
-  return machine.dailyReward * numberOfMachines + worker.dailyReward * numberOfWorkers;
-};
-
 export const generateDailyWarSnapshot = async () => {
   try {
     logger.info('\n\n---------taking daily war snapshot--------\n');
@@ -198,7 +180,7 @@ export const generateDailyWarSnapshot = async () => {
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
           startRewardCountingTime: gamePlay.startRewardCountingTime,
           pendingReward: gamePlay.pendingReward,
-          dailyReward: activeSeason.machine.dailyReward * gamePlay.numberOfMachines,
+          dailyReward: gamePlay.machine.dailyReward * gamePlay.numberOfMachines,
           numberOfMachines: gamePlay.numberOfMachines,
           numberOfWorkers: gamePlay.numberOfWorkers,
           numberOfBuildings: gamePlay.numberOfBuildings,

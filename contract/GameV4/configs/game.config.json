@@ -6,7 +6,8 @@
       "maxPerBatch": 100,
       "maxWhitelistAmount": 10,
       "dailyReward": 1000,
-      "networth": 10
+      "networth": 10,
+      "earningRateIncrementPerLevel": 0.01
     },
     "worker": {
       "basePrice": 200,
