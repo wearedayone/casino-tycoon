@@ -25,6 +25,8 @@ const main = async () => {
           { type: 'point', value: 10000, order: 14, percentage: 0.009 },
           { type: 'point', value: 50000, order: 15, percentage: 0.001 },
         ],
+        spinIncrementStep: 1,
+        maxSpin: 10,
       },
     });
 };

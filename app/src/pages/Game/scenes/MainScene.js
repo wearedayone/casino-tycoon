@@ -228,6 +228,7 @@ class MainScene extends Phaser.Scene {
     this.add.existing(this.popupSpinReward);
 
     this.infoButtons = new InfoButtons(this, 550);
+    this.infoButtons.setDepth(2);
     this.add.existing(this.infoButtons);
     this.game.events.on('update-user-away-reward', ({ showWarPopup, claimableReward }) => {
       this.popupWelcome = showWarPopup
@@ -243,9 +244,6 @@ class MainScene extends Phaser.Scene {
       this.isUserActive = active;
     });
 
-    this.game.events.on('update-spinned-status', ({ spinned }) => {
-      this.infoButtons?.spinButton?.setVisible(!spinned);
-    });
     this.game.events.emit('request-game-ended-status');
     this.game.events.emit('request-active-status');
     this.game.events.emit('request-deposit-code');
@@ -271,6 +269,8 @@ class MainScene extends Phaser.Scene {
         setTimeout(() => {
           this.popupDailySpin && (this.popupDailySpin.loading = false);
           this.popupDailySpin?.close();
+          this.popupDailySpin?.checkSpinButtonState();
+          this.popupDailySpin?.resetSpinItemCard();
           this.popupSpinReward?.showReward(reward);
         }, 1500);
       }

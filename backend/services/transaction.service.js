@@ -58,17 +58,13 @@ export const initTransaction = async ({ userId, type, ...data }) => {
   }
 
   if (type === 'daily-spin') {
-    const utcDate = moment().utc().format('DD/MM/YYYY');
-    const todayStartTime = moment(`${utcDate} 00:00:00`, 'DD/MM/YYYY HH:mm:ss').utc(true).toDate().getTime();
-    const existedSnapshot = await firestore
-      .collection('transaction')
-      .where('seasonId', '==', activeSeason.id)
-      .where('userId', '==', userId)
-      .where('type', '==', 'daily-spin')
-      .where('status', 'in', ['Pending', 'Success'])
-      .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(todayStartTime))
-      .get();
-    if (!existedSnapshot.empty) throw new Error('API error: Already spin today');
+    const userGamePlay = await getUserGamePlay(userId);
+    const { numberOfSpins } = userGamePlay;
+    if (!numberOfSpins) throw new Error('API error: Run out of spins');
+    await firestore
+      .collection('gamePlay')
+      .doc(userGamePlay.id)
+      .update({ numberOfSpins: admin.firestore.FieldValue.increment(-1) });
   }
 
   const { machine, machineSold, workerSold, buildingSold, worker, building, referralConfig, prizePoolConfig } =

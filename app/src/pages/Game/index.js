@@ -10,7 +10,6 @@ import * as Sentry from '@sentry/react';
 import useUserStore from '../../stores/user.store';
 import useSystemStore from '../../stores/system.store';
 import useSettingStore from '../../stores/setting.store';
-import useSpinStore from '../../stores/spin.store';
 import {
   applyInviteCode,
   getRank,
@@ -35,6 +34,7 @@ import {
   updateLastTimeSeenGangWarResult,
   updateUserWarAttack,
   updateUserWarMachines,
+  getNextSpinIncrementUnixTime,
 } from '../../services/gamePlay.service';
 import {
   getLatestWar,
@@ -199,9 +199,6 @@ const Game = () => {
     enableBuildingSalesTracking,
     disableBuildingSalesTracking,
   } = useSalesLast24h();
-
-  const spinInitialized = useSpinStore((state) => state.initialized);
-  const spinned = useSpinStore((state) => state.spinned);
 
   const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -512,7 +509,11 @@ const Game = () => {
       const txnHash = receipt.transactionHash;
       const res1 = await validateDailySpin({ transactionId: id, txnHash });
       const { result } = res1.data;
-      gameRef.current?.events.emit('spin-result', { destinationIndex: result });
+      gameRef.current?.events.emit('spin-result', { preDestinationIndex: result });
+
+      // test
+      // await delay(5000);
+      // gameRef.current?.events.emit('spin-result', { preDestinationIndex: 3 });
     } catch (err) {
       console.error(err);
       throw err;
@@ -549,7 +550,6 @@ const Game = () => {
     const diffInDays = (Date.now() - gamePlay.startXTokenCountingTime.toDate().getTime()) / MILISECONDS_IN_A_DAY;
     const newEarnedXToken = diffInDays * dailyXToken;
     const newXTokenBalance = xTokenBalance + newEarnedXToken;
-    console.log({ newXTokenBalance, startXTokenCountingTime: gamePlay?.startXTokenCountingTime });
     gameRef.current?.events.emit('update-xtoken-balance', { balance: newXTokenBalance });
   };
 
@@ -671,11 +671,6 @@ const Game = () => {
         } catch (err) {
           console.error(err);
           Sentry.captureException(err);
-        }
-      });
-      gameRef.current?.events.on('request-spinned-status', () => {
-        if (spinInitialized) {
-          gameRef.current?.events.emit('update-spinned-status', { spinned });
         }
       });
       gameRef.current?.events.on('request-app-version', () => {
@@ -849,6 +844,17 @@ const Game = () => {
         getNextWarSnapshotUnixTime()
           .then((res) => {
             gameRef.current.events.emit('update-next-war-time', { time: res.data.time });
+          })
+          .catch((err) => {
+            console.error(err);
+            Sentry.captureException(err);
+          });
+      });
+
+      gameRef.current?.events.on('request-next-spin-increment-time', () => {
+        getNextSpinIncrementUnixTime()
+          .then((res) => {
+            gameRef.current.events.emit('update-next-spin-increment-time', { time: res.data.time });
           })
           .catch((err) => {
             console.error(err);
@@ -1367,6 +1373,19 @@ const Game = () => {
         });
       });
 
+      gameRef.current?.events.on('request-badge-number', () => {
+        gameRef.current?.events.emit('update-badge-number', {
+          numberOfSpins: gamePlay.numberOfSpins,
+        });
+      });
+
+      gameRef.current?.events.on('request-spin-config', () => {
+        gameRef.current?.events.emit('update-spin-config', {
+          spinIncrementStep: activeSeason?.spinConfig?.spinIncrementStep,
+          maxSpin: activeSeason?.spinConfig?.maxSpin,
+        });
+      });
+
       gameRef.current?.events.on('request-auth', () => {
         gameRef.current?.events.emit('update-auth', { uid: profile.id });
       });
@@ -1673,12 +1692,6 @@ const Game = () => {
   }, [spinRewards, networth]);
 
   useEffect(() => {
-    if (spinInitialized) {
-      gameRef.current?.events.emit('update-spinned-status', { spinned });
-    }
-  }, [spinInitialized, spinned]);
-
-  useEffect(() => {
     if ((swapXTokenGapInSeconds, lastTimeSwapXToken)) {
       gameRef.current?.events.emit('update-last-swap-x-token', {
         swapXTokenGapInSeconds,
@@ -1697,6 +1710,23 @@ const Game = () => {
       });
     }
   }, [endTimeConfig]);
+
+  useEffect(() => {
+    if (gamePlay) {
+      gameRef.current?.events.emit('update-badge-number', {
+        numberOfSpins: gamePlay.numberOfSpins,
+      });
+    }
+  }, [gamePlay?.numberOfSpins]);
+
+  useEffect(() => {
+    if (activeSeason?.spinConfig) {
+      gameRef.current?.events.emit('update-spin-config', {
+        spinIncrementStep: activeSeason?.spinConfig?.spinIncrementStep,
+        maxSpin: activeSeason?.spinConfig?.maxSpin,
+      });
+    }
+  }, [activeSeason?.spinConfig]);
 
   return (
     <Box

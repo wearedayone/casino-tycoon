@@ -121,6 +121,10 @@ const ROW_STRUCTURE = {
     worker: { row: 64, formatter: Number },
     building: { row: 65, formatter: Number },
   },
+  spinConfig: {
+    spinIncrementStep: { row: 77, formatter: Number },
+    maxSpin: { row: 78, formatter: Number },
+  },
 };
 
 const main = async () => {
@@ -155,7 +159,8 @@ const main = async () => {
     return result;
   };
 
-  const generatedConfig = { ...generateConfigFromObject(ROW_STRUCTURE), houseLevels, spinConfig: { spinRewards } };
+  const generatedConfig = { ...generateConfigFromObject(ROW_STRUCTURE), houseLevels };
+  generatedConfig.spinConfig.spinRewards = spinRewards;
   console.log('generatedConfig:', generatedConfig);
 
   // check sum of prize pool distribution
