@@ -29,7 +29,6 @@ class PopupWarMachines extends Popup {
   attackUser = null;
   workerBonusToken = 0;
   buildingBonus = 0;
-  thugBonus = 0;
   totalEarn = 0;
   loading = false;
 
@@ -415,16 +414,6 @@ class PopupWarMachines extends Popup {
     this.defendBonusText.setStroke(colors.brown, 12);
     this.add(this.defendBonusText);
 
-    this.attackBonusText = scene.add
-      .text(this.popup.x + 320, input3Y - 15, ``, {
-        fontSize: '64px',
-        color: '#fff',
-        fontFamily: fontFamilies.extraBold,
-      })
-      .setOrigin(0, 0.5);
-    this.attackBonusText.setStroke(colors.brown, 12);
-    this.add(this.attackBonusText);
-
     scene.game.events.on(
       events.updateGamePlay,
       ({
@@ -448,7 +437,6 @@ class PopupWarMachines extends Popup {
         this.workerBonusToken = numberOfWorkers * (tokenRewardPerEarner || 0) * (workerBonusMultiple || 0);
         this.totalEarn = numberOfMachinesToEarn * tokenRewardPerEarner + this.workerBonusToken;
         this.buildingBonus = numberOfBuildings * (buildingBonusMultiple || 0);
-        this.thugBonus = 0 // TODO: update when add thug logic
         this.earnUnits = numberOfMachinesToEarn;
         this.attackUnits = numberOfMachinesToAttack;
         this.defendUnits = numberOfMachinesToDefend;
@@ -498,7 +486,6 @@ class PopupWarMachines extends Popup {
     )}`;
     this.workerBonusText1.text = `Including +${formatter.format(this.workerBonusToken)} as`;
     this.defendBonusText.text = `+${formatter.format(this.buildingBonus)}`;
-    this.attackBonusText.text = `+${formatter.format(this.thugBonus)}`;
 
     this.raidBtn.setDisabledState(!this.scene?.isUserActive);
     const isRaid = Boolean(this.attackUnits);
