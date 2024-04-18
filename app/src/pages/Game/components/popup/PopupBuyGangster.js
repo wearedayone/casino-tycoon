@@ -26,6 +26,7 @@ class PopupBuyGangster extends Popup {
   reservePool = 0;
   reservePoolReward = 0;
   balance = 0;
+  xTokenBalance = 0;
   basePrice = 0;
   unitPrice = 0;
   whitelistPrice = 0;
@@ -51,6 +52,7 @@ class PopupBuyGangster extends Popup {
       updateIncrementTime: isSimulator ? 'simulator-update-increment-time' : 'update-increment-time',
       upgradeGangsters: isSimulator ? 'simulator-upgrade-gangsters' : 'upgrade-gangsters',
       upgradeCompleted: isSimulator ? 'simulator-upgrade-gangsters-completed' : 'upgrade-gangsters-completed',
+      updateXTokenBalance: isSimulator ? 'simulator-update-xtoken-balance' : 'update-xtoken-balance',
     };
     this.onCompleted = onCompleted;
     this.isSimulator = isSimulator;
@@ -323,6 +325,12 @@ class PopupBuyGangster extends Popup {
     scene.game.events.on(events.gameEnded, () => {
       this.upgradeBtn.setDisabledState(true);
     });
+
+    scene.game.events.on(events.updateXTokenBalance, (data) => {
+      this.xTokenBalance = data.balance;
+      this.updateUpgradePriceButton();
+    });
+
     scene.game.events.on(
       events.updateMachines,
       ({
@@ -360,12 +368,7 @@ class PopupBuyGangster extends Popup {
         this.earningBonusText.text = `+${((level + 1) * earningRateIncrementPerLevel * 100).toLocaleString('en', {
           maximumFractionDigits: 1,
         })}%`;
-        const price = calculateUpgradeMachinePrice(level);
-        this.upgradePriceButton.updateValue(price);
-
-        if (!numberOfMachines || price > this.balance) {
-          this.upgradePriceButton.setDisabledState(true);
-        }
+        this.updateUpgradePriceButton();
 
         this.networthText.text = `${networth.toLocaleString()}`;
         this.rateText.text = `${formatter.format(numberOfMachines * dailyReward)}`;
@@ -390,6 +393,17 @@ class PopupBuyGangster extends Popup {
     scene.game.events.emit(events.requestMachines);
     scene.game.events.emit(events.requestIncrementTime);
     scene.game.events.emit('request-gas-mint');
+  }
+
+  updateUpgradePriceButton() {
+    const price = calculateUpgradeMachinePrice(this.level);
+    this.upgradePriceButton.updateValue(price);
+
+    if (!this.numberOfMachines || price > this.xTokenBalance) {
+      this.upgradePriceButton.setDisabledState(true);
+    } else {
+      this.upgradePriceButton.setDisabledState(false);
+    }
   }
 
   onOpen() {
