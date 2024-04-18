@@ -10,7 +10,11 @@ const Loading = ({ isBlocked }) => {
         sx={{
           zIndex: -1,
           top: 0,
-          backgroundImage: { xs: 'url(images/bg-login-vertical.webp)', md: 'url(images/bg-login.webp)' },
+          backgroundImage: {
+            xs: 'url(images/bg-login-vertical.webp)',
+            sm: 'url(images/bg-login-5x4.webp)',
+            md: 'url(images/bg-login.webp)',
+          },
           backgroundSize: 'cover',
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'center',
@@ -22,18 +26,8 @@ const Loading = ({ isBlocked }) => {
         display="flex"
         flexDirection="column"
         justifyContent="center"
-        bgcolor="rgba(0, 0, 0, 0.2)">
+        bgcolor="rgba(0, 0, 0, 0.1)">
         <Box flex={1} display="flex" flexDirection="column" justifyContent="center" gap={10}>
-          <Box
-            flex={1}
-            mx="auto"
-            pt={5}
-            width={{ xs: '100%', sm: '600px' }}
-            display="flex"
-            flexDirection="column"
-            sx={{ maxWidth: '600px', '& img': { width: '100%' } }}>
-            <img src="/images/logo.svg" />
-          </Box>
           {isBlocked && (
             <Typography align="center" color="white" fontSize={24} fontFamily="WixMadeforDisplayExtraBold">
               Game is under temporary maintenance

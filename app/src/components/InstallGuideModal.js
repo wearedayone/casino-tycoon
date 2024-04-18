@@ -46,7 +46,8 @@ const InstallGuideModal = () => {
         alignItems="center"
         justifyContent="center"
         sx={{ '& img': { maxWidth: '80vw', maxHeight: '80vh' } }}>
-        <Box position="relative">
+        <img src="/images/add-to-homepage-android.png" alt="add-to-home-page" />
+        {/* <Box position="relative">
           <img src="/images/unsupported-browser-android.png" alt="unsupported-browser-android" />
           <Box
             position="absolute"
@@ -80,7 +81,7 @@ const InstallGuideModal = () => {
               </span>
             </Typography>
           </Box>
-        </Box>
+        </Box> */}
       </Box>
     );
 

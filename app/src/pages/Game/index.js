@@ -1795,15 +1795,6 @@ const Game = () => {
             <Box position="absolute" top={0} left={0} width="100%" height="100%" zIndex={10}>
               <Box p={2} width="100%" display="flex" flexDirection="column" alignItems="center" gap={2}>
                 <Box
-                  mx="auto"
-                  mt={5}
-                  width={{ xs: '100%', sm: '600px' }}
-                  display="flex"
-                  flexDirection="column"
-                  sx={{ maxWidth: '600px', '& img': { width: '100%' } }}>
-                  <img src="/images/logo.svg" />
-                </Box>
-                <Box
                   width="100px"
                   mb={15}
                   sx={{

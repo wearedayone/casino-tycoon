@@ -108,28 +108,6 @@ const processMintEvent = async ({ to, tokenId, amount, nonce, event, contract, n
 
     // update user && referrer
     console.log('update user && referrer');
-    if (referrerAddress) {
-      const currentDiscount = user.data().referralTotalDiscount;
-      const referralTotalDiscount = currentDiscount
-        ? admin.firestore.FieldValue.increment(referralDiscount)
-        : referralDiscount;
-
-      batch.update(user.ref, { referralTotalDiscount });
-
-      const referrerSnapshot = await firestore
-        .collection('user')
-        .where('address', '==', referrerAddress)
-        .limit(1)
-        .get();
-
-      if (!referrerSnapshot.empty) {
-        const reward = getAccurate(value * referralConfig.referralBonus, 7);
-        const userCurrentReward = referrerSnapshot.docs[0].data().referralTotalReward;
-        const referralTotalReward = userCurrentReward ? admin.firestore.FieldValue.increment(reward) : reward;
-
-        batch.update(referrerSnapshot.docs[0].ref, { referralTotalReward });
-      }
-    }
 
     // update gamePlay && warDeployment
     console.log('update gamPlay && warDeployment');

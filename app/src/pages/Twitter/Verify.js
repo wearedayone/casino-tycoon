@@ -52,16 +52,6 @@ const VerifyTwitter = () => {
         justifyContent="center"
         bgcolor="rgba(0, 0, 0, 0.4)">
         <Box flex={1} display="flex" flexDirection="column" justifyContent="center" gap={3}>
-          <Box
-            flex={1}
-            pt={5}
-            mx="auto"
-            width={{ xs: '100%', sm: '600px' }}
-            display="flex"
-            flexDirection="column"
-            sx={{ maxWidth: '600px', '& img': { width: '100%' } }}>
-            <img src="/images/logo.svg" />
-          </Box>
           <Box px={3} flex={1} display="flex" flexDirection="column" alignItems="center" justifyContent="center">
             <Typography fontSize={20} fontWeight={700} align="center" color="white">
               {status === 'loading'

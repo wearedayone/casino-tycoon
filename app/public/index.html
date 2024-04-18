@@ -22,7 +22,7 @@
     <meta property="og:description" content="Just as DeFi reinvented finance, we are reinventing gaming." />
     <meta
       property="og:image"
-      content="https://res.cloudinary.com/gangsterarena/image/upload/v1710216211/images/gangster-arena.png" />
+      content="%PUBLIC_URL%/images/bg-login.webp" />
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
@@ -31,7 +31,7 @@
     <meta property="twitter:description" content="Just as DeFi reinvented finance, we are reinventing gaming." />
     <meta
       property="twitter:image"
-      content="https://res.cloudinary.com/gangsterarena/image/upload/v1710216211/images/gangster-arena.png" />
+      content="%PUBLIC_URL%/images/bg-login.webp" />
     <!--
       manifest.json provides metadata used when your web app is installed on a
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
@@ -86,6 +86,11 @@
         -webkit-box-pack: center;
         background-position: center;
       }
+      @media (max-width: 900px) {
+        #flash {
+          background-image: url(images/bg-login-5x4.webp);
+        }
+      }
       @media (max-width: 600px) {
         #flash {
           background-image: url(images/bg-login-vertical.webp);
@@ -112,18 +117,12 @@
         id="flash"
         style="
           height: 100vh;
-          background-image: url(images/bg-login.webp);
           background-size: cover;
           background-repeat: no-repeat;
           justify-content: center;
           -webkit-box-pack: center;
           background-position: center;
         ">
-        <div style="padding: 16px">
-          <div style="margin-top: 40px; display: flex; justify-content: center">
-            <img src="/images/logo.svg" width="100%" style="max-width: 600px" />
-          </div>
-        </div>
       </div>
     </div>
     <!--

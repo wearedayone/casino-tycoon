@@ -82,7 +82,7 @@ class PopupDeposit extends Popup {
     const baseContainer = scene.add.image(width / 2, baseContainerY, 'text-container');
     const baseIcon = scene.add.image(imageX, baseContainerY, 'icon-wallet');
     const baseTitle = scene.add
-      .text(sectionTextX, baseContainerY, 'Receive on Base', sectionTitleStyle)
+      .text(sectionTextX, baseContainerY, 'Receive on Blast', sectionTitleStyle)
       .setOrigin(0, 1.1);
     this.baseDescription = scene.add.text(sectionTextX, baseContainerY, '', sectionDescriptionStyle).setOrigin(0, -0.1);
     const copyButton = new Button(

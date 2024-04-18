@@ -43,18 +43,8 @@ const Twitter = () => {
         display="flex"
         flexDirection="column"
         justifyContent="center"
-        bgcolor="rgba(0, 0, 0, 0.2)">
+        bgcolor="rgba(0, 0, 0, 0.1)">
         <Box flex={1} display="flex" flexDirection="column" justifyContent="center" gap={3}>
-          <Box
-            flex={1}
-            pt={5}
-            mx="auto"
-            width={{ xs: '100%', sm: '600px' }}
-            display="flex"
-            flexDirection="column"
-            sx={{ maxWidth: '600px', '& img': { width: '100%' } }}>
-            <img src="/images/logo.svg" />
-          </Box>
           <Box
             flex={1}
             mx="auto"
