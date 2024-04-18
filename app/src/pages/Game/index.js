@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Box, Typography } from '@mui/material';
 import Phaser from 'phaser';
 import CircleMaskImagePlugin from 'phaser3-rex-plugins/plugins/circlemaskimage-plugin.js';
@@ -10,6 +10,7 @@ import * as Sentry from '@sentry/react';
 import useUserStore from '../../stores/user.store';
 import useSystemStore from '../../stores/system.store';
 import useSettingStore from '../../stores/setting.store';
+import usePrivyStore from '../../stores/privy.store';
 import {
   applyInviteCode,
   getRank,
@@ -165,6 +166,7 @@ const Game = () => {
   const sound = useSettingStore((state) => state.sound);
   const toggleSound = useSettingStore((state) => state.toggleSound);
   const setOnlineListener = useSettingStore((state) => state.setOnlineListener);
+  const setIsCustomContainer = usePrivyStore((state) => state.setIsCustomContainer);
   const {
     getNFTBalance,
     getETHBalance,
@@ -200,6 +202,10 @@ const Game = () => {
     enableBuildingSalesTracking,
     disableBuildingSalesTracking,
   } = useSalesLast24h();
+
+  useLayoutEffect(() => {
+    setIsCustomContainer(false);
+  }, []);
 
   const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -339,6 +345,7 @@ const Game = () => {
   }, [userCanReload, startLoadingTime, appReloadThresholdInSeconds]);
 
   const exportWallet = async () => {
+    console.log('export wallet', { userWallet, isAuthenticated });
     if (!isAuthenticated || userWallet?.walletClientType !== 'privy') return;
     try {
       await exportWalletPrivy();
