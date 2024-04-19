@@ -1034,12 +1034,13 @@ export const calculateGeneratedReward = async (userId) => {
     .get();
 
   const gamePlay = gamePlaySnapshot.docs[0];
-  const { startRewardCountingTime, numberOfMachines, machine } = gamePlay.data();
+  const { startRewardCountingTime, numberOfMachines, machine, building } = gamePlay.data();
 
+  const numberOfActiveMachines = Math.min(numberOfMachines, building?.machineCapacity || 0);
   const now = Date.now();
   const start = startRewardCountingTime.toDate().getTime();
   const diffInDays = (now - start) / (24 * 60 * 60 * 1000);
 
-  const generatedReward = diffInDays * (numberOfMachines * machine.dailyReward);
+  const generatedReward = diffInDays * (numberOfActiveMachines * machine.dailyReward);
   return Math.round(generatedReward * 1000) / 1000;
 };

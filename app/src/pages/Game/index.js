@@ -322,7 +322,8 @@ const Game = () => {
     spinConfig: { spinRewards: [] },
   };
 
-  const dailyToken = numberOfMachines * gamePlay?.machine?.dailyReward;
+  const dailyToken =
+    Math.min(numberOfMachines, gamePlay?.building?.machineCapacity || 0) * gamePlay?.machine?.dailyReward;
   const dailyXToken = numberOfWorkers * worker.dailyReward;
 
   useEffect(() => {
@@ -549,6 +550,7 @@ const Game = () => {
     if (!gamePlay?.startRewardCountingTime) return;
     const diffInDays = (Date.now() - gamePlay.startRewardCountingTime.toDate().getTime()) / MILISECONDS_IN_A_DAY;
     const claimableReward = gamePlay.pendingReward + diffInDays * dailyToken;
+    console.log('claimable reward', claimableReward);
     gameRef.current?.events.emit('update-claimable-reward', { reward: claimableReward });
     gameRef.current?.events.emit('claimable-reward-added');
   };
