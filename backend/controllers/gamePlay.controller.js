@@ -7,6 +7,7 @@ import {
   getUserWarDeployment,
   getNextSpinIncrementUnixTime,
   upgradeMachine,
+  upgradeBuilding,
 } from '../services/gamePlay.service.js';
 import logger from '../utils/logger.js';
 
@@ -103,6 +104,18 @@ export const getNextSpinIncrement = async (req, res) => {
 export const upgradeUserMachines = async (req, res) => {
   try {
     await upgradeMachine(req.userId);
+    return res.sendStatus(200);
+  } catch (err) {
+    console.error(err);
+    logger.error(err.message);
+    const message = err.message.startsWith('API error') ? err.message : 'Something is wrong';
+    return res.status(400).send(message);
+  }
+};
+
+export const upgradeUserBuildings = async (req, res) => {
+  try {
+    await upgradeBuilding(req.userId);
     return res.sendStatus(200);
   } catch (err) {
     console.error(err);
