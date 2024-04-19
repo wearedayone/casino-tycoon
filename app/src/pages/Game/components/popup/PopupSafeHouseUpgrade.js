@@ -1,12 +1,17 @@
 import Phaser from 'phaser';
 
 import Popup from './Popup';
+import UpgradeAssetButton from '../button/UpgradeAssetButton';
 import PopupProcessing from './PopupProcessing';
 import PopupConfirm, { icon1Gap } from './PopupConfirm';
 import TextButton from '../button/TextButton';
 import Button from '../button/Button';
 import configs from '../../configs/configs';
-import { estimateNumberOfBuildingCanBuy, calculateNextBuildingBuyPriceBatch } from '../../../../utils/formulas';
+import {
+  estimateNumberOfBuildingCanBuy,
+  calculateNextBuildingBuyPriceBatch,
+  calculateUpgradeBuildingPrice,
+} from '../../../../utils/formulas';
 import { customFormat, formatter } from '../../../../utils/numbers';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
 
@@ -23,6 +28,7 @@ const smallBrownBold = { fontSize: fontSizes.small, color: colors.brown, fontFam
 class PopupSafeHouseUpgrade extends Popup {
   gas = 0;
   numberOfBuildings = 0;
+  building = {};
   networth = 0;
   networthIncrease = 0;
   balance = 0;
@@ -53,16 +59,20 @@ class PopupSafeHouseUpgrade extends Popup {
       updateXTokenBalance: isSimulator ? 'simulator-update-xtoken-balance' : 'update-xtoken-balance',
       requestDecrementTime: isSimulator ? 'simulator-request-decrement-time' : 'request-decrement-time',
       updateDecrementTime: isSimulator ? 'simulator-update-decrement-time' : 'update-decrement-time',
+      upgradeSafehouses: isSimulator ? 'simulator-upgrade-safehouses-level' : 'upgrade-safehouses-level',
+      upgradeCompleted: isSimulator
+        ? 'simulator-upgrade-safehouses-level-completed'
+        : 'upgrade-safehouses-level-completed',
     };
     this.events = events;
     this.onCompleted = onCompleted;
     this.isSimulator = isSimulator;
-    const networthY = this.popup.y - 200;
-    const checkBoxY = this.popup.y + 390;
+    const networthY = this.popup.y - 55;
+    const checkBoxY = this.popup.y + 510;
     const leftCheckBoxX = this.popup.x - this.popup.width / 2 + 180;
     const rightCheckBoxX = this.popup.x + 70;
     const availableY = checkBoxY + 50;
-    const counterY = this.popup.y + this.popup.height / 2 - 250;
+    const counterY = this.popup.y + this.popup.height / 2 - 260;
     const minusBtnX = this.popup.x - this.popup.width / 2 + 320;
 
     this.popupBuyProcessing = new PopupProcessing(scene, {
@@ -120,6 +130,16 @@ class PopupSafeHouseUpgrade extends Popup {
     this.add(this.xgangAvailable);
     this.add(this.tokenAvailable);
 
+    this.upgradePopupBuyProcessing = new PopupProcessing(scene, {
+      sound: 'gangster',
+      completedEvent: events.upgradeCompleted,
+      completedIcon: 'icon-safehouse-upgraded-level',
+      failedIcon: 'icon-safehouse-upgrade-fail',
+      description: '',
+      onCompleted,
+    });
+    scene.add.existing(this.upgradePopupBuyProcessing);
+
     this.upgradeBtn = new TextButton(
       scene,
       width / 2,
@@ -147,12 +167,70 @@ class PopupSafeHouseUpgrade extends Popup {
     );
     this.add(this.upgradeBtn);
 
-    this.numberOfBuildingsText = scene.add.text(this.popup.x + 150, this.popup.y - this.popup.height / 2 + 170, '0', {
-      fontSize: fontSizes.extraLarge,
-      color: colors.black,
-      fontFamily: fontFamilies.extraBold,
+    this.upgradePriceButton = new UpgradeAssetButton(scene, {
+      x: this.popup.x + 250,
+      y: this.popup.y - 415,
+      value: 0,
+      onClick: () => {
+        if (isSimulator) return;
+        this.upgradePopupBuyProcessing.initLoading(
+          `Upgrading safehouses to level ${this.building?.level + 1}.\nPlease, wait`
+        );
+        this.onCompleted = null;
+        this.close();
+
+        scene.game.events.emit(events.upgradeSafehouses, {
+          amount: this.numberOfBuildings,
+          currentLevel: this.building?.level,
+        });
+      },
     });
-    this.add(this.numberOfBuildingsText);
+    this.add(this.upgradePriceButton);
+
+    this.levelTitle = scene.add
+      .text(this.popup.x + 80, this.popup.y - this.popup.height / 2 + 215, 'Safehouse Level:', {
+        fontSize: fontSizes.large,
+        color: colors.black,
+        fontFamily: fontFamilies.bold,
+      })
+      .setOrigin(0.5, 0.5);
+    this.add(this.levelTitle);
+
+    this.safehouseLevelText = scene.add
+      .text(this.popup.x + 150, this.popup.y - this.popup.height / 2 + 215, '', {
+        fontSize: fontSizes.extraLarge,
+        color: colors.black,
+        fontFamily: fontFamilies.extraBold,
+      })
+      .setOrigin(0.5, 0.5);
+    this.add(this.safehouseLevelText);
+
+    this.levelText = scene.add
+      .text(this.popup.x - 385, this.popup.y - this.popup.height / 2 + 440, '- LVL', {
+        fontSize: '48px',
+        fontFamily: fontFamilies.extraBold,
+        color: '#B23F05',
+      })
+      .setOrigin(0.5, 0.5);
+    this.add(this.levelText);
+
+    this.currentCapacityText = scene.add
+      .text(this.popup.x - 395, this.popup.y - this.popup.height / 2 + 615, '', {
+        fontSize: '48px',
+        fontFamily: fontFamilies.bold,
+        color: '#FFF',
+      })
+      .setOrigin(0.5, 0.5);
+    this.add(this.currentCapacityText);
+
+    this.nextLevelCapacityText = scene.add
+      .text(this.popup.x - 155, this.popup.y - this.popup.height / 2 + 615, '', {
+        fontSize: '48px',
+        fontFamily: fontFamilies.bold,
+        color: '#FFF',
+      })
+      .setOrigin(0.5, 0.5);
+    this.add(this.nextLevelCapacityText);
 
     this.networthText = scene.add.text(this.popup.x + 380, networthY, '0', largeBlackExtraBold).setOrigin(1, 0);
     this.networthIncreaseText = scene.add
@@ -166,7 +244,7 @@ class PopupSafeHouseUpgrade extends Popup {
     this.add(this.networthIncreaseText);
 
     this.gameTimerText = scene.add
-      .text(this.popup.x - 130, this.popup.y + 210, 'Game Timer:', {
+      .text(this.popup.x - 130, this.popup.y + 355, 'Game Timer:', {
         fontSize: '52px',
         color: colors.black,
         fontFamily: fontFamilies.bold,
@@ -341,6 +419,9 @@ class PopupSafeHouseUpgrade extends Popup {
       events.updateBuildings,
       ({
         numberOfBuildings,
+        numberOfMachines,
+        building,
+        machineCapacityIncrementPerLevel,
         networth,
         balance,
         basePrice,
@@ -358,10 +439,21 @@ class PopupSafeHouseUpgrade extends Popup {
         this.targetPrice = targetPrice;
         this.salesLastPeriod = salesLastPeriod;
         this.numberOfBuildings = numberOfBuildings;
+        this.building = building;
         this.networth = networth;
         this.networthIncrease = networthIncrease;
 
-        this.numberOfBuildingsText.text = numberOfBuildings.toLocaleString();
+        this.updateUpgradePriceButton();
+
+        this.safehouseLevelText.text = `${building.level?.toLocaleString()}`;
+        this.levelTitle.x = this.popup.x + 80 - this.safehouseLevelText.width / 2 + 5;
+        this.levelText.text = `${building?.level} LVL`;
+
+        this.safehouseLevelText.x =
+          this.levelTitle.x + this.levelTitle.width / 2 + this.safehouseLevelText.width / 2 + 10;
+        this.currentCapacityText.text = `${numberOfMachines}/${building.machineCapacity}`;
+        this.nextLevelCapacityText.text = `${building.machineCapacity + machineCapacityIncrementPerLevel}`;
+
         this.networthText.text = `${networth.toLocaleString()}`;
         this.updateValues();
       }
@@ -371,9 +463,25 @@ class PopupSafeHouseUpgrade extends Popup {
       this.decrementTimeText.text = `-${timeDecrementInSeconds}s`;
     });
 
+    scene.game.events.on(events.updateXTokenBalance, (data) => {
+      this.xTokenBalance = data.balance;
+      this.updateUpgradePriceButton();
+    });
+
     scene.game.events.emit(events.requestBuildings);
     scene.game.events.emit(events.requestDecrementTime);
     scene.game.events.emit('request-gas-upgrade-safehouse');
+  }
+
+  updateUpgradePriceButton() {
+    const price = calculateUpgradeBuildingPrice(this.building?.level);
+    this.upgradePriceButton.updateValue(price);
+
+    if (!this.numberOfBuildings || price > this.xTokenBalance) {
+      this.upgradePriceButton.setDisabledState(true);
+    } else {
+      this.upgradePriceButton.setDisabledState(false);
+    }
   }
 
   onOpen() {

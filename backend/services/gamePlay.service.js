@@ -347,9 +347,9 @@ export const upgradeBuilding = async (userId) => {
     const gamePlayRef = firestore.collection('gamePlay').doc(gamePlayId);
     const gamePlay = await transaction.get(gamePlayRef);
 
-    const { active, numberOfMachines, numberOfWorkers, startXTokenCountingTime } = gamePlay.data();
+    const { active, numberOfBuildings, numberOfWorkers, startXTokenCountingTime } = gamePlay.data();
     if (!active) throw new Error('API error: Inactive user');
-    if (!numberOfMachines) throw new Error('API error: You have no gangster');
+    if (!numberOfBuildings) throw new Error('API error: You have no safehouse');
     const { id: activeSeasonId, worker, building } = await getActiveSeason();
 
     const now = Date.now();
@@ -361,7 +361,7 @@ export const upgradeBuilding = async (userId) => {
     const upgradePrice = calculateUpgradeBuildingPrice(gamePlay.data()?.building?.level);
     if (currentXTokenBalance < upgradePrice) throw new Error('API error: Insufficient xGANG');
 
-    const newLevel = gamePlay.data()?.machine?.level + 1;
+    const newLevel = gamePlay.data()?.building?.level + 1;
     const { initMachineCapacity, machineCapacityIncrementPerLevel } = building;
     const newMachineCapacity = initMachineCapacity + machineCapacityIncrementPerLevel * newLevel;
 

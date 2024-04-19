@@ -2,7 +2,7 @@ import Popup from './Popup';
 import PopupProcessing from './PopupProcessing';
 import PopupConfirm, { icon1Gap } from './PopupConfirm';
 import TextButton from '../button/TextButton';
-import UpgradeMachineButton from '../button/UpgradeMachineButton';
+import UpgradeAssetButton from '../button/UpgradeAssetButton';
 import configs from '../../configs/configs';
 import { customFormat, formatter } from '../../../../utils/numbers';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
@@ -169,7 +169,7 @@ class PopupBuyGangster extends Popup {
       .setOrigin(0.5, 0.5);
     this.add(this.earningBonusText);
 
-    this.upgradePriceButton = new UpgradeMachineButton(scene, {
+    this.upgradePriceButton = new UpgradeAssetButton(scene, {
       x: this.popup.x + 250,
       y: this.popup.y - 300,
       value: 0,
@@ -178,8 +178,6 @@ class PopupBuyGangster extends Popup {
         this.upgradePopupBuyProcessing.initLoading(`Upgrading gangsters to level ${this.level + 1}.\nPlease, wait`);
         this.onCompleted = null;
         this.close();
-
-        console.log('Upgrade gangstersss!', events.upgradeGangsters);
 
         scene.game.events.emit(events.upgradeGangsters, { amount: this.numberOfMachines });
       },

@@ -2,7 +2,7 @@ import Button from './Button';
 import { fontFamilies } from '../../../../utils/styles';
 import { formatter } from '../../../../utils/numbers';
 
-class UpgradeMachineButton extends Button {
+class UpgradeAssetButton extends Button {
   constructor(scene, { x, y, onClick, value }) {
     super(scene, x, y, 'button-green-full-length', 'button-green-full-length-pressed', onClick, {
       sound: 'button-1',
@@ -40,4 +40,4 @@ class UpgradeMachineButton extends Button {
   }
 }
 
-export default UpgradeMachineButton;
+export default UpgradeAssetButton;

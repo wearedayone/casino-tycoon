@@ -37,6 +37,7 @@ import {
   updateUserWarMachines,
   getNextSpinIncrementUnixTime,
   upgradeUserMachines,
+  upgradeUserBuildings,
 } from '../../services/gamePlay.service';
 import {
   getLatestWar,
@@ -985,6 +986,9 @@ const Game = () => {
       gameRef.current?.events.on('request-buildings', () => {
         gameRef.current?.events.emit('update-buildings', {
           numberOfBuildings,
+          numberOfMachines,
+          building: gamePlay?.building,
+          machineCapacityIncrementPerLevel: activeSeason?.building?.machineCapacityIncrementPerLevel,
           networth,
           balance: tokenBalance,
           basePrice: building.basePrice,
@@ -1057,6 +1061,24 @@ const Game = () => {
             code: 4001,
             message: err.message,
             action: err.message === 'You have no gangster' ? 'Please buy gangster first' : '',
+          });
+        }
+      });
+
+      gameRef.current?.events.on('upgrade-safehouses-level', async ({ amount, currentLevel }) => {
+        try {
+          await upgradeUserBuildings();
+          gameRef.current?.events.emit('upgrade-safehouses-level-completed', {
+            message: `Safehouse level upgraded`,
+            title: `Upgrade safehouse${amount > 1 ? 's' : ''} successfully`,
+            level: currentLevel + 1,
+          });
+        } catch (err) {
+          gameRef.current?.events.emit('upgrade-safehouses-level-completed', {
+            status: 'failed',
+            code: 4001,
+            message: err.message,
+            action: err.message === 'You have no safehouse' ? 'Please buy safehouse first' : '',
           });
         }
       });
@@ -1567,6 +1589,9 @@ const Game = () => {
   useEffect(() => {
     gameRef.current?.events.emit('update-buildings', {
       numberOfBuildings,
+      numberOfMachines,
+      building: gamePlay?.building,
+      machineCapacityIncrementPerLevel: activeSeason?.building?.machineCapacityIncrementPerLevel,
       networth,
       balance: tokenBalance,
       basePrice: building.basePrice,
@@ -1576,7 +1601,16 @@ const Game = () => {
       salesLastPeriod: buildingSoldLast24h,
       networthIncrease: building.networth,
     });
-  }, [numberOfBuildings, networth, tokenBalance, building, buildingSoldLast24h]);
+  }, [
+    numberOfBuildings,
+    networth,
+    tokenBalance,
+    building,
+    buildingSoldLast24h,
+    gamePlay?.building,
+    numberOfMachines,
+    activeSeason?.building?.machineCapacityIncrementPerLevel,
+  ]);
 
   useEffect(() => {
     gameRef.current?.events.emit('update-workers', {
