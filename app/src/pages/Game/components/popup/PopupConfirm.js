@@ -105,6 +105,14 @@ class PopupConfirm extends Popup {
     }
   }
 
+  cleanup() {
+    if (this.checkboxChecked) {
+      const approvedState = false;
+      this.checkboxChecked.setVisible(approvedState);
+      this.buttonYes.setDisabledState(!approvedState);
+    }
+  }
+
   updateTextLeft(text) {
     this.textLeft.text = text;
     if (this.iconLeft) {
