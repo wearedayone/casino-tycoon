@@ -122,6 +122,8 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('eth-balance', '/images/eth-balance.png');
 
     this.load.image('popup', '/images/popup.png');
+    this.load.image('popup-tiny', '/images/popup-tiny.png');
+    this.load.image('popup-mini', '/images/popup-mini.png');
     this.load.image('popup-small', '/images/popup-small.png');
     this.load.image('popup-medium', '/images/popup-medium.png');
     this.load.image('popup-large', '/images/popup-large.png');
@@ -284,6 +286,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('text-container-outlined', '/images/text-container-outlined.png');
     this.load.image('tabs-container', '/images/tabs-container.png');
     this.load.image('tabs-container-simple', '/images/tabs-container-simple.png');
+    this.load.image('container-short', '/images/container-short.png');
     this.load.image('container-large', '/images/container-large.png');
     this.load.image('container-large-2', '/images/container-large-2.png');
     this.load.image('container-large-3', '/images/container-large-3.png');
@@ -326,12 +329,15 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-crown-silver', '/images/icons/crown-silver.png');
     this.load.image('icon-crown-copper', '/images/icons/crown-copper.png');
     this.load.image('icon-eth', '/images/icons/eth.png');
+    this.load.image('icon-eth-small', '/images/icons/eth-small.png');
     this.load.image('icon-eth-done', '/images/icons/eth-done.png');
     this.load.image('icon-gangster', '/images/icons/gangster.png');
+    this.load.image('icon-gangster-medium', '/images/icons/gangster-medium.png');
     this.load.image('icon-gangster-small', '/images/icons/gangster-small.png');
     this.load.image('icon-gangster-mini', '/images/icons/gangster-mini.png');
     this.load.image('icon-gangster-buy-done', '/images/icons/gangster-buy-done.png');
     this.load.image('icon-gangster-buy-fail', '/images/icons/gangster-buy-fail.png');
+    this.load.image('icon-goon-medium', '/images/icons/goon-medium.png');
     this.load.image('icon-goon-mini', '/images/icons/goon-mini.png');
     this.load.image('icon-goon-buy-done', '/images/icons/goon-buy-done.png');
     this.load.image('icon-goon-buy-fail', '/images/icons/goon-buy-fail.png');
@@ -343,6 +349,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-retire-done', '/images/icons/retire-done.png');
     this.load.image('icon-retire-fail', '/images/icons/retire-fail.png');
     this.load.image('icon-ribbon-chart', '/images/icons/ribbon-chart.png');
+    this.load.image('icon-safehouse-medium', '/images/icons/safehouse-medium.png');
     this.load.image('icon-safehouse-upgrade-done', '/images/icons/safehouse-upgrade-done.png');
     this.load.image('icon-safehouse-upgrade-fail', '/images/icons/safehouse-upgrade-fail.png');
     this.load.image('icon-settings', '/images/icons/settings.png');

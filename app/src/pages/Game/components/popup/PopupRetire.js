@@ -1,7 +1,7 @@
 import Popup from './Popup';
 import PopupProcessing from './PopupProcessing';
+import PopupConfirm from './PopupConfirm';
 import TextButton from '../button/TextButton';
-import Button from '../button/Button';
 import configs from '../../configs/configs';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
 import { formatter } from '../../../../utils/numbers';
@@ -27,6 +27,18 @@ class PopupRetire extends Popup {
       description: '',
     });
     scene.add.existing(this.popupBuyProcessing);
+    this.popupConfirm = new PopupConfirm(scene, this, {
+      title: 'Retire',
+      action: 'retire',
+      icon2: 'icon-eth-small',
+      checkboxTitle: `I understand this action will burn all\nmy assets including NFTs`,
+      onConfirm: () => {
+        this.popupBuyProcessing.initLoading(`Your payout will take\na few minutes to process`);
+        scene.game.events.emit('init-retire');
+      },
+    });
+    scene.add.existing(this.popupConfirm);
+    this.popupConfirm.updateTextLeft(`All your units`);
 
     const leftMargin = this.popup.x - this.popup.width / 2;
     const paddedX = leftMargin + this.popup.width * 0.1;
@@ -97,10 +109,8 @@ class PopupRetire extends Popup {
       'button-green',
       'button-green-pressed',
       () => {
-        this.popupBuyProcessing.initLoading(`Your payout will take\na few minutes to process`);
         this.close();
-
-        scene.game.events.emit('init-retire');
+        this.popupConfirm.open();
       },
       'Yes',
       { sound: 'button-1', fontSize: '82px' }
@@ -123,6 +133,7 @@ class PopupRetire extends Popup {
   calculatePayout() {
     const actualPayout = this.originalPayout * (1 - this.taxPercent);
     this.payout.text = formatter.format(actualPayout);
+    this.popupConfirm.updateTextRight(formatter.format(actualPayout));
   }
 }
 
