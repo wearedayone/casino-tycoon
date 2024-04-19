@@ -79,6 +79,8 @@ const ROW_STRUCTURE = {
       targetDailyPurchase: { row: 20, formatter: Number },
       targetPrice: { row: 21, formatter: Number },
       maxPerBatch: { row: 22, formatter: Number },
+      initMachineCapacity: { row: 16, formatter: Number },
+      machineCapacityIncrementPerLevel: { row: 23, formatter: Number },
     },
   },
   referral: { referralBonus: { row: 25, formatter: Number }, referralDiscount: { row: 26, formatter: Number } },

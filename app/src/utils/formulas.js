@@ -169,3 +169,8 @@ export const calculateUpgradeMachinePrice = (currentLevel) => {
   const nextLevel = currentLevel + 1;
   return Math.pow(nextLevel, 1.5) * 1000;
 };
+
+export const calculateUpgradeBuildingPrice = (currentLevel) => {
+  const nextLevel = currentLevel + 1;
+  return Math.pow(nextLevel, 1.5) * 1000;
+};
