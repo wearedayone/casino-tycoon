@@ -1099,6 +1099,7 @@ const Game = () => {
           dailyReward: gamePlay.machine?.dailyReward || machine.dailyReward,
           earningRateIncrementPerLevel: activeSeason?.machine?.earningRateIncrementPerLevel,
           level: gamePlay.machine?.level,
+          building: gamePlay.building,
           reservePool,
           reservePoolReward,
           networthIncrease: machine.networth,
@@ -1602,6 +1603,7 @@ const Game = () => {
         dailyReward: gamePlay?.machine?.dailyReward,
         level: gamePlay.machine?.level,
         earningRateIncrementPerLevel: activeSeason?.machine?.earningRateIncrementPerLevel,
+        building: gamePlay?.building,
         reservePool,
         reservePoolReward,
         networthIncrease: machine.networth,
@@ -1625,6 +1627,7 @@ const Game = () => {
     inviteCode,
     activeSeason?.referralConfig?.referralDiscount,
     gamePlay?.machine,
+    gamePlay?.building,
     activeSeason?.machine?.earningRateIncrementPerLevel,
   ]);
 

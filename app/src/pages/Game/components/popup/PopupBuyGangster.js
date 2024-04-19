@@ -38,6 +38,7 @@ class PopupBuyGangster extends Popup {
   referralDiscount = 0;
   mintFunction = 'mint';
   level = 0;
+  building = {};
   onCompleted;
 
   constructor(scene, { isSimulator, onCompleted } = {}) {
@@ -123,12 +124,32 @@ class PopupBuyGangster extends Popup {
     );
     this.add(this.upgradeBtn);
 
-    this.numberOfMachinesText = scene.add.text(this.popup.x + 150, this.popup.y - this.popup.height / 2 + 170, '0', {
-      fontSize: fontSizes.extraLarge,
-      color: colors.black,
-      fontFamily: fontFamilies.extraBold,
-    });
+    this.numberOfMachinesTitle = scene.add
+      .text(this.popup.x + 80, this.popup.y - this.popup.height / 2 + 195, 'Gangsters: ', {
+        fontSize: fontSizes.large,
+        color: colors.black,
+        fontFamily: fontFamilies.bold,
+      })
+      .setOrigin(0.5, 0.5);
+    this.add(this.numberOfMachinesTitle);
+
+    this.numberOfMachinesText = scene.add
+      .text(this.popup.x + 150, this.popup.y - this.popup.height / 2 + 195, '', {
+        fontSize: fontSizes.extraLarge,
+        color: colors.black,
+        fontFamily: fontFamilies.extraBold,
+      })
+      .setOrigin(0.5, 0.5);
     this.add(this.numberOfMachinesText);
+
+    this.capacityText = scene.add
+      .text(this.popup.x + 105, this.popup.y - this.popup.height / 2 + 260, 'GANGSTER CAPACITY:', {
+        fontSize: fontSizes.small,
+        fontFamily: fontFamilies.extraBold,
+        color: colors.brown,
+      })
+      .setOrigin(0.5, 0.5);
+    this.add(this.capacityText);
 
     this.levelText = scene.add
       .text(this.popup.x - 370, this.popup.y - this.popup.height / 2 + 455, '- LVL', {
@@ -364,6 +385,7 @@ class PopupBuyGangster extends Popup {
         maxPerBatch,
         level,
         earningRateIncrementPerLevel,
+        building,
         dailyReward,
         reservePool,
         reservePoolReward,
@@ -374,7 +396,7 @@ class PopupBuyGangster extends Popup {
         referralDiscount,
       }) => {
         this.balance = balance;
-
+        this.building = building;
         this.numberOfMachines = numberOfMachines;
         this.networth = networth;
         this.networthIncrease = networthIncrease;
@@ -387,11 +409,20 @@ class PopupBuyGangster extends Popup {
         this.mintFunction = isWhitelisted && whitelistAmountLeft ? 'mintWL' : hasInviteCode ? 'mintReferral' : 'mint';
 
         this.level = level;
-        this.numberOfMachinesText.text = numberOfMachines.toLocaleString();
+        this.numberOfMachinesText.text = `${numberOfMachines.toLocaleString()}`;
+        this.numberOfMachinesTitle.x = this.popup.x + 80 - this.numberOfMachinesText.width / 2 + 5;
+        this.numberOfMachinesText.x =
+          this.numberOfMachinesTitle.x +
+          this.numberOfMachinesTitle.width / 2 +
+          this.numberOfMachinesText.width / 2 +
+          10;
         this.levelText.text = `${level} LVL`;
         this.earningBonusText.text = `+${((level + 1) * earningRateIncrementPerLevel * 100).toLocaleString('en', {
           maximumFractionDigits: 1,
         })}%`;
+
+        this.capacityText.text = `GANGSTER CAPACITY: ${numberOfMachines}/${building?.machineCapacity}`;
+
         this.updateUpgradePriceButton();
 
         this.networthText.text = `${networth.toLocaleString()}`;
