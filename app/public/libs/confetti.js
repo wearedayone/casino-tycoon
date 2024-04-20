@@ -169,7 +169,6 @@ function poof() {
   if (!gameContainer) return;
 
   const canvas = gameContainer.querySelector('canvas');
-  console.log({ width: canvas.width, realWidth: canvas.clientWidth });
 
   // Create the overarching container
   const container = document.createElement('div');
