@@ -34,6 +34,7 @@ const createGamePlayIfNotExist = async (userId, isWhitelisted) => {
         numberOfMachines: 0,
         numberOfWorkers: 1,
         numberOfBuildings: 0,
+        numberOfSpins: 0,
         machine: { level: 0, dailyReward: season.machine.dailyReward },
         lastClaimTime: admin.firestore.FieldValue.serverTimestamp(),
         point: 0,

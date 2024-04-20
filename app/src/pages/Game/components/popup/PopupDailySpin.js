@@ -56,7 +56,7 @@ class PopupDailySpin extends Popup {
   constructor(scene) {
     super(scene, 'popup-spin', { title: 'Daily Spin' });
 
-    this.spinSound = scene.sound.add('spin-sound', { loop: true });
+    this.spinSound = scene.sound.add('spin-sound', { loop: false });
 
     this.spinIncrementText = scene.add
       .text(this.popup.x, this.popup.y + this.popup.height / 2 - 330, '+1 spin in 00h00m00s', {
@@ -144,7 +144,6 @@ class PopupDailySpin extends Popup {
           this.loading = true;
           this.spinButton?.setDisabledState(true);
           scene.game.events.emit('start-spin');
-          this.spinSound.play();
         },
         value: spinPrice,
       });
@@ -211,18 +210,33 @@ class PopupDailySpin extends Popup {
       this.preDestinationIndex = preDestinationIndex;
     });
 
+    let startReducing = false;
     scene.game.events.on('continue-spin', () => {
       if (!this.contentContainer) return;
+
+      const diff = (this.maxContainerX - this.contentContainer.x) % (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP);
+      if (diff < 100) {
+        this.spinSound.play();
+      }
+
       if (this.preDestinationIndex || this.preDestinationIndex === 0) {
         const preDestinationX =
           this.maxContainerX -
           this.preDestinationIndex * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP) +
           this.randomDistanceFromCenter;
 
-        const diff = preDestinationX - this.contentContainer.x;
-        if (diff > (this.numberOfRewards / 2) * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP)) {
-          this.spinXStep = Math.max(this.spinXStep - 0.3, 5);
-          if (Math.max(this.spinXStep, 5) === 5) {
+        if (!startReducing) {
+          startReducing =
+            this.contentContainer.x <= preDestinationX && Math.abs(this.contentContainer.x - preDestinationX) < 100;
+        }
+
+        if (startReducing) {
+          let distance = this.contentContainer.x - preDestinationX;
+          if (distance < 0) {
+            distance += (this.numberOfRewards - 1) * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP);
+          }
+          this.spinXStep = Math.max(this.spinXStep - 0.2, 10);
+          if (Math.max(this.spinXStep, 10) === 10) {
             this.destinationIndex = this.preDestinationIndex;
           }
         }

@@ -521,7 +521,7 @@ const Game = () => {
 
       // test
       // await delay(5000);
-      // gameRef.current?.events.emit('spin-result', { preDestinationIndex: 3 });
+      // gameRef.current?.events.emit('spin-result', { preDestinationIndex: Math.floor(Math.random() * 14) });
     } catch (err) {
       console.error(err);
       throw err;
