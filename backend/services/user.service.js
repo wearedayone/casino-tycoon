@@ -264,6 +264,20 @@ export const getUserUsernames = async (userIds) => {
   return usernames;
 };
 
+export const getUserAvatarsSmall = async (userIds) => {
+  const chunkIdsArrays = chunk(userIds, 10);
+
+  const promises = chunkIdsArrays.map((ids) =>
+    firestore.collection('user').where(admin.firestore.FieldPath.documentId(), 'in', ids).get()
+  );
+  const snapshots = await Promise.all(promises);
+
+  const avatars = {};
+  snapshots.map((snapshot) => snapshot.docs.map((doc) => (avatars[doc.id] = doc.data().avatarURL_small)));
+
+  return avatars;
+};
+
 export const updateViewedTutorial = async (userId) => {
   await firestore.collection('user').doc(userId).update({ completedTutorial: true });
 };

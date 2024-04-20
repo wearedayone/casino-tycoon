@@ -6,7 +6,7 @@ import chunk from 'lodash.chunk';
 import admin, { firestore } from '../configs/firebase.config.js';
 import { getActiveSeasonId, getActiveSeason } from './season.service.js';
 import { getNFTBalance, setWarResult } from './worker.service.js';
-import { getUserUsernames } from './user.service.js';
+import { getUserAvatarsSmall, getUserUsernames } from './user.service.js';
 import { getUserGamePlay } from './gamePlay.service.js';
 import logger from '../utils/logger.js';
 import { getAccurate } from '../utils/math.js';
@@ -65,6 +65,7 @@ export const getWarHistoryDetail = async ({ userId, warSnapshotId, warResultId }
   const { attackResults, defendResults } = snapshot.data();
   const userIds = [...new Set([...(attackResults || []), ...(defendResults || [])].map((item) => item.userId))];
   const usernames = await getUserUsernames(userIds);
+  const avatars = await getUserAvatarsSmall(userIds);
 
   return {
     id: snapshot.id,
@@ -72,10 +73,12 @@ export const getWarHistoryDetail = async ({ userId, warSnapshotId, warResultId }
     attackResults: (attackResults || []).map((item) => ({
       ...item,
       userUsername: usernames[item.userId],
+      avatar: avatars[item.userId],
     })),
     defendResults: (defendResults || []).map((item) => ({
       ...item,
       userUsername: usernames[item.userId],
+      avatar: avatars[item.userId],
     })),
   };
 };
