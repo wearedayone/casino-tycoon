@@ -156,7 +156,6 @@ class LoadingScene extends Phaser.Scene {
 
     this.load.image('glow', '/images/glow.png');
     this.load.image('coin', '/images/coin.png');
-    this.load.image('coin3', '/images/coin-3.png');
     this.load.image('guard', '/images/guard.png');
     this.load.image('mini-gangster-2', '/images/mini-gangster-2.png');
     this.load.image('percent', '/images/percent.png');
@@ -327,6 +326,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-coin-mini', '/images/icons/coin-mini.png');
     this.load.image('icon-coin-done', '/images/icons/coin-done.png');
     this.load.image('icon-coin-glowing', '/images/icons/coin-glowing.png');
+    this.load.image('icon-coin-outlined-small', '/images/icons/coin-outlined-small.png');
     this.load.image('icon-crown-gold', '/images/icons/crown-gold.png');
     this.load.image('icon-crown-silver', '/images/icons/crown-silver.png');
     this.load.image('icon-crown-copper', '/images/icons/crown-copper.png');
