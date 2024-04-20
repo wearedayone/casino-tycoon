@@ -354,6 +354,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-safehouse-medium', '/images/icons/safehouse-medium.png');
     this.load.image('icon-safehouse-upgrade-done', '/images/icons/safehouse-upgrade-done.png');
     this.load.image('icon-safehouse-upgrade-fail', '/images/icons/safehouse-upgrade-fail.png');
+    this.load.image('icon-search-contained', '/images/icons/search-contained.png');
     this.load.image('icon-settings', '/images/icons/settings.png');
     this.load.image('icon-sound-on', '/images/icons/sound-on.png');
     this.load.image('icon-sound-off', '/images/icons/sound-off.png');
