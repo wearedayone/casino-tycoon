@@ -203,6 +203,7 @@ class PopupDailySpin extends Popup {
       });
       scene.add.existing(this.popupTxnCompleted);
       this.close();
+      this.checkSpinButtonState();
     });
 
     scene.game.events.on('spin-result', ({ preDestinationIndex }) => {
