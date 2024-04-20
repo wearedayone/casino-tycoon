@@ -12,6 +12,8 @@ const gap = buttonWidth + 20;
 
 class Header extends Phaser.GameObjects.Container {
   timeout;
+  headerY = 0;
+  xGangBalance = 0;
 
   constructor(scene, y, { isSimulator } = {}) {
     super(scene, 0, 0);
@@ -24,6 +26,16 @@ class Header extends Phaser.GameObjects.Container {
       updateXTokenBalance: isSimulator ? 'simulator-update-xtoken-balance' : 'update-xtoken-balance',
     };
 
+    this.headerY = y;
+
+    this.addedAmountXGang = scene.add
+      .text(width / 2 - gap + 100, y, '', {
+        fontSize: fontSizes.medium,
+        color: '#389d2a',
+        fontFamily: fontFamilies.extraBold,
+      })
+      .setOrigin(0.5, 0);
+    this.addedAmountXGang.setStroke('#fff', 10);
     this.addedAmount = scene.add
       .text(width / 2 + 100, y, '', {
         fontSize: fontSizes.extraLarge,
@@ -68,6 +80,18 @@ class Header extends Phaser.GameObjects.Container {
 
   updateXTokenBalance({ balance }) {
     this.xTokenBalance.updateValue(customFormat(balance || 0, 1));
+    if (this.xGangBalance && balance - this.xGangBalance > 0) {
+      this.addedAmountXGang.text = `+${customFormat(balance - this.xGangBalance, 1)}`;
+      this.scene.tweens.add({
+        targets: this.addedAmountXGang,
+        y: [this.headerY, this.headerY + 120],
+        alpha: [0, 1],
+        duration: 800,
+        ease: 'Cubic.out',
+        onComplete: () => this.addedAmountXGang.setAlpha(0),
+      });
+    }
+    this.xGangBalance = balance;
   }
 }
 
