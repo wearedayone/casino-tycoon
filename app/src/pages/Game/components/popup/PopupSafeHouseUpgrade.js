@@ -2,11 +2,12 @@ import Phaser from 'phaser';
 
 import Popup from './Popup';
 import PopupProcessing from './PopupProcessing';
+import PopupConfirm, { icon1Gap } from './PopupConfirm';
 import TextButton from '../button/TextButton';
 import Button from '../button/Button';
 import configs from '../../configs/configs';
 import { estimateNumberOfBuildingCanBuy, calculateNextBuildingBuyPriceBatch } from '../../../../utils/formulas';
-import { customFormat } from '../../../../utils/numbers';
+import { customFormat, formatter } from '../../../../utils/numbers';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
 
 const { width, height } = configs;
@@ -64,6 +65,30 @@ class PopupSafeHouseUpgrade extends Popup {
     const counterY = this.popup.y + this.popup.height / 2 - 250;
     const minusBtnX = this.popup.x - this.popup.width / 2 + 320;
 
+    this.popupBuyProcessing = new PopupProcessing(scene, {
+      sound: 'house',
+      completedEvent: events.completed,
+      completedIcon: 'icon-safehouse-upgrade-done',
+      failedIcon: 'icon-safehouse-upgrade-fail',
+      description: `Upgrading Safehouse.\nPlease, wait`,
+      onCompleted,
+    });
+    scene.add.existing(this.popupBuyProcessing);
+    this.popupConfirm = new PopupConfirm(scene, this, {
+      title: 'Upgrade Safehouse',
+      action: 'upgrade',
+      icon1: 'icon-safehouse-medium',
+      icon2: 'icon-coin-small',
+      onConfirm: () => {
+        if (!this.quantity) return;
+        this.popupBuyProcessing.initLoading(`Upgrading Safehouse.\nPlease, wait`);
+
+        scene.game.events.emit(events.upgradeHouse, { quantity: this.quantity, token: this.purchaseToken });
+      },
+    });
+    scene.add.existing(this.popupConfirm);
+    this.popupConfirm.updateTextLeft(`1${icon1Gap}unit`);
+
     this.xgangUnchecked = scene.add.image(leftCheckBoxX, checkBoxY, 'icon-checkbox-false');
     this.xgangChecked = scene.add.image(leftCheckBoxX, checkBoxY, 'icon-checkbox-true').setVisible(false);
     this.tokenUnchecked = scene.add.image(rightCheckBoxX, checkBoxY, 'icon-checkbox-false');
@@ -77,6 +102,7 @@ class PopupSafeHouseUpgrade extends Popup {
       this.xgangChecked.setVisible(true);
       this.tokenChecked.setVisible(false);
       this.purchaseToken = 'xGANG';
+      this.popupConfirm.updateIconRight('icon-xgang-small');
       if (this.coin) this.coin.setTexture('icon-xgang-small');
       this.updateValues();
     });
@@ -84,6 +110,7 @@ class PopupSafeHouseUpgrade extends Popup {
       this.xgangChecked.setVisible(false);
       this.tokenChecked.setVisible(true);
       this.purchaseToken = 'FIAT';
+      this.popupConfirm.updateIconRight('icon-coin-small');
       if (this.coin) this.coin.setTexture('icon-coin-small');
       this.updateValues();
     });
@@ -93,16 +120,6 @@ class PopupSafeHouseUpgrade extends Popup {
     this.add(this.xgangAvailable);
     this.add(this.tokenAvailable);
 
-    this.popupBuyProcessing = new PopupProcessing(scene, {
-      sound: 'house',
-      completedEvent: events.completed,
-      completedIcon: 'icon-safehouse-upgrade-done',
-      failedIcon: 'icon-safehouse-upgrade-fail',
-      description: `Upgrading Safehouse.\nPlease, wait`,
-      onCompleted,
-    });
-    scene.add.existing(this.popupBuyProcessing);
-
     this.upgradeBtn = new TextButton(
       scene,
       width / 2,
@@ -110,12 +127,20 @@ class PopupSafeHouseUpgrade extends Popup {
       'button-blue',
       'button-blue-pressed',
       () => {
-        if (!this.quantity) return;
-        this.popupBuyProcessing.initLoading(`Upgrading Safehouse.\nPlease, wait`);
-        this.onCompleted = null;
-        this.close();
+        if (isSimulator) {
+          this.quantity = 1;
+          this.popupBuyProcessing.initLoading(`Upgrading Safehouse.\nPlease, wait`);
+          this.onCompleted = null;
+          this.close();
 
-        scene.game.events.emit(events.upgradeHouse, { quantity: this.quantity, token: this.purchaseToken });
+          scene.game.events.emit(events.upgradeHouse, {
+            quantity: this.quantity,
+            token: this.purchaseToken,
+          });
+        } else {
+          this.close();
+          this.popupConfirm.open();
+        }
       },
       'Upgrade',
       { fontSize: '82px', sound: 'buy' }
@@ -390,6 +415,8 @@ class PopupSafeHouseUpgrade extends Popup {
     ).total;
 
     this.quantityText.text = `${this.quantity}`;
+    this.popupConfirm.updateTextLeft(`${this.quantity}${icon1Gap}unit${this.quantity > 1 ? 's' : ''}`);
+    this.popupConfirm.updateTextRight(formatter.format(estimatedPrice.toPrecision(3)));
     this.priceText.text = `${customFormat(estimatedPrice, 1)}`;
     const formattedGas = customFormat(this.gas, 4) === '0' ? '<0.0001' : customFormat(this.gas, 4);
     this.gasPrice.text = `+${formattedGas} ETH (gas)`;

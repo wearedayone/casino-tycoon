@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 
 import Popup from './Popup';
+import PopupConfirm, { icon1Gap } from './PopupConfirm';
 import PopupProcessing from './PopupProcessing';
 import TextButton from '../button/TextButton';
 import Button from '../button/Button';
@@ -76,6 +77,23 @@ class PopupBuyGoon extends Popup {
       onCompleted,
     });
     scene.add.existing(this.popupBuyProcessing);
+    this.popupConfirm = new PopupConfirm(scene, this, {
+      title: 'Buy Goons',
+      action: 'buy',
+      icon1: 'icon-goon-medium',
+      icon2: 'icon-coin-small',
+      onConfirm: () => {
+        if (!this.quantity) return;
+        this.popupBuyProcessing.initLoading(
+          `Hiring ${this.quantity} Goon${this.quantity > 1 ? 's' : ''}.\nPlease, wait`
+        );
+
+        scene.game.events.emit(events.buyGoon, { quantity: this.quantity, mintFunction: this.mintFunction });
+      },
+    });
+    scene.add.existing(this.popupConfirm);
+    this.popupConfirm.updateTextLeft(`1${icon1Gap}unit`);
+
     this.upgradeBtn = new TextButton(
       scene,
       width / 2,
@@ -83,14 +101,22 @@ class PopupBuyGoon extends Popup {
       'button-blue',
       'button-blue-pressed',
       () => {
-        if (!this.quantity) return;
-        this.popupBuyProcessing.initLoading(
-          `Hiring ${this.quantity} Goon${this.quantity > 1 ? 's' : ''}.\nPlease, wait`
-        );
-        this.onCompleted = null;
-        this.close();
+        if (isSimulator) {
+          this.quantity = 1;
+          this.popupBuyProcessing.initLoading(
+            `Hiring ${this.quantity} Goon${this.quantity > 1 ? 's' : ''}.\nPlease, wait`
+          );
+          this.onCompleted = null;
+          this.close();
 
-        scene.game.events.emit(events.buyGoon, { quantity: this.quantity, token: this.purchaseToken });
+          scene.game.events.emit(events.buyGoon, {
+            quantity: this.quantity,
+            token: this.purchaseToken,
+          });
+        } else {
+          this.close();
+          this.popupConfirm.open();
+        }
       },
       'Buy',
       { fontSize: '82px', sound: 'buy', disabledImage: 'button-disabled' }
@@ -140,6 +166,7 @@ class PopupBuyGoon extends Popup {
       this.xgangChecked.setVisible(true);
       this.tokenChecked.setVisible(false);
       this.purchaseToken = 'xGANG';
+      this.popupConfirm.updateIconRight('icon-xgang-small');
       if (this.coin) this.coin.setTexture('icon-xgang-small');
       this.updateValues();
     });
@@ -147,6 +174,7 @@ class PopupBuyGoon extends Popup {
       this.xgangChecked.setVisible(false);
       this.tokenChecked.setVisible(true);
       this.purchaseToken = 'FIAT';
+      this.popupConfirm.updateIconRight('icon-coin-small');
       if (this.coin) this.coin.setTexture('icon-coin-small');
       this.updateValues();
     });
@@ -385,6 +413,8 @@ class PopupBuyGoon extends Popup {
     const roi = estimatedPrice ? (((this.rateIncrease * this.quantity) / estimatedPrice) * 100).toFixed(1) : 0;
 
     this.quantityText.text = `${this.quantity}`;
+    this.popupConfirm.updateTextLeft(`${this.quantity}${icon1Gap}unit${this.quantity > 1 ? 's' : ''}`);
+    this.popupConfirm.updateTextRight(formatter.format(estimatedPrice.toPrecision(3)));
     this.roiText.text = `${roi}%`;
     this.priceText.text = `${customFormat(estimatedPrice, 1)}`;
     const formattedGas = customFormat(this.gas, 4) === '0' ? '<0.0001' : customFormat(this.gas, 4);

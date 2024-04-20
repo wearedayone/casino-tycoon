@@ -1,5 +1,6 @@
 import Popup from './Popup';
 import PopupProcessing from './PopupProcessing';
+import PopupConfirm, { icon1Gap } from './PopupConfirm';
 import TextButton from '../button/TextButton';
 import UpgradeMachineButton from '../button/UpgradeMachineButton';
 import configs from '../../configs/configs';
@@ -76,6 +77,22 @@ class PopupBuyGangster extends Popup {
       onCompleted,
     });
     scene.add.existing(this.upgradePopupBuyProcessing);
+    this.popupConfirm = new PopupConfirm(scene, this, {
+      title: 'Buy Gangsters',
+      action: 'buy',
+      icon1: 'icon-gangster-medium',
+      icon2: 'icon-coin-small',
+      onConfirm: () => {
+        if (!this.quantity) return;
+        this.popupBuyProcessing.initLoading(
+          `Hiring ${this.quantity} Gangster${this.quantity > 1 ? 's' : ''}.\nPlease, wait`
+        );
+
+        scene.game.events.emit(events.buyGangster, { quantity: this.quantity, mintFunction: this.mintFunction });
+      },
+    });
+    scene.add.existing(this.popupConfirm);
+    this.popupConfirm.updateTextLeft(`1${icon1Gap}unit`);
 
     this.upgradeBtn = new TextButton(
       scene,
@@ -84,15 +101,22 @@ class PopupBuyGangster extends Popup {
       'button-blue',
       'button-blue-pressed',
       () => {
-        if (!this.quantity) return;
-        if (isSimulator) this.quantity = 1;
-        this.popupBuyProcessing.initLoading(
-          `Hiring ${this.quantity} Gangster${this.quantity > 1 ? 's' : ''}.\nPlease, wait`
-        );
-        this.onCompleted = null;
-        this.close();
+        if (isSimulator) {
+          this.quantity = 1;
+          this.popupBuyProcessing.initLoading(
+            `Hiring ${this.quantity} Gangster${this.quantity > 1 ? 's' : ''}.\nPlease, wait`
+          );
+          this.onCompleted = null;
+          this.close();
 
-        scene.game.events.emit(events.buyGangster, { quantity: this.quantity, mintFunction: this.mintFunction });
+          scene.game.events.emit(events.buyGangster, {
+            quantity: this.quantity,
+            mintFunction: this.mintFunction,
+          });
+        } else {
+          this.close();
+          this.popupConfirm.open();
+        }
       },
       'Buy',
       { fontSize: '82px', sound: 'buy' }
@@ -433,6 +457,8 @@ class PopupBuyGangster extends Popup {
     const roi = estimatedPrice ? (((this.rateIncrease * this.quantity) / estimatedPrice) * 100).toFixed(1) : 0;
 
     this.quantityText.text = `${this.quantity}`;
+    this.popupConfirm.updateTextLeft(`${this.quantity}${icon1Gap}unit${this.quantity > 1 ? 's' : ''}`);
+    this.popupConfirm.updateTextRight(formatter.format(estimatedPrice.toPrecision(3)));
     this.roiText.text = `${roi}%`;
     this.priceText.text = `${formatter.format(this.quantity * this.basePrice)}`;
     const discountNote =

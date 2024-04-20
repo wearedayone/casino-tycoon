@@ -3,7 +3,7 @@ import moment from 'moment';
 
 import Popup from './Popup';
 import PopupProcessing from './PopupProcessing';
-import Button from '../button/Button';
+import PopupConfirm from './PopupConfirm';
 import TextInput from '../inputs/TextInput';
 import TextButton from '../button/TextButton';
 import ImageButton from '../button/ImageButton';
@@ -128,6 +128,26 @@ class PopupSwap extends Popup {
       description: `Swapping may take a few minutes.`,
     });
     scene.add.existing(this.popupProcessing);
+    this.popupConfirm = new PopupConfirm(scene, this, {
+      title: 'Swap',
+      action: 'swap',
+      icon1: 'icon-eth-small',
+      icon2: 'icon-coin-small',
+      onConfirm: () => {
+        if (this.mode === 'web3') {
+          const data = {
+            tokenSwap: this.tokenSwap,
+            amount: Number(this.token1AmountInput.value),
+          };
+          scene.game.events.emit('swap', data);
+        }
+
+        if (this.mode === 'web2') {
+          scene.game.events.emit('swap-x-token', { amount: Number(this.token1AmountInput.value) });
+        }
+      },
+    });
+    scene.add.existing(this.popupConfirm);
 
     this.modeSwitch = new ModeSwitch(scene, width / 2, switchY, {
       containerImg: 'swap-switch-container',
@@ -175,6 +195,8 @@ class PopupSwap extends Popup {
           this.token2AmountInput.updateValue('0.00', true, true);
           this.token1AmountInput.changeIcon('icon-xgang');
           this.token2AmountInput.changeIcon('icon-coin');
+          this.popupConfirm.updateIconLeft('icon-xgang-small');
+          this.popupConfirm.updateIconRight('icon-coin-small');
           this.token2AmountInput.setDisabled(true);
 
           this.switchBtn.setVisible(false);
@@ -373,18 +395,12 @@ class PopupSwap extends Popup {
         const isValid = this.validate();
         if (!isValid) return;
 
-        this.setLoading(true);
-        if (this.mode === 'web3') {
-          const data = {
-            tokenSwap: this.tokenSwap,
-            amount: Number(this.token1AmountInput.value),
-          };
-          scene.game.events.emit('swap', data);
-        }
-
-        if (this.mode === 'web2') {
-          scene.game.events.emit('swap-x-token', { amount: Number(this.token1AmountInput.value) });
-        }
+        this.popupConfirm.updateTextLeft(
+          `${formatter.format(Number(this.token1AmountInput.value).toPrecision(3))}         `
+        );
+        this.popupConfirm.updateTextRight(formatter.format(Number(this.token2AmountInput.value).toPrecision(3)));
+        this.close();
+        this.popupConfirm.open();
       },
       'Approve',
       { sound: 'button-1', fontSize: '82px', disabledImage: 'button-disabled' }
@@ -402,7 +418,8 @@ class PopupSwap extends Popup {
         if (this.mode === 'web3') {
           const fee = this.tokenSwap === 'eth' ? Math.min(this.ethBalance, this.gas) : Math.min(this.tokenBalance, 1);
           const balance = this.tokenSwap === 'eth' ? this.ethBalance : Math.floor(this.tokenBalance);
-          this.token1AmountInput.updateValue((balance - fee).toString(), true, true);
+          const displayedBalance = balance - fee;
+          this.token1AmountInput.updateValue(displayedBalance.toString(), true, true);
           this.setLoading(true);
           this.timeout = setTimeout(
             () =>
@@ -534,12 +551,16 @@ class PopupSwap extends Popup {
       this.tokenSwap = 'token';
       this.token1AmountInput.changeIcon('icon-coin');
       this.token2AmountInput.changeIcon('icon-eth');
+      this.popupConfirm.updateIconLeft('icon-coin-small');
+      this.popupConfirm.updateIconRight('icon-eth-small');
       this.balanceText.text = `${formatter.format(this.tokenBalance)}`;
       this.popupProcessing.updateCompletedIcon('swap-token-eth');
     } else {
       this.tokenSwap = 'eth';
       this.token1AmountInput.changeIcon('icon-eth');
       this.token2AmountInput.changeIcon('icon-coin');
+      this.popupConfirm.updateIconLeft('icon-eth-small');
+      this.popupConfirm.updateIconRight('icon-coin-small');
       this.balanceText.text = `${formatter.format(this.ethBalance)}`;
       this.popupProcessing.updateCompletedIcon('swap-eth-token');
     }
@@ -547,6 +568,9 @@ class PopupSwap extends Popup {
   }
 
   onOpen() {
+    // reset form
+    this.token1AmountInput.updateValue('');
+    this.token2AmountInput.updateValue('');
     // this.scene.game.events.emit('request-balances');
     if (this.mode === 'web2') {
       if (!this.interval) {
@@ -586,10 +610,6 @@ class PopupSwap extends Popup {
   }
 
   cleanup() {
-    // reset form
-    this.token1AmountInput.updateValue('');
-    this.token2AmountInput.updateValue('');
-
     if (this.interval) {
       clearInterval(this.interval);
       this.interval = null;
