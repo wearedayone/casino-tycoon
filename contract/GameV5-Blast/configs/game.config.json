@@ -6,7 +6,8 @@
       "maxPerBatch": 100,
       "maxWhitelistAmount": 10,
       "dailyReward": 1000,
-      "networth": 10
+      "networth": 10,
+      "earningRateIncrementPerLevel": 0.01
     },
     "worker": {
       "basePrice": 200,
@@ -22,7 +23,9 @@
       "networth": 8,
       "targetDailyPurchase": 200,
       "targetPrice": 1000,
-      "maxPerBatch": 100
+      "maxPerBatch": 100,
+      "initMachineCapacity": 20,
+      "machineCapacityIncrementPerLevel": 20
     }
   },
   "referral": {

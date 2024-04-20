@@ -149,8 +149,10 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('popup-goon-price', '/images/popup-goon-price.png');
     this.load.image('popup-spin', '/images/popup-spin.png');
     this.load.image('popup-swap', '/images/popup-swap.png');
+    this.load.image('popup-warning-limit-gangster', '/images/popup-warning-limit-gangster.png');
 
     this.load.image('ribbon-welcome', '/images/ribbon-welcome.png');
+    this.load.image('quantity-plane', '/images/quantity-plane.png');
 
     this.load.image('glow', '/images/glow.png');
     this.load.image('coin', '/images/coin.png');
@@ -361,6 +363,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-search', '/images/icon-search.png');
     this.load.image('icon-xgang-small', '/images/icons/xgang-small.png');
     this.load.image('icon-xgang', '/images/icon-xgang.png');
+    this.load.image('icon-safehouse-upgraded-level', '/images/icon-safehouse-upgraded-level.png');
 
     this.load.image('icon-history', '/images/icon-history.png');
     this.load.image('icon-war', '/images/icon-war.png');

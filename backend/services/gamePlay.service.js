@@ -2,10 +2,7 @@ import moment from 'moment';
 
 import admin, { firestore } from '../configs/firebase.config.js';
 import { getActiveSeason, getActiveSeasonId, getActiveSeasonWithRank } from './season.service.js';
-import { calculateReward, calculateUpgradeMachinePrice } from '../utils/formulas.js';
-import logger from '../utils/logger.js';
-
-const MAX_RETRY = 3;
+import { calculateReward, calculateUpgradeMachinePrice, calculateUpgradeBuildingPrice } from '../utils/formulas.js';
 
 export const getUserGamePlay = async (userId) => {
   const activeSeasonId = await getActiveSeasonId();
@@ -330,6 +327,59 @@ export const upgradeMachine = async (userId) => {
       seasonId: activeSeasonId,
       userId,
       type: 'upgrade-machine',
+      value: upgradePrice,
+      token: 'xGANG',
+      status: 'Success',
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+  });
+};
+
+export const upgradeBuilding = async (userId) => {
+  await firestore.runTransaction(async (transaction) => {
+    // lock user doc && gamePlay doc
+    const userRef = firestore.collection('user').doc(userId);
+    const user = await transaction.get(userRef);
+
+    const { xTokenBalance } = user.data();
+
+    const gamePlayId = (await getUserGamePlay(userId)).id;
+    const gamePlayRef = firestore.collection('gamePlay').doc(gamePlayId);
+    const gamePlay = await transaction.get(gamePlayRef);
+
+    const { active, numberOfBuildings, numberOfWorkers, startXTokenCountingTime } = gamePlay.data();
+    if (!active) throw new Error('API error: Inactive user');
+    if (!numberOfBuildings) throw new Error('API error: You have no safehouse');
+    const { id: activeSeasonId, worker, building } = await getActiveSeason();
+
+    const now = Date.now();
+    const start = startXTokenCountingTime.toDate().getTime();
+    const diffInDays = (now - start) / (24 * 60 * 60 * 1000);
+    const generatedXToken = Math.round(diffInDays * (numberOfWorkers * worker.dailyReward) * 1000) / 1000;
+    const currentXTokenBalance = xTokenBalance + generatedXToken;
+
+    const upgradePrice = calculateUpgradeBuildingPrice(gamePlay.data()?.building?.level);
+    if (currentXTokenBalance < upgradePrice) throw new Error('API error: Insufficient xGANG');
+
+    const newLevel = gamePlay.data()?.building?.level + 1;
+    const { initMachineCapacity, machineCapacityIncrementPerLevel } = building;
+    const newMachineCapacity = initMachineCapacity + machineCapacityIncrementPerLevel * newLevel;
+
+    transaction.update(userRef, { xTokenBalance: currentXTokenBalance - upgradePrice });
+
+    transaction.update(gamePlayRef, {
+      startXTokenCountingTime: admin.firestore.FieldValue.serverTimestamp(),
+      building: {
+        level: newLevel,
+        machineCapacity: newMachineCapacity,
+      },
+    });
+
+    const txnRef = firestore.collection('transaction').doc();
+    transaction.create(txnRef, {
+      seasonId: activeSeasonId,
+      userId,
+      type: 'upgrade-building',
       value: upgradePrice,
       token: 'xGANG',
       status: 'Success',

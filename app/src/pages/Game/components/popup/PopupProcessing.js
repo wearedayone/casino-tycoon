@@ -49,11 +49,21 @@ class PopupProcessing extends Popup {
       })
       .setOrigin(0.5, 0.5);
 
+    this.upgradedSafehouseLevelText = scene.add
+      .text(this.iconDone.x - 20, this.iconDone.y + this.iconDone.height / 2 - 45, '', {
+        fontSize: '48px',
+        fontFamily: fontFamilies.extraBold,
+        color: '#B23F05',
+      })
+      .setOrigin(0.5, 0.5)
+      .setVisible(false);
+
     this.add(this.icon);
     this.add(this.iconDone);
     this.add(this.title);
     this.add(descriptionContainer);
     this.add(this.description);
+    this.add(this.upgradedSafehouseLevelText);
 
     this.loadingAnimation = scene.tweens.add({
       targets: this.icon,
@@ -127,6 +137,11 @@ class PopupProcessing extends Popup {
           );
           this.add(buttonGreat);
 
+          if (data.level !== undefined) {
+            this.upgradedSafehouseLevelText.text = `${data.level} LVL`;
+            this.upgradedSafehouseLevelText.setVisible(true);
+          }
+
           return;
         }
 
@@ -136,8 +151,12 @@ class PopupProcessing extends Popup {
 
         switch (completedEvent) {
           case 'upgrade-gangsters-completed':
-            title = `${formatter.format(amount)} Gangster${amount > 1 ? 's' : ''}`;
+            title = `+${formatter.format(amount)} Gangster${amount > 1 ? 's' : ''}`;
             desc = 'Gangsters upgraded successfully';
+            break;
+          case 'upgrade-safehouses-level-completed':
+            title = '+1 level';
+            desc = `Safehouse level upgraded`;
             break;
           case 'buy-gangster-completed':
           case 'simulator-buy-gangster-completed':
@@ -151,7 +170,7 @@ class PopupProcessing extends Popup {
             break;
           case 'upgrade-safehouse-completed':
           case 'simulator-upgrade-safehouse-completed':
-            title = `${formatter.format(amount)} Safehouse level${amount > 1 ? 's' : ''}`;
+            title = `${formatter.format(amount)} Safehouse${amount > 1 ? 's' : ''}`;
             desc = 'Safehouse upgraded successfully.';
             break;
           case 'deposit-nft-completed':
@@ -193,6 +212,7 @@ class PopupProcessing extends Popup {
 
   cleanup() {
     this.onCompleted?.();
+    this.upgradedSafehouseLevelText.setVisible(false);
   }
 
   initLoading(description) {

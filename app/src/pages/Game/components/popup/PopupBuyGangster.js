@@ -1,8 +1,10 @@
+import Phaser from 'phaser';
+
 import Popup from './Popup';
 import PopupProcessing from './PopupProcessing';
 import PopupConfirm, { icon1Gap } from './PopupConfirm';
 import TextButton from '../button/TextButton';
-import UpgradeMachineButton from '../button/UpgradeMachineButton';
+import UpgradeAssetButton from '../button/UpgradeAssetButton';
 import configs from '../../configs/configs';
 import { customFormat, formatter } from '../../../../utils/numbers';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
@@ -38,6 +40,7 @@ class PopupBuyGangster extends Popup {
   referralDiscount = 0;
   mintFunction = 'mint';
   level = 0;
+  building = {};
   onCompleted;
 
   constructor(scene, { isSimulator, onCompleted } = {}) {
@@ -123,12 +126,32 @@ class PopupBuyGangster extends Popup {
     );
     this.add(this.upgradeBtn);
 
-    this.numberOfMachinesText = scene.add.text(this.popup.x + 150, this.popup.y - this.popup.height / 2 + 170, '0', {
-      fontSize: fontSizes.extraLarge,
-      color: colors.black,
-      fontFamily: fontFamilies.extraBold,
-    });
+    this.numberOfMachinesTitle = scene.add
+      .text(this.popup.x + 80, this.popup.y - this.popup.height / 2 + 195, 'Gangsters: ', {
+        fontSize: fontSizes.large,
+        color: colors.black,
+        fontFamily: fontFamilies.bold,
+      })
+      .setOrigin(0.5, 0.5);
+    this.add(this.numberOfMachinesTitle);
+
+    this.numberOfMachinesText = scene.add
+      .text(this.popup.x + 150, this.popup.y - this.popup.height / 2 + 195, '', {
+        fontSize: fontSizes.extraLarge,
+        color: colors.black,
+        fontFamily: fontFamilies.extraBold,
+      })
+      .setOrigin(0.5, 0.5);
     this.add(this.numberOfMachinesText);
+
+    this.capacityText = scene.add
+      .text(this.popup.x + 105, this.popup.y - this.popup.height / 2 + 260, 'GANGSTER CAPACITY:', {
+        fontSize: fontSizes.small,
+        fontFamily: fontFamilies.extraBold,
+        color: colors.brown,
+      })
+      .setOrigin(0.5, 0.5);
+    this.add(this.capacityText);
 
     this.levelText = scene.add
       .text(this.popup.x - 370, this.popup.y - this.popup.height / 2 + 455, '- LVL', {
@@ -148,7 +171,7 @@ class PopupBuyGangster extends Popup {
       .setOrigin(0.5, 0.5);
     this.add(this.earningBonusText);
 
-    this.upgradePriceButton = new UpgradeMachineButton(scene, {
+    this.upgradePriceButton = new UpgradeAssetButton(scene, {
       x: this.popup.x + 250,
       y: this.popup.y - 300,
       value: 0,
@@ -157,8 +180,6 @@ class PopupBuyGangster extends Popup {
         this.upgradePopupBuyProcessing.initLoading(`Upgrading gangsters to level ${this.level + 1}.\nPlease, wait`);
         this.onCompleted = null;
         this.close();
-
-        console.log('Upgrade gangstersss!', events.upgradeGangsters);
 
         scene.game.events.emit(events.upgradeGangsters, { amount: this.numberOfMachines });
       },
@@ -214,89 +235,6 @@ class PopupBuyGangster extends Popup {
 
     const counterY = this.popup.y + this.popup.height / 2 - 260;
     const minusBtnX = this.popup.x - this.popup.width / 2 + 310;
-    this.minusBtn = new TextButton(
-      scene,
-      minusBtnX,
-      counterY,
-      'button-square',
-      'button-square-pressed',
-      () => {
-        if (this.quantity > DEFAULT_QUANTITY) {
-          this.quantity--;
-          this.updateValues();
-        }
-      },
-      '-',
-      {
-        disabledImage: 'button-square-disabled',
-        fontSize: '82px',
-        sound: 'button-1',
-        onHold: () => {
-          if (this.interval) {
-            clearInterval(this.interval);
-          }
-          this.interval = setInterval(() => {
-            if (this.quantity > DEFAULT_QUANTITY) {
-              this.quantity--;
-              this.updateValues();
-            }
-          }, INTERVAL);
-        },
-        onRelease: () => {
-          if (this.interval) {
-            clearInterval(this.interval);
-          }
-        },
-      }
-    );
-    this.minusBtn.setDisabledState(isSimulator);
-    this.add(this.minusBtn);
-
-    this.plusBtn = new TextButton(
-      scene,
-      minusBtnX + 350,
-      counterY,
-      'button-square',
-      'button-square-pressed',
-      () => {
-        if (this.quantity < this.maxQuantity) {
-          this.quantity++;
-          this.updateValues();
-        }
-      },
-      '+',
-      {
-        disabledImage: 'button-square-disabled',
-        fontSize: '82px',
-        sound: 'button-1',
-        onHold: () => {
-          if (this.interval) {
-            clearInterval(this.interval);
-          }
-          this.interval = setInterval(() => {
-            if (this.quantity < this.maxQuantity) {
-              this.quantity++;
-              this.updateValues();
-            }
-          }, INTERVAL);
-        },
-        onRelease: () => {
-          if (this.interval) {
-            clearInterval(this.interval);
-          }
-        },
-      }
-    );
-    this.plusBtn.setDisabledState(isSimulator);
-    this.add(this.plusBtn);
-
-    this.quantityText = scene.add.text(minusBtnX + 170, counterY, this.quantity, {
-      fontSize: '60px',
-      fontFamily: fontFamilies.extraBold,
-      color: '#7C2828',
-    });
-    this.quantityText.setOrigin(0.5, 0.5);
-    this.add(this.quantityText);
 
     this.priceTextX = this.popup.x + (isSimulator ? 200 : 160);
     this.priceText = scene.add.text(this.priceTextX, counterY, '0', largeBlackExtraBold).setOrigin(0, 0.5);
@@ -334,6 +272,171 @@ class PopupBuyGangster extends Popup {
       .setVisible(!isSimulator);
     this.add(this.coin);
 
+    this.background = scene.add.rectangle(0, 0, width, height, 0x260343, 0.8).setOrigin(0, 0).setVisible(false);
+    this.background
+      .setInteractive()
+      .on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, (pointer, localX, localY, event) => {
+        // TODO: fix popup cannot be closed when click on backdrop over open button position
+        // example: open settings popup -> click on backdrop where settings btn is
+        this.hideWarning();
+      });
+    this.add(this.background);
+
+    this.quantityPlane = scene.add.image(minusBtnX + 170, counterY, 'quantity-plane').setOrigin(0.5, 0.5);
+    this.add(this.quantityPlane);
+
+    this.minusBtn = new TextButton(
+      scene,
+      minusBtnX,
+      counterY,
+      'button-square',
+      'button-square-pressed',
+      () => {
+        if (this.quantity > DEFAULT_QUANTITY) {
+          this.quantity--;
+          this.updateValues();
+          this.checkQuantity();
+        }
+      },
+      '-',
+      {
+        disabledImage: 'button-square-disabled',
+        fontSize: '82px',
+        sound: 'button-1',
+        onHold: () => {
+          if (this.interval) {
+            clearInterval(this.interval);
+          }
+          this.interval = setInterval(() => {
+            if (this.quantity > DEFAULT_QUANTITY) {
+              this.quantity--;
+              this.updateValues();
+              this.checkQuantity();
+            }
+          }, INTERVAL);
+        },
+        onRelease: () => {
+          if (this.interval) {
+            clearInterval(this.interval);
+          }
+        },
+      }
+    );
+    this.minusBtn.setDisabledState(isSimulator);
+    this.add(this.minusBtn);
+
+    this.plusBtn = new TextButton(
+      scene,
+      minusBtnX + 350,
+      counterY,
+      'button-square',
+      'button-square-pressed',
+      () => {
+        if (this.quantity < this.maxQuantity) {
+          this.quantity++;
+          this.updateValues();
+          this.checkQuantity();
+        }
+      },
+      '+',
+      {
+        disabledImage: 'button-square-disabled',
+        fontSize: '82px',
+        sound: 'button-1',
+        onHold: () => {
+          if (this.interval) {
+            clearInterval(this.interval);
+          }
+          this.interval = setInterval(() => {
+            if (this.quantity < this.maxQuantity) {
+              this.quantity++;
+              this.updateValues();
+              this.checkQuantity();
+            }
+          }, INTERVAL);
+        },
+        onRelease: () => {
+          if (this.interval) {
+            clearInterval(this.interval);
+          }
+        },
+      }
+    );
+    this.plusBtn.setDisabledState(isSimulator);
+    this.add(this.plusBtn);
+
+    this.quantityText = scene.add.text(minusBtnX + 170, counterY, this.quantity, {
+      fontSize: '60px',
+      fontFamily: fontFamilies.extraBold,
+      color: '#7C2828',
+    });
+    this.quantityText.setOrigin(0.5, 0.5);
+    this.add(this.quantityText);
+
+    this.popupWarningLimitGangster = scene.add
+      .image(this.popup.x - 20, counterY, 'popup-warning-limit-gangster')
+      .setOrigin(0.5, 1)
+      .setVisible(false);
+    this.add(this.popupWarningLimitGangster);
+
+    this.warningLevelText = scene.add
+      .text(
+        this.popupWarningLimitGangster.x - this.popupWarningLimitGangster.width / 2 + 165,
+        this.popupWarningLimitGangster.y - 175,
+        '',
+        {
+          fontSize: '48px',
+          fontFamily: fontFamilies.extraBold,
+          color: '#B23F05',
+        }
+      )
+      .setOrigin(0.5, 0.5)
+      .setVisible(false);
+    this.add(this.warningLevelText);
+
+    const warningTextX = this.popup.x + 100;
+    const warningTextGap = 50;
+    this.warningText1 = scene.add
+      .text(
+        warningTextX,
+        this.popupWarningLimitGangster.y - this.popupWarningLimitGangster.height / 2 - 120,
+        'You will need to upgrade your',
+        {
+          fontSize: '40px',
+          fontFamily: fontFamilies.bold,
+          color: '#29000B',
+        }
+      )
+      .setOrigin(0.5, 0.5);
+    this.add(this.warningText1);
+
+    this.warningText2 = scene.add
+      .text(warningTextX, this.warningText1.y + warningTextGap, 'Safehouse Level for excess', {
+        fontSize: '40px',
+        fontFamily: fontFamilies.bold,
+        color: '#29000B',
+      })
+      .setOrigin(0.5, 0.5);
+    this.add(this.warningText2);
+
+    this.warningText3 = scene.add
+      .text(warningTextX, this.warningText2.y + warningTextGap, 'Gangsters (+0)', {
+        fontSize: '40px',
+        fontFamily: fontFamilies.bold,
+        color: '#29000B',
+      })
+      .setOrigin(0.5, 0.5);
+    this.add(this.warningText3);
+
+    this.warningText4 = scene.add
+      .text(warningTextX, this.warningText3.y + warningTextGap, 'to earn $GANG', {
+        fontSize: '40px',
+        fontFamily: fontFamilies.bold,
+        color: '#29000B',
+      })
+      .setOrigin(0.5, 0.5);
+    this.add(this.warningText4);
+
     scene.game.events.on(events.completed, () => {
       this.quantity = DEFAULT_QUANTITY;
       this.updateValues();
@@ -364,6 +467,7 @@ class PopupBuyGangster extends Popup {
         maxPerBatch,
         level,
         earningRateIncrementPerLevel,
+        building,
         dailyReward,
         reservePool,
         reservePoolReward,
@@ -374,7 +478,7 @@ class PopupBuyGangster extends Popup {
         referralDiscount,
       }) => {
         this.balance = balance;
-
+        this.building = building;
         this.numberOfMachines = numberOfMachines;
         this.networth = networth;
         this.networthIncrease = networthIncrease;
@@ -387,11 +491,20 @@ class PopupBuyGangster extends Popup {
         this.mintFunction = isWhitelisted && whitelistAmountLeft ? 'mintWL' : hasInviteCode ? 'mintReferral' : 'mint';
 
         this.level = level;
-        this.numberOfMachinesText.text = numberOfMachines.toLocaleString();
+        this.numberOfMachinesText.text = `${numberOfMachines.toLocaleString()}`;
+        this.numberOfMachinesTitle.x = this.popup.x + 80 - this.numberOfMachinesText.width / 2 + 5;
+        this.numberOfMachinesText.x =
+          this.numberOfMachinesTitle.x +
+          this.numberOfMachinesTitle.width / 2 +
+          this.numberOfMachinesText.width / 2 +
+          10;
         this.levelText.text = `${level} LVL`;
         this.earningBonusText.text = `+${((level + 1) * earningRateIncrementPerLevel * 100).toLocaleString('en', {
           maximumFractionDigits: 1,
         })}%`;
+
+        this.capacityText.text = `GANGSTER CAPACITY: ${numberOfMachines}/${building?.machineCapacity}`;
+
         this.updateUpgradePriceButton();
 
         this.networthText.text = `${networth.toLocaleString()}`;
@@ -417,6 +530,41 @@ class PopupBuyGangster extends Popup {
     scene.game.events.emit(events.requestMachines);
     scene.game.events.emit(events.requestIncrementTime);
     scene.game.events.emit('request-gas-mint');
+
+    this.showWarning();
+  }
+
+  showWarning(overflowGangsters = 0) {
+    this.background.setVisible(true);
+    this.popupWarningLimitGangster.setVisible(true);
+    this.warningLevelText.text = `${this.building?.level} LVL`;
+    this.warningLevelText.setVisible(true);
+
+    this.warningText3.text = `Gangsters (+${overflowGangsters})`;
+    this.warningText1.setVisible(true);
+    this.warningText2.setVisible(true);
+    this.warningText3.setVisible(true);
+    this.warningText4.setVisible(true);
+  }
+
+  hideWarning() {
+    this.background.setVisible(false);
+    this.popupWarningLimitGangster.setVisible(false);
+    this.warningLevelText.setVisible(false);
+    this.warningText1.setVisible(false);
+    this.warningText2.setVisible(false);
+    this.warningText3.setVisible(false);
+    this.warningText4.setVisible(false);
+  }
+
+  checkQuantity() {
+    const maxActiveMachines = this.building?.machineCapacity || 0;
+    const overflowMachines = this.numberOfMachines + this.quantity - maxActiveMachines;
+    if (overflowMachines > 0) {
+      this.showWarning(overflowMachines);
+    } else {
+      this.hideWarning();
+    }
   }
 
   updateUpgradePriceButton() {

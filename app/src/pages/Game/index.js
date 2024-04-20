@@ -37,6 +37,7 @@ import {
   updateUserWarMachines,
   getNextSpinIncrementUnixTime,
   upgradeUserMachines,
+  upgradeUserBuildings,
 } from '../../services/gamePlay.service';
 import {
   getLatestWar,
@@ -321,7 +322,8 @@ const Game = () => {
     spinConfig: { spinRewards: [] },
   };
 
-  const dailyToken = numberOfMachines * gamePlay?.machine?.dailyReward;
+  const dailyToken =
+    Math.min(numberOfMachines, gamePlay?.building?.machineCapacity || 0) * gamePlay?.machine?.dailyReward;
   const dailyXToken = numberOfWorkers * worker.dailyReward;
 
   useEffect(() => {
@@ -548,6 +550,7 @@ const Game = () => {
     if (!gamePlay?.startRewardCountingTime) return;
     const diffInDays = (Date.now() - gamePlay.startRewardCountingTime.toDate().getTime()) / MILISECONDS_IN_A_DAY;
     const claimableReward = gamePlay.pendingReward + diffInDays * dailyToken;
+    console.log('claimable reward', claimableReward);
     gameRef.current?.events.emit('update-claimable-reward', { reward: claimableReward });
     gameRef.current?.events.emit('claimable-reward-added');
   };
@@ -985,6 +988,9 @@ const Game = () => {
       gameRef.current?.events.on('request-buildings', () => {
         gameRef.current?.events.emit('update-buildings', {
           numberOfBuildings,
+          numberOfMachines,
+          building: gamePlay?.building,
+          machineCapacityIncrementPerLevel: activeSeason?.building?.machineCapacityIncrementPerLevel,
           networth,
           balance: tokenBalance,
           basePrice: building.basePrice,
@@ -1061,6 +1067,24 @@ const Game = () => {
         }
       });
 
+      gameRef.current?.events.on('upgrade-safehouses-level', async ({ amount, currentLevel }) => {
+        try {
+          await upgradeUserBuildings();
+          gameRef.current?.events.emit('upgrade-safehouses-level-completed', {
+            message: `Safehouse level upgraded`,
+            title: `Upgrade safehouse${amount > 1 ? 's' : ''} successfully`,
+            level: currentLevel + 1,
+          });
+        } catch (err) {
+          gameRef.current?.events.emit('upgrade-safehouses-level-completed', {
+            status: 'failed',
+            code: 4001,
+            message: err.message,
+            action: err.message === 'You have no safehouse' ? 'Please buy safehouse first' : '',
+          });
+        }
+      });
+
       gameRef.current?.events.on('init-retire', async () => {
         try {
           const txnHash = await startRetirement();
@@ -1099,6 +1123,7 @@ const Game = () => {
           dailyReward: gamePlay.machine?.dailyReward || machine.dailyReward,
           earningRateIncrementPerLevel: activeSeason?.machine?.earningRateIncrementPerLevel,
           level: gamePlay.machine?.level,
+          building: gamePlay.building,
           reservePool,
           reservePoolReward,
           networthIncrease: machine.networth,
@@ -1566,6 +1591,9 @@ const Game = () => {
   useEffect(() => {
     gameRef.current?.events.emit('update-buildings', {
       numberOfBuildings,
+      numberOfMachines,
+      building: gamePlay?.building,
+      machineCapacityIncrementPerLevel: activeSeason?.building?.machineCapacityIncrementPerLevel,
       networth,
       balance: tokenBalance,
       basePrice: building.basePrice,
@@ -1575,7 +1603,16 @@ const Game = () => {
       salesLastPeriod: buildingSoldLast24h,
       networthIncrease: building.networth,
     });
-  }, [numberOfBuildings, networth, tokenBalance, building, buildingSoldLast24h]);
+  }, [
+    numberOfBuildings,
+    networth,
+    tokenBalance,
+    building,
+    buildingSoldLast24h,
+    gamePlay?.building,
+    numberOfMachines,
+    activeSeason?.building?.machineCapacityIncrementPerLevel,
+  ]);
 
   useEffect(() => {
     gameRef.current?.events.emit('update-workers', {
@@ -1602,6 +1639,7 @@ const Game = () => {
         dailyReward: gamePlay?.machine?.dailyReward,
         level: gamePlay.machine?.level,
         earningRateIncrementPerLevel: activeSeason?.machine?.earningRateIncrementPerLevel,
+        building: gamePlay?.building,
         reservePool,
         reservePoolReward,
         networthIncrease: machine.networth,
@@ -1625,6 +1663,7 @@ const Game = () => {
     inviteCode,
     activeSeason?.referralConfig?.referralDiscount,
     gamePlay?.machine,
+    gamePlay?.building,
     activeSeason?.machine?.earningRateIncrementPerLevel,
   ]);
 

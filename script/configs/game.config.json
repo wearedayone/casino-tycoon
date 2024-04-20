@@ -23,7 +23,9 @@
       "networth": 8,
       "targetDailyPurchase": 200,
       "targetPrice": 1000,
-      "maxPerBatch": 100
+      "maxPerBatch": 100,
+      "initMachineCapacity": 20,
+      "machineCapacityIncrementPerLevel": 20
     }
   },
   "referral": {
