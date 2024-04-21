@@ -120,7 +120,7 @@ const TAKE_SEASON_SNAPSHOT = 'take-season-snapshot';
 export const onSnapshotSeasonChange = async () => {
   let unsubscribe;
   const systemSnapshot = firestore.collection('system').doc('default');
-
+  let currentEndTime = null;
   systemSnapshot.onSnapshot(async (systemDoc) => {
     try {
       if (unsubscribe) {
@@ -128,31 +128,35 @@ export const onSnapshotSeasonChange = async () => {
       }
 
       const activeSeasonId = systemDoc.data().activeSeasonId;
+      if (!activeSeasonId) return;
       const seasonSnapshot = firestore.collection('season').doc(activeSeasonId);
       unsubscribe = seasonSnapshot.onSnapshot((doc) => {
-        logger.info(`detect season changes, ${JSON.stringify(doc.data())}`);
+        // logger.info(`detect season changes, ${JSON.stringify(doc.data())}`);
         const existingJob = schedule.scheduledJobs[TAKE_SEASON_SNAPSHOT];
         logger.info(`existingJobExists: ${!!existingJob}`);
 
         const { estimatedEndTime } = doc.data();
-        const now = Date.now();
-        const date = estimatedEndTime.toDate();
-        const dateUnix = estimatedEndTime.toDate().getTime();
+        if (currentEndTime?.valueOf() !== estimatedEndTime.valueOf()) {
+          currentEndTime = estimatedEndTime;
+          const now = Date.now();
+          const date = estimatedEndTime.toDate();
+          const dateUnix = estimatedEndTime.toDate().getTime();
 
-        logger.info(`Scheduling season ${doc.id} snapshot at ${date.toLocaleString()}`);
-        if (dateUnix <= now) {
-          if (existingJob) {
-            existingJob.cancelNext();
-            existingJob.invoke();
+          logger.info(`Scheduling season ${doc.id} snapshot at ${date.toLocaleString()}`);
+          if (dateUnix <= now) {
+            if (existingJob) {
+              existingJob.cancelNext();
+              existingJob.invoke();
+            } else {
+              logger.info(`Detect season ended, takeSeasonLeaderboardSnapshot immediately`);
+              takeSeasonLeaderboardSnapshot();
+            }
           } else {
-            logger.info(`Detect season ended, takeSeasonLeaderboardSnapshot immediately`);
-            takeSeasonLeaderboardSnapshot();
-          }
-        } else {
-          if (existingJob) {
-            existingJob.reschedule(date);
-          } else {
-            schedule.scheduleJob(TAKE_SEASON_SNAPSHOT, date, takeSeasonLeaderboardSnapshot);
+            if (existingJob) {
+              existingJob.reschedule(date);
+            } else {
+              schedule.scheduleJob(TAKE_SEASON_SNAPSHOT, date, takeSeasonLeaderboardSnapshot);
+            }
           }
         }
       });

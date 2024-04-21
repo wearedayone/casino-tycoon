@@ -10,37 +10,7 @@ const main = async () => {
   console.log('init data');
   // web3Listener
   await firestore.collection('web3Listener').doc('8453').set({ lastBlock: 0 });
-  // system config
-  console.log('create system configs');
-  const activeSeasonId = firestore.collection('season').doc().id;
-  await firestore
-    .collection('system')
-    .doc('default')
-    .set({
-      ...gameConfigs.assets,
-      openseaNftCollection: gameConfigs.openseaNftCollection,
-      activeSeasonId,
-      appReloadThresholdInSeconds: 10,
-      appVersion: '0.9.3.0',
-      disabledUrls: ['gangsterarena.com', 'demo.gangsterarena.com'],
-    });
-  await firestore.collection('system').doc('market').set({
-    ethPriceInUsd: '3000',
-    nftPrice: '0.005',
-    tokenPrice: '0.00001',
-  });
-  await firestore
-    .collection('system')
-    .doc('estimated-gas')
-    .set({
-      game: { buyGangster: 0, buyGoon: 0, buySafeHouse: 0 },
-      swap: { swapEthToFiat: 0 },
-    });
-  // await firestore
-  //   .collection('system')
-  //   .doc('data')
-  //   .set({ nonce: admin.firestore.FieldValue.increment(1) });
-  console.log('created system configs');
+
   console.log('create templates');
   const templatePromises = Object.keys(templates).map((key) =>
     firestore.collection('template').doc(key).set({ text: templates[key] })
@@ -53,6 +23,7 @@ const main = async () => {
   const endTimeUnix = startTimeUnix + gameConfigs.initGameDurationInDays * 24 * 60 * 60 * 1000;
   const startTime = admin.firestore.Timestamp.fromMillis(startTimeUnix);
   const estimatedEndTime = admin.firestore.Timestamp.fromMillis(endTimeUnix);
+  const activeSeasonId = firestore.collection('season').doc().id;
   await firestore
     .collection('season')
     .doc(activeSeasonId)
@@ -90,6 +61,37 @@ const main = async () => {
     });
   console.log('created season');
 
+  // system config
+  console.log('create system configs');
+
+  await firestore
+    .collection('system')
+    .doc('default')
+    .set({
+      ...gameConfigs.assets,
+      openseaNftCollection: gameConfigs.openseaNftCollection,
+      activeSeasonId,
+      appReloadThresholdInSeconds: 10,
+      appVersion: '0.9.3.0',
+      disabledUrls: ['gangsterarena.com', 'demo.gangsterarena.com'],
+    });
+  await firestore.collection('system').doc('market').set({
+    ethPriceInUsd: '3000',
+    nftPrice: '0.005',
+    tokenPrice: '0.00001',
+  });
+  await firestore
+    .collection('system')
+    .doc('estimated-gas')
+    .set({
+      game: { buyGangster: 0, buyGoon: 0, buySafeHouse: 0 },
+      swap: { swapEthToFiat: 0 },
+    });
+  // await firestore
+  //   .collection('system')
+  //   .doc('data')
+  //   .set({ nonce: admin.firestore.FieldValue.increment(1) });
+  console.log('created system configs');
   // init system txn for worker and building
   const initStartTimeTxn = startTimeUnix - 12 * 60 * 60 * 1000;
   const txnTimes = [

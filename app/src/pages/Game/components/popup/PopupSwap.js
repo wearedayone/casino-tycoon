@@ -162,10 +162,7 @@ class PopupSwap extends Popup {
           }
 
           this.switchBtn.setVisible(true);
-          this.feeText1.setVisible(true);
-          this.feeText2.setVisible(true);
-          this.tradingFeeText1.setVisible(true);
-          this.tradingFeeText2.setVisible(true);
+
           this.nextConversionText.setVisible(false);
           this.clockIcon.setVisible(false);
           this.gameEndText.setVisible(false);
@@ -200,10 +197,7 @@ class PopupSwap extends Popup {
           this.token2AmountInput.setDisabled(true);
 
           this.switchBtn.setVisible(false);
-          this.feeText1.setVisible(false);
-          this.feeText2.setVisible(false);
-          this.tradingFeeText1.setVisible(false);
-          this.tradingFeeText2.setVisible(false);
+
           this.nextConversionText.setVisible(true);
           this.clockIcon.setVisible(true);
           this.gameEndText.setVisible(true);
@@ -236,8 +230,6 @@ class PopupSwap extends Popup {
               this.tokenSwap === 'eth' ? 'convert-eth-input-to-token-result' : 'convert-token-input-to-eth-result',
               { amount: '0.00', fee: 0 }
             );
-            this.tradingFeeText1.text = `0.00 $GANG`;
-            this.tradingFeeText2.text = `(~$0.0000 USD)`;
 
             return;
           }
@@ -305,8 +297,6 @@ class PopupSwap extends Popup {
             this.tokenSwap === 'eth' ? 'convert-token-output-to-eth-result' : 'convert-eth-output-to-token-result',
             { amount: '0.00', fee: 0 }
           );
-          this.tradingFeeText1.text = `0.00 $GANG`;
-          this.tradingFeeText2.text = `(~$0.0000 USD)`;
 
           return;
         }
@@ -339,16 +329,6 @@ class PopupSwap extends Popup {
     this.add(this.switchBtn);
 
     // for web3
-    this.feeText1 = scene.add.text(textX, feeText1Y, 'Trading Fees - 5%', mediumBrownBold);
-    this.feeText2 = scene.add.text(textX, feeText2Y, '(Burn & fund treasury)', mediumBrownBold);
-    this.tradingFeeText1 = scene.add.text(width - textX, feeText1Y, '0 $GANG', mediumBrownBold).setOrigin(1, 0);
-    this.tradingFeeText2 = scene.add
-      .text(width - textX, feeText2Y, '(~$0.0000 USD)', { ...mediumBrownBold, fontSize: '36px' })
-      .setOrigin(1, 0);
-    this.add(this.feeText1);
-    this.add(this.feeText2);
-    this.add(this.tradingFeeText1);
-    this.add(this.tradingFeeText2);
 
     // for web2
     this.nextConversionText = scene.add
@@ -474,35 +454,27 @@ class PopupSwap extends Popup {
     });
     scene.game.events.on('convert-eth-input-to-token-result', ({ amount, tradingFee, tradingFeeInUSD }) => {
       this.token2AmountInput.updateValue(`${amount}`, true, true);
-      this.tradingFeeText1.text = `${tradingFee} $GANG`;
-      this.tradingFeeText2.text = `(~$${tradingFeeInUSD} USD)`;
       this.setLoading(false);
       this.setError(false);
     });
     scene.game.events.on('convert-eth-output-to-token-result', ({ amount, tradingFee, tradingFeeInUSD }) => {
       this.token1AmountInput.updateValue(`${amount}`, true, true);
-      this.tradingFeeText1.text = `${tradingFee} $GANG`;
-      this.tradingFeeText2.text = `(~$${tradingFeeInUSD} USD)`;
       this.setLoading(false);
       this.setError(false);
     });
     scene.game.events.on('convert-token-input-to-eth-result', ({ amount, tradingFee, tradingFeeInUSD }) => {
       this.token2AmountInput.updateValue(`${amount}`, true, true);
-      this.tradingFeeText1.text = `${tradingFee} $GANG`;
-      this.tradingFeeText2.text = `(~$${tradingFeeInUSD} USD)`;
       this.setLoading(false);
       this.setError(false);
     });
     scene.game.events.on('convert-token-output-to-eth-result', ({ amount, tradingFee, tradingFeeInUSD }) => {
       this.token1AmountInput.updateValue(`${amount}`, true, true);
-      this.tradingFeeText1.text = `${tradingFee} $GANG`;
-      this.tradingFeeText2.text = `(~$${tradingFeeInUSD} USD)`;
       this.setLoading(false);
       this.setError(false);
     });
 
     scene.game.events.on('update-fee-percent', ({ feePercent }) => {
-      this.feeText1.text = `Trading Fees -${feePercent}%`;
+      // this.feeText1.text = `Trading Fees -${feePercent}%`;
     });
     scene.game.events.emit('request-balances');
     scene.game.events.emit('request-fee-percent');

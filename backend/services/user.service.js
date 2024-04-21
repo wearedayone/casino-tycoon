@@ -24,7 +24,17 @@ const createGamePlayIfNotExist = async (userId, isWhitelisted) => {
     const user = await firestore.collection('user').doc(userId).get();
     const userData = user.data();
 
+    let tokenBalance = 0;
+    let address = userData?.address ?? '';
+    try {
+      const tba = await getTokenBalance({ address });
+      tokenBalance = Number(formatEther(tba));
+    } catch (ex) {
+      console.log(ex);
+    }
+
     await Promise.all([
+      firestore.collection('user').doc(userId).update({ tokenBalance: tokenBalance }),
       firestore.collection('gamePlay').add({
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
         userId,
@@ -32,7 +42,7 @@ const createGamePlayIfNotExist = async (userId, isWhitelisted) => {
         networth: season.worker.networth,
         networthFromWar: 0,
         numberOfMachines: 0,
-        numberOfWorkers: 1,
+        numberOfWorkers: 0,
         numberOfBuildings: 0,
         numberOfSpins: 0,
         machine: { level: 0, dailyReward: season.machine.dailyReward },
@@ -48,6 +58,7 @@ const createGamePlayIfNotExist = async (userId, isWhitelisted) => {
         avatarURL: userData.avatarURL ?? '',
         avatarURL_small: userData.avatarURL_small ?? '',
         username: userData.username ?? '',
+        address: userData.address ?? '',
         lastTimeSwapXToken: admin.firestore.FieldValue.serverTimestamp(),
       }),
       firestore.collection('warDeployment').add({

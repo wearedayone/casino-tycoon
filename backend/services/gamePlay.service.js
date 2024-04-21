@@ -239,19 +239,17 @@ export const getUserWarDeployment = async (userId) => {
 
 export const getNextSpinIncrementUnixTime = async () => {
   const utcDate = moment().utc().format('DD/MM/YYYY');
+  let startTime = moment().startOf('day');
+  const durationInSeconds = 600;
+  const endTime = moment()
+    .endOf('day')
+    .add(durationInSeconds * 2, 'seconds');
+  const snapshotTimes = [];
 
-  const snapshotTimes = [
-    moment(`${utcDate} 00:00:00`, 'DD/MM/YYYY HH:mm:ss').utc(true).toDate().getTime(),
-    moment(`${utcDate} 03:00:00`, 'DD/MM/YYYY HH:mm:ss').utc(true).toDate().getTime(),
-    moment(`${utcDate} 06:00:00`, 'DD/MM/YYYY HH:mm:ss').utc(true).toDate().getTime(),
-    moment(`${utcDate} 09:00:00`, 'DD/MM/YYYY HH:mm:ss').utc(true).toDate().getTime(),
-    moment(`${utcDate} 12:00:00`, 'DD/MM/YYYY HH:mm:ss').utc(true).toDate().getTime(),
-    moment(`${utcDate} 15:00:00`, 'DD/MM/YYYY HH:mm:ss').utc(true).toDate().getTime(),
-    moment(`${utcDate} 18:00:00`, 'DD/MM/YYYY HH:mm:ss').utc(true).toDate().getTime(),
-    moment(`${utcDate} 21:00:00`, 'DD/MM/YYYY HH:mm:ss').utc(true).toDate().getTime(),
-    moment(`${utcDate} 00:00:00`, 'DD/MM/YYYY HH:mm:ss').utc(true).add(1, 'day').toDate().getTime(),
-    moment(`${utcDate} 03:00:00`, 'DD/MM/YYYY HH:mm:ss').utc(true).add(1, 'day').toDate().getTime(),
-  ];
+  while (startTime < endTime) {
+    snapshotTimes.push(startTime.utc(true).toDate().getTime());
+    startTime = startTime.add(durationInSeconds, 'seconds');
+  }
 
   const now = Date.now();
   const nextTime = snapshotTimes.find((time) => time > now);

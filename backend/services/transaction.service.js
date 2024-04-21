@@ -29,12 +29,15 @@ import {
 } from '../utils/formulas.js';
 import { getAccurate } from '../utils/math.js';
 import logger from '../utils/logger.js';
+import { TOKENS } from '../utils/constants.js';
+const { FIAT, GANG, ETH } = TOKENS;
 
 const MAX_RETRY = 3;
 
 export const initTransaction = async ({ userId, type, ...data }) => {
   logger.info(`init transaction user:${userId} - type:${type}`);
   const activeSeason = await getActiveSeason();
+  console.log({ data });
 
   const utcDate = moment().utc().format('DD/MM/YYYY');
   const todayStartTime = moment(`${utcDate} 00:00:00`, 'DD/MM/YYYY HH:mm:ss').utc(true).toDate().getTime();
