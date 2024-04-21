@@ -130,7 +130,7 @@ export const createUserIfNotExist = async (userId) => {
         address: address,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
         username,
-        avatarURL: defaultAvatar,
+        avatarURL: avatarURL_big,
         avatarURL_small,
         avatarURL_big,
         tokenBalance: tokenBalance,
@@ -155,6 +155,7 @@ export const createUserIfNotExist = async (userId) => {
         .update({
           avatarURL_small: twitter.profilePictureUrl,
           avatarURL_big: twitter.profilePictureUrl.replace('_normal', '_bigger'),
+          avatarURL: twitter.profilePictureUrl.replace('_normal', '_bigger'),
         });
     }
     if (twitter?.username && username !== twitter.username) {

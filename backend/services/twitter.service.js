@@ -4,7 +4,7 @@ import axios from 'axios';
 import environments from '../utils/environments.js';
 import { firestore } from '../configs/firebase.config.js';
 
-const { TWITTER_CONSUMER_API_KEY, TWITTER_CONSUMER_API_SECRET, SITE_URL } = environments;
+const { TWITTER_CONSUMER_API_KEY, TWITTER_CONSUMER_API_SECRET, TWITTER_BEARER_TOKEN, SITE_URL } = environments;
 
 export const getOauthRequestToken = async () => {
   const { oauth_token, oauth_callback_confirmed } = await obtainOauthRequestToken({
@@ -35,10 +35,23 @@ export const submitOauthData = async ({ userId, oauth_token, oauth_verifier }) =
   const existed = await firestore.collection('user').where('username', '==', screen_name).get();
   if (!existed.empty) throw new Error('API error: Twitter linked with another account already');
 
+  const userTwitter = await axios.get(`https://api.twitter.com/2/users/by/username/${screen_name}`, {
+    params: { 'user.fields': 'profile_image_url' },
+    headers: { Authorization: `Bearer ${TWITTER_BEARER_TOKEN}` },
+  });
+
+  const { profile_image_url } = userTwitter.data.data;
+
   await firestore
     .collection('user')
     .doc(userId)
-    .update({ username: screen_name, socials: { twitter: { verified: true } } });
+    .update({
+      username: screen_name,
+      socials: { twitter: { verified: true } },
+      avatarURL_small: profile_image_url,
+      avatarURL_big: profile_image_url.replace('_normal', '_bigger'),
+      avatarURL: profile_image_url.replace('_normal', '_bigger'),
+    });
   await firestore
     .collection('social')
     .doc(userId)
