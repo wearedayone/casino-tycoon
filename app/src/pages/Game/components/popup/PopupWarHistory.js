@@ -1,6 +1,7 @@
 import { ScrollablePanel } from 'phaser3-rex-plugins/templates/ui/ui-components.js';
 
 import Popup from './Popup';
+import Button from '../button/Button';
 import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
@@ -80,55 +81,59 @@ class PopupWarHistory extends Popup {
         const bg = this.scene.add.image(this.popup.width / 2 - 90, y, 'row-container').setOrigin(0.5, 0);
         this.items.push(bg);
       }
-      const { id, warSnapshotId, date, totalTokenReward, machinesLost } = this.data[i];
+      const { id, warSnapshotId, date, totalTokenReward, machinesLost, gainedReputation } = this.data[i];
       const dateText = this.scene.add
         .text(this.popup.width * 0.07, y + rowHeight / 2, date, smallBlackBoldCenter)
         .setOrigin(0.5, 0.5);
       const prefix = totalTokenReward > 0 ? '+' : '-';
       const color = totalTokenReward > 0 ? colors.black : '#7C2828';
       const totalTokenRewardText = this.scene.add
-        .text(this.popup.width * 0.25, y + rowHeight / 2, `${prefix}${formatter.format(totalTokenReward || 0)}`, {
+        .text(this.popup.width * 0.23, y + rowHeight / 2, `${prefix}${formatter.format(totalTokenReward || 0)}`, {
           ...smallBlackBoldCenter,
           color,
         })
         .setOrigin(0.5, 0.5);
-      const totalTokenRewardIcon = this.scene.add
-        .image(this.popup.width * 0.25 + totalTokenRewardText.width / 2 + 30, y + rowHeight / 2, 'coin3')
+      const gainReputationText = this.scene.add
+        .text(
+          this.popup.width * 0.39,
+          y + rowHeight / 2,
+          `+${formatter.format(gainedReputation || 0)}`,
+          smallBlackBoldCenter
+        )
         .setOrigin(0.5, 0.5);
 
-      const viewBtn = new TextButton(
+      const viewBtn = new Button(
         this.scene,
         this.popup.width * 0.75,
         y + rowHeight / 2,
-        'button-blue-small',
-        'button-blue-small',
+        'icon-search-contained',
+        'icon-search-contained',
         () => {
           this.loading = false;
           this.scene.popupWarHistoryDetail?.updateWarIds({ warSnapshotId, warResultId: id });
           this.close();
           this.scene.popupWarHistoryDetail?.open();
         },
-        'View',
         { fontSize: '36px', sound: 'open' }
       );
 
-      this.items.push(dateText, totalTokenRewardText, totalTokenRewardIcon, viewBtn);
+      this.items.push(dateText, totalTokenRewardText, gainReputationText, viewBtn);
 
       if (machinesLost && machinesLost > 0) {
         const machinesLostText = this.scene.add
-          .text(this.popup.width * 0.5, y + rowHeight / 2, `-${machinesLost || 0}`, {
+          .text(this.popup.width * 0.52, y + rowHeight / 2, `-${machinesLost || 0}`, {
             ...smallBlackBoldCenter,
             color: '#E93D45',
           })
           .setOrigin(0.5, 0.5);
         const machinesLostIcon = this.scene.add
-          .image(this.popup.width * 0.5 + machinesLostText.width / 2 + 45, y + rowHeight / 2, 'icon-gangster-mini')
+          .image(this.popup.width * 0.52 + machinesLostText.width / 2 + 45, y + rowHeight / 2, 'icon-gangster-mini')
           .setOrigin(0.5, 0.5);
 
         this.items.push(machinesLostText, machinesLostIcon);
       } else {
         const machineNoLostText = this.scene.add
-          .text(this.popup.width * 0.5 + 40, y + rowHeight / 2, `-`, smallBlackBoldCenter)
+          .text(this.popup.width * 0.52 + 40, y + rowHeight / 2, `-`, smallBlackBoldCenter)
           .setOrigin(0.5, 0.5);
         this.items.push(machineNoLostText);
       }

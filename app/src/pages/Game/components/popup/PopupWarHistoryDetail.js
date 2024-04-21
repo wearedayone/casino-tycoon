@@ -1,3 +1,4 @@
+import Phaser from 'phaser';
 import { ScrollablePanel } from 'phaser3-rex-plugins/templates/ui/ui-components.js';
 
 import Popup from './Popup';
@@ -12,12 +13,16 @@ const { width, height } = configs;
 const NUMBER_OF_TOP_ATTACKERS = 5;
 
 const MAX_USERNAME_LENGTH = 12;
+const sectionTitleStyle = { fontSize: '50px', color: colors.brown, fontFamily: fontFamilies.bold };
+const itemTitleStyle = { fontSize: '50px', color: colors.black, fontFamily: fontFamilies.bold };
+const itemContentStyle = { fontSize: '50px', color: colors.black, fontFamily: fontFamilies.extraBold };
 
 class PopupWarHistoryDetail extends Popup {
   data = null;
   warSnapshotId = null;
   warResultId = null;
   items = [];
+  avatars = {};
 
   constructor(scene) {
     super(scene, 'popup-large', { title: 'Overview' });
@@ -40,10 +45,10 @@ class PopupWarHistoryDetail extends Popup {
     this.add(this.backBtn);
 
     this.titleText = scene.add
-      .text(width / 2, height / 2 - this.popup.height / 2 + 170, 'Raid/Defend Result', {
+      .text(width / 2, height / 2 - this.popup.height / 2 + 170, 'Raid/Defend Result:', {
         fontSize: fontSizes.large,
         color: colors.black,
-        fontFamily: fontFamilies.bold,
+        fontFamily: fontFamilies.extraBold,
       })
       .setOrigin(0.5, 0.5);
     this.add(this.titleText);
@@ -87,109 +92,88 @@ class PopupWarHistoryDetail extends Popup {
     } = this.data;
 
     let y = 80;
-    const earnIcon = this.scene.add.image(this.popup.width * 0.2, y, 'icon-coin-small').setOrigin(0, 0.5);
-    const earnTitle = this.scene.add
-      .text(this.popup.width * 0.2 + earnIcon.width / 2 + 50, y, 'Earn Details', {
-        fontSize: fontSizes.large,
-        color: colors.black,
-        fontFamily: fontFamilies.bold,
-      })
-      .setOrigin(0, 0.5);
+    const iconX = this.popup.width * 0.13;
+    const titleX = iconX + 60;
+    const contentX = this.listContainer.width * 0.83;
+    const centerX = this.listContainer.width / 2;
+    const earnTitle = this.scene.add.text(centerX, y, 'Earn Details:', sectionTitleStyle).setOrigin(0.5, 0.5);
     y += 150;
 
     const earnItemContainer = this.scene.add
       .image(this.popup.width / 2 - 90, y, 'container-border')
       .setOrigin(0.5, 0.5);
-    const earnItemIcon = this.scene.add.image(this.popup.width * 0.13, y, 'icon-coin-small').setOrigin(0.5, 0.5);
-    const earnItemText = this.scene.add
-      .text(
-        this.popup.width * 0.13 + earnItemIcon.width / 2 + 30,
-        y,
-        `$GANG Earned: ${customFormat(tokenEarnFromEarning || 0, 1)}`,
-        {
-          fontSize: '50px',
-          color: colors.black,
-          fontFamily: fontFamilies.bold,
-        }
-      )
+    const earnItemIcon = this.scene.add.image(iconX, y, 'icon-coin-small').setOrigin(0.5, 0.5);
+    const earnItemText = this.scene.add.text(titleX, y, `GANG Earned:`, itemTitleStyle).setOrigin(0, 0.5);
+    const earnItemContent = this.scene.add
+      .text(contentX, y, customFormat(tokenEarnFromEarning || 0, 1), itemContentStyle)
+      .setOrigin(1, 0.5);
+    y += 165;
+
+    const reputationGainedItemContainer = this.scene.add
+      .image(this.popup.width / 2 - 90, y, 'container-border')
+      .setOrigin(0.5, 0.5);
+    const reputationGainedItemIcon = this.scene.add.image(iconX, y, 'icon-star-medium').setOrigin(0.5, 0.5);
+    const reputationGainedItemText = this.scene.add
+      .text(titleX, y, `Reputation Earned:`, itemTitleStyle)
       .setOrigin(0, 0.5);
+    const reputationGainedItemContent = this.scene.add
+      .text(contentX, y, formatter.format(gainedReputation || 0), itemContentStyle)
+      .setOrigin(1, 0.5);
     y += 200;
 
-    const defendIcon = this.scene.add.image(this.popup.width * 0.2, y, 'guard').setOrigin(0, 0.5);
-    const defendTitle = this.scene.add
-      .text(this.popup.width * 0.2 + defendIcon.width / 2 + 50, y, 'Defend Details', {
-        fontSize: fontSizes.large,
-        color: colors.black,
-        fontFamily: fontFamilies.bold,
-      })
-      .setOrigin(0, 0.5);
+    const defendTitle = this.scene.add.text(centerX, y, 'Defend Details:', sectionTitleStyle).setOrigin(0.5, 0.5);
     y += 150;
 
     const defendUnitsItemContainer = this.scene.add
       .image(this.popup.width / 2 - 90, y, 'container-border')
       .setOrigin(0.5, 0.5);
-    const defendUnitsItemIcon = this.scene.add.image(this.popup.width * 0.13, y, 'guard').setOrigin(0.5, 0.5);
-    const defendUnitsItemText = this.scene.add
-      .text(this.popup.width * 0.13 + defendUnitsItemIcon.width / 2 + 30, y, `Your Defense: ${defendUnits || 0}`, {
-        fontSize: '50px',
-        color: colors.black,
-        fontFamily: fontFamilies.bold,
-      })
-      .setOrigin(0, 0.5);
+    const defendUnitsItemIcon = this.scene.add.image(iconX, y, 'guard').setOrigin(0.5, 0.5);
+    const defendUnitsItemText = this.scene.add.text(titleX, y, `Your Defense:`, itemTitleStyle).setOrigin(0, 0.5);
+    const defendUnitsItemContent = this.scene.add
+      .text(contentX, y, (defendUnits || 0).toLocaleString(), itemContentStyle)
+      .setOrigin(1, 0.5);
     y += 165;
 
     const totalAttackUnits = (defendResults || []).reduce((total, item) => total + item.attackUnits, 0);
     const totalAttackItemContainer = this.scene.add
       .image(this.popup.width / 2 - 90, y, 'container-border')
       .setOrigin(0.5, 0.5);
-    const totalAttackItemIcon = this.scene.add.image(this.popup.width * 0.13, y, 'gun').setOrigin(0.5, 0.5);
-    const totalAttackItemText = this.scene.add
-      .text(this.popup.width * 0.13 + totalAttackItemIcon.width / 2 + 30, y, `Total Attack: ${totalAttackUnits}`, {
-        fontSize: '50px',
-        color: colors.black,
-        fontFamily: fontFamilies.bold,
-      })
-      .setOrigin(0, 0.5);
+    const totalAttackItemIcon = this.scene.add.image(iconX, y, 'gun').setOrigin(0.5, 0.5);
+    const totalAttackItemText = this.scene.add.text(titleX, y, `Total Attack:`, itemTitleStyle).setOrigin(0, 0.5);
+    const totalAttackItemContent = this.scene.add
+      .text(contentX, y, totalAttackUnits.toLocaleString(), itemContentStyle)
+      .setOrigin(1, 0.5);
     y += 165;
 
     const tokenStolenItemContainer = this.scene.add
       .image(this.popup.width / 2 - 90, y, 'container-border')
       .setOrigin(0.5, 0.5);
-    const tokenStolenItemIcon = this.scene.add.image(this.popup.width * 0.13, y, 'icon-coin-small').setOrigin(0.5, 0.5);
-    const tokenStolenItemText = this.scene.add
-      .text(
-        this.popup.width * 0.13 + tokenStolenItemIcon.width / 2 + 30,
-        y,
-        `$GANG Lost: ${customFormat(tokenStolen || 0, 1)}`,
-        {
-          fontSize: '50px',
-          color: colors.black,
-          fontFamily: fontFamilies.bold,
-        }
-      )
-      .setOrigin(0, 0.5);
+    const tokenStolenItemIcon = this.scene.add.image(iconX, y, 'icon-coin-small').setOrigin(0.5, 0.5);
+    const tokenStolenItemText = this.scene.add.text(titleX, y, `GANG Lost:`, itemTitleStyle).setOrigin(0, 0.5);
+    const tokenStolenItemContent = this.scene.add
+      .text(contentX, y, customFormat(tokenStolen || 0, 1), itemContentStyle)
+      .setOrigin(1, 0.5);
     y += 165;
 
     const topAttackerItemContainerTop = this.scene.add
       .image(this.popup.width / 2 - 90, y, 'container-border-top')
       .setOrigin(0.5, 0.5);
-    const topAttackerItemIcon = this.scene.add.image(this.popup.width * 0.13, y, 'man').setOrigin(0.5, 0.5);
-    const topAttackerItemText = this.scene.add
-      .text(this.popup.width * 0.13 + tokenStolenItemIcon.width / 2 + 30, y, `Top Raiders:`, {
-        fontSize: '50px',
-        color: colors.black,
-        fontFamily: fontFamilies.bold,
-      })
-      .setOrigin(0, 0.5);
+    const topAttackerItemIcon = this.scene.add.image(iconX, y, 'man').setOrigin(0.5, 0.5);
+    const topAttackerItemText = this.scene.add.text(titleX, y, `Top Raiders:`, itemTitleStyle).setOrigin(0, 0.5);
 
     const attackers = (defendResults || [])
       .sort((user1, user2) => user2.attackUnits - user1.attackUnits)
       .slice(0, NUMBER_OF_TOP_ATTACKERS)
-      .map((user) => ({ username: user.userUsername, attackUnits: user.attackUnits }));
-    y += 131;
+      .map((user) => ({ username: user.userUsername, attackUnits: user.attackUnits, avatar: user.avatar }));
+    y += 120;
 
     const attackerTexts = [];
-    attackers.map((attacker, index) => {
+    this.avatars = {};
+    const attackersLeftMargin = this.listContainer.width * 0.22;
+    const attackersRightMargin = this.listContainer.width * 0.78;
+    const avatarSize = 72;
+    let attackerX = attackersLeftMargin;
+    attackers.forEach((attacker, index) => {
       const topAttackerItemContainerItem = this.scene.add
         .image(
           this.popup.width / 2 - 90,
@@ -198,54 +182,45 @@ class PopupWarHistoryDetail extends Popup {
         )
         .setOrigin(0.5, 0.5);
 
-      const attackerRankText = this.scene.add
-        .text(this.popup.width * 0.12, y, `${index + 1}`, {
-          fontSize: '50px',
-          color: colors.black,
-          fontFamily: fontFamilies.bold,
-        })
-        .setOrigin(0, 0.5);
+      const avatar = this.scene.add.rexCircleMaskImage(attackerX, y, 'avatar').setOrigin(0.5, 0.5);
 
       const attackerUsernameText = this.scene.add
         .text(
-          this.popup.width * 0.12 + 50,
+          attackerX + avatarSize / 2 + 20,
           y,
-          `${formatUsername({ username: attacker.username, MAX_USERNAME_LENGTH })}`,
+          `${formatUsername({ username: attacker.username, MAX_USERNAME_LENGTH: 20 })}`,
           {
-            fontSize: '50px',
-            color: colors.black,
-            fontFamily: fontFamilies.bold,
+            ...itemTitleStyle,
+            fontSize: fontSizes.small,
           }
         )
         .setOrigin(0, 0.5);
+      this.avatars[attacker.username] = avatar;
 
-      const attackerAttackUnitsIcon = this.scene.add
-        .image(this.popup.width * 0.7, y, 'mini-gangster-2')
-        .setOrigin(0.5, 0.5);
+      const attackerEndX = attackerUsernameText.x + attackerUsernameText.width;
+      const hasOverflowed = attackerEndX > attackersRightMargin;
+      const stillHasMoreAttackers = index < attackers.length - 1;
+      if (hasOverflowed) {
+        // move to next row & reset x
+        attackerX = attackersLeftMargin;
+        y += 120;
+        // update latest item's position
+        avatar.x = attackerX;
+        attackerUsernameText.x = attackerX + avatarSize / 2 + 20;
+        avatar.y = y;
+        attackerUsernameText.y = y;
+        topAttackerItemContainerItem.y = y;
+        attackerTexts.push(topAttackerItemContainerItem, avatar, attackerUsernameText);
+      } else if (index > 0) {
+        topAttackerItemContainerItem.destroy();
+        attackerTexts.push(avatar, attackerUsernameText);
+      } else {
+        attackerTexts.push(topAttackerItemContainerItem, avatar, attackerUsernameText);
+      }
 
-      const attackerAttackUnitsText = this.scene.add
-        .text(
-          this.popup.width * 0.8 - attackerAttackUnitsIcon.width / 2 - 130,
-          y,
-          `${formatter.format(attacker.attackUnits)}`,
-          {
-            fontSize: '50px',
-            color: colors.black,
-            fontFamily: fontFamilies.bold,
-          }
-        )
-        .setOrigin(1, 0.5);
-
-      attackerTexts.push(
-        topAttackerItemContainerItem,
-        attackerRankText,
-        attackerUsernameText,
-        attackerAttackUnitsIcon,
-        attackerAttackUnitsText
-      );
-
-      if (index < attackers.length - 1) {
-        y += 131;
+      if (stillHasMoreAttackers) {
+        // update x for next item
+        attackerX = attackerUsernameText.x + attackerUsernameText.width + 70;
       }
     });
 
@@ -261,48 +236,34 @@ class PopupWarHistoryDetail extends Popup {
     const gangsterKilledItemContainer = this.scene.add
       .image(this.popup.width / 2 - 90, y, 'container-border')
       .setOrigin(0.5, 0.5);
-    const gangsterKilledItemIcon = this.scene.add
-      .image(this.popup.width * 0.13, y, 'mini-gangster-2')
-      .setOrigin(0.5, 0.5);
+    const gangsterKilledItemIcon = this.scene.add.image(iconX, y, 'mini-gangster-2').setOrigin(0.5, 0.5);
     const gangsterKilledItemText = this.scene.add
-      .text(
-        this.popup.width * 0.13 + gangsterKilledItemIcon.width / 2 + 30,
-        y,
-        `Gangsters Killed: ${defendResults.reduce((result, item) => result + item.machinesLost || 0, 0)}`,
-        {
-          fontSize: '50px',
-          color: colors.black,
-          fontFamily: fontFamilies.bold,
-        }
-      )
+      .text(titleX, y, `Gangsters Killed:`, itemTitleStyle)
       .setOrigin(0, 0.5);
+    const gangsterKilledItemContent = this.scene.add
+      .text(
+        contentX,
+        y,
+        `${defendResults.reduce((result, item) => result + item.machinesLost || 0, 0)}`,
+        itemContentStyle
+      )
+      .setOrigin(1, 0.5);
 
     y += 200;
 
-    const attackIcon = this.scene.add.image(this.popup.width * 0.2, y, 'gun').setOrigin(0, 0.5);
-    const attackTitle = this.scene.add
-      .text(this.popup.width * 0.2 + attackIcon.width / 2 + 50, y, 'Raid Details', {
-        fontSize: fontSizes.large,
-        color: colors.black,
-        fontFamily: fontFamilies.bold,
-      })
-      .setOrigin(0, 0.5);
+    const attackTitle = this.scene.add.text(centerX, y, 'Raid Details:', sectionTitleStyle).setOrigin(0.5, 0.5);
     y += 150;
 
     const attackTargetItemContainer = this.scene.add
       .image(this.popup.width / 2 - 90, y, 'container-border')
       .setOrigin(0.5, 0.5);
-    const attackTargetItemIcon = this.scene.add.image(this.popup.width * 0.13, y, 'man').setOrigin(0.5, 0.5);
+    const attackTargetItemIcon = this.scene.add.image(iconX, y, 'man').setOrigin(0.5, 0.5);
     const attackTargetItemText = this.scene.add
       .text(
-        this.popup.width * 0.13 + attackTargetItemIcon.width / 2 + 30,
+        titleX,
         y,
         `${formatUsername({ username: attackResults?.[0]?.userUsername || '', MAX_USERNAME_LENGTH })}`,
-        {
-          fontSize: '50px',
-          color: colors.black,
-          fontFamily: fontFamilies.bold,
-        }
+        itemTitleStyle
       )
       .setOrigin(0, 0.5);
     y += 165;
@@ -310,19 +271,11 @@ class PopupWarHistoryDetail extends Popup {
     const targetDefenseItemContainer = this.scene.add
       .image(this.popup.width / 2 - 90, y, 'container-border')
       .setOrigin(0.5, 0.5);
-    const targetDefenseItemIcon = this.scene.add.image(this.popup.width * 0.13, y, 'guard').setOrigin(0.5, 0.5);
-    const targetDefenseItemText = this.scene.add
-      .text(
-        this.popup.width * 0.13 + targetDefenseItemIcon.width / 2 + 30,
-        y,
-        `Target Defense: ${formatter.format(attackResults?.[0]?.defendUnits || 0)}`,
-        {
-          fontSize: '50px',
-          color: colors.black,
-          fontFamily: fontFamilies.bold,
-        }
-      )
-      .setOrigin(0, 0.5);
+    const targetDefenseItemIcon = this.scene.add.image(iconX, y, 'guard').setOrigin(0.5, 0.5);
+    const targetDefenseItemText = this.scene.add.text(titleX, y, `Target Defense:`, itemTitleStyle).setOrigin(0, 0.5);
+    const targetDefenseItemContent = this.scene.add
+      .text(contentX, y, formatter.format(attackResults?.[0]?.defendUnits || 0), itemContentStyle)
+      .setOrigin(1, 0.5);
     y += 165;
 
     const totalAttackContributionUnits = attackResults[0]
@@ -332,111 +285,66 @@ class PopupWarHistoryDetail extends Popup {
     const attackUnitsItemContainer = this.scene.add
       .image(this.popup.width / 2 - 90, y, 'container-border')
       .setOrigin(0.5, 0.5);
-    const attackUnitsItemIcon = this.scene.add.image(this.popup.width * 0.13, y, 'gun').setOrigin(0.5, 0.5);
-    const attackUnitsItemText = this.scene.add
-      .text(
-        this.popup.width * 0.13 + attackUnitsItemIcon.width / 2 + 30,
-        y,
-        `Total Attack: ${totalAttackContributionUnits}`,
-        {
-          fontSize: '50px',
-          color: colors.black,
-          fontFamily: fontFamilies.bold,
-        }
-      )
-      .setOrigin(0, 0.5);
+    const attackUnitsItemIcon = this.scene.add.image(iconX, y, 'gun').setOrigin(0.5, 0.5);
+    const attackUnitsItemText = this.scene.add.text(titleX, y, `Total Attack:`, itemTitleStyle).setOrigin(0, 0.5);
+    const attackUnitsItemContent = this.scene.add
+      .text(contentX, y, totalAttackContributionUnits.toLocaleString(), itemContentStyle)
+      .setOrigin(1, 0.5);
     y += 165;
 
     const attackContributionItemContainer = this.scene.add
       .image(this.popup.width / 2 - 90, y, 'container-border')
       .setOrigin(0.5, 0.5);
-    const attackContributionItemIcon = this.scene.add.image(this.popup.width * 0.13, y, 'percent').setOrigin(0.5, 0.5);
+    const attackContributionItemIcon = this.scene.add.image(iconX, y, 'percent').setOrigin(0.5, 0.5);
     const attackContributionItemText = this.scene.add
-      .text(
-        this.popup.width * 0.13 + attackContributionItemIcon.width / 2 + 30,
-        y,
-        `Atk Contribution: ${Math.round((attackResults?.[0]?.attackContribution || 0) * 100)}%`,
-        {
-          fontSize: '50px',
-          color: colors.black,
-          fontFamily: fontFamilies.bold,
-        }
-      )
+      .text(titleX, y, `Atk Contribution:`, itemTitleStyle)
       .setOrigin(0, 0.5);
+    const attackContributionItemContent = this.scene.add
+      .text(contentX, y, `${Math.round((attackResults?.[0]?.attackContribution || 0) * 100)}%`, itemContentStyle)
+      .setOrigin(1, 0.5);
     y += 165;
 
     const tokenEarnedFromAttackingItemContainer = this.scene.add
       .image(this.popup.width / 2 - 90, y, 'container-border')
       .setOrigin(0.5, 0.5);
-    const tokenEarnedFromAttackingItemIcon = this.scene.add
-      .image(this.popup.width * 0.13, y, 'icon-coin-small')
-      .setOrigin(0.5, 0.5);
+    const tokenEarnedFromAttackingItemIcon = this.scene.add.image(iconX, y, 'icon-coin-small').setOrigin(0.5, 0.5);
     const tokenEarnedFromAttackingItemText = this.scene.add
-      .text(
-        this.popup.width * 0.13 + tokenEarnedFromAttackingItemIcon.width / 2 + 30,
-        y,
-        `$GANG Stolen: ${customFormat(tokenEarnFromAttacking || 0, 1)}`,
-        {
-          fontSize: '50px',
-          color: colors.black,
-          fontFamily: fontFamilies.bold,
-        }
-      )
+      .text(titleX, y, `GANG Stolen:`, itemTitleStyle)
       .setOrigin(0, 0.5);
-    y += 165;
-
-    const reputationGainedItemContainer = this.scene.add
-      .image(this.popup.width / 2 - 90, y, 'container-border')
-      .setOrigin(0.5, 0.5);
-    const reputationGainedItemIcon = this.scene.add
-      .image(this.popup.width * 0.13, y, 'icon-star-medium')
-      .setOrigin(0.5, 0.5);
-    const reputationGainedItemText = this.scene.add
-      .text(
-        this.popup.width * 0.13 + reputationGainedItemIcon.width / 2 + 30,
-        y,
-        `Reputation Gained: ${formatter.format(gainedReputation || 0)}`,
-        {
-          fontSize: '50px',
-          color: colors.black,
-          fontFamily: fontFamilies.bold,
-        }
-      )
-      .setOrigin(0, 0.5);
+    const tokenEarnedFromAttackingItemContent = this.scene.add
+      .text(contentX, y, customFormat(tokenEarnFromAttacking || 0, 1), itemContentStyle)
+      .setOrigin(1, 0.5);
     y += 165;
 
     const machinesLostItemContainer = this.scene.add
       .image(this.popup.width / 2 - 90, y, 'container-border')
       .setOrigin(0.5, 0.5);
-    const machinesLostItemIcon = this.scene.add
-      .image(this.popup.width * 0.13, y, 'mini-gangster-2')
-      .setOrigin(0.5, 0.5);
-    const machinesLostItemText = this.scene.add
-      .text(this.popup.width * 0.13 + earnItemIcon.width / 2 + 30, y, `Gangsters Lost: ${machinesLost || 0}`, {
-        fontSize: '50px',
-        color: colors.black,
-        fontFamily: fontFamilies.bold,
-      })
-      .setOrigin(0, 0.5);
+    const machinesLostItemIcon = this.scene.add.image(iconX, y, 'mini-gangster-2').setOrigin(0.5, 0.5);
+    const machinesLostItemText = this.scene.add.text(titleX, y, `Gangsters Lost:`, itemTitleStyle).setOrigin(0, 0.5);
+    const machinesLostItemContent = this.scene.add
+      .text(contentX, y, (machinesLost || 0).toLocaleString(), itemContentStyle)
+      .setOrigin(1, 0.5);
     y += 200;
 
     this.items.push(
-      earnIcon,
       earnTitle,
       earnItemContainer,
       earnItemIcon,
       earnItemText,
-      defendIcon,
+      earnItemContent,
       defendTitle,
       defendUnitsItemContainer,
       defendUnitsItemIcon,
       defendUnitsItemText,
+      defendUnitsItemContent,
       totalAttackItemContainer,
       totalAttackItemIcon,
       totalAttackItemText,
+      totalAttackItemContent,
       tokenStolenItemContainer,
       tokenStolenItemIcon,
       tokenStolenItemText,
+      tokenStolenItemContent,
       topAttackerItemContainerTop,
       topAttackerItemIcon,
       topAttackerItemText,
@@ -444,7 +352,7 @@ class PopupWarHistoryDetail extends Popup {
       gangsterKilledItemContainer,
       gangsterKilledItemIcon,
       gangsterKilledItemText,
-      attackIcon,
+      gangsterKilledItemContent,
       attackTitle,
       attackTargetItemContainer,
       attackTargetItemIcon,
@@ -452,23 +360,45 @@ class PopupWarHistoryDetail extends Popup {
       targetDefenseItemContainer,
       targetDefenseItemIcon,
       targetDefenseItemText,
+      targetDefenseItemContent,
       attackUnitsItemContainer,
       attackUnitsItemIcon,
       attackUnitsItemText,
+      attackUnitsItemContent,
       attackContributionItemContainer,
       attackContributionItemIcon,
       attackContributionItemText,
+      attackContributionItemContent,
       tokenEarnedFromAttackingItemContainer,
       tokenEarnedFromAttackingItemIcon,
       tokenEarnedFromAttackingItemText,
+      tokenEarnedFromAttackingItemContent,
       reputationGainedItemContainer,
       reputationGainedItemIcon,
       reputationGainedItemText,
+      reputationGainedItemContent,
       machinesLostItemContainer,
       machinesLostItemIcon,
-      machinesLostItemText
+      machinesLostItemText,
+      machinesLostItemContent
     );
     this.contentContainer.add(this.items);
+    // load avatars
+    let loader = new Phaser.Loader.LoaderPlugin(this.scene);
+    let textureManager = new Phaser.Textures.TextureManager(this.scene.game);
+    attackers.forEach(({ username, avatar }) => {
+      // ask the LoaderPlugin to load the texture
+      if (!textureManager.exists(`${username}-avatar`)) loader.image(`${username}-avatar`, avatar);
+    });
+
+    loader.once(Phaser.Loader.Events.COMPLETE, () =>
+      Object.keys(this.avatars).forEach((username) => {
+        const avatar = this.avatars[username];
+        avatar.setTexture(`${username}-avatar`);
+        avatar.setDisplaySize(avatarSize, avatarSize);
+      })
+    );
+    loader.start();
 
     const contentContainerHeight = y;
     this.contentContainer.setSize(0, contentContainerHeight);

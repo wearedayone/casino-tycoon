@@ -6,6 +6,7 @@ import configs from '../../configs/configs';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
 import { formatter } from '../../../../utils/numbers';
 import { capitalize, formatUsername } from '../../../../utils/strings';
+import { getReputationWhenWinWar } from '../../../../utils/formulas';
 
 const { width, height } = configs;
 
@@ -27,6 +28,7 @@ class PopupWarAttackDetail extends Popup {
   user = null;
   gamePlay = null;
   warResults = null;
+  attackerNetworth = 0;
   resultListY = height / 2 - this.popup.height / 2 + 350;
   resultItems = [];
   earnItems = [];
@@ -35,6 +37,10 @@ class PopupWarAttackDetail extends Popup {
     super(scene, 'popup-war-attack-detail', { title: 'Profile' });
     this.scene = scene;
     this.earnListY = this.resultListY + 550;
+    const numberOfAssetTextY = height / 2 + this.popup.height / 2 - 340;
+    const numberOfAssetTextGap = 350;
+    const numberOfAssetTextBaseX = width / 2 + 70;
+    const reputationY = numberOfAssetTextY + 120;
 
     this.backBtn = new TextButton(
       scene,
@@ -78,34 +84,40 @@ class PopupWarAttackDetail extends Popup {
       .setOrigin(0.5, 0.5);
     this.add(this.usernameText);
 
-    const numberOfAssetTextY = height / 2 + this.popup.height / 2 - 212;
-    const numberOfAssetTextGap = 350;
     this.numberOfMachinesText = scene.add
-      .text(width / 2 - numberOfAssetTextGap, numberOfAssetTextY, '', {
-        fontSize: '56px',
+      .text(numberOfAssetTextBaseX - numberOfAssetTextGap, numberOfAssetTextY, '', {
+        fontSize: fontSizes.medium,
         color: colors.black,
-        fontFamily: fontFamilies.bold,
+        fontFamily: fontFamilies.extraBold,
       })
       .setOrigin(0.5, 0.5);
     this.add(this.numberOfMachinesText);
 
     this.numberOfWorkersText = scene.add
-      .text(width / 2, numberOfAssetTextY, '', {
-        fontSize: '56px',
+      .text(numberOfAssetTextBaseX, numberOfAssetTextY, '', {
+        fontSize: fontSizes.medium,
         color: colors.black,
-        fontFamily: fontFamilies.bold,
+        fontFamily: fontFamilies.extraBold,
       })
       .setOrigin(0.5, 0.5);
     this.add(this.numberOfWorkersText);
 
     this.numberOfBuildingsText = scene.add
-      .text(width / 2 + numberOfAssetTextGap, numberOfAssetTextY, '', {
-        fontSize: '56px',
+      .text(numberOfAssetTextBaseX + numberOfAssetTextGap, numberOfAssetTextY, '', {
+        fontSize: fontSizes.medium,
         color: colors.black,
-        fontFamily: fontFamilies.bold,
+        fontFamily: fontFamilies.extraBold,
       })
       .setOrigin(0.5, 0.5);
     this.add(this.numberOfBuildingsText);
+    this.gainedReputation = scene.add
+      .text(width / 2 + this.popup.width * 0.22, reputationY, '+0', {
+        fontSize: '40px',
+        color: colors.brown,
+        fontFamily: fontFamilies.extraBold,
+      })
+      .setOrigin(0.5, 0.5);
+    this.add(this.gainedReputation);
 
     this.resultListContainer = scene.add.image(width / 2, this.resultListY, 'container-small').setOrigin(0.5, 0);
     this.add(this.resultListContainer);
@@ -115,8 +127,9 @@ class PopupWarAttackDetail extends Popup {
     this.add(this.earnListContainer);
     this.earnContentContainer = scene.add.container().setSize(this.popup.width * 0.8, 0);
 
-    scene.game.events.on('update-user-to-attack-detail', ({ user, gamePlay, warResults }) => {
+    scene.game.events.on('update-user-to-attack-detail', ({ user, attackerNetworth, gamePlay, warResults }) => {
       this.user = user;
+      this.attackerNetworth = attackerNetworth || 0;
       this.gamePlay = gamePlay;
       this.warResults = warResults;
       this.updateDetail();
@@ -142,10 +155,12 @@ class PopupWarAttackDetail extends Popup {
     const { username } = this.user;
     this.usernameText.text = username;
 
-    const { numberOfMachines, numberOfWorkers, numberOfBuildings } = this.gamePlay;
+    const { numberOfMachines, numberOfWorkers, numberOfBuildings, networth } = this.gamePlay;
     this.numberOfMachinesText.text = `${formatter.format(numberOfMachines)}`;
     this.numberOfWorkersText.text = `${formatter.format(numberOfWorkers)}`;
     this.numberOfBuildingsText.text = `${formatter.format(numberOfBuildings)}`;
+    const gainedReputation = getReputationWhenWinWar(this.attackerNetworth, networth);
+    this.gainedReputation.text = `+${formatter.format(gainedReputation)}`;
 
     // clear old items
     this.resultItems.map((item) => {
@@ -235,20 +250,20 @@ class PopupWarAttackDetail extends Popup {
         })
         .setOrigin(0.5, 0.5);
       const earnUnitsText = this.scene.add
-        .text(this.popup.width * 0.55, y + rowHeight / 2, `${formatter.format(earnUnits)}`, smallBlackBoldCenter)
+        .text(this.popup.width * 0.58, y + rowHeight / 2, `${formatter.format(earnUnits)}`, smallBlackBoldCenter)
         .setOrigin(0.5, 0.5);
       const attackUnitsText = this.scene.add
-        .text(this.popup.width * 0.67, y + rowHeight / 2, `${formatter.format(attackUnits)}`, smallBlackBoldCenter)
+        .text(this.popup.width * 0.68, y + rowHeight / 2, `${formatter.format(attackUnits)}`, smallBlackBoldCenter)
         .setOrigin(0.5, 0.5);
       const defendUnitsText = this.scene.add
-        .text(this.popup.width * 0.77, y + rowHeight / 2, `${formatter.format(defendUnits)}`, smallBlackBoldCenter)
+        .text(this.popup.width * 0.78, y + rowHeight / 2, `${formatter.format(defendUnits)}`, smallBlackBoldCenter)
         .setOrigin(0.5, 0.5);
 
       const tokenEarnedText = this.scene.add
         .text(this.popup.width * 0.23, y + rowHeight / 2, `+${formatter.format(tokenEarned)}`, smallBlackBoldCenter)
         .setOrigin(0.5, 0.5);
       const tokenEarnedIcon = this.scene.add
-        .image(this.popup.width * 0.23 + tokenEarnedText.width / 2 + 30, y + rowHeight / 2, 'coin3')
+        .image(this.popup.width * 0.23 + tokenEarnedText.width / 2 + 40, y + rowHeight / 2, 'icon-coin-outlined-small')
         .setOrigin(0.5, 0.5);
 
       const tokenLossText = this.scene.add
@@ -258,7 +273,7 @@ class PopupWarAttackDetail extends Popup {
         })
         .setOrigin(0.5, 0.5);
       const tokenLossIcon = this.scene.add
-        .image(this.popup.width * 0.47 + tokenLossText.width / 2 + 30, y + rowHeight / 2, 'coin3')
+        .image(this.popup.width * 0.47 + tokenLossText.width / 2 + 40, y + rowHeight / 2, 'icon-coin-outlined-small')
         .setOrigin(0.5, 0.5);
 
       const topAttackerText = this.scene.add

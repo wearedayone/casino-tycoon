@@ -6,10 +6,11 @@ import chunk from 'lodash.chunk';
 import admin, { firestore } from '../configs/firebase.config.js';
 import { getActiveSeasonId, getActiveSeason } from './season.service.js';
 import { getNFTBalance, setWarResult } from './worker.service.js';
-import { getUserUsernames } from './user.service.js';
+import { getUserAvatarsSmall, getUserUsernames } from './user.service.js';
 import { getUserGamePlay } from './gamePlay.service.js';
 import logger from '../utils/logger.js';
 import { getAccurate } from '../utils/math.js';
+import { getReputationWhenWinWar } from '../utils/formulas.js';
 
 const MAX_RETRY = 3;
 
@@ -64,6 +65,7 @@ export const getWarHistoryDetail = async ({ userId, warSnapshotId, warResultId }
   const { attackResults, defendResults } = snapshot.data();
   const userIds = [...new Set([...(attackResults || []), ...(defendResults || [])].map((item) => item.userId))];
   const usernames = await getUserUsernames(userIds);
+  const avatars = await getUserAvatarsSmall(userIds);
 
   return {
     id: snapshot.id,
@@ -71,10 +73,12 @@ export const getWarHistoryDetail = async ({ userId, warSnapshotId, warResultId }
     attackResults: (attackResults || []).map((item) => ({
       ...item,
       userUsername: usernames[item.userId],
+      avatar: avatars[item.userId],
     })),
     defendResults: (defendResults || []).map((item) => ({
       ...item,
       userUsername: usernames[item.userId],
+      avatar: avatars[item.userId],
     })),
   };
 };
@@ -217,15 +221,7 @@ export const generateDailyWarSnapshot = async () => {
 
       if (totalAttackUnits > attackedUser.defendUnits) {
         // winners gain reputation
-        let gainedReputationPercent = 0;
-        const reputationRatio = attackedUser.networth / networth;
-
-        if (reputationRatio > 10) gainedReputationPercent = 0.005;
-        else if (reputationRatio > 5) gainedReputationPercent = 0.004;
-        else if (reputationRatio > 3) gainedReputationPercent = 0.003;
-        else if (reputationRatio > 2) gainedReputationPercent = 0.002;
-        else if (reputationRatio > 1) gainedReputationPercent = 0.001;
-        user.gainedReputation = Math.round(attackedUser.networth * gainedReputationPercent);
+        user.gainedReputation = getReputationWhenWinWar(networth, attackedUser.networth);
 
         const stolenToken = Math.floor(attackContribution * earningStealPercent * attackedUser.tokenEarnFromEarning);
         user.tokenEarnFromAttacking = stolenToken;
@@ -607,7 +603,7 @@ export const getUserToAttackDetail = async (userId) => {
   const userGamePlay = await getUserGamePlay(userId);
   if (!userGamePlay) throw new Error('API error: Bad request - cannot find game play');
 
-  const { numberOfMachines, numberOfWorkers, numberOfBuildings } = userGamePlay;
+  const { numberOfMachines, numberOfWorkers, numberOfBuildings, networth } = userGamePlay;
 
   const seasonId = await getActiveSeasonId();
   const warHistorySnapshot = await firestore
@@ -640,7 +636,7 @@ export const getUserToAttackDetail = async (userId) => {
 
   return {
     user: { id: userId, username: usernames[userId] },
-    gamePlay: { numberOfMachines, numberOfWorkers, numberOfBuildings },
+    gamePlay: { numberOfMachines, numberOfWorkers, numberOfBuildings, networth },
     warResults,
   };
 };

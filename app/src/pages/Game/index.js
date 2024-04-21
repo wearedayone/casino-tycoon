@@ -1326,7 +1326,12 @@ const Game = () => {
         getUserDetailToAttack(userId)
           .then((res) => {
             const { user, gamePlay, warResults } = res.data;
-            gameRef.current?.events.emit('update-user-to-attack-detail', { user, gamePlay, warResults });
+            gameRef.current?.events.emit('update-user-to-attack-detail', {
+              user,
+              attackerNetworth: networth,
+              gamePlay,
+              warResults,
+            });
           })
           .catch((err) => {
             console.error(err);
