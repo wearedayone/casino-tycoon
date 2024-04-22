@@ -33,6 +33,7 @@ import PopupWarAttackDetail from '../components/popup/PopupWarAttackDetail';
 import PopupWarHistoryDetail from '../components/popup/PopupWarHistoryDetail';
 import PopupGoonPrice from '../components/popup/PopupGoonPrice';
 import PopupSafehousePrice from '../components/popup/PopupSafehousePrice';
+import PopupGangsterPrice from '../components/popup/PopupGangsterPrice';
 import PopupDailySpin from '../components/popup/PopupDailySpin';
 import PopupSpinReward from '../components/popup/PopupSpinReward';
 
@@ -193,6 +194,9 @@ class MainScene extends Phaser.Scene {
 
       this.popupSafehousePrice = new PopupSafehousePrice(this);
       this.add.existing(this.popupSafehousePrice);
+
+      this.popupGangsterPrice = new PopupGangsterPrice(this);
+      this.add.existing(this.popupGangsterPrice);
 
       this.popupLeaderboard = new PopupLeaderboard(this);
       this.add.existing(this.popupLeaderboard);

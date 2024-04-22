@@ -4,6 +4,7 @@ import Popup from './Popup';
 import PopupProcessing from './PopupProcessing';
 import PopupConfirm, { icon1Gap } from './PopupConfirm';
 import TextButton from '../button/TextButton';
+import Button from '../button/Button';
 import UpgradeAssetButton from '../button/UpgradeAssetButton';
 import configs from '../../configs/configs';
 import { customFormat, formatter } from '../../../../utils/numbers';
@@ -280,6 +281,23 @@ class PopupBuyGangster extends Popup {
       .setOrigin(0, 0.5)
       .setVisible(!isSimulator);
     this.add(this.coin);
+
+    if (!isSimulator) {
+      this.infoButton = new Button(
+        scene,
+        this.coin.x + this.coin.width + 50,
+        counterY - 40,
+        'button-info',
+        'button-info-pressed',
+        () => {
+          if (isSimulator) return;
+          this.close();
+          scene.popupGangsterPrice?.open();
+        },
+        { sound: 'open' }
+      );
+      this.add(this.infoButton);
+    }
 
     this.background = scene.add.rectangle(0, 0, width, height, 0x260343, 0.8).setOrigin(0, 0).setVisible(false);
     this.background
