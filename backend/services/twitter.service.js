@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import axios from 'axios';
 
 import environments from '../utils/environments.js';
+import logger from '../utils/logger.js';
 import { firestore } from '../configs/firebase.config.js';
 
 const { TWITTER_CONSUMER_API_KEY, TWITTER_CONSUMER_API_SECRET, TWITTER_BEARER_TOKEN, SITE_URL } = environments;
@@ -35,32 +36,50 @@ export const submitOauthData = async ({ userId, oauth_token, oauth_verifier }) =
   const existed = await firestore.collection('user').where('username', '==', screen_name).get();
   if (!existed.empty) throw new Error('API error: Twitter linked with another account already');
 
-  const userTwitter = await axios.get(`https://api.twitter.com/2/users/by/username/${screen_name}`, {
-    params: { 'user.fields': 'profile_image_url' },
-    headers: { Authorization: `Bearer ${TWITTER_BEARER_TOKEN}` },
-  });
-
-  const { profile_image_url } = userTwitter.data.data;
-
   await firestore
     .collection('user')
     .doc(userId)
-    .update({
-      username: screen_name,
-      socials: { twitter: { verified: true } },
-      avatarURL_small: profile_image_url,
-      avatarURL_big: profile_image_url.replace('_normal', '_bigger'),
-      avatarURL: profile_image_url.replace('_normal', '_bigger'),
-    });
+    .update({ username: screen_name, socials: { twitter: { verified: true } } });
   await firestore
     .collection('social')
     .doc(userId)
     .set({ twitter: { oauth_token: oauth_token_response, oauth_token_secret, user_id, screen_name } }, { merge: true });
+  updateAvatarFromTwitter({ userId });
 
   const promises = [];
   const gamePlaySnapshot = await firestore.collection('gamePlay').where('userId', '==', userId).get();
   gamePlaySnapshot.docs.forEach((doc) => promises.push(doc.ref.update({ username: screen_name })));
   await Promise.all(promises);
+};
+
+export const updateAvatarFromTwitter = async ({ userId }) => {
+  try {
+    const userRef = firestore.collection('user').doc(userId);
+
+    const userSnapshot = await userRef.get();
+    const { username, avatarURL, socials } = userSnapshot.data();
+    if (!socials?.twitter?.verified) throw new Error('User has not connected to Twitter');
+    const userTwitter = await axios.get(`https://api.twitter.com/2/users/by/username/${username}`, {
+      params: { 'user.fields': 'profile_image_url' },
+      headers: { Authorization: `Bearer ${TWITTER_BEARER_TOKEN}` },
+    });
+
+    const { profile_image_url } = userTwitter.data.data;
+
+    const bigAvatar = profile_image_url.replace('_normal', '_bigger');
+    const smallAvatar = profile_image_url;
+
+    if (avatarURL !== bigAvatar) {
+      const data = { avatarURL_small: smallAvatar, avatarURL_big: bigAvatar, avatarURL: bigAvatar };
+      await firestore.collection('user').doc(userId).update(data);
+      const promises = [];
+      const gamePlaySnapshot = await firestore.collection('gamePlay').where('userId', '==', userId).get();
+      gamePlaySnapshot.docs.forEach((doc) => promises.push(doc.ref.update(data)));
+      await Promise.all(promises);
+    }
+  } catch (error) {
+    logger.error(error.message);
+  }
 };
 
 const obtainOauthAccessToken = async ({ consumerKey, consumerSecret, oauthToken, oauthVerifier, method, apiUrl }) => {

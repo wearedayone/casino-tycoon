@@ -9,6 +9,7 @@ import { getActiveSeason } from './season.service.js';
 import { getLeaderboard, getRank } from './gamePlay.service.js';
 import { generateCode } from '../utils/formulas.js';
 import { getTokenBalance } from './worker.service.js';
+import { updateAvatarFromTwitter } from './twitter.service.js';
 
 const CODE_LENGTH = 10;
 
@@ -163,6 +164,9 @@ export const createUserIfNotExist = async (userId) => {
         username: twitter.username,
       });
     }
+
+    // custom twitter connection
+    updateAvatarFromTwitter({ userId });
 
     if (wallet) {
       updateETHBalance(userId, wallet, ETHBalance).catch((err) => console.error(err));
