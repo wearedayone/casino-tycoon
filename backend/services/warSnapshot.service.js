@@ -41,13 +41,14 @@ export const getWarHistory = async (userId) => {
     .get();
 
   const warHistory = warHistorySnapshot.docs.map((doc) => {
-    const { createdAt, totalTokenReward, machinesLost } = doc.data();
+    const { createdAt, totalTokenReward, machinesLost, gainedReputation } = doc.data();
     return {
       id: doc.id,
       warSnapshotId: doc.ref.parent.parent.id,
       date: moment(createdAt.toDate()).format('DD/MM'),
       totalTokenReward,
       machinesLost,
+      gainedReputation,
     };
   });
   return warHistory;
