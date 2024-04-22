@@ -407,7 +407,8 @@ class PopupBuyGangster extends Popup {
           color: '#29000B',
         }
       )
-      .setOrigin(0.5, 0.5);
+      .setOrigin(0.5, 0.5)
+      .setVisible(false);
     this.add(this.warningText1);
 
     this.warningText2 = scene.add
@@ -416,7 +417,8 @@ class PopupBuyGangster extends Popup {
         fontFamily: fontFamilies.bold,
         color: '#29000B',
       })
-      .setOrigin(0.5, 0.5);
+      .setOrigin(0.5, 0.5)
+      .setVisible(false);
     this.add(this.warningText2);
 
     this.warningText3 = scene.add
@@ -425,7 +427,8 @@ class PopupBuyGangster extends Popup {
         fontFamily: fontFamilies.bold,
         color: '#29000B',
       })
-      .setOrigin(0.5, 0.5);
+      .setOrigin(0.5, 0.5)
+      .setVisible(false);
     this.add(this.warningText3);
 
     this.warningText4 = scene.add
@@ -434,7 +437,8 @@ class PopupBuyGangster extends Popup {
         fontFamily: fontFamilies.bold,
         color: '#29000B',
       })
-      .setOrigin(0.5, 0.5);
+      .setOrigin(0.5, 0.5)
+      .setVisible(false);
     this.add(this.warningText4);
 
     scene.game.events.on(events.completed, () => {
@@ -530,8 +534,6 @@ class PopupBuyGangster extends Popup {
     scene.game.events.emit(events.requestMachines);
     scene.game.events.emit(events.requestIncrementTime);
     scene.game.events.emit('request-gas-mint');
-
-    this.showWarning();
   }
 
   showWarning(overflowGangsters = 0) {
