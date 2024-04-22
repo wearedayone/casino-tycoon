@@ -10,7 +10,7 @@ const main = async () => {
       machine: {
         ...activeSeason.machine,
         basePrice: 3000,
-        targetDailyPurchase: 3000,
+        targetDailyPurchase: 1000,
         targetPrice: 3000,
       },
     });

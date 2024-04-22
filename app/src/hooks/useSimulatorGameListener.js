@@ -106,12 +106,16 @@ const useSimulatorGameListener = () => {
         networth: assets.networth,
         balance: balances.ETHBalance,
         basePrice: activeSeason?.machine.basePrice || 0,
+        basePriceWhitelist: activeSeason?.machine.basePrice || 0,
         maxPerBatch: activeSeason?.machine.maxPerBatch,
         dailyReward: activeSeason?.machine.dailyReward || 0,
         reservePool: activeSeason?.reservePool || 0,
         reservePoolReward: activeSeason?.reservePoolReward || 0,
         networthIncrease: activeSeason?.machine.networth,
         tokenPrice: market?.tokenPrice || 0,
+        targetDailyPurchase: activeSeason?.machine.targetDailyPurchase,
+        targetPrice: activeSeason?.machine.targetPrice,
+        salesLastPeriod: 0,
       });
     });
 
@@ -340,12 +344,16 @@ const useSimulatorGameListener = () => {
         networth: assets.networth,
         balance: balances.ETHBalance,
         basePrice: activeSeason?.machine.basePrice || 0,
+        basePriceWhitelist: activeSeason?.machine.basePrice || 0,
         maxPerBatch: activeSeason?.machine.maxPerBatch || 0,
         dailyReward: activeSeason?.machine.dailyReward || 0,
         reservePool: 0,
         reservePoolReward: activeSeason?.reservePoolReward || 0,
         networthIncrease: activeSeason?.machine.networth,
         tokenPrice: market?.tokenPrice || 0,
+        targetDailyPurchase: activeSeason?.machine.targetDailyPurchase,
+        targetPrice: activeSeason?.machine.targetPrice,
+        salesLastPeriod: 0,
       });
     }
   }, [assets, balances, activeSeason, market]);

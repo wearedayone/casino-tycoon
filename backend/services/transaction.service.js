@@ -23,6 +23,8 @@ import {
   calculateNextWorkerBuyPriceBatch,
   calculateNextBuildingBuyPrice,
   calculateNextWorkerBuyPrice,
+  calculateNextMachineBuyPrice,
+  calculateNextMachineBuyPriceBatch,
   calculateSpinPrice,
   getTokenFromXToken,
   calculateNewEstimatedEndTimeUnix,
@@ -111,14 +113,24 @@ export const initTransaction = async ({ userId, type, ...data }) => {
         txnData.referrerAddress = referrerSnapshot.docs[0].data().address;
         txnData.referralDiscount = getAccurate(data.amount * machine.basePrice * userReferralDiscount);
       }
-      const unitPrice = isMintWhitelist
-        ? machine.whitelistPrice
-        : getAccurate(machine.basePrice * (1 - userReferralDiscount));
-      const unitPriceInToken = (await convertEthInputToToken(unitPrice)).amount;
 
-      const estimatedPrice = data.amount * unitPriceInToken;
-      txnData.value = estimatedPrice;
-      txnData.prices = Array.from({ length: data.amount }, () => unitPriceInToken);
+      const machineTxns = await firestore
+        .collection('transaction')
+        .where('seasonId', '==', activeSeason.id)
+        .where('type', '==', 'buy-machine')
+        .where('status', '==', 'Success')
+        .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startSalePeriod))
+        .get();
+      const machineSalesLastPeriod = machineTxns.docs.reduce((total, doc) => total + doc.data().amount, 0);
+      const machinePrices = calculateNextMachineBuyPriceBatch(
+        machineSalesLastPeriod,
+        machine.targetDailyPurchase,
+        machine.targetPrice,
+        machine.basePrice,
+        txnData.amount
+      );
+      txnData.value = machinePrices.total;
+      txnData.prices = machinePrices.prices;
       break;
     case 'buy-worker':
       txnData.amount = data.amount;
@@ -934,6 +946,48 @@ export const getWorkerPriceChart = async ({ timeMode }) => {
     worker.targetDailyPurchase,
     worker.targetPrice,
     worker.basePrice
+  );
+
+  return [...txns, { createdAt: now, value: currentPrice }];
+};
+
+export const getMachinePriceChart = async ({ timeMode }) => {
+  if (!['1d', '5d'].includes(timeMode)) throw new Error('API error: Invalid time mode');
+
+  const activeSeason = await getActiveSeason();
+  const now = Date.now();
+  const numberOfDays = timeMode === '1d' ? 1 : 5;
+  const startTimeUnix = now - numberOfDays * 24 * 60 * 60 * 1000;
+
+  const snapshot = await firestore
+    .collection('machine-txn-prices')
+    .where('seasonId', '==', activeSeason.id)
+    .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startTimeUnix))
+    .where('createdAt', '<', admin.firestore.Timestamp.fromMillis(now))
+    .orderBy('createdAt', 'asc')
+    .get();
+
+  const txns = snapshot.docs.map((doc) => ({
+    createdAt: doc.data().createdAt.toDate().getTime(),
+    value: doc.data().avgPrice,
+  }));
+
+  const { machine } = activeSeason;
+  const last12hTxns = await firestore
+    .collection('transaction')
+    .where('seasonId', '==', activeSeason.id)
+    .where('type', '==', 'buy-machine')
+    .where('status', '==', 'Success')
+    .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(now - 12 * 60 * 60 * 1000))
+    .where('createdAt', '<', admin.firestore.Timestamp.fromMillis(now))
+    .get();
+
+  const machineSalesLastPeriod = last12hTxns.docs.reduce((total, doc) => total + doc.data().amount, 0);
+  const currentPrice = calculateNextMachineBuyPrice(
+    machineSalesLastPeriod,
+    machine.targetDailyPurchase,
+    machine.targetPrice,
+    machine.basePrice
   );
 
   return [...txns, { createdAt: now, value: currentPrice }];

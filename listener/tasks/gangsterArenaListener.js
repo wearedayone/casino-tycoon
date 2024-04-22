@@ -58,7 +58,7 @@ const processMintEvent = async ({ to, tokenId, amount, nonce, event, contract, n
     logger.info({ to, tokenId, amount, nonce, event });
     const { transactionHash } = event;
 
-    // need to update txn, season, user, referrer, gamePlay, warDeployment
+    // need to update txn, season, user, referrer, gamePlay, warDeployment, machine-txn-prices
     const batch = firestore.batch();
 
     const user = await getUserFromAddress(to);
@@ -130,6 +130,16 @@ const processMintEvent = async ({ to, tokenId, amount, nonce, event, contract, n
       const warDeploymentRef = firestore.collection('warDeployment').doc(warDeploymentId);
       batch.update(warDeploymentRef, warDeployment);
     }
+
+    // update machine-txn-prices
+    const { createdAt, prices, value } = txn.data();
+    const machineTxnPriceRef = firestore.collection('machine-txn-prices').doc(txn.id);
+    batch.set(machineTxnPriceRef, {
+      txnId: txn.id,
+      createdAt,
+      avgPrice: prices.length > 0 ? value / prices.length : 0,
+      seasonId: activeSeason.id,
+    });
 
     console.log('start batching...');
     let retry = 0;

@@ -1,11 +1,15 @@
 import admin, { firestore } from '../configs/admin.config.js';
-import { calculateNextBuildingBuyPrice, calculateNextWorkerBuyPrice } from '../utils/formulas.js';
+import {
+  calculateNextBuildingBuyPrice,
+  calculateNextWorkerBuyPrice,
+  calculateNextMachineBuyPrice,
+} from '../utils/formulas.js';
 import { getActiveSeason } from '../utils/utils.js';
 
 const calculateTxnPrice = async () => {
   try {
     const activeSeason = await getActiveSeason();
-    const { worker, building } = activeSeason;
+    const { worker, building, machine } = activeSeason;
 
     const now = Date.now();
     const startTimeUnix = now - 12 * 60 * 60 * 1000;
@@ -57,6 +61,30 @@ const calculateTxnPrice = async () => {
       avgPrice: buildingPrice,
     });
     console.log('Calculate building txn price done');
+
+    console.log('Calculate machine txn price');
+    const machineTxnSnapshot = await firestore
+      .collection('transaction')
+      .where('seasonId', '==', activeSeason.id)
+      .where('type', '==', 'buy-machine')
+      .where('status', '==', 'Success')
+      .where('createdAt', '>=', admin.firestore.Timestamp.fromMillis(startTimeUnix))
+      .get();
+
+    const machineSalesLastPeriod = machineTxnSnapshot.docs.reduce((total, doc) => total + doc.data().amount, 0);
+    const machinePrice = calculateNextMachineBuyPrice(
+      machineSalesLastPeriod,
+      machine.targetDailyPurchase,
+      machine.targetPrice,
+      machine.basePrice
+    );
+    await firestore.collection('machine-txn-prices').add({
+      seasonId: activeSeason.id,
+      txnId: null,
+      createdAt: admin.firestore.Timestamp.fromMillis(now),
+      avgPrice: machinePrice,
+    });
+    console.log('Calculate machine txn price done');
   } catch (ex) {
     console.log(ex);
     console.error(ex);

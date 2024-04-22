@@ -264,6 +264,43 @@ const generateTxnPriceForExistTxn = async () => {
     }
   }
   console.log('calculate buy building txns done');
+
+  console.log('calculate buy machine txns');
+  const machineTxnSnapshot = await firestore
+    .collection('transaction')
+    .where('seasonId', '==', activeSeason.id)
+    .where('type', '==', 'buy-machine')
+    .where('status', '==', 'Success')
+    .orderBy('createdAt', 'asc')
+    .get();
+  const machineTxns = machineTxnSnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+
+  const formattedMachineTxns = machineTxns.map((txn) => ({
+    txnId: txn.id,
+    createdAt: txn.createdAt,
+    avgPrice: txn.value / txn.prices.length,
+    seasonId: activeSeason.id,
+  }));
+
+  listTxns = [...formattedMachineTxns];
+  i = 0;
+  for (const item of listTxns) {
+    if (item.txnId) {
+      console.log(`${++i}/${listTxns.length}: update`);
+      await firestore
+        .collection('machine-txn-prices')
+        .doc(item.txnId)
+        .set({
+          ...item,
+        });
+    } else {
+      console.log(`${++i}/${listTxns.length}: Add New`);
+      await firestore.collection('machine-txn-prices').add({
+        ...item,
+      });
+    }
+  }
+  console.log('calculate buy machine txns done');
 };
 
 const generateTxnPrice30Min = async ({ endTime }) => {
@@ -368,9 +405,9 @@ const generateTxnPrice30Min = async ({ endTime }) => {
 const main = async () => {
   // await generateTxnPrice();
   // await cleanTxnPrice({ startTime: 1711762200000 });
-  // await generateTxnPriceForExistTxn();
-  await cleanAllAutoTxnPrice();
-  await generateTxnPrice30Min({ endTime: 1711848600000 });
+  await generateTxnPriceForExistTxn();
+  // await cleanAllAutoTxnPrice();
+  // await generateTxnPrice30Min({ endTime: 1711848600000 });
 };
 
 main()
