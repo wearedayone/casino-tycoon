@@ -136,6 +136,7 @@ class PopupGangsterPrice extends Popup {
       ).total;
 
       this.currentPrice.text = formatter.format(estimatedPrice.toPrecision(3));
+      this.coin.x = this.currentPrice.x + this.currentPrice.width + this.coin.width + 20;
     });
 
     scene.game.events.on('update-gangster-price', (data) => {

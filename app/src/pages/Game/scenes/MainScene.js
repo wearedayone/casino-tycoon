@@ -180,15 +180,6 @@ class MainScene extends Phaser.Scene {
       sceneKey: 'rexUI',
     });
     pluginLoader.once(Phaser.Loader.Events.COMPLETE, () => {
-      this.popupSafeHouseUpgrade = new PopupSafeHouseUpgrade(this);
-      this.add.existing(this.popupSafeHouseUpgrade);
-
-      this.popupBuyGoon = new PopupBuyGoon(this);
-      this.add.existing(this.popupBuyGoon);
-
-      this.popupBuyGangster = new PopupBuyGangster(this);
-      this.add.existing(this.popupBuyGangster);
-
       this.popupGoonPrice = new PopupGoonPrice(this);
       this.add.existing(this.popupGoonPrice);
 
@@ -197,6 +188,15 @@ class MainScene extends Phaser.Scene {
 
       this.popupGangsterPrice = new PopupGangsterPrice(this);
       this.add.existing(this.popupGangsterPrice);
+
+      this.popupSafeHouseUpgrade = new PopupSafeHouseUpgrade(this);
+      this.add.existing(this.popupSafeHouseUpgrade);
+
+      this.popupBuyGoon = new PopupBuyGoon(this);
+      this.add.existing(this.popupBuyGoon);
+
+      this.popupBuyGangster = new PopupBuyGangster(this);
+      this.add.existing(this.popupBuyGangster);
 
       this.popupLeaderboard = new PopupLeaderboard(this);
       this.add.existing(this.popupLeaderboard);
