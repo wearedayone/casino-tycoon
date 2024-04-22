@@ -88,7 +88,7 @@ class PopupBuyGoon extends Popup {
           `Hiring ${this.quantity} Goon${this.quantity > 1 ? 's' : ''}.\nPlease, wait`
         );
 
-        scene.game.events.emit(events.buyGoon, { quantity: this.quantity, mintFunction: this.mintFunction });
+        scene.game.events.emit(events.buyGoon, { quantity: this.quantity, token: this.purchaseToken });
       },
     });
     scene.add.existing(this.popupConfirm);
