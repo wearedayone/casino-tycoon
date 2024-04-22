@@ -56,13 +56,15 @@ const spinRewards = [
 const ROW_STRUCTURE = {
   assets: {
     machine: {
-      basePrice: { row: 2, formatter: Number },
+      basePrice: { row: 83, formatter: Number },
       whitelistPrice: { row: 3, formatter: Number },
       maxPerBatch: { row: 4, formatter: Number },
       maxWhitelistAmount: { row: 5, formatter: Number },
       dailyReward: { row: 6, formatter: Number },
       networth: { row: 7, formatter: Number },
       earningRateIncrementPerLevel: { row: 8, formatter: Number },
+      targetDailyPurchase: { row: 81, formatter: Number },
+      targetPrice: { row: 82, formatter: Number },
     },
     worker: {
       basePrice: { row: 10, formatter: Number },

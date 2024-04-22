@@ -1,13 +1,15 @@
 {
   "assets": {
     "machine": {
-      "basePrice": 0.01,
+      "basePrice": 3000,
       "whitelistPrice": 0.01,
       "maxPerBatch": 100,
       "maxWhitelistAmount": 10,
       "dailyReward": 1000,
       "networth": 10,
-      "earningRateIncrementPerLevel": 0.01
+      "earningRateIncrementPerLevel": 0.01,
+      "targetDailyPurchase": 3000,
+      "targetPrice": 1000
     },
     "worker": {
       "basePrice": 200,
@@ -56,9 +58,9 @@
     "timeIncrementInSeconds": 60,
     "timeDecrementInSeconds": 10
   },
-  "claimGapInSeconds": 600,
+  "claimGapInSeconds": 3600,
   "openseaNftCollection": "gangster-arena",
-  "swapXTokenGapInSeconds": 600,
+  "swapXTokenGapInSeconds": 432000,
   "tokenContract": {
     "liquidityFee": 0.01,
     "teamFee": 0.02,
