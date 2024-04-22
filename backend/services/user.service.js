@@ -9,6 +9,7 @@ import { getActiveSeason } from './season.service.js';
 import { getLeaderboard, getRank } from './gamePlay.service.js';
 import { generateCode } from '../utils/formulas.js';
 import { getTokenBalance } from './worker.service.js';
+import { updateAvatarFromTwitter } from './twitter.service.js';
 
 const CODE_LENGTH = 10;
 
@@ -130,7 +131,7 @@ export const createUserIfNotExist = async (userId) => {
         address: address,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
         username,
-        avatarURL: defaultAvatar,
+        avatarURL: avatarURL_big,
         avatarURL_small,
         avatarURL_big,
         tokenBalance: tokenBalance,
@@ -155,6 +156,7 @@ export const createUserIfNotExist = async (userId) => {
         .update({
           avatarURL_small: twitter.profilePictureUrl,
           avatarURL_big: twitter.profilePictureUrl.replace('_normal', '_bigger'),
+          avatarURL: twitter.profilePictureUrl.replace('_normal', '_bigger'),
         });
     }
     if (twitter?.username && username !== twitter.username) {
@@ -162,6 +164,9 @@ export const createUserIfNotExist = async (userId) => {
         username: twitter.username,
       });
     }
+
+    // custom twitter connection
+    updateAvatarFromTwitter({ userId });
 
     if (wallet) {
       updateETHBalance(userId, wallet, ETHBalance).catch((err) => console.error(err));
