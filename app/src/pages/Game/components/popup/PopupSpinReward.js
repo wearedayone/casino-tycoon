@@ -78,14 +78,18 @@ class PopupSpinReward extends Phaser.GameObjects.Container {
     this.amountText.x = this.iconX;
   };
 
-  showReward({ type, value }) {
-    const icon = type === 'house' ? 'spin-reward-house' : 'spin-reward-point';
-    const reward = type === 'house' ? 'Safehouses' : '$GANG';
+  showReward(reward) {
+    const { iconImg, type, value } = reward;
+    const rewardText = type === 'house' ? 'Safehouses' : '$GANG';
 
-    this.icon.setTexture(icon);
+    this.icon.setTexture(iconImg);
+    if (this.icon.width > configs.width) {
+      this.icon.displayWidth = configs.width * 0.8;
+      this.icon.scaleY = this.icon.scaleX;
+    }
 
     this.amountText.text = `${value}`;
-    this.rewardText.text = reward;
+    this.rewardText.text = rewardText;
 
     this.wonText.y = this.iconY + this.icon.height / 2 + 80;
     this.amountText.y = this.wonText.y + 100;

@@ -173,8 +173,6 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('arrow-1-blue', '/images/arrow-1-blue.png');
     this.load.image('arrow-2-white', '/images/arrow-2-white.png');
     this.load.image('arrow-2-blue', '/images/arrow-2-blue.png');
-    this.load.image('spin-item', '/images/spin-item.png');
-    this.load.image('spin-item-active', '/images/spin-item-active.png');
     this.load.image('spin-house', '/images/spin-house.png');
     this.load.image('spin-point', '/images/spin-point.png');
     this.load.image('spin-reward-house', '/images/spin-reward-house.png');
@@ -183,6 +181,23 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('swap-switch-container', '/images/swap-switch-container.png');
     this.load.image('gang-coin', '/images/gang-coin.png');
     this.load.image('gang-coin-small', '/images/gang-coin-small.png');
+    this.load.image('spin-container-1', '/images/spin-container-1.png');
+    this.load.image('spin-container-2', '/images/spin-container-2.png');
+    this.load.image('spin-container-3', '/images/spin-container-3.png');
+    this.load.image('spin-container-4', '/images/spin-container-4.png');
+    this.load.image('spin-container-5', '/images/spin-container-5.png');
+    this.load.image('spin-reward-token-1', '/images/spin-reward-token-1.png');
+    this.load.image('spin-reward-token-2', '/images/spin-reward-token-2.png');
+    this.load.image('spin-reward-token-3', '/images/spin-reward-token-3.png');
+    this.load.image('spin-reward-token-4', '/images/spin-reward-token-4.png');
+    this.load.image('spin-reward-token-5', '/images/spin-reward-token-5.png');
+    this.load.image('spin-reward-token-6', '/images/spin-reward-token-6.png');
+    this.load.image('spin-reward-token-7', '/images/spin-reward-token-7.png');
+    this.load.image('spin-reward-house-1', '/images/spin-reward-house-1.png');
+    this.load.image('spin-reward-house-2', '/images/spin-reward-house-2.png');
+    this.load.image('spin-reward-house-3', '/images/spin-reward-house-3.png');
+    this.load.image('spin-reward-house-4', '/images/spin-reward-house-4.png');
+    this.load.image('spin-reward-house-5', '/images/spin-reward-house-5.png');
 
     this.load.image('button-blue', '/images/button-blue.png');
     this.load.image('button-blue-pressed', '/images/button-blue-pressed.png');
