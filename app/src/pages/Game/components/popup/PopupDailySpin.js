@@ -3,8 +3,10 @@ import { ScrollablePanel } from 'phaser3-rex-plugins/templates/ui/ui-components.
 
 import Popup from './Popup';
 import PopupTxnError from './PopupTxnError';
+import PopupConfirm from './PopupConfirm';
 import SpinButton from '../button/SpinButton';
 import configs from '../../configs/configs';
+import { formatter } from '../../../../utils/numbers';
 import { fontFamilies } from '../../../../utils/styles';
 import { randomNumberInRange, formatTimeDigit } from '../../../../utils/numbers';
 
@@ -80,11 +82,28 @@ class PopupDailySpin extends Popup {
       .setOrigin(0.5, 0.5);
     this.add(this.numberOfSpinsText);
 
+    this.popupConfirm = new PopupConfirm(scene, this, {
+      title: 'Spin',
+      action: 'spin',
+      icon1: '',
+      icon2: 'icon-coin-small',
+      onConfirm: () => {
+        if (!this.numberOfSpins || this.loading) return;
+        this.loading = true;
+        this.spinButton?.setDisabledState(true);
+        scene.game.events.emit('start-spin');
+      },
+    });
+    scene.add.existing(this.popupConfirm);
+    this.popupConfirm.updateTextLeft(`Spin 1 time`);
+
     scene.game.events.on('update-spin-rewards', ({ spinRewards, spinPrice }) => {
       if (this.loading) return;
       this.spinRewards = spinRewards;
       this.spinPrice = spinPrice;
       this.numberOfRewards = spinRewards.length;
+
+      this.popupConfirm.updateTextRight(formatter.format(spinPrice.toPrecision(3)));
 
       this.maxContainerX = this.popup.x - this.popup.width / 2 - 1 * SPIN_ITEM_WIDTH - SPIN_ITEM_GAP;
       this.minContainerX = this.maxContainerX - this.numberOfRewards * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP);
@@ -143,10 +162,9 @@ class PopupDailySpin extends Popup {
         x: width / 2,
         y: height / 2 + this.popup.height / 2 - 20,
         onClick: () => {
-          if (!this.numberOfSpins) return;
-          this.loading = true;
-          this.spinButton?.setDisabledState(true);
-          scene.game.events.emit('start-spin');
+          if (!this.numberOfSpins || this.loading) return;
+          this.close();
+          this.popupConfirm?.open();
         },
         value: spinPrice,
       });
@@ -217,6 +235,11 @@ class PopupDailySpin extends Popup {
     let startReducing = false;
     scene.game.events.on('continue-spin', () => {
       if (!this.contentContainer) return;
+
+      if (!this.visible) {
+        this.popupConfirm?.close();
+        this.visible = true;
+      }
 
       const diff = (this.maxContainerX - this.contentContainer.x) % (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP);
       if (diff < 100) {
