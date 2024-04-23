@@ -137,13 +137,14 @@ export const createUserIfNotExist = async (userId) => {
         tokenBalance: tokenBalance,
         xTokenBalance: 0,
         ETHBalance: 0,
-        isWhitelisted,
+        isWhitelisted: false,
         walletPasswordAsked: false,
         referralCode,
         referralTotalReward: 0,
         referralTotalDiscount: 0,
         code: numberToCodeString(numberOfUsers + 1),
-        completedTutorial: false,
+        //TODO: change to false after implement new tutorial
+        completedTutorial: true,
       });
   } else {
     const { username, ETHBalance, avatarURL_small } = snapshot.data();
