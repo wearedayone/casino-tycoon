@@ -33,7 +33,7 @@ const createGamePlayIfNotExist = async (userId, isWhitelisted) => {
     } catch (ex) {
       console.log(ex);
     }
-
+    const oldDate = 1711213702000;
     await Promise.all([
       firestore.collection('user').doc(userId).update({ tokenBalance: tokenBalance }),
       firestore.collection('gamePlay').add({
@@ -60,7 +60,7 @@ const createGamePlayIfNotExist = async (userId, isWhitelisted) => {
         avatarURL_small: userData.avatarURL_small ?? '',
         username: userData.username ?? '',
         address: userData.address ?? '',
-        lastTimeSwapXToken: admin.firestore.FieldValue.serverTimestamp(),
+        lastTimeSwapXToken: admin.firestore.Timestamp.fromMillis(oldDate),
       }),
       firestore.collection('warDeployment').add({
         userId,
