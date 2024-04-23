@@ -1,49 +1,23 @@
 import admin, { firestore } from '../configs/admin.config.js';
 
 const patchGamePlay = async () => {
-  const userSnapshot = await firestore.collection('user').get();
+  const systemSnapshot = await firestore.collection('system').doc('default').get();
+  const { activeSeasonId } = systemSnapshot.data();
+
+  const gamePlaySnapshot = await firestore.collection('gamePlay').where('seasonId', '==', activeSeasonId).get();
   console.log(`update GamePlay`);
-  const users = userSnapshot.docs.map((item) => ({
-    userId: item.id,
-    username: item.data().username,
-    address: item.data().address,
-    avatarURL: item.data().avatarURL ?? '',
-    avatarURL_Small: item.data().avatarURL_Small ?? '',
-  }));
 
-  for (const user of users) {
+  for (let gamePlay of gamePlaySnapshot.docs) {
     try {
-      console.log('update user', user.userId);
-      const gamePlay = await firestore
-        .collection('gamePlay')
-        .where('userId', '==', user.userId)
-        .where('seasonId', '==', 'X6RRmbbG9kWh7VnqJDC9')
-        .limit(1)
-        .get();
+      console.log('update user', gamePlay.data().username);
 
-      await firestore
-        .collection('user')
-        .doc(user.userId)
-        .update({
-          avatarURL_small: user.avatarURL_Small,
-          avatarURL_big: user.avatarURL_Small.replace('_normal', '_bigger'),
-        });
-      if (!gamePlay.empty) {
-        console.log('update gamePlay', gamePlay.docs[0].id);
-        await firestore
-          .collection('gamePlay')
-          .doc(gamePlay.docs[0].id)
-          .update({
-            username: user.username,
-            avatarURL: user.avatarURL,
-            avatarURL_small: user.avatarURL_Small,
-            avatarURL_big: user.avatarURL_Small.replace('_normal', '_bigger'),
-            // avatarURL_Small: admin.firestore.FieldValue.delete(),
-          });
-      }
+      await gamePlay.ref.update({
+        pendingXToken: 0,
+        startXTokenRewardCountingTime: admin.firestore.FieldValue.serverTimestamp(),
+        tokenHoldingRewardMode: 'xGANG',
+      });
     } catch (err) {
-      console.error(`Error while update for ${user.username}`, err.message);
-      continue;
+      console.error(`Error while update for ${gamePlay.data().username}`, err.message);
     }
   }
 };

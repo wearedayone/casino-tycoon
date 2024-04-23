@@ -186,6 +186,9 @@ const processRetireEvent = async ({ to, amount, nonce, event, contract }) => {
       active: false,
       pendingReward: 0,
       startRewardCountingTime: admin.firestore.FieldValue.serverTimestamp(),
+      startXTokenCountingTime: admin.firestore.FieldValue.serverTimestamp(),
+      pendingXToken: 0,
+      startXTokenRewardCountingTime: admin.firestore.FieldValue.serverTimestamp(),
     });
 
     // update warDeployment

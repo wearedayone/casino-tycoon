@@ -128,6 +128,9 @@ const ROW_STRUCTURE = {
     spinIncrementStep: { row: 77, formatter: Number },
     maxSpin: { row: 78, formatter: Number },
   },
+  tokenHoldingRewardConfig: {
+    xTokenRewardPercent: { row: 85, formatter: Number },
+  },
 };
 
 const main = async () => {
