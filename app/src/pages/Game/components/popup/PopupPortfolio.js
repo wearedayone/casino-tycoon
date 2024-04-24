@@ -167,6 +167,7 @@ class PopupPortfolio extends Popup {
         rankReward,
         reputationReward,
         blastPointReward,
+        uPointReward,
       }) => {
         this.address = address;
         this.addressText.text = this.formatAddress(address);
@@ -180,7 +181,7 @@ class PopupPortfolio extends Popup {
         this.rankRewardText.text = `~${formatter.format(rankReward)}`;
         this.reputationRewardText.text = `~${formatter.format(reputationReward)}`;
         this.blastPointText.text = `~${formatter.format(blastPointReward)}`;
-        this.uPointText.text = 2354;
+        this.uPointText.text = `${formatter.format(uPointReward)}`;
       }
     );
 
