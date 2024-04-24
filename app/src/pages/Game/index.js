@@ -25,6 +25,7 @@ import {
   claimToken,
   getWorkerPrices,
   getBuildingPrices,
+  getMachinePrices,
   validateDailySpin,
   buyAssetsWithXToken,
   convertWeb2Token,
@@ -198,10 +199,13 @@ const Game = () => {
   const {
     workerSoldLast24h,
     buildingSoldLast24h,
+    machineSoldLast24h,
     enableWorkerSalesTracking,
     disableWorkerSalesTracking,
     enableBuildingSalesTracking,
     disableBuildingSalesTracking,
+    enableMachineSalesTracking,
+    disableMachineSalesTracking,
   } = useSalesLast24h();
 
   useLayoutEffect(() => {
@@ -550,7 +554,6 @@ const Game = () => {
     if (!gamePlay?.startRewardCountingTime) return;
     const diffInDays = (Date.now() - gamePlay.startRewardCountingTime.toDate().getTime()) / MILISECONDS_IN_A_DAY;
     const claimableReward = gamePlay.pendingReward + diffInDays * dailyToken;
-    console.log('claimable reward', claimableReward);
     gameRef.current?.events.emit('update-claimable-reward', { reward: claimableReward });
     gameRef.current?.events.emit('claimable-reward-added');
   };
@@ -1132,6 +1135,11 @@ const Game = () => {
           whitelistAmountLeft: machine.maxWhitelistAmount - whitelistAmountMinted,
           hasInviteCode: Boolean(inviteCode),
           referralDiscount: inviteCode ? Number(activeSeason?.referralConfig?.referralDiscount) : 0,
+          basePrice: machine.basePrice,
+          basePriceWhitelist: machine.whitelistPrice,
+          targetDailyPurchase: machine.targetDailyPurchase,
+          targetPrice: machine.targetPrice,
+          salesLastPeriod: machineSoldLast24h,
         });
       });
 
@@ -1231,19 +1239,6 @@ const Game = () => {
           )
           .catch((err) => {
             gameRef.current?.events.emit('swap-error');
-            console.error(err);
-            Sentry.captureException(err);
-          });
-      });
-      gameRef.current?.events.on('request-gangster-price', async () => {
-        Promise.all([convertEthInputToToken(machine.basePrice), convertEthInputToToken(machine.whitelistPrice)])
-          .then(([resBasePrice, resWhitelistPrice]) => {
-            gameRef.current?.events.emit('update-gangster-price', {
-              basePrice: resBasePrice.amount,
-              whitelistPrice: resWhitelistPrice.amount,
-            });
-          })
-          .catch((err) => {
             console.error(err);
             Sentry.captureException(err);
           });
@@ -1387,12 +1382,20 @@ const Game = () => {
         enableBuildingSalesTracking();
       });
 
+      gameRef.current?.events.on('enable-machine-sales-tracking', () => {
+        enableMachineSalesTracking();
+      });
+
       gameRef.current?.events.on('disable-worker-sales-tracking', () => {
         disableWorkerSalesTracking();
       });
 
       gameRef.current?.events.on('disable-building-sales-tracking', () => {
         disableBuildingSalesTracking();
+      });
+
+      gameRef.current?.events.on('disable-machine-sales-tracking', () => {
+        disableMachineSalesTracking();
       });
 
       gameRef.current?.events.on('request-goon-price', ({ timeMode }) => {
@@ -1409,6 +1412,16 @@ const Game = () => {
         console.log('begin request house price', timeMode, Date.now());
         getBuildingPrices({ timeMode })
           .then((res) => gameRef.current?.events.emit('update-house-price', res.data))
+          .catch((err) => {
+            console.error(err);
+            Sentry.captureException(err);
+          });
+      });
+
+      gameRef.current?.events.on('request-gangster-price', ({ timeMode }) => {
+        console.log('begin request gangster price', timeMode, Date.now());
+        getMachinePrices({ timeMode })
+          .then((res) => gameRef.current?.events.emit('update-gangster-price', res.data))
           .catch((err) => {
             console.error(err);
             Sentry.captureException(err);
@@ -1653,6 +1666,11 @@ const Game = () => {
         whitelistAmountLeft: Number(machine.maxWhitelistAmount - whitelistAmountMinted),
         hasInviteCode: Boolean(inviteCode),
         referralDiscount: inviteCode ? Number(activeSeason?.referralConfig?.referralDiscount) : 0,
+        basePrice: machine.basePrice,
+        basePriceWhitelist: machine.whitelistPrice,
+        targetDailyPurchase: machine.targetDailyPurchase,
+        targetPrice: machine.targetPrice,
+        salesLastPeriod: machineSoldLast24h,
       });
     }
   }, [
@@ -1670,6 +1688,8 @@ const Game = () => {
     gamePlay?.machine,
     gamePlay?.building,
     activeSeason?.machine?.earningRateIncrementPerLevel,
+    machine,
+    machineSoldLast24h,
   ]);
 
   useEffect(() => {

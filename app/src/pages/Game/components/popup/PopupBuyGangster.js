@@ -4,11 +4,16 @@ import Popup from './Popup';
 import PopupProcessing from './PopupProcessing';
 import PopupConfirm, { icon1Gap } from './PopupConfirm';
 import TextButton from '../button/TextButton';
+import Button from '../button/Button';
 import UpgradeAssetButton from '../button/UpgradeAssetButton';
 import configs from '../../configs/configs';
 import { customFormat, formatter } from '../../../../utils/numbers';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
-import { calculateUpgradeMachinePrice } from '../../../../utils/formulas';
+import {
+  calculateUpgradeMachinePrice,
+  estimateNumberOfMachineCanBuy,
+  calculateNextMachineBuyPriceBatch,
+} from '../../../../utils/formulas';
 
 const { width, height } = configs;
 const DEFAULT_QUANTITY = 1;
@@ -41,6 +46,9 @@ class PopupBuyGangster extends Popup {
   mintFunction = 'mint';
   level = 0;
   building = {};
+  targetDailyPurchase = 1;
+  targetPrice = 0;
+  salesLastPeriod = 0;
   onCompleted;
 
   constructor(scene, { isSimulator, onCompleted } = {}) {
@@ -57,6 +65,8 @@ class PopupBuyGangster extends Popup {
       upgradeGangsters: isSimulator ? 'simulator-upgrade-gangsters' : 'upgrade-gangsters',
       upgradeCompleted: isSimulator ? 'simulator-upgrade-gangsters-completed' : 'upgrade-gangsters-completed',
       updateXTokenBalance: isSimulator ? 'simulator-update-xtoken-balance' : 'update-xtoken-balance',
+      enableSalesTracking: isSimulator ? 'simulator-enable-machine-sales-tracking' : 'enable-machine-sales-tracking',
+      disableSalesTracking: isSimulator ? 'simulator-disable-machine-sales-tracking' : 'disable-machine-sales-tracking',
     };
     this.onCompleted = onCompleted;
     this.isSimulator = isSimulator;
@@ -272,6 +282,23 @@ class PopupBuyGangster extends Popup {
       .setVisible(!isSimulator);
     this.add(this.coin);
 
+    if (!isSimulator) {
+      this.infoButton = new Button(
+        scene,
+        this.coin.x + this.coin.width + 50,
+        counterY - 40,
+        'button-info',
+        'button-info-pressed',
+        () => {
+          if (isSimulator) return;
+          this.close();
+          scene.popupGangsterPrice?.open();
+        },
+        { sound: 'open' }
+      );
+      this.add(this.infoButton);
+    }
+
     this.background = scene.add.rectangle(0, 0, width, height, 0x260343, 0.8).setOrigin(0, 0).setVisible(false);
     this.background
       .setInteractive()
@@ -480,10 +507,20 @@ class PopupBuyGangster extends Popup {
         whitelistAmountLeft,
         hasInviteCode,
         referralDiscount,
+        basePrice,
+        basePriceWhitelist,
+        targetDailyPurchase,
+        targetPrice,
+        salesLastPeriod,
       }) => {
         this.balance = balance;
+        this.basePrice = basePrice;
+        this.whitelistPrice = basePriceWhitelist;
         this.building = building;
         this.numberOfMachines = numberOfMachines;
+        this.targetDailyPurchase = targetDailyPurchase;
+        this.targetPrice = targetPrice;
+        this.salesLastPeriod = salesLastPeriod;
         this.networth = networth;
         this.networthIncrease = networthIncrease;
         this.rateIncrease = dailyReward;
@@ -518,14 +555,6 @@ class PopupBuyGangster extends Popup {
         this.updateValues();
       }
     );
-    scene.game.events.on('update-gangster-price', ({ basePrice, whitelistPrice }) => {
-      this.basePrice = basePrice;
-      this.whitelistPrice = whitelistPrice;
-      this.updateValues();
-
-      if (this.updatePriceTimeout) clearTimeout(this.updatePriceTimeout);
-      this.updatePriceTimeout = setTimeout(() => scene.game.events.emit('request-gangster-price'), 30 * 1000);
-    });
 
     scene.game.events.on(events.updateIncrementTime, ({ timeIncrementInSeconds }) => {
       this.incrementTimeText.text = `+${timeIncrementInSeconds}s`;
@@ -534,6 +563,9 @@ class PopupBuyGangster extends Popup {
     scene.game.events.emit(events.requestMachines);
     scene.game.events.emit(events.requestIncrementTime);
     scene.game.events.emit('request-gas-mint');
+
+    this.scene = scene;
+    this.events = events;
   }
 
   showWarning(overflowGangsters = 0) {
@@ -581,13 +613,13 @@ class PopupBuyGangster extends Popup {
   }
 
   onOpen() {
+    this.scene.game.events.emit(this.events.enableSalesTracking);
     if (this.isSimulator) return;
-    this.scene.game.events.emit('request-gangster-price');
   }
 
   cleanup() {
     this.onCompleted?.();
-    if (this.updatePriceTimeout) clearTimeout(this.updatePriceTimeout);
+    this.scene.game.events.emit(this.events.disableSalesTracking);
   }
 
   updateValues() {
@@ -603,7 +635,23 @@ class PopupBuyGangster extends Popup {
     this.networthIncreaseText.text = `+${(this.networthIncrease * this.quantity).toLocaleString()}`;
     this.rateIncreaseText.text = `+${(this.rateIncrease * this.quantity).toLocaleString()} /d`;
 
-    const estimatedPrice = this.quantity * this.unitPrice;
+    this.estimatedMaxPurchase = estimateNumberOfMachineCanBuy(
+      this.balance,
+      this.salesLastPeriod,
+      this.targetDailyPurchase,
+      this.targetPrice,
+      this.basePrice,
+      this.maxQuantity
+    );
+
+    const estimatedPrice = calculateNextMachineBuyPriceBatch(
+      this.salesLastPeriod,
+      this.targetDailyPurchase,
+      this.targetPrice,
+      this.basePrice,
+      this.quantity
+    ).total;
+
     const roi = estimatedPrice ? (((this.rateIncrease * this.quantity) / estimatedPrice) * 100).toFixed(1) : 0;
 
     this.quantityText.text = `${this.quantity}`;

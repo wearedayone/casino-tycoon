@@ -1,16 +1,16 @@
-import Phaser from 'phaser';
 import moment from 'moment';
 
 import Popup from './Popup';
 import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
-import { customFormat, formatter } from '../../../../utils/numbers';
-import { calculateNextWorkerBuyPriceBatch } from '../../../../utils/formulas';
+import { SimpleModeSwitch, getHourlyDisplayedLabels, getPriceChartConfig } from './PopupGoonPrice';
+import { calculateNextMachineBuyPriceBatch } from '../../../../utils/formulas';
+import { formatter } from '../../../../utils/numbers';
 
 const { width, height } = configs;
 const MILLIS_PER_HOUR = 60 * 60 * 1000;
-class PopupGoonPrice extends Popup {
+class PopupGangsterPrice extends Popup {
   timeMode = '1d';
   priceData = [];
   chartY = height / 2;
@@ -20,7 +20,7 @@ class PopupGoonPrice extends Popup {
   ticks = [];
 
   constructor(scene) {
-    super(scene, 'popup-medium', { title: 'Goon Price', titleIcon: 'icon-ribbon-chart' });
+    super(scene, 'popup-medium', { title: 'Gangster Price', titleIcon: 'icon-ribbon-chart' });
     this.scene = scene;
     const leftMargin = width / 2 - this.popup.displayWidth / 2;
     const topMargin = height / 2 - this.popup.displayHeight / 2;
@@ -75,16 +75,16 @@ class PopupGoonPrice extends Popup {
     this.coin = scene.add
       .image(width / 2 + this.titleContainer.width / 2 - 40, titleY, 'icon-coin-small')
       .setOrigin(1, 0.5);
-    this.goon = scene.add.image(
+    this.gangster = scene.add.image(
       leftMargin + this.popup.displayWidth * 0.175,
-      titleY + this.popup.displayHeight * 0.07,
-      'icon-goon-buy-fail'
+      titleY + this.popup.displayHeight * 0.06,
+      'icon-gangster-large'
     );
     this.add(this.titleContainer);
     this.add(this.current);
     this.add(this.currentPrice);
     this.add(this.coin);
-    this.add(this.goon);
+    this.add(this.gangster);
     this.drawXAxis();
 
     this.modeSwitch = new SimpleModeSwitch(scene, width / 2, modeSwitchY, {
@@ -95,7 +95,7 @@ class PopupGoonPrice extends Popup {
           this.drawXAxis();
           this.remove(this.chart);
           this.chart.destroy();
-          scene.game.events.emit('request-goon-price', { timeMode: this.timeMode });
+          scene.game.events.emit('request-gangster-price', { timeMode: this.timeMode });
         },
       },
       modeTwo: {
@@ -105,7 +105,7 @@ class PopupGoonPrice extends Popup {
           this.drawXAxis();
           this.remove(this.chart);
           this.chart.destroy();
-          scene.game.events.emit('request-goon-price', { timeMode: this.timeMode });
+          scene.game.events.emit('request-gangster-price', { timeMode: this.timeMode });
         },
       },
     });
@@ -119,15 +119,15 @@ class PopupGoonPrice extends Popup {
       'button-blue-pressed',
       () => {
         this.close();
-        scene.popupBuyGoon?.open();
+        scene.popupBuyGangster?.open();
       },
       'Back',
       { fontSize: '82px', sound: 'close' }
     );
     this.add(this.backBtn);
 
-    scene.game.events.on('update-workers', ({ basePrice, targetDailyPurchase, targetPrice, salesLastPeriod }) => {
-      const estimatedPrice = calculateNextWorkerBuyPriceBatch(
+    scene.game.events.on('update-machines', ({ basePrice, targetDailyPurchase, targetPrice, salesLastPeriod }) => {
+      const estimatedPrice = calculateNextMachineBuyPriceBatch(
         salesLastPeriod,
         targetDailyPurchase,
         targetPrice,
@@ -139,8 +139,8 @@ class PopupGoonPrice extends Popup {
       this.coin.x = this.currentPrice.x + this.currentPrice.width + this.coin.width + 20;
     });
 
-    scene.game.events.on('update-goon-price', (data) => {
-      console.log('updatelist goon', Date.now(), data);
+    scene.game.events.on('update-gangster-price', (data) => {
+      console.log('updatelist gangster', Date.now(), data);
       this.priceData = data;
       this.updateChart();
     });
@@ -148,7 +148,8 @@ class PopupGoonPrice extends Popup {
 
   onOpen() {
     this.drawXAxis();
-    // this.scene.game.events.emit('request-workers');
+    if (!this.isSimulator)
+      this.scene.game.events.emit('request-gangster-price', { timeMode: this.scene.popupGangsterPrice.timeMode });
   }
 
   updateChart() {
@@ -168,7 +169,7 @@ class PopupGoonPrice extends Popup {
       config
     );
     this.add(this.chart);
-    console.log('this.chart.chart', this.chart.chart);
+    console.log('this.chart.chart.scales.y', this.chart.chart);
     const chartPaddingHorizontal = this.chart.chart.scales.y.width;
     const borderRightWidth = 1;
     this.chartWidth = this.chartContainerWidth - chartPaddingHorizontal + 2 + borderRightWidth * 2;
@@ -194,7 +195,7 @@ class PopupGoonPrice extends Popup {
               .format('D/M')
           );
 
-    const now = moment(); // 16h45
+    const now = moment(); // 16h45?
     const sectionDuration = this.timeMode === '1d' ? 6 : 24;
     const startTime = now.subtract(this.timeMode === '1d' ? 1 : 4, 'day');
     const sectionLength = this.chartWidth / labels.length;
@@ -226,143 +227,4 @@ class PopupGoonPrice extends Popup {
   }
 }
 
-export const getHourlyDisplayedLabels = ({ now, labels }) => {
-  const tickSliceIndex = Math.ceil(now.get('hour') / 6);
-  const displayedLabelsStart = labels.slice(tickSliceIndex);
-  const displayedLabelsEnd = labels.slice(0, tickSliceIndex);
-  const displayedLabels = [...displayedLabelsStart, ...displayedLabelsEnd];
-  return displayedLabels;
-};
-export class SimpleModeSwitch extends Phaser.GameObjects.Container {
-  mode = '';
-
-  constructor(scene, x, y, { containerImg = 'tabs-container-simple', modeOne, modeTwo } = {}) {
-    super(scene, 0, 0);
-    this.mode = modeOne.title;
-    const textStyle = {
-      fontSize: fontSizes.extraLarge,
-      color: '#ffffff',
-      fontFamily: fontFamilies.extraBold,
-      align: 'center',
-    };
-    const textStyleInactive = {
-      fontSize: fontSizes.extraLarge,
-      color: colors.brown,
-      fontFamily: fontFamilies.extraBold,
-      align: 'center',
-    };
-
-    this.container = scene.add.image(x, y, containerImg).setOrigin(0.5, 0.5);
-    this.add(this.container);
-
-    const buttonOffset = this.container.width / 4;
-    this.btnOne = scene.add.image(x - buttonOffset, y, 'button-blue-med').setOrigin(0.5, 0.5);
-    this.btnTwo = scene.add
-      .image(x + buttonOffset, y, 'button-blue-med')
-      .setOrigin(0.5, 0.5)
-      .setAlpha(0);
-    this.add(this.btnOne);
-    this.add(this.btnTwo);
-
-    this.textOne = scene.add
-      .text(x - buttonOffset, y, modeOne.title, textStyle)
-      .setStroke('#0004a0', 10)
-      .setOrigin(0.5, 0.5);
-    this.textOneInactive = scene.add
-      .text(x - buttonOffset, y, modeOne.title, textStyleInactive)
-      .setOrigin(0.5, 0.5)
-      .setAlpha(0);
-    this.textTwo = scene.add
-      .text(x + buttonOffset, y, modeTwo.title, textStyle)
-      .setStroke('#0004a0', 10)
-      .setOrigin(0.5, 0.5)
-      .setAlpha(0);
-    this.textTwoInactive = scene.add.text(x + buttonOffset, y, modeTwo.title, textStyleInactive).setOrigin(0.5, 0.5);
-    this.add(this.textOne);
-    this.add(this.textOneInactive);
-    this.add(this.textTwo);
-    this.add(this.textTwoInactive);
-
-    this.container
-      .setInteractive()
-      .on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, (pointer, localX, localY, event) => {
-        const isModeOneClicked = localX <= this.container.width / 2;
-        this.btnOne.setAlpha(Number(isModeOneClicked));
-        this.textOne.setAlpha(Number(isModeOneClicked));
-        this.textOneInactive.setAlpha(Number(!isModeOneClicked));
-        this.btnTwo.setAlpha(Number(!isModeOneClicked));
-        this.textTwo.setAlpha(Number(!isModeOneClicked));
-        this.textTwoInactive.setAlpha(Number(isModeOneClicked));
-
-        const newMode = isModeOneClicked ? modeOne : modeTwo;
-        this.mode = newMode.title;
-        newMode.onClick();
-      });
-  }
-}
-
-export default PopupGoonPrice;
-
-export const getPriceChartConfig = ({ data, timeMode, chartHeight }) => {
-  var canvas = document.getElementsByTagName('canvas').item(0);
-  var ctx = canvas.getContext('2d');
-  const gradient = ctx.createLinearGradient(0, 0, 0, chartHeight);
-  gradient.addColorStop(0, 'rgba(255, 205, 156, 1)');
-  gradient.addColorStop(0.5, 'rgba(255, 205, 156, 1)');
-  gradient.addColorStop(1, 'rgba(255, 227, 156, 0.1)');
-
-  const ticksCount = timeMode === '1d' ? 4 : 5;
-
-  return {
-    type: 'line',
-    data: {
-      datasets: [
-        {
-          data,
-          fill: true,
-          backgroundColor: gradient,
-          borderColor: '#7D2E00',
-          borderWidth: 4,
-          cubicInterpolationMode: 'monotone', // smooth lines instead of zig-zags
-          tension: 0.4, // smooth lines instead of zig-zags
-        },
-      ],
-    },
-    options: {
-      elements: { point: { radius: 0 } }, // no visible points
-      scales: {
-        x: {
-          type: 'linear',
-          grace: 0,
-          bounds: 'data',
-          border: { display: false },
-          ticks: {
-            maxRotation: 0, // no rotating labels - only horizontal
-            font: { size: 40, family: 'WixMadeforDisplayBold' },
-            color: '#7D2E00',
-            stepSize: timeMode === '1d' ? MILLIS_PER_HOUR * 6 : MILLIS_PER_HOUR * 24,
-            count: ticksCount,
-            autoSkip: true,
-            maxTicksLimit: ticksCount,
-            callback: (value) => {
-              return '';
-            },
-          },
-          grid: { display: false }, // no vertial lines inside chart
-        },
-        y: {
-          border: { display: false },
-          ticks: {
-            font: { size: 40, family: 'WixMadeforDisplayBold' },
-            color: '#7D2E00',
-            callback: (value) => customFormat(value, 1), // 5k, 10k, 15k instead of 5,000 10,000 15,000
-          },
-          position: 'right',
-          beginAtZero: true,
-          grid: { display: true },
-        },
-      },
-      plugins: { legend: { display: false } },
-    },
-  };
-};
+export default PopupGangsterPrice;

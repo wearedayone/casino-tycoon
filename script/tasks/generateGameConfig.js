@@ -56,84 +56,90 @@ const spinRewards = [
 const ROW_STRUCTURE = {
   assets: {
     machine: {
-      basePrice: { row: 2, formatter: Number },
-      whitelistPrice: { row: 3, formatter: Number },
-      maxPerBatch: { row: 4, formatter: Number },
-      maxWhitelistAmount: { row: 5, formatter: Number },
-      dailyReward: { row: 6, formatter: Number },
-      networth: { row: 7, formatter: Number },
-      earningRateIncrementPerLevel: { row: 8, formatter: Number },
+      basePrice: { row: 3, formatter: Number },
+      whitelistPrice: { row: 4, formatter: Number },
+      maxPerBatch: { row: 5, formatter: Number },
+      maxWhitelistAmount: { row: 6, formatter: Number },
+      dailyReward: { row: 7, formatter: Number },
+      networth: { row: 8, formatter: Number },
+      earningRateIncrementPerLevel: { row: 9, formatter: Number },
+      targetDailyPurchase: { row: 10, formatter: Number },
+      targetPrice: { row: 11, formatter: Number },
+      // pricePower: { row: 12, formatter: Number },
     },
     worker: {
-      basePrice: { row: 10, formatter: Number },
-      dailyReward: { row: 11, formatter: Number },
-      networth: { row: 12, formatter: Number },
-      targetDailyPurchase: { row: 13, formatter: Number },
-      targetPrice: { row: 14, formatter: Number },
-      maxPerBatch: { row: 15, formatter: Number },
+      basePrice: { row: 19, formatter: Number },
+      maxPerBatch: { row: 20, formatter: Number },
+      dailyReward: { row: 21, formatter: Number },
+      networth: { row: 22, formatter: Number },
+      targetDailyPurchase: { row: 23, formatter: Number },
+      targetPrice: { row: 24, formatter: Number },
+      // pricePower: { row: 25, formatter: Number },
     },
     building: {
-      basePrice: { row: 17, formatter: Number },
-      dailyReward: { row: 18, formatter: Number },
-      networth: { row: 19, formatter: Number },
-      targetDailyPurchase: { row: 20, formatter: Number },
-      targetPrice: { row: 21, formatter: Number },
-      maxPerBatch: { row: 22, formatter: Number },
-      initMachineCapacity: { row: 16, formatter: Number },
-      machineCapacityIncrementPerLevel: { row: 23, formatter: Number },
+      basePrice: { row: 32, formatter: Number },
+      maxPerBatch: { row: 33, formatter: Number },
+      dailyReward: { row: 34, formatter: Number },
+      networth: { row: 35, formatter: Number },
+      targetDailyPurchase: { row: 36, formatter: Number },
+      targetPrice: { row: 37, formatter: Number },
+      // pricePower: { row: 38, formatter: Number },
+      initMachineCapacity: { row: 39, formatter: Number },
+      machineCapacityIncrementPerLevel: { row: 40, formatter: Number },
     },
   },
-  referral: { referralBonus: { row: 25, formatter: Number }, referralDiscount: { row: 26, formatter: Number } },
-  prizePool: {
-    earlyRetirementTax: { row: 28, formatter: Number },
-    rankRewardsPercent: { row: 29, formatter: Number },
-    reputationRewardsPercent: { row: 30, formatter: Number },
-    rewardScalingRatio: { row: 31, formatter: Number },
-    // rank leaderboard
-    higherRanksCutoffPercent: { row: 32, formatter: Number },
-    lowerRanksCutoffPercent: { row: 33, formatter: Number },
-    minRewardHigherRanks: { row: 34, formatter: Number }, // in ETH
-    minRewardLowerRanks: { row: 35, formatter: Number }, // in ETH
-    // game contract
-    devFee: { row: 60, formatter: getDecimalFromPercentString },
-    marketingFee: { row: 61, formatter: getDecimalFromPercentString },
-  },
-  war: {
-    buildingBonusMultiple: { row: 37, formatter: Number },
-    workerBonusMultiple: { row: 38, formatter: Number },
-    earningStealPercent: { row: 39, formatter: Number },
-    tokenRewardPerEarner: { row: 40, formatter: Number },
-    machinePercentLost: { row: 41, formatter: Number },
-  },
-  initGameDurationInDays: { row: 45, formatter: Number },
+  initGameDurationInDays: { row: 48, formatter: Number },
+  claimGapInSeconds: { row: 49, formatter: Number },
+  swapXTokenGapInSeconds: { row: 50, formatter: Number },
   endTimeConfig: {
-    timeIncrementInSeconds: { row: 69, formatter: Number },
-    timeDecrementInSeconds: { row: 70, formatter: Number },
-  },
-  claimGapInSeconds: { row: 47, formatter: Number },
-  openseaNftCollection: { row: 49, formatter: null },
-  swapXTokenGapInSeconds: { row: 73, formatter: Number },
-  tokenContract: {
-    liquidityFee: { row: 52, formatter: getDecimalFromPercentString },
-    teamFee: { row: 53, formatter: getDecimalFromPercentString },
-    burnFee: { row: 54, formatter: getDecimalFromPercentString },
-    revShareFee: { row: 55, formatter: getDecimalFromPercentString },
-    swapAmount: { row: 57, formatter: Number },
-  },
-  initPurchased: {
-    worker: { row: 64, formatter: Number },
-    building: { row: 65, formatter: Number },
+    timeIncrementInSeconds: { row: 57, formatter: Number },
+    timeDecrementInSeconds: { row: 58, formatter: Number },
   },
   spinConfig: {
-    spinIncrementStep: { row: 77, formatter: Number },
-    maxSpin: { row: 78, formatter: Number },
+    spinIncrementStep: { row: 63, formatter: Number },
+    maxSpin: { row: 64, formatter: Number },
+  },
+  referral: { referralBonus: { row: 70, formatter: Number }, referralDiscount: { row: 71, formatter: Number } },
+
+  prizePool: {
+    earlyRetirementTax: { row: 78, formatter: Number },
+    rankRewardsPercent: { row: 79, formatter: Number },
+    reputationRewardsPercent: { row: 80, formatter: Number },
+    rewardScalingRatio: { row: 81, formatter: Number },
+    // rank leaderboard
+    higherRanksCutoffPercent: { row: 82, formatter: Number },
+    lowerRanksCutoffPercent: { row: 83, formatter: Number },
+    minRewardHigherRanks: { row: 84, formatter: Number }, // in ETH
+    minRewardLowerRanks: { row: 85, formatter: Number }, // in ETH
+    // game contract
+    devFee: { row: 132, formatter: getDecimalFromPercentString },
+    marketingFee: { row: 133, formatter: getDecimalFromPercentString },
+  },
+  war: {
+    buildingBonusMultiple: { row: 92, formatter: Number },
+    workerBonusMultiple: { row: 93, formatter: Number },
+    earningStealPercent: { row: 94, formatter: Number },
+    tokenRewardPerEarner: { row: 95, formatter: Number },
+    machinePercentLost: { row: 96, formatter: Number },
+  },
+  openseaNftCollection: { row: 102, formatter: null },
+  tokenContract: {
+    liquidityFee: { row: 112, formatter: getDecimalFromPercentString },
+    teamFee: { row: 113, formatter: getDecimalFromPercentString },
+    burnFee: { row: 114, formatter: getDecimalFromPercentString },
+    revShareFee: { row: 115, formatter: getDecimalFromPercentString },
+    swapAmount: { row: 117, formatter: Number },
+  },
+  initPurchased: {
+    worker: { row: 121, formatter: Number },
+    building: { row: 122, formatter: Number },
   },
 };
 
 const main = async () => {
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId: GAME_CONFIG_SPREADSHEET_ID,
-    range: 'sheet2!A1:100',
+    range: 'sheet2!A1:150',
   });
   const rows = res.data.values;
 
@@ -143,6 +149,7 @@ const main = async () => {
   }
 
   const getRowValue = ({ row, formatter }) => {
+    // console.log({ row, data: rows[row - 1], next: rows[row], next1: rows[row + 1], columnIndex });
     const index = row - 1;
     const value = rows[index][columnIndex];
     if (!value) throw new Error(`No data for ${rows[index][0]}! Empty cell found at cell ${col}${row}`);

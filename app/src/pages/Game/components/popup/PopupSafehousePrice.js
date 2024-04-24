@@ -72,7 +72,9 @@ class PopupSafehousePrice extends Popup {
         fontFamily: fontFamilies.extraBold,
       })
       .setOrigin(0, 0.5);
-    this.coin = scene.add.image(width / 2 + this.titleContainer.width / 2 - 40, titleY, 'icon-coin-small').setOrigin(1, 0.5);
+    this.coin = scene.add
+      .image(width / 2 + this.titleContainer.width / 2 - 40, titleY, 'icon-coin-small')
+      .setOrigin(1, 0.5);
     this.safehouse = scene.add.image(
       leftMargin + this.popup.displayWidth * 0.175,
       titleY + this.popup.displayHeight * 0.06,
@@ -134,6 +136,7 @@ class PopupSafehousePrice extends Popup {
       ).total;
 
       this.currentPrice.text = formatter.format(estimatedPrice.toPrecision(3));
+      this.coin.x = this.currentPrice.x + this.currentPrice.width + this.coin.width + 20;
     });
 
     scene.game.events.on('update-house-price', (data) => {

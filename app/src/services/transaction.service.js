@@ -16,6 +16,9 @@ export const getWorkerPrices = ({ timeMode }) =>
 export const getBuildingPrices = ({ timeMode }) =>
   api.get('/api/v1/transactions/building/price-chart', { params: { timeMode } });
 
+export const getMachinePrices = ({ timeMode }) =>
+  api.get('/api/v1/transactions/machine/price-chart', { params: { timeMode } });
+
 export const buyAssetsWithXToken = ({ type, amount }) =>
   api.post('/api/v1/transactions/assets/x-token', { type, amount });
 

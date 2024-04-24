@@ -33,6 +33,7 @@ import PopupWarAttackDetail from '../components/popup/PopupWarAttackDetail';
 import PopupWarHistoryDetail from '../components/popup/PopupWarHistoryDetail';
 import PopupGoonPrice from '../components/popup/PopupGoonPrice';
 import PopupSafehousePrice from '../components/popup/PopupSafehousePrice';
+import PopupGangsterPrice from '../components/popup/PopupGangsterPrice';
 import PopupDailySpin from '../components/popup/PopupDailySpin';
 import PopupSpinReward from '../components/popup/PopupSpinReward';
 
@@ -179,6 +180,15 @@ class MainScene extends Phaser.Scene {
       sceneKey: 'rexUI',
     });
     pluginLoader.once(Phaser.Loader.Events.COMPLETE, () => {
+      this.popupGoonPrice = new PopupGoonPrice(this);
+      this.add.existing(this.popupGoonPrice);
+
+      this.popupSafehousePrice = new PopupSafehousePrice(this);
+      this.add.existing(this.popupSafehousePrice);
+
+      this.popupGangsterPrice = new PopupGangsterPrice(this);
+      this.add.existing(this.popupGangsterPrice);
+
       this.popupSafeHouseUpgrade = new PopupSafeHouseUpgrade(this);
       this.add.existing(this.popupSafeHouseUpgrade);
 
@@ -187,12 +197,6 @@ class MainScene extends Phaser.Scene {
 
       this.popupBuyGangster = new PopupBuyGangster(this);
       this.add.existing(this.popupBuyGangster);
-
-      this.popupGoonPrice = new PopupGoonPrice(this);
-      this.add.existing(this.popupGoonPrice);
-
-      this.popupSafehousePrice = new PopupSafehousePrice(this);
-      this.add.existing(this.popupSafehousePrice);
 
       this.popupLeaderboard = new PopupLeaderboard(this);
       this.add.existing(this.popupLeaderboard);

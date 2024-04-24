@@ -6,6 +6,7 @@ import {
   finishClaimToken,
   getWorkerPriceChart,
   getBuildingPriceChart,
+  getMachinePriceChart,
   buyAssetsWithXToken,
   convertXTokenToToken,
 } from '../services/transaction.service.js';
@@ -81,6 +82,19 @@ export const getBuildingPrices = async (req, res) => {
   try {
     const { timeMode } = req.query;
     const result = await getBuildingPriceChart({ timeMode });
+    return res.status(200).send(result);
+  } catch (err) {
+    console.error(err);
+    logger.error(err.message);
+    const message = err.message.startsWith('API error') ? err.message : 'Something is wrong';
+    return res.status(400).send(message);
+  }
+};
+
+export const getMachinePrices = async (req, res) => {
+  try {
+    const { timeMode } = req.query;
+    const result = await getMachinePriceChart({ timeMode });
     return res.status(200).send(result);
   } catch (err) {
     console.error(err);

@@ -89,9 +89,49 @@ export const estimateNumberOfWorkerCanBuy = (
   return quantity;
 };
 
-// TODO: update this formula
-export const calculateMachineSellPrice = (machinePrice) => {
-  return machinePrice * 0.6;
+export const estimateNumberOfMachineCanBuy = (
+  balance,
+  salesLastPeriod,
+  targetDailyPurchase,
+  targetPrice,
+  startPrice,
+  maxPerBatch
+) => {
+  let quantity = 0;
+  let total = calculateNextMachineBuyPriceBatch(
+    salesLastPeriod,
+    targetDailyPurchase,
+    targetPrice,
+    startPrice,
+    quantity
+  ).total;
+  let nextTotal = calculateNextMachineBuyPriceBatch(
+    salesLastPeriod,
+    targetDailyPurchase,
+    targetPrice,
+    startPrice,
+    quantity + 1
+  ).total;
+  console.log('estimatee', { total, nextTotal, maxPerBatch, balance });
+  while (quantity < maxPerBatch && nextTotal <= balance) {
+    quantity++;
+    total = calculateNextMachineBuyPriceBatch(
+      salesLastPeriod,
+      targetDailyPurchase,
+      targetPrice,
+      startPrice,
+      quantity
+    ).total;
+    nextTotal = calculateNextMachineBuyPriceBatch(
+      salesLastPeriod,
+      targetDailyPurchase,
+      targetPrice,
+      startPrice,
+      quantity + 1
+    ).total;
+  }
+
+  return quantity;
 };
 
 export const calculateNextWorkerBuyPrice = (salesLastPeriod, targetDailyPurchase, targetPrice, startPrice) => {
@@ -132,7 +172,31 @@ export const calculateNextBuildingBuyPriceBatch = (
   let soldCount = salesLastPeriod;
   const prices = [];
   while (soldCount < salesLastPeriod + quantity) {
-    prices.push(calculateNextWorkerBuyPrice(soldCount, targetDailyPurchase, targetPrice, startPrice));
+    prices.push(calculateNextBuildingBuyPrice(soldCount, targetDailyPurchase, targetPrice, startPrice));
+    soldCount++;
+  }
+
+  return {
+    total: prices.reduce((total, item) => total + item, 0),
+    prices,
+  };
+};
+
+export const calculateNextMachineBuyPrice = (salesLastPeriod, targetDailyPurchase, targetPrice, startPrice) => {
+  return Math.pow(salesLastPeriod / targetDailyPurchase, 2) * targetPrice + startPrice;
+};
+
+export const calculateNextMachineBuyPriceBatch = (
+  salesLastPeriod,
+  targetDailyPurchase,
+  targetPrice,
+  startPrice,
+  quantity
+) => {
+  let soldCount = salesLastPeriod;
+  const prices = [];
+  while (soldCount < salesLastPeriod + quantity) {
+    prices.push(calculateNextMachineBuyPrice(soldCount, targetDailyPurchase, targetPrice, startPrice));
     soldCount++;
   }
 

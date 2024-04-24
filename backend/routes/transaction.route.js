@@ -8,6 +8,7 @@ import {
   claimToken,
   getWorkerPrices,
   getBuildingPrices,
+  getMachinePrices,
   buyAssetsXToken,
   convertWeb2Token,
 } from '../controllers/transaction.controller.js';
@@ -20,6 +21,7 @@ router.post('/validation', auth, validate);
 router.post('/claimToken', auth, claimToken);
 router.get('/worker/price-chart', getWorkerPrices);
 router.get('/building/price-chart', getBuildingPrices);
+router.get('/machine/price-chart', getMachinePrices);
 router.post('/assets/x-token', auth, buyAssetsXToken);
 router.post('/convert-x-token', auth, convertWeb2Token);
 

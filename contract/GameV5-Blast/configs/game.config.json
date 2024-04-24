@@ -1,74 +1,41 @@
 {
   "assets": {
     "machine": {
-      "basePrice": 0.01,
-      "whitelistPrice": 0.01,
+      "basePrice": 3000,
+      "whitelistPrice": 1500,
       "maxPerBatch": 100,
       "maxWhitelistAmount": 10,
       "dailyReward": 1000,
       "networth": 10,
-      "earningRateIncrementPerLevel": 0.01
+      "earningRateIncrementPerLevel": 0.01,
+      "targetDailyPurchase": 1000,
+      "targetPrice": 3000
     },
     "worker": {
       "basePrice": 200,
+      "maxPerBatch": 100,
       "dailyReward": 400,
       "networth": 2,
       "targetDailyPurchase": 200,
-      "targetPrice": 1000,
-      "maxPerBatch": 100
+      "targetPrice": 1000
     },
     "building": {
       "basePrice": 500,
+      "maxPerBatch": 100,
       "dailyReward": 0,
       "networth": 8,
       "targetDailyPurchase": 200,
       "targetPrice": 1000,
-      "maxPerBatch": 100,
       "initMachineCapacity": 20,
       "machineCapacityIncrementPerLevel": 20
     }
   },
-  "referral": {
-    "referralBonus": 0.1,
-    "referralDiscount": 0.1
-  },
-  "prizePool": {
-    "earlyRetirementTax": 0.2,
-    "rankRewardsPercent": 0.5,
-    "reputationRewardsPercent": 0.4,
-    "rewardScalingRatio": 1.28,
-    "higherRanksCutoffPercent": 0.1,
-    "lowerRanksCutoffPercent": 0.2,
-    "minRewardHigherRanks": 0.04,
-    "minRewardLowerRanks": 0,
-    "devFee": 0,
-    "marketingFee": 0.1
-  },
-  "war": {
-    "buildingBonusMultiple": 0.1,
-    "workerBonusMultiple": 0.1,
-    "earningStealPercent": 0.8,
-    "tokenRewardPerEarner": 1000,
-    "machinePercentLost": 0.05
-  },
   "initGameDurationInDays": 4,
+  "claimGapInSeconds": 3600,
+  "swapXTokenGapInSeconds": 432000,
   "endTimeConfig": {
     "timeIncrementInSeconds": 60,
     "timeDecrementInSeconds": 10
-  },
-  "claimGapInSeconds": 3600,
-  "openseaNftCollection": "gangster-arena",
-  "swapXTokenGapInSeconds": 432000,
-  "tokenContract": {
-    "liquidityFee": 0.01,
-    "teamFee": 0.02,
-    "burnFee": 0.02,
-    "revShareFee": 0,
-    "swapAmount": 1000
-  },
-  "initPurchased": {
-    "worker": 10,
-    "building": 10
   },
   "spinConfig": {
     "spinIncrementStep": 1,
@@ -165,6 +132,41 @@
         "percentage": 0.001
       }
     ]
+  },
+  "referral": {
+    "referralBonus": 0.1,
+    "referralDiscount": 0.1
+  },
+  "prizePool": {
+    "earlyRetirementTax": 0.2,
+    "rankRewardsPercent": 0.5,
+    "reputationRewardsPercent": 0.4,
+    "rewardScalingRatio": 1.28,
+    "higherRanksCutoffPercent": 0.1,
+    "lowerRanksCutoffPercent": 0.2,
+    "minRewardHigherRanks": 0.04,
+    "minRewardLowerRanks": 0,
+    "devFee": 0,
+    "marketingFee": 0.1
+  },
+  "war": {
+    "buildingBonusMultiple": 0.1,
+    "workerBonusMultiple": 0.1,
+    "earningStealPercent": 0.8,
+    "tokenRewardPerEarner": 1000,
+    "machinePercentLost": 0.05
+  },
+  "openseaNftCollection": "gangster-arena",
+  "tokenContract": {
+    "liquidityFee": 0.01,
+    "teamFee": 0.02,
+    "burnFee": 0.02,
+    "revShareFee": 0,
+    "swapAmount": 1000
+  },
+  "initPurchased": {
+    "worker": 10,
+    "building": 10
   },
   "houseLevels": [
     {

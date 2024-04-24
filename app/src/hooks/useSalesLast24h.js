@@ -9,8 +9,10 @@ const SALE_PERIOD = 12 * 60 * 60 * 1000;
 const useSalesLast24h = () => {
   const [listeningWorker, setListeningWorker] = useState(false);
   const [listeningBuilding, setListeningBuilding] = useState(false);
+  const [listeningMachine, setListeningMachine] = useState(false);
   const [workerSoldLast24h, setWorkerSoldLast24h] = useState(0);
   const [buildingSoldLast24h, setBuildingSoldLast24h] = useState(0);
+  const [machineSoldLast24h, setMachineSoldLast24h] = useState(0);
   const configs = useSystemStore((state) => state.configs);
 
   useEffect(() => {
@@ -72,18 +74,53 @@ const useSalesLast24h = () => {
     };
   }, [listeningBuilding, configs?.activeSeasonId]);
 
+  useEffect(() => {
+    let unsubscribe;
+    if (listeningMachine) {
+      const now = Date.now();
+      const startTime = now - SALE_PERIOD;
+
+      const buildingQuery = query(
+        collection(firestore, 'transaction'),
+        where('seasonId', '==', configs?.activeSeasonId || null),
+        where('type', '==', 'buy-machine'),
+        where('status', '==', 'Success'),
+        where('createdAt', '>=', Timestamp.fromMillis(startTime))
+      );
+      unsubscribe = onSnapshot(buildingQuery, (snapshot) => {
+        console.log(
+          'machine txn count: ',
+          snapshot.size,
+          snapshot.docs.map((doc) => ({ id: doc.id, amount: doc.data().amount }))
+        );
+        setMachineSoldLast24h(snapshot.docs.reduce((total, doc) => total + doc.data().amount, 0));
+      });
+    } else {
+      unsubscribe?.();
+    }
+
+    return () => {
+      unsubscribe?.();
+    };
+  }, [listeningBuilding, configs?.activeSeasonId]);
+
   const enableWorkerSalesTracking = () => setListeningWorker(true);
   const disableWorkerSalesTracking = () => setListeningWorker(false);
   const enableBuildingSalesTracking = () => setListeningBuilding(true);
   const disableBuildingSalesTracking = () => setListeningBuilding(false);
+  const enableMachineSalesTracking = () => setListeningMachine(true);
+  const disableMachineSalesTracking = () => setListeningMachine(false);
 
   return {
     workerSoldLast24h,
     buildingSoldLast24h,
+    machineSoldLast24h,
     enableWorkerSalesTracking,
     disableWorkerSalesTracking,
     enableBuildingSalesTracking,
     disableBuildingSalesTracking,
+    enableMachineSalesTracking,
+    disableMachineSalesTracking,
   };
 };
 

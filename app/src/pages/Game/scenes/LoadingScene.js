@@ -365,6 +365,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-xgang-small', '/images/icons/xgang-small.png');
     this.load.image('icon-xgang', '/images/icon-xgang.png');
     this.load.image('icon-safehouse-upgraded-level', '/images/icon-safehouse-upgraded-level.png');
+    this.load.image('icon-gangster-large', '/images/gangster-large.png');
 
     this.load.image('icon-history', '/images/icon-history.png');
     this.load.image('icon-war', '/images/icon-war.png');
