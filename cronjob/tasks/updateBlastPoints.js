@@ -54,24 +54,26 @@ const updateBlastPoints = async () => {
     const activeSeason = await getActiveSeason();
     const { id: activeSeasonId, blastPointBalance } = activeSeason;
 
-    const newBlastPointBalance = await getGameBlastPointBalance();
-    // const newBlastPointBalance = 10000;
+    // const newBlastPointBalance = await getGameBlastPointBalance();
+    const newBlastPointBalance = 10000;
     if (!newBlastPointBalance || newBlastPointBalance === blastPointBalance) return;
 
     const gamePlaySnapshot = await firestore.collection('gamePlay').where('seasonId', '==', activeSeasonId).get();
     const totalNetworths = gamePlaySnapshot.docs.reduce((total, item) => total + item.data().networth, 0);
-    // console.log('Total networths', totalNetworths);
+    const blastPointToDistribute = newBlastPointBalance - blastPointBalance;
 
     const batch = firestore.batch();
     for (const gamePlay of gamePlaySnapshot.docs) {
       const { networth } = gamePlay.data();
-      const newBlastPointReward = newBlastPointBalance * (networth / totalNetworths);
-      // console.log(`Gameplay ${gamePlay.id}: ${newBlastPointReward}`);
+      const newBlastPointReward = blastPointToDistribute * (networth / totalNetworths);
       const gamePlayRef = firestore.collection('gamePlay').doc(gamePlay.id);
       batch.update(gamePlayRef, {
         blastPointReward: admin.firestore.FieldValue.increment(newBlastPointReward),
       });
     }
+
+    const seasonRef = firestore.collection('season').doc(activeSeasonId);
+    batch.update(seasonRef, { blastPointBalance: newBlastPointBalance });
 
     let retry = 0;
     let isSuccess = false;
