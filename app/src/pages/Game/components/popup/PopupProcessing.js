@@ -171,7 +171,7 @@ class PopupProcessing extends Popup {
           case 'upgrade-safehouse-completed':
           case 'simulator-upgrade-safehouse-completed':
             title = `${formatter.format(amount)} Safehouse${amount > 1 ? 's' : ''}`;
-            desc = 'Safehouse upgraded successfully.';
+            desc = 'Safehouse bought successfully.';
             break;
           case 'deposit-nft-completed':
             title = `${formatter.format(amount)} NFT${amount > 1 ? 's' : ''}`;

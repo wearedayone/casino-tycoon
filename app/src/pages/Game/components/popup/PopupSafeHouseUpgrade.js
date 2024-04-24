@@ -80,18 +80,18 @@ class PopupSafeHouseUpgrade extends Popup {
       completedEvent: events.completed,
       completedIcon: 'icon-safehouse-upgrade-done',
       failedIcon: 'icon-safehouse-upgrade-fail',
-      description: `Upgrading Safehouse.\nPlease, wait`,
+      description: `Buying Safehouse.\nPlease, wait`,
       onCompleted,
     });
     scene.add.existing(this.popupBuyProcessing);
     this.popupConfirm = new PopupConfirm(scene, this, {
-      title: 'Upgrade Safehouse',
-      action: 'upgrade',
+      title: 'Buy Safehouse',
+      action: 'buy',
       icon1: 'icon-safehouse-medium',
       icon2: 'icon-coin-small',
       onConfirm: () => {
         if (!this.quantity) return;
-        this.popupBuyProcessing.initLoading(`Upgrading Safehouse.\nPlease, wait`);
+        this.popupBuyProcessing.initLoading(`Buying Safehouse.\nPlease, wait`);
 
         scene.game.events.emit(events.upgradeHouse, { quantity: this.quantity, token: this.purchaseToken });
       },
@@ -140,7 +140,7 @@ class PopupSafeHouseUpgrade extends Popup {
     });
     scene.add.existing(this.upgradePopupBuyProcessing);
 
-    this.upgradeBtn = new TextButton(
+    this.buyBtn = new TextButton(
       scene,
       width / 2,
       height / 2 + this.popup.height / 2 - 20,
@@ -149,7 +149,7 @@ class PopupSafeHouseUpgrade extends Popup {
       () => {
         if (isSimulator) {
           this.quantity = 1;
-          this.popupBuyProcessing.initLoading(`Upgrading Safehouse.\nPlease, wait`);
+          this.popupBuyProcessing.initLoading(`Buying Safehouse.\nPlease, wait`);
           this.onCompleted = null;
           this.close();
 
@@ -162,10 +162,10 @@ class PopupSafeHouseUpgrade extends Popup {
           this.popupConfirm.open();
         }
       },
-      'Upgrade',
+      'Buy',
       { fontSize: '82px', sound: 'buy' }
     );
-    this.add(this.upgradeBtn);
+    this.add(this.buyBtn);
 
     this.upgradePriceButton = new UpgradeAssetButton(scene, {
       x: this.popup.x + 250,
@@ -400,7 +400,7 @@ class PopupSafeHouseUpgrade extends Popup {
     });
 
     scene.game.events.on(events.gameEnded, () => {
-      this.upgradeBtn.setDisabledState(true);
+      this.buyBtn.setDisabledState(true);
     });
     scene.game.events.on('update-gas-upgrade-safehouse', ({ gas }) => {
       if (isNaN(gas)) return;
@@ -534,7 +534,7 @@ class PopupSafeHouseUpgrade extends Popup {
     const maxPurchase = this.purchaseToken === 'FIAT' ? this.estimatedMaxPurchase : this.xTokenMaxPurchase;
     const insufficientBalance = this.quantity > maxPurchase;
     this.insufficientBalance.setVisible(insufficientBalance);
-    this.upgradeBtn.setDisabledState(
+    this.buyBtn.setDisabledState(
       this.scene?.isGameEnded || (!this.scene?.isUserActive && !this.isSimulator) || insufficientBalance
     );
   }
