@@ -277,6 +277,7 @@ const Game = () => {
     whitelistAmountMinted,
     warDeployment,
     lastTimeSwapXToken,
+    blastPointReward,
   } = gamePlay || {
     numberOfMachines: 0,
     numberOfWorkers: 0,
@@ -290,6 +291,7 @@ const Game = () => {
       attackUserId: null,
       acttackUser: null,
     },
+    blastPointReward: 0,
   };
   const {
     machine,
@@ -1166,6 +1168,7 @@ const Game = () => {
             machineValue,
             rankReward,
             reputationReward,
+            blastPointReward,
           });
         });
       });
@@ -1730,9 +1733,10 @@ const Game = () => {
         machineValue,
         rankReward,
         reputationReward,
+        blastPointReward,
       });
     }
-  }, [rankData, address, tokenBalance, numberOfMachines, ETHBalance]);
+  }, [rankData, address, tokenBalance, numberOfMachines, ETHBalance, blastPointReward]);
 
   useEffect(() => {
     if (rankData?.data) {

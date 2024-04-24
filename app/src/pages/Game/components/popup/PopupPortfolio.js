@@ -3,6 +3,7 @@ import Button from '../button/Button';
 import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
 import { formatter } from '../../../../utils/numbers';
+import { fontFamilies } from '../../../../utils/styles';
 
 const { width, height } = configs;
 
@@ -44,7 +45,7 @@ class PopupPortfolio extends Popup {
     this.add(this.statisticBtn);
 
     this.addressText = scene.add
-      .text(this.popup.x - 160, this.popup.y - 590, '', {
+      .text(this.popup.x - 150, this.popup.y - 743, '', {
         fontSize: '60px',
         color: '#7D2E00',
         fontFamily: 'WixMadeforDisplayExtraBold',
@@ -64,7 +65,7 @@ class PopupPortfolio extends Popup {
     this.add(this.copyBtn);
 
     this.totalBalanceText = scene.add
-      .text(this.popup.x + 10, this.popup.y - 320, '', {
+      .text(this.popup.x + 10, this.popup.y - 480, '', {
         fontSize: '60px',
         color: '#30030B',
         fontFamily: 'WixMadeforDisplayExtraBold',
@@ -73,7 +74,7 @@ class PopupPortfolio extends Popup {
     this.add(this.totalBalanceText);
 
     this.balanceText = scene.add
-      .text(this.popup.x + 350, this.popup.y - 180, '', {
+      .text(this.popup.x + 350, this.popup.y - 325, '', {
         fontSize: '48px',
         color: '#30030B',
         fontFamily: 'WixMadeforDisplayBold',
@@ -125,6 +126,7 @@ class PopupPortfolio extends Popup {
       })
       .setOrigin(1, 0.5);
     this.add(this.rankRewardText);
+
     this.reputationRewardText = scene.add
       .text(this.balanceText.x, this.machineValueText.y + lineGap * 2 + 20, '', {
         fontSize: '48px',
@@ -133,6 +135,24 @@ class PopupPortfolio extends Popup {
       })
       .setOrigin(1, 0.5);
     this.add(this.reputationRewardText);
+
+    this.blastPointText = scene.add
+      .text(this.balanceText.x + 95, this.reputationRewardText.y + lineGap, '', {
+        fontSize: '48px',
+        color: '#30030B',
+        fontFamily: 'WixMadeforDisplayBold',
+      })
+      .setOrigin(1, 0.5);
+    this.add(this.blastPointText);
+
+    this.uPointText = scene.add
+      .text(this.popup.x - 10, this.popup.y + this.popup.height / 2 - 280, '', {
+        fontSize: '72px',
+        color: '#29000B',
+        fontFamily: fontFamilies.extraBold,
+      })
+      .setOrigin(0, 0.5);
+    this.add(this.uPointText);
 
     scene.game.events.on(
       'update-portfolio',
@@ -146,6 +166,7 @@ class PopupPortfolio extends Popup {
         machineValue,
         rankReward,
         reputationReward,
+        blastPointReward,
       }) => {
         this.address = address;
         this.addressText.text = this.formatAddress(address);
@@ -158,6 +179,8 @@ class PopupPortfolio extends Popup {
         this.machineValueText.text = `~${formatter.format(machineValue)}`;
         this.rankRewardText.text = `~${formatter.format(rankReward)}`;
         this.reputationRewardText.text = `~${formatter.format(reputationReward)}`;
+        this.blastPointText.text = `~${formatter.format(blastPointReward)}`;
+        this.uPointText.text = 2354;
       }
     );
 
