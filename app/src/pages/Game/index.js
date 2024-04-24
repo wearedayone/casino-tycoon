@@ -23,6 +23,7 @@ import {
   create,
   validate,
   claimToken,
+  claimXTokenHoldingReward,
   getWorkerPrices,
   getBuildingPrices,
   validateDailySpin,
@@ -561,7 +562,6 @@ const Game = () => {
     const diffInDays = (Date.now() - gamePlay.startXTokenRewardCountingTime.toDate().getTime()) / MILISECONDS_IN_A_DAY;
     const dailyXTokenReward = tokenBalance * xTokenRewardPercent;
     const claimableReward = gamePlay.pendingXToken + diffInDays * dailyXTokenReward;
-    console.log('claimable xgang reward', claimableReward);
     gameRef.current?.events.emit('update-claimable-x-token', {
       tokenBalance,
       dailyXTokenReward,
@@ -943,6 +943,16 @@ const Game = () => {
             code,
             message,
           });
+        }
+      });
+
+      gameRef.current?.events.on('claim-holding-reward-x-token', async () => {
+        try {
+          await claimXTokenHoldingReward();
+          calculateXTokenBalanceRef.current?.();
+        } catch (err) {
+          console.error(err);
+          Sentry.captureException(err);
         }
       });
 
@@ -1770,12 +1780,6 @@ const Game = () => {
       });
     }
   }, [warConfig]);
-
-  useEffect(() => {
-    if (gamePlay?.startXTokenCountingTime) {
-      calculateXTokenBalanceRef.current?.();
-    }
-  }, [xTokenBalance, gamePlay?.startXTokenCountingTime]);
 
   useEffect(() => {
     gameRef.current?.events.emit('update-spin-rewards', {

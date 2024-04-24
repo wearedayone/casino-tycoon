@@ -608,6 +608,51 @@ export const validateTxnHash = async ({ userId, transactionId, txnHash }) => {
   await updateUserBalance(userId);
 };
 
+export const claimPendingXToken = async ({ userId }) => {
+  console.log('Claim x token');
+  const userSnapshot = await firestore.collection('user').doc(userId).get();
+  const activeSeason = await getActiveSeason();
+  if (activeSeason.status !== 'open') throw new Error('API error: Season ended');
+
+  if (userSnapshot.exists) {
+    const { address, tokenBalance } = userSnapshot.data();
+    const minted = await isMinted(address);
+    if (!minted) throw new Error('API error: You need to buy a Gangster before claiming');
+
+    const gamePlaySnapshot = await firestore
+      .collection('gamePlay')
+      .where('userId', '==', userId)
+      .where('seasonId', '==', activeSeason.id)
+      .limit(1)
+      .get();
+    if (!gamePlaySnapshot.empty) {
+      const { xTokenRewardPercent } = activeSeason.tokenHoldingRewardConfig;
+      const { pendingXToken, startXTokenRewardCountingTime } = gamePlaySnapshot.docs[0].data();
+
+      const gamePlayId = gamePlaySnapshot.docs[0].id;
+      const now = Date.now();
+
+      const start = startXTokenRewardCountingTime.toDate().getTime();
+      const diffInDays = (now - start) / (24 * 60 * 60 * 1000);
+      const dailyXTokenReward = tokenBalance * xTokenRewardPercent;
+      const generatedReward = Math.round(diffInDays * dailyXTokenReward * 1000) / 1000;
+
+      const claimedAmount = pendingXToken + generatedReward;
+
+      await firestore.collection('gamePlay').doc(gamePlayId).update({
+        pendingXToken: 0,
+        startXTokenRewardCountingTime: admin.firestore.FieldValue.serverTimestamp(),
+      });
+      await firestore
+        .collection('user')
+        .doc(userId)
+        .update({
+          xTokenBalance: admin.firestore.FieldValue.increment(claimedAmount),
+        });
+    }
+  }
+};
+
 export const claimToken = async ({ userId }) => {
   console.log('Claim token');
   const userSnapshot = await firestore.collection('user').doc(userId).get();

@@ -10,6 +10,8 @@ export const validateDailySpin = ({ transactionId, txnHash }) =>
 
 export const claimToken = () => api.post('/api/v1/transactions/claimToken');
 
+export const claimXTokenHoldingReward = () => api.post('/api/v1/transactions/claim-holding-reward/x-token');
+
 export const getWorkerPrices = ({ timeMode }) =>
   api.get('/api/v1/transactions/worker/price-chart', { params: { timeMode } });
 

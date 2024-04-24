@@ -6,6 +6,7 @@ import {
   validate,
   validateDailySpin,
   claimToken,
+  claimXTokenHoldingReward,
   getWorkerPrices,
   getBuildingPrices,
   buyAssetsXToken,
@@ -18,6 +19,7 @@ router.post('/', auth, create);
 router.post('/validation/daily-spin', auth, validateDailySpin);
 router.post('/validation', auth, validate);
 router.post('/claimToken', auth, claimToken);
+router.post('/claim-holding-reward/x-token', auth, claimXTokenHoldingReward);
 router.get('/worker/price-chart', getWorkerPrices);
 router.get('/building/price-chart', getBuildingPrices);
 router.post('/assets/x-token', auth, buyAssetsXToken);
