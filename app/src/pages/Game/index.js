@@ -562,6 +562,11 @@ const Game = () => {
     const dailyXTokenReward = tokenBalance * xTokenRewardPercent;
     const claimableReward = gamePlay.pendingXToken + diffInDays * dailyXTokenReward;
     console.log('claimable xgang reward', claimableReward);
+    gameRef.current?.events.emit('update-claimable-x-token', {
+      tokenBalance,
+      dailyXTokenReward,
+      xGangReward: claimableReward,
+    });
   };
 
   const calculateXTokenBalanceRef = useRef();

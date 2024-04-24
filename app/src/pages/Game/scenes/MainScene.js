@@ -35,6 +35,7 @@ import PopupGoonPrice from '../components/popup/PopupGoonPrice';
 import PopupSafehousePrice from '../components/popup/PopupSafehousePrice';
 import PopupDailySpin from '../components/popup/PopupDailySpin';
 import PopupSpinReward from '../components/popup/PopupSpinReward';
+import PopupHold from '../components/popup/PopupHold';
 
 const { goonAnimation, gangsterAnimation, width } = configs;
 
@@ -228,6 +229,9 @@ class MainScene extends Phaser.Scene {
 
       this.popupDailySpin = new PopupDailySpin(this);
       this.add.existing(this.popupDailySpin);
+
+      this.popupHold = new PopupHold(this);
+      this.add.existing(this.popupHold);
 
       const footer = new Footer(this, 2600);
       footer.setDepth(1);
