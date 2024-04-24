@@ -9,6 +9,7 @@ import burnFiat from './tasks/burnFIAT.js';
 import extractUser from './tasks/extractUser.js';
 import calculateTxnPrice from './tasks/calculateTxnPrice.js';
 import increaseSpin from './tasks/increaseSpin.js';
+import updateBlastPoints from './tasks/updateBlastPoints.js';
 import environments from './utils/environments.js';
 
 const {
@@ -21,6 +22,7 @@ const {
   CRON_EXTRACT_USER,
   CRON_CALCULATE_TXN_PRICE,
   CRON_INCREASE_SPIN,
+  CRON_UPDATE_BLAST_POINTS,
 } = environments;
 
 cron.schedule(CRON_UPDATE_FIAT_PRICE, function () {
@@ -61,4 +63,8 @@ cron.schedule(CRON_CALCULATE_TXN_PRICE, function () {
 
 cron.schedule(CRON_INCREASE_SPIN, () => {
   increaseSpin();
+});
+
+cron.schedule(CRON_UPDATE_BLAST_POINTS, () => {
+  updateBlastPoints();
 });
