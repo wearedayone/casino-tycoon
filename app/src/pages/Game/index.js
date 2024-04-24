@@ -830,34 +830,6 @@ const Game = () => {
         gameRef.current.events.emit('update-war-die-chance', { dieChance: activeSeason.warConfig.dieChance });
       });
 
-      gameRef.current?.events.on('request-referral-config', () => {
-        gameRef.current.events.emit('update-referral-config', activeSeason?.referralConfig);
-      });
-
-      gameRef.current?.events.on('request-invite-code', () => {
-        if (inviteCode) gameRef.current.events.emit('update-invite-code', { code: inviteCode });
-      });
-
-      gameRef.current?.events.on('request-referral-data', () => {
-        gameRef.current.events.emit('update-referral-data', {
-          referralTotalReward,
-          referralTotalDiscount,
-          ethPriceInUsd,
-          tweetTemplate: templates.twitterShareReferralCode || '',
-        });
-      });
-
-      gameRef.current?.events.on('apply-invite-code', ({ code }) => {
-        applyInviteCode({ code })
-          .then(() =>
-            gameRef.current.events.emit('complete-apply-invite-code', { status: 'Success', message: 'Success' })
-          )
-          .catch((err) => {
-            console.log('err', err);
-            gameRef.current.events.emit('complete-apply-invite-code', { status: 'Error', message: err.message });
-          });
-      });
-
       gameRef.current?.events.on('request-next-war-time', () => {
         getNextWarSnapshotUnixTime()
           .then((res) => {
@@ -1190,10 +1162,6 @@ const Game = () => {
         });
       });
 
-      gameRef.current?.events.on('request-referral-code', () => {
-        gameRef.current?.events.emit('update-referral-code', referralCode);
-      });
-
       gameRef.current?.events.on('check-user-loaded', () => {
         gameRef.current?.events.emit('user-info-loaded');
       });
@@ -1463,6 +1431,19 @@ const Game = () => {
         });
       });
 
+      gameRef.current?.events.on('request-u-point-reward', () => {
+        gameRef.current?.events.emit('update-u-point-reward', {
+          uPointReward,
+        });
+      });
+
+      gameRef.current?.events.on('request-twitter-share-template', () => {
+        gameRef.current?.events.emit('update-twitter-share-template', {
+          template: templates.twitterShareReferralCode,
+          referralCode,
+        });
+      });
+
       gameRef.current?.events.on('request-auth', () => {
         gameRef.current?.events.emit('update-auth', { uid: profile.id });
       });
@@ -1707,15 +1688,6 @@ const Game = () => {
   }, [networth]);
 
   useEffect(() => {
-    gameRef.current?.events.emit('update-referral-data', {
-      referralTotalReward,
-      referralTotalDiscount,
-      ethPriceInUsd,
-      tweetTemplate: templates.twitterShareReferralCode || '',
-    });
-  }, [referralTotalReward, referralTotalDiscount, ethPriceInUsd, templates.twitterShareReferralCode]);
-
-  useEffect(() => {
     gameRef.current?.events.emit('update-workers-machines', { numberOfWorkers, numberOfMachines });
   }, [numberOfWorkers, numberOfMachines]);
 
@@ -1833,6 +1805,19 @@ const Game = () => {
       });
     }
   }, [activeSeason?.spinConfig]);
+
+  useEffect(() => {
+    gameRef.current?.events.emit('update-u-point-reward', {
+      uPointReward,
+    });
+  }, [uPointReward]);
+
+  useEffect(() => {
+    gameRef.current?.events.emit('update-twitter-share-template', {
+      template: templates.twitterShareReferralCode,
+      referralCode,
+    });
+  }, [templates.twitterShareReferralCode, referralCode]);
 
   return (
     <Box
