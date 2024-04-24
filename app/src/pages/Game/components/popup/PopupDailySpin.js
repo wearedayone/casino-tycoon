@@ -254,7 +254,7 @@ class PopupDailySpin extends Popup {
 
         if (!startReducing) {
           startReducing =
-            this.contentContainer.x <= preDestinationX && Math.abs(this.contentContainer.x - preDestinationX) < 100;
+            this.contentContainer.x <= preDestinationX && Math.abs(this.contentContainer.x - preDestinationX) < 200;
         }
 
         if (startReducing) {
