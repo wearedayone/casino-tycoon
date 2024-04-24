@@ -499,7 +499,7 @@ export const validateDailySpinTxnAndReturnSpinResult = async ({ userId, transact
     await snapshot.ref.update({ txnHash, status: 'Success', reward: { type: reward.type, value: reward.value } });
   }
 
-  if (reward.type === 'point') {
+  if (reward.type === 'GANG') {
     const userSnapshot = await firestore.collection('user').doc(userId).get();
     if (userSnapshot.exists) {
       const { address } = userSnapshot.data();

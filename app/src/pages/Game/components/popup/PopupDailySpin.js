@@ -3,27 +3,33 @@ import { ScrollablePanel } from 'phaser3-rex-plugins/templates/ui/ui-components.
 
 import Popup from './Popup';
 import PopupTxnError from './PopupTxnError';
+import PopupConfirm from './PopupConfirm';
 import SpinButton from '../button/SpinButton';
 import configs from '../../configs/configs';
+import { formatter } from '../../../../utils/numbers';
 import { fontFamilies } from '../../../../utils/styles';
 import { randomNumberInRange, formatTimeDigit } from '../../../../utils/numbers';
 
 const { width, height } = configs;
 
 const SPIN_ITEM_WIDTH = 560;
-const SPIN_ITEM_HEIGHT = 634;
+const SPIN_ITEM_HEIGHT = 656;
 const SPIN_CONTAINER_WIDTH = 1195;
 const SPIN_CONTAINER_HEIGHT = 900;
 const SPIN_ITEM_GAP = 40;
 
 class SpinItem extends Phaser.GameObjects.Container {
-  constructor(scene, x, y, type, value) {
+  constructor(scene, x, y, item) {
     super(scene, 0, 0);
 
-    const iconImg = type === 'house' ? 'spin-house' : 'spin-point';
+    const { type, value, iconImg, containerImg } = item;
+    this.containerImg = containerImg;
+
     const text = type === 'house' ? `Safehouse x${value}` : `$GANG x${value}`;
-    this.container = scene.add.sprite(x, y, 'spin-item').setOrigin(0.5, 0.5);
+    this.container = scene.add.sprite(x, y, containerImg).setOrigin(0.5, 0.5);
     this.icon = scene.add.image(x, y - 60, iconImg).setOrigin(0.5, 0.5);
+    this.icon.displayWidth = this.container.width * 0.8;
+    this.icon.scaleY = this.icon.scaleX;
     this.text = scene.add
       .text(x, y + 190, text, { fontSize: 64, fontFamily: fontFamilies.extraBold })
       .setOrigin(0.5, 0.5);
@@ -76,11 +82,28 @@ class PopupDailySpin extends Popup {
       .setOrigin(0.5, 0.5);
     this.add(this.numberOfSpinsText);
 
+    this.popupConfirm = new PopupConfirm(scene, this, {
+      title: 'Spin',
+      action: 'spin',
+      icon1: '',
+      icon2: 'icon-coin-small',
+      onConfirm: () => {
+        if (!this.numberOfSpins || this.loading) return;
+        this.loading = true;
+        this.spinButton?.setDisabledState(true);
+        scene.game.events.emit('start-spin');
+      },
+    });
+    scene.add.existing(this.popupConfirm);
+    this.popupConfirm.updateTextLeft(`Spin 1 time`);
+
     scene.game.events.on('update-spin-rewards', ({ spinRewards, spinPrice }) => {
       if (this.loading) return;
       this.spinRewards = spinRewards;
       this.spinPrice = spinPrice;
       this.numberOfRewards = spinRewards.length;
+
+      this.popupConfirm.updateTextRight(formatter.format(spinPrice.toPrecision(3)));
 
       this.maxContainerX = this.popup.x - this.popup.width / 2 - 1 * SPIN_ITEM_WIDTH - SPIN_ITEM_GAP;
       this.minContainerX = this.maxContainerX - this.numberOfRewards * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP);
@@ -101,9 +124,8 @@ class PopupDailySpin extends Popup {
         const spinItem = new SpinItem(
           scene,
           SPIN_ITEM_WIDTH * (index + 1) + 40 * (index + 1),
-          SPIN_CONTAINER_HEIGHT / 2 - 130,
-          item.type,
-          item.value
+          SPIN_CONTAINER_HEIGHT / 2 - 110,
+          item
         );
 
         return spinItem;
@@ -140,10 +162,9 @@ class PopupDailySpin extends Popup {
         x: width / 2,
         y: height / 2 + this.popup.height / 2 - 20,
         onClick: () => {
-          if (!this.numberOfSpins) return;
-          this.loading = true;
-          this.spinButton?.setDisabledState(true);
-          scene.game.events.emit('start-spin');
+          if (!this.numberOfSpins || this.loading) return;
+          this.close();
+          this.popupConfirm?.open();
         },
         value: spinPrice,
       });
@@ -155,7 +176,7 @@ class PopupDailySpin extends Popup {
         this.arrowDown.destroy();
       }
       this.arrowDown = scene.add
-        .image(width / 2, this.popup.y - this.popup.height / 2 + 160, 'arrow-spin-down')
+        .image(width / 2, this.popup.y - this.popup.height / 2 + 170, 'arrow-spin-down')
         .setOrigin(0.5, 0.5);
       this.add(this.arrowDown);
 
@@ -215,6 +236,11 @@ class PopupDailySpin extends Popup {
     scene.game.events.on('continue-spin', () => {
       if (!this.contentContainer) return;
 
+      if (!this.visible) {
+        this.popupConfirm?.close();
+        this.visible = true;
+      }
+
       const diff = (this.maxContainerX - this.contentContainer.x) % (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP);
       if (diff < 100) {
         this.spinSound.play();
@@ -261,7 +287,6 @@ class PopupDailySpin extends Popup {
           Math.abs(this.contentContainer.x - destinationX) < SPIN_ITEM_WIDTH / 2
         ) {
           const reward = this.spinRewards[this.destinationIndex];
-          this.spinItems[this.destinationIndex + 1]?.container?.setTexture('spin-item-active');
           this.spinSound.stop();
           this.destinationIndex = null;
           this.preDestinationIndex = null;
@@ -335,12 +360,6 @@ class PopupDailySpin extends Popup {
 
   resetSpinPosition() {
     this.contentContainer && (this.contentContainer.x = this.maxContainerX);
-  }
-
-  resetSpinItemCard() {
-    if (this.spinItems?.length) {
-      this.spinItems.map((item) => item.container?.setTexture('spin-item'));
-    }
   }
 
   onOpen() {
