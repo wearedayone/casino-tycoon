@@ -54,8 +54,7 @@ const updateBlastPoints = async () => {
     const activeSeason = await getActiveSeason();
     const { id: activeSeasonId, blastPointBalance } = activeSeason;
 
-    // const newBlastPointBalance = await getGameBlastPointBalance();
-    const newBlastPointBalance = 10000;
+    const newBlastPointBalance = await getGameBlastPointBalance();
     if (!newBlastPointBalance || newBlastPointBalance === blastPointBalance) return;
 
     const gamePlaySnapshot = await firestore.collection('gamePlay').where('seasonId', '==', activeSeasonId).get();
