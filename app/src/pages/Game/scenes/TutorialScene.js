@@ -157,22 +157,7 @@ class TutorialScene extends Phaser.Scene {
       }); // done
       this.add.existing(this.popupBuyGangster);
 
-      this.popupLeaderboard = new PopupLeaderboard(this, {
-        isSimulator: true,
-        onClose: () => {
-          this.tutorial.step11.setVisible(false);
-          this.tutorial.step12.setVisible(false);
-          this.tutorial.background.setDisplaySize(width, height);
-          this.tutorial.lowerBackground?.destroy();
-          this.tutorial.step13.setVisible(true);
-        },
-        onClickRank: () => {
-          this.tutorial.step12.arrow.setX(width / 2);
-        },
-        onClickReputation: () => {
-          this.tutorial.step12.arrow.setX(width / 2 - this.popupLeaderboard.popup.width * 0.23);
-        },
-      }); // done
+      this.popupLeaderboard = new PopupLeaderboard(this, { isSimulator: true });
       this.add.existing(this.popupLeaderboard);
 
       this.popupPrizePool = new PopupPrizePool(this, { isSimulator: true }); // done

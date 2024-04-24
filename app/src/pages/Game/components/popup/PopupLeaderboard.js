@@ -32,10 +32,9 @@ class PopupLeaderboard extends Popup {
   items = [];
   avatars = {};
 
-  constructor(scene, { isSimulator, onClose, onClickRank, onClickReputation } = {}) {
+  constructor(scene, { isSimulator } = {}) {
     super(scene, 'popup-extra-large', { title: 'Season Leaderboard', noCloseBtn: true });
 
-    this.onCloseCallback = onClose;
     this.isSimulator = isSimulator;
     const events = {
       updateSeason: isSimulator ? 'simulator-update-season' : 'update-season',
@@ -136,7 +135,6 @@ class PopupLeaderboard extends Popup {
             component.text = this.rankRewards[index];
           });
           this.playerReward.text = `~${formatter.format(this.userRankingReward)}`;
-          if (isSimulator) onClickRank();
         },
       },
       modeTwo: {
@@ -148,7 +146,6 @@ class PopupLeaderboard extends Popup {
             component.text = this.reputationRewards[index];
           });
           this.playerReward.text = `~${formatter.format(this.userReputationReward)}`;
-          if (isSimulator) onClickReputation();
         },
       },
     });
@@ -274,7 +271,6 @@ class PopupLeaderboard extends Popup {
 
   cleanup() {
     this.table?.scrollToTop();
-    this.onCloseCallback?.();
     if (this.table) {
       this.table.setMouseWheelScrollerEnable(false);
       this.leaderboardThumb?.setVisible(false);
