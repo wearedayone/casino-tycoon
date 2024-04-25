@@ -133,12 +133,15 @@ class TutorialScene extends Phaser.Scene {
 
       this.popupBuyGoon = new PopupBuyGoon(this, {
         isSimulator: true,
+        noCloseBtn: true,
+        noBackground: true,
+        originY: -120,
         onCompleted: () => {
-          this.tutorial.step8.setVisible(false);
+          this.tutorial.step7.setVisible(false);
           this.tutorial.setVisible(false);
           setTimeout(() => {
             this.tutorial.setVisible(true);
-            this.tutorial.step7.setVisible(true);
+            this.tutorial.step8.setVisible(true);
           }, 300);
         },
       }); // done

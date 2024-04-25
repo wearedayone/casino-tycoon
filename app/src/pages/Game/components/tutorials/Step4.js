@@ -20,7 +20,6 @@ class Step4 extends Phaser.GameObjects.Container {
     this.add(this.character);
 
     scene.game.events.on('simulator-buy-gangster', () => {
-      this.scene.tutorial.setDepth(2);
       this.arrow.setVisible(false);
       this.character.setVisible(false);
     });
