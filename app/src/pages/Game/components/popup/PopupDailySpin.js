@@ -60,7 +60,7 @@ class PopupDailySpin extends Popup {
   interval = null;
 
   constructor(scene) {
-    super(scene, 'popup-spin', { title: 'Daily Spin' });
+    super(scene, 'popup-spin', { title: 'Spin to Win' });
 
     this.spinSound = scene.sound.add('spin-sound', { loop: false });
 

@@ -136,7 +136,7 @@ class InfoButtons extends Phaser.GameObjects.Container {
       .setOrigin(0, 0.5);
 
     this.dailySpinText = scene.add
-      .text(this.dailySpinButton.x + this.dailySpinButton.width / 2 + 50, this.dailySpinButton.y, 'Daily Spin', {
+      .text(this.dailySpinButton.x + this.dailySpinButton.width / 2 + 50, this.dailySpinButton.y, 'Spin to Win', {
         fontSize: '46px',
         fontFamily: fontFamilies.extraBold,
         color: '#fff',
