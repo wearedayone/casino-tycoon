@@ -412,6 +412,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('tutorial-7', '/images/tutorial-7.png');
     this.load.image('tutorial-8', '/images/tutorial-8.png');
     this.load.image('tutorial-9', '/images/tutorial-9.png');
+    this.load.image('tutorial-10', '/images/tutorial-10.png');
     this.load.image('tutorial-11', '/images/tutorial-11.png');
     this.load.image('tutorial-13', '/images/tutorial-13.png');
     this.load.image('tutorial-15', '/images/tutorial-15.png');
