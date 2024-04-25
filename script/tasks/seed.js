@@ -43,6 +43,7 @@ const main = async () => {
       machineSold: 0,
       workerSold: 0,
       buildingSold: 0,
+      blastPointBalance: 0,
       ...gameConfigs.assets,
       status: 'open',
       houseLevels: gameConfigs.houseLevels,
