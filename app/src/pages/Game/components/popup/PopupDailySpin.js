@@ -3,10 +3,8 @@ import { ScrollablePanel } from 'phaser3-rex-plugins/templates/ui/ui-components.
 
 import Popup from './Popup';
 import PopupTxnError from './PopupTxnError';
-import PopupConfirm from './PopupConfirm';
 import SpinButton from '../button/SpinButton';
 import configs from '../../configs/configs';
-import { formatter } from '../../../../utils/numbers';
 import { fontFamilies } from '../../../../utils/styles';
 import { randomNumberInRange, formatTimeDigit } from '../../../../utils/numbers';
 
@@ -17,6 +15,7 @@ const SPIN_ITEM_HEIGHT = 656;
 const SPIN_CONTAINER_WIDTH = 1195;
 const SPIN_CONTAINER_HEIGHT = 900;
 const SPIN_ITEM_GAP = 40;
+const ALPHA = 0.5;
 
 class SpinItem extends Phaser.GameObjects.Container {
   constructor(scene, x, y, item) {
@@ -53,10 +52,6 @@ class PopupDailySpin extends Popup {
   nextSpinIncrementTime = null;
   spinIncrementStep = 0;
   maxSpin = 0;
-  destinationIndex = null;
-  preDestinationIndex = null;
-  randomDistanceFromCenter = 0;
-  spinXStep = 30;
   interval = null;
 
   constructor(scene) {
@@ -65,7 +60,7 @@ class PopupDailySpin extends Popup {
     this.spinSound = scene.sound.add('spin-sound', { loop: false });
 
     this.spinIncrementText = scene.add
-      .text(this.popup.x, this.popup.y + this.popup.height / 2 - 330, '+1 spin in 00h00m00s', {
+      .text(this.popup.x, this.popup.y + this.popup.height / 2 - 320, '+1 spin in 00h00m00s', {
         fontSize: '72px',
         fontFamily: fontFamilies.extraBold,
         color: '#30030B',
@@ -73,8 +68,13 @@ class PopupDailySpin extends Popup {
       .setOrigin(0.5, 0.5);
     this.add(this.spinIncrementText);
 
+    this.numberOfSpinsContainer = scene.add
+      .image(this.popup.x, this.popup.y + this.popup.height / 2 - 210, 'number-of-spin-container')
+      .setOrigin(0.5, 0.5);
+    this.add(this.numberOfSpinsContainer);
+
     this.numberOfSpinsText = scene.add
-      .text(this.popup.x, this.popup.y + this.popup.height / 2 - 220, '+1 spin in 00h00m00s', {
+      .text(this.popup.x, this.popup.y + this.popup.height / 2 - 210, '+1 spin in 00h00m00s', {
         fontSize: '48px',
         fontFamily: fontFamilies.bold,
         color: '#7D2E00',
@@ -82,28 +82,11 @@ class PopupDailySpin extends Popup {
       .setOrigin(0.5, 0.5);
     this.add(this.numberOfSpinsText);
 
-    this.popupConfirm = new PopupConfirm(scene, this, {
-      title: 'Spin',
-      action: 'spin',
-      icon1: '',
-      icon2: 'icon-coin-small',
-      onConfirm: () => {
-        if (!this.numberOfSpins || this.loading) return;
-        this.loading = true;
-        this.spinButton?.setDisabledState(true);
-        scene.game.events.emit('start-spin');
-      },
-    });
-    scene.add.existing(this.popupConfirm);
-    this.popupConfirm.updateTextLeft(`Spin 1 time`);
-
     scene.game.events.on('update-spin-rewards', ({ spinRewards, spinPrice }) => {
       if (this.loading) return;
       this.spinRewards = spinRewards;
       this.spinPrice = spinPrice;
       this.numberOfRewards = spinRewards.length;
-
-      this.popupConfirm.updateTextRight(formatter.format(spinPrice.toPrecision(3)));
 
       this.maxContainerX = this.popup.x - this.popup.width / 2 - 1 * SPIN_ITEM_WIDTH - SPIN_ITEM_GAP;
       this.minContainerX = this.maxContainerX - this.numberOfRewards * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP);
@@ -120,16 +103,18 @@ class PopupDailySpin extends Popup {
         this.table = null;
       }
 
-      this.spinItems = [spinRewards.at(-1), ...spinRewards, spinRewards[0], spinRewards[1]].map((item, index) => {
-        const spinItem = new SpinItem(
-          scene,
-          SPIN_ITEM_WIDTH * (index + 1) + 40 * (index + 1),
-          SPIN_CONTAINER_HEIGHT / 2 - 110,
-          item
-        );
+      this.spinItems = [spinRewards.at(-1), ...spinRewards, ...spinRewards, spinRewards[0], spinRewards[1]].map(
+        (item, index) => {
+          const spinItem = new SpinItem(
+            scene,
+            SPIN_ITEM_WIDTH * (index + 1) + 40 * (index + 1),
+            SPIN_CONTAINER_HEIGHT / 2 - 110,
+            item
+          );
 
-        return spinItem;
-      });
+          return spinItem;
+        }
+      );
       this.contentContainer = scene.add
         .container()
         .add(this.spinItems)
@@ -163,8 +148,7 @@ class PopupDailySpin extends Popup {
         y: height / 2 + this.popup.height / 2 - 20,
         onClick: () => {
           if (!this.numberOfSpins || this.loading) return;
-          this.close();
-          this.popupConfirm?.open();
+          this.showPopupConfirmSpin();
         },
         value: spinPrice,
       });
@@ -189,6 +173,40 @@ class PopupDailySpin extends Popup {
         .setOrigin(0.5, 0.5);
       this.add(this.arrowUp);
 
+      if (this.confirmation) {
+        this.remove(this.confirmation);
+        this.confirmation.destroy();
+      }
+
+      if (this.loadingIcon) {
+        this.remove(this.loadingIcon);
+        this.loadingIcon.destroy();
+      }
+
+      if (this.loadingAnimation) {
+        this.loadingAnimation.remove();
+      }
+
+      this.confirmation = scene.add
+        .image(this.popup.x, this.popup.y, 'spin-confirmation')
+        .setOrigin(0.5, 0.5)
+        .setVisible(false);
+      this.add(this.confirmation);
+
+      this.loadingIcon = scene.add
+        .image(this.confirmation.x - this.confirmation.width / 2 + 130, this.confirmation.y - 10, 'icon-loading-small')
+        .setOrigin(0.5, 0.5)
+        .setVisible(false);
+      this.add(this.loadingIcon);
+
+      this.loadingAnimation = scene.tweens.add({
+        targets: this.loadingIcon,
+        rotation: Math.PI * 2, // full circle
+        duration: 3000,
+        repeat: -1, // infinite
+        ease: 'Cubic.out',
+      });
+
       this.checkSpinButtonState();
     });
 
@@ -210,91 +228,21 @@ class PopupDailySpin extends Popup {
     });
 
     scene.game.events.on('spin-error', ({ code, message }) => {
-      scene.game.events.emit('stop-spin');
       this.spinSound.stop();
       this.loading = false;
-      this.destinationIndex = null;
-      this.preDestinationIndex = null;
-      this.randomDistanceFromCenter = 0;
-      this.spinXStep = 30;
       this.popupTxnCompleted = new PopupTxnError({
         scene,
         code,
         description: message,
       });
       scene.add.existing(this.popupTxnCompleted);
+      this.hidePopupConfirmSpin();
       this.close();
       this.checkSpinButtonState();
     });
 
-    scene.game.events.on('spin-result', ({ preDestinationIndex }) => {
-      this.randomDistanceFromCenter = randomNumberInRange(-SPIN_ITEM_WIDTH / 2 + 50, SPIN_ITEM_WIDTH / 2 - 50);
-      this.preDestinationIndex = preDestinationIndex;
-    });
-
-    let startReducing = false;
-    scene.game.events.on('continue-spin', () => {
-      if (!this.contentContainer) return;
-
-      if (!this.visible) {
-        this.popupConfirm?.close();
-        this.visible = true;
-      }
-
-      const diff = (this.maxContainerX - this.contentContainer.x) % (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP);
-      if (diff < 100) {
-        this.spinSound.play();
-      }
-
-      if (this.preDestinationIndex || this.preDestinationIndex === 0) {
-        const preDestinationX =
-          this.maxContainerX -
-          this.preDestinationIndex * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP) +
-          this.randomDistanceFromCenter;
-
-        if (!startReducing) {
-          startReducing =
-            this.contentContainer.x <= preDestinationX && Math.abs(this.contentContainer.x - preDestinationX) < 200;
-        }
-
-        if (startReducing) {
-          let distance = this.contentContainer.x - preDestinationX;
-          if (distance < 0) {
-            distance += (this.numberOfRewards - 1) * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP);
-          }
-          this.spinXStep = Math.max(this.spinXStep - 0.2, 10);
-          if (Math.max(this.spinXStep, 10) === 10) {
-            this.destinationIndex = this.preDestinationIndex;
-          }
-        }
-      } else {
-        this.spinXStep = Math.min(this.spinXStep + 1, 100);
-      }
-      this.contentContainer.x -= Math.round(this.spinXStep);
-
-      if (this.contentContainer.x < this.minContainerX) {
-        this.contentContainer.x += this.numberOfRewards * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP);
-      }
-
-      if (this.destinationIndex !== null) {
-        const destinationX =
-          this.maxContainerX -
-          this.destinationIndex * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP) +
-          this.randomDistanceFromCenter;
-
-        if (
-          this.contentContainer.x <= destinationX &&
-          Math.abs(this.contentContainer.x - destinationX) < SPIN_ITEM_WIDTH / 2
-        ) {
-          const reward = this.spinRewards[this.destinationIndex];
-          this.spinSound.stop();
-          this.destinationIndex = null;
-          this.preDestinationIndex = null;
-          this.randomDistanceFromCenter = 0;
-          this.spinXStep = 30;
-          scene.game.events.emit('stop-spin', reward);
-        }
-      }
+    scene.game.events.on('spin-result', ({ destinationIndex }) => {
+      this.startSpinAnimation(destinationIndex);
     });
 
     scene.game.events.on('update-spin-config', ({ spinIncrementStep, maxSpin }) => {
@@ -332,6 +280,68 @@ class PopupDailySpin extends Popup {
     }
 
     this.spinButton?.setDisabledState(!valid);
+  }
+
+  showPopupConfirmSpin() {
+    this.loading = true;
+    this.spinButton?.setDisabledState(true);
+    this.spinIncrementText?.setAlpha(ALPHA);
+    this.numberOfSpinsContainer?.setAlpha(ALPHA);
+    this.numberOfSpinsText?.setAlpha(ALPHA);
+    this.arrowDown?.setAlpha(ALPHA);
+    this.arrowUp?.setAlpha(ALPHA);
+    this.spinItems?.map((item) => item?.setAlpha(ALPHA));
+    this.confirmation?.setVisible(true);
+    this.loadingIcon?.setVisible(true);
+    this.loadingAnimation?.play();
+    this.scene.game.events.emit('start-spin');
+  }
+
+  hidePopupConfirmSpin() {
+    this.spinIncrementText?.setAlpha(1);
+    this.numberOfSpinsContainer?.setAlpha(1);
+    this.numberOfSpinsText?.setAlpha(1);
+    this.arrowDown?.setAlpha(1);
+    this.arrowUp?.setAlpha(1);
+    this.spinItems?.map((item) => item?.setAlpha(1));
+    this.confirmation?.setVisible(false);
+    this.loadingIcon?.setVisible(false);
+    this.loadingAnimation?.stop();
+  }
+
+  startSpinAnimation(destinationIndex) {
+    this.hidePopupConfirmSpin();
+
+    const randomDistanceFromCenter = randomNumberInRange(-SPIN_ITEM_WIDTH / 2 + 50, SPIN_ITEM_WIDTH / 2 - 50);
+    const reward = this.spinRewards[destinationIndex];
+
+    const destinationX =
+      this.maxContainerX -
+      destinationIndex * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP) -
+      this.numberOfRewards * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP) +
+      randomDistanceFromCenter;
+
+    this.scene.tweens.add({
+      targets: this.contentContainer,
+      x: [this.maxContainerX, destinationX],
+      duration: 3000,
+      ease: 'Cubic.InOut',
+      easeParams: [100, 500],
+      onStart: () => {
+        setTimeout(() => {
+          this.spinSound.play();
+        }, 200);
+      },
+      onComplete: () => {
+        setTimeout(() => {
+          this.loading = false;
+          this.close();
+          this.checkSpinButtonState();
+          this.contentContainer.x = this.maxContainerX;
+          this.scene.popupSpinReward?.showReward(reward);
+        }, 1000);
+      },
+    });
   }
 
   updateSpinIncrementText() {

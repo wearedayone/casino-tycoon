@@ -516,7 +516,6 @@ const Game = () => {
 
   const initDailySpin = async () => {
     try {
-      await delay(2000); // delay 2s to spin
       const res = await create({ type: 'daily-spin' });
       const { id, spinType, amount, value, lastSpin, time, nonce, signature } = res.data;
       const receipt = await dailySpin({ spinType, amount, value, lastSpin, time, nonce, signature });
@@ -526,11 +525,11 @@ const Game = () => {
       const txnHash = receipt.transactionHash;
       const res1 = await validateDailySpin({ transactionId: id, txnHash });
       const { result } = res1.data;
-      gameRef.current?.events.emit('spin-result', { preDestinationIndex: result });
+      gameRef.current?.events.emit('spin-result', { destinationIndex: result });
 
       // test
       // await delay(5000);
-      // gameRef.current?.events.emit('spin-result', { preDestinationIndex: Math.floor(Math.random() * 14) });
+      // gameRef.current?.events.emit('spin-result', { destinationIndex: 0 });
     } catch (err) {
       console.error(err);
       throw err;
@@ -1018,7 +1017,7 @@ const Game = () => {
         }
       });
 
-      gameRef.current?.events.on('daily-spin', async () => {
+      gameRef.current?.events.on('start-spin', async () => {
         try {
           await initDailySpin();
         } catch (err) {

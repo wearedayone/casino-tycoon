@@ -271,29 +271,7 @@ class MainScene extends Phaser.Scene {
     }
   }
 
-  create() {
-    this.spinListener();
-  }
-
-  spinListener() {
-    this.game.events.on('start-spin', () => {
-      if (this.isSpinning) return;
-      this.isSpinning = true;
-      this.game.events.emit('daily-spin');
-    });
-
-    this.game.events.on('stop-spin', (reward) => {
-      this.isSpinning = false;
-      if (reward) {
-        setTimeout(() => {
-          this.popupDailySpin && (this.popupDailySpin.loading = false);
-          this.popupDailySpin?.close();
-          this.popupDailySpin?.checkSpinButtonState();
-          this.popupSpinReward?.showReward(reward);
-        }, 1500);
-      }
-    });
-  }
+  create() {}
 
   updateAnimationPositions(delta) {
     if (this.animationLayer.gangsterAction === 'back') {
@@ -391,14 +369,8 @@ class MainScene extends Phaser.Scene {
     }
   }
 
-  updateSpin() {
-    if (!this.isSpinning) return;
-    this.game.events.emit('continue-spin');
-  }
-
   update(_time, delta) {
     this.updateAnimationPositions(delta);
-    this.updateSpin();
   }
 }
 
