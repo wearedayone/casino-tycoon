@@ -32,8 +32,8 @@ class PopupLeaderboard extends Popup {
   items = [];
   avatars = {};
 
-  constructor(scene, { isSimulator } = {}) {
-    super(scene, 'popup-extra-large', { title: 'Season Leaderboard', noCloseBtn: true });
+  constructor(scene, { isSimulator, ...configs } = {}) {
+    super(scene, 'popup-extra-large', { title: 'Season Leaderboard', noCloseBtn: true, ...configs });
 
     this.isSimulator = isSimulator;
     const events = {

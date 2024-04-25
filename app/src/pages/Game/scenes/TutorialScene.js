@@ -166,7 +166,7 @@ class TutorialScene extends Phaser.Scene {
       }); // done
       this.add.existing(this.popupBuyGangster);
 
-      this.popupLeaderboard = new PopupLeaderboard(this, { isSimulator: true });
+      this.popupLeaderboard = new PopupLeaderboard(this, { isSimulator: true, noBackground: true });
       this.add.existing(this.popupLeaderboard);
 
       this.popupPrizePool = new PopupPrizePool(this, { isSimulator: true }); // done
@@ -174,6 +174,7 @@ class TutorialScene extends Phaser.Scene {
 
       this.popupWarMachines = new PopupWarMachines(this, {
         isSimulator: true,
+        noBackground: true,
         onClickInfoButton: () => {
           this.tutorial.step13.setVisible(false);
           this.popupWarExplain.background?.destroy();
@@ -188,6 +189,7 @@ class TutorialScene extends Phaser.Scene {
       this.add.existing(this.popupWarMachines);
 
       this.popupWarExplain = new PopupWarExplain(this, {
+        noBackground: true,
         onClickBackButton: () => {
           this.tutorial.step14.setVisible(false);
           this.tutorial.step15.setVisible(true);

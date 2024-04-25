@@ -41,7 +41,6 @@ class Step2 extends Phaser.GameObjects.Container {
     // effects
     this.scene.popupLeaderboard.open();
     this.scene.popupLeaderboard.setDepth(1);
-    this.scene.popupLeaderboard.background?.destroy();
     this.scene.tutorial.background.setVisible(false);
 
     const overlayWidth = this.overlay.width * 0.92;

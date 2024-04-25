@@ -18,7 +18,6 @@ class Step8 extends Phaser.GameObjects.Container {
 
     const next = () => {
       scene.popupBuy.setVisible(false);
-      scene.popupSafeHouseUpgrade.open();
       onNext();
     };
 
@@ -36,7 +35,6 @@ class Step8 extends Phaser.GameObjects.Container {
         this.arrow.setVisible(true);
         this.arrow1.setVisible(false);
 
-        scene.popupWar.setVisible(false);
         scene.popupBuy.setDepth(5);
         scene.popupBuy.updateDisabled({ goonDisabled: true, gangsterDisabled: true, houseDisabled: false });
         scene.popupBuy.updateCallback(() => next());

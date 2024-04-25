@@ -20,7 +20,6 @@ class Step3 extends Phaser.GameObjects.Container {
 
     const next = () => {
       scene.popupBuy.setVisible(false);
-      scene.popupBuyGangster.open();
       onNext();
     };
 
