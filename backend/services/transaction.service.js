@@ -94,25 +94,25 @@ export const initTransaction = async ({ userId, type, ...data }) => {
         .limit(1)
         .get();
       const { isWhitelisted, whitelistAmountMinted } = gamePlaySnapshot.docs[0].data();
-      const { inviteCode } = userSnapshot.data();
-      let userReferralDiscount = 0;
+      // const { inviteCode } = userSnapshot.data();
+      // let userReferralDiscount = 0;
       const whitelistAmountLeft = machine.maxWhitelistAmount - whitelistAmountMinted;
       const isMintWhitelist = Boolean(isWhitelisted && whitelistAmountLeft);
       txnData.isMintWhitelist = isMintWhitelist;
       txnData.amount = isMintWhitelist ? Math.min(data.amount, whitelistAmountLeft) : data.amount; // cannot exceed whitelistAmountLeft
 
-      if (inviteCode && !isMintWhitelist) {
-        const referrerSnapshot = await firestore
-          .collection('user')
-          .where('referralCode', '==', inviteCode)
-          .limit(1)
-          .get();
-        if (!referrerSnapshot.size) break;
+      // if (inviteCode && !isMintWhitelist) {
+      //   const referrerSnapshot = await firestore
+      //     .collection('user')
+      //     .where('referralCode', '==', inviteCode)
+      //     .limit(1)
+      //     .get();
+      //   if (!referrerSnapshot.size) break;
 
-        userReferralDiscount = referralConfig.referralDiscount;
-        txnData.referrerAddress = referrerSnapshot.docs[0].data().address;
-        txnData.referralDiscount = getAccurate(data.amount * machine.basePrice * userReferralDiscount);
-      }
+      //   userReferralDiscount = referralConfig.referralDiscount;
+      //   txnData.referrerAddress = referrerSnapshot.docs[0].data().address;
+      //   txnData.referralDiscount = getAccurate(data.amount * machine.basePrice * userReferralDiscount);
+      // }
 
       const machineTxns = await firestore
         .collection('transaction')
@@ -267,7 +267,7 @@ export const initTransaction = async ({ userId, type, ...data }) => {
         nGangster,
         nonce,
         bType: 1,
-        referral: txnData.referrerAddress ?? '0xb5987682d601354eA1e8620253191Fb4e43024e6',
+        referral: txnData.referrerAddress ?? '0x0000000000000000000000000000000000000000',
       };
       const signature = await signMessageBuyGangster(signedData);
       return {

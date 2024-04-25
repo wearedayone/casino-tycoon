@@ -192,7 +192,6 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('spin-reward-token-4', '/images/spin-reward-token-4.png');
     this.load.image('spin-reward-token-5', '/images/spin-reward-token-5.png');
     this.load.image('spin-reward-token-6', '/images/spin-reward-token-6.png');
-    this.load.image('spin-reward-token-7', '/images/spin-reward-token-7.png');
     this.load.image('spin-reward-house-1', '/images/spin-reward-house-1.png');
     this.load.image('spin-reward-house-2', '/images/spin-reward-house-2.png');
     this.load.image('spin-reward-house-3', '/images/spin-reward-house-3.png');
@@ -277,7 +276,10 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-green-full-length', '/images/button-green-full-length.png');
     this.load.image('button-green-full-length-pressed', '/images/button-green-full-length-pressed.png');
     this.load.image('button-green-full-length-disabled', '/images/button-green-full-length-disabled.png');
-
+    this.load.image('button-referral-sign-up', '/images/button-referral-sign-up.png');
+    this.load.image('button-referral-sign-up-pressed', '/images/button-referral-sign-up-pressed.png');
+    this.load.image('button-x-share', '/images/button-x-share.png');
+    this.load.image('button-x-share-pressed', '/images/button-x-share-pressed.png');
     this.load.image('button-buy-safehouse', '/images/button-buy-safehouse.png');
     this.load.image('button-buy-safehouse-pressed', '/images/button-buy-safehouse-pressed.png');
     this.load.image('button-buy-gangster', '/images/button-buy-gangster.png');

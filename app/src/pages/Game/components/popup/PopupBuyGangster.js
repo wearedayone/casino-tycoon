@@ -42,7 +42,6 @@ class PopupBuyGangster extends Popup {
   maxQuantity = 10;
   isWhitelisted = false;
   whitelistAmountLeft = 0;
-  referralDiscount = 0;
   mintFunction = 'mint';
   level = 0;
   building = {};
@@ -250,7 +249,7 @@ class PopupBuyGangster extends Popup {
     this.priceText = scene.add.text(this.priceTextX, counterY, '0', largeBlackExtraBold).setOrigin(0, 0.5);
     this.add(this.priceText);
 
-    // WL & referral mint
+    // WL mint
     this.alternativePrice = scene.add.text(this.priceTextX, counterY - 110, '0', largeBlackExtraBold).setVisible(false);
     this.priceStrikethrough = scene.add
       .rectangle(this.priceTextX + 20, counterY, this.priceText.width, 5, 0x29000b)
@@ -505,8 +504,6 @@ class PopupBuyGangster extends Popup {
         networthIncrease,
         isWhitelisted,
         whitelistAmountLeft,
-        hasInviteCode,
-        referralDiscount,
         basePrice,
         basePriceWhitelist,
         targetDailyPurchase,
@@ -528,8 +525,7 @@ class PopupBuyGangster extends Popup {
         this.reservePoolReward = reservePoolReward;
         this.isWhitelisted = isWhitelisted;
         this.whitelistAmountLeft = whitelistAmountLeft;
-        this.referralDiscount = referralDiscount;
-        this.mintFunction = isWhitelisted && whitelistAmountLeft ? 'mintWL' : hasInviteCode ? 'mintReferral' : 'mint';
+        this.mintFunction = isWhitelisted && whitelistAmountLeft ? 'mintWL' : 'mint';
 
         this.level = level;
         this.numberOfMachinesText.text = `${numberOfMachines.toLocaleString()}`;
@@ -629,8 +625,7 @@ class PopupBuyGangster extends Popup {
       return;
     }
 
-    this.unitPrice =
-      this.mintFunction === 'mintWL' ? this.whitelistPrice : this.basePrice * (1 - this.referralDiscount);
+    this.unitPrice = this.mintFunction === 'mintWL' ? this.whitelistPrice : this.basePrice;
     this.estimatedMaxPurchase = this.balance && this.unitPrice ? Math.floor(this.balance / this.unitPrice) : 0;
     this.networthIncreaseText.text = `+${(this.networthIncrease * this.quantity).toLocaleString()}`;
     this.rateIncreaseText.text = `+${(this.rateIncrease * this.quantity).toLocaleString()} /d`;
@@ -659,12 +654,7 @@ class PopupBuyGangster extends Popup {
     this.popupConfirm.updateTextRight(formatter.format(estimatedPrice.toPrecision(3)));
     this.roiText.text = `${roi}%`;
     this.priceText.text = `${formatter.format(this.quantity * this.basePrice)}`;
-    const discountNote =
-      this.mintFunction === 'mintReferral'
-        ? ` (-${this.referralDiscount * 100}%)`
-        : this.mintFunction === 'mintWL'
-        ? ' (WL)'
-        : '';
+    const discountNote = this.mintFunction === 'mintWL' ? ' (WL)' : '';
     this.alternativePrice.text = `${formatter.format(estimatedPrice)}${discountNote}`;
     this.priceStrikethrough.width = this.priceText.width;
     const formattedGas = customFormat(this.gas, 4) === '0' ? '<0.0001' : customFormat(this.gas, 4);
