@@ -9,7 +9,7 @@ import Step6 from './Step6';
 import Step7 from './Step7';
 import Step8 from './Step8';
 import Step9 from './Step9';
-import Step10 from './Step10';
+import Step10 from './Step9';
 import Step11 from './Step11';
 import Step12 from './Step12';
 import Step13 from './Step13';
@@ -21,7 +21,7 @@ import configs from '../../configs/configs';
 const { width, height } = configs;
 
 class Tutorial extends Phaser.GameObjects.Container {
-  constructor(scene) {
+  constructor(scene, overlayContainer) {
     super(scene, 0, 0);
 
     this.background = scene.add.rectangle(0, 0, width, height, 0x260343, 0.8).setOrigin(0, 0).setDepth(5);
@@ -41,11 +41,11 @@ class Tutorial extends Phaser.GameObjects.Container {
 
     this.step3 = new Step3(scene, () => {
       this.step3.setVisible(false);
-      this.step4.setVisible(true);
+      this.step4.start();
     });
     this.add(this.step3);
 
-    this.step4 = new Step4(scene, () => {
+    this.step4 = new Step4(scene, overlayContainer, () => {
       this.step4.setVisible(false);
       this.step5.setVisible(true);
     });

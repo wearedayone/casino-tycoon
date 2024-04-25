@@ -146,12 +146,15 @@ class TutorialScene extends Phaser.Scene {
 
       this.popupBuyGangster = new PopupBuyGangster(this, {
         isSimulator: true,
+        noCloseBtn: true,
+        noBackground: true,
+        originY: -170,
         onCompleted: () => {
-          this.tutorial.step3.setVisible(false);
+          this.tutorial.step4.setVisible(false);
           this.tutorial.setVisible(false);
           setTimeout(() => {
             this.tutorial.setVisible(true);
-            this.tutorial.step4.setVisible(true);
+            this.tutorial.step5.setVisible(true);
           }, 300);
         },
       }); // done
@@ -195,7 +198,9 @@ class TutorialScene extends Phaser.Scene {
     const infoButtons = new InfoButtons(this, 550, { isSimulator: true }); // done
     this.add.existing(infoButtons);
 
-    this.tutorial = new Tutorial(this);
+    this.tutorialOverlay = this.add.container(0, 0).setDepth(6);
+    this.add.existing(this.tutorialOverlay);
+    this.tutorial = new Tutorial(this, this.tutorialOverlay);
     this.add.existing(this.tutorial);
     this.tutorial.setDepth(2);
   }

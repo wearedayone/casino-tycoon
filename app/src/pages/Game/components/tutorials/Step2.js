@@ -33,6 +33,7 @@ class Step2 extends Phaser.GameObjects.Container {
     if (!this.scene.popupLeaderboard) {
       if (this.openTimeout) clearTimeout(this.openTimeout);
       this.openTimeout = setTimeout(() => this.start(), 200);
+      return;
     }
 
     this.setVisible(true);

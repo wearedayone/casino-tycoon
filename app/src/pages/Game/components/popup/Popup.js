@@ -21,14 +21,18 @@ class Popup extends Phaser.GameObjects.Container {
       noCloseBtn = false,
       hasGlow,
       onClose,
+      noBackground = false,
+      originY = 0,
     } = {}
   ) {
-    super(scene, 0, 0);
+    super(scene, 0, originY);
     this.destroyWhenClosed = destroyWhenClosed;
     this.onClose = onClose;
 
-    this.background = scene.add.rectangle(0, 0, configs.width, configs.height, 0x000000, 0.4).setOrigin(0, 0);
-    this.add(this.background);
+    if (!noBackground) {
+      this.background = scene.add.rectangle(0, 0, configs.width, configs.height, 0x000000, 0.4).setOrigin(0, 0);
+      this.add(this.background);
+    }
     this.popup = scene.add.image(configs.width / 2, configs.height / 2, img).setOrigin(0.5, 0.5);
     if (hasGlow) {
       this.glow = scene.add
@@ -40,13 +44,14 @@ class Popup extends Phaser.GameObjects.Container {
     this.setDepth(5);
 
     // close on backdrop click
-    this.background
-      .setInteractive()
-      .on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, (pointer, localX, localY, event) => {
-        // TODO: fix popup cannot be closed when click on backdrop over open button position
-        // example: open settings popup -> click on backdrop where settings btn is
-        this.close();
-      });
+    if (!noBackground)
+      this.background
+        .setInteractive()
+        .on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, (pointer, localX, localY, event) => {
+          // TODO: fix popup cannot be closed when click on backdrop over open button position
+          // example: open settings popup -> click on backdrop where settings btn is
+          this.close();
+        });
     this.popup.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, emptyListener);
 
     if (!noCloseBtn) {
