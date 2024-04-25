@@ -267,7 +267,7 @@ export const initTransaction = async ({ userId, type, ...data }) => {
         nGangster,
         nonce,
         bType: 1,
-        referral: txnData.referrerAddress ?? '0xb5987682d601354eA1e8620253191Fb4e43024e6',
+        referral: txnData.referrerAddress ?? '0x0000000000000000000000000000000000000000',
       };
       const signature = await signMessageBuyGangster(signedData);
       return {
