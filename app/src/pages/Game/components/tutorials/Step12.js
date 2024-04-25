@@ -10,7 +10,7 @@ class Step12 extends Phaser.GameObjects.Container {
 
     this.setVisible(false);
 
-    this.arrow = scene.add.image(width / 2, height - 300, 'tutorial-arrow-up').setOrigin(0.5, 0);
+    this.arrow = scene.add.image(width / 2, height / 2 + 900, 'tutorial-arrow-up').setOrigin(0.5, 0);
     this.add(this.arrow);
   }
 }

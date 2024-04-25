@@ -176,9 +176,9 @@ class TutorialScene extends Phaser.Scene {
         isSimulator: true,
         noBackground: true,
         onClickInfoButton: () => {
-          this.tutorial.step13.setVisible(false);
-          this.popupWarExplain.background?.destroy();
-          this.tutorial.step14.setVisible(true);
+          this.tutorial.step11.setVisible(false);
+          this.tutorial.step11.arrow.setVisible(false);
+          this.tutorial.step12.setVisible(true);
         },
         onClickClose: () => {
           this.tutorial.step13.setVisible(false);
