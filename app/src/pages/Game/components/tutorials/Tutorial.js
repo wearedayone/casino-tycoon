@@ -83,11 +83,11 @@ class Tutorial extends Phaser.GameObjects.Container {
 
     this.step10 = new Step10(scene, () => {
       this.step10.setVisible(false);
-      this.step11.setVisible(true);
+      this.step11.start();
     });
     this.add(this.step10);
 
-    this.step11 = new Step11(scene, () => {
+    this.step11 = new Step11(scene, overlayContainer, () => {
       this.step11.setVisible(false);
       this.step12.setVisible(true);
     });
