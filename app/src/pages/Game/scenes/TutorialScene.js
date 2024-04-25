@@ -120,12 +120,15 @@ class TutorialScene extends Phaser.Scene {
     pluginLoader.once(Phaser.Loader.Events.COMPLETE, () => {
       this.popupSafeHouseUpgrade = new PopupSafeHouseUpgrade(this, {
         isSimulator: true,
+        noCloseBtn: true,
+        noBackground: true,
+        originY: -120,
         onCompleted: () => {
-          this.tutorial.step10.setVisible(false);
+          this.tutorial.step9.setVisible(false);
           this.tutorial.setVisible(false);
           setTimeout(() => {
             this.tutorial.setVisible(true);
-            this.tutorial.step9.setVisible(true);
+            this.tutorial.step10.setVisible(true);
           }, 300);
         },
       }); // done

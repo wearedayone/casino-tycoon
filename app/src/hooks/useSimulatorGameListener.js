@@ -143,7 +143,9 @@ const useSimulatorGameListener = () => {
       game.events.emit('simulator-update-buildings', {
         numberOfBuildings: assets.numberOfBuildings,
         networth: assets.networth,
+        numberOfMachines: assets.numberOfMachines,
         building: { level: 0, machineCapacity: activeSeason?.building?.initMachineCapacity },
+        machineCapacityIncrementPerLevel: activeSeason?.building?.machineCapacityIncrementPerLevel,
         balance: balances.tokenBalance,
         sold: assets.numberOfBuildings,
         basePrice: activeSeason?.building.basePrice,
@@ -405,7 +407,9 @@ const useSimulatorGameListener = () => {
       gameRef.events.emit('simulator-update-buildings', {
         numberOfBuildings: assets.numberOfBuildings,
         networth: assets.networth,
+        numberOfMachines: assets.numberOfMachines,
         building: { level: 0, machineCapacity: activeSeason?.building?.initMachineCapacity },
+        machineCapacityIncrementPerLevel: activeSeason?.building?.machineCapacityIncrementPerLevel,
         balance: balances.tokenBalance,
         sold: assets.numberOfBuildings,
         basePrice: activeSeason?.building.basePrice,
