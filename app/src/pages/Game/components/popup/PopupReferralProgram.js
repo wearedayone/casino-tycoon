@@ -14,8 +14,9 @@ class PopupReferralProgram extends Popup {
   template = '';
   referralCode = '';
 
-  constructor(scene) {
+  constructor(scene, { onOpen }) {
     super(scene, 'popup-referral', { title: 'Referral Program' });
+    this.onOpenCallback = onOpen;
 
     const btnY = this.popup.y + 670;
     this.signupBtn = new Button(
@@ -87,7 +88,9 @@ class PopupReferralProgram extends Popup {
     scene.game.events.emit('request-twitter-share-template');
   }
 
-  onOpen() {}
+  onOpen() {
+    this.onOpenCallback?.();
+  }
 
   cleanup() {}
 }

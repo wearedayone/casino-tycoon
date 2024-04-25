@@ -14,6 +14,7 @@ import PopupSafeHouseUpgrade from '../components/popup/PopupSafeHouseUpgrade';
 import PopupBuyGoon from '../components/popup/PopupBuyGoon';
 import PopupBuyGangster from '../components/popup/PopupBuyGangster';
 import Animation from '../components/common/Animation';
+import PopupReferralProgram from '../components/popup/PopupReferralProgram';
 import PopupLeaderboard from '../components/popup/PopupLeaderboard';
 import PopupDeposit from '../components/popup/PopupDeposit';
 import PopupPrizePool from '../components/popup/PopupPrizePool';
@@ -71,6 +72,15 @@ class TutorialScene extends Phaser.Scene {
       this.scene.stop();
       this.scene.start('MainScene', { isFromTutorial: true });
     };
+
+    this.popupReferralProgram = new PopupReferralProgram(this, {
+      onOpen: () => {
+        this.tutorial.step13.setVisible(false);
+        this.tutorial.step14.setVisible(true);
+      },
+    });
+    this.add.existing(this.popupReferralProgram);
+
     this.popupDeposit = new PopupDeposit(this, null, {
       isSimulator: true,
       onOpen: () => {
@@ -181,9 +191,9 @@ class TutorialScene extends Phaser.Scene {
           this.tutorial.step12.setVisible(true);
         },
         onClickClose: () => {
-          this.tutorial.step13.setVisible(false);
-          this.tutorial.step15.setVisible(true);
-          this.game.events.emit('simulator-reset-assets');
+          this.tutorial.step11.setVisible(false);
+          this.tutorial.step11.arrow.setVisible(false);
+          this.tutorial.step13.setVisible(true);
         },
       });
       this.add.existing(this.popupWarMachines);
@@ -191,9 +201,8 @@ class TutorialScene extends Phaser.Scene {
       this.popupWarExplain = new PopupWarExplain(this, {
         noBackground: true,
         onClickBackButton: () => {
-          this.tutorial.step14.setVisible(false);
-          this.tutorial.step15.setVisible(true);
-          this.game.events.emit('simulator-reset-assets');
+          this.tutorial.step12.setVisible(false);
+          this.tutorial.step13.setVisible(true);
         },
       });
       this.add.existing(this.popupWarExplain);

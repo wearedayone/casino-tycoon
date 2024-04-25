@@ -1,67 +1,45 @@
 import Phaser from 'phaser';
 
-import Button from '../button/Button';
-import configs from '../../configs/configs';
 import TutorialCharacter from './TutorialCharacter';
+import InfoButtons from '../action-buttons/InfoButtons';
+import configs from '../../configs/configs';
 
 const { width, height } = configs;
 
 const px = 40;
-const buttonWidth = 288;
-const y = 2600;
+const buttonWidth = 230;
 
 class Step13 extends Phaser.GameObjects.Container {
   clicked = false;
+
   constructor(scene) {
     super(scene, 0, 0);
 
     this.setVisible(false);
 
-    const next = () => {
-      this.arrow.setVisible(false);
-      this.character.destroy();
-      this.activeButton.destroy();
+    this.character = new TutorialCharacter(scene, width / 2, height - 800, 'tutorial-13', () => {});
+    this.add(this.character);
 
-      this.backBtnArrow = scene.add
-        .image(width / 2 - scene.popupWarMachines.popup.width * 0.23, height - 350, 'tutorial-arrow-up')
-        .setOrigin(0.5, 0);
-      this.add(this.backBtnArrow);
-      scene.popupWar.setVisible(false);
-      scene.popupWarMachines.background?.destroy();
-    };
-
-    this.activeButton = new Button(
-      scene,
-      buttonWidth / 2 + px,
-      y,
-      'button-war',
-      'button-war-pressed',
-      () => {
+    this.infoButton = new InfoButtons(scene, 550, {
+      noBackground: true,
+      hideSettings: true,
+      hideLeaderboard: true,
+      hidePortfolio: true,
+      dailySpinDisabled: true,
+      holdingRewardDisabled: true,
+      onClickReward: () => {
         if (this.clicked) return;
         this.clicked = true;
 
-        this.character = new TutorialCharacter(scene, width / 2, height / 2 - 400, 'tutorial-13', () => {});
-        this.add(this.character);
-
-        this.arrow1.setVisible(false);
-        this.arrow.setVisible(true);
-        scene.popupBuy.setVisible(false);
-        scene.popupWar.setDepth(5);
-        scene.popupWar.updateDisabled({ historyDisabled: true, warDisabled: false });
-        scene.popupWar.updateCallback(() => next());
-        scene.popupWar.setVisible(true);
+        if (this.arrow.y !== 1022) {
+          this.arrow.y = 1022;
+          this.arrow.x = buttonWidth + px + 230;
+        } else this.arrow.y = 786;
       },
-      { sound: 'button-1' }
-    );
-    this.add(this.activeButton);
+    });
+    this.add(this.infoButton);
 
-    this.arrow1 = scene.add
-      .image(this.activeButton.x, this.activeButton.y - this.activeButton.height / 2 - 20, 'tutorial-arrow-down')
-      .setOrigin(0.5, 1);
-    this.add(this.arrow1);
-
-    this.arrow = scene.add.image(buttonWidth + px, 2380, 'tutorial-arrow-left').setOrigin(0, 0.5);
-    this.arrow.setVisible(false);
+    this.arrow = scene.add.image(buttonWidth + px, 786, 'tutorial-arrow-left').setOrigin(0, 0.5);
     this.add(this.arrow);
   }
 }
