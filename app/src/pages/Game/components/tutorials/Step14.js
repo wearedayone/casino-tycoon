@@ -17,8 +17,18 @@ class Step14 extends Phaser.GameObjects.Container {
       onNext();
     };
 
+    this.onNext = next;
+
     this.character = new TutorialCharacter(scene, width / 2, height - 260, 'tutorial-14', next);
     this.add(this.character);
+  }
+
+  start() {
+    this.scene.tutorial.background.removeAllListeners();
+    this.scene.tutorial.background.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
+      this.onNext();
+    });
+    this.setVisible(true);
   }
 }
 
