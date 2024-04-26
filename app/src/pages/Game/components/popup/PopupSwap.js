@@ -544,6 +544,7 @@ class PopupSwap extends Popup {
     // reset form
     this.token1AmountInput.updateValue('', true, true);
     this.token2AmountInput.updateValue('', true, true);
+    this.buttonApprove?.setDisabledState(true);
     // this.scene.game.events.emit('request-balances');
     if (this.mode === 'web2') {
       if (!this.interval) {
