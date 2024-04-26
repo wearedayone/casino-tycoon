@@ -16,6 +16,9 @@ const SPIN_CONTAINER_WIDTH = 1195;
 const SPIN_CONTAINER_HEIGHT = 900;
 const SPIN_ITEM_GAP = 40;
 const ALPHA = 0.5;
+const SPIN_DURATION = 4500;
+const SPIN_IN = 100;
+const SPIN_OUT = 2000;
 
 class SpinItem extends Phaser.GameObjects.Container {
   constructor(scene, x, y, item) {
@@ -103,18 +106,23 @@ class PopupDailySpin extends Popup {
         this.table = null;
       }
 
-      this.spinItems = [spinRewards.at(-1), ...spinRewards, ...spinRewards, spinRewards[0], spinRewards[1]].map(
-        (item, index) => {
-          const spinItem = new SpinItem(
-            scene,
-            SPIN_ITEM_WIDTH * (index + 1) + 40 * (index + 1),
-            SPIN_CONTAINER_HEIGHT / 2 - 110,
-            item
-          );
+      this.spinItems = [
+        spinRewards.at(-1),
+        ...spinRewards,
+        ...spinRewards,
+        ...spinRewards,
+        spinRewards[0],
+        spinRewards[1],
+      ].map((item, index) => {
+        const spinItem = new SpinItem(
+          scene,
+          SPIN_ITEM_WIDTH * (index + 1) + 40 * (index + 1),
+          SPIN_CONTAINER_HEIGHT / 2 - 110,
+          item
+        );
 
-          return spinItem;
-        }
-      );
+        return spinItem;
+      });
       this.contentContainer = scene.add
         .container()
         .add(this.spinItems)
@@ -293,7 +301,7 @@ class PopupDailySpin extends Popup {
     this.spinItems?.map((item) => item?.setAlpha(ALPHA));
     this.confirmation?.setVisible(true);
     this.loadingIcon?.setVisible(true);
-    this.loadingAnimation?.play();
+    this.loadingAnimation?.resume();
     this.scene.game.events.emit('start-spin');
   }
 
@@ -306,7 +314,7 @@ class PopupDailySpin extends Popup {
     this.spinItems?.map((item) => item?.setAlpha(1));
     this.confirmation?.setVisible(false);
     this.loadingIcon?.setVisible(false);
-    this.loadingAnimation?.stop();
+    this.loadingAnimation?.pause();
   }
 
   startSpinAnimation(destinationIndex) {
@@ -318,15 +326,15 @@ class PopupDailySpin extends Popup {
     const destinationX =
       this.maxContainerX -
       destinationIndex * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP) -
-      this.numberOfRewards * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP) +
+      2 * this.numberOfRewards * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP) +
       randomDistanceFromCenter;
 
     this.scene.tweens.add({
       targets: this.contentContainer,
       x: [this.maxContainerX, destinationX],
-      duration: 3000,
+      duration: SPIN_DURATION,
       ease: 'Cubic.InOut',
-      easeParams: [100, 500],
+      easeParams: [SPIN_IN, SPIN_OUT],
       onStart: () => {
         setTimeout(() => {
           this.spinSound.play();
