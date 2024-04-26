@@ -284,7 +284,7 @@ class PopupBuyGangster extends Popup {
     if (!isSimulator) {
       this.infoButton = new Button(
         scene,
-        this.coin.x + this.coin.width + 50,
+        this.coin.x + this.coin.width + 40,
         counterY - 40,
         'button-info',
         'button-info-pressed',
@@ -660,6 +660,9 @@ class PopupBuyGangster extends Popup {
     const formattedGas = customFormat(this.gas, 4) === '0' ? '<0.0001' : customFormat(this.gas, 4);
     this.gasPrice.text = `+${formattedGas} ETH (gas)`;
     this.coin.x = this.priceText.x + this.priceText.width + 20;
+    if (this.infoButton) {
+      this.infoButton.x = this.coin.x + this.coin.width + 40;
+    }
 
     const hasDifferentPrice = this.mintFunction !== 'mint';
     this.alternativePrice.setVisible(hasDifferentPrice);
