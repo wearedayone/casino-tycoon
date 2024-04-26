@@ -362,6 +362,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-goon-buy-fail', '/images/icons/goon-buy-fail.png');
     this.load.image('icon-info', '/images/icons/info.png');
     this.load.image('icon-loading', '/images/icons/loading.png');
+    this.load.image('icon-loading-small', '/images/icons/loading-small.png');
     this.load.image('icon-logout', '/images/icons/logout.png');
     this.load.image('icon-nft-done', '/images/icons/nft-done.png');
     this.load.image('icon-open-link', '/images/icons/open-link.png');
@@ -390,6 +391,8 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-error-unknown', '/images/icons/error-unknown.png');
     this.load.image('icon-error-insufficient', '/images/icons/error-insufficient.png');
     this.load.image('deposit-more-eth', '/images/deposit-more-eth.png');
+    this.load.image('spin-confirmation', '/images/spin-confirmation.png');
+    this.load.image('number-of-spin-container', '/images/number-of-spin-container.png');
 
     this.load.image('tutorial-overlay', '/images/tutorial-overlay.png');
     this.load.image('tutorial-arrow-up', '/images/tutorial-arrow-up.png');

@@ -12,6 +12,8 @@ const buttonSize = 186;
 const verticalGap = buttonSize + 50;
 
 class InfoButtons extends Phaser.GameObjects.Container {
+  numberOfSpins = 0;
+
   constructor(scene, y, { isSimulator } = {}) {
     super(scene, 0, 0);
 
@@ -126,6 +128,21 @@ class InfoButtons extends Phaser.GameObjects.Container {
       },
       { sound: 'button-1' }
     );
+    this.dailySpinBadge = scene.add
+      .image(
+        this.dailySpinButton.x + this.dailySpinButton.width / 2 - 10,
+        this.dailySpinButton.y - this.dailySpinButton.height / 2 + 10,
+        'badge'
+      )
+      .setOrigin(0.5, 0.5);
+
+    this.dailySpinBadgeText = scene.add
+      .text(this.dailySpinBadge.x, this.dailySpinBadge.y, '0', {
+        fontFamily: fontFamilies.extraBold,
+        fontSize: '46px',
+        color: '#fff',
+      })
+      .setOrigin(0.5, 0.5);
 
     this.referralText = scene.add
       .text(this.referralButton.x + this.referralButton.width / 2 + 50, this.referralButton.y, 'Referrals', {
@@ -136,7 +153,7 @@ class InfoButtons extends Phaser.GameObjects.Container {
       .setOrigin(0, 0.5);
 
     this.dailySpinText = scene.add
-      .text(this.dailySpinButton.x + this.dailySpinButton.width / 2 + 50, this.dailySpinButton.y, 'Daily Spin', {
+      .text(this.dailySpinButton.x + this.dailySpinButton.width / 2 + 50, this.dailySpinButton.y, 'Spin to Win', {
         fontSize: '46px',
         fontFamily: fontFamilies.extraBold,
         color: '#fff',
@@ -167,33 +184,41 @@ class InfoButtons extends Phaser.GameObjects.Container {
     this.add(this.referralButton);
     this.add(this.dailySpinButton);
     this.add(this.holdButton);
+    this.add(this.dailySpinBadge);
+    this.add(this.dailySpinBadgeText);
     this.add(this.referralText);
     this.add(this.dailySpinText);
     this.add(this.holdText);
 
     scene.game.events.on(events.updateBadgeNumber, ({ numberOfSpins }) => {
+      this.numberOfSpins = numberOfSpins;
+
       if (!numberOfSpins) {
         this.hideBadge();
         return;
       }
 
       this.badgeText.text = `${numberOfSpins}`;
+      this.dailySpinBadgeText.text = `${numberOfSpins}`;
       this.showBadge();
     });
     scene.game.events.emit(events.requestBadgeNumber);
   }
 
   hideBadge() {
-    if (this.badge) {
-      this.badge.setVisible(false);
-      this.badgeText.setVisible(false);
-    }
+    this.badge?.setVisible(false);
+    this.badgeText?.setVisible(false);
+    this.dailySpinBadge?.setVisible(false);
+    this.dailySpinBadgeText?.setVisible(false);
   }
 
   showBadge() {
-    if (this.badge) {
-      this.badge.setVisible(true);
-      this.badgeText.setVisible(true);
+    this.badge?.setVisible(true);
+    this.badgeText?.setVisible(true);
+
+    if (this.dailySpinButton?.visible) {
+      this.dailySpinBadge?.setVisible(true);
+      this.dailySpinBadgeText?.setVisible(true);
     }
   }
 
@@ -204,6 +229,8 @@ class InfoButtons extends Phaser.GameObjects.Container {
     this.referralText?.setVisible(false);
     this.dailySpinText?.setVisible(false);
     this.holdText?.setVisible(false);
+    this.dailySpinBadge?.setVisible(false);
+    this.dailySpinBadgeText?.setVisible(false);
     this.background?.setVisible(false);
     this.arrow?.setTexture('arrow-down-gold');
   }
@@ -215,6 +242,10 @@ class InfoButtons extends Phaser.GameObjects.Container {
     this.referralText?.setVisible(true);
     this.dailySpinText?.setVisible(true);
     this.holdText?.setVisible(true);
+    if (this.numberOfSpins) {
+      this.dailySpinBadge?.setVisible(true);
+      this.dailySpinBadgeText?.setVisible(true);
+    }
     this.background?.setVisible(true);
     this.arrow?.setTexture('arrow-up-gold');
   }
