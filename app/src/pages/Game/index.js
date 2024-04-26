@@ -23,6 +23,7 @@ import {
   create,
   validate,
   claimToken,
+  claimXTokenHoldingReward,
   getWorkerPrices,
   getBuildingPrices,
   getMachinePrices,
@@ -297,8 +298,6 @@ const Game = () => {
     machine,
     worker,
     building,
-    workerSold,
-    buildingSold,
     reservePool,
     reservePoolReward,
     houseLevels,
@@ -306,6 +305,7 @@ const Game = () => {
     spinConfig: { spinRewards },
     swapXTokenGapInSeconds,
     endTimeConfig,
+    tokenHoldingRewardConfig: { xTokenRewardPercent },
   } = activeSeason || {
     rankPrizePool: 0,
     reputationPrizePool: 0,
@@ -326,6 +326,7 @@ const Game = () => {
       earlyRetirementTax: 0,
     },
     spinConfig: { spinRewards: [] },
+    tokenHoldingRewardConfig: { xTokenRewardPercent: 0 },
   };
 
   const dailyToken =
@@ -558,6 +559,19 @@ const Game = () => {
     const claimableReward = gamePlay.pendingReward + diffInDays * dailyToken;
     gameRef.current?.events.emit('update-claimable-reward', { reward: claimableReward });
     gameRef.current?.events.emit('claimable-reward-added');
+  };
+
+  const calculateClaimableXTokenRewardRef = useRef();
+  calculateClaimableXTokenRewardRef.current = () => {
+    if (!gamePlay?.startXTokenRewardCountingTime || (gamePlay && gamePlay.tokenHoldingRewardMode !== 'xGANG')) return;
+    const diffInDays = (Date.now() - gamePlay.startXTokenRewardCountingTime.toDate().getTime()) / MILISECONDS_IN_A_DAY;
+    const dailyXTokenReward = tokenBalance * xTokenRewardPercent;
+    const claimableReward = gamePlay.pendingXToken + diffInDays * dailyXTokenReward;
+    gameRef.current?.events.emit('update-claimable-x-token', {
+      tokenBalance,
+      dailyXTokenReward,
+      xGangReward: claimableReward,
+    });
   };
 
   const calculateXTokenBalanceRef = useRef();
@@ -800,6 +814,7 @@ const Game = () => {
       });
 
       gameRef.current?.events.on('request-claimable-reward', () => calculateClaimableRewardRef.current?.());
+      gameRef.current?.events.on('request-claimable-x-token', () => calculateClaimableXTokenRewardRef.current?.());
       gameRef.current?.events.on('request-xtoken-balance', () => calculateXTokenBalanceRef.current?.());
       gameRef.current?.events.on('check-game-ended', () => checkGameEndRef.current?.());
 
@@ -905,6 +920,16 @@ const Game = () => {
             code,
             message,
           });
+        }
+      });
+
+      gameRef.current?.events.on('claim-holding-reward-x-token', async () => {
+        try {
+          await claimXTokenHoldingReward();
+          calculateXTokenBalanceRef.current?.();
+        } catch (err) {
+          console.error(err);
+          Sentry.captureException(err);
         }
       });
 
@@ -1748,12 +1773,6 @@ const Game = () => {
       });
     }
   }, [warConfig]);
-
-  useEffect(() => {
-    if (gamePlay?.startXTokenCountingTime) {
-      calculateXTokenBalanceRef.current?.();
-    }
-  }, [xTokenBalance, gamePlay?.startXTokenCountingTime]);
 
   useEffect(() => {
     gameRef.current?.events.emit('update-spin-rewards', {

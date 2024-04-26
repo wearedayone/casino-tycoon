@@ -136,6 +136,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('popup-safehouse-upgrade', '/images/popup-safehouse-upgrade.png');
     this.load.image('popup-buy-goon', '/images/popup-buy-goon.png');
     this.load.image('popup-buy-gangster', '/images/popup-buy-gangster.png');
+    this.load.image('popup-hold', '/images/popup-hold.png');
     this.load.image('popup-portfolio-with-reputation', '/images/popup-portfolio-with-reputation.png');
     this.load.image('popup-statistic', '/images/popup-statistic.png');
     this.load.image('popup-referral', '/images/popup-referral.png');
@@ -224,6 +225,8 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-deposit', '/images/button-deposit.png');
     this.load.image('button-deposit-pressed', '/images/button-deposit-pressed.png');
     this.load.image('button-deposit-disabled', '/images/button-deposit-disabled.png');
+    this.load.image('button-hold', '/images/button-hold.png');
+    this.load.image('button-hold-pressed', '/images/button-hold-pressed.png');
     this.load.image('button-info', '/images/button-info.png');
     this.load.image('button-info-pressed', '/images/button-info-pressed.png');
     this.load.image('button-buy', '/images/button-buy.png');

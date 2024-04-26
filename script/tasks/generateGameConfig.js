@@ -231,6 +231,9 @@ const ROW_STRUCTURE = {
     worker: { row: 121, formatter: Number },
     building: { row: 122, formatter: Number },
   },
+  tokenHoldingRewardConfig: {
+    xTokenRewardPercent: { row: 85, formatter: Number },
+  },
 };
 
 const main = async () => {

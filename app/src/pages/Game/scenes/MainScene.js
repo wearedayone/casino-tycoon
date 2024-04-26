@@ -36,6 +36,7 @@ import PopupSafehousePrice from '../components/popup/PopupSafehousePrice';
 import PopupGangsterPrice from '../components/popup/PopupGangsterPrice';
 import PopupDailySpin from '../components/popup/PopupDailySpin';
 import PopupSpinReward from '../components/popup/PopupSpinReward';
+import PopupHold from '../components/popup/PopupHold';
 
 const { goonAnimation, gangsterAnimation, width } = configs;
 
@@ -70,6 +71,7 @@ class MainScene extends Phaser.Scene {
   isFromTutorial = false;
   isSpinning = false;
   timeout = null;
+  timeoutClaimableXToken = null;
   timeout2 = null;
 
   constructor() {
@@ -88,6 +90,16 @@ class MainScene extends Phaser.Scene {
 
     this.timeout = setTimeout(() => {
       this.game.events.emit('request-claimable-reward');
+    }, 200);
+  }
+
+  requestClaimableXToken() {
+    if (this.timeoutClaimableXToken) {
+      clearTimeout(this.timeoutClaimableXToken);
+    }
+
+    this.timeoutClaimableXToken = setTimeout(() => {
+      this.game.events.emit('request-claimable-x-token');
     }, 200);
   }
 
@@ -222,6 +234,9 @@ class MainScene extends Phaser.Scene {
       this.popupDailySpin = new PopupDailySpin(this);
       this.add.existing(this.popupDailySpin);
 
+      this.popupHold = new PopupHold(this);
+      this.add.existing(this.popupHold);
+
       const footer = new Footer(this, 2600);
       footer.setDepth(1);
       this.add.existing(footer);
@@ -312,6 +327,7 @@ class MainScene extends Phaser.Scene {
         // this.game.events.emit('request-claimable-reward');
         this.game.events.emit('check-game-ended');
         this.requestClaimableReward();
+        this.requestClaimableXToken();
       } else {
         const newY = Math.min(
           this.animationLayer.gangsterFront.y + gangsterFrontAnimationSpeed.y * delta,

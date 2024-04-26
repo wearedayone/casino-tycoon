@@ -7,6 +7,7 @@ import provider from '../configs/provider.config.js';
 import environments from '../utils/environments.js';
 import logger from '../utils/logger.js';
 import { getActiveSeason } from '../services/season.service.js';
+import { getUpdatedHoldingReward } from '../services/gamePlay.service.js';
 
 const { NETWORK_ID } = environments;
 const MAX_RETRY = 3;
@@ -42,30 +43,6 @@ const processTransferEvent = async ({ from, to, value, event, contract }) => {
     logger.info({ from, to, value, event });
     const { transactionHash } = event;
 
-    const batch = firestore.batch();
-
-    const fromUserSnapshot = await firestore
-      .collection('user')
-      .where('address', '==', from.toLowerCase())
-      .limit(1)
-      .get();
-    if (!fromUserSnapshot.empty) {
-      const fromUserBalance = await contract.balanceOf(from);
-      const fromUser = fromUserSnapshot.docs[0];
-      const tokenBalance = Number(parseFloat(formatEther(fromUserBalance)).toFixed(6));
-      batch.update(fromUser.ref, { tokenBalance });
-    }
-
-    if (from !== to) {
-      const toUserSnapshot = await firestore.collection('user').where('address', '==', to.toLowerCase()).limit(1).get();
-      if (!toUserSnapshot.empty) {
-        const toUserBalance = await contract.balanceOf(to);
-        const toUser = toUserSnapshot.docs[0];
-        const tokenBalance = Number(parseFloat(formatEther(toUserBalance)).toFixed(6));
-        batch.update(toUser.ref, { tokenBalance });
-      }
-    }
-
     let retry = 0;
     let isSuccess = false;
     while (retry < MAX_RETRY && !isSuccess) {
@@ -73,7 +50,38 @@ const processTransferEvent = async ({ from, to, value, event, contract }) => {
         logger.info(
           `Start processTransferEvent. Retry ${retry++} times. ${JSON.stringify({ from, to, value, event })}`
         );
-        await batch.commit();
+        await firestore.runTransaction(async (firestoreTxn) => {
+          const processedTxn = firestore.collection('web3TransactionProcessed').doc(NETWORK_ID);
+          const isProcessedSnapshot = await firestoreTxn.get(processedTxn);
+          if (isProcessedSnapshot.data()?.[transactionHash]) return;
+
+          const fromUserSnapshot = await firestoreTxn.get(
+            firestore.collection('user').where('address', '==', from.toLowerCase()).limit(1)
+          );
+          const toUserSnapshot = await firestoreTxn.get(
+            firestore.collection('user').where('address', '==', to.toLowerCase()).limit(1)
+          );
+
+          if (!fromUserSnapshot.empty) {
+            const fromUserBalance = await contract.balanceOf(from);
+            const fromUser = fromUserSnapshot.docs[0];
+            const tokenBalance = Number(parseFloat(formatEther(fromUserBalance)).toFixed(6));
+            firestoreTxn.update(fromUser.ref, { tokenBalance });
+            const { gamePlayRef, data } = await getUpdatedHoldingReward({ userId: fromUser.id, tokenBalance });
+            firestoreTxn.update(gamePlayRef, data);
+          }
+
+          if (from !== to && !toUserSnapshot.empty) {
+            const toUserBalance = await contract.balanceOf(to);
+            const toUser = toUserSnapshot.docs[0];
+            const tokenBalance = Number(parseFloat(formatEther(toUserBalance)).toFixed(6));
+            firestoreTxn.update(toUser.ref, { tokenBalance });
+            const { gamePlayRef, data } = await getUpdatedHoldingReward({ userId: toUser.id, tokenBalance });
+            firestoreTxn.update(gamePlayRef, data);
+          }
+          firestoreTxn.set(processedTxn, { [transactionHash]: true }, { merge: true });
+        });
+
         isSuccess = true;
       } catch (err) {
         logger.error(`Unsuccessful processTransferEvent txn: ${JSON.stringify(err)}`);

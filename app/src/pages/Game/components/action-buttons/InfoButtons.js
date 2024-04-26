@@ -114,6 +114,19 @@ class InfoButtons extends Phaser.GameObjects.Container {
       { sound: 'button-1' }
     );
 
+    this.holdButton = new Button(
+      scene,
+      buttonSize / 2 + px,
+      y + 4 * verticalGap,
+      'button-hold',
+      'button-hold-pressed',
+      () => {
+        if (isSimulator) return;
+        this.openHoldPopup();
+      },
+      { sound: 'button-1' }
+    );
+
     this.referralText = scene.add
       .text(this.referralButton.x + this.referralButton.width / 2 + 50, this.referralButton.y, 'Referrals', {
         fontSize: '46px',
@@ -124,6 +137,14 @@ class InfoButtons extends Phaser.GameObjects.Container {
 
     this.dailySpinText = scene.add
       .text(this.dailySpinButton.x + this.dailySpinButton.width / 2 + 50, this.dailySpinButton.y, 'Daily Spin', {
+        fontSize: '46px',
+        fontFamily: fontFamilies.extraBold,
+        color: '#fff',
+      })
+      .setOrigin(0, 0.5);
+
+    this.holdText = scene.add
+      .text(this.holdButton.x + this.holdButton.width / 2 + 50, this.holdButton.y, 'Hold to Earn', {
         fontSize: '46px',
         fontFamily: fontFamilies.extraBold,
         color: '#fff',
@@ -145,8 +166,10 @@ class InfoButtons extends Phaser.GameObjects.Container {
     this.add(this.arrow);
     this.add(this.referralButton);
     this.add(this.dailySpinButton);
+    this.add(this.holdButton);
     this.add(this.referralText);
     this.add(this.dailySpinText);
+    this.add(this.holdText);
 
     scene.game.events.on(events.updateBadgeNumber, ({ numberOfSpins }) => {
       if (!numberOfSpins) {
@@ -177,8 +200,10 @@ class InfoButtons extends Phaser.GameObjects.Container {
   hidePopupReward() {
     this.referralButton?.setVisible(false);
     this.dailySpinButton?.setVisible(false);
+    this.holdButton?.setVisible(false);
     this.referralText?.setVisible(false);
     this.dailySpinText?.setVisible(false);
+    this.holdText?.setVisible(false);
     this.background?.setVisible(false);
     this.arrow?.setTexture('arrow-down-gold');
   }
@@ -186,8 +211,10 @@ class InfoButtons extends Phaser.GameObjects.Container {
   showPopupReward() {
     this.referralButton?.setVisible(true);
     this.dailySpinButton?.setVisible(true);
+    this.holdButton?.setVisible(true);
     this.referralText?.setVisible(true);
     this.dailySpinText?.setVisible(true);
+    this.holdText?.setVisible(true);
     this.background?.setVisible(true);
     this.arrow?.setTexture('arrow-up-gold');
   }
@@ -208,6 +235,11 @@ class InfoButtons extends Phaser.GameObjects.Container {
   openDailySpinPopup() {
     this.hidePopupReward();
     this.scene.popupDailySpin?.open();
+  }
+
+  openHoldPopup() {
+    this.hidePopupReward();
+    this.scene.popupHold?.open();
   }
 }
 
