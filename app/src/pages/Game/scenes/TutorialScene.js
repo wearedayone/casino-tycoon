@@ -114,8 +114,8 @@ class TutorialScene extends Phaser.Scene {
     this.popupBuy = new PopupBuy(this, width - 335, 1600); // done
     this.add.existing(this.popupBuy);
 
-    const header = new Header(this, 250, { isSimulator: true }); // done
-    this.add.existing(header);
+    this.header = new Header(this, 250, { isSimulator: true }); // done
+    this.add.existing(this.header);
 
     this.popupWar = new PopupWar(this, 35, 1850); // done
     this.add.existing(this.popupWar);

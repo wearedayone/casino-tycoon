@@ -28,7 +28,7 @@ class Step15 extends Phaser.GameObjects.Container {
         scene.popupDeposit.open();
       },
       'eth-balance',
-      '0'
+      scene.header.ethBalance.valueText.text
     );
     this.add(this.ethBalance);
 
