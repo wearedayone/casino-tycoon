@@ -78,7 +78,7 @@ class PopupStatistic extends Popup {
         this.rankText.text = `${rank}/${formatter.format(totalPlayers)}`;
         this.networthText.text = `${formatter.format(networth)}`;
         this.numberOfMachinesText.text = `${formatter.format(numberOfMachines)} units`;
-        this.numberOfBuildingsText.text = `${formatter.format(numberOfBuildings)} upgrades`;
+        this.numberOfBuildingsText.text = `${formatter.format(numberOfBuildings)} units`;
         this.numberOfWorkersText.text = `${formatter.format(numberOfWorkers)} units`;
       }
     );
