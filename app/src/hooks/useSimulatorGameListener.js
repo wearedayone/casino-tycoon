@@ -17,8 +17,9 @@ const useSimulatorGameListener = () => {
 
   // })
   const market = useSystemStore((state) => state.market);
+  const templates = useSystemStore((state) => state.templates);
   const [gameRef, setGameRef] = useState(null);
-  const [balances, setBalances] = useState({ xTokenBalance: 10000, ETHBalance: 100000, tokenBalance: 100000 });
+  const [balances, setBalances] = useState({ xTokenBalance: 10000, tokenBalance: 100000 });
   const [assets, setAssets] = useState({
     numberOfMachines: 0,
     numberOfWorkers: 0,
@@ -93,7 +94,7 @@ const useSimulatorGameListener = () => {
     });
 
     game.events.on('simulator-request-balances', () => {
-      game.events.emit('simulator-update-balances', balances);
+      game.events.emit('simulator-update-balances', { ...balances, ETHBalance: user?.ETHBalance || 0 });
     });
 
     game.events.on('simulator-request-xtoken-balance', () => {
@@ -104,7 +105,11 @@ const useSimulatorGameListener = () => {
       game.events.emit('simulator-update-machines', {
         numberOfMachines: assets.numberOfMachines,
         networth: assets.networth,
-        balance: balances.ETHBalance,
+        balance: user?.ETHBalance || 0,
+        level: 0,
+        dailyReward: activeSeason?.machine?.dailyReward,
+        earningRateIncrementPerLevel: activeSeason?.machine?.earningRateIncrementPerLevel,
+        building: { level: 0, machineCapacity: activeSeason?.building?.initMachineCapacity },
         basePrice: activeSeason?.machine.basePrice || 0,
         basePriceWhitelist: activeSeason?.machine.basePrice || 0,
         maxPerBatch: activeSeason?.machine.maxPerBatch,
@@ -139,6 +144,9 @@ const useSimulatorGameListener = () => {
       game.events.emit('simulator-update-buildings', {
         numberOfBuildings: assets.numberOfBuildings,
         networth: assets.networth,
+        numberOfMachines: assets.numberOfMachines,
+        building: { level: 0, machineCapacity: activeSeason?.building?.initMachineCapacity },
+        machineCapacityIncrementPerLevel: activeSeason?.building?.machineCapacityIncrementPerLevel,
         balance: balances.tokenBalance,
         sold: assets.numberOfBuildings,
         basePrice: activeSeason?.building.basePrice,
@@ -254,6 +262,17 @@ const useSimulatorGameListener = () => {
       });
     });
 
+    game.events.on('simulator-request-u-point-reward', () => {
+      game.events.emit('simulator-update-u-point-reward', { uPointReward: 0 });
+    });
+
+    game.events.on('simulator-request-twitter-share-template', () => {
+      game.events.emit('simulator-update-twitter-share-template', {
+        template: templates.twitterShareReferralCode,
+        referralCode: user?.referralCode || '',
+      });
+    });
+
     game.events.on('simulator-request-next-war-time', () => {
       getNextWarSnapshotUnixTime()
         .then((res) => {
@@ -282,7 +301,7 @@ const useSimulatorGameListener = () => {
     });
 
     game.events.on('simulator-request-eth-balance', async () => {
-      game.events.emit('simulator-update-eth-balance', { address: user.address, ETHBalance: balances.ETHBalance });
+      game.events.emit('simulator-update-eth-balance', { address: user.address, ETHBalance: user?.ETHBalance || 0 });
     });
 
     game.events.on('simulator-request-increment-time', () => {
@@ -302,10 +321,10 @@ const useSimulatorGameListener = () => {
     if (gameRef) {
       gameRef.events.emit('simulator-update-eth-balance', {
         address: user?.address || '',
-        ETHBalance: balances.ETHBalance,
+        ETHBalance: user?.ETHBalance || 0,
       });
     }
-  }, [balances.ETHBalance]);
+  }, [user?.ETHBalance]);
 
   useEffect(() => {
     if (gameRef) {
@@ -322,10 +341,10 @@ const useSimulatorGameListener = () => {
 
   useEffect(() => {
     if (gameRef) {
-      gameRef.events.emit('simulator-update-balances', balances);
+      gameRef.events.emit('simulator-update-balances', { ...balances, ETHBalance: user?.ETHBalance || 0 });
       gameRef.events.emit('simulator-xbalance-token', { balance: balances.xTokenBalance });
     }
-  }, [balances]);
+  }, [balances, user?.ETHBalance]);
 
   useEffect(() => {
     console.log('Change ', { activeSeason, gameRef });
@@ -342,7 +361,11 @@ const useSimulatorGameListener = () => {
       gameRef.events.emit('simulator-update-machines', {
         numberOfMachines: assets.numberOfMachines,
         networth: assets.networth,
-        balance: balances.ETHBalance,
+        balance: user?.ETHBalance || 0,
+        level: 0,
+        dailyReward: activeSeason?.machine?.dailyReward,
+        earningRateIncrementPerLevel: activeSeason?.machine?.earningRateIncrementPerLevel,
+        building: { level: 0, machineCapacity: activeSeason?.building?.initMachineCapacity },
         basePrice: activeSeason?.machine.basePrice || 0,
         basePriceWhitelist: activeSeason?.machine.basePrice || 0,
         maxPerBatch: activeSeason?.machine.maxPerBatch || 0,
@@ -356,7 +379,7 @@ const useSimulatorGameListener = () => {
         salesLastPeriod: 0,
       });
     }
-  }, [assets, balances, activeSeason, market]);
+  }, [assets, user?.ETHBalance, activeSeason, market]);
 
   useEffect(() => {
     if (gameRef) {
@@ -396,6 +419,9 @@ const useSimulatorGameListener = () => {
       gameRef.events.emit('simulator-update-buildings', {
         numberOfBuildings: assets.numberOfBuildings,
         networth: assets.networth,
+        numberOfMachines: assets.numberOfMachines,
+        building: { level: 0, machineCapacity: activeSeason?.building?.initMachineCapacity },
+        machineCapacityIncrementPerLevel: activeSeason?.building?.machineCapacityIncrementPerLevel,
         balance: balances.tokenBalance,
         sold: assets.numberOfBuildings,
         basePrice: activeSeason?.building.basePrice,
@@ -453,6 +479,14 @@ const useSimulatorGameListener = () => {
       });
     }
   }, [activeSeason?.endTimeConfig?.timeIncrementInSeconds]);
+
+  useEffect(() => {
+    if (gameRef)
+      gameRef.events.emit('simulator-update-twitter-share-template', {
+        template: templates.twitterShareReferralCode,
+        referralCode: user?.referralCode || '',
+      });
+  }, [templates.twitterShareReferralCode, user?.referralCode]);
 
   return { setupSimulatorGameListener };
 };

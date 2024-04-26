@@ -14,8 +14,20 @@ class PopupReferralProgram extends Popup {
   template = '';
   referralCode = '';
 
-  constructor(scene) {
-    super(scene, 'popup-referral', { title: 'Referral Program' });
+  constructor(scene, { onOpen, isSimulator, ...configs } = {}) {
+    super(scene, 'popup-referral', { title: 'Referral Program', ...configs });
+    this.onOpenCallback = onOpen;
+
+    this.events = {
+      requestUPointReward: isSimulator ? 'simulator-request-u-point-reward' : 'request-u-point-reward',
+      requestTwitterShareTemplate: isSimulator
+        ? 'simulator-request-twitter-share-template'
+        : 'request-twitter-share-template',
+      updateUPointReward: isSimulator ? 'simulator-update-u-point-reward' : 'update-u-point-reward',
+      updateTwitterShareTemplate: isSimulator
+        ? 'simulator-update-twitter-share-template'
+        : 'update-twitter-share-template',
+    };
 
     const btnY = this.popup.y + 670;
     this.signupBtn = new Button(
@@ -73,21 +85,23 @@ class PopupReferralProgram extends Popup {
       .setOrigin(0.5, 0.5);
     this.add(underline);
 
-    scene.game.events.on('update-u-point-reward', ({ uPointReward }) => {
+    scene.game.events.on(this.events.updateUPointReward, ({ uPointReward }) => {
       this.uPointText.text = formatter.format(uPointReward);
     });
 
-    scene.game.events.on('update-twitter-share-template', ({ template, referralCode }) => {
+    scene.game.events.on(this.events.updateTwitterShareTemplate, ({ template, referralCode }) => {
       this.template = template;
       this.referralCode = referralCode;
       console.log('update-twitter-share-template', { template, referralCode });
     });
 
-    scene.game.events.emit('request-u-point-reward');
-    scene.game.events.emit('request-twitter-share-template');
+    scene.game.events.emit(this.events.requestUPointReward);
+    scene.game.events.emit(this.events.requestTwitterShareTemplate);
   }
 
-  onOpen() {}
+  onOpen() {
+    this.onOpenCallback?.();
+  }
 
   cleanup() {}
 }

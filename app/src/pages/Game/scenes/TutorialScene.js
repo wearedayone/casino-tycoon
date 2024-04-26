@@ -14,6 +14,7 @@ import PopupSafeHouseUpgrade from '../components/popup/PopupSafeHouseUpgrade';
 import PopupBuyGoon from '../components/popup/PopupBuyGoon';
 import PopupBuyGangster from '../components/popup/PopupBuyGangster';
 import Animation from '../components/common/Animation';
+import PopupReferralProgram from '../components/popup/PopupReferralProgram';
 import PopupLeaderboard from '../components/popup/PopupLeaderboard';
 import PopupDeposit from '../components/popup/PopupDeposit';
 import PopupPrizePool from '../components/popup/PopupPrizePool';
@@ -71,23 +72,50 @@ class TutorialScene extends Phaser.Scene {
       this.scene.stop();
       this.scene.start('MainScene', { isFromTutorial: true });
     };
+
+    this.popupReferralProgram = new PopupReferralProgram(this, {
+      isSimulator: true,
+      noBackground: true,
+      originY: -120,
+      onOpen: () => {
+        this.tutorial.step13.setVisible(false);
+        this.tutorial.step14.setVisible(true);
+      },
+      onClose: () => {
+        this.tutorial.step14.setVisible(false);
+        this.tutorial.step15.start();
+      },
+    });
+    this.add.existing(this.popupReferralProgram);
+
     this.popupDeposit = new PopupDeposit(this, null, {
       isSimulator: true,
+      noBackground: true,
+      originY: -220,
       onOpen: () => {
-        this.tutorial.step16.setVisible(false);
+        this.tutorial.step15.moveArrowToDepositBtn();
       },
       onClose: endTutorial,
     }); // done
     this.add.existing(this.popupDeposit);
 
-    this.popupDepositETH = new PopupDepositETH(this, { isSimulator: true, onClose: endTutorial });
+    this.popupDepositETH = new PopupDepositETH(this, {
+      isSimulator: true,
+      noBackground: true,
+      originY: -220,
+      onOpen: () => {
+        this.tutorial.step15.arrow.setVisible(false);
+        this.tutorial.step15.character.updateCallback(endTutorial);
+      },
+      onClose: endTutorial,
+    });
     this.add.existing(this.popupDepositETH);
 
     this.popupBuy = new PopupBuy(this, width - 335, 1600); // done
     this.add.existing(this.popupBuy);
 
-    const header = new Header(this, 250, { isSimulator: true }); // done
-    this.add.existing(header);
+    this.header = new Header(this, 250, { isSimulator: true }); // done
+    this.add.existing(this.header);
 
     this.popupWar = new PopupWar(this, 35, 1850); // done
     this.add.existing(this.popupWar);
@@ -120,12 +148,15 @@ class TutorialScene extends Phaser.Scene {
     pluginLoader.once(Phaser.Loader.Events.COMPLETE, () => {
       this.popupSafeHouseUpgrade = new PopupSafeHouseUpgrade(this, {
         isSimulator: true,
+        noCloseBtn: true,
+        noBackground: true,
+        originY: -120,
         onCompleted: () => {
-          this.tutorial.step10.setVisible(false);
+          this.tutorial.step9.setVisible(false);
           this.tutorial.setVisible(false);
           setTimeout(() => {
             this.tutorial.setVisible(true);
-            this.tutorial.step9.setVisible(true);
+            this.tutorial.step10.setVisible(true);
           }, 300);
         },
       }); // done
@@ -133,12 +164,15 @@ class TutorialScene extends Phaser.Scene {
 
       this.popupBuyGoon = new PopupBuyGoon(this, {
         isSimulator: true,
+        noCloseBtn: true,
+        noBackground: true,
+        originY: -120,
         onCompleted: () => {
-          this.tutorial.step8.setVisible(false);
+          this.tutorial.step7.setVisible(false);
           this.tutorial.setVisible(false);
           setTimeout(() => {
             this.tutorial.setVisible(true);
-            this.tutorial.step7.setVisible(true);
+            this.tutorial.step8.setVisible(true);
           }, 300);
         },
       }); // done
@@ -146,33 +180,21 @@ class TutorialScene extends Phaser.Scene {
 
       this.popupBuyGangster = new PopupBuyGangster(this, {
         isSimulator: true,
+        noCloseBtn: true,
+        noBackground: true,
+        originY: -170,
         onCompleted: () => {
-          this.tutorial.step3.setVisible(false);
+          this.tutorial.step4.setVisible(false);
           this.tutorial.setVisible(false);
           setTimeout(() => {
             this.tutorial.setVisible(true);
-            this.tutorial.step4.setVisible(true);
+            this.tutorial.step5.setVisible(true);
           }, 300);
         },
       }); // done
       this.add.existing(this.popupBuyGangster);
 
-      this.popupLeaderboard = new PopupLeaderboard(this, {
-        isSimulator: true,
-        onClose: () => {
-          this.tutorial.step11.setVisible(false);
-          this.tutorial.step12.setVisible(false);
-          this.tutorial.background.setDisplaySize(width, height);
-          this.tutorial.lowerBackground?.destroy();
-          this.tutorial.step13.setVisible(true);
-        },
-        onClickRank: () => {
-          this.tutorial.step12.arrow.setX(width / 2);
-        },
-        onClickReputation: () => {
-          this.tutorial.step12.arrow.setX(width / 2 - this.popupLeaderboard.popup.width * 0.23);
-        },
-      }); // done
+      this.popupLeaderboard = new PopupLeaderboard(this, { isSimulator: true, noBackground: true });
       this.add.existing(this.popupLeaderboard);
 
       this.popupPrizePool = new PopupPrizePool(this, { isSimulator: true }); // done
@@ -180,24 +202,25 @@ class TutorialScene extends Phaser.Scene {
 
       this.popupWarMachines = new PopupWarMachines(this, {
         isSimulator: true,
+        noBackground: true,
         onClickInfoButton: () => {
-          this.tutorial.step13.setVisible(false);
-          this.popupWarExplain.background?.destroy();
-          this.tutorial.step14.setVisible(true);
+          this.tutorial.step11.setVisible(false);
+          this.tutorial.step11.arrow.setVisible(false);
+          this.tutorial.step12.setVisible(true);
         },
         onClickClose: () => {
-          this.tutorial.step13.setVisible(false);
-          this.tutorial.step15.setVisible(true);
-          this.game.events.emit('simulator-reset-assets');
+          this.tutorial.step11.setVisible(false);
+          this.tutorial.step11.arrow.setVisible(false);
+          this.tutorial.step13.setVisible(true);
         },
       });
       this.add.existing(this.popupWarMachines);
 
       this.popupWarExplain = new PopupWarExplain(this, {
+        noBackground: true,
         onClickBackButton: () => {
-          this.tutorial.step14.setVisible(false);
-          this.tutorial.step15.setVisible(true);
-          this.game.events.emit('simulator-reset-assets');
+          this.tutorial.step12.setVisible(false);
+          this.tutorial.step13.setVisible(true);
         },
       });
       this.add.existing(this.popupWarExplain);
@@ -210,7 +233,9 @@ class TutorialScene extends Phaser.Scene {
     const infoButtons = new InfoButtons(this, 550, { isSimulator: true }); // done
     this.add.existing(infoButtons);
 
-    this.tutorial = new Tutorial(this);
+    this.tutorialOverlay = this.add.container(0, 0).setDepth(6);
+    this.add.existing(this.tutorialOverlay);
+    this.tutorial = new Tutorial(this, this.tutorialOverlay);
     this.add.existing(this.tutorial);
     this.tutorial.setDepth(2);
   }

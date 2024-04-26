@@ -1,61 +1,34 @@
 import Phaser from 'phaser';
 
-import Button from '../button/Button';
-import configs from '../../configs/configs';
 import TutorialCharacter from './TutorialCharacter';
+import configs from '../../configs/configs';
 
 const { width, height } = configs;
 
-const px = 40;
-const buttonWidth = 288;
-const y = 2600;
-
 class Step7 extends Phaser.GameObjects.Container {
-  constructor(scene, onNext) {
+  constructor(scene, overlayContainer) {
     super(scene, 0, 0);
 
     this.setVisible(false);
 
-    const next = () => {
-      scene.popupBuy.setVisible(false);
-      scene.popupSafeHouseUpgrade.setDepth(5);
-      scene.popupSafeHouseUpgrade.background?.destroy();
-      scene.popupSafeHouseUpgrade.setVisible(true);
-      onNext();
-    };
+    this.arrow = scene.add
+      .image(width / 2, height / 2 + 730, 'tutorial-arrow-up')
+      .setOrigin(0.5, 0)
+      .setVisible(false);
+    overlayContainer.add(this.arrow);
 
-    this.character = new TutorialCharacter(scene, width / 2, height / 2 - 200, 'tutorial-7', () => {});
+    this.character = new TutorialCharacter(scene, width / 2, height - 240, 'tutorial-7', () => {});
     this.add(this.character);
 
-    this.activeButton = new Button(
-      scene,
-      width - px - buttonWidth / 2,
-      y,
-      'button-buy',
-      'button-buy-pressed',
-      () => {
-        this.character.y -= 400;
-        this.arrow.setVisible(true);
-        this.arrow1.setVisible(false);
+    scene.game.events.on('simulator-buy-goon', () => {
+      this.arrow.setVisible(false);
+      this.character.setVisible(false);
+    });
+  }
 
-        scene.popupWar.setVisible(false);
-        scene.popupBuy.setDepth(5);
-        scene.popupBuy.updateDisabled({ goonDisabled: true, gangsterDisabled: true, houseDisabled: false });
-        scene.popupBuy.updateCallback(() => next());
-        scene.popupBuy.setVisible(!scene.popupBuy.visible);
-      },
-      { sound: 'button-1' }
-    );
-    this.add(this.activeButton);
-
-    this.arrow1 = scene.add
-      .image(this.activeButton.x, this.activeButton.y - this.activeButton.height / 2 - 20, 'tutorial-arrow-down')
-      .setOrigin(0.5, 1);
-    this.add(this.arrow1);
-
-    this.arrow = scene.add.image(width - 360, 1620, 'tutorial-arrow-right').setOrigin(1, 0);
-    this.arrow.setVisible(false);
-    this.add(this.arrow);
+  start() {
+    this.setVisible(true);
+    this.arrow.setVisible(true);
   }
 }
 

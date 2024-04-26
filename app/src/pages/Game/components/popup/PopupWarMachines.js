@@ -32,8 +32,8 @@ class PopupWarMachines extends Popup {
   totalEarn = 0;
   loading = false;
 
-  constructor(scene, { isSimulator, onClickInfoButton, onClickClose } = {}) {
-    super(scene, 'popup-war-machines', { title: 'Gang War' });
+  constructor(scene, { isSimulator, onClickInfoButton, onClickClose, ...configs } = {}) {
+    super(scene, 'popup-war-machines', { title: 'Gang War', ...configs });
     this.scene = scene;
     this.onClickClose = onClickClose;
 

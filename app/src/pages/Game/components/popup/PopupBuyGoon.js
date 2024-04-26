@@ -40,8 +40,8 @@ class PopupBuyGoon extends Popup {
   isSimulator = false;
   purchaseToken = 'GREED'; // 'xGREED' || 'GREED'
 
-  constructor(scene, { isSimulator, onCompleted } = {}) {
-    super(scene, 'popup-buy-goon', { title: 'Buy Goons', noCloseBtn: !!isSimulator });
+  constructor(scene, { isSimulator, onCompleted, ...configs } = {}) {
+    super(scene, 'popup-buy-goon', { title: 'Buy Goons', ...configs });
 
     this.scene = scene;
     const events = {
@@ -292,7 +292,8 @@ class PopupBuyGoon extends Popup {
 
     this.coin = scene.add
       .image(this.priceText.x + this.priceText.width + 10, counterY, 'icon-coin-small')
-      .setOrigin(0, 0.5);
+      .setOrigin(0, 0.5)
+      .setVisible(!isSimulator);
     this.add(this.coin);
 
     if (!isSimulator) {
@@ -383,6 +384,12 @@ class PopupBuyGoon extends Popup {
   }
 
   updateValues() {
+    if (this.isSimulator) {
+      this.priceText.text = 'FREE';
+      this.priceText.x = width / 2 + 200;
+      return;
+    }
+
     this.networthIncreaseText.text = `+${(this.networthIncrease * this.quantity).toLocaleString()}`;
     this.rateIncreaseText.text = `+${(this.rateIncrease * this.quantity).toLocaleString()} /d`;
 

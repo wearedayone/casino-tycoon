@@ -1,17 +1,12 @@
 import Phaser from 'phaser';
 
-import Button from '../button/Button';
-import configs from '../../configs/configs';
 import TutorialCharacter from './TutorialCharacter';
+import configs from '../../configs/configs';
 
 const { width, height } = configs;
 
-const px = 40;
-const buttonWidth = 288;
-const y = 2600;
-
 class Step2 extends Phaser.GameObjects.Container {
-  clicked = false;
+  openTimeout = null;
 
   constructor(scene, onNext) {
     super(scene, 0, 0);
@@ -19,46 +14,49 @@ class Step2 extends Phaser.GameObjects.Container {
     this.setVisible(false);
 
     const next = () => {
-      scene.popupBuy.setVisible(false);
-      scene.popupBuyGangster.setDepth(5);
-      scene.popupBuyGangster.background?.destroy();
-      scene.popupBuyGangster.open();
+      scene.popupLeaderboard.close();
+      scene.tutorial.background.setVisible(true);
+      scene.tutorial.leftBg?.destroy();
+      scene.tutorial.rightBg?.destroy();
+
       onNext();
     };
 
-    this.activeButton = new Button(
-      scene,
-      width - px - buttonWidth / 2,
-      y,
-      'button-buy',
-      'button-buy-pressed',
-      () => {
-        if (this.clicked) return;
-        this.clicked = true;
+    this.overlay = scene.add.image(width / 2, height / 2 + 20, 'tutorial-2-overlay');
+    this.add(this.overlay);
+    this.character = new TutorialCharacter(scene, width / 2, height - 650, 'tutorial-2', next);
+    this.add(this.character);
+  }
 
-        this.character = new TutorialCharacter(scene, width / 2, height / 2 - 600, 'tutorial-2', () => {});
-        this.add(this.character);
+  start() {
+    // wait for rexUI plugin loader to finish
+    if (!this.scene.popupLeaderboard) {
+      if (this.openTimeout) clearTimeout(this.openTimeout);
+      this.openTimeout = setTimeout(() => this.start(), 200);
+      return;
+    }
 
-        this.arrow1.setVisible(false);
-        this.arrow.setVisible(true);
-        scene.popupWar.setVisible(false);
-        scene.popupBuy.setDepth(5);
-        scene.popupBuy.updateDisabled({ goonDisabled: true, gangsterDisabled: false, houseDisabled: true });
-        scene.popupBuy.updateCallback(() => next());
-        scene.popupBuy.setVisible(true);
-      },
-      { sound: 'button-1' }
-    );
-    this.add(this.activeButton);
+    this.setVisible(true);
 
-    this.arrow1 = scene.add
-      .image(this.activeButton.x, this.activeButton.y - this.activeButton.height / 2 - 20, 'tutorial-arrow-down')
-      .setOrigin(0.5, 1);
-    this.add(this.arrow1);
+    // effects
+    this.scene.popupLeaderboard.open();
+    this.scene.popupLeaderboard.setDepth(1);
+    this.scene.tutorial.background.setVisible(false);
 
-    this.arrow = scene.add.image(width - 360, 1900, 'tutorial-arrow-right').setOrigin(1, 0);
-    this.arrow.setVisible(false);
-    this.add(this.arrow);
+    const overlayWidth = this.overlay.width * 0.92;
+    if (overlayWidth < width) {
+      const sidePieceWidth = (width - overlayWidth) / 2;
+      this.scene.tutorial.leftBg = this.scene.add
+        .rectangle(0, 0, sidePieceWidth, height, 0x260343, 0.8)
+        .setOrigin(0, 0)
+        .setDepth(1);
+      this.scene.tutorial.rightBg = this.scene.add
+        .rectangle(width, 0, sidePieceWidth, height, 0x260343, 0.8)
+        .setOrigin(1, 0)
+        .setDepth(1);
+      this.scene.add.existing(this.scene.tutorial.leftBg);
+      this.scene.add.existing(this.scene.tutorial.rightBg);
+    }
   }
 }
 

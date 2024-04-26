@@ -1,18 +1,24 @@
 import Phaser from 'phaser';
 
-import configs from '../../configs/configs';
 import TutorialCharacter from './TutorialCharacter';
+import configs from '../../configs/configs';
 
 const { width, height } = configs;
 
 class Step14 extends Phaser.GameObjects.Container {
-  constructor(scene) {
+  constructor(scene, onNext) {
     super(scene, 0, 0);
 
     this.setVisible(false);
 
-    this.arrow = scene.add.image(width / 2, height - 500, 'tutorial-arrow-up').setOrigin(0.5, 0);
-    this.add(this.arrow);
+    const next = () => {
+      scene.popupReferralProgram.close();
+
+      onNext();
+    };
+
+    this.character = new TutorialCharacter(scene, width / 2, height - 260, 'tutorial-14', next);
+    this.add(this.character);
   }
 }
 

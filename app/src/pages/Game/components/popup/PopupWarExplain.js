@@ -10,8 +10,8 @@ class PopupWarExplain extends Popup {
   earningStealPercent = 0;
   machinePercentLost = 0;
 
-  constructor(scene, { onClickBackButton } = {}) {
-    super(scene, 'popup-gang-war-explain', { title: 'Gang War', titleIcon: 'icon-info', noCloseBtn: true });
+  constructor(scene, { onClickBackButton, ...configs } = {}) {
+    super(scene, 'popup-gang-war-explain', { title: 'Gang War', titleIcon: 'icon-info', noCloseBtn: true, ...configs });
     this.onClickClose = onClickBackButton;
 
     this.backBtn = new TextButton(

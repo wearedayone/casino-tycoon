@@ -1,50 +1,61 @@
 import Phaser from 'phaser';
 
-import RankButton from '../action-buttons/RankButton';
+import TutorialCharacter from './TutorialCharacter';
+import Button from '../button/Button';
 import configs from '../../configs/configs';
 
 const { width, height } = configs;
 
-const y = 550;
 const px = 40;
-const buttonSize = 186;
+const buttonWidth = 288;
+const y = 2600;
 
 class Step10 extends Phaser.GameObjects.Container {
+  clicked = false;
+
   constructor(scene, onNext) {
     super(scene, 0, 0);
 
     this.setVisible(false);
 
     const next = () => {
-      scene.popupLeaderboard.setDepth(1);
-      scene.popupLeaderboard.open();
-
-      // background with a gap
-      scene.tutorial.background.setDisplaySize(width, scene.popupLeaderboard.prizePoolContainerY - 120);
-      const lowerBgY = scene.popupLeaderboard.leaderboardY - 100;
-      scene.tutorial.lowerBackground = scene.add
-        .rectangle(0, lowerBgY, width, height - lowerBgY, 0x260343, 0.8)
-        .setOrigin(0, 0)
-        .setDepth(1);
-      scene.add.existing(scene.tutorial.lowerBackground);
-
+      scene.popupWar.setVisible(false);
       onNext();
     };
 
-    this.rankButton = new RankButton(
-      scene,
-      width - px - buttonSize / 2,
-      y,
-      'button-rank',
-      'button-rank-pressed',
-      () => next(),
-      { sound: 'button-1', isSimulator: true }
-    );
-    this.add(this.rankButton);
+    this.character = new TutorialCharacter(scene, width / 2, height / 2 + 200, 'tutorial-10', () => {});
+    this.add(this.character);
 
-    this.arrow = scene.add
-      .image(width - px - buttonSize - 20, this.rankButton.y, 'tutorial-arrow-right')
-      .setOrigin(1, 0.5);
+    this.activeButton = new Button(
+      scene,
+      0 + px + buttonWidth / 2,
+      y,
+      'button-war',
+      'button-war-pressed',
+      () => {
+        if (this.clicked) return;
+        this.clicked = true;
+
+        this.character.y -= 400;
+        this.arrow.setVisible(true);
+        this.arrow1.setVisible(false);
+
+        scene.popupWar.setDepth(5);
+        scene.popupWar.updateDisabled({ historyDisabled: true, warDisabled: false });
+        scene.popupWar.updateCallback(() => next());
+        scene.popupWar.setVisible(!scene.popupWar.visible);
+      },
+      { sound: 'button-1' }
+    );
+    this.add(this.activeButton);
+
+    this.arrow1 = scene.add
+      .image(this.activeButton.x, this.activeButton.y - this.activeButton.height / 2 - 20, 'tutorial-arrow-down')
+      .setOrigin(0.5, 1);
+    this.add(this.arrow1);
+
+    this.arrow = scene.add.image(360, 2210, 'tutorial-arrow-left').setOrigin(0, 0);
+    this.arrow.setVisible(false);
     this.add(this.arrow);
   }
 }

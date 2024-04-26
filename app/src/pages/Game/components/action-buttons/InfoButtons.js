@@ -14,7 +14,20 @@ const verticalGap = buttonSize + 50;
 class InfoButtons extends Phaser.GameObjects.Container {
   numberOfSpins = 0;
 
-  constructor(scene, y, { isSimulator } = {}) {
+  constructor(
+    scene,
+    y,
+    {
+      isSimulator,
+      noBackground = false,
+      hideSettings = false,
+      hideLeaderboard = false,
+      hidePortfolio = false,
+      dailySpinDisabled = false,
+      holdingRewardDisabled = false,
+      onClickReward,
+    } = {}
+  ) {
     super(scene, 0, 0);
 
     this.scene = scene;
@@ -24,18 +37,21 @@ class InfoButtons extends Phaser.GameObjects.Container {
       updateBadgeNumber: isSimulator ? 'simulator-update-badge-number' : 'update-badge-number',
     };
 
-    this.settingButton = new Button(
-      scene,
-      buttonSize / 2 + px,
-      y,
-      'button-setting',
-      'button-setting-pressed',
-      () => {
-        if (isSimulator) return;
-        scene.popupSettings?.open();
-      },
-      { sound: 'button-1' }
-    );
+    if (!hideSettings) {
+      this.settingButton = new Button(
+        scene,
+        buttonSize / 2 + px,
+        y,
+        'button-setting',
+        'button-setting-pressed',
+        () => {
+          if (isSimulator) return;
+          scene.popupSettings?.open();
+        },
+        { sound: 'button-1' }
+      );
+      this.add(this.settingButton);
+    }
 
     this.rewardButton = new Button(
       scene,
@@ -45,34 +61,48 @@ class InfoButtons extends Phaser.GameObjects.Container {
       'button-reward-pressed',
       () => {
         if (isSimulator) return;
+        // within simulator
+        if (onClickReward) {
+          onClickReward();
+          this.showPopupReward();
+          return;
+        }
         this.togglePopupReward();
       },
       { sound: 'button-1' }
     );
-    this.rankButton = new RankButton(
-      scene,
-      width - px - buttonSize / 2,
-      y,
-      'button-rank',
-      'button-rank-pressed',
-      () => {
-        if (isSimulator) return;
-        scene.popupLeaderboard?.open();
-      },
-      { sound: 'button-1', isSimulator }
-    );
-    this.portfolioButton = new Button(
-      scene,
-      width - px - buttonSize / 2,
-      y + verticalGap,
-      'button-portfolio',
-      'button-portfolio-pressed',
-      () => {
-        if (isSimulator) return;
-        scene.popupPortfolio?.open();
-      },
-      { sound: 'button-1' }
-    );
+
+    if (!hideLeaderboard) {
+      this.rankButton = new RankButton(
+        scene,
+        width - px - buttonSize / 2,
+        y,
+        'button-rank',
+        'button-rank-pressed',
+        () => {
+          if (isSimulator) return;
+          scene.popupLeaderboard?.open();
+        },
+        { sound: 'button-1', isSimulator }
+      );
+      this.add(this.rankButton);
+    }
+
+    if (!hidePortfolio) {
+      this.portfolioButton = new Button(
+        scene,
+        width - px - buttonSize / 2,
+        y + verticalGap,
+        'button-portfolio',
+        'button-portfolio-pressed',
+        () => {
+          if (isSimulator) return;
+          scene.popupPortfolio?.open();
+        },
+        { sound: 'button-1' }
+      );
+      this.add(this.portfolioButton);
+    }
 
     this.badge = scene.add
       .image(
@@ -97,11 +127,11 @@ class InfoButtons extends Phaser.GameObjects.Container {
       'button-referral',
       'button-referral-pressed',
       () => {
-        if (isSimulator) return;
         this.openReferralPopup();
       },
-      { sound: 'button-1' }
+      { sound: 'button-1', disabledImage: 'button-square-disabled' }
     );
+    this.referralButton.setDisabledState(isSimulator);
 
     this.dailySpinButton = new Button(
       scene,
@@ -110,11 +140,11 @@ class InfoButtons extends Phaser.GameObjects.Container {
       'button-daily-spin',
       'button-daily-spin-pressed',
       () => {
-        if (isSimulator) return;
         this.openDailySpinPopup();
       },
-      { sound: 'button-1' }
+      { sound: 'button-1', disabledImage: 'button-daily-spin-disabled' }
     );
+    this.dailySpinButton.setDisabledState(isSimulator || dailySpinDisabled);
 
     this.holdButton = new Button(
       scene,
@@ -123,11 +153,11 @@ class InfoButtons extends Phaser.GameObjects.Container {
       'button-hold',
       'button-hold-pressed',
       () => {
-        if (isSimulator) return;
         this.openHoldPopup();
       },
-      { sound: 'button-1' }
+      { sound: 'button-1', disabledImage: 'button-hold-disabled' }
     );
+    this.holdButton.setDisabledState(isSimulator || holdingRewardDisabled);
     this.dailySpinBadge = scene.add
       .image(
         this.dailySpinButton.x + this.dailySpinButton.width / 2 - 10,
@@ -156,7 +186,7 @@ class InfoButtons extends Phaser.GameObjects.Container {
       .text(this.dailySpinButton.x + this.dailySpinButton.width / 2 + 50, this.dailySpinButton.y, 'Spin to Win', {
         fontSize: '46px',
         fontFamily: fontFamilies.extraBold,
-        color: '#fff',
+        color: dailySpinDisabled ? '#aaa' : '#fff',
       })
       .setOrigin(0, 0.5);
 
@@ -164,19 +194,18 @@ class InfoButtons extends Phaser.GameObjects.Container {
       .text(this.holdButton.x + this.holdButton.width / 2 + 50, this.holdButton.y, 'Hold to Earn', {
         fontSize: '46px',
         fontFamily: fontFamilies.extraBold,
-        color: '#fff',
+        color: holdingRewardDisabled ? '#aaa' : '#fff',
       })
       .setOrigin(0, 0.5);
 
-    this.background = scene.add.rectangle(0, 0, width, height, 0x260343, 0.8).setOrigin(0, 0).setVisible(false);
+    if (!noBackground) {
+      this.background = scene.add.rectangle(0, 0, width, height, 0x260343, 0.8).setOrigin(0, 0).setVisible(false);
+      this.add(this.background);
+    }
 
     this.hideBadge();
     this.hidePopupReward();
 
-    this.add(this.settingButton);
-    this.add(this.rankButton);
-    this.add(this.portfolioButton);
-    this.add(this.background);
     this.add(this.rewardButton);
     this.add(this.badge);
     this.add(this.badgeText);
@@ -231,7 +260,7 @@ class InfoButtons extends Phaser.GameObjects.Container {
     this.holdText?.setVisible(false);
     this.dailySpinBadge?.setVisible(false);
     this.dailySpinBadgeText?.setVisible(false);
-    this.background?.setVisible(false);
+    this.background && this.background?.setVisible(false);
     this.arrow?.setTexture('arrow-down-gold');
   }
 
@@ -246,7 +275,7 @@ class InfoButtons extends Phaser.GameObjects.Container {
       this.dailySpinBadge?.setVisible(true);
       this.dailySpinBadgeText?.setVisible(true);
     }
-    this.background?.setVisible(true);
+    this.background && this.background?.setVisible(true);
     this.arrow?.setTexture('arrow-up-gold');
   }
 

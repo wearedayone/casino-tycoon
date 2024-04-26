@@ -50,8 +50,8 @@ class PopupBuyGangster extends Popup {
   salesLastPeriod = 0;
   onCompleted;
 
-  constructor(scene, { isSimulator, onCompleted } = {}) {
-    super(scene, 'popup-buy-gangster', { title: 'Buy Gangsters', noCloseBtn: !!isSimulator });
+  constructor(scene, { isSimulator, onCompleted, ...configs } = {}) {
+    super(scene, 'popup-buy-gangster', { title: 'Buy Gangsters', ...configs });
 
     const events = {
       completed: isSimulator ? 'simulator-buy-gangster-completed' : 'buy-gangster-completed',
@@ -620,7 +620,7 @@ class PopupBuyGangster extends Popup {
 
   updateValues() {
     if (this.isSimulator) {
-      this.priceText.text = 'SAMPLE';
+      this.priceText.text = 'FREE';
       this.gasPrice.text = '';
       return;
     }

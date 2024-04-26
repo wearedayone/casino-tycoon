@@ -146,8 +146,6 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('popup-war-attack-confirmation', '/images/popup-attack-confirmation.png');
     this.load.image('popup-war-attack-detail', '/images/popup-war-attack-detail.png');
     this.load.image('popup-war-history', '/images/popup-war-history.png');
-    this.load.image('popup-house-price', '/images/popup-house-price.png');
-    this.load.image('popup-goon-price', '/images/popup-goon-price.png');
     this.load.image('popup-spin', '/images/popup-spin.png');
     this.load.image('popup-swap', '/images/popup-swap.png');
     this.load.image('popup-warning-limit-gangster', '/images/popup-warning-limit-gangster.png');
@@ -227,6 +225,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-deposit-disabled', '/images/button-deposit-disabled.png');
     this.load.image('button-hold', '/images/button-hold.png');
     this.load.image('button-hold-pressed', '/images/button-hold-pressed.png');
+    this.load.image('button-hold-disabled', '/images/button-hold-disabled.png');
     this.load.image('button-info', '/images/button-info.png');
     this.load.image('button-info-pressed', '/images/button-info-pressed.png');
     this.load.image('button-buy', '/images/button-buy.png');
@@ -276,6 +275,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-reward-pressed', '/images/button-reward-pressed.png');
     this.load.image('button-daily-spin', '/images/button-daily-spin.png');
     this.load.image('button-daily-spin-pressed', '/images/button-daily-spin-pressed.png');
+    this.load.image('button-daily-spin-disabled', '/images/button-daily-spin-disabled.png');
     this.load.image('button-green-full-length', '/images/button-green-full-length.png');
     this.load.image('button-green-full-length-pressed', '/images/button-green-full-length-pressed.png');
     this.load.image('button-green-full-length-disabled', '/images/button-green-full-length-disabled.png');
@@ -403,18 +403,20 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('tutorial-claim-inactive-btn', '/images/tutorial-claim-inactive-btn.png');
     this.load.image('tutorial-1', '/images/tutorial-1.png');
     this.load.image('tutorial-2', '/images/tutorial-2.png');
+    this.load.image('tutorial-2-overlay', '/images/tutorial-2-overlay.png');
+    this.load.image('tutorial-3', '/images/tutorial-3.png');
     this.load.image('tutorial-4', '/images/tutorial-4.png');
-    this.load.image('tutorial-4-gangster', '/images/tutorial-4-gangster.png');
-    this.load.image('tutorial-4-claim-btn', '/images/tutorial-4-claim-btn.png');
-    this.load.image('tutorial-4-claim-btn-light', '/images/tutorial-4-claim-btn-light.png');
     this.load.image('tutorial-5', '/images/tutorial-5.png');
+    this.load.image('tutorial-5-claim-btn', '/images/tutorial-5-claim-btn.png');
+    this.load.image('tutorial-6', '/images/tutorial-6.png');
     this.load.image('tutorial-7', '/images/tutorial-7.png');
+    this.load.image('tutorial-8', '/images/tutorial-8.png');
     this.load.image('tutorial-9', '/images/tutorial-9.png');
+    this.load.image('tutorial-10', '/images/tutorial-10.png');
     this.load.image('tutorial-11', '/images/tutorial-11.png');
     this.load.image('tutorial-13', '/images/tutorial-13.png');
+    this.load.image('tutorial-14', '/images/tutorial-14.png');
     this.load.image('tutorial-15', '/images/tutorial-15.png');
-    this.load.image('tutorial-15-goon', '/images/tutorial-15-goon.png');
-    this.load.image('tutorial-16', '/images/tutorial-16.png');
   }
 
   create() {}
