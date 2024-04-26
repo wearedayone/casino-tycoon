@@ -32,7 +32,7 @@ const configGame = async () => {
   console.log('Configs game...');
   const { token, nft, game, pair, uniRouter } = readConfigs();
 
-  const FIAT = await ethers.getContractFactory('GANG');
+  const FIAT = await ethers.getContractFactory('GREED');
   const fiatToken = FIAT.attach(token);
   const minterRole = await fiatToken.MINTER_ROLE();
   await fiatToken.grantRole(minterRole, game);
@@ -53,7 +53,7 @@ const configGameNewContract = async () => {
   console.log('Configs game...');
   const { token, nft, game, pair, uniRouter } = readConfigs();
 
-  const FIAT = await ethers.getContractFactory('GANG');
+  const FIAT = await ethers.getContractFactory('GREED');
   const fiatToken = FIAT.attach(token);
   const minterRole = await fiatToken.MINTER_ROLE();
   await fiatToken.grantRole(minterRole, game);
@@ -71,7 +71,7 @@ const configGameNewContract = async () => {
 const setupVariables = async () => {
   console.log('setup contract variables...');
   const { token, nft, game } = readConfigs();
-  const FIAT = await ethers.getContractFactory('GANG');
+  const FIAT = await ethers.getContractFactory('GREED');
   const tokenContract = FIAT.attach(token);
   if (tokenContractVariables) {
     console.log('update token contract fees');

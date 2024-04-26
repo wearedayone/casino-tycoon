@@ -90,6 +90,12 @@ module.exports = {
       url: 'https://sepolia.blast.io',
       accounts: [secrets.blast_sepolia_key],
       gasPrice: 1000000000,
+      verify: {
+        etherscan: {
+          apiUrl: 'https://api-sepolia.blastscan.io/api',
+          apiKey: '2VK4ZW7RSFK4VEPIMN95STMKNBVMP9YGCC',
+        },
+      },
     },
   },
   gasReporter: {
@@ -148,8 +154,8 @@ module.exports = {
         network: 'blast_sepolia',
         chainId: 168587773,
         urls: {
-          apiURL: 'https://api.routescan.io/v2/network/testnet/evm/168587773/etherscan',
-          browserURL: 'https://testnet.blastscan.io',
+          apiURL: 'https://api-sepolia.blastscan.io/api',
+          browserURL: 'https://sepolia.blastscan.io',
         },
       },
     ],

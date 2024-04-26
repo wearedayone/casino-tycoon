@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import '@openzeppelin/contracts/access/AccessControl.sol';
 import './Gangster.sol';
-import './GANG.sol';
+import './GREED.sol';
 import './IGangsterArena.sol';
 import './libs/SafeMath.sol';
 import './libs/SafeTransferLib.sol';
@@ -22,7 +22,7 @@ contract GangsterArena is AccessControl, IGangsterArena {
   using SafeTransferLib for address payable;
 
   Gangster public nft; // NFT token
-  GANG public pointToken; // pointToken token
+  GREED public pointToken; // pointToken token
   address private signer; // Signer address
 
   bytes32 public constant WORKER_ROLE = keccak256('WORKER_ROLE'); // Worker role - process game transaction
@@ -76,7 +76,7 @@ contract GangsterArena is AccessControl, IGangsterArena {
     address payable _fiatAddress
   ) {
     nft = Gangster(_gangsterAddress);
-    pointToken = GANG(_fiatAddress);
+    pointToken = GREED(_fiatAddress);
     signer = _signerAddress;
     pointsOperator_ = _pointsOperator;
 
@@ -112,7 +112,6 @@ contract GangsterArena is AccessControl, IGangsterArena {
     uint256 nGangster,
     uint256 nonce,
     uint256 bType,
-    address referral,
     bytes memory sig
   ) public {
     // require whitelisted for genesis token
@@ -123,7 +122,7 @@ contract GangsterArena is AccessControl, IGangsterArena {
     // require(pointToken.transferFrom(msg.sender, address(this), value));
 
     bytes32 message = prefixed(
-      keccak256(abi.encodePacked(msg.sender, tokenId, amount, value, time, nGangster, nonce, bType, referral))
+      keccak256(abi.encodePacked(msg.sender, tokenId, amount, value, time, nGangster, nonce, bType))
     );
     require(verifyAddressSigner(message, sig), 'Invalid signature');
     if (bType == 1) {
@@ -134,11 +133,6 @@ contract GangsterArena is AccessControl, IGangsterArena {
       //whitelisted buy
       pointToken.burnFrom(msg.sender, value);
       nft.mintWLOnBehalf(msg.sender, tokenId, amount);
-    } else {
-      // referral buy
-      require(pointToken.transfer(referral, (value * refReward_) / 100_00));
-      pointToken.burnFrom(address(this), (value * (100_00 - refReward_)) / 100_00);
-      nft.mintOnBehalf(msg.sender, tokenId, amount);
     }
     usedNonces[nonce] = true;
     gangsterBought[msg.sender] += amount;

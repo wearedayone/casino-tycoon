@@ -12,7 +12,7 @@ const _fiatAddress = '0x589c6835C21c51Bf297a7DdD7aEAb134c5a11858';
 async function main() {
   const _defaultAdmin = '0x7866Ac3933dCA99b2e9a80F8948344a387a7BF62';
 
-  const FIAT = await ethers.getContractFactory('GANG');
+  const FIAT = await ethers.getContractFactory('GREED');
   const fiatToken = FIAT.attach(_fiatAddress);
   const minterRole = await fiatToken.MINTER_ROLE();
   await fiatToken.grantRole(minterRole, _defaultAdmin);

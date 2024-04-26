@@ -11,7 +11,7 @@ const deployToken = async () => {
   console.log('deploying token...');
   const configs = readConfigs();
   const { defaultAdmin, worker } = configs;
-  const GANG = await ethers.getContractFactory('GANG');
+  const GANG = await ethers.getContractFactory('GREED');
   const GANGToken = await GANG.deploy(defaultAdmin, worker);
   const tokenAddress = await GANGToken.getAddress();
 
@@ -85,7 +85,7 @@ const addLiquidity = async () => {
   console.log('adding liquidity');
 
   const { defaultAdmin, token, uniRouter, tokenAmountToLiquidity, ethAmountToLiquidity } = readConfigs();
-  const FIAT = await ethers.getContractFactory('GANG');
+  const FIAT = await ethers.getContractFactory('GREED');
   const fiatToken = FIAT.attach(token);
   const minterRole = await fiatToken.MINTER_ROLE();
   await fiatToken.grantRole(minterRole, defaultAdmin);

@@ -16,7 +16,7 @@
     "deploy:dev": "yarn --cwd app build:dev && yarn --cwd firebase deploy:dev"
   },
   "lint-staged": {
-    "**/*.{js,ts,tsx,json,css,scss,md}": [
+    "**/src/**/*.{js,ts,tsx,json,css,scss,md}": [
       "prettier --write"
     ]
   },

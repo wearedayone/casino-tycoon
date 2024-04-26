@@ -37,7 +37,6 @@ interface IGangsterArena {
     uint256 nGangster,
     uint256 nonce,
     uint256 bType,
-    address referral,
     bytes memory sig
   ) external;
 
