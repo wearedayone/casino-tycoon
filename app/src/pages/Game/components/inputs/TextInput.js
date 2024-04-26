@@ -27,7 +27,9 @@ class TextInput extends Phaser.GameObjects.Container {
       textTransform = 'none',
       onChange,
       icon,
+      iconHorizontalPadding,
       valueRegex = /.*/,
+      iconRightMargin,
       characterRegex = /./,
       maxDisplayedCharacters = 0, // currently hardcoding this
       inputImg = 'text-input',
@@ -54,8 +56,8 @@ class TextInput extends Phaser.GameObjects.Container {
 
     // icon
     if (icon) {
-      const iconXPadding = this.container.width * 0.05;
-      const iconMarginRight = this.container.width * 0.1;
+      const iconXPadding = iconHorizontalPadding || this.container.width * 0.05;
+      const iconMarginRight = iconRightMargin || this.container.width * 0.1;
       this.icon = scene.add.sprite(inputStartX + iconXPadding, y, icon);
       this.add(this.icon);
       this.textBeginningX = inputStartX + iconXPadding + iconMarginRight;

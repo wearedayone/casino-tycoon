@@ -1,16 +1,18 @@
 import { ScrollablePanel } from 'phaser3-rex-plugins/templates/ui/ui-components.js';
 
 import Popup from './Popup';
+import Button from '../button/Button';
 import TextButton from '../button/TextButton';
 import TextInput from '../inputs/TextInput';
 import { formatter } from '../../../../utils/numbers';
 import { formatUsername } from '../../../../utils/strings';
-import configs from '../../configs/configs';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
+import { getReputationWhenWinWar } from '../../../../utils/formulas';
+import configs from '../../configs/configs';
 
 const { width, height } = configs;
 
-const rowHeight = 139;
+const rowHeight = 162;
 const paginationBtnSize = 66;
 const paginationBtnGap = 15;
 const smallBlackBoldCenter = {
@@ -23,6 +25,7 @@ const smallBlackBoldCenter = {
 const MAX_USERNAME_LENGTH = 10;
 
 class PopupWarAttack extends Popup {
+  networth = 0;
   uid = null;
   loading = false;
   page = 0;
@@ -30,7 +33,7 @@ class PopupWarAttack extends Popup {
   search = '';
   totalPages = 10;
   users = [];
-  listY = height / 2 - 530;
+  listY = height / 2 - 510;
   items = [];
   paginations = [];
 
@@ -63,8 +66,10 @@ class PopupWarAttack extends Popup {
     this.searchInput = new TextInput(scene, width / 2, height / 2 - this.popup.height / 2 + 200, {
       inputImg: 'search-input',
       icon: 'icon-search',
+      iconHorizontalPadding: 10,
+      iconRightMargin: 70,
       placeholder: 'Search user',
-      fontSize: '40px',
+      fontSize: '54px',
       color: '#29000B',
       onChange: (value) => {
         this.search = value;
@@ -98,6 +103,10 @@ class PopupWarAttack extends Popup {
     scene.game.events.on('update-auth', ({ uid }) => {
       this.uid = uid;
       this.reloadData();
+    });
+    scene.game.events.on('update-networth', ({ networth }) => {
+      this.networth = networth;
+      this.updateList();
     });
 
     scene.game.events.emit('request-next-war-time');
@@ -158,51 +167,80 @@ class PopupWarAttack extends Popup {
     });
 
     this.items = [];
+    const usernameX = this.popup.width * 0.22;
+    const lastDayTokenX = this.popup.width * 0.52;
     for (let i = 0; i < this.users.length; i++) {
       const y = i * rowHeight;
+      const firstLineY = y + rowHeight * 0.32;
+      const secondLineY = y + rowHeight * 0.7;
       if (i % 2 === 1) {
-        const bg = this.scene.add.image(this.popup.width / 2 - 90, y, 'row-container').setOrigin(0.5, 0);
+        const bg = this.scene.add.image(this.popup.width / 2 - 90, y, 'row-container-162').setOrigin(0.5, 0);
         this.items.push(bg);
       }
-      const { id, rank, username, lastDayTokenReward, active } = this.users[i];
+      const { id, rank, username, lastDayTokenReward, active, networth } = this.users[i];
       const rankText = this.scene.add
-        .text(this.popup.width * 0.05, y + rowHeight / 2, `${rank}`, smallBlackBoldCenter)
+        .text(this.popup.width * 0.05, firstLineY, `${rank}`, smallBlackBoldCenter)
         .setOrigin(0.5, 0.5);
       const usernameText = this.scene.add
-        .text(
-          this.popup.width * 0.2,
-          y + rowHeight / 2,
-          formatUsername({ username, MAX_USERNAME_LENGTH }),
-          smallBlackBoldCenter
-        )
+        .text(usernameX, firstLineY, formatUsername({ username, MAX_USERNAME_LENGTH }), smallBlackBoldCenter)
         .setOrigin(0.5, 0.5);
-      const lastDayTokenRewardText = this.scene.add
-        .text(this.popup.width * 0.42, y + rowHeight / 2, formatter.format(lastDayTokenReward), smallBlackBoldCenter)
-        .setOrigin(0.5, 0.5);
-
-      const profileBtn = new TextButton(
+      const profileBtn = new Button(
         this.scene,
-        this.popup.width * 0.58,
-        y + rowHeight / 2,
-        'button-blue-small',
-        'button-blue-small',
+        usernameX + usernameText.width / 2 + 60,
+        firstLineY,
+        'icon-search-contained',
+        'icon-search-contained',
         () => {
           this.loading = false;
           this.close();
           this.scene.popupWarAttackDetail?.updateUserId(id);
           this.scene.popupWarAttackDetail?.open();
         },
-        'Profile',
-        { fontSize: '36px' }
+        { sound: 'open' }
       );
 
-      this.items.push(rankText, usernameText, lastDayTokenRewardText, profileBtn);
+      const reputationIfWin = getReputationWhenWinWar(this.networth, networth);
+      const reputationText = this.scene.add
+        .text(usernameX + 50, secondLineY, `+${reputationIfWin} rep.`, {
+          ...smallBlackBoldCenter,
+          color: colors.brown,
+        })
+        .setOrigin(0.5, 0.5);
+      const reputationIcon = this.scene.add.image(
+        reputationText.x - reputationText.width / 2 - 25,
+        secondLineY,
+        'icon-star'
+      );
+
+      const lastDayTokenRewardText = this.scene.add
+        .text(
+          lastDayTokenX,
+          firstLineY,
+          `+${formatter.format(lastDayTokenReward.toPrecision(3))}`,
+          smallBlackBoldCenter
+        )
+        .setOrigin(0.5, 0.5);
+      const lastDayTokenIcon = this.scene.add.image(
+        lastDayTokenX + lastDayTokenRewardText.width / 2 + 50,
+        firstLineY,
+        'icon-coin-mini'
+      );
+
+      this.items.push(
+        rankText,
+        usernameText,
+        reputationIcon,
+        reputationText,
+        lastDayTokenRewardText,
+        lastDayTokenIcon,
+        profileBtn
+      );
 
       if (id !== this.uid && active) {
         const attackBtn = new TextButton(
           this.scene,
           this.popup.width * 0.58 + 200,
-          y + rowHeight / 2,
+          firstLineY,
           'button-blue-small',
           'button-blue-small',
           () => {
@@ -327,8 +365,9 @@ class PopupWarAttack extends Popup {
     ];
 
     const paginationY = this.listY + this.listContainer.height + 80;
+    const paginationWidth = allPageBtns.length * paginationBtnSize + (allPageBtns.length - 1) * paginationBtnGap;
     this.paginations = allPageBtns.reverse().map((item, index) => {
-      const x = width / 2 + this.popup.width / 2 - 120 - index * (paginationBtnSize + paginationBtnGap);
+      const x = width / 2 - paginationWidth / 2 + index * (paginationBtnSize + paginationBtnGap);
       const btn = new TextButton(
         this.scene,
         x,
