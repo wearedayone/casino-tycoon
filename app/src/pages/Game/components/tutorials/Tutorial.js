@@ -15,7 +15,6 @@ import Step12 from './Step12';
 import Step13 from './Step13';
 import Step14 from './Step14';
 import Step15 from './Step15';
-import Step16 from './Step16';
 import configs from '../../configs/configs';
 
 const { width, height } = configs;
@@ -104,24 +103,12 @@ class Tutorial extends Phaser.GameObjects.Container {
 
     this.step14 = new Step14(scene, () => {
       this.step14.setVisible(false);
-      this.step15.setVisible(true);
+      this.step15.start();
     });
     this.add(this.step14);
 
-    this.step15 = new Step15(scene, () => {
-      this.step15.setVisible(false);
-      this.step16.setVisible(true);
-      scene.game.events.emit('simulator-buy-goon', { quantity: 1, delayDuration: 0, hideSuccessPopup: true });
-    });
+    this.step15 = new Step15(scene, overlayContainer);
     this.add(this.step15);
-
-    this.step16 = new Step16(scene, () => {
-      this.step16.setVisible(false);
-      scene.game.events.emit('simulator-end');
-      scene.scene.stop();
-      scene.scene.start('MainScene', { isFromTutorial: true });
-    });
-    this.add(this.step16);
 
     this.step1.setVisible(true);
   }

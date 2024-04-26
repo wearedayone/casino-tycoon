@@ -80,19 +80,34 @@ class TutorialScene extends Phaser.Scene {
         this.tutorial.step13.setVisible(false);
         this.tutorial.step14.setVisible(true);
       },
+      onClose: () => {
+        this.tutorial.step14.setVisible(false);
+        this.tutorial.step15.start();
+      },
     });
     this.add.existing(this.popupReferralProgram);
 
     this.popupDeposit = new PopupDeposit(this, null, {
       isSimulator: true,
+      noBackground: true,
+      originY: -220,
       onOpen: () => {
-        this.tutorial.step16.setVisible(false);
+        this.tutorial.step15.moveArrowToDepositBtn();
       },
       onClose: endTutorial,
     }); // done
     this.add.existing(this.popupDeposit);
 
-    this.popupDepositETH = new PopupDepositETH(this, { isSimulator: true, onClose: endTutorial });
+    this.popupDepositETH = new PopupDepositETH(this, {
+      isSimulator: true,
+      noBackground: true,
+      originY: -220,
+      onOpen: () => {
+        this.tutorial.step15.arrow.setVisible(false);
+        this.tutorial.step15.character.updateCallback(endTutorial);
+      },
+      onClose: endTutorial,
+    });
     this.add.existing(this.popupDepositETH);
 
     this.popupBuy = new PopupBuy(this, width - 335, 1600); // done

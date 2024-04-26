@@ -12,8 +12,8 @@ class PopupDeposit extends Popup {
   address = '';
   isSimulator;
 
-  constructor(scene, parentModal, { isSimulator, onOpen, onClose } = {}) {
-    super(scene, 'popup-small', { title: 'Deposit' });
+  constructor(scene, parentModal, { isSimulator, onOpen, onClose, ...configs } = {}) {
+    super(scene, 'popup-small', { title: 'Deposit', ...configs });
     this.onOpenCallback = onOpen;
     this.cleanup = onClose;
     this.isSimulator = isSimulator;

@@ -9,8 +9,9 @@ const { width, height } = configs;
 class PopupDepositETH extends Popup {
   code = '-----';
 
-  constructor(scene, { isSimulator, onClose } = {}) {
-    super(scene, 'popup-small', { title: 'Deposit ETH' });
+  constructor(scene, { isSimulator, onOpen, onClose, ...configs } = {}) {
+    super(scene, 'popup-small', { title: 'Deposit ETH', ...configs });
+    this.onOpenCallback = onOpen;
     this.cleanup = onClose;
     this.isSimulator = isSimulator;
 
@@ -84,6 +85,7 @@ class PopupDepositETH extends Popup {
 
   onOpen() {
     this.scene.game.events.emit(this.events.requestDepositCode);
+    this.onOpenCallback?.();
   }
 }
 

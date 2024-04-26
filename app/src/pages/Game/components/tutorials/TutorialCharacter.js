@@ -11,6 +11,10 @@ class TutorialCharacter extends Phaser.GameObjects.Container {
       onNext();
     });
   }
+
+  updateCallback(callback) {
+    this.image.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, callback);
+  }
 }
 
 export default TutorialCharacter;
