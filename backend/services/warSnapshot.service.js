@@ -574,6 +574,7 @@ export const getUsersToAttack = async ({ page, limit, search }) => {
       username: usernames[doc.data().userId],
       lastDayTokenReward: 0,
       active: doc.data().active,
+      networth: doc.data().networth,
     }));
 
     return { totalDocs, docs: users };
@@ -595,6 +596,7 @@ export const getUsersToAttack = async ({ page, limit, search }) => {
     username: usernames[doc.data().userId],
     lastDayTokenReward: totalTokenRewards[doc.data().userId] || 0,
     active: doc.data().active,
+    networth: doc.data().networth,
   }));
 
   return { totalDocs, docs: users };

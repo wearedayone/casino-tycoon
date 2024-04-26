@@ -36,6 +36,7 @@ class TextButton extends Button {
     switch (defaultImage) {
       case 'button-blue':
       case 'button-blue-mini':
+      case 'button-blue-small':
       case 'button-blue-med':
       case 'button-blue-long':
         textStrokeColor = '#0004a0';

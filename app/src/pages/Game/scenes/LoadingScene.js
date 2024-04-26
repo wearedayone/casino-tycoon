@@ -165,6 +165,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('eth-coin', '/images/eth-coin.png');
     this.load.image('counter', '/images/counter.png');
     this.load.image('row-container', '/images/row-container.png');
+    this.load.image('row-container-162', '/images/row-container-162.png');
     this.load.image('goon-mini', '/images/goon-mini.png');
     this.load.image('safehouse-mini', '/images/safehouse-mini.png');
     this.load.image('swap-arrow', '/images/swap-arrow.png');
@@ -374,6 +375,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-safehouse-medium', '/images/icons/safehouse-medium.png');
     this.load.image('icon-safehouse-upgrade-done', '/images/icons/safehouse-upgrade-done.png');
     this.load.image('icon-safehouse-upgrade-fail', '/images/icons/safehouse-upgrade-fail.png');
+    this.load.image('icon-search', '/images/icons/search.png');
     this.load.image('icon-search-contained', '/images/icons/search-contained.png');
     this.load.image('icon-settings', '/images/icons/settings.png');
     this.load.image('icon-sound-on', '/images/icons/sound-on.png');
@@ -381,7 +383,6 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-star', '/images/icons/star.png');
     this.load.image('icon-star-medium', '/images/icons/star-medium.png');
     this.load.image('icon-wallet', '/images/icons/wallet.png');
-    this.load.image('icon-search', '/images/icon-search.png');
     this.load.image('icon-xgang-small', '/images/icons/xgang-small.png');
     this.load.image('icon-xgang', '/images/icon-xgang.png');
     this.load.image('icon-safehouse-upgraded-level', '/images/icon-safehouse-upgraded-level.png');
