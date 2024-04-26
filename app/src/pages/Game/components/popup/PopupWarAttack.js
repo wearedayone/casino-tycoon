@@ -167,7 +167,7 @@ class PopupWarAttack extends Popup {
     });
 
     this.items = [];
-    const usernameX = this.popup.width * 0.22;
+    const usernameX = this.popup.width * 0.13;
     const lastDayTokenX = this.popup.width * 0.52;
     for (let i = 0; i < this.users.length; i++) {
       const y = i * rowHeight;
@@ -183,10 +183,10 @@ class PopupWarAttack extends Popup {
         .setOrigin(0.5, 0.5);
       const usernameText = this.scene.add
         .text(usernameX, firstLineY, formatUsername({ username, MAX_USERNAME_LENGTH }), smallBlackBoldCenter)
-        .setOrigin(0.5, 0.5);
+        .setOrigin(0, 0.5);
       const profileBtn = new Button(
         this.scene,
-        usernameX + usernameText.width / 2 + 60,
+        usernameX + usernameText.width + 60,
         firstLineY,
         'icon-search-contained',
         'icon-search-contained',
@@ -205,12 +205,8 @@ class PopupWarAttack extends Popup {
           ...smallBlackBoldCenter,
           color: colors.brown,
         })
-        .setOrigin(0.5, 0.5);
-      const reputationIcon = this.scene.add.image(
-        reputationText.x - reputationText.width / 2 - 25,
-        secondLineY,
-        'icon-star'
-      );
+        .setOrigin(0, 0.5);
+      const reputationIcon = this.scene.add.image(usernameX + 25, secondLineY, 'icon-star');
 
       const lastDayTokenRewardText = this.scene.add
         .text(
