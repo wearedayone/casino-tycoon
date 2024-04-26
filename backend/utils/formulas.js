@@ -170,15 +170,14 @@ export const calculateUpgradeBuildingPrice = (currentLevel) => {
 };
 
 export const getReputationWhenWinWar = (attackerNetworth, defenderNetworth) => {
-  let gainedReputationPercent = 0;
+  let gainedReputation = 5;
   const reputationRatio = defenderNetworth / attackerNetworth;
 
-  if (reputationRatio > 10) gainedReputationPercent = 0.005;
-  else if (reputationRatio > 5) gainedReputationPercent = 0.004;
-  else if (reputationRatio > 3) gainedReputationPercent = 0.003;
-  else if (reputationRatio > 2) gainedReputationPercent = 0.002;
-  else if (reputationRatio > 1) gainedReputationPercent = 0.001;
-  const gainedReputation = Math.round(defenderNetworth * gainedReputationPercent);
+  if (reputationRatio > 10) gainedReputation = 50;
+  else if (reputationRatio > 5) gainedReputation = 40;
+  else if (reputationRatio > 3) gainedReputation = 30;
+  else if (reputationRatio > 2) gainedReputation = 20;
+  else if (reputationRatio > 1) gainedReputation = 10;
 
   return gainedReputation;
 };
