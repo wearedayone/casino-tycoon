@@ -23,7 +23,8 @@ class InActiveClaimButton extends Button {
       .setOrigin(0.5, 0.5);
     this.rewardText.setStroke('#0004A0', 3);
 
-    this.coinImage = scene.add.image(0 + this.text.width / 2 + 20, -35, 'coin').setOrigin(0.5, 0.5);
+    this.coinImage = scene.add.image(0 + this.text.width / 2 + 20, -35, 'gang-coin-small').setOrigin(0.5, 0.5);
+    this.coinImage.setScale(0.75);
 
     this.add(this.text);
     this.add(this.rewardText);

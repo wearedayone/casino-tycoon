@@ -498,7 +498,7 @@ const submitWarResults = async (users) => {
       type: 'war-bonus',
       value: item.value,
       gainedReputation: item.gainedReputation,
-      token: 'FIAT',
+      token: 'GREED',
       status,
       txnHash,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),

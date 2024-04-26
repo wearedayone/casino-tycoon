@@ -89,14 +89,14 @@ const updateTokenBalance = async ({ userDatas, tokenContract }) => {
   const promises = userDatas.map(async (userData) => {
     try {
       const { address, tokenBalance } = userData;
-      // console.log(`${address}: Update FIAT Balance`);
+      // console.log(`${address}: Update GREED Balance`);
       const balance = await tokenContract.balanceOf(address);
       const newBalance = ethers.utils.formatEther(balance.toString());
       if (newBalance - tokenBalance > 1 || newBalance - tokenBalance < -1) {
         const latestUser = await firestore.collection('user').doc(userData.userId).get();
         const { tokenBalance: currentBalance } = latestUser.data();
         if (newBalance - currentBalance > 1 || newBalance - currentBalance < -1) {
-          console.log(new Date().toLocaleString(), `${address}: FIAT: ${currentBalance} ${newBalance}`);
+          console.log(new Date().toLocaleString(), `${address}: GREED: ${currentBalance} ${newBalance}`);
           await firestore.collection('user').doc(userData.userId).update({ tokenBalance: newBalance });
         }
       }

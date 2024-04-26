@@ -378,7 +378,7 @@ const Game = () => {
   const transfer = async ({ amount, address, tokenType }) => {
     let web3Withdraw, txnStartedEvent, txnCompletedEvent;
     switch (tokenType) {
-      case 'FIAT':
+      case 'GREED':
         web3Withdraw = withdrawToken;
         txnStartedEvent = 'withdraw-token-started';
         txnCompletedEvent = 'withdraw-token-completed';
@@ -395,7 +395,7 @@ const Game = () => {
         break;
     }
     try {
-      if (!web3Withdraw) throw new Error(`Invalid tokenType. Must be one of 'ETH' | 'FIAT' | 'NFT'`);
+      if (!web3Withdraw) throw new Error(`Invalid tokenType. Must be one of 'ETH' | 'GREED' | 'NFT'`);
       gameRef.current?.events.emit(txnStartedEvent);
 
       const value = Number(amount);
@@ -409,7 +409,7 @@ const Game = () => {
         console.log({ receipt });
         gameRef.current?.events.emit(txnCompletedEvent, { amount, txnHash: receipt.transactionHash });
         if (receipt.status === 1) {
-          if (txnId && ['ETH', 'FIAT'].includes(tokenType))
+          if (txnId && ['ETH', 'GREED'].includes(tokenType))
             await validate({ transactionId: txnId, txnHash: receipt.transactionHash });
         }
       }
@@ -448,7 +448,7 @@ const Game = () => {
 
   const buyBuilding = async ({ quantity, token }) => {
     try {
-      if (token === 'xGANG') {
+      if (token === 'xGREED') {
         await buyAssetsWithXToken({ type: 'building', amount: quantity });
       } else {
         const res = await create({ type: 'buy-building', amount: quantity, token });
@@ -456,7 +456,7 @@ const Game = () => {
         const receipt = await buySafeHouse({
           type,
           amount,
-          value: token === 'FIAT' ? value : 0,
+          value: token === 'GREED' ? value : 0,
           lastB,
           time,
           nonce,
@@ -474,12 +474,12 @@ const Game = () => {
 
   const buyWorker = async ({ quantity, token }) => {
     try {
-      if (token === 'xGANG') {
+      if (token === 'xGREED') {
         await buyAssetsWithXToken({ type: 'worker', amount: quantity });
       } else {
         const res = await create({ type: 'buy-worker', amount: quantity, token });
         const { id, amount, value, time, nonce, signature, lastB } = res.data;
-        const receipt = await buyGoon({ amount, value: token === 'FIAT' ? value : 0, lastB, time, nonce, signature });
+        const receipt = await buyGoon({ amount, value: token === 'GREED' ? value : 0, lastB, time, nonce, signature });
 
         if (receipt.status !== 1) throw new Error('Transaction failed');
         return receipt.transactionHash;
@@ -866,7 +866,7 @@ const Game = () => {
       });
 
       gameRef.current?.events.on('withdraw-token', ({ amount, address }) => {
-        transfer({ amount, address, tokenType: 'FIAT' });
+        transfer({ amount, address, tokenType: 'GREED' });
       });
       gameRef.current?.events.on('withdraw-eth', ({ amount, address }) => {
         transfer({ amount, address, tokenType: 'ETH' });
@@ -887,8 +887,8 @@ const Game = () => {
             gameRef.current.events.emit('swap-completed', {
               txnHash: receipt.transactionHash,
               amount: receiveAmount,
-              token: tokenSwap === 'eth' ? '$GANG' : 'ETH',
-              description: tokenSwap === 'eth' ? 'Swap ETH to $GANG completed' : 'Swap $GANG to ETH completed',
+              token: tokenSwap === 'eth' ? '$GREED' : 'ETH',
+              description: tokenSwap === 'eth' ? 'Swap ETH to $GREED completed' : 'Swap $GREED to ETH completed',
             });
             reloadBalance();
           }
@@ -910,8 +910,8 @@ const Game = () => {
           gameRef.current.events.emit('swap-completed', {
             txnHash,
             amount: receiveAmount,
-            token: '$GANG',
-            description: 'Swap xGANG to $GANG completed',
+            token: '$GREED',
+            description: 'Swap xGREED to $GREED completed',
           });
         } catch (err) {
           const { message, code } = handleError(err);

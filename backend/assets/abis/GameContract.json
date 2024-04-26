@@ -813,7 +813,7 @@
       "name": "pointToken",
       "outputs": [
         {
-          "internalType": "contract GANG",
+          "internalType": "contract GREED",
           "name": "",
           "type": "address"
         }

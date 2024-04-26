@@ -87,7 +87,7 @@ const main = async () => {
   console.log('buildingLastTxnAmount', buildingLastTxnAmount);
   console.log('workerAmountPerTxn', workerAmountPerTxn);
   console.log('workerLastTxnAmount', workerLastTxnAmount);
-  
+
   return; // uncomment to run
   for (let i = 0; i < txnCount; i++) {
     const createdAt = startPopulateAt + i * INTERVAL_DURATION;
@@ -126,7 +126,7 @@ export const createGhostTxn = async ({ type, createdAt, ...data }) => {
   switch (type) {
     case 'buy-worker':
       txnData.amount = data.amount;
-      txnData.token = 'FIAT';
+      txnData.token = 'GREED';
       txnData.currentSold = workerSold;
       const workerTxns = await firestore
         .collection('transaction')
@@ -148,7 +148,7 @@ export const createGhostTxn = async ({ type, createdAt, ...data }) => {
       break;
     case 'buy-building':
       txnData.amount = data.amount;
-      txnData.token = 'FIAT';
+      txnData.token = 'GREED';
       txnData.currentSold = buildingSold;
       const buildingTxns = await firestore
         .collection('transaction')

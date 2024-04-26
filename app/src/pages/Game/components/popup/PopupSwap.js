@@ -152,7 +152,7 @@ class PopupSwap extends Popup {
     this.modeSwitch = new ModeSwitch(scene, width / 2, switchY, {
       containerImg: 'swap-switch-container',
       modeOne: {
-        title: 'GANG        ETH',
+        title: 'GREED        ETH',
         onClick: () => {
           if (this.loading) return;
           this.mode = 'web3';
@@ -176,7 +176,7 @@ class PopupSwap extends Popup {
         },
       },
       modeTwo: {
-        title: 'xGANG     GANG',
+        title: 'xGREED     GREED',
         onClick: () => {
           if (this.loading) return;
           this.mode = 'web2';
@@ -191,7 +191,7 @@ class PopupSwap extends Popup {
           this.token1AmountInput.updateValue('0.00', true, true);
           this.token2AmountInput.updateValue('0.00', true, true);
           this.token1AmountInput.changeIcon('icon-xgang');
-          this.token2AmountInput.changeIcon('icon-coin');
+          this.token2AmountInput.changeIcon('gang-coin-small');
           this.popupConfirm.updateIconLeft('icon-xgang-small');
           this.popupConfirm.updateIconRight('icon-coin-small');
           this.token2AmountInput.setDisabled(true);
@@ -282,7 +282,7 @@ class PopupSwap extends Popup {
       })
       .setOrigin(0, 0.5);
     this.token2AmountInput = new TextInput(scene, width / 2, token2AmountInputY, {
-      icon: 'icon-coin',
+      icon: 'gang-coin-small',
       placeholder: '0.00',
       valueRegex: numberInputRegex,
       characterRegex: numberCharacterRegex,
@@ -521,7 +521,7 @@ class PopupSwap extends Popup {
 
     if (this.tokenSwap === 'eth') {
       this.tokenSwap = 'token';
-      this.token1AmountInput.changeIcon('icon-coin');
+      this.token1AmountInput.changeIcon('gang-coin-small');
       this.token2AmountInput.changeIcon('icon-eth');
       this.popupConfirm.updateIconLeft('icon-coin-small');
       this.popupConfirm.updateIconRight('icon-eth-small');
@@ -530,7 +530,7 @@ class PopupSwap extends Popup {
     } else {
       this.tokenSwap = 'eth';
       this.token1AmountInput.changeIcon('icon-eth');
-      this.token2AmountInput.changeIcon('icon-coin');
+      this.token2AmountInput.changeIcon('gang-coin-small');
       this.popupConfirm.updateIconLeft('icon-eth-small');
       this.popupConfirm.updateIconRight('icon-coin-small');
       this.balanceText.text = `${formatter.format(this.ethBalance)}`;

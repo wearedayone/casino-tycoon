@@ -64,7 +64,7 @@ export const initTransaction = async ({ userId, type, ...data }) => {
     case 'war-bonus':
       txnData.value = data.value;
       txnData.gainedReputation = data.gainedReputation;
-      txnData.token = 'FIAT';
+      txnData.token = 'GREED';
       break;
     case 'war-penalty':
       const { machinesDeadCount } = data;

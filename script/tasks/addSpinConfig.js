@@ -50,7 +50,7 @@ const main = async () => {
             containerImg: 'spin-container-5',
           },
           {
-            type: 'GANG',
+            type: 'GREED',
             value: 100,
             order: 6,
             percentage: 0.05,
@@ -58,7 +58,7 @@ const main = async () => {
             containerImg: 'spin-container-1',
           },
           {
-            type: 'GANG',
+            type: 'GREED',
             value: 300,
             order: 7,
             percentage: 0.13,
@@ -66,7 +66,7 @@ const main = async () => {
             containerImg: 'spin-container-1',
           },
           {
-            type: 'GANG',
+            type: 'GREED',
             value: 400,
             order: 8,
             percentage: 0.28,
@@ -74,7 +74,7 @@ const main = async () => {
             containerImg: 'spin-container-1',
           },
           {
-            type: 'GANG',
+            type: 'GREED',
             value: 500,
             order: 9,
             percentage: 0.1,
@@ -82,7 +82,7 @@ const main = async () => {
             containerImg: 'spin-container-1',
           },
           {
-            type: 'GANG',
+            type: 'GREED',
             value: 800,
             order: 10,
             percentage: 0.07,
@@ -90,7 +90,7 @@ const main = async () => {
             containerImg: 'spin-container-2',
           },
           {
-            type: 'GANG',
+            type: 'GREED',
             value: 1500,
             order: 11,
             percentage: 0.027,
@@ -98,7 +98,7 @@ const main = async () => {
             containerImg: 'spin-container-3',
           },
           {
-            type: 'GANG',
+            type: 'GREED',
             value: 4500,
             order: 12,
             percentage: 0.009,
@@ -106,7 +106,7 @@ const main = async () => {
             containerImg: 'spin-container-4',
           },
           {
-            type: 'GANG',
+            type: 'GREED',
             value: 10000,
             order: 13,
             percentage: 0.003,
@@ -114,7 +114,7 @@ const main = async () => {
             containerImg: 'spin-container-4',
           },
           {
-            type: 'GANG',
+            type: 'GREED',
             value: 50000,
             order: 14,
             percentage: 0.001,
