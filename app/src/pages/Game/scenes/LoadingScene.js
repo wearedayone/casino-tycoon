@@ -146,8 +146,6 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('popup-war-attack-confirmation', '/images/popup-attack-confirmation.png');
     this.load.image('popup-war-attack-detail', '/images/popup-war-attack-detail.png');
     this.load.image('popup-war-history', '/images/popup-war-history.png');
-    this.load.image('popup-house-price', '/images/popup-house-price.png');
-    this.load.image('popup-goon-price', '/images/popup-goon-price.png');
     this.load.image('popup-spin', '/images/popup-spin.png');
     this.load.image('popup-swap', '/images/popup-swap.png');
     this.load.image('popup-warning-limit-gangster', '/images/popup-warning-limit-gangster.png');
