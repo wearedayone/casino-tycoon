@@ -1,10 +1,8 @@
 import Phaser from 'phaser';
 
 import Button from '../button/Button';
-import configs from '../../configs/configs';
-import DisabledClaimButton from '../button/DiabledClaimButton';
-import ActiveClaimButton from '../button/ActiveClaimButton';
 import ClaimButton from '../button/ClaimButton';
+import configs from '../../configs/configs';
 
 const { width } = configs;
 
@@ -93,6 +91,8 @@ class Footer extends Phaser.GameObjects.Container {
 
       const timeText = `${hours}h ${mins.toString().padStart(2, '0')}m`;
       this.timeText.text = timeText;
+      if (isSimulator) return;
+
       if (this.interval) {
         clearInterval(this.interval);
       }
