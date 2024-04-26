@@ -14,8 +14,8 @@ class PopupReferralProgram extends Popup {
   template = '';
   referralCode = '';
 
-  constructor(scene, { onOpen }) {
-    super(scene, 'popup-referral', { title: 'Referral Program' });
+  constructor(scene, { onOpen, ...configs }) {
+    super(scene, 'popup-referral', { title: 'Referral Program', ...configs });
     this.onOpenCallback = onOpen;
 
     const btnY = this.popup.y + 670;
