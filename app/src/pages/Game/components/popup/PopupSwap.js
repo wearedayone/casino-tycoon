@@ -385,6 +385,7 @@ class PopupSwap extends Popup {
       'Approve',
       { sound: 'button-1', fontSize: '82px', disabledImage: 'button-disabled' }
     );
+    this.buttonApprove.setDisabledState(true);
     this.add(buttonBack);
     this.add(this.buttonApprove);
 
@@ -541,8 +542,8 @@ class PopupSwap extends Popup {
 
   onOpen() {
     // reset form
-    this.token1AmountInput.updateValue('');
-    this.token2AmountInput.updateValue('');
+    this.token1AmountInput.updateValue('', true, true);
+    this.token2AmountInput.updateValue('', true, true);
     // this.scene.game.events.emit('request-balances');
     if (this.mode === 'web2') {
       if (!this.interval) {
