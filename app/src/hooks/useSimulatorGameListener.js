@@ -17,6 +17,7 @@ const useSimulatorGameListener = () => {
 
   // })
   const market = useSystemStore((state) => state.market);
+  const templates = useSystemStore((state) => state.templates);
   const [gameRef, setGameRef] = useState(null);
   const [balances, setBalances] = useState({ xTokenBalance: 10000, tokenBalance: 100000 });
   const [assets, setAssets] = useState({
@@ -261,6 +262,17 @@ const useSimulatorGameListener = () => {
       });
     });
 
+    game.events.on('simulator-request-u-point-reward', () => {
+      game.events.emit('simulator-update-u-point-reward', { uPointReward: 0 });
+    });
+
+    game.events.on('simulator-request-twitter-share-template', () => {
+      game.events.emit('simulator-update-twitter-share-template', {
+        template: templates.twitterShareReferralCode,
+        referralCode: user?.referralCode || '',
+      });
+    });
+
     game.events.on('simulator-request-next-war-time', () => {
       getNextWarSnapshotUnixTime()
         .then((res) => {
@@ -467,6 +479,14 @@ const useSimulatorGameListener = () => {
       });
     }
   }, [activeSeason?.endTimeConfig?.timeIncrementInSeconds]);
+
+  useEffect(() => {
+    if (gameRef)
+      gameRef.events.emit('simulator-update-twitter-share-template', {
+        template: templates.twitterShareReferralCode,
+        referralCode: user?.referralCode || '',
+      });
+  }, [templates.twitterShareReferralCode, user?.referralCode]);
 
   return { setupSimulatorGameListener };
 };

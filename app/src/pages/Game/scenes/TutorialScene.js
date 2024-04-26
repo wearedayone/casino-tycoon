@@ -74,6 +74,7 @@ class TutorialScene extends Phaser.Scene {
     };
 
     this.popupReferralProgram = new PopupReferralProgram(this, {
+      isSimulator: true,
       noBackground: true,
       originY: -120,
       onOpen: () => {
