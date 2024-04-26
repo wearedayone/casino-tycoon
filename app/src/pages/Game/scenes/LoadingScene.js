@@ -340,6 +340,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('icon-checkbox-true', '/images/icons/checkbox-true.png');
     this.load.image('icon-checkbox-false', '/images/icons/checkbox-false.png');
     this.load.image('icon-clock', '/images/icons/clock.png');
+    this.load.image('icon-coin-mini', '/images/icons/coin-mini.png');
     this.load.image('icon-coin-small', '/images/icons/coin-small.png');
     this.load.image('icon-coin-done', '/images/icons/coin-done.png');
     this.load.image('icon-coin-glowing', '/images/icons/coin-glowing.png');

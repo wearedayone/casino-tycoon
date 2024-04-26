@@ -103,6 +103,7 @@ class Tutorial extends Phaser.GameObjects.Container {
 
     this.step14 = new Step14(scene, () => {
       this.step14.setVisible(false);
+      this.background.removeAllListeners();
       this.step15.start();
     });
     this.add(this.step14);
@@ -111,6 +112,11 @@ class Tutorial extends Phaser.GameObjects.Container {
     this.add(this.step15);
 
     this.step1.setVisible(true);
+    this.background.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
+      this.step1.setVisible(false);
+      this.background.setInteractive().removeAllListeners();
+      this.step2.start();
+    });
   }
 }
 

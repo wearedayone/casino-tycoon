@@ -79,7 +79,7 @@ class TutorialScene extends Phaser.Scene {
       originY: -120,
       onOpen: () => {
         this.tutorial.step13.setVisible(false);
-        this.tutorial.step14.setVisible(true);
+        this.tutorial.step14.start();
       },
       onClose: () => {
         this.tutorial.step14.setVisible(false);
@@ -105,6 +105,7 @@ class TutorialScene extends Phaser.Scene {
       originY: -220,
       onOpen: () => {
         this.tutorial.step15.arrow.setVisible(false);
+        this.tutorial.background.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, endTutorial);
         this.tutorial.step15.character.updateCallback(endTutorial);
       },
       onClose: endTutorial,

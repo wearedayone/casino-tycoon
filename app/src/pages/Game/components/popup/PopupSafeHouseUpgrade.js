@@ -188,7 +188,7 @@ class PopupSafeHouseUpgrade extends Popup {
     this.add(this.upgradePriceButton);
 
     this.levelTitle = scene.add
-      .text(this.popup.x + 80, this.popup.y - this.popup.height / 2 + 215, 'Safehouse Level:', {
+      .text(this.popup.x + 80, this.popup.y - this.popup.height / 2 + 215, 'Safehouses:', {
         fontSize: fontSizes.large,
         color: colors.black,
         fontFamily: fontFamilies.bold,
