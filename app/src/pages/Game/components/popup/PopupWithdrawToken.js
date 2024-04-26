@@ -20,7 +20,7 @@ class PopupWithdrawToken extends Popup {
   balance = 0;
 
   constructor(scene, parentModal) {
-    super(scene, 'popup-small', { title: 'Withdraw $GANG' });
+    super(scene, 'popup-small', { title: 'Withdraw $GREED', ribbon: 'popup-title-large' });
 
     const startingY = this.popup.y - this.popup.height / 2;
     const subtitleY = startingY + 170;
@@ -28,7 +28,7 @@ class PopupWithdrawToken extends Popup {
     const balanceY = amountInputY + 130;
     const addressInputY = balanceY + 240;
 
-    const subtitle = scene.add.text(width / 2, subtitleY, 'Enter the amount of $GANG \nto withdraw', {
+    const subtitle = scene.add.text(width / 2, subtitleY, 'Enter the amount of $GREED \nto withdraw', {
       fontSize: '60px',
       color: '#29000b',
       fontFamily: 'WixMadeforDisplayBold',
@@ -38,7 +38,7 @@ class PopupWithdrawToken extends Popup {
     this.add(subtitle);
 
     this.amountInput = new TextInput(scene, width / 2, amountInputY, {
-      icon: 'icon-coin',
+      icon: 'gang-coin-small',
       placeholder: '0',
       valueRegex: integerInputRegex,
       characterRegex: integerCharacterRegex,
@@ -55,7 +55,7 @@ class PopupWithdrawToken extends Popup {
     this.add(this.amountInput);
     this.add(buttonMax);
 
-    this.balanceText = scene.add.text(width / 2, balanceY, `Balance: 0 $GANG`, {
+    this.balanceText = scene.add.text(width / 2, balanceY, `Balance: 0 $GREED`, {
       fontSize: '50px',
       color: '#7c2828',
       fontFamily: 'WixMadeforDisplayBold',
@@ -150,7 +150,7 @@ class PopupWithdrawToken extends Popup {
 
     if (!amount || amount > this.balance) {
       isValid = false;
-      this.errMSG.text = 'Insufficient $GANG ';
+      this.errMSG.text = 'Insufficient $GREED ';
     }
     if (!address || !isAddress(address)) {
       isValid = false;
@@ -174,7 +174,7 @@ class PopupWithdrawToken extends Popup {
 
   updateBalance(balance) {
     this.balance = balance;
-    this.balanceText.text = `Balance: ${balance.toLocaleString()} $GANG`;
+    this.balanceText.text = `Balance: ${balance.toLocaleString()} $GREED`;
   }
 }
 

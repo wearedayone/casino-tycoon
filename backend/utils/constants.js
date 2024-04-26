@@ -1,7 +1,6 @@
 export const TOKENS = {
-  FIAT: 'FIAT',
   ETH: 'ETH',
-  GANG: 'GANG',
+  GREED: 'GREED',
 };
 
 export const TransactionType = {

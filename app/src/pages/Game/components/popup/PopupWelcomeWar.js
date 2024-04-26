@@ -37,7 +37,7 @@ class PopupWelcomeWar extends Popup {
       .text(
         leftMargin + this.popup.width * 0.28,
         topMargin + this.popup.height * 0.2,
-        `+${formatter.format(value)}\n$GANG`,
+        `+${formatter.format(value)}\n$GREED`,
         {
           fontSize: '88px',
           color: '#fff',
@@ -59,7 +59,7 @@ class PopupWelcomeWar extends Popup {
       .setVisible(false);
     this.add(this.earnValueText);
     this.earnTokenText = scene.add
-      .text(width / 2 - this.numberGap, this.line2Y, '$GANG', {
+      .text(width / 2 - this.numberGap, this.line2Y, '$GREED', {
         fontSize: '40px',
         color: colors.black,
         fontFamily: fontFamilies.bold,
@@ -87,7 +87,7 @@ class PopupWelcomeWar extends Popup {
       .setVisible(false);
     this.add(this.defendValueText);
     this.defendTokenText = scene.add
-      .text(width / 2, this.line2Y, '$GANG', {
+      .text(width / 2, this.line2Y, '$GREED', {
         fontSize: '40px',
         color: colors.black,
         fontFamily: fontFamilies.bold,
@@ -115,7 +115,7 @@ class PopupWelcomeWar extends Popup {
       .setVisible(false);
     this.add(this.attackValueText);
     this.attackTokenText = scene.add
-      .text(width / 2 + this.numberGap, this.line2Y, '$GANG', {
+      .text(width / 2 + this.numberGap, this.line2Y, '$GREED', {
         fontSize: '40px',
         color: colors.black,
         fontFamily: fontFamilies.bold,

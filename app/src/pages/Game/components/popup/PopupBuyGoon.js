@@ -38,7 +38,7 @@ class PopupBuyGoon extends Popup {
   estimatedMaxPurchase = 0;
   onCompleted;
   isSimulator = false;
-  purchaseToken = 'FIAT'; // 'xGANG' || 'FIAT'
+  purchaseToken = 'GREED'; // 'xGREED' || 'GREED'
 
   constructor(scene, { isSimulator, onCompleted } = {}) {
     super(scene, 'popup-buy-goon', { title: 'Buy Goons', noCloseBtn: !!isSimulator });
@@ -165,7 +165,7 @@ class PopupBuyGoon extends Popup {
     this.xgangUnchecked.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
       this.xgangChecked.setVisible(true);
       this.tokenChecked.setVisible(false);
-      this.purchaseToken = 'xGANG';
+      this.purchaseToken = 'xGREED';
       this.popupConfirm.updateIconRight('icon-xgang-small');
       if (this.coin) this.coin.setTexture('icon-xgang-small');
       this.updateValues();
@@ -173,7 +173,7 @@ class PopupBuyGoon extends Popup {
     this.tokenUnchecked.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
       this.xgangChecked.setVisible(false);
       this.tokenChecked.setVisible(true);
-      this.purchaseToken = 'FIAT';
+      this.purchaseToken = 'GREED';
       this.popupConfirm.updateIconRight('icon-coin-small');
       if (this.coin) this.coin.setTexture('icon-coin-small');
       this.updateValues();
@@ -281,7 +281,7 @@ class PopupBuyGoon extends Popup {
       .setVisible(!isSimulator);
     this.add(this.gasPrice);
     this.insufficientBalance = scene.add
-      .text(priceTextX, counterY + 48, 'Insufficient $GANG', {
+      .text(priceTextX, counterY + 48, 'Insufficient $GREED', {
         fontSize: fontSizes.small,
         color: colors.black,
         fontFamily: fontFamilies.bold,
@@ -330,7 +330,7 @@ class PopupBuyGoon extends Popup {
     scene.game.events.on(events.updateXTokenBalance, ({ balance }) => {
       this.xTokenBalance = balance;
       this.xgangAvailable.text = `Available: ${customFormat(balance || 0, 1)}`;
-      if (this.purchaseToken === 'xGANG') this.updateValues();
+      if (this.purchaseToken === 'xGREED') this.updateValues();
     });
 
     scene.game.events.on(
@@ -422,7 +422,7 @@ class PopupBuyGoon extends Popup {
     this.coin.x = this.priceText.x + this.priceText.width + 10;
     if (this.infoButton) this.infoButton.x = this.coin.x + this.coin.width + 30;
 
-    const maxPurchase = this.purchaseToken === 'FIAT' ? this.estimatedMaxPurchase : this.xTokenMaxPurchase;
+    const maxPurchase = this.purchaseToken === 'GREED' ? this.estimatedMaxPurchase : this.xTokenMaxPurchase;
     const insufficientBalance = this.quantity > maxPurchase;
     this.insufficientBalance.setVisible(insufficientBalance);
     this.upgradeBtn.setDisabledState(

@@ -103,7 +103,7 @@ class PopupWarHistoryDetail extends Popup {
       .image(this.popup.width / 2 - 90, y, 'container-border')
       .setOrigin(0.5, 0.5);
     const earnItemIcon = this.scene.add.image(iconX, y, 'icon-coin-small').setOrigin(0.5, 0.5);
-    const earnItemText = this.scene.add.text(titleX, y, `GANG Earned:`, itemTitleStyle).setOrigin(0, 0.5);
+    const earnItemText = this.scene.add.text(titleX, y, `GREED Earned:`, itemTitleStyle).setOrigin(0, 0.5);
     const earnItemContent = this.scene.add
       .text(contentX, y, customFormat(tokenEarnFromEarning || 0, 1), itemContentStyle)
       .setOrigin(1, 0.5);
@@ -149,7 +149,7 @@ class PopupWarHistoryDetail extends Popup {
       .image(this.popup.width / 2 - 90, y, 'container-border')
       .setOrigin(0.5, 0.5);
     const tokenStolenItemIcon = this.scene.add.image(iconX, y, 'icon-coin-small').setOrigin(0.5, 0.5);
-    const tokenStolenItemText = this.scene.add.text(titleX, y, `GANG Lost:`, itemTitleStyle).setOrigin(0, 0.5);
+    const tokenStolenItemText = this.scene.add.text(titleX, y, `GREED Lost:`, itemTitleStyle).setOrigin(0, 0.5);
     const tokenStolenItemContent = this.scene.add
       .text(contentX, y, customFormat(tokenStolen || 0, 1), itemContentStyle)
       .setOrigin(1, 0.5);
@@ -309,7 +309,7 @@ class PopupWarHistoryDetail extends Popup {
       .setOrigin(0.5, 0.5);
     const tokenEarnedFromAttackingItemIcon = this.scene.add.image(iconX, y, 'icon-coin-small').setOrigin(0.5, 0.5);
     const tokenEarnedFromAttackingItemText = this.scene.add
-      .text(titleX, y, `GANG Stolen:`, itemTitleStyle)
+      .text(titleX, y, `GREED Stolen:`, itemTitleStyle)
       .setOrigin(0, 0.5);
     const tokenEarnedFromAttackingItemContent = this.scene.add
       .text(contentX, y, customFormat(tokenEarnFromAttacking || 0, 1), itemContentStyle)

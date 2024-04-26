@@ -25,7 +25,7 @@ class SpinItem extends Phaser.GameObjects.Container {
     const { type, value, iconImg, containerImg } = item;
     this.containerImg = containerImg;
 
-    const text = type === 'house' ? `Safehouse x${value}` : `$GANG x${value}`;
+    const text = type === 'house' ? `Safehouse x${value}` : `$GREED x${value}`;
     this.container = scene.add.sprite(x, y, containerImg).setOrigin(0.5, 0.5);
     this.icon = scene.add.image(x, y - 60, iconImg).setOrigin(0.5, 0.5);
     this.icon.displayWidth = this.container.width * 0.8;

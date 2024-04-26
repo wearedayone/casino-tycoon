@@ -33,9 +33,9 @@ class PopupWarExplain extends Popup {
     );
     this.add(this.backBtn);
 
-    const tokenRewardY = height / 2 - 400;
-    const earningStealPercentY = tokenRewardY + 412;
-    const machinePercentLostY = earningStealPercentY + 369;
+    const tokenRewardY = height / 2 - 385;
+    const earningStealPercentY = tokenRewardY + 415;
+    const machinePercentLostY = earningStealPercentY + 365;
 
     this.tokenRewardText = scene.add
       .text(width / 2 + 250, tokenRewardY, `${this.tokenRewardPerEarner.toLocaleString()}`, {

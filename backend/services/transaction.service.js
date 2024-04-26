@@ -31,8 +31,6 @@ import {
 } from '../utils/formulas.js';
 import { getAccurate } from '../utils/math.js';
 import logger from '../utils/logger.js';
-import { TOKENS } from '../utils/constants.js';
-const { FIAT, GANG, ETH } = TOKENS;
 
 const MAX_RETRY = 3;
 
@@ -49,12 +47,12 @@ export const initTransaction = async ({ userId, type, ...data }) => {
   }
 
   if (type === 'buy-worker') {
-    if (!['FIAT'].includes(data.token)) throw new Error('API error: Bad request - invalid token');
+    if (!['GREED'].includes(data.token)) throw new Error('API error: Bad request - invalid token');
     if (data.amount > activeSeason.worker.maxPerBatch) throw new Error('API error: Bad request - over max per batch');
   }
 
   if (type === 'buy-building') {
-    if (!['FIAT'].includes(data.token)) throw new Error('API error: Bad request - invalid token');
+    if (!['GREED'].includes(data.token)) throw new Error('API error: Bad request - invalid token');
     if (data.amount > activeSeason.building.maxPerBatch) throw new Error('API error: Bad request - over max per batch');
   }
   let userSnapshot;
@@ -84,7 +82,7 @@ export const initTransaction = async ({ userId, type, ...data }) => {
       txnData.token = data.token;
       break;
     case 'buy-machine':
-      txnData.token = 'FIAT';
+      txnData.token = 'GREED';
       txnData.currentSold = machineSold;
 
       const gamePlaySnapshot = await firestore
@@ -179,7 +177,7 @@ export const initTransaction = async ({ userId, type, ...data }) => {
     case 'war-bonus':
       txnData.value = data.value;
       txnData.gainedReputation = data.gainedReputation;
-      txnData.token = 'FIAT';
+      txnData.token = 'GREED';
       break;
     case 'war-penalty':
       const { machinesDeadCount } = data;
@@ -201,7 +199,7 @@ export const initTransaction = async ({ userId, type, ...data }) => {
         .get();
       const gamePlay = userGamePlay.docs[0]?.data();
       txnData.value = calculateSpinPrice(gamePlay?.networth || 0);
-      txnData.token = 'FIAT';
+      txnData.token = 'GREED';
     default:
       break;
   }
@@ -235,7 +233,7 @@ export const initTransaction = async ({ userId, type, ...data }) => {
     if (userData.exists) {
       const time = Math.floor(Date.now() / 1000);
       const buyType = type === 'buy-worker' ? 1 : 2;
-      const web3TokenValue = txnData.token === 'FIAT' ? txnData.value : 0;
+      const web3TokenValue = txnData.token === 'GREED' ? txnData.value : 0;
 
       const { address } = userData.data();
       const lastB = await getLastBuyTime({ address, type: buyType });
@@ -339,7 +337,7 @@ export const buyAssetsWithXToken = async ({ userId, type, amount }) => {
   const startSalePeriod = now - 12 * 60 * 60 * 1000;
   const txnData = {};
   txnData.amount = amount;
-  txnData.token = 'xGANG';
+  txnData.token = 'xGREED';
 
   if (type === 'worker') {
     txnData.currentSold = workerSold;
@@ -383,7 +381,7 @@ export const buyAssetsWithXToken = async ({ userId, type, amount }) => {
     txnData.prices = buildingPrices.prices;
   }
 
-  if (currentTotalBalance < txnData.value) throw new Error('API error: Insufficient xGANG');
+  if (currentTotalBalance < txnData.value) throw new Error('API error: Insufficient xGREED');
 
   const batch = firestore.batch();
 
@@ -499,7 +497,7 @@ export const validateDailySpinTxnAndReturnSpinResult = async ({ userId, transact
     await snapshot.ref.update({ txnHash, status: 'Success', reward: { type: reward.type, value: reward.value } });
   }
 
-  if (reward.type === 'GANG') {
+  if (reward.type === 'GREED') {
     const userSnapshot = await firestore.collection('user').doc(userId).get();
     if (userSnapshot.exists) {
       const { address } = userSnapshot.data();
@@ -565,7 +563,7 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
     const snapshot = await firestore.collection('transaction').doc(transactionId).get();
     const { type, value, token } = snapshot.data();
 
-    const transactionValue = token === 'ETH' ? tx.value : token === 'FIAT' ? BigInt(logs[0].data) : parseEther('0');
+    const transactionValue = token === 'ETH' ? tx.value : token === 'GREED' ? BigInt(logs[0].data) : parseEther('0');
     const bnValue = parseEther(value.toString());
     console.log({ logdata: logs[0]?.data, value, bnValue });
 
@@ -573,7 +571,7 @@ const validateBlockchainTxn = async ({ userId, transactionId, txnHash }) => {
     const { tokenAddress: TOKEN_ADDRESS } = activeSeason || {};
 
     if (type === 'withdraw') {
-      if (token === 'FIAT' && to.toLowerCase() !== TOKEN_ADDRESS.toLowerCase())
+      if (token === 'GREED' && to.toLowerCase() !== TOKEN_ADDRESS.toLowerCase())
         throw new Error(`API error: Bad request - invalid receiver for ${type}, txn: ${JSON.stringify(receipt)}`);
 
       if (!bnValue.eq(transactionValue))
@@ -716,7 +714,7 @@ export const claimToken = async ({ userId }) => {
         userId,
         seasonId: activeSeason.id,
         type: 'claim-token',
-        token: 'FIAT',
+        token: 'GREED',
         value: claimedAmount,
         status: 'Pending',
         txnHash: '',
@@ -1067,7 +1065,7 @@ export const convertXTokenToToken = async ({ userId, amount }) => {
     const generatedXToken = Math.round(diffInDays * (numberOfWorkers * worker.dailyReward) * 1000) / 1000;
     const currentXTokenBalance = xTokenBalance + generatedXToken;
 
-    if (currentXTokenBalance < amount) throw new Error('API error: Insufficient xGANG');
+    if (currentXTokenBalance < amount) throw new Error('API error: Insufficient xGREED');
 
     transaction.update(userRef, { xTokenBalance: currentXTokenBalance - amount });
     transaction.update(gamePlayRef, { startXTokenCountingTime: admin.firestore.FieldValue.serverTimestamp() });
@@ -1090,7 +1088,7 @@ export const convertXTokenToToken = async ({ userId, amount }) => {
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
     type: 'swap-x-token',
     status: 'Pending',
-    token: 'xGANG',
+    token: 'xGREED',
     value: amount,
     txnHash: '',
   });

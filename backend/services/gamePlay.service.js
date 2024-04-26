@@ -307,7 +307,7 @@ export const upgradeMachine = async (userId) => {
     const currentXTokenBalance = xTokenBalance + generatedXToken;
 
     const upgradePrice = calculateUpgradeMachinePrice(gamePlay.data()?.machine?.level);
-    if (currentXTokenBalance < upgradePrice) throw new Error('API error: Insufficient xGANG');
+    if (currentXTokenBalance < upgradePrice) throw new Error('API error: Insufficient xGREED');
     const newLevel = gamePlay.data()?.machine?.level + 1;
 
     transaction.update(userRef, { xTokenBalance: currentXTokenBalance - upgradePrice });
@@ -326,7 +326,7 @@ export const upgradeMachine = async (userId) => {
       userId,
       type: 'upgrade-machine',
       value: upgradePrice,
-      token: 'xGANG',
+      token: 'xGREED',
       status: 'Success',
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
@@ -357,7 +357,7 @@ export const upgradeBuilding = async (userId) => {
     const currentXTokenBalance = xTokenBalance + generatedXToken;
 
     const upgradePrice = calculateUpgradeBuildingPrice(gamePlay.data()?.building?.level);
-    if (currentXTokenBalance < upgradePrice) throw new Error('API error: Insufficient xGANG');
+    if (currentXTokenBalance < upgradePrice) throw new Error('API error: Insufficient xGREED');
 
     const newLevel = gamePlay.data()?.building?.level + 1;
     const { initMachineCapacity, machineCapacityIncrementPerLevel } = building;
@@ -379,7 +379,7 @@ export const upgradeBuilding = async (userId) => {
       userId,
       type: 'upgrade-building',
       value: upgradePrice,
-      token: 'xGANG',
+      token: 'xGREED',
       status: 'Success',
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });

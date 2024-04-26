@@ -53,7 +53,7 @@ const getTokenContract = async (signer) => {
 
 const burnFiat = async () => {
   try {
-    console.log('1. start burn FIAT job', new Date().toLocaleString());
+    console.log('1. start burn GREED job', new Date().toLocaleString());
     const marketingWallet = new Wallet(MARKETING_WALLET_PRIVATE_KEY, quickNode);
     const gameContract = await getGameContract(marketingWallet);
     let walletBalance = await quickNode.getBalance(marketingWallet.address, 'latest');
@@ -82,7 +82,7 @@ const burnFiat = async () => {
     await sleep(sleepTimeInMins * 60 * 1000);
 
     // swap to fiat
-    console.log('2. start swapping to FIAT');
+    console.log('2. start swapping to GREED');
     // return;
     const routerContract = await getUniswapRouterContract(marketingWallet);
     const { tokenAddress, wethAddress, routerAddress } = await getAddress();
@@ -101,10 +101,10 @@ const burnFiat = async () => {
       gasPrice: gasPrice,
     });
     const receipt2 = await tx2.wait();
-    console.log(`2. done swapping to FIAT. Txn hash ${receipt2.transactionHash}`);
+    console.log(`2. done swapping to GREED. Txn hash ${receipt2.transactionHash}`);
 
     // burn fiat
-    console.log(`3. start burning FIAT`);
+    console.log(`3. start burning GREED`);
     const tokenContract = await getTokenContract(marketingWallet);
     const balanceRes = await tokenContract.balanceOf(marketingWallet.address);
     console.log({ balanceRes });
@@ -113,7 +113,7 @@ const burnFiat = async () => {
     gasPrice = await quickNode.getGasPrice();
     const tx3 = await tokenContract.burn(parseEther(balance), { gasPrice: gasPrice });
     const receipt3 = await tx3.wait();
-    console.log(`3. done burning ${balance} FIAT. Txn hash ${receipt3.transactionHash}`);
+    console.log(`3. done burning ${balance} GREED. Txn hash ${receipt3.transactionHash}`);
   } catch (err) {
     console.error(err);
   }

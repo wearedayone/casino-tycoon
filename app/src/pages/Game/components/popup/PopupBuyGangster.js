@@ -266,7 +266,7 @@ class PopupBuyGangster extends Popup {
       .setOrigin(0, -1);
     this.add(this.gasPrice);
     this.insufficientBalance = scene.add
-      .text(this.priceTextX, counterY + 48, 'Insufficient $GANG', {
+      .text(this.priceTextX, counterY + 48, 'Insufficient $GREED', {
         fontSize: fontSizes.small,
         color: colors.black,
         fontFamily: fontFamilies.bold,
@@ -458,7 +458,7 @@ class PopupBuyGangster extends Popup {
     this.add(this.warningText3);
 
     this.warningText4 = scene.add
-      .text(warningTextX, this.warningText3.y + warningTextGap, 'to earn $GANG', {
+      .text(warningTextX, this.warningText3.y + warningTextGap, 'to earn $GREED', {
         fontSize: '40px',
         fontFamily: fontFamilies.bold,
         color: '#29000B',
