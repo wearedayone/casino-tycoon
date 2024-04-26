@@ -19,7 +19,7 @@ class PopupTxnProcessingSwap extends Popup {
     const titleY = iconY + 220;
     const viewTxnHashY = titleY + 300;
 
-    this.icon = scene.add.image(width / 2, iconY, 'swap');
+    this.icon = scene.add.image(width / 2, iconY, 'swap-eth-token');
     this.title = scene.add
       .text(width / 2, titleY, 'Allow ETH to be used \nfor swapping', {
         fontSize: fontSizes.large,
