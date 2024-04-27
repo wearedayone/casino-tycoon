@@ -1,5 +1,5 @@
 import { firestore } from '../configs/admin.config.js';
-import { getActiveSeason } from '../../script/utils/utils.js';
+import { getActiveSeason } from '../utils/utils.js';
 
 const MAX_RETRY = 3;
 

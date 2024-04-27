@@ -2,7 +2,7 @@ import axios from 'axios';
 import { Wallet } from '@ethersproject/wallet';
 
 import admin, { firestore } from '../configs/admin.config.js';
-import { getActiveSeason } from '../../script/utils/utils.js';
+import { getActiveSeason } from '../utils/utils.js';
 import quickNode from '../configs/quicknode.config.js';
 import environments from '../utils/environments.js';
 
