@@ -1,5 +1,5 @@
 import moment from 'moment';
-
+import { formatEther, parseEther } from '@ethersproject/units';
 import admin, { firestore } from '../configs/firebase.config.js';
 import { getActiveSeason, getActiveSeasonId, getActiveSeasonWithRank } from './season.service.js';
 import { calculateReward, calculateUpgradeMachinePrice, calculateUpgradeBuildingPrice } from '../utils/formulas.js';
@@ -412,7 +412,7 @@ export const retireGamePlay = async ({ userId }) => {
 
   await firestore.runTransaction(async (transaction) => {
     const systemData = await transaction.get(systemDataRef);
-    const { nonce } = systemData.data();
+    nonce = systemData.data()?.nonce;
     transaction.update(systemDataRef, { nonce: nonce + 1 });
     const transactionData = {
       userId,
@@ -420,7 +420,7 @@ export const retireGamePlay = async ({ userId }) => {
       type: 'retire',
       txnHash: '',
       status: 'Pending',
-      nonce,
+      nonce: nonce,
       value: retireReward,
       token: 'ETH',
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -433,8 +433,13 @@ export const retireGamePlay = async ({ userId }) => {
   console.log('completed', { transactionId });
 
   // send transaction to retire
-  const txn = await retire({ address, reward: retireReward, nonce, gameAddress });
-
+  const txn = await retire({
+    address,
+    reward: BigInt(parseEther(retireReward.toString()).toString()),
+    nonce,
+    gameAddress,
+  });
+  console.log({ txn });
   // remove user data if retire completed
   if (txn.status === TransactionStatus.Success) {
     await firestore.runTransaction(async (transaction) => {

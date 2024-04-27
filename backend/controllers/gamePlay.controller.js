@@ -129,8 +129,8 @@ export const upgradeUserBuildings = async (req, res) => {
 export const retire = async (req, res) => {
   try {
     const data = { ...req.body, userId: req.userId };
-    const { txnHash } = await retireGamePlay(data);
-    return res.status(200).send({ txnHash });
+    const { txnHash, status } = await retireGamePlay(data);
+    return res.status(200).send({ txnHash, status });
   } catch (err) {
     console.error(err);
     logger.error(err.message);

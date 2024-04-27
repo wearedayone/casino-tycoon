@@ -50,7 +50,7 @@ contract GREED is ERC20, AccessControl, ERC20Burnable, ERC20Permit, ReentrancyGu
 
   event SwapAndLiquify(uint256 tokensSwapped, uint256 ethReceived, uint256 tokensIntoLiquidity);
 
-  constructor(address defaultAdmin, address minter) ERC20('GANG', '$GANG') ERC20Permit('GANG') {
+  constructor(address defaultAdmin, address minter) ERC20('GREED', '$GREED') ERC20Permit('GREED') {
     _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
     _grantRole(MINTER_ROLE, minter);
     _defaultAdmin = defaultAdmin;

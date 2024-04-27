@@ -107,7 +107,7 @@ const useSmartContract = () => {
     }
   };
 
-  const buyMachine = async ({ amount, value, time, nGangster, nonce, bType, referrerAddress, signature }) => {
+  const buyMachine = async ({ amount, value, time, nGangster, nonce, bType, signature }) => {
     console.log('Start buyMachine');
     if (!loadedAssets) return;
     const provider = await getProvider();
@@ -128,7 +128,7 @@ const useSmartContract = () => {
     }
     // eslint-disable-next-line no-undef
     const valueBigint = BigInt(parseEther(value + '').toString());
-    let params = [amount, valueBigint, time, nGangster, nonce, bType, referrerAddress, signature];
+    let params = [amount, valueBigint, time, nGangster, nonce, bType, signature];
     const data = gameInterface.encodeFunctionData('buyGangster', params);
     const txnRequest = { to: GAME_CONTRACT_ADDRESS, data };
 

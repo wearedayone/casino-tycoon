@@ -1,45 +1,54 @@
 {
   "assets": {
     "machine": {
-      "basePrice": 3000,
-      "whitelistPrice": 1500,
-      "maxPerBatch": 100,
-      "maxWhitelistAmount": 10,
-      "dailyReward": 1000,
       "networth": 10,
-      "earningRateIncrementPerLevel": 0.01,
+      "dailyReward": 1000,
+      "basePrice": 3000,
       "targetDailyPurchase": 1000,
-      "targetPrice": 3000
+      "targetPrice": 3000,
+      "pricePower": 2,
+      "maxPerBatch": 100,
+      "levelPower": 1.4,
+      "levelMultiple": 500,
+      "earningRateIncrementPerLevel": 0.01
     },
     "worker": {
-      "basePrice": 200,
-      "maxPerBatch": 100,
-      "dailyReward": 400,
       "networth": 2,
+      "dailyReward": 500,
+      "targetPrice": 1000,
       "targetDailyPurchase": 200,
-      "targetPrice": 1000
+      "basePrice": 750,
+      "pricePower": 2,
+      "maxPerBatch": 100
     },
     "building": {
-      "basePrice": 500,
-      "maxPerBatch": 100,
-      "dailyReward": 0,
       "networth": 8,
-      "targetDailyPurchase": 200,
+      "dailyReward": 0,
       "targetPrice": 1000,
+      "targetDailyPurchase": 250,
+      "basePrice": 500,
+      "pricePower": 2,
+      "maxPerBatch": 100,
       "initMachineCapacity": 20,
-      "machineCapacityIncrementPerLevel": 20
+      "machineCapacityIncrementPerLevel": 20,
+      "levelPower": 2,
+      "levelMultiple": 1000
     }
   },
-  "initGameDurationInDays": 4,
+  "initGameDurationInDays": 7,
   "claimGapInSeconds": 3600,
-  "swapXTokenGapInSeconds": 432000,
+  "tokenHoldingRewardConfig": {
+    "xTokenRewardPercent": 0.01
+  },
+  "swapXTokenGapInSeconds": 3600,
   "endTimeConfig": {
     "timeIncrementInSeconds": 60,
     "timeDecrementInSeconds": 10
   },
   "spinConfig": {
     "spinIncrementStep": 1,
-    "maxSpin": 10,
+    "spinIncrementTime": 600,
+    "maxSpin": 1000,
     "spinRewards": [
       {
         "type": "house",
@@ -138,16 +147,16 @@
     "referralDiscount": 0.1
   },
   "prizePool": {
-    "earlyRetirementTax": 0.2,
+    "earlyRetirementTax": 0.15,
     "rankRewardsPercent": 0.5,
-    "reputationRewardsPercent": 0.4,
+    "reputationRewardsPercent": 0.5,
     "rewardScalingRatio": 1.28,
     "higherRanksCutoffPercent": 0.1,
     "lowerRanksCutoffPercent": 0.2,
     "minRewardHigherRanks": 0.04,
     "minRewardLowerRanks": 0,
     "devFee": 0,
-    "marketingFee": 0.1
+    "marketingFee": 0
   },
   "war": {
     "buildingBonusMultiple": 0.1,
@@ -158,11 +167,11 @@
   },
   "openseaNftCollection": "gangster-arena",
   "tokenContract": {
-    "liquidityFee": 0.01,
-    "teamFee": 0.02,
-    "burnFee": 0.02,
-    "revShareFee": 0,
-    "swapAmount": 1000
+    "liquidityFee": 0.005,
+    "teamFee": 0.015,
+    "burnFee": 0,
+    "revShareFee": 0.03,
+    "swapAmount": 5000
   },
   "initPurchased": {
     "worker": 10,

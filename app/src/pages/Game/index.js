@@ -543,6 +543,8 @@ const Game = () => {
       const { status, txnHash } = res.data;
       if (status === 'Success') {
         return txnHash;
+      } else {
+        throw new Error('Fail to retire');
       }
     } catch (err) {
       console.error(err);

@@ -59,6 +59,7 @@ const main = async () => {
       warConfig: gameConfigs.war,
       referralConfig: gameConfigs.referral,
       swapXTokenGapInSeconds: gameConfigs.swapXTokenGapInSeconds,
+      tokenHoldingRewardConfig: gameConfigs.tokenHoldingRewardConfig,
     });
   console.log('created season');
 

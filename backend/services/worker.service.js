@@ -251,15 +251,19 @@ export const burnGoon = async ({ addresses, amounts }) => {
 };
 
 export const retire = async ({ address, reward, nonce, gameAddress }) => {
+  console.log({ address, reward, nonce, gameAddress });
   let txnHash = '';
   try {
     logger.info('start retire');
     logger.info({ address, reward, nonce });
-    const sig = signMessageRetire({ address, reward, nonce });
     const workerWallet = await getWorkerWallet();
+
     const gameContract = await getContract(gameAddress, gameContractABI.abi, workerWallet);
+    const sig = await signMessageRetire({ sender: workerWallet.address, address, reward, nonce });
+
     logger.info('start Transaction:');
-    const tx = await gameContract.retired(address, reward, nonce, sig);
+    console.log({ address, reward, nonce, sig });
+    const tx = await gameContract.retire(address, reward, nonce, sig);
     logger.info('Transaction:' + tx.hash);
     txnHash = tx.hash;
     const receipt = await tx.wait();
@@ -397,9 +401,9 @@ export const signMessageBuyGangster = async ({ address, amount, value, time, nGa
   const signerWallet = await getSignerWallet();
 
   // Array of types: declares the data types in the message.
-  const types = ['address', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'address'];
+  const types = ['address', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256', 'uint256'];
   // Array of values: actual values of the parameters to be hashed.
-  const values = [address, 1, amount, value, time, nGangster, nonce, bType, referral];
+  const values = [address, amount, value, time, nGangster, nonce, bType];
 
   let message = ethers.solidityPackedKeccak256(types, values);
 
@@ -407,13 +411,13 @@ export const signMessageBuyGangster = async ({ address, amount, value, time, nGa
   return signature;
 };
 
-export const signMessageRetire = async ({ address, reward, nonce }) => {
+export const signMessageRetire = async ({ sender, address, reward, nonce }) => {
   const signerWallet = await getSignerWallet();
   // Array of types: declares the data types in the message.
-  const types = ['address', 'uint256', 'uint256'];
+  const types = ['address', 'address', 'uint256', 'uint256'];
   // Array of values: actual values of the parameters to be hashed.
-  const values = [address, BigInt(parseEther(reward.toString()).toString()), nonce];
-
+  const values = [sender, address, reward, nonce];
+  console.log({ values });
   let message = ethers.solidityPackedKeccak256(types, values);
 
   console.log('message', message);

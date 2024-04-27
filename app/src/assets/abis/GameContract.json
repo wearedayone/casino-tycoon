@@ -1,4 +1,7 @@
 {
+  "_format": "hh-sol-artifact-1",
+  "contractName": "GangsterArena",
+  "sourceName": "contracts/GangsterArena.sol",
   "abi": [
     {
       "inputs": [
@@ -24,17 +27,22 @@
         },
         {
           "internalType": "address",
-          "name": "_pointsOperator",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
           "name": "_gangsterAddress",
           "type": "address"
         },
         {
           "internalType": "address payable",
           "name": "_fiatAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_pointsOperator",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_blastPointAddr",
           "type": "address"
         }
       ],
@@ -247,6 +255,25 @@
         }
       ],
       "name": "Deposit",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "Received",
       "type": "event"
     },
     {
@@ -572,11 +599,6 @@
           "type": "uint256"
         },
         {
-          "internalType": "address",
-          "name": "referral",
-          "type": "address"
-        },
-        {
           "internalType": "bytes",
           "name": "sig",
           "type": "bytes"
@@ -807,10 +829,49 @@
     },
     {
       "inputs": [],
+      "name": "percentOfDev",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "percentOfRankPrize",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "percentOfRepPrize",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
       "name": "pointToken",
       "outputs": [
         {
-          "internalType": "contract GANG",
+          "internalType": "contract GREED",
           "name": "",
           "type": "address"
         }
@@ -892,21 +953,26 @@
       "inputs": [
         {
           "internalType": "address",
-          "name": "to",
+          "name": "_to",
           "type": "address"
         },
         {
           "internalType": "uint256",
-          "name": "payout",
+          "name": "_payout",
           "type": "uint256"
         },
         {
           "internalType": "uint256",
-          "name": "nonce",
+          "name": "_nonce",
           "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_sig",
+          "type": "bytes"
         }
       ],
-      "name": "retired",
+      "name": "retire",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -957,6 +1023,21 @@
         {
           "internalType": "uint256",
           "name": "_vtd",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_percentOfRankPrize",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_percentOfRepPrize",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_percentOfDev",
           "type": "uint256"
         }
       ],
