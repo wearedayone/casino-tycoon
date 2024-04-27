@@ -539,6 +539,7 @@ export const getUsersToAttack = async ({ page, limit, search }) => {
   const gamePlaySnapshot = await firestore
     .collection('gamePlay')
     .where('seasonId', '==', activeSeasonId)
+    .where('active', '==', true)
     .orderBy('networth', 'desc')
     .orderBy('createdAt', 'asc')
     .get();
