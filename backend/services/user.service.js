@@ -35,7 +35,7 @@ const createGamePlayIfNotExist = async (userId, isWhitelisted) => {
     }
     const oldDate = 1711213702000;
     await Promise.all([
-      firestore.collection('user').doc(userId).update({ tokenBalance: tokenBalance }),
+      firestore.collection('user').doc(userId).update({ tokenBalance: tokenBalance, completedTutorial: false }),
       firestore.collection('gamePlay').add({
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
         userId,
@@ -146,8 +146,7 @@ export const createUserIfNotExist = async (userId) => {
         walletPasswordAsked: false,
         referralCode,
         code: numberToCodeString(numberOfUsers + 1),
-        //TODO: change to false after implement new tutorial
-        completedTutorial: true,
+        completedTutorial: false,
       });
   } else {
     const { username, ETHBalance, avatarURL_small } = snapshot.data();
