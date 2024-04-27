@@ -16,15 +16,16 @@ const SPIN_CONTAINER_WIDTH = 1195;
 const SPIN_CONTAINER_HEIGHT = 900;
 const SPIN_ITEM_GAP = 40;
 const ALPHA = 0.5;
-const SPIN_DURATION = 4500;
-const SPIN_IN = 100;
-const SPIN_OUT = 2000;
+const SPIN_DURATION = 6000;
+const SPIN_IN = 500;
+const SPIN_OUT = 4000;
 
 class SpinItem extends Phaser.GameObjects.Container {
   constructor(scene, x, y, item) {
     super(scene, 0, 0);
 
     const { type, value, iconImg, containerImg } = item;
+    console.log({ type, value, iconImg, containerImg });
     this.containerImg = containerImg;
 
     const text = type === 'house' ? `Safehouse x${value}` : `$GREED x${value}`;
@@ -114,6 +115,7 @@ class PopupDailySpin extends Popup {
         spinRewards[0],
         spinRewards[1],
       ].map((item, index) => {
+        console.log({ item });
         const spinItem = new SpinItem(
           scene,
           SPIN_ITEM_WIDTH * (index + 1) + 40 * (index + 1),
@@ -338,7 +340,7 @@ class PopupDailySpin extends Popup {
       onStart: () => {
         setTimeout(() => {
           this.spinSound.play();
-        }, 200);
+        }, 100);
       },
       onComplete: () => {
         setTimeout(() => {
@@ -347,7 +349,7 @@ class PopupDailySpin extends Popup {
           this.checkSpinButtonState();
           this.contentContainer.x = this.maxContainerX;
           this.scene.popupSpinReward?.showReward(reward);
-        }, 1000);
+        }, 2000);
       },
     });
   }

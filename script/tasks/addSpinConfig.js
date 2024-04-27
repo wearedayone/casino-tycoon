@@ -123,7 +123,8 @@ const main = async () => {
           },
         ],
         spinIncrementStep: 1,
-        maxSpin: 10,
+        maxSpin: 1000,
+        spinIncrementTime: 600,
       },
     });
 };
