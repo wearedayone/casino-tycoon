@@ -89,7 +89,7 @@ const addLiquidity = async () => {
   const fiatToken = FIAT.attach(token);
   const minterRole = await fiatToken.MINTER_ROLE();
   await fiatToken.grantRole(minterRole, defaultAdmin);
-  // await fiatToken.mint(defaultAdmin, parseEther(`${tokenAmountToLiquidity}`));
+  await fiatToken.mint(defaultAdmin, parseEther(`${tokenAmountToLiquidity}`));
 
   const Router = await ethers.getContractFactory(routerArtifact.abi, routerArtifact.bytecode);
   const routerContract = Router.attach(uniRouter);

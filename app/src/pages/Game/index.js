@@ -40,6 +40,7 @@ import {
   getNextSpinIncrementUnixTime,
   upgradeUserMachines,
   upgradeUserBuildings,
+  retireService,
 } from '../../services/gamePlay.service';
 import {
   getLatestWar,
@@ -538,11 +539,10 @@ const Game = () => {
 
   const startRetirement = async () => {
     try {
-      const res = await create({ type: 'retire' });
-      const { id, value, nonce, signature } = res.data;
-      const receipt = await retire({ value, nonce, numberOfGangsters: gamePlay.numberOfMachines, signature });
-      if (receipt.status === 1) {
-        return receipt.transactionHash;
+      const res = await retireService();
+      const { status, txnHash } = res.data;
+      if (status === 'Success') {
+        return txnHash;
       }
     } catch (err) {
       console.error(err);

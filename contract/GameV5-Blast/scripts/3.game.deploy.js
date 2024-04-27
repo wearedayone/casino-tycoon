@@ -16,12 +16,30 @@ const deployGame = async () => {
   const { defaultAdmin, admin, worker, signer, token, nft } = readConfigs();
 
   const GangsterArena = await ethers.getContractFactory('GangsterArena');
-  const gameContract = await GangsterArena.deploy(defaultAdmin, admin, worker, signer, admin, nft, token);
+  const gameContract = await GangsterArena.deploy(
+    defaultAdmin,
+    admin,
+    worker,
+    signer,
+    nft,
+    token,
+    admin,
+    '0x2fc95838c71e76ec69ff817983BFf17c710F34E0'
+  );
   const gameAddress = await gameContract.getAddress();
 
   await verifyContract({
     address: gameAddress,
-    constructorArguments: [defaultAdmin, admin, worker, signer, admin, nft, token],
+    constructorArguments: [
+      defaultAdmin,
+      admin,
+      worker,
+      signer,
+      nft,
+      token,
+      admin,
+      '0x2fc95838c71e76ec69ff817983BFf17c710F34E0',
+    ],
   });
 
   updateConfigs({ game: gameAddress, gameDeployed: true });
@@ -108,7 +126,7 @@ const setupVariables = async () => {
         })}`
       );
 
-      await tokenContract.updateFees(revShareFee * 10000, liquidityFee * 10000, teamFee * 10000, burnFee * 10000);
+      await tokenContract.updateFees(revShareFee * 10000, liquidityFee * 10000, teamFee * 10000, burnFee * 10000, 5000);
     }
 
     if (swapAmount !== Number(currentSwapAmount)) {
@@ -189,7 +207,7 @@ const setupVariables = async () => {
 
 async function main() {
   try {
-    // await deployGame();
+    await deployGame();
     await configGameNewContract();
     await configGame();
     await setupVariables();

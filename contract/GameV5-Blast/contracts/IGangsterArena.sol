@@ -7,6 +7,7 @@ interface IGangsterArena {
     Event
   ***************************
    */
+  event Received(address, uint);
   event BuyGangster(address indexed to, uint256 tokenId, uint256 amount, uint256 nonce);
   event BuyGoon(address indexed to, uint256 amount, uint256 nonce);
   event BuySafeHouse(address indexed to, uint256 amount, uint256 nonce);
@@ -30,6 +31,9 @@ interface IGangsterArena {
    */
   function addReward(uint256 devValue, uint256 burnValue, uint256 rankPrize, uint256 reputationPrize) external payable;
 
+  /**
+   * Buy Gangster as NFT
+   */
   function buyGangster(
     uint256 amount,
     uint256 value,
@@ -40,6 +44,9 @@ interface IGangsterArena {
     bytes memory sig
   ) external;
 
+  /**
+   * Buy game asset (Goon/Safehouse)
+   */
   function buyAsset(
     uint256 _typeA,
     uint256 _amount,
@@ -50,16 +57,28 @@ interface IGangsterArena {
     bytes memory _sig
   ) external;
 
+  /**
+   * Deposit NFT to game
+   */
   function depositNFT(address to, uint256 amount) external;
 
+  /**
+   * Withdraw NFT from game
+   */
   function withdrawNFT(address to, uint256 amount) external;
 
+  /**
+   * War result pay out
+   */
   function finalWarResult(address[] memory addr, uint256[] memory _lGang, uint256[] memory _wToken) external;
 
+  /**
+   * Winner pay out
+   */
   function setWinner(address[] memory to, uint256[] memory points) external;
 
   /**
    * user retire game
    */
-  function retired(address to, uint256 payout, uint256 nonce) external;
+  function retire(address to, uint256 payout, uint256 nonce, bytes memory _sig) external;
 }

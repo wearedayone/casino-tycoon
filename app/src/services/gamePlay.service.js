@@ -17,3 +17,5 @@ export const getNextSpinIncrementUnixTime = () => api.get('/api/v1/gamePlays/nex
 export const upgradeUserMachines = () => api.put('/api/v1/gamePlays/machine-levels');
 
 export const upgradeUserBuildings = () => api.put('/api/v1/gamePlays/building-levels');
+
+export const retireService = () => api.post('/api/v1/gamePlays/retire');

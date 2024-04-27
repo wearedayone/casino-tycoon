@@ -11,6 +11,7 @@ import {
   getNextSpinIncrement,
   upgradeUserMachines,
   upgradeUserBuildings,
+  retire,
 } from '../controllers/gamePlay.controller.js';
 
 const router = Router();
@@ -24,5 +25,6 @@ router.get('/war-deployment', auth, getWarDeployment);
 router.get('/next-spin-increment-time', getNextSpinIncrement);
 router.put('/machine-levels', auth, upgradeUserMachines);
 router.put('/building-levels', auth, upgradeUserBuildings);
+router.post('/retire', auth, retire);
 
 export default router;

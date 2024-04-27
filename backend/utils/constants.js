@@ -8,3 +8,9 @@ export const TransactionType = {
   BuyGoon: 'buy-worker',
   BuySafehouse: 'buy-building',
 };
+
+export const TransactionStatus = {
+  Success: 'Success',
+  Failed: 'Failed',
+  Pending: 'Pending',
+};

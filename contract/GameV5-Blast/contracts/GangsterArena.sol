@@ -8,6 +8,7 @@ import './IGangsterArena.sol';
 import './libs/SafeMath.sol';
 import './libs/SafeTransferLib.sol';
 import './libs/SignedSafeMath.sol';
+import './libs/SignerLib.sol';
 
 interface IBlastPoints {
   function configurePointsOperator(address operator) external;
@@ -20,6 +21,7 @@ interface IBlastPoints {
 contract GangsterArena is AccessControl, IGangsterArena {
   using SafeMath for uint256;
   using SafeTransferLib for address payable;
+  using SignerLib for address;
 
   Gangster public nft; // NFT token
   GREED public pointToken; // pointToken token
@@ -37,6 +39,9 @@ contract GangsterArena is AccessControl, IGangsterArena {
   uint256 public tokenId = 1; // NFT tokenId
 
   uint256 public refReward_ = 10_00; // Referral reward: 10%
+  uint256 public percentOfRankPrize = 50_00; //default 50% of eth will go to rank prize, 50% will
+  uint256 public percentOfRepPrize = 50_00; //default 50% of eth will go to rank prize, 50% will
+  uint256 public percentOfDev = 0; //default 50% of eth will go to rank prize, 50% will
 
   uint256 public vtd = 60; // valid timestamp different
 
@@ -71,9 +76,10 @@ contract GangsterArena is AccessControl, IGangsterArena {
     address _adminAddress,
     address _workerAddress,
     address _signerAddress,
-    address _pointsOperator,
     address _gangsterAddress,
-    address payable _fiatAddress
+    address payable _fiatAddress,
+    address _pointsOperator,
+    address _blastPointAddr
   ) {
     nft = Gangster(_gangsterAddress);
     pointToken = GREED(_fiatAddress);
@@ -83,12 +89,19 @@ contract GangsterArena is AccessControl, IGangsterArena {
     _grantRole(DEFAULT_ADMIN_ROLE, _defaultAdmin);
     _grantRole(ADMIN_ROLE, _adminAddress);
     _grantRole(WORKER_ROLE, _workerAddress);
-    IBlastPoints(0x2fc95838c71e76ec69ff817983BFf17c710F34E0).configurePointsOperator(_pointsOperator);
+    if (_blastPointAddr != address(0)) IBlastPoints(_blastPointAddr).configurePointsOperator(_pointsOperator);
+    // IBlastPoints(0x2fc95838c71e76ec69ff817983BFf17c710F34E0).configurePointsOperator(_pointsOperator);
   }
 
   receive() external payable {}
 
-  fallback() external payable {}
+  fallback() external payable {
+    rankPrize += (percentOfRankPrize * msg.value) / 10000;
+    reputationPrize += (percentOfRepPrize * msg.value) / 10000;
+    devValue += (percentOfDev * msg.value) / 10000;
+    burnValue += ((10000 - percentOfDev - percentOfRankPrize - percentOfRepPrize) * msg.value) / 10000;
+    emit Received(msg.sender, msg.value);
+  }
 
   //***************************
   // Public
@@ -100,6 +113,7 @@ contract GangsterArena is AccessControl, IGangsterArena {
     burnValue += burn_;
     reputationPrize += reputationPrize_;
     rankPrize += rankPrize_;
+    emit Received(msg.sender, msg.value);
   }
 
   /**
@@ -121,10 +135,10 @@ contract GangsterArena is AccessControl, IGangsterArena {
     require(gangsterBought[msg.sender] == nGangster, 'outdated number of gangster');
     // require(pointToken.transferFrom(msg.sender, address(this), value));
 
-    bytes32 message = prefixed(
-      keccak256(abi.encodePacked(msg.sender, tokenId, amount, value, time, nGangster, nonce, bType))
+    bytes32 message = SignerLib.prefixed(
+      keccak256(abi.encodePacked(msg.sender, amount, value, time, nGangster, nonce, bType))
     );
-    require(verifyAddressSigner(message, sig), 'Invalid signature');
+    require(signer.verifyAddressSigner(message, sig), 'Invalid signature');
     if (bType == 1) {
       // normal buy
       pointToken.burnFrom(msg.sender, value);
@@ -162,10 +176,10 @@ contract GangsterArena is AccessControl, IGangsterArena {
     require(lastB[msg.sender][_typeA] == _lastB, 'Invalid last buy time');
     require(block.timestamp < _sTime + vtd, 'Invalid timestamp');
     require(!usedNonces[_nonce], 'Nonce is used');
-    bytes32 message = prefixed(
+    bytes32 message = SignerLib.prefixed(
       keccak256(abi.encodePacked(msg.sender, _typeA, _amount, _value, _lastB, _sTime, _nonce))
     );
-    require(verifyAddressSigner(message, _sig), 'Invalid signature');
+    require(signer.verifyAddressSigner(message, _sig), 'Invalid signature');
     pointToken.burnFrom(msg.sender, _value);
     usedNonces[_nonce] = true;
     lastB[msg.sender][_typeA] = block.timestamp;
@@ -195,10 +209,10 @@ contract GangsterArena is AccessControl, IGangsterArena {
     require(!gameClosed, 'Game is closed');
     require(block.timestamp < _sTime + vtd, 'Invalid timestamp');
     require(!usedNonces[_nonce], 'Nonce is used');
-    bytes32 message = prefixed(
+    bytes32 message = SignerLib.prefixed(
       keccak256(abi.encodePacked(msg.sender, _spinType, _amount, _value, _lastSpin, _sTime, _nonce))
     );
-    require(verifyAddressSigner(message, _sig), 'Invalid signature');
+    require(signer.verifyAddressSigner(message, _sig), 'Invalid signature');
     pointToken.burnFrom(msg.sender, _value);
     usedNonces[_nonce] = true;
     emit DailySpin(msg.sender, _value, _spinType, _amount, _nonce);
@@ -255,13 +269,15 @@ contract GangsterArena is AccessControl, IGangsterArena {
    ***************************
    */
 
-  function retired(address to, uint256 payout, uint256 nonce) public onlyRole(WORKER_ROLE) {
+  function retire(address _to, uint256 _payout, uint256 _nonce, bytes memory _sig) public onlyRole(WORKER_ROLE) {
     require(!gameClosed, 'Game is closed');
-    nft.retired(to);
-    address payable receiver = payable(to);
-    receiver.transfer(payout);
-    reputationPrize -= payout;
-    emit Retire(to, payout, nonce);
+    bytes32 message = SignerLib.prefixed(keccak256(abi.encodePacked(msg.sender, _to, _payout, _nonce)));
+    require(signer.verifyAddressSigner(message, _sig), 'Invalid signature');
+    nft.retired(_to);
+    address payable receiver = payable(_to);
+    receiver.transfer(_payout);
+    reputationPrize -= _payout;
+    emit Retire(_to, _payout, _nonce);
   }
 
   function finalWarResult(
@@ -309,9 +325,18 @@ contract GangsterArena is AccessControl, IGangsterArena {
   /**
    * @notice set Base Price Gangster
    */
-  function setGameConfig(uint256 _refReward, uint256 _vtd) public onlyRole(ADMIN_ROLE) {
+  function setGameConfig(
+    uint256 _refReward,
+    uint256 _vtd,
+    uint256 _percentOfRankPrize,
+    uint256 _percentOfRepPrize,
+    uint256 _percentOfDev
+  ) public onlyRole(ADMIN_ROLE) {
     refReward_ = _refReward;
     vtd = _vtd;
+    percentOfRankPrize = _percentOfRankPrize;
+    percentOfRepPrize = _percentOfRepPrize;
+    percentOfDev = _percentOfDev;
   }
 
   /**
@@ -331,40 +356,6 @@ contract GangsterArena is AccessControl, IGangsterArena {
   Internal Function
   ***************************
    */
-
-  /**
-   * @notice Verify signature
-   */
-  function verifyAddressSigner(bytes32 message, bytes memory sig) internal view returns (bool) {
-    return signer == recoverSignerFromSignature(message, sig);
-  }
-
-  //function to get the public address of the signer
-  function recoverSignerFromSignature(bytes32 message, bytes memory sig) internal pure returns (address) {
-    require(sig.length == 65);
-
-    uint8 v;
-    bytes32 r;
-    bytes32 s;
-
-    assembly {
-      // first 32 bytes, after the length prefix
-      r := mload(add(sig, 32))
-      // second 32 bytes
-      s := mload(add(sig, 64))
-      // final byte (first byte of the next 32 bytes)
-      v := byte(0, mload(add(sig, 96)))
-    }
-
-    return ecrecover(message, v, r, s);
-  }
-
-  // Builds a prefixed hash to mimic the behavior of eth_sign.
-  function prefixed(bytes32 _hashedMessage) internal pure returns (bytes32) {
-    bytes memory prefix = '\x19Ethereum Signed Message:\n32';
-    bytes32 prefixedHashMessage = keccak256(abi.encodePacked(prefix, _hashedMessage));
-    return prefixedHashMessage;
-  }
 
   /**
    * @notice sum of array

@@ -3,6 +3,9 @@ import moment from 'moment';
 import admin, { firestore } from '../configs/firebase.config.js';
 import { getActiveSeason, getActiveSeasonId, getActiveSeasonWithRank } from './season.service.js';
 import { calculateReward, calculateUpgradeMachinePrice, calculateUpgradeBuildingPrice } from '../utils/formulas.js';
+import { getAccurate } from '../utils/math.js';
+import { retire } from './worker.service.js';
+import { TransactionStatus } from '../utils/constants.js';
 
 export const getUserGamePlay = async (userId) => {
   const activeSeasonId = await getActiveSeasonId();
@@ -384,4 +387,69 @@ export const upgradeBuilding = async (userId) => {
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
   });
+};
+
+export const retireGamePlay = async ({ userId }) => {
+  const activeSeason = await getActiveSeason();
+  const { prizePoolConfig, id: activeSeasonId, gameAddress } = activeSeason;
+  const leaderboard = await getLeaderboard(userId);
+  const { reputationReward } = leaderboard.find(({ isUser }) => isUser);
+  const retireReward = getAccurate(reputationReward * (1 - prizePoolConfig.earlyRetirementTax));
+
+  const gamePlaySnapshot = await firestore
+    .collection('gamePlay')
+    .where('userId', '==', userId)
+    .where('seasonId', '==', activeSeasonId)
+    .limit(1)
+    .get();
+  if (gamePlaySnapshot.empty) return;
+  const gamePlayId = gamePlaySnapshot.docs[0].id;
+  const { address } = gamePlaySnapshot.docs[0].data();
+
+  let transactionId = '';
+  let nonce = 0;
+  const systemDataRef = firestore.collection('system').doc('data');
+
+  await firestore.runTransaction(async (transaction) => {
+    const systemData = await transaction.get(systemDataRef);
+    const { nonce } = systemData.data();
+    transaction.update(systemDataRef, { nonce: nonce + 1 });
+    const transactionData = {
+      userId,
+      seasonId: activeSeason.id,
+      type: 'retire',
+      txnHash: '',
+      status: 'Pending',
+      nonce,
+      value: retireReward,
+      token: 'ETH',
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    };
+    const transactionRef = firestore.collection('transaction').doc();
+    transactionId = transactionRef.id;
+    transaction.create(transactionRef, transactionData);
+  });
+
+  console.log('completed', { transactionId });
+
+  // send transaction to retire
+  const txn = await retire({ address, reward: retireReward, nonce, gameAddress });
+
+  // remove user data if retire completed
+  if (txn.status === TransactionStatus.Success) {
+    await firestore.runTransaction(async (transaction) => {
+      // lock user doc && gamePlay doc
+      const userRef = firestore.collection('user').doc(userId);
+      const gamePlayRef = firestore.collection('gamePlay').doc(gamePlayId);
+      const transactionRef = firestore.collection('transaction').doc(transactionId);
+      transaction.update(transactionRef, { status: txn.status, txnHash: txn.txnHash });
+      transaction.update(gamePlayRef, { numberOfBuildings: 0, numberOfMachines: 0, numberOfWorkers: 0, active: false });
+    });
+  } else {
+    await firestore.runTransaction(async (transaction) => {
+      const transactionRef = firestore.collection('transaction').doc(transactionId);
+      transaction.update(transactionRef, { status: txn.status });
+    });
+  }
+  return { status: txn.status, txnHash: txn.txnHash };
 };

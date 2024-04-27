@@ -112,7 +112,7 @@ contract GREED is ERC20, AccessControl, ERC20Burnable, ERC20Permit, ReentrancyGu
     uint256 _burnFee,
     uint256 _percentOfRankPrize
   ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(_prizeFee + _liquidityFee + _devFee + _burnFee <= 1000, 'Fees must be <= 10000.');
+    require(_prizeFee + _liquidityFee + _devFee + _burnFee <= 10000, 'Fees must be <= 10000.');
     require(_percentOfRankPrize <= 10000, 'percen must be <= 10000.');
     prizeFee = _prizeFee;
     liquidityFee = _liquidityFee;

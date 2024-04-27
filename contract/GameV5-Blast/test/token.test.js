@@ -23,7 +23,7 @@ describe('POINT', function () {
     const accounts = await ethers.getSigners();
     const [ownerWallet, teamWallet, revShareWallet, userWallet] = accounts;
 
-    const Token = await ethers.getContractFactory('GANG');
+    const Token = await ethers.getContractFactory('GREED');
     const token = await Token.deploy(ownerWallet.address, ownerWallet.address);
     await token.waitForDeployment();
     const tokenAddress = await token.getAddress();
@@ -47,7 +47,9 @@ describe('POINT', function () {
       _workerAddress,
       _signerAddress,
       _gangsterAddress,
-      _fiatAddress
+      _fiatAddress,
+      _defaultAdmin,
+      ethers.ZeroAddress
     );
     await GangsterArenaContract.waitForDeployment();
     const GangsterArenaContractAddress = await GangsterArenaContract.getAddress();
@@ -377,7 +379,7 @@ describe('POINT', function () {
       } = await loadFixture(deployStakingFixture);
 
       await token.updateUniswapAddresses(pairAddress, routerAddress);
-      await token.updateFees(20, 10, 20, 10);
+      await token.updateFees(200, 100, 200, 100, 5000);
 
       const tokenBalanceBefore = await token.balanceOf(tokenAddress);
 
@@ -528,7 +530,7 @@ describe('POINT', function () {
       } = await loadFixture(deployStakingFixture);
 
       await token.updateUniswapAddresses(pairAddress, routerAddress);
-      await token.updateFees(20, 10, 20, 10);
+      await token.updateFees(200, 100, 200, 100, 5000);
 
       const tokenBalanceBefore = await token.balanceOf(tokenAddress);
 
@@ -607,7 +609,7 @@ describe('POINT', function () {
         userWallet,
       } = await loadFixture(deployStakingFixture);
 
-      let dev = await GangsterArenaContract.getDevBalance();
+      let dev = await GangsterArenaContract.devValue();
 
       await token.updateUniswapAddresses(pairAddress, routerAddress);
 
@@ -663,7 +665,7 @@ describe('POINT', function () {
       // const reservesAfter = await pair.getReserves();
       // expect(reservesAfter[0]).to.equal(reservesBefore[0] + liquidityTokens + tokenAmount - fees);
       // expect(reservesAfter[1]).to.equal(reservesBefore[1] + ethForLiquidity - amountOut[1] - amountOut1[1]);
-      dev = await GangsterArenaContract.getDevBalance();
+      dev = await GangsterArenaContract.devValue();
       // console.log({ dev });
       const devFee = await token.devFee();
       const liquidityFee = await token.liquidityFee();
@@ -698,7 +700,7 @@ describe('POINT', function () {
       } = await loadFixture(deployStakingFixture);
 
       await token.updateUniswapAddresses(pairAddress, routerAddress);
-      await token.updateFees(20, 10, 20, 10);
+      await token.updateFees(200, 100, 200, 100, 5000);
 
       const tokenBalanceBefore = await token.balanceOf(tokenAddress);
 

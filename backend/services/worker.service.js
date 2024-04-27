@@ -47,6 +47,12 @@ const getGameContract = async (signer) => {
   return contract;
 };
 
+const getContract = async (contractAddress, abi, signer) => {
+  const activeSeason = await getActiveSeason();
+  const contract = new Contract(contractAddress, abi, signer);
+  return contract;
+};
+
 export const decodeTokenTxnLogs = async (name, log) => {
   const { data, topics } = log;
   const workerWallet = await getWorkerWallet();
@@ -216,6 +222,44 @@ export const burnGoon = async ({ addresses, amounts }) => {
     const gameContract = await getGameContract(workerWallet);
     logger.info('start Transaction:');
     const tx = await gameContract.burnGoon(addresses, amounts);
+    logger.info('Transaction:' + tx.hash);
+    txnHash = tx.hash;
+    const receipt = await tx.wait();
+
+    if (receipt.status !== 1) {
+      logger.error(`Unsuccessful txn: ${JSON.stringify(receipt)}`);
+      throw new Error(`API error: Txn failed`);
+    }
+
+    return { txnHash, status: 'Success' };
+  } catch (err) {
+    console.error(err);
+    const newError = getParsedEthersError(err);
+    const regex = /(execution reverted: )([A-Za-z\s])*/;
+    if (newError.context) {
+      const message = newError.context.match(regex);
+      if (message) {
+        const error = new Error(message[0]);
+        logger.error(error.message);
+      }
+    } else {
+      logger.error(err.message);
+    }
+
+    return { txnHash, status: 'Failed' };
+  }
+};
+
+export const retire = async ({ address, reward, nonce, gameAddress }) => {
+  let txnHash = '';
+  try {
+    logger.info('start retire');
+    logger.info({ address, reward, nonce });
+    const sig = signMessageRetire({ address, reward, nonce });
+    const workerWallet = await getWorkerWallet();
+    const gameContract = await getContract(gameAddress, gameContractABI.abi, workerWallet);
+    logger.info('start Transaction:');
+    const tx = await gameContract.retired(address, reward, nonce, sig);
     logger.info('Transaction:' + tx.hash);
     txnHash = tx.hash;
     const receipt = await tx.wait();
@@ -414,6 +458,7 @@ export const getNoGangster = async ({ address }) => {
   const value = await contract.gangsterBought(address);
   return value;
 };
+
 export const getLastBuyTime = async ({ address, type }) => {
   const activeSeason = await getActiveSeason();
   const { gameAddress } = activeSeason || {};
