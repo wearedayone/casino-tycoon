@@ -20,20 +20,21 @@ import configs from '../../configs/configs';
 const { width, height } = configs;
 
 class Tutorial extends Phaser.GameObjects.Container {
+  // use this to track tutorial progress if needed
+  // only need in 1st step for now
+  currentStep = 1;
+
   constructor(scene, overlayContainer) {
     super(scene, 0, 0);
 
     this.background = scene.add.rectangle(0, 0, width, height, 0x260343, 0.8).setOrigin(0, 0).setDepth(5);
     this.add(this.background);
 
-    this.step1 = new Step1(scene, () => {
-      this.step1.setVisible(false);
-      this.step2.start();
-    });
+    this.step1 = new Step1(scene);
     this.add(this.step1);
 
     this.step2 = new Step2(scene, () => {
-      this.step2.setVisible(false);
+      this.step2.destroy();
       this.step3.setVisible(true);
     });
     this.add(this.step2);
@@ -112,11 +113,16 @@ class Tutorial extends Phaser.GameObjects.Container {
     this.add(this.step15);
 
     this.step1.setVisible(true);
-    this.background.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
-      this.step1.setVisible(false);
-      this.background.setInteractive().removeAllListeners();
-      this.step2.start();
-    });
+    this.background.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, this.moveToStep2);
+  }
+
+  moveToStep2() {
+    if (this.scene.tutorial.currentStep === 1) {
+      this.scene.tutorial.step1.destroy();
+      this.scene.tutorial.background.setInteractive().removeAllListeners();
+      this.scene.tutorial.step2.start();
+      this.scene.tutorial.currentStep = 2;
+    }
   }
 }
 
