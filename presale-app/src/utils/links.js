@@ -48,3 +48,7 @@ export const links = [
 ];
 
 export const menuLinks = [...links.slice(0, 4), ...externalLinks];
+
+export const tosLink = 'https://www.uncharted.gg/terms-of-service';
+
+export const privacyLink = 'https://www.uncharted.gg/privacy-policy';

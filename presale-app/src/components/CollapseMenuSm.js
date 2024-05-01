@@ -1,13 +1,15 @@
 import { Box, Collapse, Typography, useMediaQuery } from '@mui/material';
 
 import { menuLinks, socials } from '../utils/links';
-import useMenuStore from '../stores/menu.store';
+import useAppContext from '../contexts/useAppContext';
 import { MediumIcon, XIcon, DiscordIcon } from './Icons';
 
 const CollapsedMenuSm = () => {
   const upSm = useMediaQuery((theme) => theme.breakpoints.up('sm'));
   const down1300 = useMediaQuery('(max-width: 1300px)');
-  const openMenu = useMenuStore((state) => state.open);
+  const {
+    menuState: { open: openMenu },
+  } = useAppContext();
 
   const show = upSm && down1300;
 

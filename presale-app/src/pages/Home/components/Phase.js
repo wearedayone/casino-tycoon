@@ -149,7 +149,8 @@ const PhaseDesktop = ({ text, status, amount, sold, price, ethPrice, endTimeUnix
               alignItems="center"
               justifyContent="center"
               sx={{
-                clipPath: 'polygon(85% 0, 100% 15%, 100% 100%, 15% 100%, 0 85%, 0 0)',
+                clipPath:
+                  'polygon(0px 0%, calc(100% - 20px) 0%, 100% calc(10px), 100% calc(100% + 0px), calc(100% - 20px) 100%, calc(20px) 100%, 0% calc(100% - 10px), 0% calc(10px))',
               }}>
               <Typography fontSize={{ xs: 12, lg: 16 }} fontWeight={300} color="white" textTransform="uppercase">
                 ended
@@ -163,7 +164,7 @@ const PhaseDesktop = ({ text, status, amount, sold, price, ethPrice, endTimeUnix
   const { up, down, color, btnColor, btnText, btnHoverColor } = desktopStatuses[status] || {};
 
   return (
-    <Box>
+    <Box display="flex" flexDirection="column" gap={1}>
       <Typography fontSize={{ xs: 20, md: 24 }} fontWeight={500} color="white">
         {text}
       </Typography>
@@ -293,7 +294,8 @@ const PhaseDesktop = ({ text, status, amount, sold, price, ethPrice, endTimeUnix
               sx={{
                 transition: 'all ease 0.3s',
                 cursor: btnHoverColor ? 'pointer' : 'default',
-                clipPath: 'polygon(85% 0, 100% 15%, 100% 100%, 15% 100%, 0 85%, 0 0)',
+                clipPath:
+                  'polygon(0px 0%, calc(100% - 20px) 0%, 100% calc(10px), 100% calc(100% + 0px), calc(100% - 20px) 100%, calc(20px) 100%, 0% calc(100% - 10px), 0% calc(10px))',
                 ...(btnHoverColor ? { '&:hover': { bgcolor: btnHoverColor } } : {}),
               }}>
               <Typography fontSize={{ xs: 12, lg: 16 }} fontWeight={300} color="white" textTransform="uppercase">
@@ -387,7 +389,8 @@ const PhaseMobile = ({ text, status, amount, sold, price, ethPrice, endTimeUnix,
               alignItems="center"
               justifyContent="center"
               sx={{
-                clipPath: 'polygon(85% 0, 100% 15%, 100% 100%, 15% 100%, 0 85%, 0 0)',
+                clipPath:
+                  'polygon(0px 0%, calc(100% - 20px) 0%, 100% calc(10px), 100% calc(100% + 0px), calc(100% - 20px) 100%, calc(20px) 100%, 0% calc(100% - 10px), 0% calc(10px))',
               }}>
               <Typography
                 fontSize={{ xs: 16, sm: 24, md: 32 }}
@@ -405,7 +408,7 @@ const PhaseMobile = ({ text, status, amount, sold, price, ethPrice, endTimeUnix,
   const { up, middle, down, color, btnColor, btnText, btnHoverColor } = mobileStatuses[status] || {};
 
   return (
-    <Box>
+    <Box display="flex" flexDirection="column" gap={1}>
       <Typography fontSize={{ xs: 20, md: 24 }} fontWeight={500} color="white">
         {text}
       </Typography>
@@ -539,7 +542,8 @@ const PhaseMobile = ({ text, status, amount, sold, price, ethPrice, endTimeUnix,
               sx={{
                 transition: 'all ease 0.3s',
                 cursor: btnHoverColor ? 'pointer' : 'default',
-                clipPath: 'polygon(85% 0, 100% 15%, 100% 100%, 15% 100%, 0 85%, 0 0)',
+                clipPath:
+                  'polygon(0px 0%, calc(100% - 20px) 0%, 100% calc(10px), 100% calc(100% + 0px), calc(100% - 20px) 100%, calc(20px) 100%, 0% calc(100% - 10px), 0% calc(10px))',
                 ...(btnHoverColor ? { '&:hover': { bgcolor: btnHoverColor } } : {}),
               }}>
               <Typography

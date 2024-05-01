@@ -1,14 +1,12 @@
 import { Box, Typography, useMediaQuery, alpha } from '@mui/material';
 
 import UnchartedLogo from './UnchartedLogo';
-
-const tosLink = 'https://www.uncharted.gg/terms-of-service';
-const privacyLink = 'https://www.uncharted.gg/privacy-policy';
+import { tosLink, privacyLink } from '../utils/links';
 
 const FooterDesktop = () => {
   return (
     <Box
-      py={4}
+      py={3}
       px={2}
       bgcolor="#1A0C31"
       position="relative"

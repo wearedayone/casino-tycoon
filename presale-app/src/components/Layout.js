@@ -17,7 +17,9 @@ const Layout = ({ children }) => {
           backgroundRepeat: 'no-repeat',
         }}>
         <Header />
-        <Box flex={1}>{children}</Box>
+        <Box flex={1} display="flex" flexDirection="column">
+          {children}
+        </Box>
         <Footer />
       </Box>
       <CollapsedMenuXs />
