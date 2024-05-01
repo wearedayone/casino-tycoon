@@ -2,6 +2,9 @@ import { Box, Typography, useMediaQuery, alpha } from '@mui/material';
 
 import UnchartedLogo from './UnchartedLogo';
 
+const tosLink = 'https://www.uncharted.gg/terms-of-service';
+const privacyLink = 'https://www.uncharted.gg/privacy-policy';
+
 const FooterDesktop = () => {
   return (
     <Box
@@ -16,8 +19,14 @@ const FooterDesktop = () => {
       <UnchartedLogo width="120px" />
       <Box display="flex" alignItems="center" gap={3}>
         <Box display="flex" alignItems="center" gap={2}>
-          <Typography color="#5f556f">Terms of Use</Typography>
-          <Typography fontWeight={500} color="#5f556f">
+          <Typography color="#5f556f" sx={{ cursor: 'pointer' }} onClick={() => window.open(tosLink)}>
+            Terms of Use
+          </Typography>
+          <Typography
+            fontWeight={500}
+            color="#5f556f"
+            sx={{ cursor: 'pointer' }}
+            onClick={() => window.open(privacyLink)}>
             Privacy Policy
           </Typography>
         </Box>
@@ -77,8 +86,14 @@ const FooterMobile = () => {
         </Typography>
       </Box>
       <Box display="flex" alignItems="center" gap={2}>
-        <Typography color="#5f556f">Terms of Use</Typography>
-        <Typography fontWeight={500} color="#5f556f">
+        <Typography color="#5f556f" sx={{ cursor: 'pointer' }} onClick={() => window.open(tosLink)}>
+          Terms of Use
+        </Typography>
+        <Typography
+          fontWeight={500}
+          color="#5f556f"
+          sx={{ cursor: 'pointer' }}
+          onClick={() => window.open(privacyLink)}>
           Privacy Policy
         </Typography>
       </Box>
