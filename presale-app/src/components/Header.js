@@ -1,65 +1,18 @@
 import { useState } from 'react';
-import { Box, Typography, Menu, Drawer, Collapse, useMediaQuery } from '@mui/material';
+import { Box, Typography, Menu, Collapse, useMediaQuery } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 
 import UnchartedLogo from './UnchartedLogo';
+import CollapsedMenuSm from './CollapseMenuSm';
 import { MediumIcon, XIcon, ChevronIcon, DiscordIcon } from './Icons';
-
-const socials = [
-  {
-    name: 'Medium',
-    url: 'https://medium.com/@unchartedgg',
-  },
-  {
-    name: 'Discord',
-    url: 'https://discord.gg/nVyGcEPVmj',
-  },
-  {
-    name: 'X',
-    url: 'https://twitter.com/gguncharted',
-  },
-];
-
-const externalLinks = [
-  {
-    name: 'Launchpad',
-    url: 'https://uncharted.gg',
-  },
-  {
-    name: 'Rewards',
-    url: 'https://uncharted.gg/dashboard/rewards',
-  },
-];
-
-const links = [
-  {
-    name: 'Games',
-    url: 'https://uncharted.gg/#games',
-  },
-  {
-    name: 'Token',
-    url: 'https://uncharted.gg/#token',
-  },
-  {
-    name: 'Backers',
-    url: 'https://uncharted.gg/#backers',
-  },
-  {
-    name: 'Work with us',
-    url: 'https://uncharted.gg/#work-with-us',
-  },
-  {
-    name: 'Learn more',
-    sublinks: socials,
-  },
-];
-
-const menuLinks = [...links.slice(0, 4), ...externalLinks];
+import { externalLinks, links } from '../utils/links';
+import useMenuStore from '../stores/menu.store';
 
 const Header = () => {
+  const openCollapsedMenu = useMenuStore((state) => state.open);
+  const setOpenCollapseMenu = useMenuStore((state) => state.setOpen);
   const isSmall = useMediaQuery('(max-width: 1300px)');
-  const [openMenu, setOpenMenu] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   const handleClick = (event) => {
@@ -71,13 +24,7 @@ const Header = () => {
 
   return (
     <Box p={2} bgcolor="#1A0C31">
-      <Box
-        // p={2}
-        // bgcolor="#1A0C31"
-        position="relative"
-        display="flex"
-        alignItems="center"
-        justifyContent="space-between">
+      <Box position="relative" display="flex" alignItems="center" justifyContent="space-between">
         <UnchartedLogo width={isSmall ? '123px' : '173px'} />
         <Box display="flex" alignItems="center" gap={isSmall ? 1.5 : 3}>
           {externalLinks.map((item) => (
@@ -119,7 +66,9 @@ const Header = () => {
                 clipPath:
                   'polygon(0px 0%, calc(100% - 20px) 0%, 100% calc(20px / 2), 100% calc(100% - 0px / 2), calc(100% - 20px) 100%, calc(20px) 100%, 0% calc(100% - 20px / 2), 0% calc(20px / 2))',
               }}
-              onClick={() => setOpenMenu(!openMenu)}>
+              onClick={() => {
+                setOpenCollapseMenu(!openCollapsedMenu);
+              }}>
               <Box
                 width="54px"
                 height="54px"
@@ -139,7 +88,11 @@ const Header = () => {
                     display="flex"
                     alignItems="center"
                     justifyContent="center">
-                    {openMenu ? <CloseIcon sx={{ color: '#904aff' }} /> : <MenuIcon sx={{ color: '#904aff' }} />}
+                    {openCollapsedMenu ? (
+                      <CloseIcon sx={{ color: '#904aff' }} />
+                    ) : (
+                      <MenuIcon sx={{ color: '#904aff' }} />
+                    )}
                   </Box>
                 </Box>
               </Box>
@@ -226,38 +179,7 @@ const Header = () => {
           )}
         </Box>
       </Box>
-      <Collapse in={openMenu}>
-        <Box p={2} display="flex" alignItems="flex-end">
-          <Box flex={1} display="flex" flexDirection="column" justifyContent="center" gap={2}>
-            {menuLinks.map(({ name, url }) => (
-              <Box
-                key={name}
-                onClick={() => window.open(url)}
-                display="flex"
-                alignItems="center"
-                gap={1.5}
-                sx={{ cursor: 'pointer' }}>
-                {name === 'Token' ? (
-                  <video autoPlay playsInline loop muted style={{ width: '20px', height: '20px' }}>
-                    <source src="/videos/coin-safari.mp4" type="video/mp4" />
-                    <source src="/videos/coin-vp9.mp4" type="video/webp" />
-                  </video>
-                ) : null}
-                <Typography fontWeight="300" color="white" textTransform="uppercase">
-                  {name}
-                </Typography>
-              </Box>
-            ))}
-          </Box>
-          <Box display="flex" alignItems="center" gap={4}>
-            {socials?.map(({ name, url }) => (
-              <Box key={`sub-${name}`} sx={{ cursor: 'pointer' }} onClick={() => window.open(url)}>
-                {name === 'Medium' ? <MediumIcon /> : name === 'X' ? <XIcon width="20px" /> : <DiscordIcon />}
-              </Box>
-            ))}
-          </Box>
-        </Box>
-      </Collapse>
+      <CollapsedMenuSm />
     </Box>
   );
 };

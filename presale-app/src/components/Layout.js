@@ -2,6 +2,7 @@ import { Box } from '@mui/material';
 
 import Header from './Header';
 import Footer from './Footer';
+import CollapsedMenuXs from './CollapsedMenuXs';
 
 const Layout = ({ children }) => {
   return (
@@ -19,6 +20,7 @@ const Layout = ({ children }) => {
         <Box flex={1}>{children}</Box>
         <Footer />
       </Box>
+      <CollapsedMenuXs />
     </Box>
   );
 };
