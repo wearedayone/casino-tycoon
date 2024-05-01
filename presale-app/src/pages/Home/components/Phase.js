@@ -505,7 +505,7 @@ const PhaseMobile = ({ text, status, amount, sold, price, ethPrice, endTimeUnix,
                 <Typography fontSize={{ xs: 16, sm: 24, md: 32 }} fontWeight={300} color="#68ABC4">
                   Quantity:
                 </Typography>
-                <Box width={{ lg: '24px', xl: '28px' }}>
+                <Box width={{ xs: '24px', sm: '28px' }}>
                   <Typography fontSize={{ xs: 20, sm: 24, md: 32 }} fontWeight={500} color="#fff">
                     {quantity}
                   </Typography>
