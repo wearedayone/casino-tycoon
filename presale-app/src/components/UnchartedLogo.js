@@ -1,17 +1,12 @@
 import { useNavigate } from 'react-router-dom';
-import { Box, useMediaQuery } from '@mui/material';
+import { Box } from '@mui/material';
 
-const UnchartedLogo = () => {
+const UnchartedLogo = ({ width }) => {
   const navigate = useNavigate();
-  const isSmall = useMediaQuery((theme) => theme.breakpoints.down('sm'));
 
   return (
     <Box display="inline" sx={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
-      <svg
-        viewBox="0 0 207 39"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        style={{ width: isSmall ? '123px' : '173px' }}>
+      <svg viewBox="0 0 207 39" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width }}>
         <path
           d="M57.0579 13.0474L61.6984 10.3721V24.0656C61.6984 27.117 60.8447 29.4542 59.1373 31.0729C57.4298 32.6958 55.2025 33.5031 52.4469 33.5031C49.6913 33.5031 47.464 32.6916 45.7565 31.0729C44.049 29.45 43.1953 27.117 43.1953 24.0656V13.0474L47.8359 10.3721V23.8078C47.8359 27.3706 49.3701 29.1541 52.4426 29.1541C55.5152 29.1541 57.0494 27.3748 57.0494 23.8078V13.0474H57.0579Z"
           fill="white"

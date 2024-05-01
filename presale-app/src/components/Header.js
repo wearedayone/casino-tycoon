@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Box, Typography, Menu, useMediaQuery } from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
+import CloseIcon from '@mui/icons-material/Close';
 
 import UnchartedLogo from './UnchartedLogo';
 import { MediumIcon, XIcon, ChevronIcon, DiscordIcon } from './Icons';
@@ -42,6 +44,7 @@ const links = [
 
 const Header = () => {
   const isSmall = useMediaQuery('(max-width: 1300px)');
+  const [openMenu, setOpenMenu] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   const handleClick = (event) => {
@@ -53,20 +56,8 @@ const Header = () => {
 
   return (
     <Box p={2} bgcolor="#1A0C31" position="relative" display="flex" alignItems="center" justifyContent="space-between">
-      {/* <Box
-        position="absolute"
-        left={0}
-        bottom="0px"
-        height="2px"
-        width="100px"
-        sx={{
-          background:
-            'linear-gradient(90deg, rgba(90,0,255,1) 0%, rgba(144,74,255,1) 0%, rgba(103,215,249,1) 100%, rgba(103,215,249,1) 100%, rgba(103,215,249,1) 100%)',
-          transition: 'all ease 0.3s',
-        }}
-      /> */}
-      <UnchartedLogo />
-      <Box display="flex" alignItems="center" gap={3}>
+      <UnchartedLogo width={isSmall ? '123px' : '173px'} />
+      <Box display="flex" alignItems="center" gap={isSmall ? 1.5 : 3}>
         <Box
           onClick={() => window.open('https://uncharted.gg')}
           display={isSmall ? 'none' : 'flex'}
@@ -89,7 +80,7 @@ const Header = () => {
         </Box>
         <Box
           height="54px"
-          px={6}
+          px={isSmall ? 2 : 6}
           bgcolor="#904aff"
           display="flex"
           alignItems="center"
@@ -109,9 +100,11 @@ const Header = () => {
         {isSmall && (
           <Box
             sx={{
+              cursor: 'pointer',
               clipPath:
                 'polygon(0px 0%, calc(100% - 20px) 0%, 100% calc(20px / 2), 100% calc(100% - 0px / 2), calc(100% - 20px) 100%, calc(20px) 100%, 0% calc(100% - 20px / 2), 0% calc(20px / 2))',
-            }}>
+            }}
+            onClick={() => setOpenMenu(!openMenu)}>
             <Box
               width="54px"
               height="54px"
@@ -130,7 +123,9 @@ const Header = () => {
                   bgcolor="#1A0C31"
                   display="flex"
                   alignItems="center"
-                  justifyContent="center"></Box>
+                  justifyContent="center">
+                  {openMenu ? <CloseIcon sx={{ color: '#904aff' }} /> : <MenuIcon sx={{ color: '#904aff' }} />}
+                </Box>
               </Box>
             </Box>
           </Box>
