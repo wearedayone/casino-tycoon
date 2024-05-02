@@ -478,7 +478,7 @@ class PopupSafeHouseUpgrade extends Popup {
     const price = calculateUpgradeBuildingPrice(this.building?.level);
     this.upgradePriceButton.updateValue(price);
 
-    if (!this.numberOfBuildings || price > this.xTokenBalance) {
+    if (price > this.xTokenBalance) {
       this.upgradePriceButton.setDisabledState(true);
     } else {
       this.upgradePriceButton.setDisabledState(false);
@@ -487,8 +487,10 @@ class PopupSafeHouseUpgrade extends Popup {
 
   onOpen() {
     this.scene.game.events.emit(this.events.enableSalesTracking);
-    if (!this.isSimulator)
-      this.scene.game.events.emit('request-house-price', { timeMode: this.scene.popupSafehousePrice.timeMode });
+
+    if (this.isSimulator) return;
+    this.scene.game.events.emit('request-xtoken-balance');
+    this.scene.game.events.emit('request-house-price', { timeMode: this.scene.popupSafehousePrice.timeMode });
   }
 
   cleanup() {

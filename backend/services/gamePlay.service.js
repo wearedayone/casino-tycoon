@@ -348,9 +348,8 @@ export const upgradeBuilding = async (userId) => {
     const gamePlayRef = firestore.collection('gamePlay').doc(gamePlayId);
     const gamePlay = await transaction.get(gamePlayRef);
 
-    const { active, numberOfBuildings, numberOfWorkers, startXTokenCountingTime } = gamePlay.data();
+    const { active, numberOfWorkers, startXTokenCountingTime } = gamePlay.data();
     if (!active) throw new Error('API error: Inactive user');
-    if (!numberOfBuildings) throw new Error('API error: You have no safehouse');
     const { id: activeSeasonId, worker, building } = await getActiveSeason();
 
     const now = Date.now();

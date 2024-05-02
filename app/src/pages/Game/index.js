@@ -1083,7 +1083,7 @@ const Game = () => {
             status: 'failed',
             code: 4001,
             message: err.message,
-            action: err.message === 'You have no safehouse' ? 'Please buy safehouse first' : '',
+            action: '',
           });
         }
       });
