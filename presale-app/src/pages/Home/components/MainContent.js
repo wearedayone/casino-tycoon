@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { Box, Typography } from '@mui/material';
 import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
 
@@ -15,6 +16,7 @@ const MainContent = () => {
     phaseState: { phases, updatePhaseStatus },
     ethPriceState: { ethPrice },
   } = useAppContext();
+  const moreInformationRef = useRef();
 
   return (
     <Box display="flex" flexDirection="column" gap={1}>
@@ -40,11 +42,18 @@ const MainContent = () => {
             </Typography>
           </Box>
         </Box>
-        <Box display="flex" alignItems="center" gap={1}>
-          <Typography fontSize={{ xs: 12, sm: 14 }} fontWeight={700} color="white">
-            Read more
-          </Typography>
-          <ArrowRightAltIcon sx={{ color: '#904AFF' }} />
+        <Box display="flex" alignItems="center">
+          <Box
+            display="flex"
+            alignItems="center"
+            gap={1}
+            sx={{ cursor: 'pointer' }}
+            onClick={() => moreInformationRef.current?.scrollIntoView?.()}>
+            <Typography fontSize={{ xs: 12, sm: 14 }} fontWeight={700} color="white">
+              Read more
+            </Typography>
+            <ArrowRightAltIcon sx={{ color: '#904AFF' }} />
+          </Box>
         </Box>
       </Box>
       <Box py={2} display="flex" flexDirection="column" gap={2}>
@@ -64,7 +73,7 @@ const MainContent = () => {
           />
         ))}
       </Box>
-      <Box display="flex" flexDirection="column" gap={2}>
+      <Box display="flex" flexDirection="column" gap={2} ref={moreInformationRef}>
         <Box display="flex" alignItems="center" gap={1}>
           <Typography fontSize={{ xs: 24, md: 32, xl: 40 }} fontWeight={500} color="white">
             More
