@@ -8,8 +8,6 @@ const Navigations = () => {
     userState: { initialized: initializedUser, user },
   } = useAppContext();
 
-  console.log({ initializedWallet, initializedUser });
-
   if (!initializedWallet || !initializedUser) return null;
 
   if (!user) return <AuthRoutes />;

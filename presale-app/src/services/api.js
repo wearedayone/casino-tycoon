@@ -29,8 +29,7 @@ api.interceptors.response.use(
     return response;
   },
   (err) => {
-    console.log(err.response.data);
-    if (err.response.status === 401) {
+    if (err.response?.status === 401) {
       signOut(auth);
     }
     throw new Error((err.response && err.response.data) || err.message);

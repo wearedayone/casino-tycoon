@@ -1,14 +1,32 @@
+import { useState } from 'react';
 import { Box, Typography } from '@mui/material';
 
 import useAppContext from '../contexts/useAppContext';
+import { getOauthRequestToken } from '../services/twitter.service';
 
 const UserAddress = () => {
   const {
     walletState: { logout },
     userState: { user },
   } = useAppContext();
+  const [loading, setLoading] = useState(false);
 
   const addressText = `${user?.id?.slice(0, 4)}...${user?.id?.slice(-4)}`;
+  const twitterVerified = user?.socials?.twitter?.verified;
+
+  const verifyTwitter = async () => {
+    if (loading) return;
+    setLoading(true);
+    try {
+      const res = await getOauthRequestToken();
+      const { oauth_token } = res.data;
+      const url = `https://api.twitter.com/oauth/authenticate?oauth_token=${oauth_token}`;
+      window.location.href = url;
+    } catch (err) {
+      console.error(err);
+    }
+    setLoading(false);
+  };
 
   return (
     <Box>
@@ -20,7 +38,27 @@ const UserAddress = () => {
             display: 'flex',
           },
         }}>
-        <Typography color="white">{addressText}</Typography>
+        <Box display="flex" alignItems="center" gap={2}>
+          {user?.avatarURL && (
+            <Box
+              width="45px"
+              borderRadius="50%"
+              overflow="hidden"
+              sx={{
+                aspectRatio: '1/1',
+                '& img': {
+                  display: 'block',
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  objectPosition: 'center',
+                },
+              }}>
+              <img src={user.avatarURL} alt="avatar" />
+            </Box>
+          )}
+          <Typography color="white">{twitterVerified ? user?.username : addressText}</Typography>
+        </Box>
         <Box
           className="content"
           display="none"
@@ -30,7 +68,7 @@ const UserAddress = () => {
           position="absolute"
           bottom={0}
           right={0}
-          width={300}
+          width={400}
           p={2}
           bgcolor="#1A0C31"
           border="1px solid #2a224e"
@@ -47,31 +85,42 @@ const UserAddress = () => {
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
               }}>
-              {addressText}
+              {twitterVerified ? user?.username : addressText}
             </Typography>
           </Box>
-          <Box display="flex" flexDirection="column" gap={2}>
-            <Box
-              height="54px"
-              width="200px"
-              bgcolor="#000"
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              sx={{
-                clipPath:
-                  'polygon(0px 0%, calc(100% - 20px) 0%, 100% calc(10px), 100% calc(100% + 0px), calc(100% - 20px) 100%, calc(20px) 100%, 0% calc(100% - 10px), 0% calc(10px))',
-                cursor: 'pointer',
-                transition: 'all ease 0.3s',
-                '&:hover': {
-                  bgcolor: '#888',
-                },
-              }}
-              onClick={() => {}}>
-              <Typography fontWeight="300" color="white" textTransform="uppercase">
-                Connect X
-              </Typography>
-            </Box>
+          <Box width="100%" display="flex" flexDirection="column" alignItems="center" gap={2}>
+            {twitterVerified ? (
+              <Box width="100%" display="flex" flexDirection="column" gap={2}>
+                <Box height="1px" sx={{ background: 'linear-gradient(to right, #904AFF 0%, #67D7F9 100%)' }} />
+                <Box display="flex" alignItems="center" justifyContent="space-between">
+                  <Typography color="white">X connected</Typography>
+                  <Typography color="white">{user?.username}</Typography>
+                </Box>
+                <Box height="1px" sx={{ background: 'linear-gradient(to right, #904AFF 0%, #67D7F9 100%)' }} />
+              </Box>
+            ) : (
+              <Box
+                height="54px"
+                width="200px"
+                bgcolor="#000"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                sx={{
+                  clipPath:
+                    'polygon(0px 0%, calc(100% - 20px) 0%, 100% calc(10px), 100% calc(100% + 0px), calc(100% - 20px) 100%, calc(20px) 100%, 0% calc(100% - 10px), 0% calc(10px))',
+                  cursor: 'pointer',
+                  transition: 'all ease 0.3s',
+                  '&:hover': {
+                    bgcolor: '#888',
+                  },
+                }}
+                onClick={verifyTwitter}>
+                <Typography fontWeight="300" color="white" textTransform="uppercase">
+                  Connect X
+                </Typography>
+              </Box>
+            )}
             <Box
               height="54px"
               width="200px"

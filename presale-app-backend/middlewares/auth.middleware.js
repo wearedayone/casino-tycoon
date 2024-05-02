@@ -1,6 +1,7 @@
-import { auth } from '../configs/admin.config';
+import { auth } from '../configs/firebase.config.js';
+import logger from '../utils/logger.js';
 
-const auth = async (req, res, next) => {
+const authMiddleware = async (req, res, next) => {
   try {
     const idToken = req.headers.authorization?.split(' ')[1];
     if (!idToken) throw new Error('401');
@@ -10,8 +11,9 @@ const auth = async (req, res, next) => {
 
     next();
   } catch (err) {
+    logger.error(err.message);
     return res.sendStatus(401);
   }
 };
 
-export default auth;
+export default authMiddleware;
