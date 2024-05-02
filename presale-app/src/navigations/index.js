@@ -1,3 +1,4 @@
+import Loading from '../components/Loading';
 import MainRoutes from './MainRoutes';
 import AuthRoutes from './AuthRoutes';
 import useAppContext from '../contexts/useAppContext';
@@ -8,7 +9,7 @@ const Navigations = () => {
     userState: { initialized: initializedUser, user },
   } = useAppContext();
 
-  if (!initializedWallet || !initializedUser) return null;
+  if (!initializedWallet || !initializedUser) return <Loading />;
 
   if (!user) return <AuthRoutes />;
 
