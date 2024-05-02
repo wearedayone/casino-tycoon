@@ -2,13 +2,18 @@ import { Box, Typography } from '@mui/material';
 import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
 
 import Phase from './Phase';
+import useAppContext from '../../../contexts/useAppContext';
+
+const links = [
+  { img: '/images/discord.png', url: 'https://discord.gg/nVyGcEPVmj' },
+  { img: '/images/x.png', url: 'https://twitter.com/gguncharted' },
+  { img: '/images/web.png', url: 'https://uncharted.gg' },
+];
 
 const MainContent = () => {
-  const links = [
-    { img: '/images/discord.png', url: 'https://discord.gg/nVyGcEPVmj' },
-    { img: '/images/x.png', url: 'https://twitter.com/gguncharted' },
-    { img: '/images/web.png', url: 'https://uncharted.gg' },
-  ];
+  const {
+    phaseState: { phases, updatePhaseStatus },
+  } = useAppContext();
 
   return (
     <Box display="flex" flexDirection="column" gap={1}>
@@ -42,56 +47,21 @@ const MainContent = () => {
         </Box>
       </Box>
       <Box py={2} display="flex" flexDirection="column" gap={2}>
-        <Phase
-          text="Phase active"
-          status="active"
-          amount={500}
-          sold={500}
-          price={0}
-          ethPrice={3400}
-          endTimeUnix={Date.now() + 3 * 24 * 60 * 60 * 1000}
-          maxQuantity={10}
-        />
-        <Phase
-          text="Phase cs"
-          status="cs"
-          amount={500}
-          sold={500}
-          price={0.01}
-          ethPrice={3400}
-          endTimeUnix={Date.now() + 2 * 24 * 60 * 60 * 1000}
-          maxQuantity={10}
-        />
-        <Phase
-          text="Phase invalid"
-          status="invalid"
-          amount={500}
-          sold={500}
-          price={0.01}
-          ethPrice={3400}
-          endTimeUnix={Date.now() + 2 * 24 * 60 * 60 * 1000}
-          maxQuantity={10}
-        />
-        <Phase
-          text="Phase login"
-          status="login"
-          amount={500}
-          sold={500}
-          price={0.01}
-          ethPrice={3400}
-          endTimeUnix={Date.now() + 2 * 24 * 60 * 60 * 1000}
-          maxQuantity={10}
-        />
-        <Phase
-          text="Phase end"
-          status="end"
-          amount={500}
-          sold={500}
-          price={0.01}
-          ethPrice={3400}
-          endTimeUnix={Date.now() + 2 * 24 * 60 * 60 * 1000}
-          maxQuantity={10}
-        />
+        {phases.map((phase) => (
+          <Phase
+            key={phase.id}
+            text={phase.name}
+            status={phase.status}
+            amount={phase.totalSupply}
+            sold={phase.sold}
+            price={phase.priceInEth}
+            ethPrice={3000}
+            startTimeUnix={phase.startTime}
+            endTimeUnix={phase.endTime}
+            maxQuantity={phase.maxPerWallet}
+            updatePhaseStatus={updatePhaseStatus}
+          />
+        ))}
       </Box>
       <Box display="flex" flexDirection="column" gap={2}>
         <Box display="flex" alignItems="center" gap={1}>

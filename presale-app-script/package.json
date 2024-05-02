@@ -1,0 +1,13 @@
+{
+  "name": "presale-app-script",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "firebase-admin": "^12.1.0"
+  },
+  "devDependencies": {
+    "env-cmd": "^10.1.0"
+  }
+}

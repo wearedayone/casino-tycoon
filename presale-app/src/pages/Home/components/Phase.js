@@ -76,7 +76,18 @@ const mobileStatuses = {
   },
 };
 
-const PhaseDesktop = ({ text, status, amount, sold, price, ethPrice, endTimeUnix, maxQuantity }) => {
+const PhaseDesktop = ({
+  text,
+  status,
+  amount,
+  sold,
+  price,
+  ethPrice,
+  startTimeUnix,
+  endTimeUnix,
+  maxQuantity,
+  updatePhaseStatus,
+}) => {
   const [quantity, setQuantity] = useState(1);
   const [timeLeft, setTimeLeft] = useState(null);
   const interval = useRef();
@@ -86,13 +97,14 @@ const PhaseDesktop = ({ text, status, amount, sold, price, ethPrice, endTimeUnix
 
   const countdown = () => {
     const now = Date.now();
-    const diff = endTimeUnix - now;
+    const diff = status === 'cs' ? startTimeUnix - now : endTimeUnix - now;
     if (diff <= 0) {
       setTimeLeft({
         h: `00`,
         m: `00`,
         s: `00`,
       });
+      updatePhaseStatus();
     } else {
       const diffInSeconds = diff / 1000;
       const h = Math.floor(diffInSeconds / 3600);
@@ -111,10 +123,14 @@ const PhaseDesktop = ({ text, status, amount, sold, price, ethPrice, endTimeUnix
       clearInterval(interval.current);
       interval.current = null;
     }
-    if (endTimeUnix) {
+    if (status !== 'end') {
       interval.current = setInterval(countdown, 1000);
+    } else {
+      if (interval.current) {
+        clearInterval(interval.current);
+      }
     }
-  }, [endTimeUnix]);
+  }, [status]);
 
   if (status === 'end')
     return (
@@ -186,7 +202,7 @@ const PhaseDesktop = ({ text, status, amount, sold, price, ethPrice, endTimeUnix
             {timeLeft && (
               <Box display="flex" alignItems="center" gap={1}>
                 <Typography fontSize={{ xs: 16, lg: 20, xl: 24 }} fontWeight={300} color={color}>
-                  Time left:
+                  {status === 'cs' ? 'Starts in:' : 'Time left:'}
                 </Typography>
                 <Typography fontSize={{ xs: 16, lg: 20, xl: 24 }} fontWeight={500} color={color}>
                   {timeLeft.h}:{timeLeft.m}:{timeLeft.s}
@@ -314,7 +330,18 @@ const PhaseDesktop = ({ text, status, amount, sold, price, ethPrice, endTimeUnix
   );
 };
 
-const PhaseMobile = ({ text, status, amount, sold, price, ethPrice, endTimeUnix, maxQuantity }) => {
+const PhaseMobile = ({
+  text,
+  status,
+  amount,
+  sold,
+  price,
+  ethPrice,
+  startTimeUnix,
+  endTimeUnix,
+  maxQuantity,
+  updatePhaseStatus,
+}) => {
   const [quantity, setQuantity] = useState(1);
   const [timeLeft, setTimeLeft] = useState(null);
   const interval = useRef();
@@ -324,13 +351,14 @@ const PhaseMobile = ({ text, status, amount, sold, price, ethPrice, endTimeUnix,
 
   const countdown = () => {
     const now = Date.now();
-    const diff = endTimeUnix - now;
+    const diff = status === 'cs' ? startTimeUnix - now : endTimeUnix - now;
     if (diff <= 0) {
       setTimeLeft({
         h: `00`,
         m: `00`,
         s: `00`,
       });
+      updatePhaseStatus();
     } else {
       const diffInSeconds = diff / 1000;
       const h = Math.floor(diffInSeconds / 3600);
@@ -349,10 +377,14 @@ const PhaseMobile = ({ text, status, amount, sold, price, ethPrice, endTimeUnix,
       clearInterval(interval.current);
       interval.current = null;
     }
-    if (endTimeUnix) {
+    if (status !== 'end') {
       interval.current = setInterval(countdown, 1000);
+    } else {
+      if (interval.current) {
+        clearInterval(interval.current);
+      }
     }
-  }, [endTimeUnix]);
+  }, [status]);
 
   if (status === 'end')
     return (
@@ -566,12 +598,27 @@ const PhaseMobile = ({ text, status, amount, sold, price, ethPrice, endTimeUnix,
   );
 };
 
-const Phase = ({ text, status, amount, sold, price, ethPrice, endTimeUnix, maxQuantity }) => {
+const Phase = ({
+  text,
+  status,
+  amount,
+  sold,
+  price,
+  ethPrice,
+  startTimeUnix,
+  endTimeUnix,
+  maxQuantity,
+  updatePhaseStatus,
+}) => {
   const isSmall = useMediaQuery((theme) => theme.breakpoints.down('lg'));
 
-  if (isSmall) return <PhaseMobile {...{ text, status, amount, sold, price, ethPrice, endTimeUnix, maxQuantity }} />;
+  const Component = isSmall ? PhaseMobile : PhaseDesktop;
 
-  return <PhaseDesktop {...{ text, status, amount, sold, price, ethPrice, endTimeUnix, maxQuantity }} />;
+  return (
+    <Component
+      {...{ text, status, amount, sold, price, ethPrice, startTimeUnix, endTimeUnix, maxQuantity, updatePhaseStatus }}
+    />
+  );
 };
 
 export default Phase;
