@@ -244,7 +244,7 @@ const PhaseDesktop = ({
                 </Typography>
                 {!!(price && ethPrice) && (
                   <Typography fontSize={{ xs: 12, md: 14, lg: 16 }} fontWeight={300} color="#FFFFFF50">
-                    ({price * ethPrice}$)
+                    ({(price * ethPrice).toFixed(2)}$)
                   </Typography>
                 )}
               </Box>
@@ -528,7 +528,7 @@ const PhaseMobile = ({
                 </Typography>
                 {!!(price && ethPrice) && (
                   <Typography fontSize={{ xs: 16, sm: 24, md: 32 }} fontWeight={300} color="#FFFFFF50">
-                    ({price * ethPrice}$)
+                    ({(price * ethPrice).toFixed(2)}$)
                   </Typography>
                 )}
               </Box>

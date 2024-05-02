@@ -13,6 +13,7 @@ const links = [
 const MainContent = () => {
   const {
     phaseState: { phases, updatePhaseStatus },
+    ethPriceState: { ethPrice },
   } = useAppContext();
 
   return (
@@ -55,7 +56,7 @@ const MainContent = () => {
             amount={phase.totalSupply}
             sold={phase.sold}
             price={phase.priceInEth}
-            ethPrice={3000}
+            ethPrice={ethPrice}
             startTimeUnix={phase.startTime}
             endTimeUnix={phase.endTime}
             maxQuantity={phase.maxPerWallet}

@@ -5,6 +5,7 @@ import useMenu from '../hooks/useMenu';
 import useUser from '../hooks/useUser';
 import usePhase from '../hooks/usePhase';
 import useUserType from '../hooks/useUserType';
+import useEthPrice from '../hooks/useEthPrice';
 
 export const AppContext = createContext();
 
@@ -18,9 +19,10 @@ export const AppContextProvider = ({ children }) => {
     isFromSeasonOne: userTypeState.isFromSeasonOne,
     logged: !!userState.user,
   });
+  const ethPriceState = useEthPrice();
 
   return (
-    <AppContext.Provider value={{ walletState, menuState, userState, phaseState, userTypeState }}>
+    <AppContext.Provider value={{ walletState, menuState, userState, phaseState, userTypeState, ethPriceState }}>
       {children}
     </AppContext.Provider>
   );
