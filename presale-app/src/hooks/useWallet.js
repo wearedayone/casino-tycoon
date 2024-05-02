@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
 import { Web3Provider } from '@ethersproject/providers';
 import { signInWithCustomToken, signOut } from 'firebase/auth';
@@ -17,7 +16,6 @@ if (ethereum?.providers?.length) {
 }
 
 const useWallet = () => {
-  const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
   const [initialized, setInitialized] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -62,6 +60,10 @@ const useWallet = () => {
     if (!address) return;
     const message = `Welcome to Gangster NFT Presale!\n\nSign this message to create your account\n\nThis request will not trigger a blockchain transaction or cost any gas fees.`;
     const signature = await signMessage(message);
+    if (!signature) {
+      logout();
+      return;
+    }
 
     // call to server with signature
     const {
@@ -103,11 +105,6 @@ const useWallet = () => {
     setLoading(false);
   };
 
-  const logout = () => {
-    setAddress(null);
-    signOut(auth);
-  };
-
   const init = async () => {
     if (!provider) {
       setInitialized(true);
@@ -140,6 +137,11 @@ const useWallet = () => {
     }
   };
 
+  const logout = () => {
+    setAddress(null);
+    signOut(auth).catch((err) => console.log(err));
+  };
+
   useEffect(() => {
     init();
   }, []);
@@ -147,12 +149,8 @@ const useWallet = () => {
   return {
     initialized,
     loading,
-    address,
-    provider,
-    checkNetwork,
     connectWallet,
     logout,
-    signMessage,
   };
 };
 

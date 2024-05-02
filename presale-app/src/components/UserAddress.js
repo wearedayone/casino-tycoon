@@ -5,9 +5,10 @@ import useAppContext from '../contexts/useAppContext';
 import { getOauthRequestToken } from '../services/twitter.service';
 
 const UserAddress = () => {
-  const isXs = useMediaQuery('(max-width: 400px)');
+  const isXs = useMediaQuery('(max-width: 500px)');
   const {
     walletState: { logout },
+    connectWalletState: { logout: logoutConnectWallet },
     userState: { user },
   } = useAppContext();
   const [loading, setLoading] = useState(false);
@@ -67,13 +68,13 @@ const UserAddress = () => {
           position="absolute"
           bottom={0}
           right={0}
-          width={400}
+          width={isXs ? 250 : 400}
           maxWidth="90vw"
           p={2}
           bgcolor="#1A0C31"
           border="1px solid #2a224e"
           sx={{ transform: 'translateY(100%)' }}>
-          <Box display="flex" alignItems="center" gap={1}>
+          <Box display="flex" flexDirection={isXs ? 'column' : 'row'} alignItems="center" gap={1}>
             <Typography fontSize="20px" color="white" align="center">
               Welcome back
             </Typography>
@@ -92,7 +93,11 @@ const UserAddress = () => {
             {twitterVerified ? (
               <Box width="100%" display="flex" flexDirection="column" gap={2}>
                 <Box height="1px" sx={{ background: 'linear-gradient(to right, #904AFF 0%, #67D7F9 100%)' }} />
-                <Box display="flex" alignItems="center" justifyContent="space-between">
+                <Box
+                  display="flex"
+                  flexDirection={isXs ? 'column' : 'row'}
+                  alignItems="center"
+                  justifyContent="space-between">
                   <Typography color="white">X connected</Typography>
                   <Typography color="white">{user?.username}</Typography>
                 </Box>
@@ -137,7 +142,10 @@ const UserAddress = () => {
                   bgcolor: '#7b1fe4',
                 },
               }}
-              onClick={logout}>
+              onClick={() => {
+                logout();
+                logoutConnectWallet();
+              }}>
               <Typography fontWeight="300" color="white" textTransform="uppercase">
                 log out
               </Typography>

@@ -7,6 +7,7 @@ import useAppContext from '../../contexts/useAppContext';
 const Login = () => {
   const {
     walletState: { connectWallet, loading },
+    connectWalletState: { openConnectWalletModal, loading: loadingConnectWallet },
   } = useAppContext();
 
   return (
@@ -79,9 +80,9 @@ const Login = () => {
                 bgcolor: '#5B96AC',
               },
             }}
-            onClick={() => {}}>
+            onClick={openConnectWalletModal}>
             <Typography fontWeight="300" color="white" textTransform="uppercase">
-              Connect wallet
+              {loadingConnectWallet ? 'Connecting...' : 'Connect wallet'}
             </Typography>
           </Box>
         </Box>
