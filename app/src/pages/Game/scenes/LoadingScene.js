@@ -2,15 +2,11 @@ import Phaser from 'phaser';
 
 import configs from '../configs/configs';
 
-const logoRatio = 10 / 3;
 const loadingIconRatio = 100 / 109;
-const isXS = window.innerWidth < 600;
-const logoWidth = isXS ? window.innerWidth - 32 : Math.min(600, window.innerWidth - 32);
-const logoHeight = logoWidth / logoRatio;
 const loadingIconWidth = 100;
 const loadingIconHeight = loadingIconWidth / loadingIconRatio;
 
-export const windowLoadingTextY = 0.2 * window.innerHeight + logoHeight + 16 + loadingIconHeight + 32;
+const windowLoadingTextY = 0.5 * window.innerHeight + loadingIconHeight + 32;
 
 class LoadingScene extends Phaser.Scene {
   assetLoaded = false;

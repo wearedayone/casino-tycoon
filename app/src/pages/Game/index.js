@@ -1856,7 +1856,7 @@ const Game = () => {
         sx={
           showBg
             ? {
-                backgroundImage: { xs: 'url(images/bg-login-vertical.webp)', md: 'url(images/bg-login.webp)' },
+                backgroundImage: { xs: 'url(images/bg-login-vertical.webp)', sm: 'url(images/bg-login.webp)' },
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 '& canvas': { position: 'absolute' },
@@ -1866,11 +1866,19 @@ const Game = () => {
         }>
         {showBg && (
           <>
-            <Box position="absolute" top={0} left={0} width="100%" height="100%" zIndex={10}>
-              <Box p={2} width="100%" display="flex" flexDirection="column" alignItems="center" gap={2}>
+            <Box position="absolute" top={0} left={0} width="100%" height="100%" zIndex={10} display="flex">
+              <Box
+                mt="auto"
+                mb="5vh"
+                p={2}
+                width="100%"
+                display="flex"
+                flexDirection="column"
+                alignItems="center"
+                gap={2}>
                 <Box
                   width="100px"
-                  mb={15}
+                  mb={12}
                   sx={{
                     '& img': {
                       width: '100%',
