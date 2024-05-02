@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, useMediaQuery } from '@mui/material';
 
 import useAppContext from '../contexts/useAppContext';
 import { getOauthRequestToken } from '../services/twitter.service';
 
 const UserAddress = () => {
+  const isXs = useMediaQuery('(max-width: 400px)');
   const {
     walletState: { logout },
     userState: { user },
@@ -39,25 +40,23 @@ const UserAddress = () => {
           },
         }}>
         <Box display="flex" alignItems="center" gap={2}>
-          {user?.avatarURL && (
-            <Box
-              width="45px"
-              borderRadius="50%"
-              overflow="hidden"
-              sx={{
-                aspectRatio: '1/1',
-                '& img': {
-                  display: 'block',
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  objectPosition: 'center',
-                },
-              }}>
-              <img src={user.avatarURL} alt="avatar" />
-            </Box>
-          )}
-          <Typography color="white">{twitterVerified ? user?.username : addressText}</Typography>
+          <Box
+            width="45px"
+            borderRadius="50%"
+            overflow="hidden"
+            sx={{
+              aspectRatio: '1/1',
+              '& img': {
+                display: 'block',
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center',
+              },
+            }}>
+            <img src={user?.avatarURL || '/images/default-avatar.png'} alt="avatar" />
+          </Box>
+          {!isXs && <Typography color="white">{twitterVerified ? user?.username : addressText}</Typography>}
         </Box>
         <Box
           className="content"
@@ -69,6 +68,7 @@ const UserAddress = () => {
           bottom={0}
           right={0}
           width={400}
+          maxWidth="90vw"
           p={2}
           bgcolor="#1A0C31"
           border="1px solid #2a224e"
