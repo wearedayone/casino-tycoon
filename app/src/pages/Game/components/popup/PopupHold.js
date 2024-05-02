@@ -3,6 +3,7 @@ import TextButton from '../button/TextButton';
 import configs from '../../configs/configs';
 import { formatter } from '../../../../utils/numbers';
 import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
+import PopupProcessing from './PopupProcessing';
 
 const { width, height } = configs;
 
@@ -50,12 +51,20 @@ class PopupHold extends Popup {
       'button-blue-pressed',
       () => {
         scene.game.events.emit('claim-holding-reward-x-token');
+        this.popupProcessing.initLoading(`Claiming may take a few seconds.`);
         this.close();
       },
       'Claim',
       { fontSize: '82px', sound: 'button-1' }
     );
     this.add(this.claimBtn);
+
+    this.popupProcessing = new PopupProcessing(scene, {
+      completedEvent: 'claim-holding-reward-x-token-completed',
+      completedIcon: 'icon-xtoken-done',
+      description: `Claiming may take a few seconds.`,
+    });
+    scene.add.existing(this.popupProcessing);
 
     scene.game.events.on('update-claimable-x-token', ({ tokenBalance, xGangReward, dailyXTokenReward }) => {
       this.gangBalance.text = formatter.format(tokenBalance);

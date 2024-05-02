@@ -659,8 +659,12 @@ export const claimPendingXToken = async ({ userId }) => {
         .update({
           xTokenBalance: admin.firestore.FieldValue.increment(claimedAmount),
         });
+
+      return claimedAmount;
     }
   }
+
+  return 0;
 };
 
 export const claimToken = async ({ userId }) => {

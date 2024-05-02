@@ -122,8 +122,10 @@ class PopupProcessing extends Popup {
           'withdraw-nft-completed',
           'retire-completed',
           'swap-completed',
+          'claim-holding-reward-x-token-completed',
         ];
 
+        // deprecated, can use PopupTxnCompleted without passing a txnHash
         if (!hasTxnHashEvents.includes(completedEvent)) {
           const buttonGreat = new TextButton(
             scene,
@@ -192,6 +194,10 @@ class PopupProcessing extends Popup {
           case 'swap-completed':
             title = `${formatter.format(amount)} ${token}`;
             desc = description;
+            break;
+          case 'claim-holding-reward-x-token-completed':
+            title = `+${formatter.format(amount)}`;
+            desc = 'xGREED successfully claimed.';
             break;
           case 'retire-completed':
             title = '';
