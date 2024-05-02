@@ -102,7 +102,7 @@ const useSalesLast24h = () => {
     return () => {
       unsubscribe?.();
     };
-  }, [listeningBuilding, configs?.activeSeasonId]);
+  }, [listeningMachine, configs?.activeSeasonId]);
 
   const enableWorkerSalesTracking = () => setListeningWorker(true);
   const disableWorkerSalesTracking = () => setListeningWorker(false);
