@@ -130,7 +130,7 @@ const PhaseDesktop = ({
         clearInterval(interval.current);
       }
     }
-  }, [status]);
+  }, [status, endTimeUnix, startTimeUnix]);
 
   if (status === 'end')
     return (
@@ -384,7 +384,7 @@ const PhaseMobile = ({
         clearInterval(interval.current);
       }
     }
-  }, [status]);
+  }, [status, endTimeUnix, startTimeUnix]);
 
   if (status === 'end')
     return (
