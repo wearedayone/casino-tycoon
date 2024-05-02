@@ -6,6 +6,7 @@ import CloseIcon from '@mui/icons-material/Close';
 
 import UnchartedLogo from './UnchartedLogo';
 import CollapsedMenuSm from './CollapseMenuSm';
+import UserAddress from './UserAddress';
 import { MediumIcon, XIcon, ChevronIcon, DiscordIcon } from './Icons';
 import { externalLinks, links } from '../utils/links';
 import useAppContext from '../contexts/useAppContext';
@@ -15,7 +16,7 @@ const Header = () => {
   const { pathname } = useLocation();
   const {
     menuState: { open: openCollapsedMenu, setOpen: setOpenCollapseMenu },
-    walletState: { address },
+    userState: { user },
   } = useAppContext();
   const isSmall = useMediaQuery('(max-width: 1300px)');
   const [anchorEl, setAnchorEl] = useState(null);
@@ -45,7 +46,7 @@ const Header = () => {
               </Typography>
             </Box>
           ))}
-          {!address && pathname !== '/login' && (
+          {!user?.id && pathname !== '/login' && (
             <Box
               height="54px"
               px={isSmall ? 2 : 6}
@@ -54,7 +55,8 @@ const Header = () => {
               alignItems="center"
               justifyContent="center"
               sx={{
-                clipPath: 'polygon(85% 0, 100% 15%, 100% 100%, 15% 100%, 0 85%, 0 0)',
+                clipPath:
+                  'polygon(0px 0%, calc(100% - 20px) 0%, 100% calc(10px), 100% calc(100% + 0px), calc(100% - 20px) 100%, calc(20px) 100%, 0% calc(100% - 10px), 0% calc(10px))',
                 cursor: 'pointer',
                 transition: 'all ease 0.3s',
                 '&:hover': {
@@ -67,7 +69,7 @@ const Header = () => {
               </Typography>
             </Box>
           )}
-          {address && <Typography color="white">{`${address.slice(0, 4)}...${address.slice(-4)}`}</Typography>}
+          {user?.id && <UserAddress />}
           {isSmall && (
             <Box
               sx={{

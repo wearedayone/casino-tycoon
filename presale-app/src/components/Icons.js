@@ -24,7 +24,6 @@ export const ChevronIcon = ({ width = '12px' }) => {
 };
 
 export const MediumIcon = ({ width = '24px' }) => {
-  console.log({ width });
   return (
     <svg viewBox="0 0 37 21" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width }}>
       <path

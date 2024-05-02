@@ -4,12 +4,15 @@ import useAppContext from '../contexts/useAppContext';
 
 const Navigations = () => {
   const {
-    walletState: { initialized, address },
+    walletState: { initialized: initializedWallet },
+    userState: { initialized: initializedUser, user },
   } = useAppContext();
 
-  if (!initialized) return null;
+  console.log({ initializedWallet, initializedUser });
 
-  if (!address) return <AuthRoutes />;
+  if (!initializedWallet || !initializedUser) return null;
+
+  if (!user) return <AuthRoutes />;
 
   return <MainRoutes />;
 };

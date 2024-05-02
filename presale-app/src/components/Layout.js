@@ -6,7 +6,7 @@ import CollapsedMenuXs from './CollapsedMenuXs';
 
 const Layout = ({ children }) => {
   return (
-    <Box bgcolor="#1a0c31">
+    <Box bgcolor="#1a0c31" height="100vh" overflow="auto" sx={{ scrollBehavior: 'smooth' }}>
       <Box
         minHeight="100vh"
         display="flex"

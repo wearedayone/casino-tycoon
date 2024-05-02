@@ -2,7 +2,10 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
 import { Web3Provider } from '@ethersproject/providers';
+import { signInWithCustomToken, signOut } from 'firebase/auth';
 
+import { auth } from '../configs/firebase.config';
+import { getAuthToken } from '../services/auth.service';
 import environments from '../utils/environments';
 
 const { NETWORK_ID } = environments;
@@ -55,13 +58,23 @@ const useWallet = () => {
     }
   };
 
-  const createUserRecord = async () => {
+  const signInWithFirebase = async () => {
     if (!address) return;
-    const message = `Welcome to Blast the Balloon!\n\nSign this message to create your account\n\nThis request will not trigger a blockchain transaction or cost any gas fees.`;
+    const message = `Welcome to Gangster NFT Presale!\n\nSign this message to create your account\n\nThis request will not trigger a blockchain transaction or cost any gas fees.`;
     const signature = await signMessage(message);
 
     // call to server with signature
+    const {
+      data: { token },
+    } = await getAuthToken({
+      message,
+      signature,
+    });
+
+    // 3. signIn & trigger onAuthStateChanged
+    await signInWithCustomToken(auth, token);
   };
+
   // wallet functions
   const connectWallet = async () => {
     if (!provider || loading) return;
@@ -78,6 +91,8 @@ const useWallet = () => {
 
       setAddress(newAddress);
       await checkNetwork();
+
+      await signInWithFirebase();
     } catch (err) {
       console.error(err);
       if (err.message && !err.message.includes('rejected')) {
@@ -90,7 +105,7 @@ const useWallet = () => {
 
   const logout = () => {
     setAddress(null);
-    navigate('/');
+    signOut(auth);
   };
 
   const init = async () => {
@@ -138,7 +153,6 @@ const useWallet = () => {
     connectWallet,
     logout,
     signMessage,
-    createUserRecord,
   };
 };
 
