@@ -1890,39 +1890,41 @@ const Game = () => {
                   }}>
                   <img src="/images/icons/loading.png" />
                 </Box>
-                {userCanReload && (
-                  <Box
-                    alignSelf="center"
-                    position="relative"
-                    sx={{ cursor: 'pointer', userSelect: 'none' }}
-                    onMouseDown={() => setMouseDown(true)}
-                    onMouseUp={() => setMouseDown(false)}
-                    onClick={() => {
-                      logAnalyticsEvent('user_reload', {
-                        loading_duration: (Date.now() - startLoadingTime) / 1000,
-                      });
-                      logout();
-                      // window.location.reload();
-                    }}>
-                    <Box width="120px" sx={{ '& img': { width: '100%' } }}>
-                      <img
-                        draggable={false}
-                        src={mouseDown ? '/images/button-blue-pressed.png' : '/images/button-blue.png'}
-                        alt="button"
-                      />
+                <Box height={48}>
+                  {userCanReload && (
+                    <Box
+                      alignSelf="center"
+                      position="relative"
+                      sx={{ cursor: 'pointer', userSelect: 'none' }}
+                      onMouseDown={() => setMouseDown(true)}
+                      onMouseUp={() => setMouseDown(false)}
+                      onClick={() => {
+                        logAnalyticsEvent('user_reload', {
+                          loading_duration: (Date.now() - startLoadingTime) / 1000,
+                        });
+                        logout();
+                        // window.location.reload();
+                      }}>
+                      <Box width="120px" sx={{ '& img': { width: '100%' } }}>
+                        <img
+                          draggable={false}
+                          src={mouseDown ? '/images/button-blue-pressed.png' : '/images/button-blue.png'}
+                          alt="button"
+                        />
+                      </Box>
+                      <Box position="absolute" top="45%" left="50%" sx={{ transform: 'translate(-50%, -50%)' }}>
+                        <Typography
+                          fontSize={20}
+                          fontWeight={700}
+                          color="white"
+                          fontFamily="WixMadeforDisplayBold"
+                          sx={{ userSelect: 'none' }}>
+                          Retry
+                        </Typography>
+                      </Box>
                     </Box>
-                    <Box position="absolute" top="45%" left="50%" sx={{ transform: 'translate(-50%, -50%)' }}>
-                      <Typography
-                        fontSize={20}
-                        fontWeight={700}
-                        color="white"
-                        fontFamily="WixMadeforDisplayBold"
-                        sx={{ userSelect: 'none' }}>
-                        Retry
-                      </Typography>
-                    </Box>
-                  </Box>
-                )}
+                  )}
+                </Box>
               </Box>
             </Box>
           </>
