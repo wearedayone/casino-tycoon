@@ -17,7 +17,7 @@ import environments from '../utils/environments';
 const { NETWORK_ID } = environments;
 
 const useConnectWallet = (initialized, user) => {
-  const { open: openConnectWalletModal } = useWeb3Modal();
+  const { open } = useWeb3Modal();
   const {
     address: web3ModalAddress,
     chainId: web3ModalChainId,
@@ -27,6 +27,14 @@ const useConnectWallet = (initialized, user) => {
   const { disconnect: web3ModalDisconnect } = useDisconnect();
   const { switchNetwork } = useSwitchNetwork();
   const { loading } = useWeb3ModalState();
+
+  const openConnectWalletModal = async () => {
+    try {
+      await open();
+    } catch (err) {
+      open().catch((err) => console.log(err));
+    }
+  };
 
   const signMessageConnectWallet = async (message = '') => {
     try {
