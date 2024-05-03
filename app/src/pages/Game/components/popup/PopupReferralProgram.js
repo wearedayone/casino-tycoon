@@ -6,7 +6,8 @@ import { colors, fontFamilies } from '../../../../utils/styles';
 import { formatter } from '../../../../utils/numbers';
 
 const signUpLink = 'https://www.uncharted.gg';
-const learnMoreLink = 'https://medium.com/@unchartedgg';
+const learnMoreLink =
+  'https://unchartedgg.notion.site/0c461d942f33455e8588c81ab1cd0057?v=b7175561f39a4303b90549bf551be664';
 
 class PopupReferralProgram extends Popup {
   loading = false;

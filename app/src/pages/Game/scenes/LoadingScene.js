@@ -2,15 +2,11 @@ import Phaser from 'phaser';
 
 import configs from '../configs/configs';
 
-const logoRatio = 10 / 3;
 const loadingIconRatio = 100 / 109;
-const isXS = window.innerWidth < 600;
-const logoWidth = isXS ? window.innerWidth - 32 : Math.min(600, window.innerWidth - 32);
-const logoHeight = logoWidth / logoRatio;
 const loadingIconWidth = 100;
 const loadingIconHeight = loadingIconWidth / loadingIconRatio;
 
-export const windowLoadingTextY = 0.2 * window.innerHeight + logoHeight + 16 + loadingIconHeight + 32;
+const windowLoadingTextY = 0.5 * window.innerHeight + loadingIconHeight + 32;
 
 class LoadingScene extends Phaser.Scene {
   assetLoaded = false;
@@ -117,7 +113,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('gangster-house-15', '/images/gangster-house-15.png');
     this.load.image('gangster-house-sign', '/images/gangster-house-sign.png');
 
-    this.load.image('xgang-balance', '/images/xgang-balance.png');
+    this.load.image('xtoken-balance', '/images/xtoken-balance.png');
     this.load.image('fiat-balance', '/images/fiat-balance.png');
     this.load.image('eth-balance', '/images/eth-balance.png');
 

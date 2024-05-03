@@ -373,8 +373,9 @@ class PopupBuyGoon extends Popup {
 
   onOpen() {
     this.scene.game.events.emit(this.events.enableSalesTracking);
-    if (!this.isSimulator)
-      this.scene.game.events.emit('request-goon-price', { timeMode: this.scene.popupGoonPrice.timeMode });
+    if (this.isSimulator) return;
+    this.scene.game.events.emit('request-xtoken-balance');
+    this.scene.game.events.emit('request-goon-price', { timeMode: this.scene.popupGoonPrice.timeMode });
   }
 
   cleanup() {
@@ -426,6 +427,7 @@ class PopupBuyGoon extends Popup {
     this.priceText.text = `${customFormat(estimatedPrice, 1)}`;
     const formattedGas = customFormat(this.gas, 4) === '0' ? '<0.0001' : customFormat(this.gas, 4);
     this.gasPrice.text = `+${formattedGas} ETH (gas)`;
+    this.gasPrice.setVisible(this.purchaseToken === 'GREED');
     this.coin.x = this.priceText.x + this.priceText.width + 10;
     if (this.infoButton) this.infoButton.x = this.coin.x + this.coin.width + 30;
 
