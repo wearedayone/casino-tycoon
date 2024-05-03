@@ -113,7 +113,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('gangster-house-15', '/images/gangster-house-15.png');
     this.load.image('gangster-house-sign', '/images/gangster-house-sign.png');
 
-    this.load.image('xgang-balance', '/images/xgang-balance.png');
+    this.load.image('xtoken-balance', '/images/xtoken-balance.png');
     this.load.image('fiat-balance', '/images/fiat-balance.png');
     this.load.image('eth-balance', '/images/eth-balance.png');
 

@@ -7,13 +7,13 @@ const px = 15;
 const py = 5;
 
 class Balance extends Phaser.GameObjects.Container {
-  constructor(scene, x, y, onClickAdd, img, value) {
+  constructor(scene, x, y, onClickAdd, img, value, { customX } = {}) {
     super(scene, 0, 0);
 
-    this.container = scene.add.image(x, y, img).setOrigin(0.5, 0.5);
+    this.container = scene.add.image(customX || x, y, img).setOrigin(0.5, 0.5);
     this.addButton = new Button(
       scene,
-      x + this.container.width / 2 - buttonWidth / 2 - px,
+      (customX || x) + this.container.width / 2 - buttonWidth / 2 - px,
       y - py,
       'button-add',
       'button-add-pressed',

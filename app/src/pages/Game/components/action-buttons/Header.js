@@ -45,7 +45,9 @@ class Header extends Phaser.GameObjects.Container {
       .setOrigin(0.5, 0);
     this.addedAmount.setStroke(colors.brown, 10);
 
-    this.xTokenBalance = new Balance(scene, width / 2 - gap, y, () => scene.popupBuyGoon?.open(), 'xgang-balance', 0);
+    this.xTokenBalance = new Balance(scene, width / 2 - gap, y, () => scene.popupBuyGoon?.open(), 'xtoken-balance', 0, {
+      customX: width / 2 - gap - 10,
+    });
     this.fiatBalance = new Balance(scene, width / 2, y, () => scene.popupSwap?.open(), 'fiat-balance', 0);
     this.ethBalance = new Balance(scene, width / 2 + gap, y, () => scene.popupDeposit.open(), 'eth-balance', 0);
 
