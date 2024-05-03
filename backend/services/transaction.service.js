@@ -461,14 +461,11 @@ export const validateDailySpinTxnAndReturnSpinResult = async ({ userId, transact
   const { from, to, status: txnStatus, logs } = receipt;
   if (txnStatus !== 1) throw new Error('API error: Invalid txn status');
 
-  console.log('validate spin txn logs', { logs });
-
   const activeSeason = await getActiveSeason();
 
   const {
-    id: activeSeasonId,
     gameAddress,
-    spinConfig: { spinRewards },
+    spinConfig: { spinRewards, tokenReputationRewardMutiplier },
   } = activeSeason;
   const user = await firestore.collection('user').doc(userId).get();
   const { address } = user.data();
@@ -480,18 +477,18 @@ export const validateDailySpinTxnAndReturnSpinResult = async ({ userId, transact
   if (price !== value) throw new Error('API error: Mismatching price');
 
   const { reward, index } = randomSpinResult(spinRewards);
+  // const { reward, index } = { reward: spinRewards[10], index: 10 };
+
+  const gamePlay = await getUserGamePlay(userId);
 
   if (reward.type === 'house') {
-    const gamePlaySnapshot = await firestore
-      .collection('gamePlay')
-      .where('userId', '==', userId)
-      .where('seasonId', '==', activeSeasonId)
-      .limit(1)
-      .get();
-    if (!gamePlaySnapshot.empty) {
-      await gamePlaySnapshot.docs[0].ref.update({
-        numberOfBuildings: admin.firestore.FieldValue.increment(reward.value),
-      });
+    if (!!gamePlay) {
+      await firestore
+        .collection('gamePlay')
+        .doc(gamePlay.id)
+        .update({
+          numberOfBuildings: admin.firestore.FieldValue.increment(reward.value),
+        });
     }
 
     await snapshot.ref.update({ txnHash, status: 'Success', reward: { type: reward.type, value: reward.value } });
@@ -502,15 +499,18 @@ export const validateDailySpinTxnAndReturnSpinResult = async ({ userId, transact
     if (userSnapshot.exists) {
       const { address } = userSnapshot.data();
 
+      const { networth } = gamePlay;
+      const tokenReward = Math.floor(reward.value * networth * tokenReputationRewardMutiplier);
+
       const { txnHash, status } = await claimTokenTask({
         address,
-        amount: BigInt(parseEther(reward.value.toString()).toString()),
+        amount: BigInt(parseEther(tokenReward.toString()).toString()),
       });
 
       await snapshot.ref.update({
         txnHash,
         status: 'Success',
-        reward: { type: reward.type, value: reward.value, rewardTxnHash: txnHash, rewardTxnStatus: status },
+        reward: { type: reward.type, value: tokenReward, rewardTxnHash: txnHash, rewardTxnStatus: status },
       });
     }
   }

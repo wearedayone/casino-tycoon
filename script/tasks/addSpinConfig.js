@@ -99,7 +99,7 @@ const main = async () => {
           },
           {
             type: 'GREED',
-            value: 4500,
+            value: 4000,
             order: 12,
             percentage: 0.009,
             iconImg: 'spin-reward-token-4',
@@ -125,6 +125,7 @@ const main = async () => {
         spinIncrementStep: 1,
         maxSpin: 1000,
         spinIncrementTime: 600,
+        tokenReputationRewardMutiplier: 0.01,
       },
     });
 };

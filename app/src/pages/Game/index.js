@@ -303,7 +303,7 @@ const Game = () => {
     reservePoolReward,
     houseLevels,
     prizePoolConfig,
-    spinConfig: { spinRewards },
+    spinConfig: { spinRewards, tokenReputationRewardMutiplier },
     swapXTokenGapInSeconds,
     endTimeConfig,
     tokenHoldingRewardConfig: { xTokenRewardPercent },
@@ -326,7 +326,7 @@ const Game = () => {
       // reputation leaderboard
       earlyRetirementTax: 0,
     },
-    spinConfig: { spinRewards: [] },
+    spinConfig: { spinRewards: [], tokenReputationRewardMutiplier: 0 },
     tokenHoldingRewardConfig: { xTokenRewardPercent: 0 },
   };
 
@@ -530,7 +530,7 @@ const Game = () => {
 
       // test
       // await delay(5000);
-      // gameRef.current?.events.emit('spin-result', { destinationIndex: 0 });
+      // gameRef.current?.events.emit('spin-result', { destinationIndex: Math.floor(Math.random() * 14) });
     } catch (err) {
       console.error(err);
       throw err;
@@ -665,7 +665,16 @@ const Game = () => {
 
       gameRef.current?.events.on('request-spin-rewards', () => {
         gameRef.current?.events.emit('update-spin-rewards', {
-          spinRewards: JSON.parse(JSON.stringify(spinRewards)).sort((item1, item2) => item1.order - item2.order),
+          spinRewards: JSON.parse(JSON.stringify(spinRewards))
+            .sort((item1, item2) => item1.order - item2.order)
+            .map((item) => {
+              if (item.type === 'GREED')
+                return {
+                  ...item,
+                  value: Math.floor(item.value * tokenReputationRewardMutiplier * networth),
+                };
+              return item;
+            }),
           spinPrice: calculateSpinPrice(networth),
         });
       });
@@ -1777,10 +1786,19 @@ const Game = () => {
 
   useEffect(() => {
     gameRef.current?.events.emit('update-spin-rewards', {
-      spinRewards: JSON.parse(JSON.stringify(spinRewards)).sort((item1, item2) => item1.order - item2.order),
+      spinRewards: JSON.parse(JSON.stringify(spinRewards))
+        .sort((item1, item2) => item1.order - item2.order)
+        .map((item) => {
+          if (item.type === 'GREED')
+            return {
+              ...item,
+              value: Math.floor(item.value * tokenReputationRewardMutiplier * networth),
+            };
+          return item;
+        }),
       spinPrice: calculateSpinPrice(networth),
     });
-  }, [spinRewards, networth]);
+  }, [spinRewards, networth, tokenReputationRewardMutiplier]);
 
   useEffect(() => {
     if ((swapXTokenGapInSeconds, lastTimeSwapXToken)) {
