@@ -19,6 +19,7 @@ package-lock.json
 listener/logs/
 backend/logs/
 */serviceAccounts/*.json
+*/service-accounts/*.json
 
 test.json
 contract/GameV4/.env.prd

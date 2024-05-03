@@ -200,6 +200,9 @@ class InfoButtons extends Phaser.GameObjects.Container {
 
     if (!noBackground) {
       this.background = scene.add.rectangle(0, 0, width, height, 0x260343, 0.8).setOrigin(0, 0).setVisible(false);
+      this.background.setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
+        this.hidePopupReward();
+      });
       this.add(this.background);
     }
 

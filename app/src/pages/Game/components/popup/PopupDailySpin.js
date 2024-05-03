@@ -2,11 +2,12 @@ import Phaser from 'phaser';
 import { ScrollablePanel } from 'phaser3-rex-plugins/templates/ui/ui-components.js';
 
 import Popup from './Popup';
+import PopupTxnConfirm from './PopupConfirm';
 import PopupTxnError from './PopupTxnError';
 import SpinButton from '../button/SpinButton';
 import configs from '../../configs/configs';
 import { fontFamilies } from '../../../../utils/styles';
-import { randomNumberInRange, formatTimeDigit } from '../../../../utils/numbers';
+import { randomNumberInRange, formatTimeDigit, formatter } from '../../../../utils/numbers';
 
 const { width, height } = configs;
 
@@ -86,11 +87,28 @@ class PopupDailySpin extends Popup {
       .setOrigin(0.5, 0.5);
     this.add(this.numberOfSpinsText);
 
+    this.popupTxnConfirm = new PopupTxnConfirm(scene, this, {
+      title: 'Spin',
+      action: 'spin',
+      icon1: '',
+      icon2: 'icon-coin-small',
+      onConfirm: () => {
+        if (!this.numberOfSpins || this.loading) return;
+        this.popupConfirm?.close();
+        this.open();
+        this.showPopupConfirmSpin();
+      },
+    });
+    scene.add.existing(this.popupTxnConfirm);
+    this.popupTxnConfirm.updateTextLeft(`Spin 1 time`);
+
     scene.game.events.on('update-spin-rewards', ({ spinRewards, spinPrice }) => {
       if (this.loading) return;
       this.spinRewards = spinRewards;
       this.spinPrice = spinPrice;
       this.numberOfRewards = spinRewards.length;
+
+      this.popupTxnConfirm.updateTextRight(formatter.format(spinPrice.toPrecision(3)));
 
       this.maxContainerX = this.popup.x - this.popup.width / 2 - 1 * SPIN_ITEM_WIDTH - SPIN_ITEM_GAP;
       this.minContainerX = this.maxContainerX - this.numberOfRewards * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP);
@@ -158,7 +176,9 @@ class PopupDailySpin extends Popup {
         y: height / 2 + this.popup.height / 2 - 20,
         onClick: () => {
           if (!this.numberOfSpins || this.loading) return;
-          this.showPopupConfirmSpin();
+          this.close();
+          this.popupTxnConfirm?.open();
+          // this.showPopupConfirmSpin();
         },
         value: spinPrice,
       });
