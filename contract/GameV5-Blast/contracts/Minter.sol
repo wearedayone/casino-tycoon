@@ -76,6 +76,7 @@ contract Minter is Ownable {
 
     gangster.mint(msg.sender, 1, amount, '');
     mintedAddr[phaseId][msg.sender] += amount;
+    mintPhase[phaseId].currentSupply += amount;
     emit Mint(msg.sender, amount, phaseId);
   }
 
