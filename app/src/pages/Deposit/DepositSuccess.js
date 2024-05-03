@@ -33,7 +33,7 @@ const DepositSuccess = () => {
       }}>
       <img
         className="eth-img"
-        src="https://res.cloudinary.com/divb64juk/image/upload/v1709800611/gangster-arena/eth_deposit_success.png"
+        src="https://res.cloudinary.com/gangsterarena/image/upload/v1714389918/images/eth_deposit_success.png"
         alt="deposit"
       />
       <Box py={5} width="70vw" display="flex" flexDirection="column" gap={1}>
