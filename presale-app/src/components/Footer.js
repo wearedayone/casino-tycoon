@@ -1,7 +1,10 @@
 import { Box, Typography, useMediaQuery, alpha } from '@mui/material';
 
 import UnchartedLogo from './UnchartedLogo';
-import { tosLink, privacyLink } from '../utils/links';
+import { tosLink, privacyLink, socials } from '../utils/links';
+
+const xLink = socials.find((item) => item.name === 'X')?.url;
+const discordLink = socials.find((item) => item.name === 'Discord')?.url;
 
 const FooterDesktop = () => {
   return (
@@ -35,8 +38,13 @@ const FooterDesktop = () => {
             onClick={() => window.open('mailto:contact@uncharted.gg')}>
             contact@uncharted.gg
           </Typography>
-          <img src="/images/discord-gradient.png" alt="discord" />
-          <img src="/images/x-gradient.png" alt="x" />
+          <img
+            src="/images/discord-gradient.png"
+            alt="discord"
+            style={{ cursor: 'pointer' }}
+            onClick={() => window.open(discordLink)}
+          />
+          <img src="/images/x-gradient.png" alt="x" style={{ cursor: 'pointer' }} onClick={() => window.open(xLink)} />
         </Box>
       </Box>
       <Box
@@ -75,8 +83,13 @@ const FooterMobile = () => {
         </Typography>
       </Box>
       <Box display="flex" alignItems="center" gap={1.5}>
-        <img src="/images/discord-gradient.png" alt="discord" />
-        <img src="/images/x-gradient.png" alt="x" />
+        <img
+          src="/images/discord-gradient.png"
+          alt="discord"
+          style={{ cursor: 'pointer' }}
+          onClick={() => window.open(discordLink)}
+        />
+        <img src="/images/x-gradient.png" alt="x" style={{ cursor: 'pointer' }} onClick={() => window.open(xLink)} />
       </Box>
       <Box>
         <Typography color="#8c8499" align="center">
