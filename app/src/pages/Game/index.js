@@ -926,7 +926,11 @@ const Game = () => {
 
       gameRef.current?.events.on('claim-holding-reward-x-token', async () => {
         try {
-          await claimXTokenHoldingReward();
+          const res = await claimXTokenHoldingReward();
+          const { claimedAmount } = res.data;
+          gameRef.current.events.emit('claim-holding-reward-x-token-completed', {
+            amount: claimedAmount,
+          });
           calculateXTokenBalanceRef.current?.();
         } catch (err) {
           console.error(err);

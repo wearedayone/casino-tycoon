@@ -69,8 +69,8 @@ export const claimToken = async (req, res) => {
 export const claimXTokenHoldingReward = async (req, res) => {
   try {
     const data = { ...req.body, userId: req.userId };
-    await claimPendingXToken(data);
-    return res.sendStatus(200);
+    const claimedAmount = await claimPendingXToken(data);
+    return res.status(200).send({ claimedAmount });
   } catch (err) {
     console.error(err);
     logger.error(err.message);
