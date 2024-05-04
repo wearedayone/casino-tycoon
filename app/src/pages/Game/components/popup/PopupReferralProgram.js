@@ -93,7 +93,6 @@ class PopupReferralProgram extends Popup {
     scene.game.events.on(this.events.updateTwitterShareTemplate, ({ template, referralCode }) => {
       this.template = template;
       this.referralCode = referralCode;
-      console.log('update-twitter-share-template', { template, referralCode });
     });
 
     scene.game.events.emit(this.events.requestUPointReward);

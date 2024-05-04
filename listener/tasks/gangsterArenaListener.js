@@ -170,7 +170,7 @@ const processRetireEvent = async ({ to, amount, nonce, event, contract }) => {
     // need to update txn, gamePlay, warDeployment, season
     const batch = firestore.batch();
 
-    const user = await getUserFromAddress(to);
+    const user = await getUserFromAddress(to.toLowerCase());
     if (!user) return;
 
     const txnSnapshot = await firestore
@@ -187,7 +187,7 @@ const processRetireEvent = async ({ to, amount, nonce, event, contract }) => {
     batch.update(txn.ref, { status: 'Success', txnHash: transactionHash });
 
     // update gamePlay
-    const gamePlay = await getUserActiveGamePlay();
+    const gamePlay = await getUserActiveGamePlay(user.id);
     const gamePlayRef = firestore.collection('gamePlay').doc(gamePlay.id);
     batch.update(gamePlayRef, {
       numberOfMachines: 0,
@@ -204,7 +204,7 @@ const processRetireEvent = async ({ to, amount, nonce, event, contract }) => {
     // update warDeployment
     const warDeploymentSnapshot = await firestore
       .collection('warDeployment')
-      .where('userId', '==', user.docs[0].id)
+      .where('userId', '==', user.id)
       .where('seasonId', '==', gamePlay.seasonId)
       .limit(1)
       .get();
