@@ -6,6 +6,7 @@ import ArrowDropUpOutlinedIcon from '@mui/icons-material/ArrowDropUpOutlined';
 import ArrowDropDownOutlinedIcon from '@mui/icons-material/ArrowDropDownOutlined';
 import { useSnackbar } from 'notistack';
 
+import LoadingModal from '../../../components/LoadingModal';
 import { getSignatureMint } from '../../../services/wallet.service';
 import useAppContext from '../../../contexts/useAppContext';
 
@@ -13,8 +14,8 @@ const formatTimeNumber = (number) => (number > 9 ? `${number}` : `0${number}`);
 const formatter = Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 4 });
 
 const handleError = (err) => {
-  if (err.message === 'The user rejected the request') {
-    return { code: '4001', message: 'The user rejected\nthe request' };
+  if (err.message === 'The user rejected the request' || err.message?.includes('user rejected transaction')) {
+    return { code: '4001', message: 'User rejected the request' };
   } else {
     const message = err.message;
     const code = err.code?.toString();
@@ -193,17 +194,15 @@ const usePhaseLogic = ({ phase, updatePhaseStatus, statuses, minted }) => {
     if (minting || !quantity) return;
     setMinting(true);
     try {
-      const runOutOfNft = amount >= maxUserQuantity;
       const res = await getSignatureMint({ phaseId: phase.id, amount: quantity });
       const { signature, value } = res.data;
       const receipt = await mint({ phaseId: phase.id, amount: quantity, signature, value });
       if (receipt.status !== 1) throw new Error('Something wrong');
       enqueueSnackbar('Mint successfully', { variant: 'success' });
-      setQuantity(runOutOfNft ? 0 : 1);
     } catch (err) {
       console.error(err);
       const { message } = handleError(err);
-      enqueueSnackbar(message, { variant: 'error' });
+      !message.includes('User rejected the request') && enqueueSnackbar(message, { variant: 'error' });
     }
     setMinting(false);
   };
@@ -221,6 +220,12 @@ const usePhaseLogic = ({ phase, updatePhaseStatus, statuses, minted }) => {
       }
     }
   }, [status, endTimeUnix, startTimeUnix]);
+
+  useEffect(() => {
+    if (maxUserQuantity < quantity) {
+      setQuantity(maxUserQuantity);
+    }
+  }, [maxUserQuantity, quantity]);
 
   const { up, middle, down, color, btnColor, btnText, btnHoverColor } = statuses[status] || {};
 
@@ -321,6 +326,7 @@ const PhaseDesktop = ({ phase, ethPrice, updatePhaseStatus, minted }) => {
 
   return (
     <Box display="flex" flexDirection="column" gap={1}>
+      {minting && <LoadingModal open />}
       <Typography fontSize={{ xs: 20, md: 24 }} fontWeight={500} color="white">
         {text}
       </Typography>
@@ -502,6 +508,7 @@ const PhaseMobile = ({ phase, ethPrice, updatePhaseStatus, minted }) => {
   if (status === 'end')
     return (
       <Box display="flex" flexDirection="column" gap={{ sm: 0.5, md: 1.5 }}>
+        {minting && <LoadingModal open />}
         <Typography fontSize={{ xs: 20, md: 24 }} fontWeight={500} color="white">
           {text}
         </Typography>

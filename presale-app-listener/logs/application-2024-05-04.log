@@ -69,3 +69,63 @@
       "hex": "0x01"
    }
 }
+2024-05-04T07:29:55.903Z info: NFT minted
+2024-05-04T07:29:55.904Z info: {
+   "address": "0x81A05B26cBFAEc5e786736C451535E18A717bbb9",
+   "amount": {
+      "type": "BigNumber",
+      "hex": "0x01"
+   },
+   "phaseId": {
+      "type": "BigNumber",
+      "hex": "0x03"
+   }
+}
+2024-05-04T07:31:55.936Z info: NFT minted
+2024-05-04T07:31:55.937Z info: {
+   "address": "0x81A05B26cBFAEc5e786736C451535E18A717bbb9",
+   "amount": {
+      "type": "BigNumber",
+      "hex": "0x01"
+   },
+   "phaseId": {
+      "type": "BigNumber",
+      "hex": "0x03"
+   }
+}
+2024-05-04T07:32:35.906Z info: NFT minted
+2024-05-04T07:32:35.907Z info: {
+   "address": "0x81A05B26cBFAEc5e786736C451535E18A717bbb9",
+   "amount": {
+      "type": "BigNumber",
+      "hex": "0x01"
+   },
+   "phaseId": {
+      "type": "BigNumber",
+      "hex": "0x01"
+   }
+}
+2024-05-04T07:42:40.741Z info: NFT minted
+2024-05-04T07:42:40.742Z info: {
+   "address": "0x81A05B26cBFAEc5e786736C451535E18A717bbb9",
+   "amount": {
+      "type": "BigNumber",
+      "hex": "0x01"
+   },
+   "phaseId": {
+      "type": "BigNumber",
+      "hex": "0x03"
+   }
+}
+2024-05-04T07:43:26.738Z info: NFT minted
+2024-05-04T07:43:26.739Z info: {
+   "address": "0x81A05B26cBFAEc5e786736C451535E18A717bbb9",
+   "amount": {
+      "type": "BigNumber",
+      "hex": "0x01"
+   },
+   "phaseId": {
+      "type": "BigNumber",
+      "hex": "0x03"
+   }
+}
