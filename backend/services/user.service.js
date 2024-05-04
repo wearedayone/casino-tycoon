@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { faker } from '@faker-js/faker';
 import { formatEther } from '@ethersproject/units';
 import chunk from 'lodash.chunk';
@@ -7,10 +8,12 @@ import privy from '../configs/privy.config.js';
 import quickNode from '../configs/quicknode.config.js';
 import { getActiveSeason } from './season.service.js';
 import { getLeaderboard, getRank } from './gamePlay.service.js';
-import { generateCode } from '../utils/formulas.js';
 import { getTokenBalance } from './worker.service.js';
 import { updateAvatarFromTwitter } from './twitter.service.js';
+import { generateCode } from '../utils/formulas.js';
+import environments from '../utils/environments.js';
 
+const { UNCHARTED_BEARER_TOKEN } = environments;
 const CODE_LENGTH = 10;
 
 const createGamePlayIfNotExist = async (userId, isWhitelisted) => {
@@ -323,6 +326,24 @@ export const checkCodeDuplicate = async (userId) => {
       }
     }
   }
+};
+
+export const getUserReferralCode = async (userId) => {
+  const user = await firestore.collection('user').doc(userId).get();
+  if (!user.exists) return null;
+
+  const { username, socials } = user.data();
+  if (!socials?.twitter?.verified) return null;
+
+  const res = await axios.get(`https://api.uncharted.gg/api/v1/ref/twitter/${username}`, {
+    headers: { Authorization: `Bearer ${UNCHARTED_BEARER_TOKEN}` },
+  });
+
+  if (!res.data?.success || !res.data?.refs?.length) return null;
+
+  const { code } = res.data.refs[0];
+
+  return { code };
 };
 
 const numberToCodeString = (number) => {

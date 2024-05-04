@@ -9,6 +9,7 @@ import {
   getUserByCode,
   checkCodeDuplicate,
   getUserRankAndRewardV2,
+  getUserReferralCode,
 } from '../services/user.service.js';
 import { getWarHistory, getWarHistoryDetail } from '../services/warSnapshot.service.js';
 import logger from '../utils/logger.js';
@@ -138,6 +139,18 @@ export const checkUserCode = async (req, res) => {
   try {
     await checkCodeDuplicate(req.userId);
     return res.sendStatus(200);
+  } catch (err) {
+    console.error(err);
+    logger.error(err.message);
+    const message = err.message.startsWith('API error') ? err.message : 'Something is wrong';
+    return res.status(400).send(message);
+  }
+};
+
+export const getReferralCode = async (req, res) => {
+  try {
+    const result = await getUserReferralCode(req.userId);
+    return res.status(200).send(result);
   } catch (err) {
     console.error(err);
     logger.error(err.message);

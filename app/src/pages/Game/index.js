@@ -12,12 +12,12 @@ import useSystemStore from '../../stores/system.store';
 import useSettingStore from '../../stores/setting.store';
 import usePrivyStore from '../../stores/privy.store';
 import {
-  applyInviteCode,
   getRank,
   getWarHistory,
   getWarHistoryDetail,
   updateBalance,
   checkUserCode,
+  getUserReferralCode,
 } from '../../services/user.service';
 import {
   create,
@@ -251,21 +251,12 @@ const Game = () => {
     },
   });
 
-  const {
-    username,
-    address,
-    avatarURL,
-    avatarURL_big,
-    xTokenBalance,
-    tokenBalance,
-    ETHBalance,
-    inviteCode,
-    referralCode,
-  } = profile || {
-    xTokenBalance: 0,
-    tokenBalance: 0,
-    ETHBalance: 0,
-  };
+  const { username, address, avatarURL, avatarURL_big, xTokenBalance, tokenBalance, ETHBalance, inviteCode } =
+    profile || {
+      xTokenBalance: 0,
+      tokenBalance: 0,
+      ETHBalance: 0,
+    };
 
   const { setupSimulatorGameListener } = useSimulatorGameListener();
   const {
@@ -1473,10 +1464,16 @@ const Game = () => {
       });
 
       gameRef.current?.events.on('request-twitter-share-template', () => {
-        gameRef.current?.events.emit('update-twitter-share-template', {
-          template: templates.twitterShareReferralCode,
-          referralCode,
-        });
+        gameRef.current?.events.emit('update-twitter-share-template', { template: templates.twitterShareReferralCode });
+      });
+
+      gameRef.current?.events.on('request-referral-code', () => {
+        getUserReferralCode()
+          .then((res) => gameRef.current?.events.emit('update-referral-code', { referralCode: res.data.code }))
+          .catch((err) => {
+            console.error(err);
+            Sentry.captureException(err);
+          });
       });
 
       gameRef.current?.events.on('request-auth', () => {
@@ -1848,11 +1845,8 @@ const Game = () => {
   }, [uPointReward]);
 
   useEffect(() => {
-    gameRef.current?.events.emit('update-twitter-share-template', {
-      template: templates.twitterShareReferralCode,
-      referralCode,
-    });
-  }, [templates.twitterShareReferralCode, referralCode]);
+    gameRef.current?.events.emit('update-twitter-share-template', { template: templates.twitterShareReferralCode });
+  }, [templates.twitterShareReferralCode]);
 
   return (
     <Box

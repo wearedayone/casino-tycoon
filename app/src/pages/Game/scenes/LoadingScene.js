@@ -248,6 +248,7 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-setting-pressed', '/images/button-setting-pressed.png');
     this.load.image('button-twitter', '/images/button-twitter.png');
     this.load.image('button-twitter-pressed', '/images/button-twitter-pressed.png');
+    this.load.image('button-twitter-disabled', '/images/button-twitter-disabled.png');
     this.load.image('button-add', '/images/button-add.png');
     this.load.image('button-add-pressed', '/images/button-add-pressed.png');
     this.load.image('button-claim', '/images/button-claim.png');
@@ -277,8 +278,6 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-green-full-length', '/images/button-green-full-length.png');
     this.load.image('button-green-full-length-pressed', '/images/button-green-full-length-pressed.png');
     this.load.image('button-green-full-length-disabled', '/images/button-green-full-length-disabled.png');
-    this.load.image('button-x-share', '/images/button-x-share.png');
-    this.load.image('button-x-share-pressed', '/images/button-x-share-pressed.png');
     this.load.image('button-buy-safehouse', '/images/button-buy-safehouse.png');
     this.load.image('button-buy-safehouse-pressed', '/images/button-buy-safehouse-pressed.png');
     this.load.image('button-buy-gangster', '/images/button-buy-gangster.png');

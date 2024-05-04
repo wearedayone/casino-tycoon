@@ -28,10 +28,12 @@ class PopupReferralProgram extends Popup {
       requestTwitterShareTemplate: isSimulator
         ? 'simulator-request-twitter-share-template'
         : 'request-twitter-share-template',
+      requestReferralCode: isSimulator ? 'simulator-request-referral-code' : 'request-referral-code',
       updateUPointReward: isSimulator ? 'simulator-update-u-point-reward' : 'update-u-point-reward',
       updateTwitterShareTemplate: isSimulator
         ? 'simulator-update-twitter-share-template'
         : 'update-twitter-share-template',
+      updateReferralCode: isSimulator ? 'simulator-update-referral-code' : 'update-referral-code',
     };
 
     const leftMargin = this.popup.x - this.popup.width / 2;
@@ -82,6 +84,7 @@ class PopupReferralProgram extends Popup {
       () => navigator.clipboard.writeText(this.referralCode.toUpperCase()),
       { sound: 'button-2' }
     );
+    this.buttonCopy.setVisible(false);
     this.add(this.buttonCopy);
     this.buttonTwitter = new Button(
       scene,
@@ -96,8 +99,9 @@ class PopupReferralProgram extends Popup {
         const intentUrl = getTwitterIntentUrl({ text });
         window.open(intentUrl);
       },
-      { sound: 'button-2' }
+      { sound: 'button-2', disabledImage: 'button-twitter-disabled' }
     );
+    this.buttonTwitter.setDisabledState(true);
     this.add(this.buttonTwitter);
 
     const learnMoreText = scene.add
@@ -122,19 +126,24 @@ class PopupReferralProgram extends Popup {
       this.uPointText.text = formatter.format(uPointReward);
     });
 
-    scene.game.events.on(this.events.updateTwitterShareTemplate, ({ template, referralCode }) => {
+    scene.game.events.on(this.events.updateTwitterShareTemplate, ({ template }) => {
       this.template = template;
-      this.referralCode = referralCode;
-      this.referralText.text = referralCode?.toUpperCase();
-      console.log('update-twitter-share-template', { template, referralCode });
+    });
+    scene.game.events.on(this.events.updateReferralCode, ({ referralCode }) => {
+      this.buttonCopy.setVisible(!!referralCode);
+      this.buttonTwitter.setDisabledState(!referralCode);
+      this.referralCode = referralCode || '';
+      this.referralText.text = this.referralCode.toUpperCase();
     });
 
     scene.game.events.emit(this.events.requestUPointReward);
     scene.game.events.emit(this.events.requestTwitterShareTemplate);
+    scene.game.events.emit(this.events.requestReferralCode);
   }
 
   onOpen() {
     this.onOpenCallback?.();
+    this.scene.game.events.emit(this.events.requestReferralCode);
   }
 
   cleanup() {}
