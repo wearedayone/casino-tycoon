@@ -198,6 +198,8 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-disabled', '/images/button-disabled.png');
     this.load.image('button-blue-mini', '/images/button-blue-mini.png');
     this.load.image('button-blue-mini-pressed', '/images/button-blue-mini-pressed.png');
+    this.load.image('button-blue-med-short', '/images/button-blue-med-short.png');
+    this.load.image('button-blue-med-short-pressed', '/images/button-blue-med-short-pressed.png');
     this.load.image('button-blue-med', '/images/button-blue-med.png');
     this.load.image('button-blue-med-pressed', '/images/button-blue-med-pressed.png');
     this.load.image('button-blue-med-outlined', '/images/button-blue-med-outlined.png');
@@ -275,8 +277,6 @@ class LoadingScene extends Phaser.Scene {
     this.load.image('button-green-full-length', '/images/button-green-full-length.png');
     this.load.image('button-green-full-length-pressed', '/images/button-green-full-length-pressed.png');
     this.load.image('button-green-full-length-disabled', '/images/button-green-full-length-disabled.png');
-    this.load.image('button-referral-sign-up', '/images/button-referral-sign-up.png');
-    this.load.image('button-referral-sign-up-pressed', '/images/button-referral-sign-up-pressed.png');
     this.load.image('button-x-share', '/images/button-x-share.png');
     this.load.image('button-x-share-pressed', '/images/button-x-share-pressed.png');
     this.load.image('button-buy-safehouse', '/images/button-buy-safehouse.png');
