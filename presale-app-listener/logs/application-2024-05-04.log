@@ -31,3 +31,17 @@
    "phaseId": 1
 }
 2024-05-04T06:42:32.926Z info: Start listen contract 0xFE05fFA2143dDea4a84b566519ACE84E2b5F6B0c on Network 0xa0c71fd
+2024-05-04T07:07:36.122Z info: Start listen contract 0xFE05fFA2143dDea4a84b566519ACE84E2b5F6B0c on Network 0xa0c71fd
+2024-05-04T07:08:30.167Z info: Start listen contract 0xFE05fFA2143dDea4a84b566519ACE84E2b5F6B0c on Network 0xa0c71fd
+2024-05-04T07:08:52.796Z info: NFT minted
+2024-05-04T07:08:52.797Z info: {
+   "address": "0x81A05B26cBFAEc5e786736C451535E18A717bbb9",
+   "amount": {
+      "type": "BigNumber",
+      "hex": "0x01"
+   },
+   "phaseId": {
+      "type": "BigNumber",
+      "hex": "0x01"
+   }
+}

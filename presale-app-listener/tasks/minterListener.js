@@ -2,7 +2,7 @@ import { Contract } from '@ethersproject/contracts';
 
 import minter from '../assets/abis/Minter.json' assert { type: 'json' };
 import { firestore } from '../configs/firebase.config.js';
-import provider from '../configs/quicknode.config.js';
+import provider from '../configs/provider.config.js';
 import environments from '../utils/environments.js';
 import logger from '../utils/logger.js';
 
@@ -14,7 +14,7 @@ const minterListener = async () => {
   const contract = new Contract(MINTER_ADDRESS, minter.abi, provider);
 
   contract.on('Mint', async (address, amount, phaseId, event) => {
-    await firestore.collection('web3Listener').doc(NETWORK_ID).update({ lastBlock: event.blockNumber });
+    await firestore.collection('web3Listener').doc(NETWORK_ID).set({ lastBlock: event.blockNumber });
     await processMintEvent({ address, amount, phaseId, event, contract });
   });
 
