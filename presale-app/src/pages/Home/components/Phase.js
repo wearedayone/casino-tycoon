@@ -158,8 +158,8 @@ const usePhaseLogic = ({ phase, updatePhaseStatus, statuses, minted }) => {
 
   const maxUserQuantity = Math.max(maxQuantity - minted, 0);
 
-  const increaseQuantity = () => setQuantity(Math.min(quantity + 1, maxUserQuantity));
-  const decreaseQuantity = () => setQuantity(Math.max(quantity - 1, 1));
+  const increaseQuantity = () => !minting && setQuantity(Math.min(quantity + 1, maxUserQuantity));
+  const decreaseQuantity = () => !minting && setQuantity(Math.max(quantity - 1, 0));
 
   const countdown = () => {
     const now = Date.now();
@@ -190,15 +190,16 @@ const usePhaseLogic = ({ phase, updatePhaseStatus, statuses, minted }) => {
       navigate('/login');
       return;
     }
-    if (minting) return;
+    if (minting || !quantity) return;
     setMinting(true);
     try {
+      const runOutOfNft = amount >= maxUserQuantity;
       const res = await getSignatureMint({ phaseId: phase.id, amount: quantity });
       const { signature, value } = res.data;
-      console.log({ phaseId: phase.id, amount: quantity, signature, value });
       const receipt = await mint({ phaseId: phase.id, amount: quantity, signature, value });
       if (receipt.status !== 1) throw new Error('Something wrong');
       enqueueSnackbar('Mint successfully', { variant: 'success' });
+      setQuantity(runOutOfNft ? 0 : 1);
     } catch (err) {
       console.error(err);
       const { message } = handleError(err);
@@ -354,7 +355,7 @@ const PhaseDesktop = ({ phase, ethPrice, updatePhaseStatus, minted }) => {
             fontWeight={300}
             color={color}
             sx={{ '& span': { fontWeight: 500 } }}>
-            Available amount: <span>{amount}</span>
+            Available amount: <span>{amount - sold}</span>
           </Typography>
         </Box>
       </Box>
@@ -601,7 +602,7 @@ const PhaseMobile = ({ phase, ethPrice, updatePhaseStatus, minted }) => {
               fontWeight={300}
               color={color}
               sx={{ '& span': { fontWeight: 500 } }}>
-              Available amount: <span>{amount}</span>
+              Available amount: <span>{amount - sold}</span>
             </Typography>
           </Box>
         </Box>

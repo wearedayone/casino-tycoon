@@ -22,6 +22,21 @@ const useUserType = (username) => {
     return () => unsubscribe?.();
   }, [username]);
 
+  useEffect(() => {
+    let unsubscribe;
+
+    if (username) {
+      const q = query(collection(firestore, 'season-1-user'), where('username', '==', username));
+      unsubscribe = onSnapshot(q, (snapshot) => {
+        setIsFromSeasonOne(!snapshot.empty);
+      });
+    } else {
+      setIsFromSeasonOne(false);
+    }
+
+    return () => unsubscribe?.();
+  }, [username]);
+
   return { isWhitelisted, isFromSeasonOne };
 };
 
