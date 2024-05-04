@@ -18,7 +18,6 @@ const handleError = (err) => {
   } else {
     const message = err.message;
     const code = err.code?.toString();
-    console.log({ message, code });
 
     if (message === 'Network Error') {
       return { code: '12002', message: 'Network Error' };

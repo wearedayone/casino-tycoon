@@ -9,7 +9,6 @@ const { MINTER_ADDRESS } = environments;
 
 const useSmartContract = ({ provider, checkNetwork }) => {
   const getSigner = () => {
-    console.log({ provider, checkNetwork });
     if (!provider) return null;
 
     const web3Provider = new Web3Provider(provider);
