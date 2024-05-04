@@ -653,7 +653,7 @@ class PopupBuyGangster extends Popup {
     this.popupConfirm.updateTextLeft(`${this.quantity}${icon1Gap}unit${this.quantity > 1 ? 's' : ''}`);
     this.popupConfirm.updateTextRight(formatter.format(estimatedPrice.toPrecision(3)));
     this.roiText.text = `${roi}%`;
-    this.priceText.text = `${formatter.format(this.quantity * this.basePrice)}`;
+    this.priceText.text = `${customFormat(estimatedPrice, 1)}`;
     const discountNote = this.mintFunction === 'mintWL' ? ' (WL)' : '';
     this.alternativePrice.text = `${formatter.format(estimatedPrice)}${discountNote}`;
     this.priceStrikethrough.width = this.priceText.width;
