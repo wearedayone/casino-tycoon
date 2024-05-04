@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Web3Provider } from '@ethersproject/providers';
 import { signInWithCustomToken, signOut } from 'firebase/auth';
 import {
@@ -7,7 +7,6 @@ import {
   useWeb3ModalAccount,
   useDisconnect,
   useSwitchNetwork,
-  useWeb3ModalState,
 } from '@web3modal/ethers5/react';
 
 import { auth } from '../configs/firebase.config';
@@ -17,6 +16,7 @@ import environments from '../utils/environments';
 const { NETWORK_ID } = environments;
 
 const useConnectWallet = (initialized, user) => {
+  const [loading, setLoading] = useState(false);
   const { open } = useWeb3Modal();
   const {
     address: web3ModalAddress,
@@ -26,9 +26,9 @@ const useConnectWallet = (initialized, user) => {
   const { walletProvider: web3ModalWalletProvider } = useWeb3ModalProvider();
   const { disconnect: web3ModalDisconnect } = useDisconnect();
   const { switchNetwork } = useSwitchNetwork();
-  const { loading } = useWeb3ModalState();
 
   const openConnectWalletModal = async () => {
+    if (loading) return;
     try {
       await open();
     } catch (err) {
@@ -55,27 +55,41 @@ const useConnectWallet = (initialized, user) => {
   };
 
   const signInWithFirebaseConnectWallet = async () => {
-    if (web3ModalConnected && web3ModalAddress && web3ModalChainId && web3ModalWalletProvider && initialized && !user) {
-      if (web3ModalChainId !== NETWORK_ID) {
-        await switchNetwork(NETWORK_ID);
-      }
-      const message = `Welcome to Gangster NFT Presale!\n\nSign this message to create your account\n\nThis request will not trigger a blockchain transaction or cost any gas fees.`;
-      const signature = await signMessageConnectWallet(message);
-      if (!signature) {
-        logout();
-        return;
-      }
-      // call to server with signature
-      const {
-        data: { token },
-      } = await getAuthToken({
-        message,
-        signature,
-      });
+    if (loading) return;
+    setLoading(true);
+    try {
+      if (
+        web3ModalConnected &&
+        web3ModalAddress &&
+        web3ModalChainId &&
+        web3ModalWalletProvider &&
+        initialized &&
+        !user
+      ) {
+        if (web3ModalChainId !== NETWORK_ID) {
+          await switchNetwork(NETWORK_ID);
+        }
+        const message = `Welcome to Gangster NFT Presale!\n\nSign this message to create your account\n\nThis request will not trigger a blockchain transaction or cost any gas fees.`;
+        const signature = await signMessageConnectWallet(message);
+        if (!signature) {
+          logout();
+          return;
+        }
+        // call to server with signature
+        const {
+          data: { token },
+        } = await getAuthToken({
+          message,
+          signature,
+        });
 
-      // 3. signIn & trigger onAuthStateChanged
-      await signInWithCustomToken(auth, token);
+        // 3. signIn & trigger onAuthStateChanged
+        await signInWithCustomToken(auth, token);
+      }
+    } catch (err) {
+      console.error(err);
     }
+    setLoading(false);
   };
 
   const logout = () => {
