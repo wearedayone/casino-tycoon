@@ -110,6 +110,7 @@ class PopupWarAttack extends Popup {
     });
 
     scene.game.events.emit('request-next-war-time');
+    scene.game.events.emit('request-networth');
     scene.game.events.emit('request-auth');
   }
 
@@ -118,6 +119,7 @@ class PopupWarAttack extends Popup {
       this.table.setMouseWheelScrollerEnable(true);
     }
     this.scene.game.events.emit('request-next-war-time');
+    this.scene.game.events.emit('request-networth');
     if (this.uid) {
       this.page = 0;
       this.search = '';
@@ -170,14 +172,14 @@ class PopupWarAttack extends Popup {
     const usernameX = this.popup.width * 0.13;
     const lastDayTokenX = this.popup.width * 0.52;
     for (let i = 0; i < this.users.length; i++) {
+      const { id, rank, username, lastDayTokenReward, active, networth } = this.users[i];
       const y = i * rowHeight;
-      const firstLineY = y + rowHeight * 0.32;
+      const firstLineY = id === this.uid ? y + rowHeight * 0.5 : y + rowHeight * 0.32;
       const secondLineY = y + rowHeight * 0.7;
       if (i % 2 === 1) {
         const bg = this.scene.add.image(this.popup.width / 2 - 90, y, 'row-container-162').setOrigin(0.5, 0);
         this.items.push(bg);
       }
-      const { id, rank, username, lastDayTokenReward, active, networth } = this.users[i];
       const rankText = this.scene.add
         .text(this.popup.width * 0.05, firstLineY, `${rank}`, smallBlackBoldCenter)
         .setOrigin(0.5, 0.5);
@@ -199,15 +201,6 @@ class PopupWarAttack extends Popup {
         { sound: 'open' }
       );
 
-      const reputationIfWin = getReputationWhenWinWar(this.networth, networth);
-      const reputationText = this.scene.add
-        .text(usernameX + 50, secondLineY, `+${reputationIfWin} rep.`, {
-          ...smallBlackBoldCenter,
-          color: colors.brown,
-        })
-        .setOrigin(0, 0.5);
-      const reputationIcon = this.scene.add.image(usernameX + 25, secondLineY, 'icon-star');
-
       const lastDayTokenRewardText = this.scene.add
         .text(
           lastDayTokenX,
@@ -222,17 +215,18 @@ class PopupWarAttack extends Popup {
         'icon-coin-mini'
       );
 
-      this.items.push(
-        rankText,
-        usernameText,
-        reputationIcon,
-        reputationText,
-        lastDayTokenRewardText,
-        lastDayTokenIcon,
-        profileBtn
-      );
+      this.items.push(rankText, usernameText, lastDayTokenRewardText, lastDayTokenIcon, profileBtn);
 
       if (id !== this.uid && active) {
+        const reputationIfWin = getReputationWhenWinWar(this.networth, networth);
+        const reputationText = this.scene.add
+          .text(usernameX + 50, secondLineY, `+${reputationIfWin} rep.`, {
+            ...smallBlackBoldCenter,
+            color: colors.brown,
+          })
+          .setOrigin(0, 0.5);
+        const reputationIcon = this.scene.add.image(usernameX + 25, secondLineY, 'icon-star');
+
         const attackBtn = new TextButton(
           this.scene,
           this.popup.width * 0.58 + 200,
@@ -249,7 +243,7 @@ class PopupWarAttack extends Popup {
           { fontSize: '36px' }
         );
 
-        this.items.push(attackBtn);
+        this.items.push(reputationIcon, reputationText, attackBtn);
       }
     }
     this.contentContainer.add(this.items);
