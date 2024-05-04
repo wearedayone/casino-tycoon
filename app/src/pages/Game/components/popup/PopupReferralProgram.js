@@ -2,8 +2,12 @@ import Phaser from 'phaser';
 
 import Popup from './Popup';
 import Button from '../button/Button';
-import { colors, fontFamilies } from '../../../../utils/styles';
+import TextButton from '../button/TextButton';
+import configs from '../../configs/configs';
+import { colors, fontFamilies, fontSizes } from '../../../../utils/styles';
 import { formatter } from '../../../../utils/numbers';
+
+const { width } = configs;
 
 const signUpLink = 'https://www.uncharted.gg';
 const learnMoreLink =
@@ -24,49 +28,81 @@ class PopupReferralProgram extends Popup {
       requestTwitterShareTemplate: isSimulator
         ? 'simulator-request-twitter-share-template'
         : 'request-twitter-share-template',
+      requestReferralCode: isSimulator ? 'simulator-request-referral-code' : 'request-referral-code',
       updateUPointReward: isSimulator ? 'simulator-update-u-point-reward' : 'update-u-point-reward',
       updateTwitterShareTemplate: isSimulator
         ? 'simulator-update-twitter-share-template'
         : 'update-twitter-share-template',
+      updateReferralCode: isSimulator ? 'simulator-update-referral-code' : 'update-referral-code',
     };
 
-    const btnY = this.popup.y + 670;
-    this.signupBtn = new Button(
-      scene,
-      this.popup.x - 255,
-      btnY,
-      'button-referral-sign-up',
-      'button-referral-sign-up-pressed',
-      () => {
-        window.open(signUpLink);
-      },
-      { sound: 'button-1' }
-    );
-    this.add(this.signupBtn);
-
-    this.shareBtn = new Button(
-      scene,
-      this.popup.x + 220,
-      btnY,
-      'button-x-share',
-      'button-x-share-pressed',
-      () => {
-        const text = this.template.replace('{referralCode}', this.referralCode.toUpperCase());
-        const intentUrl = getTwitterIntentUrl({ text });
-        window.open(intentUrl);
-      },
-      { sound: 'button-1' }
-    );
-    this.add(this.shareBtn);
+    const leftMargin = this.popup.x - this.popup.width / 2;
+    const uPointY = this.popup.y + 80;
+    const btnY = uPointY + 270;
+    const refCodeContainerY = btnY + 330;
 
     this.uPointText = scene.add
-      .text(this.popup.x + 80, this.popup.y + 95, '', {
+      .text(this.popup.x + 80, uPointY, '', {
         fontSize: '72px',
         fontFamily: fontFamilies.extraBold,
         color: colors.black,
       })
       .setOrigin(0.5, 0.5);
     this.add(this.uPointText);
+
+    this.signupBtn = new TextButton(
+      scene,
+      this.popup.x + 220,
+      btnY,
+      'button-blue-med-short',
+      'button-blue-med-short-pressed',
+      () => {
+        window.open(signUpLink);
+      },
+      'Sign Up',
+      { sound: 'button-1', fontSize: '56px' }
+    );
+    this.add(this.signupBtn);
+
+    this.refCodeContainer = scene.add.image(width / 2, refCodeContainerY, 'text-container');
+    this.add(this.refCodeContainer);
+
+    this.referralText = scene.add
+      .text(leftMargin + this.popup.width * 0.4, refCodeContainerY, '', {
+        fontSize: fontSizes.extraLarge,
+        color: colors.black,
+        fontFamily: fontFamilies.extraBold,
+      })
+      .setOrigin(0.5, 0.5);
+    this.add(this.referralText);
+    this.buttonCopy = new Button(
+      scene,
+      leftMargin + this.popup.width * 0.72,
+      refCodeContainerY,
+      'button-copy',
+      'button-copy-pressed',
+      () => navigator.clipboard.writeText(this.referralCode.toUpperCase()),
+      { sound: 'button-2' }
+    );
+    this.buttonCopy.setVisible(false);
+    this.add(this.buttonCopy);
+    this.buttonTwitter = new Button(
+      scene,
+      leftMargin + this.popup.width * 0.85,
+      refCodeContainerY,
+      'button-twitter',
+      'button-twitter-pressed',
+      () => {
+        const text = this.template
+          .replace('{referralDiscount}', this.referralDiscount * 100)
+          .replace('{referralCode}', this.referralCode.toUpperCase());
+        const intentUrl = getTwitterIntentUrl({ text });
+        window.open(intentUrl);
+      },
+      { sound: 'button-2', disabledImage: 'button-twitter-disabled' }
+    );
+    this.buttonTwitter.setDisabledState(true);
+    this.add(this.buttonTwitter);
 
     const learnMoreText = scene.add
       .text(this.popup.x, this.popup.y + this.popup.height / 2 - 135, 'Learn more', {
@@ -90,18 +126,24 @@ class PopupReferralProgram extends Popup {
       this.uPointText.text = formatter.format(uPointReward);
     });
 
-    scene.game.events.on(this.events.updateTwitterShareTemplate, ({ template, referralCode }) => {
+    scene.game.events.on(this.events.updateTwitterShareTemplate, ({ template }) => {
       this.template = template;
-      this.referralCode = referralCode;
-      console.log('update-twitter-share-template', { template, referralCode });
+    });
+    scene.game.events.on(this.events.updateReferralCode, ({ referralCode }) => {
+      this.buttonCopy.setVisible(!!referralCode);
+      this.buttonTwitter.setDisabledState(!referralCode);
+      this.referralCode = referralCode || '';
+      this.referralText.text = this.referralCode.toUpperCase();
     });
 
     scene.game.events.emit(this.events.requestUPointReward);
     scene.game.events.emit(this.events.requestTwitterShareTemplate);
+    scene.game.events.emit(this.events.requestReferralCode);
   }
 
   onOpen() {
     this.onOpenCallback?.();
+    this.scene.game.events.emit(this.events.requestReferralCode);
   }
 
   cleanup() {}

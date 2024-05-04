@@ -38,6 +38,7 @@ class TextButton extends Button {
       case 'button-blue-mini':
       case 'button-blue-small':
       case 'button-blue-med':
+      case 'button-blue-med-short':
       case 'button-blue-long':
         textStrokeColor = '#0004a0';
         break;
