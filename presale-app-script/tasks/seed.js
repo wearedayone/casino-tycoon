@@ -13,7 +13,7 @@ const main = async () => {
 
   // season 1
   console.log('adding season 1 users');
-  const season1Promises = whitelisted.map((username) =>
+  const season1Promises = season1.map((username) =>
     firestore.collection('season-1-user').doc(username).set({ username })
   );
   await Promise.all(season1Promises);
@@ -23,57 +23,57 @@ const main = async () => {
   const now = Date.now();
   const phases = [
     {
-      id: '1',
-      name: 'Whitelist mint',
+      id: 1,
+      name: 'Whitelist mint', // only for whitelisted users
       startTime: admin.firestore.Timestamp.fromMillis(now),
       endTime: admin.firestore.Timestamp.fromMillis(now + 5 * 24 * 60 * 60 * 1000),
-      totalSupply: 1000,
+      totalSupply: 500,
       sold: 0,
       maxPerWallet: 10,
-      priceInEth: 0.005,
+      priceInEth: 0.0005,
       type: 'whitelisted',
     },
     {
-      id: '2',
-      name: 'Season 1 user mint',
+      id: 2,
+      name: 'Season 1 user mint', // only for season 1 users
       startTime: admin.firestore.Timestamp.fromMillis(now + 5 * 24 * 60 * 60 * 1000),
       endTime: admin.firestore.Timestamp.fromMillis(now + 10 * 24 * 60 * 60 * 1000),
-      totalSupply: 1000,
+      totalSupply: 500,
       sold: 0,
-      maxPerWallet: 10,
-      priceInEth: 0.01,
+      maxPerWallet: 1,
+      priceInEth: 0,
       type: 'season-1',
     },
     {
-      id: '3',
-      name: 'Season 1 user mint then public 24h later',
+      id: 3,
+      name: 'Season 1 user mint then public 24h later', // public but season 1 users can mint 24h before
       startTimeForSeason1Users: admin.firestore.Timestamp.fromMillis(now + 4 * 24 * 60 * 60 * 1000),
       startTime: admin.firestore.Timestamp.fromMillis(now + 5 * 24 * 60 * 60 * 1000),
       endTime: admin.firestore.Timestamp.fromMillis(now + 10 * 24 * 60 * 60 * 1000),
-      totalSupply: 1000,
+      totalSupply: 500,
       sold: 0,
       maxPerWallet: 10,
-      priceInEth: 0.01,
+      priceInEth: 0.001,
       type: 'season-1-public',
     },
     {
-      id: '3',
-      name: 'Public mint',
+      id: 4,
+      name: 'Public mint', // public
       startTime: admin.firestore.Timestamp.fromMillis(now + 10 * 24 * 60 * 60 * 1000),
       endTime: admin.firestore.Timestamp.fromMillis(now + 15 * 24 * 60 * 60 * 1000),
-      totalSupply: 1000,
+      totalSupply: 500,
       sold: 0,
       maxPerWallet: 10,
-      priceInEth: 0.02,
+      priceInEth: 0.002,
       type: 'public',
     },
   ];
-  const phasePromises = phases.map(({ id, ...rest }) =>
+  const phasePromises = phases.map((phase) =>
     firestore
       .collection('phase')
-      .doc(id)
+      .doc(`${phase.id}`)
       .set({
-        ...rest,
+        ...phase,
       })
   );
   await Promise.all(phasePromises);

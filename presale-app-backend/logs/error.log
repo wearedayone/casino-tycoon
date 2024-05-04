@@ -9,3 +9,6 @@
 2024-05-02T09:38:11.185Z error: Cannot read properties of undefined (reading 'r')
 2024-05-02T09:38:16.174Z error: Cannot read properties of undefined (reading 'r')
 2024-05-02T09:38:24.748Z error: Cannot read properties of undefined (reading 'r')
+2024-05-03T16:22:49.466Z error: Value for argument "documentPath" is not a valid resource path. Path must be a non-empty string.
+2024-05-03T16:24:29.898Z error: SIGNER_WALLET_PRIVATE_KEY is not defined
+2024-05-04T04:36:55.974Z error: API error: Over limit per wallet

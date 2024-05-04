@@ -10,6 +10,7 @@ const environments = {
   BACKEND_URL: process.env.REACT_APP_BACKEND_URL,
   FRONTEND_URL: process.env.REACT_APP_FRONTEND_URL,
   WALLET_CONNECT_PROJECT_ID: process.env.REACT_APP_WALLET_CONNECT_PROJECT_ID,
+  MINTER_ADDRESS: process.env.REACT_APP_MINTER_ADDRESS,
 };
 
 export default environments;

@@ -12,6 +12,8 @@ const environments = {
   TWITTER_ACCESS_TOKEN: process.env.TWITTER_ACCESS_TOKEN,
   TWITTER_ACCESS_TOKEN_SECRET: process.env.TWITTER_ACCESS_TOKEN_SECRET,
   SITE_URL: process.env.SITE_URL,
+  QUICKNODE_API_ENDPOINT: process.env.QUICKNODE_API_ENDPOINT,
+  SIGNER_WALLET_PRIVATE_KEY: process.env.SIGNER_WALLET_PRIVATE_KEY,
 };
 
 export default environments;

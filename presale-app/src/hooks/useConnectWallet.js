@@ -48,6 +48,12 @@ const useConnectWallet = (initialized, user) => {
     }
   };
 
+  const checkNetwork = async () => {
+    if (web3ModalChainId !== NETWORK_ID) {
+      await switchNetwork(NETWORK_ID);
+    }
+  };
+
   const signInWithFirebaseConnectWallet = async () => {
     if (web3ModalConnected && web3ModalAddress && web3ModalChainId && web3ModalWalletProvider && initialized && !user) {
       if (web3ModalChainId !== NETWORK_ID) {
@@ -91,6 +97,8 @@ const useConnectWallet = (initialized, user) => {
 
   return {
     loading,
+    address: web3ModalAddress,
+    checkNetwork,
     openConnectWalletModal,
     logout,
     provider: web3ModalWalletProvider,

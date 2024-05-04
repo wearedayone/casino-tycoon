@@ -21,10 +21,12 @@
   "token": "",
   "nft": "",
   "game": "",
+  "minter": "",
 
   "tokenDeployed": false,
   "nftDeployed": false,
   "gameDeployed": false,
+  "minterDeployed": false,
 
   "contractCompleted": false
 }

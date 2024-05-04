@@ -149,8 +149,10 @@ const useWallet = () => {
   return {
     initialized,
     loading,
+    provider,
     connectWallet,
     logout,
+    checkNetwork,
   };
 };
 

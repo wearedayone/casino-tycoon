@@ -3,7 +3,8 @@ import { onSnapshot, collection, query, orderBy } from 'firebase/firestore';
 
 import { firestore } from '../configs/firebase.config';
 
-const getStatus = ({ type, startTime, endTime, isWhitelisted, isFromSeasonOne, logged }) => {
+const getStatus = ({ type, startTime, endTime, isWhitelisted, isFromSeasonOne, logged, sold, totalSupply }) => {
+  if (sold >= totalSupply) return 'end';
   const now = Date.now();
 
   let status = ''; // cs | invalid | active | login | end
@@ -37,7 +38,7 @@ const usePhase = ({ logged, isWhitelisted, isFromSeasonOne }) => {
     const q = query(collection(firestore, 'phase'), orderBy('startTime', 'asc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const docs = snapshot.docs.map((doc) => {
-        const { type } = doc.data();
+        const { type, sold, totalSupply } = doc.data();
         const endTime = doc.data().endTime.toDate().getTime();
         let startTime = doc.data().startTime.toDate().getTime();
         if (type === 'season-1-public') {
@@ -53,6 +54,8 @@ const usePhase = ({ logged, isWhitelisted, isFromSeasonOne }) => {
           isWhitelisted,
           isFromSeasonOne,
           logged,
+          sold,
+          totalSupply,
         });
 
         return { id: doc.id, ...doc.data(), status, startTime, endTime };
@@ -74,6 +77,8 @@ const usePhase = ({ logged, isWhitelisted, isFromSeasonOne }) => {
         isWhitelisted,
         isFromSeasonOne,
         logged,
+        sold: item.sold,
+        totalSupply: item.totalSupply,
       }),
     }));
 

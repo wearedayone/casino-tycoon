@@ -15,6 +15,7 @@ const MainContent = () => {
   const {
     phaseState: { phases, updatePhaseStatus },
     ethPriceState: { ethPrice },
+    userState: { user },
   } = useAppContext();
   const moreInformationRef = useRef();
 
@@ -60,16 +61,10 @@ const MainContent = () => {
         {phases.map((phase) => (
           <Phase
             key={phase.id}
-            text={phase.name}
-            status={phase.status}
-            amount={phase.totalSupply}
-            sold={phase.sold}
-            price={phase.priceInEth}
-            ethPrice={ethPrice}
-            startTimeUnix={phase.startTime}
-            endTimeUnix={phase.endTime}
-            maxQuantity={phase.maxPerWallet}
+            phase={phase}
             updatePhaseStatus={updatePhaseStatus}
+            ethPrice={ethPrice}
+            minted={user?.mintedPhases?.[`${phase.id}`] || 0}
           />
         ))}
       </Box>

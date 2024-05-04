@@ -1,10 +1,69 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Box, Typography, useMediaQuery } from '@mui/material';
 import QueryBuilderOutlinedIcon from '@mui/icons-material/QueryBuilderOutlined';
 import ArrowDropUpOutlinedIcon from '@mui/icons-material/ArrowDropUpOutlined';
 import ArrowDropDownOutlinedIcon from '@mui/icons-material/ArrowDropDownOutlined';
+import { useSnackbar } from 'notistack';
+
+import { getSignatureMint } from '../../../services/wallet.service';
+import useAppContext from '../../../contexts/useAppContext';
 
 const formatTimeNumber = (number) => (number > 9 ? `${number}` : `0${number}`);
+const formatter = Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 4 });
+
+const handleError = (err) => {
+  if (err.message === 'The user rejected the request') {
+    return { code: '4001', message: 'The user rejected\nthe request' };
+  } else {
+    const message = err.message;
+    const code = err.code?.toString();
+    console.log({ message, code });
+
+    if (message === 'Network Error') {
+      return { code: '12002', message: 'Network Error' };
+    }
+
+    if (message.includes('replacement fee too low')) return { code: '4001', message: 'Replacement fee\ntoo low' };
+
+    if (message.includes('Transaction reverted without a reason string'))
+      return { code: '4001', message: 'Transaction reverted' };
+
+    if (message.includes('Request failed with status code 422')) return { code: '4001', message: 'Request failed' };
+
+    if (message.includes('invalid address or ENS name')) return { code: '4001', message: 'Invalid address\nor ENS' };
+
+    if (message.includes('User exited before wallet could be connected'))
+      return { code: '4001', message: 'User exited' };
+
+    if (message.includes('transaction failed')) return { code: '4001', message: 'Transaction failed' };
+
+    if (message.includes('missing response')) return { code: '4001', message: 'Missing response' };
+
+    if (message.includes('Cannot redefine property: ethereum'))
+      return { code: '4001', message: 'Cannot redefine\nethereum' };
+
+    if (message.includes('insufficient funds for intrinsic transaction cost'))
+      return { code: 'INSUFFICIENT_FUNDS', message: 'Insufficient ETH' };
+
+    if (code === 'UNPREDICTABLE_GAS_LIMIT' || code === '-32603') {
+      if (err?.error?.data?.message && err.error?.data?.message.includes('execution reverted:')) {
+        const error = err.error?.data?.message.replace('execution reverted: ', '');
+        return { code: 'UNPREDICTABLE_GAS_LIMIT', message: error || 'INSUFFICIENT GAS' };
+      }
+
+      return { code: 'UNPREDICTABLE_GAS_LIMIT', message: 'INSUFFICIENT GAS' };
+    }
+
+    if (code === 'INSUFFICIENT_FUNDS') return { code: 'INSUFFICIENT_FUNDS', message: 'INSUFFICIENT ETH' };
+
+    if (code === 'INVALID_ARGUMENT') return { code: 'INVALID_ARGUMENT', message: 'INVALID ARGUMENT' };
+
+    if (code === 'NETWORK_ERROR') return { code: 'NETWORK_ERROR', message: 'Network Error' };
+
+    return { code: '4001', message: 'Something is wrong' };
+  }
+};
 
 const desktopStatuses = {
   active: {
@@ -76,23 +135,31 @@ const mobileStatuses = {
   },
 };
 
-const PhaseDesktop = ({
-  text,
-  status,
-  amount,
-  sold,
-  price,
-  ethPrice,
-  startTimeUnix,
-  endTimeUnix,
-  maxQuantity,
-  updatePhaseStatus,
-}) => {
+const usePhaseLogic = ({ phase, updatePhaseStatus, statuses, minted }) => {
+  const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
   const [timeLeft, setTimeLeft] = useState(null);
   const interval = useRef();
+  const [minting, setMinting] = useState(false);
+  const {
+    smartContractState: { mint },
+  } = useAppContext();
+  const { enqueueSnackbar } = useSnackbar();
 
-  const increaseQuantity = () => setQuantity(Math.min(quantity + 1, maxQuantity));
+  const {
+    name: text,
+    status,
+    totalSupply: amount,
+    sold,
+    priceInEth: price,
+    startTime: startTimeUnix,
+    endTime: endTimeUnix,
+    maxPerWallet: maxQuantity,
+  } = phase;
+
+  const maxUserQuantity = Math.max(maxQuantity - minted, 0);
+
+  const increaseQuantity = () => setQuantity(Math.min(quantity + 1, maxUserQuantity));
   const decreaseQuantity = () => setQuantity(Math.max(quantity - 1, 1));
 
   const countdown = () => {
@@ -118,6 +185,29 @@ const PhaseDesktop = ({
     }
   };
 
+  const btnOnClick = async () => {
+    if (!['active', 'login'].includes(status)) return;
+    if (status === 'login') {
+      navigate('/login');
+      return;
+    }
+    if (minting) return;
+    setMinting(true);
+    try {
+      const res = await getSignatureMint({ phaseId: phase.id, amount: quantity });
+      const { signature, value } = res.data;
+      console.log({ phaseId: phase.id, amount: quantity, signature, value });
+      const receipt = await mint({ phaseId: phase.id, amount: quantity, signature, value });
+      if (receipt.status !== 1) throw new Error('Something wrong');
+      enqueueSnackbar('Mint successfully', { variant: 'success' });
+    } catch (err) {
+      console.error(err);
+      const { message } = handleError(err);
+      enqueueSnackbar(message, { variant: 'error' });
+    }
+    setMinting(false);
+  };
+
   useEffect(() => {
     if (interval.current) {
       clearInterval(interval.current);
@@ -131,6 +221,58 @@ const PhaseDesktop = ({
       }
     }
   }, [status, endTimeUnix, startTimeUnix]);
+
+  const { up, middle, down, color, btnColor, btnText, btnHoverColor } = statuses[status] || {};
+
+  return {
+    text,
+    status,
+    amount,
+    sold,
+    price,
+    maxQuantity,
+    quantity,
+    timeLeft,
+    increaseQuantity,
+    decreaseQuantity,
+    up,
+    middle,
+    down,
+    color,
+    btnColor,
+    btnText,
+    btnHoverColor,
+    btnOnClick,
+    minting,
+  };
+};
+
+const PhaseDesktop = ({ phase, ethPrice, updatePhaseStatus, minted }) => {
+  const {
+    text,
+    status,
+    amount,
+    sold,
+    price,
+    maxQuantity,
+    quantity,
+    timeLeft,
+    increaseQuantity,
+    decreaseQuantity,
+    up,
+    down,
+    color,
+    btnColor,
+    btnText,
+    btnHoverColor,
+    btnOnClick,
+    minting,
+  } = usePhaseLogic({
+    phase,
+    updatePhaseStatus,
+    statuses: desktopStatuses,
+    minted,
+  });
 
   if (status === 'end')
     return (
@@ -176,8 +318,6 @@ const PhaseDesktop = ({
         </Box>
       </Box>
     );
-
-  const { up, down, color, btnColor, btnText, btnHoverColor } = desktopStatuses[status] || {};
 
   return (
     <Box display="flex" flexDirection="column" gap={1}>
@@ -240,7 +380,7 @@ const PhaseDesktop = ({
               </Typography>
               <Box width="100%" display="flex" alignItems="flex-end" gap={0.5}>
                 <Typography fontSize={{ xs: 16, md: 20, lg: 28 }} fontWeight={500} color="#fff" lineHeight="32px">
-                  {price ? `${price} ETH` : `Free`}
+                  {price ? `${formatter.format(price * quantity)} ETH` : `Free`}
                 </Typography>
                 {!!(price && ethPrice) && (
                   <Typography fontSize={{ xs: 12, md: 14, lg: 16 }} fontWeight={300} color="#FFFFFF50">
@@ -313,9 +453,10 @@ const PhaseDesktop = ({
                 clipPath:
                   'polygon(0px 0%, calc(100% - 20px) 0%, 100% calc(10px), 100% calc(100% + 0px), calc(100% - 20px) 100%, calc(20px) 100%, 0% calc(100% - 10px), 0% calc(10px))',
                 ...(btnHoverColor ? { '&:hover': { bgcolor: btnHoverColor } } : {}),
-              }}>
+              }}
+              onClick={btnOnClick}>
               <Typography fontSize={{ xs: 12, lg: 16 }} fontWeight={300} color="white" textTransform="uppercase">
-                {btnText}
+                {minting ? 'Minting...' : btnText}
               </Typography>
             </Box>
             {status === 'active' && (
@@ -330,61 +471,33 @@ const PhaseDesktop = ({
   );
 };
 
-const PhaseMobile = ({
-  text,
-  status,
-  amount,
-  sold,
-  price,
-  ethPrice,
-  startTimeUnix,
-  endTimeUnix,
-  maxQuantity,
-  updatePhaseStatus,
-}) => {
-  const [quantity, setQuantity] = useState(1);
-  const [timeLeft, setTimeLeft] = useState(null);
-  const interval = useRef();
-
-  const increaseQuantity = () => setQuantity(Math.min(quantity + 1, maxQuantity));
-  const decreaseQuantity = () => setQuantity(Math.max(quantity - 1, 1));
-
-  const countdown = () => {
-    const now = Date.now();
-    const diff = status === 'cs' ? startTimeUnix - now : endTimeUnix - now;
-    if (diff <= 0) {
-      setTimeLeft({
-        h: `00`,
-        m: `00`,
-        s: `00`,
-      });
-      updatePhaseStatus();
-    } else {
-      const diffInSeconds = diff / 1000;
-      const h = Math.floor(diffInSeconds / 3600);
-      const m = Math.floor((diffInSeconds % 3600) / 60);
-      const s = Math.floor(diffInSeconds % 60);
-      setTimeLeft({
-        h: formatTimeNumber(h),
-        m: formatTimeNumber(m),
-        s: formatTimeNumber(s),
-      });
-    }
-  };
-
-  useEffect(() => {
-    if (interval.current) {
-      clearInterval(interval.current);
-      interval.current = null;
-    }
-    if (status !== 'end') {
-      interval.current = setInterval(countdown, 1000);
-    } else {
-      if (interval.current) {
-        clearInterval(interval.current);
-      }
-    }
-  }, [status, endTimeUnix, startTimeUnix]);
+const PhaseMobile = ({ phase, ethPrice, updatePhaseStatus, minted }) => {
+  const {
+    text,
+    status,
+    amount,
+    sold,
+    price,
+    maxQuantity,
+    quantity,
+    timeLeft,
+    increaseQuantity,
+    decreaseQuantity,
+    up,
+    middle,
+    down,
+    color,
+    btnColor,
+    btnText,
+    btnHoverColor,
+    btnOnClick,
+    minting,
+  } = usePhaseLogic({
+    phase,
+    updatePhaseStatus,
+    statuses: mobileStatuses,
+    minted,
+  });
 
   if (status === 'end')
     return (
@@ -436,8 +549,6 @@ const PhaseMobile = ({
         </Box>
       </Box>
     );
-
-  const { up, middle, down, color, btnColor, btnText, btnHoverColor } = mobileStatuses[status] || {};
 
   return (
     <Box display="flex" flexDirection="column" gap={1}>
@@ -524,7 +635,7 @@ const PhaseMobile = ({
               </Typography>
               <Box width="100%" display="flex" alignItems="flex-end" gap={0.5}>
                 <Typography fontSize={{ xs: 16, sm: 24, md: 32 }} fontWeight={500} color="#fff">
-                  {price ? `${price} ETH` : `Free`}
+                  {price ? `${formatter.format(price * quantity)} ETH` : `Free`}
                 </Typography>
                 {!!(price && ethPrice) && (
                   <Typography fontSize={{ xs: 16, sm: 24, md: 32 }} fontWeight={300} color="#FFFFFF50">
@@ -577,13 +688,14 @@ const PhaseMobile = ({
                 clipPath:
                   'polygon(0px 0%, calc(100% - 20px) 0%, 100% calc(10px), 100% calc(100% + 0px), calc(100% - 20px) 100%, calc(20px) 100%, 0% calc(100% - 10px), 0% calc(10px))',
                 ...(btnHoverColor ? { '&:hover': { bgcolor: btnHoverColor } } : {}),
-              }}>
+              }}
+              onClick={btnOnClick}>
               <Typography
                 fontSize={{ xs: 16, sm: 24, md: 32 }}
                 fontWeight={300}
                 color="white"
                 textTransform="uppercase">
-                {btnText}
+                {minting ? 'Minting...' : btnText}
               </Typography>
             </Box>
             {status === 'active' && (
@@ -598,27 +710,12 @@ const PhaseMobile = ({
   );
 };
 
-const Phase = ({
-  text,
-  status,
-  amount,
-  sold,
-  price,
-  ethPrice,
-  startTimeUnix,
-  endTimeUnix,
-  maxQuantity,
-  updatePhaseStatus,
-}) => {
+const Phase = ({ phase, updatePhaseStatus, ethPrice, minted }) => {
   const isSmall = useMediaQuery((theme) => theme.breakpoints.down('lg'));
 
   const Component = isSmall ? PhaseMobile : PhaseDesktop;
 
-  return (
-    <Component
-      {...{ text, status, amount, sold, price, ethPrice, startTimeUnix, endTimeUnix, maxQuantity, updatePhaseStatus }}
-    />
-  );
+  return <Component {...{ phase, ethPrice, updatePhaseStatus, minted }} />;
 };
 
 export default Phase;

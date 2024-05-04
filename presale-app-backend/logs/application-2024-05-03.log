@@ -1,0 +1,2 @@
+2024-05-03T16:22:49.466Z error: Value for argument "documentPath" is not a valid resource path. Path must be a non-empty string.
+2024-05-03T16:24:29.898Z error: SIGNER_WALLET_PRIVATE_KEY is not defined
