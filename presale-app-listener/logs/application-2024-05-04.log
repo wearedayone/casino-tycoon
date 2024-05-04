@@ -1,0 +1,33 @@
+2024-05-04T04:36:38.452Z info: Start listen contract 0xFE05fFA2143dDea4a84b566519ACE84E2b5F6B0c on Network 0xa0c71fd
+2024-05-04T04:41:57.116Z info: Start listen contract 0xFE05fFA2143dDea4a84b566519ACE84E2b5F6B0c on Network 0xa0c71fd
+2024-05-04T04:42:11.477Z info: Start listen contract 0xFE05fFA2143dDea4a84b566519ACE84E2b5F6B0c on Network 0xa0c71fd
+2024-05-04T04:42:28.009Z info: Start listen contract 0xFE05fFA2143dDea4a84b566519ACE84E2b5F6B0c on Network 0xa0c71fd
+2024-05-04T04:44:43.114Z info: Start listen contract 0xFE05fFA2143dDea4a84b566519ACE84E2b5F6B0c on Network 0xa0c71fd
+2024-05-04T04:48:29.529Z info: Start listen contract 0xFE05fFA2143dDea4a84b566519ACE84E2b5F6B0c on Network 0xa0c71fd
+2024-05-04T04:48:29.537Z info: NFT minted
+2024-05-04T04:48:29.546Z error: Converting circular structure to JSON
+    --> starting at object with constructor 'Timeout'
+    |     property '_idlePrev' -> object with constructor 'TimersList'
+    --- property '_idleNext' closes the circle
+2024-05-04T04:49:08.717Z info: Start listen contract 0xFE05fFA2143dDea4a84b566519ACE84E2b5F6B0c on Network 0xa0c71fd
+2024-05-04T04:49:08.723Z info: NFT minted
+2024-05-04T04:49:08.723Z info: {
+   "address": "0x81a05b26cbfaec5e786736c451535e18a717bbb9",
+   "amount": 1,
+   "phaseId": 1
+}
+2024-05-04T04:50:55.426Z info: Start listen contract 0xFE05fFA2143dDea4a84b566519ACE84E2b5F6B0c on Network 0xa0c71fd
+2024-05-04T04:50:55.431Z info: NFT minted
+2024-05-04T04:50:55.431Z info: {
+   "address": "0x81a05b26cbfaec5e786736c451535e18a717bbb9",
+   "amount": 1,
+   "phaseId": 1
+}
+2024-05-04T04:52:28.058Z info: Start listen contract 0xFE05fFA2143dDea4a84b566519ACE84E2b5F6B0c on Network 0xa0c71fd
+2024-05-04T04:52:28.066Z info: NFT minted
+2024-05-04T04:52:28.066Z info: {
+   "address": "0x81a05b26cbfaec5e786736c451535e18a717bbb9",
+   "amount": 1,
+   "phaseId": 1
+}
+2024-05-04T06:42:32.926Z info: Start listen contract 0xFE05fFA2143dDea4a84b566519ACE84E2b5F6B0c on Network 0xa0c71fd
