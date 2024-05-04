@@ -44,7 +44,7 @@ class PopupSafeHouseUpgrade extends Popup {
   purchaseToken = 'GREED'; // 'xGREED' || 'GREED'
 
   constructor(scene, { isSimulator, onCompleted, ...configs } = {}) {
-    super(scene, 'popup-safehouse-upgrade', { title: 'Upgrade Safehouse', ...configs });
+    super(scene, 'popup-safehouse-upgrade', { title: 'Buy Safehouse', ...configs });
     this.scene = scene;
     const events = {
       completed: isSimulator ? 'simulator-upgrade-safehouse-completed' : 'upgrade-safehouse-completed',

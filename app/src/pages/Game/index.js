@@ -1881,7 +1881,7 @@ const Game = () => {
             <Box position="absolute" top={0} left={0} width="100%" height="100%" zIndex={10} display="flex">
               <Box
                 mt="auto"
-                mb="5vh"
+                mb={{ xs: '5vh', lg: 'calc(20px + 5vh)', xl: 'calc(40px + 8vh)' }}
                 p={2}
                 width="100%"
                 display="flex"
@@ -1890,7 +1890,7 @@ const Game = () => {
                 gap={2}>
                 <Box
                   width="100px"
-                  mb={12}
+                  mb={{ xs: 12, xl: 20 }}
                   sx={{
                     '& img': {
                       width: '100%',
