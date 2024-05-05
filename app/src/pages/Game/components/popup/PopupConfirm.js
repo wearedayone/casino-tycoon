@@ -133,6 +133,6 @@ class PopupConfirm extends Popup {
   }
 }
 
-export const icon1Gap = '              ';
+export const icon1Gap = '            ';
 
 export default PopupConfirm;

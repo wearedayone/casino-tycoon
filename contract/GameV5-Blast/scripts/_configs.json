@@ -17,8 +17,10 @@
   "token": "0xB3821E6Ad5D7c6cEFFE536C3D31EeBe3C06d38c1",
   "nft": "0x7C6A4D2a27B91d7d053e5f64aBdC43C147951964",
   "game": "0x1eD32c6Ff553661008C16062A24e8662D2c3c72a",
+  "minter": "0xFE05fFA2143dDea4a84b566519ACE84E2b5F6B0c",
   "tokenDeployed": true,
   "nftDeployed": true,
   "gameDeployed": true,
+  "minterDeployed": true,
   "contractCompleted": true
 }
