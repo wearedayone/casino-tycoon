@@ -26,7 +26,6 @@ class SpinItem extends Phaser.GameObjects.Container {
     super(scene, 0, 0);
 
     const { type, value, iconImg, containerImg } = item;
-    console.log({ type, value, iconImg, containerImg });
     this.containerImg = containerImg;
 
     const text = type === 'house' ? `Safehouse x${value}` : `$GREED x${value}`;
@@ -133,7 +132,6 @@ class PopupDailySpin extends Popup {
         spinRewards[0],
         spinRewards[1],
       ].map((item, index) => {
-        console.log({ item });
         const spinItem = new SpinItem(
           scene,
           SPIN_ITEM_WIDTH * (index + 1) + 40 * (index + 1),
@@ -283,7 +281,6 @@ class PopupDailySpin extends Popup {
     });
 
     scene.game.events.on('update-next-spin-increment-time', ({ time }) => {
-      console.log('update-next-spin-increment-time', time);
       this.nextSpinIncrementTime = time;
       if (this.interval) {
         clearInterval(this.interval);

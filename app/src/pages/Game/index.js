@@ -919,7 +919,7 @@ const Game = () => {
           gameRef.current?.events.emit('swap-completed', {
             status: 'failed',
             code,
-            message,
+            message: err.message === 'Inactive user' ? err.message : message,
           });
         }
       });
