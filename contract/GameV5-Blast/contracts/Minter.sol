@@ -61,8 +61,8 @@ contract Minter is Ownable {
   function mintWL(uint256 phaseId, uint256 amount, bytes memory sig) public payable {
     require(mintPhase[phaseId].status, 'Mint phase is not available'); // check phase status
     require(mintPhase[phaseId].MAX_PER_BATCH >= amount, 'Over max per batch'); // Limit max per batch
-    require(mintPhase[phaseId].currentSupply + amount >= mintPhase[phaseId].MAX_SUPPLY, 'Over max supply'); // Limit max supply presale in phase
-    require(gangster.totalSupply(1) + amount >= MAX_SUPPLY_PRESALE, 'Over max supply'); // Limit max supply presale in phase
+    require(mintPhase[phaseId].MAX_SUPPLY >= mintPhase[phaseId].currentSupply + amount, 'Over max supply'); // Limit max supply presale in phase
+    require(MAX_SUPPLY_PRESALE >= gangster.totalSupply(1) + amount, 'Over max supply'); // Limit max supply presale in phase
 
     require(mintPhase[phaseId].MAX_PER_WALLET >= mintedAddr[phaseId][msg.sender] + amount, 'Over max wl');
     if (mintPhase[phaseId].BASE_PRICE > 0) {

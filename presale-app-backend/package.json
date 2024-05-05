@@ -1,0 +1,26 @@
+{
+  "name": "presale-app-backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "stg": "npx env-cmd -f .env.stg nodemon index.js"
+  },
+  "dependencies": {
+    "@ethersproject/providers": "^5.7.2",
+    "@ethersproject/wallet": "^5.7.0",
+    "axios": "^1.6.8",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "ethers": "^6.12.1",
+    "express": "^4.19.2",
+    "firebase-admin": "^12.1.0",
+    "winston": "^3.13.0",
+    "winston-daily-rotate-file": "^5.0.0"
+  },
+  "devDependencies": {
+    "env-cmd": "^10.1.0",
+    "nodemon": "^3.1.0"
+  }
+}

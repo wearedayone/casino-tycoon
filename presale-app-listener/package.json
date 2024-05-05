@@ -1,0 +1,21 @@
+{
+  "name": "presale-app-listener",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "stg": "npx env-cmd -f .env.stg node index.js",
+    "prd": "npx env-cmd -f .env.prd node index.js"
+  },
+  "dependencies": {
+    "@ethersproject/contracts": "^5.7.0",
+    "@ethersproject/providers": "^5.7.2",
+    "@ethersproject/units": "^5.7.0",
+    "dotenv": "^16.4.5",
+    "env-cmd": "^10.1.0",
+    "firebase-admin": "^12.1.0",
+    "winston": "^3.13.0",
+    "winston-daily-rotate-file": "^5.0.0"
+  }
+}
