@@ -140,7 +140,8 @@
         "order": 15,
         "percentage": 0.001
       }
-    ]
+    ],
+    "tokenReputationRewardMutiplier": 0.01
   },
   "referral": {
     "referralBonus": 0.1,

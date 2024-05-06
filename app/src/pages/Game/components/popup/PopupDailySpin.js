@@ -17,9 +17,9 @@ const SPIN_CONTAINER_WIDTH = 1195;
 const SPIN_CONTAINER_HEIGHT = 900;
 const SPIN_ITEM_GAP = 40;
 const ALPHA = 0.5;
-const SPIN_DURATION = 6000;
-const SPIN_IN = 500;
-const SPIN_OUT = 4000;
+const SPIN_DURATION = 10000;
+const SPIN_IN = 1500;
+const SPIN_OUT = 8000;
 
 class SpinItem extends Phaser.GameObjects.Container {
   constructor(scene, x, y, item) {
@@ -57,12 +57,13 @@ class PopupDailySpin extends Popup {
   spinIncrementStep = 0;
   maxSpin = 0;
   interval = null;
+  cPosition = 0;
 
   constructor(scene) {
     super(scene, 'popup-spin', { title: 'Spin to Win' });
 
     this.spinSound = scene.sound.add('spin-sound', { loop: false });
-
+    this.spinSound1 = scene.sound.add('spin-sound-1', { loop: false });
     this.spinIncrementText = scene.add
       .text(this.popup.x, this.popup.y + this.popup.height / 2 - 320, '+1 spin in 00h00m00s', {
         fontSize: '72px',
@@ -126,6 +127,7 @@ class PopupDailySpin extends Popup {
 
       this.spinItems = [
         spinRewards.at(-1),
+        ...spinRewards,
         ...spinRewards,
         ...spinRewards,
         ...spinRewards,
@@ -345,28 +347,57 @@ class PopupDailySpin extends Popup {
     const destinationX =
       this.maxContainerX -
       destinationIndex * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP) -
-      2 * this.numberOfRewards * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP) +
+      3 * this.numberOfRewards * (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP) +
       randomDistanceFromCenter;
 
     this.scene.tweens.add({
       targets: this.contentContainer,
       x: [this.maxContainerX, destinationX],
       duration: SPIN_DURATION,
-      ease: 'Cubic.InOut',
-      easeParams: [SPIN_IN, SPIN_OUT],
+      // ease: 'Cubic.InOut',
+      ease: 'Circ.Out',
+      // easeParams: [SPIN_OUT, SPIN_IN],
       onStart: () => {
-        setTimeout(() => {
-          this.spinSound.play();
-        }, 100);
+        this.startTime = Date.now();
+        this.cPosition = 0;
       },
+      onUpdate: () => {
+        if (this.spinSound1.isPlaying) return;
+        const x = (Date.now() - this.startTime) / 10000;
+        const d = Math.sqrt(1 - Math.pow(x - 1, 2));
+
+        let position = Math.floor((destinationX * d) / (SPIN_ITEM_WIDTH + SPIN_ITEM_GAP));
+        if (position < this.cPosition) {
+          this.cPosition = position;
+          this.spinSound1.play();
+        }
+      },
+      // completeDelay: 5000,
       onComplete: () => {
-        setTimeout(() => {
-          this.loading = false;
-          this.close();
-          this.checkSpinButtonState();
-          this.contentContainer.x = this.maxContainerX;
-          this.scene.popupSpinReward?.showReward(reward);
-        }, 2000);
+        this.loading = false;
+
+        // this.close();
+        // this.checkSpinButtonState();
+        // this.contentContainer.x = this.maxContainerX;
+        // this.scene.popupSpinReward?.showReward(reward);
+        this.scene.tweens.add({
+          targets: this.contentContainer,
+          x: [destinationX, destinationX + 3],
+          duration: 200,
+          // ease: 'Cubic.InOut',
+          ease: 'Sine.In',
+          // easeParams: [SPIN_OUT, SPIN_IN],
+          onStart: () => {},
+          completeDelay: 2000,
+          onComplete: () => {
+            this.loading = false;
+
+            this.close();
+            this.checkSpinButtonState();
+            this.contentContainer.x = this.maxContainerX;
+            this.scene.popupSpinReward?.showReward(reward);
+          },
+        });
       },
     });
   }
