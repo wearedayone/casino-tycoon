@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material';
 import { SnackbarProvider } from 'notistack';
 import { createWeb3Modal, defaultConfig } from '@web3modal/ethers5/react';
+import { Toaster } from 'sonner';
 
 import './index.css';
 import App from './App';
@@ -78,6 +79,7 @@ root.render(
             horizontal: 'left',
           }}>
           <AppContextProvider>
+            <Toaster />
             <App />
           </AppContextProvider>
         </SnackbarProvider>

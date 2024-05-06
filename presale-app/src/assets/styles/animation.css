@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.glow-indicator {
+	box-shadow: inset 0px 0px 10px #00FFB290, 10px 1px 10px #00FFB290,
+    0px 0px 10px #00FFB290, 0px 0px 10px #00FFB290, inset 0px 0px 10px #00FFB290,
+    inset 0px 0px 10px #00FFB290, inset 0px 0px 10px #00FFB290,
+    inset 0px 0px 10px #00FFB290;
+	animation: glow 2s ease-in-out infinite;
+}
+
+@keyframes glow {
+	50% {
+		opacity: 0
+	}
+	70% {
+		opacity: 0
+	}
+	100% {
+		opacity: 1
+	}
+}
+
+.checkbox.error {
+	animation: shake 0.3s linear forwards;
+}
+
+@keyframes shake {
+	0% {
+		transform: translateX(0);
+		background-color: theme('colors.neutral.100');
+	}
+	25% {
+		transform: translateX(-3px);
+		background-color: theme('colors.red.DEFAULT');
+	}
+	50% {
+		transform: translateX(3px);
+		background-color: theme('colors.red.DEFAULT');
+	}
+	75% {
+		transform: translateX(-3px);
+		background-color: theme('colors.red.DEFAULT');
+	}
+	100% {
+		transform: translateX(0);
+		background-color: theme('colors.neutral.100');
+	}
+}
+
