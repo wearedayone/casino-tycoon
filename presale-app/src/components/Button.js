@@ -1,4 +1,4 @@
-// Components
+import { useNavigate } from 'react-router-dom';
 import { Clip } from './Clip';
 
 export const Button = ({
@@ -15,8 +15,10 @@ export const Button = ({
   onClick,
   children,
 }) => {
+  const navigate = useNavigate();
+
   let defaultStyle = `
-		flex flex-row items-center text-base/none text-white font-medium justify-center gap-3 ${
+		cursor-pointer flex flex-row items-center text-base/none text-white font-medium justify-center gap-3 ${
       icon ? 'pl-14 pr-10' : 'px-12'
     } h-[54px] md+:h-[58px] border-none ${
     secondary
@@ -30,9 +32,9 @@ export const Button = ({
   return (
     <Clip value={20} tr bl>
       {url ? (
-        <a id={id} href={url} target={target} download={download} className={defaultStyle}>
+        <div id={id} target={target} download={download} className={defaultStyle} onClick={() => navigate(url)}>
           {children}
-        </a>
+        </div>
       ) : (
         <button
           id={id}

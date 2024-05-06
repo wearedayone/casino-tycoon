@@ -7,11 +7,6 @@ import { createWeb3Modal, defaultConfig } from '@web3modal/ethers5/react';
 import { Toaster } from 'sonner';
 
 import './index.css';
-import './assets/styles/global.css';
-import './assets/styles/animation.css';
-import './assets/styles/content.css';
-import './assets/styles/clip.css';
-import './assets/styles/swiper.css';
 import App from './App';
 import { AppContextProvider } from './contexts/app.context';
 import environments from './utils/environments';

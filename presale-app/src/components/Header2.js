@@ -1,5 +1,5 @@
 import { createRef, useCallback, useEffect, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 // Components
 import { UnchartedLogo } from './UnchartedLogo2';
@@ -19,6 +19,7 @@ import { links } from '../utils/links';
 
 import { toast } from 'sonner';
 import { copyToClipboard, stripWalletAddress } from '../utils/strings';
+import { getOauthRequestToken } from '../services/twitter.service';
 
 const Header = () => {
   const isBrowser = true;
@@ -45,11 +46,16 @@ const Header = () => {
    * generates ssoProvider link and should redirect into it
    */
   const onConnectToTwitter = useCallback(async () => {
-    if (!user) return;
+    if (!user || isTwitterConnecting) return;
 
+    setIsTwitterConnecting(true);
     try {
-    } catch (ex) {
-      toast.error(ex);
+      const res = await getOauthRequestToken();
+      const { oauth_token } = res.data;
+      const url = `https://api.twitter.com/oauth/authenticate?oauth_token=${oauth_token}`;
+      window.location.href = url;
+    } catch (err) {
+      toast.error(err.message);
     }
     setIsTwitterConnecting(false);
   }, [user]);
@@ -291,14 +297,14 @@ const Header = () => {
                 href="https://uncharted.gg/"
                 target="_blank"
                 ref={launchpadRef}
-                className="nav-link hidden xl:block text-white/40 text-base font-normal uppercase px-2 pointer-events-none">
+                className="nav-link hidden xl:flex relative z-[1] h-full flex flex-row items-center gap-2 text-white text-base font-normal uppercase whitespace-nowrap px-2 lg:px-3 2xl:px-[20px]">
                 launchpad
               </a>
               <a
                 href="https://uncharted.gg/dashboard/rewards"
                 target="_blank"
                 ref={rewardsRef}
-                className="nav-link hidden xl:block text-white/40 text-base font-normal uppercase px-2 pointer-events-none">
+                className="nav-link hidden xl:flex relative z-[1] h-full flex flex-row items-center gap-2 text-white text-base font-normal uppercase whitespace-nowrap px-2 lg:px-3 2xl:px-[20px]">
                 rewards
               </a>
               <div className="group/user h-full relative flex flex-row gap-2 items-center ml-2">
@@ -329,7 +335,7 @@ const Header = () => {
                     </p>
                     <div className="w-full flex flex-col items-center gap-[20px]">
                       <div className="w-full h-px bg-gradient-to-r from-violet to-seagull" />
-                      {!!user?.socials?.twitter?.isVerified ? (
+                      {!!user?.socials?.twitter?.verified ? (
                         <>
                           <div className="w-full max-w-[300px] flex flex-row items-center justify-between gap-2">
                             <p className="text-sm/none text-neutral-100 text-left font-medium">Twitter connected</p>
@@ -368,14 +374,14 @@ const Header = () => {
                 href="https://uncharted.gg/"
                 target="_blank"
                 ref={launchpadRef}
-                className="nav-link hidden xl:block text-white/40 text-base font-normal uppercase px-2 pointer-events-none">
+                className="nav-link hidden xl:flex relative z-[1] h-full flex flex-row items-center gap-2 text-white text-base font-normal uppercase whitespace-nowrap px-2 lg:px-3 2xl:px-[20px]">
                 launchpad
               </a>
               <a
                 href="https://uncharted.gg/dashboard/rewards"
                 target="_blank"
                 ref={rewardsRef}
-                className="nav-link hidden xl:block text-white/40 text-base font-normal uppercase px-2 pointer-events-none">
+                className="nav-link hidden xl:flex relative z-[1] h-full flex flex-row items-center gap-2 text-white text-base font-normal uppercase whitespace-nowrap px-2 lg:px-3 2xl:px-[20px]">
                 rewards
               </a>
             </div>
@@ -434,10 +440,11 @@ const Header = () => {
         )}
         <a
           key="launchpad"
-          href="/"
+          href="https://uncharted.gg"
+          target="_blank"
           className={`
-						nav-link relative z-[1] flex flex-row items-center gap-2 text-2xl md:text-base text-white/40 active:text-white/80 font-normal md:font-light uppercase whitespace-nowrap px-2 md:px-0
-						transition-opacity duration-300 ease-out group-[.is-opened]:delay-700 group-[.is-opened]:opacity-100 opacity-0 pointer-events-none
+            nav-link relative z-[1] flex flex-row items-center gap-2 text-2xl md:text-base text-white active:text-white/80 font-normal md:font-light uppercase whitespace-nowrap px-2 md:px-0
+            transition-opacity duration-300 ease-out group-[.is-opened]:delay-700 group-[.is-opened]:opacity-100 opacity-0
 					`}
           onClick={() => {
             handleToggleMenu();
@@ -447,10 +454,11 @@ const Header = () => {
         </a>
         <a
           key="rewards"
-          href="/"
+          href="https://uncharted.gg/dashboard/rewards"
+          target="_blank"
           className={`
-						nav-link relative z-[1] flex flex-row items-center gap-2 text-2xl md:text-base text-white/40 active:text-white/80 font-normal md:font-light uppercase whitespace-nowrap px-2 md:px-0
-						transition-opacity duration-300 ease-out group-[.is-opened]:delay-700 group-[.is-opened]:opacity-100 opacity-0 pb-[120px] md:pb-[60px] pointer-events-none
+						nav-link relative z-[1] flex flex-row items-center gap-2 text-2xl md:text-base text-white active:text-white/80 font-normal md:font-light uppercase whitespace-nowrap px-2 md:px-0
+						transition-opacity duration-300 ease-out group-[.is-opened]:delay-700 group-[.is-opened]:opacity-100 opacity-0 pb-[120px] md:pb-[60px]
 					`}
           onClick={() => {
             handleToggleMenu();
