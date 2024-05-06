@@ -1,0 +1,23 @@
+.swiper-slide {
+	@media (max-width: 1024px) {
+		width: clamp(308px, 66%, 400px);
+	}
+}
+
+.swiper-pagination {
+	height: 50px;
+	bottom: 0%;
+	transform: translateY(150%);
+}
+
+.swiper-pagination-bullet {
+	height: 2px;
+	width: 24px;
+	background-color: #67D7F9;
+	border-radius: 0;
+	opacity: 1;
+}
+
+.swiper-pagination-bullet-active {
+	background-color: #904AFF;
+}

@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 
-import Header from './Header';
+import Header from './Header2';
 import Footer from './Footer';
 import CollapsedMenuXs from './CollapsedMenuXs';
 
