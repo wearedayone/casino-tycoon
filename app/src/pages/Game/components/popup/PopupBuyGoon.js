@@ -63,7 +63,7 @@ class PopupBuyGoon extends Popup {
     const roiY = networthY + 200;
     const checkBoxY = roiY + 270;
     const leftCheckBoxX = this.popup.x - this.popup.width / 2 + 180;
-    const rightCheckBoxX = this.popup.x + 70;
+    const rightCheckBoxX = this.popup.x + 72;
     const availableY = checkBoxY + 50;
     const counterY = this.popup.y + this.popup.height / 2 - 260;
     const minusBtnX = this.popup.x - this.popup.width / 2 + 320;
