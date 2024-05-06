@@ -1,8 +1,7 @@
 import { Box } from '@mui/material';
 
-import Header from './Header2';
+import Header from './Header';
 import Footer from './Footer';
-import CollapsedMenuXs from './CollapsedMenuXs';
 
 const Layout = ({ children }) => {
   return (
@@ -17,12 +16,11 @@ const Layout = ({ children }) => {
           backgroundRepeat: 'no-repeat',
         }}>
         <Header />
-        <Box flex={1} display="flex" flexDirection="column">
+        <Box pt="80px" flex={1} display="flex" flexDirection="column">
           {children}
         </Box>
         <Footer />
       </Box>
-      <CollapsedMenuXs />
     </Box>
   );
 };

@@ -1,6 +1,6 @@
 import { Box, Typography, useMediaQuery, alpha } from '@mui/material';
 
-import UnchartedLogo from './UnchartedLogo';
+import { UnchartedLogo } from './UnchartedLogo';
 import { tosLink, privacyLink, socials } from '../utils/links';
 
 const xLink = socials.find((item) => item.name === 'X')?.url;
