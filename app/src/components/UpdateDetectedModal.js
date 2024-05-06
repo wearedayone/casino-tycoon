@@ -32,9 +32,9 @@ const UpdateDetectedModal = () => {
       }}>
       <Box p={2}>
         <Box display="flex" justifyContent="flex-end">
-          <IconButton onClick={() => setOpenUpdate(false)}>
+          {/* <IconButton onClick={() => setOpenUpdate(false)}>
             <HighlightOffRoundedIcon />
-          </IconButton>
+          </IconButton> */}
         </Box>
         <Box display="flex" flexDirection="column" gap={2}>
           <Box>
@@ -52,9 +52,9 @@ const UpdateDetectedModal = () => {
             <Button variant="contained" onClick={update}>
               Update
             </Button>
-            <Button variant="outlined" color="error" onClick={() => setOpenUpdate(false)}>
+            {/* <Button variant="outlined" color="error" onClick={() => setOpenUpdate(false)}>
               Cancel
-            </Button>
+            </Button> */}
           </Box>
         </Box>
       </Box>
