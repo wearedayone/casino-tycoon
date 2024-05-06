@@ -29,11 +29,8 @@ const Login = () => {
       --privy-color-foreground-2: #29000b;
       --privy-color-foreground-4: #0005a0;
     }
-    #privy-container{
-      width: Wix Madefor Display;
-    }
     #privy-container * {
-      font-family: Wix Madefor Display;
+      font-family: Wix Madefor Display, 'Arial', 'Trebuchet MS', sans-serif;
     }
     #privy-container>div>div {
       position: relative;

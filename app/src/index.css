@@ -29,7 +29,7 @@
 
 /* twitter-linking */
 #twitter-link-container * {
-  font-family: Wix Madefor Display;
+  font-family: Wix Madefor Display, 'Arial', 'Trebuchet MS', sans-serif;
   padding: 2;
 }
 #twitter-link-container > div {
