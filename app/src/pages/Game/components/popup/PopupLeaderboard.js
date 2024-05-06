@@ -302,6 +302,7 @@ class PopupLeaderboard extends Popup {
     this.clockIcon.setVisible(!this.isEnded);
     this.gameEndTime.setVisible(!this.isEnded);
     this.endTimeExtension.setVisible(!this.isEnded);
+    this.endTimeExtension1.setVisible(!this.isEnded);
     this.buttonBack.setVisible(!this.isEnded);
     this.buttonRetire.setVisible(!this.isEnded && this.modeSwitch.mode === 'Reputation');
     if (this.isEnded) {
