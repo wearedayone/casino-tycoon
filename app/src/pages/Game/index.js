@@ -1152,12 +1152,14 @@ const Game = () => {
         });
       });
 
-      gameRef.current?.events.on('request-portfolio', () => {
-        getRank().then((res) => {
+      gameRef.current?.events.on('request-portfolio', async () => {
+        try {
+          const res = await getRank();
           const { rankReward, reputationReward } = res.data;
-          const tokenValue = tokenBalance * parseFloat(tokenPrice); // TODO: update formulas to calculate token value
+          const { amount: tokenValue } = await convertTokenInputToEth(tokenBalance);
           const machineValue = numberOfMachines * parseFloat(nftPrice); // TODO: update formulas to calculate machine value
-          const totalBalance = parseFloat(ETHBalance) + tokenValue + machineValue + rankReward + reputationReward;
+          const totalBalance =
+            parseFloat(ETHBalance) + Number(tokenValue) + machineValue + rankReward + reputationReward;
           gameRef.current?.events.emit('update-portfolio', {
             address,
             totalBalance,
@@ -1171,7 +1173,9 @@ const Game = () => {
             blastPointReward,
             uPointReward,
           });
-        });
+        } catch (err) {
+          console.error(err);
+        }
       });
 
       gameRef.current?.events.on('request-statistic', () => {
@@ -1724,22 +1728,26 @@ const Game = () => {
     if (rankData?.data) {
       const { rankReward, reputationReward } = rankData.data;
 
-      const tokenValue = tokenBalance * parseFloat(tokenPrice);
       const machineValue = numberOfMachines * parseFloat(nftPrice);
-      const totalBalance = parseFloat(ETHBalance) + tokenValue + machineValue + rankReward + reputationReward;
-      gameRef.current?.events.emit('update-portfolio', {
-        address,
-        totalBalance,
-        ETHBalance,
-        tokenBalance,
-        tokenValue,
-        numberOfMachines,
-        machineValue,
-        rankReward,
-        reputationReward,
-        blastPointReward,
-        uPointReward,
-      });
+      convertTokenInputToEth(tokenBalance)
+        .then(({ amount: tokenValue }) => {
+          const totalBalance =
+            parseFloat(ETHBalance) + Number(tokenValue) + machineValue + rankReward + reputationReward;
+          gameRef.current?.events.emit('update-portfolio', {
+            address,
+            totalBalance,
+            ETHBalance,
+            tokenBalance,
+            tokenValue,
+            numberOfMachines,
+            machineValue,
+            rankReward,
+            reputationReward,
+            blastPointReward,
+            uPointReward,
+          });
+        })
+        .catch((err) => console.log(err.message));
     }
   }, [rankData, address, tokenBalance, numberOfMachines, ETHBalance, blastPointReward, uPointReward]);
 
