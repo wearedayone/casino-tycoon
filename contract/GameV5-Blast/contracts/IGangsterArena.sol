@@ -8,6 +8,8 @@ interface IGangsterArena {
   ***************************
    */
   event Received(address, uint);
+  event AddReward(address, uint);
+
   event BuyGangster(address indexed to, uint256 tokenId, uint256 amount, uint256 nonce);
   event BuyGoon(address indexed to, uint256 amount, uint256 nonce);
   event BuySafeHouse(address indexed to, uint256 amount, uint256 nonce);

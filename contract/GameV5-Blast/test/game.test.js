@@ -4,6 +4,7 @@ const { ethers } = require('hardhat');
 const { loadFixture } = require('@nomicfoundation/hardhat-network-helpers');
 const { PANIC_CODES } = require('@nomicfoundation/hardhat-chai-matchers/panic');
 const { expect } = require('chai');
+const { kMaxLength } = require('buffer');
 require('chai').use(require('chai-as-promised')).should();
 
 // const { getBigNumber } = require('./utils');
@@ -319,5 +320,128 @@ describe('Gangster Arena', function () {
     //   await token.connect(acc1).approve(GAAddress, 10005n * BASE_18);
     //   await GangsterArenaContract.connect(acc1).buyGoon(1, 10005n * BASE_18, tgoon, timestamp, 123456, signature);
     // });
+  });
+
+  describe('Deposit eth', function () {
+    it('Using Transfer', async function () {
+      const { GangsterNFTContract, GangsterArenaContract, token, owner, acc1 } = await loadFixture(
+        deployStakingFixture
+      );
+
+      const GAAddress = await GangsterArenaContract.getAddress();
+      const percentOfRankPrize = await GangsterArenaContract.percentOfRankPrize();
+      const percentOfRepPrize = await GangsterArenaContract.percentOfRepPrize();
+      const percentOfDev = await GangsterArenaContract.percentOfDev();
+      const percentOfBurn = 10000n - percentOfDev - percentOfRankPrize - percentOfRepPrize;
+
+      let balance = await ethers.provider.getBalance(GAAddress);
+      await expect(
+        owner.sendTransaction({
+          to: GAAddress,
+          value: ethers.parseEther('0.1'),
+        })
+      )
+        .to.emit(GangsterArenaContract, 'Received')
+        .withArgs(owner.address, ethers.parseEther('0.1'));
+      let balanceAfter = await ethers.provider.getBalance(GAAddress);
+      const contractDevValue = await GangsterArenaContract.devValue();
+      const contractBurnValue = await GangsterArenaContract.burnValue();
+      const contractReputationPrize = await GangsterArenaContract.reputationPrize();
+      const contractRankPrize = await GangsterArenaContract.rankPrize();
+
+      expect(contractDevValue).to.be.equal((ethers.parseEther('0.1') * percentOfDev) / 10000n);
+      expect(contractBurnValue).to.be.equal((ethers.parseEther('0.1') * percentOfBurn) / 10000n);
+      expect(contractReputationPrize).to.be.equal((ethers.parseEther('0.1') * percentOfRepPrize) / 10000n);
+      expect(contractRankPrize).to.be.equal((ethers.parseEther('0.1') * percentOfRankPrize) / 10000n);
+      expect(balanceAfter).to.be.equal(
+        balance + contractDevValue + contractBurnValue + contractReputationPrize + contractRankPrize
+      );
+
+      await expect(
+        owner.sendTransaction({
+          to: GAAddress,
+          value: ethers.parseEther('0.2'),
+          data: '0x12',
+        })
+      )
+        .to.emit(GangsterArenaContract, 'Received')
+        .withArgs(owner.address, ethers.parseEther('0.2'));
+
+      let balanceAfter1 = await ethers.provider.getBalance(GAAddress);
+      const contractDevValue1 = await GangsterArenaContract.devValue();
+      const contractBurnValue1 = await GangsterArenaContract.burnValue();
+      const contractReputationPrize1 = await GangsterArenaContract.reputationPrize();
+      const contractRankPrize1 = await GangsterArenaContract.rankPrize();
+
+      expect(contractDevValue1).to.be.equal(contractDevValue + (ethers.parseEther('0.2') * percentOfDev) / 10000n);
+      expect(contractBurnValue1).to.be.equal(contractBurnValue + (ethers.parseEther('0.2') * percentOfBurn) / 10000n);
+      expect(contractReputationPrize1).to.be.equal(
+        contractReputationPrize + (ethers.parseEther('0.2') * percentOfRepPrize) / 10000n
+      );
+      expect(contractRankPrize1).to.be.equal(
+        contractRankPrize + (ethers.parseEther('0.2') * percentOfRankPrize) / 10000n
+      );
+      expect(balanceAfter1).to.be.equal(
+        balance + contractDevValue1 + contractBurnValue1 + contractReputationPrize1 + contractRankPrize1
+      );
+    });
+    it('Using AddReward', async function () {
+      const { GangsterNFTContract, GangsterArenaContract, token, owner, acc1 } = await loadFixture(
+        deployStakingFixture
+      );
+      const GAAddress = await GangsterArenaContract.getAddress();
+      await token.approve(GAAddress, 100500n * BASE_18);
+      await token.transfer(GAAddress, 1005n * BASE_18);
+      let balance = await ethers.provider.getBalance(GAAddress);
+      const devValue = 100000000000000000n;
+      const burValue = 50000000000000000n;
+      const repValue = 200000000000000000n;
+      const rankValue = 300000000000000000n;
+
+      await expect(
+        GangsterArenaContract.addReward(devValue, burValue, repValue, rankValue, {
+          value: ethers.parseEther('0.65'),
+        })
+      )
+        .to.emit(GangsterArenaContract, 'AddReward')
+        .withArgs(owner.address, ethers.parseEther('0.65'));
+
+      let balanceAfter = await ethers.provider.getBalance(GAAddress);
+      const contractDevValue = await GangsterArenaContract.devValue();
+      const contractBurnValue = await GangsterArenaContract.burnValue();
+      const contractReputationPrize = await GangsterArenaContract.reputationPrize();
+      const contractRankPrize = await GangsterArenaContract.rankPrize();
+
+      expect(contractDevValue).to.be.equal(devValue);
+      expect(contractBurnValue).to.be.equal(burValue);
+      expect(contractReputationPrize).to.be.equal(repValue);
+      expect(contractRankPrize).to.be.equal(rankValue);
+      expect(balanceAfter).to.be.equal(
+        balance + contractDevValue + contractBurnValue + contractReputationPrize + contractRankPrize
+      );
+
+      await expect(
+        GangsterArenaContract.connect(acc1).addReward(devValue, burValue, repValue, rankValue, {
+          value: ethers.parseEther('0.65'),
+        })
+      )
+        .to.emit(GangsterArenaContract, 'AddReward')
+        .withArgs(acc1.address, ethers.parseEther('0.65'));
+
+      let balanceAfter2 = await ethers.provider.getBalance(GAAddress);
+      console.log({ balanceAfter2 });
+      const contractDevValue1 = await GangsterArenaContract.devValue();
+      const contractBurnValue1 = await GangsterArenaContract.burnValue();
+      const contractReputationPrize1 = await GangsterArenaContract.reputationPrize();
+      const contractRankPrize1 = await GangsterArenaContract.rankPrize();
+
+      expect(contractDevValue1).to.be.equal(devValue * 2n);
+      expect(contractBurnValue1).to.be.equal(burValue * 2n);
+      expect(contractReputationPrize1).to.be.equal(repValue * 2n);
+      expect(contractRankPrize1).to.be.equal(rankValue * 2n);
+      expect(balanceAfter2).to.be.equal(
+        balance + contractDevValue1 + contractBurnValue1 + contractReputationPrize1 + contractRankPrize1
+      );
+    });
   });
 });

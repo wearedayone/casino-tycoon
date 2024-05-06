@@ -93,7 +93,13 @@ contract GangsterArena is AccessControl, IGangsterArena {
     // IBlastPoints(0x2fc95838c71e76ec69ff817983BFf17c710F34E0).configurePointsOperator(_pointsOperator);
   }
 
-  receive() external payable {}
+  receive() external payable {
+    rankPrize += (percentOfRankPrize * msg.value) / 10000;
+    reputationPrize += (percentOfRepPrize * msg.value) / 10000;
+    devValue += (percentOfDev * msg.value) / 10000;
+    burnValue += ((10000 - percentOfDev - percentOfRankPrize - percentOfRepPrize) * msg.value) / 10000;
+    emit Received(msg.sender, msg.value);
+  }
 
   fallback() external payable {
     rankPrize += (percentOfRankPrize * msg.value) / 10000;
@@ -113,7 +119,7 @@ contract GangsterArena is AccessControl, IGangsterArena {
     burnValue += burn_;
     reputationPrize += reputationPrize_;
     rankPrize += rankPrize_;
-    emit Received(msg.sender, msg.value);
+    emit AddReward(msg.sender, msg.value);
   }
 
   /**
