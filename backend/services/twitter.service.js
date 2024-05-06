@@ -3,7 +3,7 @@ import axios from 'axios';
 
 import environments from '../utils/environments.js';
 import logger from '../utils/logger.js';
-import { firestore } from '../configs/firebase.config.js';
+import admin, { firestore } from '../configs/firebase.config.js';
 
 const { TWITTER_CONSUMER_API_KEY, TWITTER_CONSUMER_API_SECRET, TWITTER_BEARER_TOKEN, SITE_URL } = environments;
 
@@ -32,8 +32,11 @@ export const submitOauthData = async ({ userId, oauth_token, oauth_verifier }) =
   });
 
   const { oauth_token: oauth_token_response, oauth_token_secret, user_id, screen_name } = data;
-
-  const existed = await firestore.collection('user').where('username', '==', screen_name).get();
+  const existed = await firestore
+    .collection('user')
+    .where('username', '==', screen_name)
+    .where(admin.firestore.FieldPath.documentId(), '!=', userId)
+    .get();
   if (!existed.empty) throw new Error('API error: Twitter linked with another account already');
 
   await firestore

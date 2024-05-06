@@ -446,7 +446,7 @@ class PopupSafeHouseUpgrade extends Popup {
 
         this.updateUpgradePriceButton();
 
-        this.safehouseLevelText.text = `${building.level?.toLocaleString()}`;
+        this.safehouseLevelText.text = `${numberOfBuildings?.toLocaleString()}`;
         this.levelTitle.x = this.popup.x + 80 - this.safehouseLevelText.width / 2 + 5;
         this.levelText.text = `${building?.level} LVL`;
 

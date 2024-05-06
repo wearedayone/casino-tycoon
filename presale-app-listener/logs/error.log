@@ -1,4 +1,0 @@
-2024-05-04T04:48:29.546Z error: Converting circular structure to JSON
-    --> starting at object with constructor 'Timeout'
-    |     property '_idlePrev' -> object with constructor 'TimersList'
-    --- property '_idleNext' closes the circle
