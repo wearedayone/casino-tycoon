@@ -1868,7 +1868,11 @@ const Game = () => {
         sx={
           showBg
             ? {
-                backgroundImage: { xs: 'url(images/bg-login-vertical.webp)', sm: 'url(images/bg-login.webp)' },
+                backgroundImage: {
+                  xs: 'url(images/bg-login-vertical.webp)',
+                  sm: 'url(images/bg-login-5x4.webp)',
+                  md: 'url(images/bg-login.webp)',
+                },
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 '& canvas': { position: 'absolute' },

@@ -31,7 +31,11 @@ const Twitter = () => {
         sx={{
           zIndex: -1,
           top: 0,
-          backgroundImage: { xs: 'url(images/bg-login-vertical.webp)', md: 'url(images/bg-login.webp)' },
+          backgroundImage: {
+            xs: 'url(images/bg-login-vertical.webp)',
+            sm: 'url(images/bg-login-5x4.webp)',
+            md: 'url(images/bg-login.webp)',
+          },
           backgroundSize: 'cover',
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'center',
