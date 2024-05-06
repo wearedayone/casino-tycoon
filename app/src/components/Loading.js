@@ -1,6 +1,15 @@
+import { useLayoutEffect } from 'react';
 import { Box, Typography } from '@mui/material';
 
+import usePrivyStore from '../stores/privy.store';
+
 const Loading = ({ isBlocked }) => {
+  const setIsCustomContainer = usePrivyStore((state) => state.setIsCustomContainer);
+
+  useLayoutEffect(() => {
+    setIsCustomContainer(false);
+  }, []);
+
   return (
     <>
       <Box
