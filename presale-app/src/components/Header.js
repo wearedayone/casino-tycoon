@@ -13,16 +13,17 @@ import { MediumIcon } from './MediumIcon';
 import { ChevronIcon } from './ChevronIcon';
 
 import useAppContext from '../contexts/useAppContext';
+import useBrowser from '../hooks/useBrowser';
 
 // Data
 import { links } from '../utils/links';
 
 import { toast } from 'sonner';
-import { copyToClipboard, stripWalletAddress } from '../utils/strings';
+import { stripWalletAddress } from '../utils/strings';
 import { getOauthRequestToken } from '../services/twitter.service';
 
 const Header = () => {
-  const isBrowser = true;
+  const { isBrowser } = useBrowser();
   const lastScrollTop = useRef(0);
   const [isDisabled, setIsDisabled] = useState(false);
   const [isTwitterConnecting, setIsTwitterConnecting] = useState(false);
@@ -215,15 +216,6 @@ const Header = () => {
       };
     }
   }, [indicator.current, navLinks.current, isBrowser]);
-
-  const handleCopy = useCallback(
-    (value) => {
-      if (!isBrowser) return;
-
-      copyToClipboard(value);
-    },
-    [isBrowser]
-  );
 
   return (
     <div
