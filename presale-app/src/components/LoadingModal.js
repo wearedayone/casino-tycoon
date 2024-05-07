@@ -23,7 +23,9 @@ const Loading = ({ open }) => {
           <CircularProgress color="warning" size={96} sx={{ position: 'absolute' }} />
           <img src="/favicon.svg" alt="uncharted" width={50} height={50} />
         </Box>
-        <Typography align="center">Processing transaction...</Typography>
+        <Typography align="center" color="#000">
+          Processing transaction...
+        </Typography>
       </Box>
     </Modal>
   );
