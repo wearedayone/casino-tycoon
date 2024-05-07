@@ -587,6 +587,32 @@ const Game = () => {
     }
   };
 
+  const updatePortfolioRef = useRef();
+  updatePortfolioRef.current = async () => {
+    try {
+      const res = await getRank();
+      const { rankReward, reputationReward } = res.data;
+      const { amount: tokenValue } = await convertTokenInputToEth(tokenBalance);
+      const machineValue = numberOfMachines * parseFloat(nftPrice);
+      const totalBalance = parseFloat(ETHBalance) + Number(tokenValue) + machineValue + rankReward + reputationReward;
+      gameRef.current?.events?.emit('update-portfolio', {
+        address,
+        totalBalance,
+        ETHBalance,
+        tokenBalance,
+        tokenValue,
+        numberOfMachines,
+        machineValue,
+        rankReward,
+        reputationReward,
+        blastPointReward,
+        uPointReward,
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     if (profile && gamePlay && activeSeasonId && !loaded && !!userWallet) {
       setLoaded(true);
@@ -1152,31 +1178,7 @@ const Game = () => {
         });
       });
 
-      gameRef.current?.events.on('request-portfolio', async () => {
-        try {
-          const res = await getRank();
-          const { rankReward, reputationReward } = res.data;
-          const { amount: tokenValue } = await convertTokenInputToEth(tokenBalance);
-          const machineValue = numberOfMachines * parseFloat(nftPrice); // TODO: update formulas to calculate machine value
-          const totalBalance =
-            parseFloat(ETHBalance) + Number(tokenValue) + machineValue + rankReward + reputationReward;
-          gameRef.current?.events.emit('update-portfolio', {
-            address,
-            totalBalance,
-            ETHBalance,
-            tokenBalance,
-            tokenValue,
-            numberOfMachines,
-            machineValue,
-            rankReward,
-            reputationReward,
-            blastPointReward,
-            uPointReward,
-          });
-        } catch (err) {
-          console.error(err);
-        }
-      });
+      gameRef.current?.events.on('request-portfolio', updatePortfolioRef.current);
 
       gameRef.current?.events.on('request-statistic', () => {
         getRank().then((res) => {
