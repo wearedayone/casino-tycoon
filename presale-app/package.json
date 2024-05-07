@@ -35,7 +35,11 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "build-stg": "npx env-cmd -f .env.stg yarn build",
+    "deploy-stg-hosting": "firebase use stg && firebase deploy --only hosting:stg",
+    "deploy-stg-firestore": "firebase use stg && firebase deploy --only firestore",
+    "build-and-deploy-stg": "yarn build-stg && yarn deploy-stg"
   },
   "eslintConfig": {
     "extends": [

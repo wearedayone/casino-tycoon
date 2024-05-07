@@ -1,0 +1,24 @@
+{
+  "projects": {
+    "stg": "ga2-nft-sale"
+  },
+  "targets": {
+    "ga2-nft-sale": {
+      "hosting": {
+        "stg": [
+          "ga2-nft-sale"
+        ]
+      }
+    }
+  },
+  "etags": {},
+  "target": {
+    "ga2-nft-sale": {
+      "hosting": {
+        "stg": [
+          "ga2-nft-sale"
+        ]
+      }
+    }
+  }
+}
