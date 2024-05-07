@@ -208,7 +208,7 @@ const setupVariables = async () => {
 async function main() {
   try {
     await deployGame();
-    await configGameNewContract();
+    // await configGameNewContract();
     await configGame();
     await setupVariables();
     updateConfigs({ contractCompleted: true });
