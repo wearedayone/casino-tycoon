@@ -4,7 +4,7 @@ import useWallet from '../hooks/useWallet';
 import useMenu from '../hooks/useMenu';
 import useUser from '../hooks/useUser';
 import usePhase from '../hooks/usePhase';
-import useUserType from '../hooks/useUserType';
+import useWhitelistedPhaseIds from '../hooks/useWhitelistedPhaseIds';
 import useEthPrice from '../hooks/useEthPrice';
 import useConnectWallet from '../hooks/useConnectWallet';
 import useSmartContract from '../hooks/useSmartContract';
@@ -15,10 +15,9 @@ export const AppContextProvider = ({ children }) => {
   const walletState = useWallet();
   const menuState = useMenu();
   const userState = useUser();
-  const userTypeState = useUserType(userState?.user?.username);
+  const { whitelistedPhaseIds } = useWhitelistedPhaseIds(userState?.user?.username);
   const phaseState = usePhase({
-    isWhitelisted: userTypeState.isWhitelisted,
-    isFromSeasonOne: userTypeState.isFromSeasonOne,
+    whitelistedPhaseIds,
     logged: !!userState.user,
   });
   const ethPriceState = useEthPrice();
@@ -37,7 +36,6 @@ export const AppContextProvider = ({ children }) => {
         menuState,
         userState,
         phaseState,
-        userTypeState,
         ethPriceState,
         smartContractState,
       }}>

@@ -3,22 +3,6 @@ import whitelisted from '../assets/whitelisted.json' assert { type: 'json' };
 import season1 from '../assets/season1.json' assert { type: 'json' };
 
 const main = async () => {
-  // whitelisted
-  console.log('adding whitelisted users');
-  const whitelistedPromises = whitelisted.map((username) =>
-    firestore.collection('whitelisted').doc(username).set({ username })
-  );
-  await Promise.all(whitelistedPromises);
-  console.log('added whitelisted users');
-
-  // season 1
-  console.log('adding season 1 users');
-  const season1Promises = season1.map((username) =>
-    firestore.collection('season-1-user').doc(username).set({ username })
-  );
-  await Promise.all(season1Promises);
-  console.log('added season 1 users');
-
   console.log('creating phases');
   const now = Date.now();
   const phases = [
@@ -42,19 +26,19 @@ const main = async () => {
       sold: 0,
       maxPerWallet: 1,
       priceInEth: 0,
-      type: 'season-1',
+      type: 'whitelisted',
     },
     {
       id: 3,
-      name: 'Season 1 user mint then public 24h later', // public but season 1 users can mint 24h before
-      startTimeForSeason1Users: admin.firestore.Timestamp.fromMillis(now + 4 * 24 * 60 * 60 * 1000),
+      name: 'Season 1 user mint then public 24h later', // public but season 1 users can mint 24h earlier
+      startTimeForWhitelisted: admin.firestore.Timestamp.fromMillis(now + 4 * 24 * 60 * 60 * 1000),
       startTime: admin.firestore.Timestamp.fromMillis(now + 5 * 24 * 60 * 60 * 1000),
       endTime: admin.firestore.Timestamp.fromMillis(now + 10 * 24 * 60 * 60 * 1000),
       totalSupply: 500,
       sold: 0,
       maxPerWallet: 10,
       priceInEth: 0.001,
-      type: 'season-1-public',
+      type: 'hybrid', // both whitelisted and public, whitelist can mint earlier
     },
     {
       id: 4,
@@ -77,8 +61,25 @@ const main = async () => {
       })
   );
   await Promise.all(phasePromises);
-
   console.log('created phases');
+
+  // create whitelisted
+  console.log('create whitelisted');
+  const whitelistedPromises = whitelisted.map((username) =>
+    firestore.collection('whitelisted-user').add({ phaseId: '1', username })
+  );
+  await Promise.all(whitelistedPromises);
+
+  const season1Promises1 = season1.map((username) =>
+    firestore.collection('whitelisted-user').add({ phaseId: '2', username })
+  );
+  await Promise.all(season1Promises1);
+
+  const season1Promises2 = season1.map((username) =>
+    firestore.collection('whitelisted-user').add({ phaseId: '3', username })
+  );
+  await Promise.all(season1Promises2);
+  console.log('created whitelisted');
 };
 
 main()

@@ -26,7 +26,7 @@ const useSmartContract = ({ provider, checkNetwork }) => {
   const mint = async ({ phaseId, amount, signature, value }) => {
     await checkNetwork();
     const minterContract = getMinterContract();
-    const tx = await minterContract.mintWL(phaseId, amount, signature, { value: parseEther(`${value}`) });
+    const tx = await minterContract.mint(phaseId, amount, signature, { value: parseEther(`${value}`) });
     const receipt = await tx.wait();
     return receipt;
   };

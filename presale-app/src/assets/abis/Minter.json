@@ -181,7 +181,7 @@
           "type": "bytes"
         }
       ],
-      "name": "mintWL",
+      "name": "mint",
       "outputs": [],
       "stateMutability": "payable",
       "type": "function"

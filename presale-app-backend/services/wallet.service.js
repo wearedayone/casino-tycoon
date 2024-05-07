@@ -3,7 +3,7 @@ import { ethers } from 'ethers';
 
 import { firestore } from '../configs/firebase.config.js';
 import quickNode from '../configs/quicknode.config.js';
-import { isWhitelisted, isFromSeasonOne } from './user.service.js';
+import { isWhitelisted } from './user.service.js';
 import environments from '../utils/environments.js';
 
 const { SIGNER_WALLET_PRIVATE_KEY } = environments;
@@ -29,11 +29,11 @@ export const getSignatureMint = async ({ address, phaseId, amount }) => {
   const phase = await firestore.collection('phase').doc(`${phaseId}`).get();
   if (!phase.exists) throw new Error('API error: Not found phase');
 
-  const { startTime, startTimeForSeason1Users, endTime, maxPerWallet, totalSupply, sold, type, priceInEth } =
+  const { startTime, startTimeForWhitelisted, endTime, maxPerWallet, totalSupply, sold, type, priceInEth } =
     phase.data();
 
-  const isSeason1User = await isFromSeasonOne(address);
-  let phaseStartTime = isSeason1User && type === 'season-1-public' ? startTimeForSeason1Users : startTime;
+  const isWhitelistedUser = await isWhitelisted(address, phaseId);
+  let phaseStartTime = isWhitelistedUser && type === 'hybrid' ? startTimeForWhitelisted : startTime;
 
   const now = Date.now();
   if (now < phaseStartTime.toDate().getTime()) throw new Error('API error: Phase hasnt started yet');
@@ -47,12 +47,7 @@ export const getSignatureMint = async ({ address, phaseId, amount }) => {
   if (mintedAmount + amount > maxPerWallet) throw new Error('API error: Over limit per wallet');
 
   if (type === 'whitelisted') {
-    const isWhitelistedUser = await isWhitelisted(address);
     if (!isWhitelistedUser) throw new Error('API error: Bad credential');
-  }
-
-  if (type === 'season-1') {
-    if (!isSeason1User) throw new Error('API error: Bad credential');
   }
 
   const signature = await signMessageMint({ address, phaseId, amount });

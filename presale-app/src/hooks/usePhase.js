@@ -3,7 +3,7 @@ import { onSnapshot, collection, query, orderBy } from 'firebase/firestore';
 
 import { firestore } from '../configs/firebase.config';
 
-const getStatus = ({ type, startTime, endTime, isWhitelisted, isFromSeasonOne, logged, sold, totalSupply }) => {
+const getStatus = ({ phaseId, type, startTime, endTime, whitelistedPhaseIds, logged, sold, totalSupply }) => {
   if (sold >= totalSupply) return 'end';
   const now = Date.now();
 
@@ -12,7 +12,7 @@ const getStatus = ({ type, startTime, endTime, isWhitelisted, isFromSeasonOne, l
     status = 'active';
   }
 
-  if ((type === 'whitelisted' && !isWhitelisted) || (type === 'season-1' && !isFromSeasonOne)) {
+  if (type === 'whitelisted' && !whitelistedPhaseIds.includes(`${phaseId}`)) {
     status = 'invalid';
   }
 
@@ -31,7 +31,7 @@ const getStatus = ({ type, startTime, endTime, isWhitelisted, isFromSeasonOne, l
   return status;
 };
 
-const usePhase = ({ logged, isWhitelisted, isFromSeasonOne }) => {
+const usePhase = ({ logged, whitelistedPhaseIds }) => {
   const [phases, setPhases] = useState([]);
 
   useEffect(() => {
@@ -41,18 +41,18 @@ const usePhase = ({ logged, isWhitelisted, isFromSeasonOne }) => {
         const { type, sold, totalSupply } = doc.data();
         const endTime = doc.data().endTime.toDate().getTime();
         let startTime = doc.data().startTime.toDate().getTime();
-        if (type === 'season-1-public') {
-          if (isFromSeasonOne) {
-            startTime = doc.data().startTimeForSeason1Users.toDate().getTime();
+        if (type === 'hybrid') {
+          if (whitelistedPhaseIds.includes(`${doc.id}`)) {
+            startTime = doc.data().startTimeForWhitelisted.toDate().getTime();
           }
         }
 
         const status = getStatus({
+          phaseId: doc.id,
           type,
           startTime,
           endTime,
-          isWhitelisted,
-          isFromSeasonOne,
+          whitelistedPhaseIds,
           logged,
           sold,
           totalSupply,
@@ -65,17 +65,17 @@ const usePhase = ({ logged, isWhitelisted, isFromSeasonOne }) => {
     });
 
     return () => unsubscribe?.();
-  }, [logged, isWhitelisted, isFromSeasonOne]);
+  }, [logged, whitelistedPhaseIds]);
 
   const updatePhaseStatus = () => {
     const newPhases = phases.map((item) => ({
       ...item,
       status: getStatus({
+        phaseId: item.id,
         type: item.type,
         startTime: item.startTime,
         endTime: item.endTime,
-        isWhitelisted,
-        isFromSeasonOne,
+        whitelistedPhaseIds,
         logged,
         sold: item.sold,
         totalSupply: item.totalSupply,
@@ -84,6 +84,8 @@ const usePhase = ({ logged, isWhitelisted, isFromSeasonOne }) => {
 
     setPhases(newPhases);
   };
+
+  console.log({ phases });
 
   return { phases, updatePhaseStatus };
 };
