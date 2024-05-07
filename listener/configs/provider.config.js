@@ -1,9 +1,9 @@
-import { JsonRpcProvider } from '@ethersproject/providers';
+import { WebSocketProvider } from '@ethersproject/providers';
 
 import environments from '../utils/environments.js';
 
 const { RPC_URL } = environments;
 
-const provider = new JsonRpcProvider(RPC_URL);
+const provider = new WebSocketProvider(RPC_URL);
 
 export default provider;
