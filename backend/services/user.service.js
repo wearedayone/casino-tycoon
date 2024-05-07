@@ -43,7 +43,7 @@ const createGamePlayIfNotExist = async (userId, isWhitelisted) => {
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
         userId,
         seasonId: season.id,
-        networth: season.worker.networth,
+        networth: 0,
         networthFromWar: 0,
         numberOfMachines: 0,
         numberOfWorkers: 0,
