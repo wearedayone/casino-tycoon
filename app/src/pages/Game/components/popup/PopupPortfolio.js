@@ -14,6 +14,7 @@ const lineGap = 130;
 class PopupPortfolio extends Popup {
   constructor(scene) {
     super(scene, 'popup-portfolio-with-reputation', { title: 'Portfolio' });
+    this.scene = scene;
 
     this.setVisible(false);
 
@@ -186,6 +187,10 @@ class PopupPortfolio extends Popup {
     );
 
     scene.game.events.emit('request-portfolio');
+  }
+
+  onOpen() {
+    this.scene.events.emit('request-portfolio');
   }
 
   formatAddress(address) {

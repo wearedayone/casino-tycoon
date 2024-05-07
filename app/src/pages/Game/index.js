@@ -587,6 +587,32 @@ const Game = () => {
     }
   };
 
+  const updatePortfolioRef = useRef();
+  updatePortfolioRef.current = async () => {
+    try {
+      const res = await getRank();
+      const { rankReward, reputationReward } = res.data;
+      const { amount: tokenValue } = await convertTokenInputToEth(tokenBalance);
+      const machineValue = numberOfMachines * parseFloat(nftPrice);
+      const totalBalance = parseFloat(ETHBalance) + Number(tokenValue) + machineValue + rankReward + reputationReward;
+      gameRef.current?.events?.emit('update-portfolio', {
+        address,
+        totalBalance,
+        ETHBalance,
+        tokenBalance,
+        tokenValue,
+        numberOfMachines,
+        machineValue,
+        rankReward,
+        reputationReward,
+        blastPointReward,
+        uPointReward,
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     if (profile && gamePlay && activeSeasonId && !loaded && !!userWallet) {
       setLoaded(true);
@@ -1152,27 +1178,7 @@ const Game = () => {
         });
       });
 
-      gameRef.current?.events.on('request-portfolio', () => {
-        getRank().then((res) => {
-          const { rankReward, reputationReward } = res.data;
-          const tokenValue = tokenBalance * parseFloat(tokenPrice); // TODO: update formulas to calculate token value
-          const machineValue = numberOfMachines * parseFloat(nftPrice); // TODO: update formulas to calculate machine value
-          const totalBalance = parseFloat(ETHBalance) + tokenValue + machineValue + rankReward + reputationReward;
-          gameRef.current?.events.emit('update-portfolio', {
-            address,
-            totalBalance,
-            ETHBalance,
-            tokenBalance,
-            tokenValue,
-            numberOfMachines,
-            machineValue,
-            rankReward,
-            reputationReward,
-            blastPointReward,
-            uPointReward,
-          });
-        });
-      });
+      gameRef.current?.events.on('request-portfolio', updatePortfolioRef.current);
 
       gameRef.current?.events.on('request-statistic', () => {
         getRank().then((res) => {
@@ -1724,22 +1730,26 @@ const Game = () => {
     if (rankData?.data) {
       const { rankReward, reputationReward } = rankData.data;
 
-      const tokenValue = tokenBalance * parseFloat(tokenPrice);
       const machineValue = numberOfMachines * parseFloat(nftPrice);
-      const totalBalance = parseFloat(ETHBalance) + tokenValue + machineValue + rankReward + reputationReward;
-      gameRef.current?.events.emit('update-portfolio', {
-        address,
-        totalBalance,
-        ETHBalance,
-        tokenBalance,
-        tokenValue,
-        numberOfMachines,
-        machineValue,
-        rankReward,
-        reputationReward,
-        blastPointReward,
-        uPointReward,
-      });
+      convertTokenInputToEth(tokenBalance)
+        .then(({ amount: tokenValue }) => {
+          const totalBalance =
+            parseFloat(ETHBalance) + Number(tokenValue) + machineValue + rankReward + reputationReward;
+          gameRef.current?.events.emit('update-portfolio', {
+            address,
+            totalBalance,
+            ETHBalance,
+            tokenBalance,
+            tokenValue,
+            numberOfMachines,
+            machineValue,
+            rankReward,
+            reputationReward,
+            blastPointReward,
+            uPointReward,
+          });
+        })
+        .catch((err) => console.log(err.message));
     }
   }, [rankData, address, tokenBalance, numberOfMachines, ETHBalance, blastPointReward, uPointReward]);
 
