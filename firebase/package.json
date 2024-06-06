@@ -1,0 +1,16 @@
+{
+  "name": "firebase",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "deploy:prd": "firebase use prd && firebase deploy --only hosting:app-prd",
+    "deploy:prd-test": "firebase use prd && firebase deploy --only hosting:app-prd-test",
+    "deploy:demo": "firebase use demo && firebase deploy --only hosting:app-demo",
+    "deploy:stg": "firebase use stg && firebase deploy --only hosting:app-stg",
+    "deploy:dev": "firebase use dev && firebase deploy --only hosting:app-dev"
+  },
+  "dependencies": {
+    "firebase-functions": "^4.5.0"
+  }
+}

@@ -1,0 +1,28 @@
+/* fonts */
+@font-face {
+  font-family: WixMadeforDisplayBold;
+  font-weight: 700;
+  src: url('../public/fonts/WixMadeforDisplay-Bold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: WixMadeforDisplayExtraBold;
+  font-weight: 800;
+  src: url('../public/fonts/WixMadeforDisplay-ExtraBold.ttf') format('truetype');
+}
+
+* {
+  margin: 0;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans',
+    'Droid Sans', 'Helvetica Neue', sans-serif;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

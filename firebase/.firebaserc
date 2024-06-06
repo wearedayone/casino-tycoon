@@ -1,0 +1,42 @@
+{
+  "projects": {
+    "dev": "casino-tycoon-14684",
+    "prd": "gangster-arena-prd",
+    "stg": "gangster-arena-d53fa",
+    "demo": "gangster-arena-demo"
+  },
+  "targets": {
+    "casino-tycoon-14684": {
+      "hosting": {
+        "app-dev": [
+          "casino-tycoon-14684"
+        ]
+      }
+    },
+    "gangster-arena-d53fa": {
+      "hosting": {
+        "app-stg": [
+          "gangster-arena-d53fa"
+        ]
+      }
+    },
+    "gangster-arena-prd": {
+      "hosting": {
+        "app-prd": [
+          "gangster-arena-prd"
+        ],
+        "app-prd-test": [
+          "playtest-0"
+        ]
+      }
+    },
+    "gangster-arena-demo": {
+      "hosting": {
+        "app-demo": [
+          "gangster-arena-demo"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
